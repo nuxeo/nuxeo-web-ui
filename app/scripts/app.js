@@ -12,6 +12,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 */
 
+// Sets app default base URL
+window.Nuxeo = window.Nuxeo || {};
+Nuxeo.baseUrl = '/';
+
 (function(document) {
   'use strict';
 
@@ -20,10 +24,10 @@ Lesser General Public License for more details.
   // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
   var app = document.querySelector('#app');
 
-  app.displayInstalledToast = function() {
-    // Check to make sure caching is actually enabled—it won't be in the dev environment.
-    if (!document.querySelector('platinum-sw-cache').disabled) {
-      document.querySelector('#caching-complete').show();
-    }
-  };
+  // Listen for template bound event to know when bindings
+  // have resolved and content has been stamped to the page
+  app.addEventListener('dom-change', function() {
+    console.log('Nuxeo is ready to rock!');
+  });
+
 })(document);

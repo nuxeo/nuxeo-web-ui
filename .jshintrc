@@ -19,6 +19,6 @@
     "Polymer": true,
     "Platform": true,
     "page": true,
-    "app": true
+    "Nuxeo": true
   }
 }

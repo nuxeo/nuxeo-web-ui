@@ -85,7 +85,7 @@ Contributors:
             <!-- Logo -->
             <section id="logo">
               <a href="#/">
-                <img src="/images/nuxeo.png">
+                <img src$="{{baseUrl}}images/nuxeo.png">
               </a>
             </section>
 
@@ -107,7 +107,7 @@ Contributors:
               <section class="profile">
                 <paper-menu-button>
                   <paper-button class="dropdown-trigger">
-                    <img src="/images/avatar.png">
+                    <img src$="{{baseUrl}}images/avatar.png">
                     <span>Lise Kemen</span>
                   </paper-button>
                   <paper-menu class="dropdown-content">
@@ -159,6 +159,7 @@ Contributors:
 
         ready: function() {
           this.selectedPage = 'browse';
+          this.baseUrl = Nuxeo.baseUrl;
         }
       });
     })();
