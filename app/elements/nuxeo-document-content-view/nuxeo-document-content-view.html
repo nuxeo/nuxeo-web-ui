@@ -1,0 +1,71 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<dom-module id="nuxeo-document-content-view">
+  <template>
+    <style>
+      ul {
+        list-style: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a:visited {
+        color: black;
+      }
+    </style>
+
+    <!-- TODO: use the 'params' attribute -->
+    <nuxeo-resource auto path="[[_path(document)]]" response="{{children}}"></nuxeo-resource>
+
+    <ul>
+      <template is="dom-repeat" items="{{children.entries}}">
+        <li><a href="#" on-tap="navigate">[[item.title]]</a></li>
+      </template>
+      </ul>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-content-view',
+        properties: {
+          document: {
+            type: Object,
+            notify: true
+          },
+          params: {
+            type: Array
+          }
+        },
+
+        navigate: function() {
+          this.document = arguments[0].model.item;
+        },
+
+        _path: function() {
+          return '/query/document_content?queryParams=' + this.document.uid;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

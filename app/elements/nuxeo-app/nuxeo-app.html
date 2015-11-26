@@ -1,0 +1,167 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-app`
+@group Nuxeo UI
+@element nuxeo-app
+-->
+<dom-module id="nuxeo-app">
+  <template>
+    <style is="custom-style">
+      #logo img {
+        max-height: 2em;
+        max-width: 7em;
+      }
+
+      #toggle {
+        right: 1rem;
+        top: 1rem;
+      }
+
+      .profile img {
+        max-height: 24px;
+        max-width: 24px;
+      }
+
+      .dropdown-trigger {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      app-header {
+        border-bottom: 1px solid #eee;
+      }
+
+      paper-badge {
+        --paper-badge-background: var(--paper-amber-a700);
+      }
+
+      paper-tabs {
+        height: 100%;
+        max-width: 640px;
+        --paper-tabs-selection-bar-color: #008cba;
+        --paper-tabs-selection-bar: {
+          top: 0;
+         }
+      }
+
+      paper-tab {
+        --paper-tab-ink: #aaa;
+        text-transform: uppercase;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+
+    <nuxeo-connection url="http://localhost:8080/nuxeo"></nuxeo-connection>
+    <nuxeo-document auto doc-path="/default-domain" response="{{currentDocument}}" enrichers="permissions"></nuxeo-document>
+
+    <app-drawer-layout id="drawerLayout" force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
+
+      <app-header-layout main>
+
+        <!-- Top -->
+        <app-header fixed waterfall>
+          <app-toolbar class="flex">
+
+            <!-- Logo -->
+            <section id="logo">
+              <a href="#/">
+                <img src="/images/nuxeo.png">
+              </a>
+            </section>
+
+            <!-- Navigation (MAIN_TABS) -->
+            <paper-tabs selected="{{selectedPage}}" attr-for-selected="name">
+              <paper-tab name="home">Home</paper-tab>
+              <paper-tab name="browse">Browse</paper-tab>
+              <paper-tab name="search">Search</paper-tab>
+              <paper-tab name="admin">Admin</paper-tab>
+            </paper-tabs>
+
+            <div class="horizontal flex center layout end-justified">
+              <!-- Search -->
+              <paper-input>
+                <iron-icon icon="search" suffix></iron-icon>
+              </paper-input>
+
+              <!-- Profile -->
+              <section class="profile">
+                <paper-menu-button>
+                  <paper-button class="dropdown-trigger">
+                    <img src="/images/avatar.png">
+                    <span>Lise Kemen</span>
+                  </paper-button>
+                  <paper-menu class="dropdown-content">
+                    <paper-item>Profile</paper-item>
+                    <paper-item>Notifications</paper-item>
+                    <paper-item>Drive</paper-item>
+                    <paper-item>Cloud Services</paper-item>
+                    <paper-item>Sign out</paper-item>
+                  </paper-menu>
+                </paper-menu-button>
+              </section>
+            </div>
+
+            <!-- Toggle right panel button -->
+            <div id="toggle">
+              <paper-icon-button icon="menu" drawer-toggle aria-label="menu"></paper-icon-button>
+              <paper-badge label="3"></paper-badge>
+            </div>
+          </app-toolbar>
+        </app-header>
+
+        <!-- The current document's page -->
+        <iron-pages selected="[[selectedPage]]" attr-for-selected="name">
+          <nuxeo-browser name="browse" document="[[currentDocument]]"></nuxeo-browser>
+        </iron-pages>
+
+      </app-header-layout>
+
+      <!-- right panel -->
+      <div drawer>
+        <!-- TODO: add right panel -->
+      </div>
+
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-app',
+
+        propertied: {
+          selectedPage: {
+            type: String
+          }
+        },
+
+        ready: function() {
+          this.selectedPage = 'browse';
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

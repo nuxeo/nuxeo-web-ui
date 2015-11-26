@@ -1,0 +1,171 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-browser`
+@group Nuxeo UI
+@element nuxeo-dbrowser
+-->
+<dom-module id="nuxeo-browser">
+  <template>
+    <style is="custom-style">
+      .side-nav {
+        background-color: #213f7d;
+        height: 100%;
+        position: fixed;
+        width: 60px;
+      }
+
+      .side-nav paper-icon-button {
+        color: #fff;
+        width: 60px;
+        height:60px;
+        padding: 15px;
+      }
+
+      .main {
+        left: 60px;
+      }
+
+      paper-header-panel {
+        height: 240px;
+      }
+
+      .paper-header {
+        height: 60px;
+        color: #039be5;
+        background-color: var(--primary-background-color);
+        font-size: 24px;
+        padding-left: 20px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .content {
+        background-color: var(--primary-background-color);
+        height: 2000px;
+      }
+    </style>
+
+    <!-- Left sidebar -->
+
+    <!-- Desktop: side icon toolbar -->
+    <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
+      <paper-icon-button icon="icons:visibility" name="view" href="/browser/view">View</paper-icon-button>
+      <paper-icon-button icon="icons:info-outline" name="metadata" href="/browser/metadata">Metadata</paper-icon-button>
+      <paper-icon-button icon="icons:restore" name="activity" href="/browser/activity">Activity</paper-icon-button>
+      <paper-icon-button icon="communication:vpn-key" name="permissions" href="/browser/permissions">Permissions</paper-icon-button>
+      <paper-icon-button icon="icons:settings" name="settings" href="/browser/settings">Settings</paper-icon-button>
+    </paper-menu>
+
+    <!-- Mobile: tabs ? -->
+    <!--
+    <iron-media-query query="min-width: 600px" query-matches="{{wideLayout}}"></iron-media-query>
+    <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" hidden$="{{!wideLayout}}">
+      <paper-tab name="view" href="/browser/view">View</paper-tab>
+      <paper-tab name="metadata" href="/browser/metadata">Metadata</paper-tab>
+      <paper-tab name="activity" href="/browser/activity">Activity</paper-tab>
+      <paper-tab name="permissions" href="/browser/permissions">Permissions</paper-tab>
+      <paper-tab name="settings" href="/browser/settings">Settings</paper-tab>
+    </paper-tabs>
+    -->
+
+    <!-- Main content -->
+
+    <paper-header-panel class="main flex">
+      <div class="paper-header">
+        <span>[[document.title]] [[selectedTab]]</span>
+      </div>
+      <div class="content">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+          <section name="view">
+            <template is="dom-if" if="[[_canViewContent(document)]]">
+              <nuxeo-document-content-view document="{{document}}"></nuxeo-document-content-view>
+            </template>
+            <template is="dom-if" if="[[_canView(document)]]">
+              <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
+            </template>
+          </section>
+
+          <section name="metadata">
+            Metadata
+          </section>
+
+          <section name="activity">
+            Activity
+          </section>
+
+          <section name="permissions">
+            Permissions
+          </section>
+
+          <section name="settings">
+            Settings
+          </section>
+      </div>
+    </paper-header-panel>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-browser',
+        properties: {
+          document: {
+            type: Object
+          }
+        },
+        observers: [
+            '_updateTabs(document)'
+        ],
+
+        _updateTabs: function() {
+          // TODO: Update document tabs
+          this.selectedTab = 'view';
+        },
+
+        get _enrichers() {
+          if (this.document) {
+            return this.document.contextParameters;
+          }
+        },
+
+        get _isFolderish() {
+          return this.document.facets.includes('Folderish');
+        },
+
+        get _canReadChildren() {
+          return this._enrichers && this._enrichers.permissions.includes('ReadChildren');
+        },
+
+        _canView: function() {
+          return this.document && !this._isFolderish;
+        },
+
+        _canViewContent: function() {
+          return this.document && this._isFolderish; // && this._canReadChildren;
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
