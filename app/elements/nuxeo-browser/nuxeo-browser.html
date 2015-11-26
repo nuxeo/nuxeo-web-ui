@@ -149,11 +149,11 @@ Contributors:
         },
 
         get _isFolderish() {
-          return this.document.facets.includes('Folderish');
+          return this.document.facets.indexOf('Folderish') !== -1;
         },
 
         get _canReadChildren() {
-          return this._enrichers && this._enrichers.permissions.includes('ReadChildren');
+          return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
         },
 
         _canView: function() {
