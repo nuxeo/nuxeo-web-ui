@@ -1,0 +1,179 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-directory-suggestion.html">
+<link rel="stylesheet" href="../../bower_components/select2/select2.css">
+<script src="../../bower_components/moment/min/moment-with-locales.min.js"></script>
+
+<!--
+`nuxeo-dublincore-edit`
+@group Nuxeo UI
+@element nuxeo-dublincore-edit
+-->
+
+<dom-module id="nuxeo-dublincore-edit">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      input,
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+        width: 300px;
+      }
+
+      label {
+        font-weight: bold;
+        width: 200px;
+      }
+    </style>
+
+    <div class="row layout horizontal">
+      <label>Title</label>
+      <input is="iron-input" value="[[document.properties.dc:title]]" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Description</label>
+      <textarea class="flex">[[document.properties.dc:description]]</textarea>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Nature</label>
+      <nuxeo-directory-suggestion class="flex"
+                                  directory-name="nature"
+                                  value="[[document.properties.dc:nature]]"
+                                  placeholder="Select a value"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Subjects</label>
+      <nuxeo-directory-suggestion class="flex"
+                                  directory-name="l10nsubjects"
+                                  value="[[document.properties.dc:subjects]]"
+                                  multiple="true"
+                                  dbl10n="true"
+                                  placeholder="Select a value"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Rights</label>
+      <input is="iron-input" value="[[document.properties.dc:rights]]" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Source</label>
+      <input is="iron-input" value="[[document.properties.dc:source]]" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Coverage</label>
+      <nuxeo-directory-suggestion class="flex"
+                                  directory-name="l10ncoverage"
+                                  value="[[document.properties.dc:coverage]]"
+                                  dbl10n="true"
+                                  placeholder="Select a value"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Created at</label>
+      <span class="flex">[[format(document.properties.dc:created)]]</span>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Modified at</label>
+      <span class="flex">[[format(document.properties.dc:modified)]]</span>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Format</label>
+      <input is="iron-input" value="[[document.properties.dc:format]]" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Language</label>
+      <input is="iron-input" value="[[document.properties.dc:language]]" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Expire on</label>
+      <input is="iron-input" type="date" class="flex">
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Creator</label>
+      <span class="flex">[[document.properties.dc:creator]]</span>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Contributors</label>
+
+      <div class="layout vertical">
+        <template is="dom-repeat" items={{document.properties.dc:contributors}}>
+          <span>{{item}}</span>
+        </template>
+      </div>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Last contributor</label>
+      <span class="flex">[[document.properties.dc:lastContributor]]</span>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-dublincore-edit',
+
+        properties: {
+          document: {
+            type: Object
+          }
+        },
+
+        format: function(date) {
+          return moment(date).format('DD/MM/YYYY HH:mm');
+        }
+      });
+    })();
+  </script>
+</dom-module>

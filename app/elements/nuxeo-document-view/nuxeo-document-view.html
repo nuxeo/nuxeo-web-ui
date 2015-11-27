@@ -24,9 +24,18 @@ Contributors:
 <dom-module id="nuxeo-document-view">
   <template>
     <style>
+      form {
+        margin: 20px;
+        width: 800px;
+      }
     </style>
 
     <span>[[document.title]]</span>
+
+    <form is="iron-form" id="form" method="GET" action="/">
+      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+      <button>Submit</button>
+    </form>
 
   </template>
 
