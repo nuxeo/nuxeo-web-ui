@@ -49,7 +49,7 @@ Contributors:
       }
 
       paper-badge {
-        --paper-badge-background: var(--paper-amber-a700);
+        --paper-badge-background: #f68500;;
       }
 
       paper-tabs {
@@ -66,6 +66,38 @@ Contributors:
         text-transform: uppercase;
       }
 
+      [drawer] .card {
+        margin: 0;
+        padding: 20px;
+      }
+
+      [drawer] .card h1 {
+          background-color: #213f7d;
+          color: #fff;
+          font-size: 1.1rem;
+          margin: -1.4rem -1.35rem 0;
+          padding: .5rem 1.3rem;
+          font-weight: 700;
+          border-bottom: 1px solid #edeff0;
+      }
+
+      .badge {
+        float: right;
+        @apply(--paper-font-common-base);
+        font-weight: 600;
+        font-size: 12px;
+        border-radius: 50%;
+        width: var(--paper-badge-width, 20px);
+        height: var(--paper-badge-height, 20px);
+        background-color: #f68500;;
+        opacity: var(--paper-badge-opacity, 1.0);
+        color: var(--paper-badge-text-color, white);
+        @apply(--layout);
+        @apply(--layout-center-center);
+        display: block;
+        outline: none;
+      }
+
       [hidden] {
         display: none !important;
       }
@@ -74,7 +106,7 @@ Contributors:
     <nuxeo-connection url="http://localhost:8080/nuxeo"></nuxeo-connection>
     <nuxeo-document auto doc-path="/default-domain" response="{{currentDocument}}" enrichers="permissions"></nuxeo-document>
 
-    <app-drawer-layout id="drawerLayout" force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
+    <app-drawer-layout force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
 
       <app-header-layout main>
 
@@ -124,7 +156,7 @@ Contributors:
             <!-- Toggle right panel button -->
             <div id="toggle">
               <paper-icon-button icon="menu" drawer-toggle aria-label="menu"></paper-icon-button>
-              <paper-badge label="3"></paper-badge>
+              <paper-badge label="[[taskCount]]"></paper-badge>
             </div>
           </app-toolbar>
         </app-header>
@@ -138,7 +170,20 @@ Contributors:
 
       <!-- right panel -->
       <div drawer>
-        <!-- TODO: add right panel -->
+        <section class="card">
+          <h1>Clipboard</h1>
+          <nuxeo-clipboard><nuxeo-clipboard>
+        </section>
+
+        <section class="card">
+          <h1>Tasks <div class="badge">[[taskCount]]</div></h1>
+          <nuxeo-task-list count="{{taskCount}}"></nuxeo-task-list>
+        </section>
+
+        <section class="card">
+          <h1>Collections</h1>
+          <nuxeo-collections></nuxeo-collections>
+        </section>
       </div>
 
     </app-drawer-layout>
@@ -151,7 +196,13 @@ Contributors:
       Polymer({
         is: 'nuxeo-app',
 
-        propertied: {
+        properties: {
+          currentDocument: {
+            type: String
+          },
+          taskCount: {
+            type: Number
+          },
           selectedPage: {
             type: String
           }

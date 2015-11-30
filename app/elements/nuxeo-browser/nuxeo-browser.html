@@ -16,6 +16,10 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+
 <!--
 `nuxeo-browser`
 @group Nuxeo UI
@@ -34,7 +38,7 @@ Contributors:
       .side-nav paper-icon-button {
         color: #fff;
         width: 60px;
-        height:60px;
+        height: 60px;
         padding: 15px;
       }
 
@@ -43,7 +47,7 @@ Contributors:
       }
 
       paper-header-panel {
-        height: 240px;
+        height: 100vh;
       }
 
       .paper-header {
@@ -131,10 +135,13 @@ Contributors:
         properties: {
           document: {
             type: Object
+          },
+          selectedTab: {
+            type: String
           }
         },
         observers: [
-            '_updateTabs(document)'
+          '_updateTabs(document)'
         ],
 
         _updateTabs: function() {
