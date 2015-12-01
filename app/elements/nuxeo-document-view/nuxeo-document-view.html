@@ -15,6 +15,7 @@ Contributors:
     Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../nuxeo-document-edit/nuxeo-dublincore-edit.html">
 
 <!--
 `nuxeo-document-view`
@@ -24,19 +25,25 @@ Contributors:
 <dom-module id="nuxeo-document-view">
   <template>
     <style>
-      form {
-        margin: 20px;
+      .container {
+        padding: 20px;
         width: 800px;
       }
     </style>
 
-    <span>[[document.title]]</span>
-
-    <form is="iron-form" id="form" method="GET" action="/">
-      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
-      <button>Submit</button>
-    </form>
-
+    <div class="container">
+      <iron-pages id="doc-pages" selected="[[mode]]" attr-for-selected="name">
+        <div name="view">
+          <span>[[document.title]]</span>
+        </div>
+        <div name="edit">
+          <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
+          <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+          <button on-click="_save">Submit</button>
+          <button on-click="_cancel">Cancel</button>
+        </div>
+      </iron-pages>
+    </div>
   </template>
 
   <script>
@@ -47,8 +54,28 @@ Contributors:
         is: 'nuxeo-document-view',
         properties: {
           document: {
-            type: Object
+            type: Object,
+            observer: '_documentChanged'
+          },
+
+          mode: {
+            type: String,
+            value: 'view'
           }
+        },
+
+        _documentChanged: function() {
+          this.mode = 'view';
+        },
+
+        _save: function() {
+          var doc = document.getElementById('doc');
+          doc.put();
+          this.mode = 'view';
+        },
+
+        _cancel: function() {
+          this.mode = 'view';
         }
       });
     })();

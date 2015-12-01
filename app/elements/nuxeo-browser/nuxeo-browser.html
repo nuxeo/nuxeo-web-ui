@@ -58,11 +58,20 @@ Contributors:
         padding-left: 20px;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        width: 80%;
       }
 
       .content {
         background-color: var(--primary-background-color);
         height: 2000px;
+      }
+
+      paper-icon-button[name="edit"] {
+        color: #000;
+      }
+
+      paper-icon-button[name="edit"]:hover {
+        color: #039be5;
       }
     </style>
 
@@ -92,8 +101,14 @@ Contributors:
     <!-- Main content -->
 
     <paper-header-panel class="main flex">
-      <div class="paper-header">
-        <span>[[document.title]] [[selectedTab]]</span>
+      <div class="paper-header layout horizontal">
+        <span class="flex">[[document.title]] [[selectedTab]]</span>
+
+        <template is="dom-if" if="[[_canView(document)]]">
+          <paper-menu selected="{{action}}" attr-for-selected="name">
+            <paper-icon-button icon="icons:create" name="edit" href="/browser/edit">Edit</paper-icon-button>
+          </paper-menu>
+        </template>
       </div>
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
@@ -102,7 +117,7 @@ Contributors:
               <nuxeo-document-content-view document="{{document}}"></nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
-              <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
+              <nuxeo-document-view document="{{document}}" mode="{{action}}"></nuxeo-document-view>
             </template>
           </section>
 
