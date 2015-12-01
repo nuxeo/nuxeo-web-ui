@@ -17,28 +17,39 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <dom-module id="nuxeo-document-content-view">
   <template>
+
     <style>
-      ul {
-        list-style: none;
+      .bubbleBoxes {
+        margin: 0 auto;
+        padding: 2em 2.5em 3em;
       }
 
-      a {
-        text-decoration: none;
+      @media (max-width: 1132px) {
+        .bubbleBoxes {
+          max-width: 880px;
+        }
       }
 
-      a:visited {
-        color: black;
+      @media (max-width: 912px) {
+        .bubbleBoxes {
+          max-width: 660px;
+        }
+      }
+
+      @media (max-width: 692px) {
+        .bubbleBoxes {
+          max-width: 440px;
+        }
       }
     </style>
 
     <!-- TODO: use the 'params' attribute -->
     <nuxeo-resource auto path="[[_path(document)]]" response="{{children}}"></nuxeo-resource>
-
-    <ul>
+    <div class="bubbleBoxes">
       <template is="dom-repeat" items="{{children.entries}}">
-        <li><a href="#" on-tap="navigate">[[item.title]]</a></li>
+        <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
       </template>
-      </ul>
+    </div>
   </template>
 
   <script>
@@ -55,10 +66,6 @@ Contributors:
           params: {
             type: Array
           }
-        },
-
-        navigate: function() {
-          this.document = arguments[0].model.item;
         },
 
         _path: function() {
