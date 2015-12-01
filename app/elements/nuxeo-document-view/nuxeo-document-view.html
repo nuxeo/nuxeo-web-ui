@@ -16,6 +16,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../nuxeo-document-edit/nuxeo-dublincore-edit.html">
+<link rel="import" href="../nuxeo-document-edit/nuxeo-versioning-edit.html">
 
 <!--
 `nuxeo-document-view`
@@ -39,6 +40,7 @@ Contributors:
         <div name="edit">
           <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
           <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+          <nuxeo-versioning-edit document="[[document]]" versioningType="{{versioningType}}"></nuxeo-versioning-edit>
           <button on-click="_save">Submit</button>
           <button on-click="_cancel">Cancel</button>
         </div>

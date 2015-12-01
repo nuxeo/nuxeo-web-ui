@@ -1,0 +1,101 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
+
+<!--
+`nuxeo-versioning-edit`
+@group Nuxeo UI
+@element nuxeo-versioning-edit
+-->
+<dom-module id="nuxeo-versioning-edit">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+        width: 300px;
+      }
+
+      label {
+        font-weight: bold;
+        width: 200px;
+      }
+
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
+      }
+    </style>
+
+    <div class="row layout horizontal">
+      <label>Change Comment</label>
+      <textarea class="flex"></textarea>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Version</label>
+      <span class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+    </div>
+
+    <div class="row layout horizontal">
+      <label>Update Versions</label>
+      <paper-radio-group selected="{{versioningType}}" class="layout vertical">
+        <paper-radio-button name="none">Skip version increment</paper-radio-button>
+        <paper-radio-button name="minor">Increment minor version</paper-radio-button>
+        <paper-radio-button name="major">Increment major version</paper-radio-button>
+      </paper-radio-group>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-versioning-edit',
+
+        properties: {
+          document: {
+            type: Object
+          },
+
+          versioningType: {
+            type: 'String',
+            value: 'none'
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>
