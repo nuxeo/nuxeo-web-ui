@@ -59,19 +59,19 @@ Contributors:
 
     <div class="row layout horizontal">
       <label>Title</label>
-      <input is="iron-input" value="[[document.properties.dc:title]]" class="flex">
+      <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Description</label>
-      <textarea class="flex">[[document.properties.dc:description]]</textarea>
+      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
     <div class="row layout horizontal">
       <label>Nature</label>
       <nuxeo-directory-suggestion class="flex"
                                   directory-name="nature"
-                                  value="[[document.properties.dc:nature]]"
+                                  value="{{document.properties.dc:nature}}"
                                   placeholder="Select a value"
                                   min-chars="0">
       </nuxeo-directory-suggestion>
@@ -81,7 +81,7 @@ Contributors:
       <label>Subjects</label>
       <nuxeo-directory-suggestion class="flex"
                                   directory-name="l10nsubjects"
-                                  value="[[document.properties.dc:subjects]]"
+                                  value="{{document.properties.dc:subjects}}"
                                   multiple="true"
                                   dbl10n="true"
                                   placeholder="Select a value"
@@ -91,19 +91,19 @@ Contributors:
 
     <div class="row layout horizontal">
       <label>Rights</label>
-      <input is="iron-input" value="[[document.properties.dc:rights]]" class="flex">
+      <input is="iron-input" value="{{document.properties.dc:rights::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Source</label>
-      <input is="iron-input" value="[[document.properties.dc:source]]" class="flex">
+      <input is="iron-input" value="{{document.properties.dc:source::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Coverage</label>
       <nuxeo-directory-suggestion class="flex"
                                   directory-name="l10ncoverage"
-                                  value="[[document.properties.dc:coverage]]"
+                                  value="{{document.properties.dc:coverage}}"
                                   dbl10n="true"
                                   placeholder="Select a value"
                                   min-chars="0">
@@ -122,22 +122,22 @@ Contributors:
 
     <div class="row layout horizontal">
       <label>Format</label>
-      <input is="iron-input" value="[[document.properties.dc:format]]" class="flex">
+      <input is="iron-input" value="{{document.properties.dc:format::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Language</label>
-      <input is="iron-input" value="[[document.properties.dc:language]]" class="flex">
+      <input is="iron-input" value="{{document.properties.dc:language::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Expire on</label>
-      <input is="iron-input" type="date" class="flex">
+      <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
       <label>Creator</label>
-      <span class="flex">[[document.properties.dc:creator]]</span>
+      <span class="flex">{{document.properties.dc:creator::change}}</span>
     </div>
 
     <div class="row layout horizontal">
@@ -152,7 +152,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <label>Last contributor</label>
-      <span class="flex">[[document.properties.dc:lastContributor]]</span>
+      <span class="flex">{{document.properties.dc:lastContributor::change}}</span>
     </div>
 
   </template>
