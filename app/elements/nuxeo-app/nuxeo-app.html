@@ -64,8 +64,15 @@ Contributors:
       paper-tab {
         --paper-tab-ink: #aaa;
         text-transform: uppercase;
-      }
+       @apply(--layout-horizontal);
+       @apply(--layout-center-center);
+     }
 
+      paper-tab a {
+        color: var(--menu-link-color);
+        text-decoration: none;
+      }
+      
       [drawer] .card {
         margin: 0;
         padding: 20px;
@@ -104,7 +111,7 @@ Contributors:
     </style>
 
     <nuxeo-connection url="http://localhost:8080/nuxeo"></nuxeo-connection>
-    <nuxeo-document auto doc-path="/default-domain" response="{{currentDocument}}" enrichers="permissions"></nuxeo-document>
+    <nuxeo-document auto doc-path="[[docPath]]" response="{{currentDocument}}" enrichers="permissions"></nuxeo-document>
 
     <app-drawer-layout force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
 
@@ -122,7 +129,7 @@ Contributors:
             </section>
 
             <!-- Navigation (MAIN_TABS) -->
-            <paper-tabs selected="{{selectedPage}}" attr-for-selected="name">
+            <paper-tabs selected="{{page}}" attr-for-selected="name">
               <paper-tab name="home">Home</paper-tab>
               <paper-tab name="browse">Browse</paper-tab>
               <paper-tab name="search">Search</paper-tab>
@@ -162,8 +169,8 @@ Contributors:
         </app-header>
 
         <!-- The current document's page -->
-        <iron-pages selected="[[selectedPage]]" attr-for-selected="name">
-          <nuxeo-browser name="browse" document="[[currentDocument]]"></nuxeo-browser>
+        <iron-pages selected="[[page]]" attr-for-selected="name">
+          <nuxeo-browser name="browse" document="[[currentDocument]]" selected-tab="{{docAction}}"></nuxeo-browser>
         </iron-pages>
 
       </app-header-layout>
@@ -197,20 +204,40 @@ Contributors:
         is: 'nuxeo-app',
 
         properties: {
-          currentDocument: {
-            type: String
+          baseUrl: {
+            type: String,
+            value: '/'
           },
-          taskCount: {
-            type: Number
+          page: {
+            type: String,
+            observer: '_navigate'
           },
-          selectedPage: {
-            type: String
-          }
+
+          currentDocument: Object,
+          docPath: String,
+          docAction: String,
+
+          taskCount: Number
         },
 
         ready: function() {
-          this.selectedPage = 'browse';
-          this.baseUrl = Nuxeo.baseUrl;
+        },
+
+        _navigate: function() {
+          var url = '/' + this.page;
+          if (this.page == 'browse') {
+            if (this.docPath) {
+              url += this.docPath;
+            }
+            if (this.docAction) {
+              url += '@' + this.docAction;
+            }
+          }
+          page(url);
+        },
+
+        scrollPageToTop: function() {
+          //this.$.selectedPage.scrollToTop(true);
         }
       });
     })();

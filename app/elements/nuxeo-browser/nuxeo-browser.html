@@ -70,11 +70,11 @@ Contributors:
 
     <!-- Desktop: side icon toolbar -->
     <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
-      <paper-icon-button icon="icons:visibility" name="view" href="/browser/view">View</paper-icon-button>
-      <paper-icon-button icon="icons:info-outline" name="metadata" href="/browser/metadata">Metadata</paper-icon-button>
-      <paper-icon-button icon="icons:restore" name="activity" href="/browser/activity">Activity</paper-icon-button>
-      <paper-icon-button icon="communication:vpn-key" name="permissions" href="/browser/permissions">Permissions</paper-icon-button>
-      <paper-icon-button icon="icons:settings" name="settings" href="/browser/settings">Settings</paper-icon-button>
+      <paper-icon-button icon="icons:visibility" name="view">View</paper-icon-button>
+      <paper-icon-button icon="icons:info-outline" name="metadata">Metadata</paper-icon-button>
+      <paper-icon-button icon="icons:restore" name="activity">Activity</paper-icon-button>
+      <paper-icon-button icon="communication:vpn-key" name="permissions">Permissions</paper-icon-button>
+      <paper-icon-button icon="icons:settings" name="settings">Settings</paper-icon-button>
     </paper-menu>
 
     <!-- Mobile: tabs ? -->
@@ -137,16 +137,10 @@ Contributors:
             type: Object
           },
           selectedTab: {
-            type: String
+            type: String,
+            value: 'view',
+            observer: '_navigate'
           }
-        },
-        observers: [
-          '_updateTabs(document)'
-        ],
-
-        _updateTabs: function() {
-          // TODO: Update document tabs
-          this.selectedTab = 'view';
         },
 
         get _enrichers() {
@@ -169,6 +163,12 @@ Contributors:
 
         _canViewContent: function() {
           return this.document && this._isFolderish; // && this._canReadChildren;
+        },
+
+        _navigate: function() {
+          if (this.document) {
+            page('/browse' + this.document.path + '@' + this.selectedTab);
+          }
         }
 
       });

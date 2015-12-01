@@ -75,7 +75,7 @@ Contributors:
         <img src="[[_thumbnail(doc)]]" class="thumbnailImg" >
       </div>
       <div>
-         <a href="#" on-tap="navigate">[[doc.title]]</a>
+         <a href$="[[_href(doc)]]">[[doc.title]]</a>
          <p class="creator">[[_docType(doc)]]</p>
       </div>
     </div>
@@ -99,11 +99,6 @@ Contributors:
           }
         },
 
-        navigate: function() {
-          console.log(this.doc);
-          this.document = this.doc;
-        },
-
         _icon: function() {
           return 'http://localhost:8080/nuxeo' + this.doc.properties['common:icon'];
         },
@@ -118,6 +113,10 @@ Contributors:
 
         _docType: function() {
           return this.doc.type;
+        },
+
+        _href: function(doc) {
+          return page.base() + '/browse' + doc.path;
         }
       });
     })();

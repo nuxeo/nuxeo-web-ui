@@ -15,6 +15,12 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-content-view`
+@group Nuxeo UI
+@element nuxeo-document-content-view
+-->
 <dom-module id="nuxeo-document-content-view">
   <template>
 
@@ -62,15 +68,13 @@ Contributors:
           document: {
             type: Object,
             notify: true
-          },
-          params: {
-            type: Array
           }
         },
 
         _path: function() {
           return '/query/document_content?queryParams=' + this.document.uid;
         }
+
       });
     })();
   </script>

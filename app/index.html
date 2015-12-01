@@ -65,29 +65,22 @@ Lesser General Public License for more details.
 
 <body unresolved class="fullbleed layout vertical">
   <span id="browser-sync-binding"></span>
-  <template is="dom-bind" id="app">
 
-    <nuxeo-app></nuxeo-app>
+  <nuxeo-app base-url="/"></nuxeo-app>
 
-    <!-- Uncomment next block to enable Service Worker support (1/2) -->
-    <!--
-    <platinum-sw-register auto-register
-                          clients-claim
-                          skip-waiting>
-      <platinum-sw-cache default-cache-strategy="fastest"
-                         cache-config-file="cache-config.json">
-      </platinum-sw-cache>
-    </platinum-sw-register>
-    -->
-
-  </template>
+  <!-- Uncomment next block to enable Service Worker support (1/2) -->
+  <!--
+  <platinum-sw-register auto-register
+                        clients-claim
+                        skip-waiting>
+    <platinum-sw-cache default-cache-strategy="fastest"
+                       cache-config-file="cache-config.json">
+    </platinum-sw-cache>
+  </platinum-sw-register>
+  -->
 
   <!-- build:js vendor/jquery.js -->
   <script src="bower_components/jquery/dist/jquery.js"></script>
-  <!-- endbuild-->
-
-  <!-- build:js scripts/app.js -->
-  <script src="scripts/app.js"></script>
   <!-- endbuild-->
 </body>
 
