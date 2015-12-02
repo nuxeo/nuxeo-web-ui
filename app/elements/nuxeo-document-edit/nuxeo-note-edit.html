@@ -1,0 +1,114 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-dublincore-edit.html">
+
+<!--
+`nuxeo-note-edit`
+@group Nuxeo UI
+@element nuxeo-note-edit
+-->
+<dom-module id="nuxeo-note-edit">
+ <template>
+   <style>
+     :host {
+       display: block;
+     }
+
+     .row {
+       margin-bottom: 25px;
+     }
+
+     input,
+     textarea {
+       background: none #fff;
+       border: 1px solid #c6c6c6;
+       border-radius: 3px;
+       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+       box-sizing: border-box;
+       display: inline-block;
+       font-size: 1em;
+       margin-bottom: 0.5em;
+       padding: 0.5em;
+     }
+
+     label {
+       font-weight: bold;
+       width: 200px;
+     }
+
+     .format {
+       font-size: 0.9em;
+       margin-right: 5px;
+     }
+
+     select {
+       background: none #fff;
+       border: 1px solid #c6c6c6;
+       border-radius: 3px;
+       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+       box-sizing: border-box;
+       display: inline-block;
+       padding: 0.5em;
+       width: 150px;
+     }
+   </style>
+
+   <div class="row layout horizontal">
+     <label>Title</label>
+     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex">
+   </div>
+
+   <div class="row layout horizontal">
+     <label>Description</label>
+     <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+   </div>
+
+   <div class="row layout horizontal">
+     <label>Note</label>
+     <div class="layout vertical flex">
+       <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
+       <div class="layout horizontal">
+         <span class="format">Format</span>
+         <select value="{{document.properties.note:mime_type::change}}">
+           <option value="text/html">HTML</option>
+           <option value="text/plain">Text</option>
+           <option value="text/xml">XML</option>
+           <option value="text/x-web-markdown">Markdown</option>
+         </select>
+       </div>
+     </div>
+   </div>
+
+   <nuxeo-dublincore-edit document="[[document]]"><nuxeo-dublincore-edit>
+ </template>
+ <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'nuxeo-note-edit',
+
+      properties: {
+        document: {
+          type: Object
+        }
+      }
+    });
+  })();
+ </script>
+</dom-module>
