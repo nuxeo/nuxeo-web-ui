@@ -1,0 +1,218 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-picture-view`
+@group Nuxeo UI
+@element nuxeo-picture-view
+-->
+<dom-module id="nuxeo-picture-view">
+
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+      }
+
+      a {
+        color: #039be5;
+        text-decoration: none;
+      }
+
+      .docinfo {
+        padding: 0.75rem;
+        box-sizing: border-box;
+      }
+
+      .doctitle {
+        color: #039be5;
+        font-size: 1.64rem;
+      }
+
+      .additional {
+        font-size: 1.64rem;
+      }
+
+      .propkey {
+        color: #999;
+        width: 15%;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+        box-sizing: inherit;
+      }
+
+      .propvalue {
+        width: 35%;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+        box-sizing: inherit;
+      }
+
+      .proptable {
+        padding-top: 1rem;
+        box-sizing: border-box;
+      }
+
+
+      .row {
+        margin-bottom: 1rem;
+        box-sizing: inherit;
+      }
+
+      .viewname {
+        color: #999;
+        width: 15%;
+        box-sizing: inherit;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .viewdim {
+        width: 30%;
+        box-sizing: inherit;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .viewsize {
+        color: #999;
+        width: 15%;
+        box-sizing: inherit;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .viewformat {
+        width: 30%;
+        box-sizing: inherit;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .viewdl {
+        width: 10%;
+        box-sizing: inherit;
+        padding-right: 0.8rem;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .viewdla {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+      }
+
+    </style>
+
+    <div class="docinfo vertical layout flex-2">
+      <paper-card image="[[document.properties.file:content.data]]">
+        <div class="card-content">
+          <p class="doctitle">[[document.title]]</p>
+          <p>[[document.properties.dc:description]]</p>
+        </div>
+        <div class="card-content sep">
+          <div class="proptable vertical layout">
+            <div class="row horizontal layout">
+              <span class="propkey">Dimensions</span>
+              <span class="propvalue">[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</span>
+              <span class="propkey">Format</span>
+              <span class="propvalue">[[document.properties.picture:info.format]]</span>
+            </div>
+            <div class="row horizontal layout">
+              <span class="propkey">Color Profile</span>
+              <span class="propvalue">[[document.properties.picture:info.colorSpace]]</span>
+              <span class="propkey">Bit Depth</span>
+              <span class="propvalue">[[document.properties.picture:info.depth]]</span>
+            </div>
+            <div class="row horizontal layout">
+              <span class="propkey">Weight</span>
+              <span class="propvalue">[[_formatSize(document.properties.common:size)]]</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content sep">
+          <p class="additional">Additional Formats</p>
+          <div class="proptable vertical layout">
+            <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
+              <div class="row horizontal layout">
+                <span class="viewname">[[item.name]]</span>
+                <span class="viewdim">[[item.dimensions]]</span>
+                <span class="viewsize">[[item.size]]</span>
+                <span class="viewformat">[[item.format]]</span>
+                <span  class="viewdl">
+                  <a href="[[item.data]]" title="download" class="viewdla">
+                    <iron-icon icon="icons:file-download"></iron-icon>
+                  </a>
+                </span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-picture-view',
+        properties: {
+          document: {
+            type: Object,
+            notify: true
+          }
+        },
+        _formatSize: function(size) {
+          if (size > 1048576) {
+            return parseFloat(size / 1048576).toFixed(2) + ' MB';
+          } else if (size > 1024) {
+            return parseFloat(size / 1024).toFixed(2) + ' KB';
+          } else {
+            return size.toString() + ' B';
+          }
+        },
+        _getAdditionalFormats: function(document) {
+          var self = this;
+          return document.properties['picture:views'].map(function(view) {
+            var size = self._formatSize(view.content.length);
+            return {
+              name: view.description,
+              dimensions: view.width + ' x ' + view.height,
+              size: size,
+              format: view.info.format,
+              data: view.content.data
+            };
+          });
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
