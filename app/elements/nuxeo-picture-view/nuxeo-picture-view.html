@@ -189,6 +189,10 @@ Contributors:
           document: {
             type: Object,
             notify: true
+          },
+          additionalFormats: {
+            type: Object,
+            computed: '_getAdditionalFormats(document)'
           }
         },
         _formatSize: function(size) {
@@ -201,17 +205,15 @@ Contributors:
           }
         },
         _getAdditionalFormats: function(document) {
-          var self = this;
           return document.properties['picture:views'].map(function(view) {
-            var size = self._formatSize(view.content.length);
             return {
               name: view.description,
               dimensions: view.width + ' x ' + view.height,
-              size: size,
+              size: this._formatSize(view.content.length),
               format: view.info.format,
               data: view.content.data
             };
-          });
+          }.bind(this));
         }
       });
     })();

@@ -30,7 +30,7 @@ Contributors:
       :host {
         display: block;
       }
-      
+
       .container {
         padding: 20px;
         width: 800px;
@@ -121,8 +121,8 @@ Contributors:
       <iron-pages id="doc-pages" selected="[[mode]]" attr-for-selected="name">
         <div name="view">
 
-          <nuxeo-resource id="workflowsRequest" auto path="[[_getWorkflowPath(document)]]" response="{{workflows}}"></nuxeo-resource>
-          <nuxeo-resource id="auditRequest" auto path="[[_getAuditPath(document)]]" response="{{audit}}"></nuxeo-resource>
+          <nuxeo-resource id="workflowsRequest" auto path="/id/[[document.uid]]/@workflow" response="{{workflows}}"></nuxeo-resource>
+          <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
 
           <div class="docview horizontal layout">
             <div class="flex-2">
@@ -143,11 +143,6 @@ Contributors:
                         </template>
                       </template>
                     </div>
-                    <!--<paper-dialog id="dialog">
-                      <h2>Dialog Title</h2>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                    </paper-dialog>
-                    <paper-button data-dialog="dialog" on-tap="toggleDialog">plain dialog</paper-button>-->
                     <paper-button class="startbutton">Process</paper-button>
                   </div>
                 </paper-card>
@@ -190,13 +185,11 @@ Contributors:
                         </paper-dropdown-menu>
                       </div>
                       <div>
-                        <nuxeo-resource id="workflowRequest" path="[[_getWorkflowPath(document)]]" data="{{workflowData}}"
+                        <nuxeo-resource id="workflowRequest" path="/id/[[document.uid]]/@workflow"
+                                        data="{{workflowData}}"
                                         response="{{workflowResponse}}"
                                         headers='{"Content-Type":"application/json"}'></nuxeo-resource>
                         <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
-                        <!--<a class="startbutton">
-                          Start
-                        </a>-->
                       </div>
                     </div>
                   </div>
@@ -303,11 +296,7 @@ Contributors:
         },
 
         _formatDate: function(date) {
-          return moment(date).format('MMMM, Do YYYY');
-        },
-
-        _getAuditPath: function(document) {
-          return '/id/' + document.uid + '/@audit';
+          return moment(date).format('MMMM D, YYYY');
         },
 
         _getActivityDescription: function(auditEntry) {
@@ -348,10 +337,6 @@ Contributors:
           return description;
         },
 
-        _getWorkflowPath: function(document) {
-          return '/id/' + document.uid + '/@workflow';
-        },
-
         _getTaskPath: function(document, user, workflowId, workflowName) {
           var path = '/id/' + document.uid + '/@task?';
           if (user) {
@@ -385,10 +370,6 @@ Contributors:
           };
           workflow.post();
           workflows.get();
-        },
-
-        toggleDialog: function() {
-          this.dialog.toggle();
         }
       });
     })();
