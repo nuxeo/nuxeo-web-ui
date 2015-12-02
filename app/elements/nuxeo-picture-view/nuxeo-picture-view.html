@@ -129,10 +129,12 @@ Contributors:
 
     </style>
 
-    <div class="docinfo vertical layout flex-2">
+    <div class="docinfo vertical layout">
       <paper-card image="[[document.properties.file:content.data]]">
         <div class="card-content">
-          <p class="doctitle">[[document.title]]</p>
+          <p class="doctitle">
+            <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
+          </p>
           <p>[[document.properties.dc:description]]</p>
         </div>
         <div class="card-content sep">

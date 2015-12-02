@@ -117,10 +117,9 @@ Contributors:
 
     </style>
 
-    <div class="container">
+    <div>
       <iron-pages id="doc-pages" selected="[[mode]]" attr-for-selected="name">
         <div name="view">
-          <span>[[document.title]]</span>
 
           <nuxeo-resource id="workflowsRequest" auto path="[[_getWorkflowPath(document)]]" response="{{workflows}}"></nuxeo-resource>
           <nuxeo-resource id="auditRequest" auto path="[[_getAuditPath(document)]]" response="{{audit}}"></nuxeo-resource>
@@ -231,7 +230,7 @@ Contributors:
             </div>
           </div>
         </div> <!-- view -->
-        <div name="edit">
+        <div name="edit" class="container">
           <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
           <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
           <nuxeo-versioning-edit document="[[document]]" versioningType="{{versioningType}}"></nuxeo-versioning-edit>
@@ -304,11 +303,7 @@ Contributors:
         },
 
         _formatDate: function(date) {
-          var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-          ];
-          var d = new Date(date);
-          return monthNames[d.getMonth()] + ' ' + d.getDate() + ',' + d.getFullYear();
+          return moment(date).format('MMMM, Do YYYY');
         },
 
         _getAuditPath: function(document) {
@@ -391,7 +386,7 @@ Contributors:
           workflow.post();
           workflows.get();
         },
-        
+
         toggleDialog: function() {
           this.dialog.toggle();
         }
