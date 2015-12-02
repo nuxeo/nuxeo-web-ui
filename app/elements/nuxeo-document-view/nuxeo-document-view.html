@@ -239,9 +239,9 @@ Contributors:
           </div>
         </div> <!-- view -->
         <div name="edit" class="container">
-          <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
+          <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
           <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
-          <nuxeo-versioning-edit document="[[document]]" versioningType="{{versioningType}}"></nuxeo-versioning-edit>
+          <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
           <button on-click="_save">Submit</button>
           <button on-click="_cancel">Cancel</button>
         </div>
@@ -280,7 +280,22 @@ Contributors:
           selectedProcess: {
             type: Number,
             value: 0
+          },
+
+          versioningType: {
+            type: String
+          },
+
+          headers: {
+            type: Object,
+            computed: 'computeHeaders(versioningType)'
           }
+        },
+
+        computeHeaders: function(versioningType) {
+          return {
+            'X-Versioning-Option': versioningType
+          };
         },
 
         _documentChanged: function() {
