@@ -75,8 +75,14 @@ Contributors:
         margin-right: 3px;
         margin-bottom: 3px;
         vertical-align: middle;
+        text-align: center;
         font-size: 0.9rem;
         border-radius: 2px;
+      }
+
+      .graybadge {
+        background-color: #eee;
+        color: #999;
       }
 
       .icon {
@@ -147,6 +153,15 @@ Contributors:
                   </div>
                 </paper-card>
               </template>
+              <paper-card class="sidecard">
+                <div class="card-content">
+                  <p class="sidetitle">Status</p>
+                  <div class="horizontal layout sep wrap cardcontent">
+                    <span class="badge">[[document.state]]</span>
+                    <span class="badge graybadge">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+                  </div>
+                </div>
+              </paper-card>
               <paper-card class="sidecard">
                 <div class="card-content">
                   <div class="vertical layout cardcontent">
