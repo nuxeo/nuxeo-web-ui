@@ -1,0 +1,96 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-tags`
+@group Nuxeo UI
+@element nuxeo-document-tags
+-->
+<dom-module id="nuxeo-document-tags">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .badge {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #00adff;
+        color: #fff;
+        padding: 0.2rem 0.4rem;
+        margin-right: 3px;
+        margin-bottom: 3px;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 2px;
+        @apply(--nuxeo-document-tags-theme);
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+        @apply(--nuxeo-document-tags-sep-theme);
+      }
+
+      .content {
+        padding: 0.75rem 0rem;
+        box-sizing: border-box;
+        @apply(--nuxeo-document-tags-content-theme);
+      }
+
+      .title {
+        color: #213f7d;
+        font-size: 1.64rem;
+        @apply(--nuxeo-document-tags-title-theme);
+      }
+    </style>
+
+    <p class="title">Tags</p>
+    <div class="horizontal layout wrap sep content">
+      <template is="dom-repeat" items="[[tags]]" as="tag">
+        <span class="badge layout horizontal center">
+          [[tag]]
+        </span>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-tags',
+        properties: {
+          document: {
+            type: Object
+          },
+
+          tags: {
+            type: Object,
+            value: ['tag1', 'tag2', 'tag3']
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,89 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-activity`
+@group Nuxeo UI
+@element nuxeo-document-activity
+-->
+<dom-module id="nuxeo-document-activity">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .audit_user a {
+        color: #039be5;
+        text-decoration: none;
+        @apply(--nuxeo-document-activity-user-theme);
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+        @apply(--nuxeo-document-activity-sep-theme);
+      }
+
+      .content {
+        padding: 0.75rem 0rem;
+        box-sizing: border-box;
+        @apply(--nuxeo-document-activity-content-theme);
+      }
+
+      .title {
+        color: #213f7d;
+        font-size: 1.64rem;
+        @apply(--nuxeo-document-activity-title-theme);
+      }
+
+      .audit {
+        max-height: 10rem;
+        overflow-y: auto;
+        @apply(--nuxeo-document-activity-audit-theme);
+      }
+    </style>
+
+    <p class="title">Activity</p>
+    <div class="vertical layout sep content audit">
+      <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
+      <template is="dom-repeat" items="[[audit.entries]]">
+        <p>
+          <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>&nbsp;</span>
+          <span>[[i18n('activity', item.eventId)]]</span>
+        </p>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-activity',
+        properties: {
+          document: {
+            type: Object
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

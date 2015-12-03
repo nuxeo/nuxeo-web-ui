@@ -1,0 +1,112 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-task-view`
+@group Nuxeo UI
+@element nuxeo-task-view
+-->
+<dom-module id="nuxeo-task-view">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .startbutton {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-radius: 2px;
+        @apply(--nuxeo-task-view-button-theme);
+        margin-top: 0.5rem;
+      }
+
+      .icon {
+        --iron-icon-height: 0.9rem;
+        --iron-icon-width: 0.9rem;
+        margin-right: 0.2rem;
+        @apply(--nuxeo-dublincore-contrib-icon-theme);
+      }
+
+      .content {
+        padding: 0.75rem 0rem;
+        box-sizing: border-box;
+        @apply(--nuxeo-task-view-content-theme);
+      }
+    </style>
+
+    <div class="vertical layout content">
+      <template is="dom-repeat" items="{{workflows.entries}}">
+        <nuxeo-resource auto path="[[_getTaskPath(document, 'Administrator', item.id, item.workflowModelName)]]" response="{{tasks}}"></nuxeo-resource>
+        <template is="dom-repeat" items="{{tasks.entries}}">
+          <span class="layout horizontal">
+            <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
+            You have a task to do before [[_formatDate(item.dueDate)]]
+          </span>
+        </template>
+      </template>
+      <div>
+        <paper-button class="startbutton">Process</paper-button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-task-view',
+        properties: {
+          document: {
+            type: Object
+          },
+
+          workflows: {
+            type: Object
+          }
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _getTaskPath: function(document, user, workflowId, workflowName) {
+          var path = '/id/' + document.uid + '/@task?';
+          if (user) {
+            path += 'userId=' + user;
+          }
+          if (workflowId) {
+            path += (user ? '&' : '') + 'workflowInstanceId=' + workflowId;
+          }
+          if (workflowName) {
+            path += (user || workflowId ? '&' : '') + 'workflowModelName=' + workflowName;
+          }
+          return path;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

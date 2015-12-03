@@ -1,0 +1,104 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-status`
+@group Nuxeo UI
+@element nuxeo-document-status
+-->
+<dom-module id="nuxeo-document-status">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .state {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #00adff;
+        color: #fff;
+        padding: 0.2rem 0.4rem;
+        margin-right: 3px;
+        margin-bottom: 3px;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 2px;
+        @apply(--nuxeo-document-status-state-theme);
+      }
+
+      .version {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #eee;
+        color: #999;
+        padding: 0.2rem 0.4rem;
+        margin-right: 3px;
+        margin-bottom: 3px;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 2px;
+        @apply(--nuxeo-document-status-version-theme);
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+        @apply(--nuxeo-document-status-sep-theme);
+      }
+
+      .content {
+        padding: 0.75rem 0rem;
+        box-sizing: border-box;
+        @apply(--nuxeo-document-status-content-theme);
+      }
+
+      .title {
+        color: #213f7d;
+        font-size: 1.64rem;
+        @apply(--nuxeo-document-status-title-theme);
+      }
+    </style>
+
+    <p class="title">Status</p>
+    <div class="horizontal layout sep wrap content">
+      <span class="state">[[document.state]]</span>
+      <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-status',
+        properties: {
+          document: {
+            type: Object
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,123 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-workflow-start`
+@group Nuxeo UI
+@element nuxeo-workflow-start
+-->
+<dom-module id="nuxeo-workflow-start">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .startbutton {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-radius: 2px;
+        @apply(--nuxeo-workflow-start-button-theme);
+      }
+
+      .title {
+        color: #213f7d;
+        font-size: 1.64rem;
+        @apply(--nuxeo-workflow-start-title-theme);
+      }
+    </style>
+
+    <p class="title">Process</p>
+    <div class="sep vertical layout">
+      <div>
+        <paper-dropdown-menu label="Start a process">
+          <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+            <template is="dom-repeat" items="[[processes]]" as="process">
+              <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+      </div>
+      <div>
+        <nuxeo-resource id="workflowRequest" path="/id/[[document.uid]]/@workflow"
+                        data="{{workflowData}}"
+                        response="{{workflowResponse}}"
+                        headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+        <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-workflow-start',
+        properties: {
+          document: {
+            type: Object
+          },
+
+          workflows: {
+            type: Object
+          },
+
+          selectedProcess: {
+            type: String
+          },
+
+          processes: {
+            type: Array,
+            value: [
+              {key: 'ParallelDocumentReview', label: 'wf.parallelDocumentReview.ParallelDocumentReview'},
+              {key: 'SerialDocumentReview', label: 'wf.serialDocumentReview.SerialDocumentReview'}
+            ]
+          }
+        },
+
+        ready: function() {
+          this.selectedProcess = this.processes[0].key;
+        },
+
+        _startProcess: function() {
+          var workflow = document.getElementById('workflowRequest'); // not working: this.$.workflowRequest;
+          var workflows = document.getElementById('workflowsRequest');
+
+          this.workflowData = {
+            'entity-type': 'workflow',
+            'workflowModelName': this.selectedProcess,
+            'attachedDocumentIds': [this.document.uid]
+          };
+          workflow.post().then(
+              function() {
+                workflows.get();
+              }
+          );
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
