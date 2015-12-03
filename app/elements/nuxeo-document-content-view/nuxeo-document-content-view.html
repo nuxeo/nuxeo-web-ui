@@ -47,14 +47,50 @@ Contributors:
           max-width: 440px;
         }
       }
+
+      paper-slider {
+        width: 80%;
+      }
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+      }
+      .flexchild {
+        @apply(--layout-flex);
+      }
+      .content-view {
+          padding: 0em 2.5em 3em;
+          margin: 8px;
+      }
     </style>
 
     <!-- TODO: use the 'params' attribute -->
-    <nuxeo-resource auto path="[[_path(document)]]" response="{{children}}"></nuxeo-resource>
-    <div class="bubbleBoxes">
-      <template is="dom-repeat" items="{{children.entries}}">
-        <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
-      </template>
+    <nuxeo-resource auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"></nuxeo-resource>
+
+    <div class="content-view">
+      <div class="flex-horizontal">
+        <div class="flexchild">
+          <template is="dom-if" if="[[_hasManyPages(children)]]">
+            <span>Page Number:</span>
+            <span>
+              <paper-slider min="1" value="[[pageNumber]]"  max="[[children.numberOfPages]]" editable on-change="updatePage"></paper-slider>
+            </span>
+          </template>
+        </div>
+        <div>
+        <span>Page Size:</span>
+          <select value="{{pageSize::change}}">
+            <option value="5">5</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div
+      <div class="bubbleBoxes">
+        <template is="dom-repeat" items="{{children.entries}}">
+          <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
+        </template>
+      </div>
     </div>
   </template>
 
@@ -68,11 +104,38 @@ Contributors:
           document: {
             type: Object,
             notify: true
+          },
+          pageNumber: {
+            type: Number,
+            value: 1
+          },
+          pageSize: {
+            type: Number,
+            value: 20
           }
         },
 
-        _path: function() {
-          return '/query/document_content?queryParams=' + this.document.uid;
+        _path: function(document, pageNumber, pageSize) {
+          return '/query/document_content?queryParams=' + document.uid + '&currentPageIndex=' + (pageNumber - 1) + '&pageSize=' + pageSize;
+        },
+
+        _hasManyPages: function(children) {
+          if (children) {
+            return children.pageCount > 1;
+          }
+          return false;
+        },
+
+        updatePage: function(e, o) {
+          if (o) {
+            this.pageNumber = e.target.value;
+          }
+        },
+
+        updatePageSize: function(e, o) {
+          if (o) {
+            this.pageSize = e.target.value;
+          }
         }
 
       });
