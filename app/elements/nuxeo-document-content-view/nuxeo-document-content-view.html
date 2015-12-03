@@ -118,7 +118,9 @@ Contributors:
         },
 
         _path: function(document, pageNumber, pageSize) {
-          return '/query/document_content?queryParams=' + document.uid + '&currentPageIndex=' + (pageNumber - 1) + '&pageSize=' + pageSize;
+          return '/query/document_content?queryParams=' + document.uid +
+          '&currentPageIndex=' + (pageNumber - 1) +
+          '&pageSize=' + pageSize;
         },
 
         _hasManyPages: function(children) {
