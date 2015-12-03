@@ -72,7 +72,9 @@ Contributors:
           <template is="dom-if" if="[[_hasManyPages(children)]]">
             <span>Page Number:</span>
             <span>
-              <paper-slider min="1" value="[[pageNumber]]"  max="[[children.numberOfPages]]" editable on-change="updatePage"></paper-slider>
+              <paper-slider min="1" value="[[pageNumber]]"
+                max="[[children.numberOfPages]]" editable on-change="updatePage">
+              </paper-slider>
             </span>
           </template>
         </div>
