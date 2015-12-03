@@ -149,8 +149,9 @@ Contributors:
           <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
 
           <div class="docview horizontal layout">
-            <div class="flex-2">
-              <nuxeo-picture-view document="{{document}}"></nuxeo-picture-view>
+            <div id="document-view" class="flex-2">
+              <!-- Dynamic layout element will be inserted here -->
+              <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
             </div>
             <div class="sideinfo vertical layout flex">
               <template is="dom-if" if="[[_hasProcessInProgress(workflows)]]">
@@ -258,8 +259,10 @@ Contributors:
         </div> <!-- view -->
         <div name="edit" class="container">
           <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-          <nuxeo-file-edit document="[[document]]"></nuxeo-file-edit>
-          <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+          <div id="document-edit">
+            <!-- Dynamic layout element will be inserted here -->
+            <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+          </div>
           <div class="row layout horizontal">
             <label>Change Comment</label>
             <textarea class="flex"></textarea>
@@ -311,11 +314,15 @@ Contributors:
 
           headers: {
             type: Object,
-            computed: 'computeHeaders(versioningType)'
+            computed: '_computeHeaders(versioningType)'
           }
         },
 
-        computeHeaders: function(versioningType) {
+        observers: [
+          '_updateLayout(document, mode)'
+        ],
+
+        _computeHeaders: function(versioningType) {
           return {
             'X-Versioning-Option': versioningType
           };
@@ -323,6 +330,54 @@ Contributors:
 
         _documentChanged: function() {
           this.mode = 'view';
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(document, mode) {
+          var type = Polymer.CaseMap.camelToDashCase(document.type).toLowerCase();
+          return ['nuxeo', type, mode].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document and mode
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.document, this.mode),
+              el = document.createElement(layout),
+              parent = this.$['document-' + this.mode];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current document and mode
+         */
+        _updateLayout: function() {
+          var layout = this._layoutFor(this.document, this.mode);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl('../nuxeo-document-' + this.mode + '/' + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                console.error('Failed to find ' + this.mode + ' layout for ' + this.document.type);
+              });
+          } else {
+            this._createLayout();
+          }
         },
 
         _save: function() {
