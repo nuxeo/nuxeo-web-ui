@@ -3,5 +3,6 @@
   "disallowSpacesInAnonymousFunctionExpression": null,
   "disallowTrailingWhitespace": null,
   "maximumLineLength": 120,
+  "disallowMultipleVarDecl": false,
   "excludeFiles": ["node_modules/**"]
 }
