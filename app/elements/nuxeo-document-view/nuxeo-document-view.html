@@ -211,9 +211,9 @@ Contributors:
                     <div class="sep vertical layout">
                       <div>
                         <paper-dropdown-menu label="Start a process">
-                          <paper-menu class="dropdown-content" selected="{{selectedProcess}}">
+                          <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
                             <template is="dom-repeat" items="[[processes]]" as="process">
-                              <paper-item>[[_getProcessLabel(process)]]</paper-item>
+                              <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
                             </template>
                           </paper-menu>
                         </paper-dropdown-menu>
@@ -247,8 +247,8 @@ Contributors:
                   <div class="vertical layout sep cardcontent auditcontent">
                     <template is="dom-repeat" items="[[audit.entries]]">
                       <p>
-                        <a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>
-                        [[_getActivityDescription(item)]]
+                        <a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>&nbsp;
+                        [[i18n('activity', item.eventId)]]
                       </p>
                     </template>
                   </div>
@@ -292,7 +292,11 @@ Contributors:
           },
 
           processes: {
-            type: Array
+            type: Array,
+            value: [
+              {key: 'ParallelDocumentReview', label: 'wf.parallelDocumentReview.ParallelDocumentReview'},
+              {key: 'SerialDocumentReview', label: 'wf.serialDocumentReview.SerialDocumentReview'}
+            ]
           },
 
           processesLabels: {
@@ -300,12 +304,12 @@ Contributors:
           },
 
           tags: {
-            type: Object
+            type: Object,
+            value: ['tag1', 'tag2', 'tag3']
           },
 
           selectedProcess: {
-            type: Number,
-            value: 0
+            type: String
           },
 
           versioningType: {
@@ -391,58 +395,11 @@ Contributors:
         },
 
         ready: function() {
-          this.processes = ['ParallelDocumentReview', 'SerialDocumentReview'];
-          this.processLabels = {
-            'ParallelDocumentReview': 'Parallel document review',
-            'SerialDocumentReview': 'Serial document review'
-          };
-          this.tags = ['tag1', 'tag2', 'tag3'];
-        },
-
-        _getProcessLabel: function(process) {
-          return this.processLabels[process];
+          this.selectedProcess = this.processes[0].key;
         },
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
-        },
-
-        _getActivityDescription: function(auditEntry) {
-          // we should be getting this from somewhere else
-          var description;
-          switch (auditEntry.eventId) {
-            case 'documentModified':
-              description = ' modified the document';
-              break;
-            case 'documentSecurityUpdated':
-              description = ' update security settings';
-              break;
-            case 'workflowCanceled':
-              description = ' canceled a workflow';
-              break;
-            case 'workflowTaskCompleted':
-              description = ' completed a workflow';
-              break;
-            case 'workflowTaskAssigned':
-              description = ' started a workflow';
-              break;
-            case 'auditLogRoute':
-              description = ' requested audit';
-              break;
-            case 'documentUnlocked':
-              description = ' unlocked the document';
-              break;
-            case 'documentLocked':
-              description = ' locked the document';
-              break;
-            case 'download':
-              description = ' downloaded the document';
-              break;
-            default:
-              description = ' did ' + auditEntry.eventId;
-              break;
-          }
-          return description;
         },
 
         _getTaskPath: function(document, user, workflowId, workflowName) {
@@ -473,7 +430,7 @@ Contributors:
 
           this.workflowData = {
             'entity-type': 'workflow',
-            'workflowModelName': this.processes[this.selectedProcess],
+            'workflowModelName': this.selectedProcess,
             'attachedDocumentIds': [this.document.uid]
           };
           workflow.post();

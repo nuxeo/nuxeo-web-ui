@@ -1,0 +1,14 @@
+{
+  "wf.parallelDocumentReview.ParallelDocumentReview": "Parallel document review",
+  "wf.serialDocumentReview.SerialDocumentReview": "Serial document review",
+
+  "activity.documentModified": "modified the document",
+  "activity.documentSecurityUpdated":"updated security settings",
+  "activity.workflowCanceled": "canceled a workflow",
+  "activity.workflowTaskCompleted": "completed a workflow",
+  "activity.workflowTaskAssigned":"started a workflow",
+  "activity.auditLogRoute":"requested audit",
+  "activity.documentUnlocked":"unlocked the document",
+  "activity.documentLocked":"locked the document",
+  "activity.download":"downloaded the document"
+}
