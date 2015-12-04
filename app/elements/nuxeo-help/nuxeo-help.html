@@ -1,0 +1,159 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
+<!--
+ `nuxeo-help`
+ @group Nuxeo UI
+ @element nuxeo-help
+ -->
+<dom-module id="nuxeo-help">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: absolute;
+        outline: none;
+      }
+
+      iron-icon {
+        color: var(--nuxeo-help-color, grey);
+        opacity: var(--nuxeo-help-opacity, 1);
+        height: var(--nuxeo-help-height, 16px);
+        margin-bottom: var(--nuxeo-help-margin-bottom, 0px);
+        margin-left: var(--nuxeo-help-margin-left, 10px);
+        margin-right: var(--nuxeo-help-margin-right, 20px);
+        margin-top: var(--nuxeo-help-margin-top, 0px);
+        width: var(--nuxeo-help-width, 16px);
+
+        @apply(--layout);
+        @apply(--layout-center-center);
+        @apply(--nuxeo-help);
+
+        cursor: help;
+      }
+
+      paper-tooltip {
+        --paper-tooltip: {
+          background: #000;
+          font-size: 12px;
+          line-height: 1.4;
+          opacity: 1;
+          text-align: center;
+          width: 200px;
+        }
+      }
+
+    </style>
+
+    <iron-icon icon="icons:info" id="icon"></iron-icon>
+    <paper-tooltip for="icon">[[label]]</paper-tooltip>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-help',
+
+        hostAttributes: {
+          tabindex: '0',
+          role: 'status'
+        },
+
+        behaviors: [
+          Polymer.IronResizableBehavior
+        ],
+
+        listeners: {
+          'iron-resize': 'updatePosition'
+        },
+
+        properties: {
+          for: {
+            type: String,
+            value: ''
+          },
+
+          label: {
+            type: String,
+            observer: '_labelChanged'
+          },
+
+          position: {
+            type: String,
+            value: 'left'
+          }
+        },
+
+        attached: function() {
+          this._updateTarget();
+        },
+
+        _labelChanged: function() {
+          this.setAttribute('aria-label', this.label);
+        },
+
+        _updateTarget: function() {
+          this._target = this.target;
+          this.async(this.notifyResize, 1);
+        },
+
+        /**
+        * Returns the target element that this helper is anchored to.
+        */
+        get target() {
+          // If the parentNode is a document fragment, then we need to use the host.
+          var ownerRoot = Polymer.dom(this).getOwnerRoot();
+          var target;
+
+          if (this.for) {
+            target = Polymer.dom(ownerRoot).querySelector('#' + this.for);
+          }
+          return target;
+        },
+
+        /**
+        * Repositions the helper relative to its anchor element.
+        */
+        updatePosition: function() {
+          if (!this._target || !this.offsetParent) {
+            return;
+          }
+          var parentRect = this.offsetParent.getBoundingClientRect();
+          var targetRect = this._target.getBoundingClientRect();
+          var thisRect = this.getBoundingClientRect();
+
+          this.style.top = targetRect.top - parentRect.top + this.offsetParent.scrollTop + 'px';
+          if (this.position === 'left') {
+            this.style.left = targetRect.left - thisRect.width - parentRect.left  + 'px';
+          } else {
+            this.style.left = targetRect.left + targetRect.width - parentRect.left + 'px';
+          }
+        }
+
+      });
+
+    })();
+  </script>
+</dom-module>

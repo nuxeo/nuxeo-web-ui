@@ -10,5 +10,14 @@
   "activity.auditLogRoute":"requested audit",
   "activity.documentUnlocked":"unlocked the document",
   "activity.documentLocked":"locked the document",
-  "activity.download":"downloaded the document"
+  "activity.download":"downloaded the document",
+
+  "label.dublincore.author.info":"The author is filled automatically when creating the document.",
+  "label.dublincore.contributors.info":"Contributors are filled automatically when creating or editing the document.",
+  "label.dublincore.lastContributor.info":"Last contributor is filled automatically when creating or editing the document.",
+  "label.dublincore.subjects.info":"This property is used by virtual navigation.",
+  "label.dublincore.coverage.info":"This property is used by virtual navigation.",
+  "label.editComment.tooltip":"This comment will be visible in the logs displayed in the \"History\" tab.",
+  "label.versioning.currentVersion.tooltip":"Current version of the document.",
+  "label.versioning.changeVersion.tooltip":"If a new version is created, the new archived version will hold the values presented in this form."
 }

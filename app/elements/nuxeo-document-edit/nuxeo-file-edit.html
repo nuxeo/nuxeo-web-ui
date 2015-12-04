@@ -48,17 +48,32 @@ Contributors:
 
      label {
        font-weight: bold;
+     }
+
+     .label-container {
+       position: relative;
        width: 200px;
+     }
+
+     .required {
+       color: red;
+       position: absolute;
+       right: 10px;
      }
    </style>
 
    <div class="row layout horizontal">
-     <label>Title</label>
-     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex">
+     <div class="label-container">
+       <label>Title</label>
+       <span class="required">*</span>
+     </div>
+     <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
    </div>
 
    <div class="row layout horizontal">
-     <label>Description</label>
+     <div class="label-container">
+       <label>Description</label>
+     </div>
      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
    </div>
 

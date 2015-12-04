@@ -16,6 +16,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-directory-suggestion.html">
+<link rel="import" href="../nuxeo-help/nuxeo-help.html">
 <link rel="stylesheet" href="../../bower_components/select2/select2.css">
 <script src="../../bower_components/moment/min/moment-with-locales.min.js"></script>
 
@@ -50,12 +51,24 @@ Contributors:
 
       label {
         font-weight: bold;
+      }
+
+      .label-container {
+        position: relative;
         width: 200px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
       }
     </style>
 
     <div class="row layout horizontal">
-      <label>Nature</label>
+      <div class="label-container">
+        <label>Nature</label>
+      </div>
       <nuxeo-directory-suggestion class="flex"
                                   directory-name="nature"
                                   value="{{document.properties.dc:nature}}"
@@ -65,8 +78,12 @@ Contributors:
     </div>
 
     <div class="row layout horizontal">
-      <label>Subjects</label>
-      <nuxeo-directory-suggestion class="flex"
+      <div class="label-container">
+        <label>Subjects</label>
+      </div>
+      <nuxeo-help for="subjects" label="[[i18n('label.dublincore.subjects.info')]]"></nuxeo-help>
+      <nuxeo-directory-suggestion id="subjects"
+                                  class="flex"
                                   directory-name="l10nsubjects"
                                   value="{{document.properties.dc:subjects}}"
                                   multiple="true"
@@ -77,18 +94,26 @@ Contributors:
     </div>
 
     <div class="row layout horizontal">
-      <label>Rights</label>
+      <div class="label-container">
+        <label>Rights</label>
+      </div>
       <input is="iron-input" value="{{document.properties.dc:rights::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
-      <label>Source</label>
+      <div class="label-container">
+        <label>Source</label>
+      </div>
       <input is="iron-input" value="{{document.properties.dc:source::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
-      <label>Coverage</label>
-      <nuxeo-directory-suggestion class="flex"
+      <div class="label-container">
+        <label>Coverage</label>
+      </div>
+      <nuxeo-help for="coverage" label="[[i18n('label.dublincore.coverage.info')]]"></nuxeo-help>
+      <nuxeo-directory-suggestion id="coverage"
+                                  class="flex"
                                   directory-name="l10ncoverage"
                                   value="{{document.properties.dc:coverage}}"
                                   dbl10n="true"
@@ -98,39 +123,54 @@ Contributors:
     </div>
 
     <div class="row layout horizontal">
-      <label>Created at</label>
+      <div class="label-container">
+        <label>Created at</label>
+      </div>
       <span class="flex">[[format(document.properties.dc:created)]]</span>
     </div>
 
     <div class="row layout horizontal">
-      <label>Modified at</label>
+      <div class="label-container">
+        <label>Modified at</label>
+      </div>
       <span class="flex">[[format(document.properties.dc:modified)]]</span>
     </div>
 
     <div class="row layout horizontal">
-      <label>Format</label>
+      <div class="label-container">
+        <label>Format</label>
+      </div>
       <input is="iron-input" value="{{document.properties.dc:format::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
-      <label>Language</label>
+      <div class="label-container">
+        <label>Language</label>
+      </div>
       <input is="iron-input" value="{{document.properties.dc:language::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
-      <label>Expire on</label>
+      <div class="label-container">
+        <label>Expire on</label>
+      </div>
       <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
     </div>
 
     <div class="row layout horizontal">
-      <label>Creator</label>
-      <span class="flex">{{document.properties.dc:creator::change}}</span>
+      <div class="label-container">
+        <label>Author</label>
+      </div>
+      <nuxeo-help for="author" label="[[i18n('label.dublincore.author.info')]]"></nuxeo-help>
+      <span id="author" class="flex">{{document.properties.dc:creator::change}}</span>
     </div>
 
     <div class="row layout horizontal">
-      <label>Contributors</label>
-
-      <div class="layout vertical">
+      <div class="label-container">
+        <label>Contributors</label>
+      </div>
+      <nuxeo-help for="contributors" label="[[i18n('label.dublincore.contributors.info')]]"></nuxeo-help>
+      <div id="contributors" class="layout vertical">
         <template is="dom-repeat" items={{document.properties.dc:contributors}}>
           <span>{{item}}</span>
         </template>
@@ -138,8 +178,11 @@ Contributors:
     </div>
 
     <div class="row layout horizontal">
-      <label>Last contributor</label>
-      <span class="flex">{{document.properties.dc:lastContributor::change}}</span>
+      <div class="label-container">
+        <label>Last contributor</label>
+      </div>
+      <nuxeo-help for="lastContributor" label="[[i18n('label.dublincore.lastContributor.info')]]"></nuxeo-help>
+      <span id="lastContributor" class="flex">{{document.properties.dc:lastContributor::change}}</span>
     </div>
 
   </template>

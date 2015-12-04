@@ -19,6 +19,7 @@ Contributors:
 <link rel="import" href="../nuxeo-document-edit/nuxeo-file-edit.html">
 <link rel="import" href="../nuxeo-document-edit/nuxeo-note-edit.html">
 <link rel="import" href="../nuxeo-document-edit/nuxeo-versioning-edit.html">
+<link rel="import" href="../nuxeo-help/nuxeo-help.html">
 
 <!--
 `nuxeo-document-view`
@@ -49,6 +50,10 @@ Contributors:
 
       label {
         font-weight: bold;
+      }
+
+      .label-container {
+        position: relative;
         width: 200px;
       }
 
@@ -246,6 +251,10 @@ Contributors:
           }
           // setup data binding
           el.document = this.document;
+
+          // hack to force resize event and correctly display <nuxeo-helper> elements
+          var pages = this.$.pages;
+          pages.notifyResize();
         },
 
         /**

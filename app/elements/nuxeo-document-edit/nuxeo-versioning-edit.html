@@ -16,6 +16,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../nuxeo-help/nuxeo-help.html">
 
 <!--
 `nuxeo-versioning-edit`
@@ -48,6 +49,10 @@ Contributors:
 
       label {
         font-weight: bold;
+      }
+
+      .label-container {
+        position: relative;
         width: 200px;
       }
 
@@ -58,13 +63,19 @@ Contributors:
     </style>
 
     <div class="row layout horizontal">
-      <label>Version</label>
-      <span class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+      <div class="label-container">
+        <label>Version</label>
+      </div>
+      <nuxeo-help for="version" label="[[i18n('label.versioning.currentVersion.tooltip')]]"></nuxeo-help>
+      <span id="version" class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
     </div>
 
     <div class="row layout horizontal">
-      <label>Update Versions</label>
-      <paper-radio-group selected="{{versioningType}}" class="layout vertical">
+      <div class="label-container">
+        <label>Update Versions</label>
+      </div>
+      <nuxeo-help for="versionType" label="[[i18n('label.versioning.changeVersion.tooltip')]]"></nuxeo-help>
+      <paper-radio-group id="versionType" selected="{{versioningType}}" class="layout vertical">
         <paper-radio-button name="none">Skip version increment</paper-radio-button>
         <paper-radio-button name="minor">Increment minor version</paper-radio-button>
         <paper-radio-button name="major">Increment major version</paper-radio-button>

@@ -46,16 +46,6 @@ Contributors:
        padding: 0.5em;
      }
 
-     label {
-       font-weight: bold;
-       width: 200px;
-     }
-
-     .format {
-       font-size: 0.9em;
-       margin-right: 5px;
-     }
-
      select {
        background: none #fff;
        border: 1px solid #c6c6c6;
@@ -66,20 +56,47 @@ Contributors:
        padding: 0.5em;
        width: 150px;
      }
+
+     label {
+       font-weight: bold;
+     }
+
+     .label-container {
+       position: relative;
+       width: 200px;
+     }
+
+     .required {
+       color: red;
+       position: absolute;
+       right: 10px;
+     }
+
+     .format {
+       font-size: 0.9em;
+       margin-right: 5px;
+     }
    </style>
 
    <div class="row layout horizontal">
-     <label>Title</label>
-     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex">
+     <div class="label-container">
+       <label>Title</label>
+       <span class="required">*</span>
+     </div>
+     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex" required>
    </div>
 
    <div class="row layout horizontal">
-     <label>Description</label>
+     <div class="label-container">
+       <label>Description</label>
+     </div>
      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
    </div>
 
    <div class="row layout horizontal">
-     <label>Note</label>
+     <div class="label-container">
+       <label>Note</label>
+     </div>
      <div class="layout vertical flex">
        <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
        <div class="layout horizontal">
