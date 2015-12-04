@@ -20,6 +20,7 @@ Contributors:
 <link rel="import" href="../nuxeo-document-edit/nuxeo-note-edit.html">
 <link rel="import" href="../nuxeo-document-edit/nuxeo-versioning-edit.html">
 <link rel="import" href="../nuxeo-help/nuxeo-help.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
 
 <!--
 `nuxeo-document-view`
@@ -95,7 +96,7 @@ Contributors:
     </style>
 
     <div>
-      <iron-pages id="doc-pages" selected="[[mode]]" attr-for-selected="name">
+      <iron-pages id="pages" selected="[[mode]]" attr-for-selected="name">
         <div name="view">
 
           <nuxeo-resource id="workflowsRequest" auto path="/id/[[document.uid]]/@workflow" response="{{workflows}}"></nuxeo-resource>
@@ -153,17 +154,22 @@ Contributors:
         </div> <!-- view -->
         <div name="edit" class="container">
           <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-          <div id="document-edit">
-            <!-- Dynamic layout element will be inserted here -->
-            <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
-          </div>
-          <div class="row layout horizontal">
-            <label>Change Comment</label>
-            <textarea class="flex"></textarea>
-          </div>
-          <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
-          <button on-click="_save">Submit</button>
-          <button on-click="_cancel">Cancel</button>
+          <form is="iron-form" action="/" on-submit="_save">
+            <div id="document-edit">
+              <!-- Dynamic layout element will be inserted here -->
+              <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+            </div>
+            <div class="row layout horizontal">
+              <div class="label-container">
+                <label>Change Comment</label>
+              </div>
+              <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip')]]"></nuxeo-help>
+              <textarea id="comment" class="flex"></textarea>
+            </div>
+            <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
+            <button>Submit</button>
+            <button on-click="_cancel">Cancel</button>
+          </form>
         </div>
       </iron-pages>
     </div>
