@@ -1,0 +1,122 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+ `nuxeo-search`
+ @group Nuxeo UI
+ @element nuxeo-search
+ -->
+<dom-module id="nuxeo-search">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .side-nav {
+        background-color: #fff;
+        height: 100%;
+        position: fixed;
+        width: 375px;
+      }
+
+      paper-header-panel {
+        height: calc(100vh - 65px);
+        width: calc(100% - 375px);
+      }
+
+      .main {
+        left: 375px;
+      }
+
+      .paper-header {
+        height: 60px;
+        color: #039be5;
+        background-color: var(--primary-background-color);
+        font-size: 24px;
+        padding-left: 20px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .content {
+        background-color: var(--primary-background-color);
+      }
+
+      .search-selector-container {
+        background-color: #213f7d;
+        margin-bottom: .8rem;
+        padding: 15px;
+      }
+
+      select {
+        background-color: rgba(255,255,255,.9);
+        border: 1px solid #ddd;
+        border-radius: 2px;
+        height: 2rem;
+        padding: 5px;
+        width: 100%;
+      }
+
+    </style>
+
+    <div class="side-nav">
+      <div class="search-selector-container">
+        <select class="browser-default" value="{{selectedSearch::change}}">
+          <option disabled>Searches</option>
+          <option value="faceted">Faceted Search</option>
+          <option value="quick">Quick Search</option>
+          <option value="nxql">NXQL Search</option>
+        </select>
+      </div>
+
+      <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
+        <div name="faceted">Faceted Search</div>
+        <div name="quick">Quick Search</div>
+        <div name="nxql">NXQL Search</div>
+      </iron-pages>
+    </div>
+
+    <paper-header-panel class="main flex">
+      <div class="paper-header layout horizontal">
+        <span class="flex">Search</span>
+      </div>
+      <div class="content">
+        <h3>Search Content</h3>
+      </div>
+    </paper-header-panel>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-search',
+
+        properties: {       
+
+          selectedSearch: {
+            type: String,
+            value: 'faceted'
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>
