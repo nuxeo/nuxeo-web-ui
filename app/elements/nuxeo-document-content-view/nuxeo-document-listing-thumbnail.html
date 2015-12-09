@@ -67,6 +67,8 @@ Contributors:
 
     </style>
 
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
     <div class="bubbleBox">
       <div>
         <input type="checkbox">
@@ -100,7 +102,8 @@ Contributors:
         },
 
         _icon: function() {
-          return 'http://localhost:8080/nuxeo' + this.doc.properties['common:icon'];
+          var url = this.$.nxcon.url;
+          return url + this.doc.properties['common:icon'];
         },
 
         _creator: function() {
@@ -108,7 +111,12 @@ Contributors:
         },
 
         _thumbnail: function() {
-          return 'http://localhost:8080/nuxeo/nxthumb/default/' + this.doc.uid + '/blobholder:0/';
+          if (this.doc.contextParameters.thumbnail.url) {
+            return this.doc.contextParameters.thumbnail.url;
+          } else {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + '/nxthumb/default/' + this.doc.uid + '/blobholder:0/';
+          }
         },
 
         _docType: function() {

@@ -64,7 +64,7 @@ Contributors:
     </style>
 
     <!-- TODO: use the 'params' attribute -->
-    <nuxeo-resource auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"></nuxeo-resource>
+    <nuxeo-resource auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"  enrichers="thumbnail"></nuxeo-resource>
 
     <div class="content-view">
       <div class="flex-horizontal">
