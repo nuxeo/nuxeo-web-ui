@@ -198,7 +198,7 @@ gulp.task('vulcanize', function() {
         inlineCss: true,
         inlineScripts: true
       }))
-      .pipe($.minifyInline())
+      //.pipe($.minifyInline())
       .pipe(gulp.dest(DEST_DIR))
       .pipe($.size({title: 'vulcanize'}));
 });
