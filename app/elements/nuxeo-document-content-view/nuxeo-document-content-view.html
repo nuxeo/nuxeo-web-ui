@@ -64,30 +64,11 @@ Contributors:
     </style>
 
     <!-- TODO: use the 'params' attribute -->
-    <nuxeo-resource auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"  enrichers="thumbnail"></nuxeo-resource>
+    <nuxeo-resource id="nxresource" auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"  enrichers="thumbnail" on-response="responseHandler"></nuxeo-resource>
 
     <div class="content-view">
-      <div class="flex-horizontal">
-        <div class="flexchild">
-          <template is="dom-if" if="[[_hasManyPages(children)]]">
-            <span>Page Number:</span>
-            <span>
-              <paper-slider min="1" value="[[pageNumber]]"
-                max="[[children.numberOfPages]]" editable on-change="updatePage">
-              </paper-slider>
-            </span>
-          </template>
-        </div>
-        <div>
-        <span>Page Size:</span>
-          <select value="{{pageSize::change}}">
-            <option value="5">5</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-      </div>
+      <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
+      </nuxeo-document-content-view-controls>
       <div class="bubbleBoxes">
         <template is="dom-repeat" items="{{children.entries}}">
           <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
@@ -114,6 +95,10 @@ Contributors:
           pageSize: {
             type: Number,
             value: 20
+          },
+          pageCount: {
+            type: Number,
+            value: 1
           }
         },
 
@@ -140,6 +125,11 @@ Contributors:
           if (o) {
             this.pageSize = e.target.value;
           }
+        },
+
+        responseHandler: function(e, detail) {
+          this.pageNumber = detail.response.currentPageIndex + 1;
+          this.pageCount = detail.response.pageCount;
         }
 
       });
