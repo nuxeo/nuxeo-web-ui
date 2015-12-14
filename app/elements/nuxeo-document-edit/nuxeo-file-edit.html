@@ -115,7 +115,8 @@ Contributors:
        <!-- upload choice -->
        <div class="layout horizontal radio-container">
          <paper-radio-button name="upload">Upload</paper-radio-button>
-         <input type="file">
+         <span>[[document.properties.file:content]]</span>
+         <nuxeo-file value="{{document.properties.file:content}}"></nuxeo-file>
        </div>
        <!-- delete choice -->
        <paper-radio-button name="delete">Delete</paper-radio-button>

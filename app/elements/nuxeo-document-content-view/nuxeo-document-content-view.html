@@ -52,7 +52,14 @@ Contributors:
           padding: 0em 2.5em 3em;
           margin: 8px;
       }
+
+      .bubbleBoxes.hover {
+        border: 2px dashed #aaa;
+        @apply(--nuxeo-drop-zone-hover);
+      }
     </style>
+
+    <nuxeo-connection id="nx"></nuxeo-connection>
 
     <!-- TODO: use the 'params' attribute -->
     <nuxeo-resource id="nxresource" auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"  enrichers="thumbnail" on-response="responseHandler"></nuxeo-resource>
@@ -60,12 +67,16 @@ Contributors:
     <div class="content-view">
       <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
       </nuxeo-document-content-view-controls>
+
       <div class="bubbleBoxes">
         <template is="dom-repeat" items="{{children.entries}}">
           <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
         </template>
       </div>
     </div>
+
+    <paper-toast id="toast"></paper-toast>
+
   </template>
 
   <script>
@@ -74,6 +85,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-content-view',
+        behaviors: [Nuxeo.UploaderBehavior],
         properties: {
           document: {
             type: Object,
@@ -91,6 +103,15 @@ Contributors:
             type: Number,
             value: 1
           }
+        },
+
+        listeners: {
+          'batchFinished': 'importBatch'
+        },
+
+        ready: function() {
+          this.connection = this.$.nx;
+          this.setupDropZone(this.$$('.bubbleBoxes'));
         },
 
         _path: function(document, pageNumber, pageSize) {
@@ -121,8 +142,30 @@ Contributors:
         responseHandler: function(e, detail) {
           this.pageNumber = detail.response.currentPageIndex + 1;
           this.pageCount = detail.response.pageCount;
-        }
+        },
 
+        importBatch: function() {
+          this.batchExecute('FileManager.Import', {
+            context: {
+              currentDocument: this.document.path
+            }
+          }).then(function(response) {
+            var docs = response.entries;
+            if (docs.length === 1) {
+              var doc = docs[0];
+              this._toast('Imported ' + doc.type.toLowerCase() + ' ' + doc.title + '.');
+            } else {
+              this._toast('Imported ' + docs.length + ' documents.');
+            }
+            // refresh
+            this.$.nxresource.get();
+          }.bind(this));
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
+        }
       });
     })();
   </script>
