@@ -4,7 +4,7 @@
     window.I18n = window.I18n || {};
 
     var language = window.I18n.language || 'en',
-        baseUrl = window.I18n.baseUrl || '',
+        baseUrl = window.I18n.baseUrl || location.origin + location.pathname,
         locales = window.I18n.locales || {};
 
     /**
