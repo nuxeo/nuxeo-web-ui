@@ -1,0 +1,101 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+
+<!--
+`nuxeo-checkbox-aggregation`
+@group Nuxeo UI
+@element nuxeo-checkbox-aggregation
+-->
+<dom-module id="nuxeo-checkbox-aggregation">
+ <template>
+   <style>
+     :host {
+       display: block;
+     }
+
+     paper-checkbox {
+       font-size: 0.8em;
+       --paper-checkbox-label-spacing: 15px;
+       margin-bottom: 5px;
+     }
+
+     label {
+       color: #c6c6c6;
+       font-style: italic;
+     }
+   </style>
+
+  <div class="layout vertical">
+    <template is="dom-repeat" items="[[_getBuckets(aggregations, name)]]">
+      <paper-checkbox value="[[item.key]]" on-change="_computeValues">[[item.key]] ([[item.docCount]])</paper-checkbox>
+    </template>
+    <template is="dom-if" if="[[_isEmpty(aggregations, name)]]">
+      <label>No available result</label>
+    </template>
+  </div>
+
+ </template>
+ <script>
+   (function() {
+     'use strict';
+
+     Polymer({
+       is: 'nuxeo-checkbox-aggregation',
+
+       properties: {
+
+         aggregations: {
+           type: Object
+         },
+
+         name: {
+           type: String
+         },
+
+         values: {
+           type: Array,
+           value: [],
+           notify: true
+         },
+       },
+
+       _computeValues: function() {
+         var values = [];
+         var checkboxes = this.getElementsByTagName('paper-checkbox');
+         for (var i = 0; i < checkboxes.length; i++) {
+           if (checkboxes[i].checked) {
+             values.push(checkboxes[i].value);
+           }
+         }
+         this.values = values;
+       },
+
+       _getBuckets: function(aggregations, name) {
+         if (aggregations && aggregations[name]) {
+           return aggregations[name].buckets;
+         }
+       },
+
+       _isEmpty: function(aggregations, name) {
+         return aggregations && aggregations[name] && aggregations[name].buckets.length === 0;
+       }
+     });
+   })();
+ </script>
+</dom-module>

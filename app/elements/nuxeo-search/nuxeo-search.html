@@ -15,6 +15,10 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-select2.html">
+<link rel="stylesheet" href="../../bower_components/select2/select2.css">
+<link rel="import" href="nuxeo-checkbox-aggregation.html">
 
 <!--
  `nuxeo-search`
@@ -73,6 +77,33 @@ Contributors:
         width: 100%;
       }
 
+      .row {
+        box-sizing: border-box;
+        margin-bottom: 20px;
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      label {
+        color: #434343;
+        font-size: 0.8em;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+
+      input {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: .2em;
+        box-sizing: border-box;
+        color: rgba(0,0,0,.75);
+        display: block;
+        font-size: 0.8em;
+        height: 2rem;
+        margin: 0;
+        padding: .5rem;
+        width: 100%;
+      }
     </style>
 
     <div class="side-nav">
@@ -85,9 +116,98 @@ Contributors:
         </select>
       </div>
 
+      <nuxeo-page-provider id="provider" auto
+                           provider="default_search"
+                           page-size="25"
+                           aggregations={{aggregations}}
+                           enrichers="thumbnail"
+                           current-page={{currentPage}}>
+      </nuxeo-page-provider>
+
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
-        <div name="faceted">Faceted Search</div>
+
+        <!-- faceted search page -->
+        <div name="faceted">
+          <div class="row layout vertical">
+            <label>Text search</label>
+            <input type="text">
+          </div>
+
+          <div class="row layout vertical">
+            <label>Tags</label>
+            <nuxeo-select2 operation="Tag.Suggestion"
+                           min-chars="1"
+                           multiple="true"
+                           placeholder="Search for tags...">
+            </nuxeo-select2>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Creation date</label>
+            <nuxeo-checkbox-aggregation name="dc_created_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{createdAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Modified date</label>
+            <nuxeo-checkbox-aggregation name="dc_modified_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{modifiedAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+
+          <div class="row layout vertical">
+            <label>Author</label>
+            <input type="text">
+          </div>
+
+          <div class="row layout vertical">
+            <label>Collections</label>
+            <nuxeo-select2 operation="User.GetCollections"
+                           min-chars="0"
+                           placeholder="Select a value">
+            </nuxeo-select2>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Nature</label>
+            <nuxeo-checkbox-aggregation name="dc_nature_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{natureAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Subjects</label>
+            <nuxeo-checkbox-aggregation name="dc_subjects_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{subjectAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Coverage</label>
+            <nuxeo-checkbox-aggregation name="dc_coverage_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{coverageAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+
+          <div class="layout vertical row">
+            <label>Size</label>
+            <nuxeo-checkbox-aggregation name="common_size_agg"
+                                        aggregations="[[aggregations]]"
+                                        values="{{sizeAgg}}">
+            </nuxeo-checkbox-aggregation>
+          </div>
+        </div>
+
+        <!-- quick search page -->
         <div name="quick">Quick Search</div>
+
+        <!-- NXQL search page -->
         <div name="nxql">NXQL Search</div>
       </iron-pages>
     </div>
@@ -97,7 +217,9 @@ Contributors:
         <span class="flex">Search</span>
       </div>
       <div class="content">
-        <h3>Search Content</h3>
+        <template is="dom-repeat" items="{{currentPage}}">
+          <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
+        </template>
       </div>
     </paper-header-panel>
 
@@ -109,12 +231,25 @@ Contributors:
       Polymer({
         is: 'nuxeo-search',
 
-        properties: {       
+        properties: {
 
           selectedSearch: {
             type: String,
             value: 'faceted'
           }
+        },
+
+        observers: [
+          '_search(createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
+        ],
+
+        _search: function() {
+          var params = {};
+          var checkboxAggregations = this.getElementsByTagName('nuxeo-checkbox-aggregation');
+          for (var i = 0; i < checkboxAggregations.length; i++) {
+            params[checkboxAggregations[i].name] = checkboxAggregations[i].values;
+          }
+          this.$.provider.params = params;
         }
       });
     })();
