@@ -116,21 +116,13 @@ Contributors:
         </select>
       </div>
 
-      <nuxeo-page-provider id="provider" auto
-                           provider="default_search"
-                           page-size="25"
-                           aggregations={{aggregations}}
-                           enrichers="thumbnail"
-                           current-page={{currentPage}}>
-      </nuxeo-page-provider>
-
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
 
         <!-- faceted search page -->
         <div name="faceted">
           <div class="row layout vertical">
             <label>Text search</label>
-            <input type="text">
+            <input type="text" name="ecm_fulltext" value={{textSearch::input}}>
           </div>
 
           <div class="row layout vertical">
@@ -138,7 +130,9 @@ Contributors:
             <nuxeo-select2 operation="Tag.Suggestion"
                            min-chars="1"
                            multiple="true"
-                           placeholder="Search for tags...">
+                           placeholder="Search for tags..."
+                           value="{{tags::change}}"
+                           name="ecm_tags">
             </nuxeo-select2>
           </div>
 
@@ -146,7 +140,7 @@ Contributors:
             <label>Creation date</label>
             <nuxeo-checkbox-aggregation name="dc_created_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{createdAgg}}">
+                                        value="{{createdAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
 
@@ -154,7 +148,7 @@ Contributors:
             <label>Modified date</label>
             <nuxeo-checkbox-aggregation name="dc_modified_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{modifiedAgg}}">
+                                        value="{{modifiedAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
 
@@ -167,7 +161,9 @@ Contributors:
             <label>Collections</label>
             <nuxeo-select2 operation="User.GetCollections"
                            min-chars="0"
-                           placeholder="Select a value">
+                           placeholder="Select a value"
+                           value="{{collections::change}}"
+                           name="ecm_collections">
             </nuxeo-select2>
           </div>
 
@@ -175,7 +171,7 @@ Contributors:
             <label>Nature</label>
             <nuxeo-checkbox-aggregation name="dc_nature_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{natureAgg}}">
+                                        value="{{natureAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
 
@@ -183,7 +179,7 @@ Contributors:
             <label>Subjects</label>
             <nuxeo-checkbox-aggregation name="dc_subjects_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{subjectAgg}}">
+                                        value="{{subjectAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
 
@@ -191,7 +187,7 @@ Contributors:
             <label>Coverage</label>
             <nuxeo-checkbox-aggregation name="dc_coverage_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{coverageAgg}}">
+                                        value="{{coverageAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
 
@@ -199,7 +195,7 @@ Contributors:
             <label>Size</label>
             <nuxeo-checkbox-aggregation name="common_size_agg"
                                         aggregations="[[aggregations]]"
-                                        values="{{sizeAgg}}">
+                                        value="{{sizeAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
         </div>
@@ -217,9 +213,11 @@ Contributors:
         <span class="flex">Search</span>
       </div>
       <div class="content">
-        <template is="dom-repeat" items="{{currentPage}}">
-          <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
-        </template>
+        <nuxeo-document-content-view id="cview"
+          provider-name="default_search"
+          params="[[params]]"
+          aggregations={{aggregations}}>
+        </nuxeo-document-content-view>
       </div>
     </paper-header-panel>
 
@@ -236,20 +234,25 @@ Contributors:
           selectedSearch: {
             type: String,
             value: 'faceted'
+          },
+
+          params: {
+            type: Object,
+            computed: '_buildParams(createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
           }
         },
 
-        observers: [
-          '_search(createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
-        ],
-
-        _search: function() {
+        _buildParams: function() {
+          // lookup all elements with a name attribute that are inside a specific search iron-page
+          // e.g. [name="faceted"] [name]
+          var elements = document.querySelectorAll('[name="' + this.selectedSearch + '"] [name]');
           var params = {};
-          var checkboxAggregations = this.getElementsByTagName('nuxeo-checkbox-aggregation');
-          for (var i = 0; i < checkboxAggregations.length; i++) {
-            params[checkboxAggregations[i].name] = checkboxAggregations[i].values;
+          for (var i = 0; i < elements.length; i++) {
+            var name = elements[i].getAttribute('name');
+            var value = elements[i].value;
+            params[name] = value;
           }
-          this.$.provider.params = params;
+          return params;
         }
       });
     })();

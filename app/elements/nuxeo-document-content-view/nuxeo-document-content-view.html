@@ -98,8 +98,8 @@ Contributors:
         behaviors: [Nuxeo.UploaderBehavior],
         properties: {
           params: {
-            type: Array,
-            value: [],
+            type: Object,
+            value: {},
             notify: true
           },
           providerName: {
@@ -161,7 +161,7 @@ Contributors:
           this.$.toast.open();
         },
 
-        _search: function(params, pageSize, pageNumber) {
+        _search: function() {
           this.$.provider.fetch();
         }
       });

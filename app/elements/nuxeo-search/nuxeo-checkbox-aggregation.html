@@ -68,7 +68,7 @@ Contributors:
            type: String
          },
 
-         values: {
+         value: {
            type: Array,
            value: [],
            notify: true
@@ -83,7 +83,7 @@ Contributors:
              values.push(checkboxes[i].value);
            }
          }
-         this.values = values;
+         this.value = values;
        },
 
        _getBuckets: function(aggregations, name) {
