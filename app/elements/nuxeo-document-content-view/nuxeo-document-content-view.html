@@ -70,7 +70,8 @@ Contributors:
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
        current-page="{{currentPage}}"
-       page="{{pageNumber}}">
+       page="{{pageNumber}}"
+       params="[[params]]">
     </nuxeo-page-provider>
 
     <div class="content-view">
@@ -97,8 +98,8 @@ Contributors:
         behaviors: [Nuxeo.UploaderBehavior],
         properties: {
           params: {
-            type: Object,
-            value: {},
+            type: Array,
+            value: [],
             notify: true
           },
           providerName: {
@@ -161,12 +162,7 @@ Contributors:
         },
 
         _search: function(params, pageSize, pageNumber) {
-          if (document) {
-            this.$.provider.params = params;
-            this.$.provider.pageSize = pageSize;
-            this.$.provider.page = pageNumber;
-            this.$.provider.fetch();
-          }
+          this.$.provider.fetch();
         }
       });
     })();
