@@ -62,14 +62,22 @@ Contributors:
     <nuxeo-connection id="nx"></nuxeo-connection>
 
     <!-- TODO: use the 'params' attribute -->
-    <nuxeo-resource id="nxresource" auto path="[[_path(document, pageNumber, pageSize)]]" response="{{children}}"  enrichers="thumbnail" on-response="responseHandler"></nuxeo-resource>
+
+    <nuxeo-page-provider id="provider"
+       provider="document_content"
+       page-size="{{pageSize}}"
+       number-of-pages="{{pageCount}}"
+       enrichers="thumbnail"
+       current-page="{{currentPage}}"
+       page="{{pageNumber}}">
+    </nuxeo-page-provider>
 
     <div class="content-view">
       <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
       </nuxeo-document-content-view-controls>
 
       <div class="bubbleBoxes">
-        <template is="dom-repeat" items="{{children.entries}}">
+        <template is="dom-repeat" items="{{currentPage}}">
           <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
         </template>
       </div>
@@ -105,6 +113,10 @@ Contributors:
           }
         },
 
+        observers: [
+          '_search(document, pageSize, pageNumber)'
+        ],
+
         listeners: {
           'batchFinished': 'importBatch'
         },
@@ -112,36 +124,6 @@ Contributors:
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$$('.bubbleBoxes'));
-        },
-
-        _path: function(document, pageNumber, pageSize) {
-          return '/query/document_content?queryParams=' + document.uid +
-          '&currentPageIndex=' + (pageNumber - 1) +
-          '&pageSize=' + pageSize;
-        },
-
-        _hasManyPages: function(children) {
-          if (children) {
-            return children.pageCount > 1;
-          }
-          return false;
-        },
-
-        updatePage: function(e, o) {
-          if (o) {
-            this.pageNumber = e.target.value;
-          }
-        },
-
-        updatePageSize: function(e, o) {
-          if (o) {
-            this.pageSize = e.target.value;
-          }
-        },
-
-        responseHandler: function(e, detail) {
-          this.pageNumber = detail.response.currentPageIndex + 1;
-          this.pageCount = detail.response.pageCount;
         },
 
         importBatch: function() {
@@ -165,6 +147,17 @@ Contributors:
         _toast: function(msg) {
           this.$.toast.text = msg;
           this.$.toast.open();
+        },
+
+        _search: function(document, pageSize, pageNumber) {
+          if (document) {
+            var params = [];
+            params.push(document.uid);
+            this.$.provider.params = params;
+            this.$.provider.pageSize = pageSize;
+            this.$.provider.page = pageNumber;
+            this.$.provider.fetch();
+          }
         }
       });
     })();
