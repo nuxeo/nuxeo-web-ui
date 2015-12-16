@@ -103,8 +103,8 @@ Contributors:
               return {
                 'entity-type': 'task',
                 id: this.task.id,
-                comment: this.comment,
                 variables: {
+                  comment: this.comment,
                   participants: JSON.stringify(this.selectedParticipants),
                   assignees: JSON.stringify(this.selectedParticipants),
                   'validationOrReview': this.selectedValidationOrReview

@@ -38,9 +38,10 @@ Contributors:
 
     <div class="vertical layout content">
       <template is="dom-repeat" items="{{workflows.entries}}">
+        <!--using hardcoded Administrator-->
         <nuxeo-resource auto
                         id="workflowTasks"
-                        path="[[_getTaskPath(document, '', item.id, item.workflowModelName)]]"
+                        path="[[_getTaskPath(document, 'Administrator', item.id, item.workflowModelName)]]"
                         response="{{tasks}}"></nuxeo-resource>
         <template is="dom-repeat" items="{{tasks.entries}}">
           <nuxeo-document-task document="{{document}}" task="{{item}}"></nuxeo-document-task>
