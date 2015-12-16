@@ -114,7 +114,10 @@ Contributors:
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
             <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view document="{{document}}"></nuxeo-document-content-view>
+              <nuxeo-document-content-view
+                provider-name"document_content"
+                params="[[cvParams]]" >
+              </nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
               <nuxeo-document-view document="{{document}}" mode="{{action}}"></nuxeo-document-view>
@@ -155,6 +158,11 @@ Contributors:
             type: String,
             value: 'view',
             observer: '_navigate'
+          },
+          cvParams: {
+            type: Array,
+            computed: '_buildCvParams(document)',
+            notify: true
           }
         },
 
@@ -184,6 +192,15 @@ Contributors:
           if (this.document) {
             page('/browse' + this.document.path + '@' + this.selectedTab);
           }
+        },
+
+        _buildCvParams: function() {
+          var params = [];
+          if (this._canViewContent()) {
+            console.log('_buildCvParams : ' + this.document.uid);
+            params.push(this.document.uid);
+          }
+          return params;
         }
 
       });

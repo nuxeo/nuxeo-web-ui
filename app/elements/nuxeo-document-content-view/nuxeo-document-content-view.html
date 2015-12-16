@@ -64,9 +64,10 @@ Contributors:
     <!-- TODO: use the 'params' attribute -->
 
     <nuxeo-page-provider id="provider"
-       provider="document_content"
+       provider="{{providerName}}"
        page-size="{{pageSize}}"
        number-of-pages="{{pageCount}}"
+       aggregations="{{aggregations}}"
        enrichers="thumbnail"
        current-page="{{currentPage}}"
        page="{{pageNumber}}">
@@ -95,8 +96,18 @@ Contributors:
         is: 'nuxeo-document-content-view',
         behaviors: [Nuxeo.UploaderBehavior],
         properties: {
-          document: {
+          params: {
             type: Object,
+            value: {},
+            notify: true
+          },
+          providerName: {
+            type: String,
+            value: 'document_content'
+          },
+          aggregations: {
+            type: Object,
+            value: {},
             notify: true
           },
           pageNumber: {
@@ -114,7 +125,7 @@ Contributors:
         },
 
         observers: [
-          '_search(document, pageSize, pageNumber)'
+          '_search(params, pageSize, pageNumber)'
         ],
 
         listeners: {
@@ -149,10 +160,8 @@ Contributors:
           this.$.toast.open();
         },
 
-        _search: function(document, pageSize, pageNumber) {
+        _search: function(params, pageSize, pageNumber) {
           if (document) {
-            var params = [];
-            params.push(document.uid);
             this.$.provider.params = params;
             this.$.provider.pageSize = pageSize;
             this.$.provider.page = pageNumber;
