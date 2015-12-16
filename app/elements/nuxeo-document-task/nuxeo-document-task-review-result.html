@@ -17,32 +17,18 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-document-activity`
+`nuxeo-document-task-review-result`
 @group Nuxeo UI
-@element nuxeo-document-activity
+@element nuxeo-document-task-review-result
 -->
-<dom-module id="nuxeo-document-activity">
+<dom-module id="nuxeo-document-task-review-result">
 
   <template>
     <style>
       :host {
         display: block;
       }
-
-      .audit_user a {
-        color: #039be5;
-        text-decoration: none;
-        @apply(--nuxeo-document-activity-user-theme);
-      }
     </style>
-
-    <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
-    <template is="dom-repeat" items="[[audit.entries]]">
-      <p>
-        <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>&nbsp;</span>
-        <span>[[i18n('activity', item.eventId)]]</span>
-      </p>
-    </template>
   </template>
 
   <script>
@@ -50,11 +36,16 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-activity',
+        is: 'nuxeo-document-task-review-result',
         properties: {
-          document: {
-            type: Object
+          result: {
+            type: String,
+            observer: '_observeResult'
           }
+        },
+
+        _observeResult: function() {
+          this.innerHTML = this.result;
         }
       });
     })();

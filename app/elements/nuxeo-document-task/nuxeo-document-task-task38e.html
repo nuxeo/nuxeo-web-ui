@@ -1,0 +1,124 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--Serial document review - Choose Participants-->
+<!--
+`nuxeo-document-task-task38e`
+@group Nuxeo UI
+@element nuxeo-document-task-task38e
+-->
+<dom-module id="nuxeo-document-task-task38e">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .action-property {
+        padding: 0.75rem 0;
+        color: #434343;
+        @apply(--nuxeo-document-task-action-property);
+      }
+
+      .action-property-header {
+        font-weight: bolder;
+        @apply(--nuxeo-document-task-action-property-header);
+      }
+    </style>
+
+    <nuxeo-operation auto op="UserGroup.Suggestion"
+                     params="[[parameters]]"
+                     response="{{response}}"></nuxeo-operation>
+
+    <div class="action-property layout horizontal center">
+      <span class="action-property-header">Participants:&nbsp;</span>
+      <div class="flex">
+        <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
+                               multiple="true"
+                               value="{{selectedParticipants}}"></nuxeo-user-suggestion>
+      </div>
+    </div>
+    <div class="action-property layout vertical">
+      <span class="action-property-header">Type:</span>
+      <paper-dropdown-menu label="Simple review or Validation?">
+        <paper-menu class="dropdown-content" selected="{{selectedValidationOrReview}}" attr-for-selected="key">
+          <template is="dom-repeat" items="[[validationOrReview]]">
+            <paper-item key="[[item.key]]">[[i18n(item.label)]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+    </div>
+    <div class="action-property layout vertical">
+      <span class="action-property-header">Add a comment</span>
+      <paper-textarea label="your comment" value="{{comment}}"></paper-textarea>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-task-task38e',
+        behaviors: [Nuxeo.DocumentTaskBehavior],
+        properties: {
+          validationOrReview: {
+            type: Array,
+            value: [
+              {key: 'simpleReview', label: 'wf.serialDocumentReview.simpleReview'},
+              {key: 'validation', label: 'wf.serialDocumentReview.validation'}
+            ]
+          }
+        },
+
+        _getUsernames: function() {
+          if (this.response) {
+            return this.response.map(function(user) {
+              return user.username;
+            });
+          } else {
+            return [];
+          }
+        },
+
+        genTaskData: function(action) {
+          switch (action) {
+            case 'start_review':
+              return {
+                'entity-type': 'task',
+                id: this.task.id,
+                comment: this.comment,
+                variables: {
+                  participants: JSON.stringify(this.selectedParticipants),
+                  assignees: JSON.stringify(this.selectedParticipants),
+                  'validationOrReview': this.selectedValidationOrReview
+                },
+              };
+            default:
+              return {
+                'entity-type': 'task',
+                id: this.task.id
+              };
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

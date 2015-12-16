@@ -1,0 +1,97 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--Parallel document review - Consolidate the Review-->
+<!--
+`nuxeo-document-task-task2169`
+@group Nuxeo UI
+@element nuxeo-document-task-task2169
+-->
+<dom-module id="nuxeo-document-task-task2169">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .action-property {
+        padding: 0.75rem 0;
+        color: #434343;
+        @apply(--nuxeo-document-task-action-property);
+      }
+
+      .action-property-header {
+        font-weight: bolder;
+        @apply(--nuxeo-document-task-action-property-header);
+      }
+
+      .review-result {
+        font-weight: 100;
+        margin-left: 1rem;
+        margin-top: 1rem;
+        @apply(--nuxeo-document-task-review-result);
+      }
+    </style>
+
+    <div class="action-property layout vertical">
+      <span class="action-property-header">Consultation Wrap-up</span>
+      <nuxeo-document-task-review-result class="review-result" result="[[reviewResult]]"></nuxeo-document-task-review-result>
+    </div>
+    <div class="action-property layout vertical">
+      <span class="action-property-header">Add a comment</span>
+      <paper-textarea label="your comment" value="{{comment}}"></paper-textarea>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-task-task2169',
+        behaviors: [Nuxeo.DocumentTaskBehavior],
+        properties: {
+          reviewResult: {
+            type: String,
+            notify: true
+          }
+        },
+        observers: ['_taskObserver(task)'],
+
+        _taskObserver: function() {
+          var hasReviewResult = (this.task.variables['review_result'] && this.task.variables['review_result'] !== '');
+          if (hasReviewResult) {
+            this.reviewResult = this.task.variables['review_result'];
+          } else {
+            this.reviewResult = '';
+          }
+        },
+
+        genTaskData: function() {
+          return {
+            'entity-type': 'task',
+            id: this.task.id,
+            comment: this.comment
+          };
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

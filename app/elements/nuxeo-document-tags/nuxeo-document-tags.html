@@ -44,33 +44,13 @@ Contributors:
         border-radius: 2px;
         @apply(--nuxeo-document-tags-theme);
       }
-
-      .sep {
-        border-top: 1px solid #e8e8e8;
-        @apply(--nuxeo-document-tags-sep-theme);
-      }
-
-      .content {
-        padding: 0.75rem 0rem;
-        box-sizing: border-box;
-        @apply(--nuxeo-document-tags-content-theme);
-      }
-
-      .title {
-        color: #213f7d;
-        font-size: 1.64rem;
-        @apply(--nuxeo-document-tags-title-theme);
-      }
     </style>
 
-    <p class="title">Tags</p>
-    <div class="horizontal layout wrap sep content">
-      <template is="dom-repeat" items="[[tags]]" as="tag">
-        <span class="badge layout horizontal center">
-          [[tag]]
-        </span>
-      </template>
-    </div>
+    <template is="dom-repeat" items="[[tags]]" as="tag">
+      <span class="badge">
+        [[tag]]
+      </span>
+    </template>
   </template>
 
   <script>

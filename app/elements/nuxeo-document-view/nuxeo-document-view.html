@@ -93,30 +93,76 @@ Contributors:
         font-size: 1.2rem;
       }
 
+      .title {
+        color: #213f7d;
+        font-size: 1.64rem;
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+      }
+
+      .content {
+        padding: 0.75rem 0rem;
+        box-sizing: border-box;
+      }
+
+      .startbutton {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-radius: 2px;
+      }
+
+      .audit {
+        max-height: 10rem;
+        overflow-y: auto;
+        @apply(--nuxeo-document-activity-audit-theme);
+      }
+
+      .docinfo {
+        padding: 0.75rem;
+        box-sizing: border-box;
+      }
     </style>
 
     <div>
       <iron-pages id="pages" selected="[[mode]]" attr-for-selected="name">
         <div name="view">
 
-          <nuxeo-resource id="workflowsRequest" auto path="/id/[[document.uid]]/@workflow" response="{{workflows}}"></nuxeo-resource>
+          <nuxeo-resource id="workflowsRequest" auto
+                          path="/id/[[document.uid]]/@workflow"
+                          data="{{workflowData}}"
+                          response="{{workflows}}"></nuxeo-resource>
 
           <div class="docview horizontal layout">
-            <div id="document-view" class="flex-2">
-              <!-- Dynamic layout element will be inserted here -->
-              <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
+            <div class="docinfo vertical layout flex-2">
+              <paper-card>
+                <div id="document-view">
+                  <!-- Dynamic layout element will be inserted here -->
+                  <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
+                </div>
+              </paper-card>
             </div>
             <div class="sideinfo vertical layout flex">
               <template is="dom-if" if="[[hasProcessInProgress]]">
                 <paper-card class="sidecard">
                   <div class="card-content">
-                    <nuxeo-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-task-view>
+                    <nuxeo-document-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-document-task-view>
                   </div>
                 </paper-card>
               </template>
               <paper-card class="sidecard">
                 <div class="card-content">
-                  <nuxeo-document-status document="{{document}}"></nuxeo-document-status>
+                  <p class="title">Status</p>
+                  <div class="horizontal layout sep wrap content">
+                    <span class="state">[[document.state]]</span>
+                    <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+                  </div>
                 </div>
               </paper-card>
               <paper-card class="sidecard">
@@ -129,24 +175,47 @@ Contributors:
               </paper-card>
               <paper-card class="sidecard">
                 <div class="card-content">
-                  <nuxeo-dublincore-contrib document="{{document}}"></nuxeo-dublincore-contrib>
+                  <p class="title">Contributors</p>
+                  <div class="horizontal layout wrap sep content">
+                    <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
+                  </div>
                 </div>
               </paper-card>
               <template is="dom-if" if="[[canStartProcess]]">
                 <paper-card class="sidecard">
                   <div class="card-content">
-                    <nuxeo-workflow-start document="{{document}}" workflows="{{workflows}}"></nuxeo-workflow-start>
+                    <p class="title">Process</p>
+                    <div class="sep vertical layout">
+                      <div>
+                        <paper-dropdown-menu label="Start a process">
+                          <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+                            <template is="dom-repeat" items="[[processes]]" as="process">
+                              <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
+                            </template>
+                          </paper-menu>
+                        </paper-dropdown-menu>
+                      </div>
+                      <div>
+                        <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
+                      </div>
+                    </div>
                   </div>
                 </paper-card>
               </template>
               <paper-card class="sidecard">
                 <div class="card-content">
-                  <nuxeo-document-tags class="tags"></nuxeo-document-tags>
+                  <p class="title">Tags</p>
+                  <div class="horizontal layout wrap sep content">
+                    <nuxeo-document-tags class="tags"></nuxeo-document-tags>
+                  </div>
                 </div>
               </paper-card>
               <paper-card class="sidecard">
                 <div class="card-content">
-                  <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
+                  <p class="title">Activity</p>
+                  <div class="vertical layout sep content audit">
+                    <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
+                  </div>
                 </div>
               </paper-card>
             </div>
@@ -196,6 +265,18 @@ Contributors:
             observer: '_workflowsChanged'
           },
 
+          selectedProcess: {
+            type: String
+          },
+
+          processes: {
+            type: Array,
+            value: [
+              {key: 'ParallelDocumentReview', label: 'wf.parallelDocumentReview.ParallelDocumentReview'},
+              {key: 'SerialDocumentReview', label: 'wf.serialDocumentReview.SerialDocumentReview'}
+            ]
+          },
+
           canStartProcess: {
             type: Boolean
           },
@@ -217,6 +298,14 @@ Contributors:
         observers: [
           '_updateLayout(document, mode)'
         ],
+
+        listeners: {
+          'taskCompleted': '_taskCompleted'
+        },
+
+        ready: function() {
+          this.selectedProcess = this.processes[0].key;
+        },
 
         _computeHeaders: function(versioningType) {
           return {
@@ -291,12 +380,43 @@ Contributors:
         },
 
         _workflowsChanged: function() {
-          this.canStartProcess = this.workflows && (this.workflows.entries.length === 0);
-          this.hasProcessInProgress = this.workflows && (this.workflows.entries.length > 0);
+          this.canStartProcess = this.workflows &&
+              this.workflows.entries &&
+              this.workflows.entries.length === 0 &&
+              this.document.state !== 'approved';
+          this.hasProcessInProgress = this.workflows &&
+              this.workflows.entries &&
+              this.workflows.entries.length > 0;
         },
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
+        },
+
+        _startProcess: function() {
+          var workflows = document.getElementById('workflowsRequest');
+
+          this.workflowData = {
+            'entity-type': 'workflow',
+            'workflowModelName': this.selectedProcess,
+            'attachedDocumentIds': [this.document.uid]
+          };
+          workflows.post().then(
+              function() {
+                workflows.get();
+              }
+          );
+        },
+
+        _taskCompleted: function() {
+          var doc = document.getElementById('doc');
+          doc.method = 'get';
+          doc.$.nxResource.execute().then(function() {
+            var workflowsRequest = document.getElementById('workflowsRequest');
+            if (workflowsRequest) {
+              workflowsRequest.get();
+            }
+          });
         }
       });
     })();

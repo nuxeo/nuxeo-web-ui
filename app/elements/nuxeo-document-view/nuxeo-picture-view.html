@@ -34,11 +34,6 @@ Contributors:
         text-decoration: none;
       }
 
-      .docinfo {
-        padding: 0.75rem;
-        box-sizing: border-box;
-      }
-
       .doctitle {
         color: #039be5;
         font-size: 1.64rem;
@@ -127,55 +122,57 @@ Contributors:
         border-top: 1px solid #e8e8e8;
       }
 
+      img {
+        max-width:100%;
+        max-height:100%;
+      }
+
     </style>
 
-    <div class="docinfo vertical layout">
-      <paper-card image="[[document.properties.file:content.data]]">
-        <div class="card-content">
-          <p class="doctitle">
-            <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
-          </p>
-          <p>[[document.properties.dc:description]]</p>
+    <img src=[[document.properties.file:content.data]]">
+    <div class="card-content">
+      <p class="doctitle">
+        <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
+      </p>
+      <p>[[document.properties.dc:description]]</p>
+    </div>
+    <div class="card-content sep">
+      <div class="proptable vertical layout">
+        <div class="row horizontal layout">
+          <span class="propkey">Dimensions</span>
+          <span class="propvalue">[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</span>
+          <span class="propkey">Format</span>
+          <span class="propvalue">[[document.properties.picture:info.format]]</span>
         </div>
-        <div class="card-content sep">
-          <div class="proptable vertical layout">
-            <div class="row horizontal layout">
-              <span class="propkey">Dimensions</span>
-              <span class="propvalue">[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</span>
-              <span class="propkey">Format</span>
-              <span class="propvalue">[[document.properties.picture:info.format]]</span>
-            </div>
-            <div class="row horizontal layout">
-              <span class="propkey">Color Profile</span>
-              <span class="propvalue">[[document.properties.picture:info.colorSpace]]</span>
-              <span class="propkey">Bit Depth</span>
-              <span class="propvalue">[[document.properties.picture:info.depth]]</span>
-            </div>
-            <div class="row horizontal layout">
-              <span class="propkey">Weight</span>
-              <span class="propvalue">[[_formatSize(document.properties.common:size)]]</span>
-            </div>
+        <div class="row horizontal layout">
+          <span class="propkey">Color Profile</span>
+          <span class="propvalue">[[document.properties.picture:info.colorSpace]]</span>
+          <span class="propkey">Bit Depth</span>
+          <span class="propvalue">[[document.properties.picture:info.depth]]</span>
+        </div>
+        <div class="row horizontal layout">
+          <span class="propkey">Weight</span>
+          <span class="propvalue">[[_formatSize(document.properties.common:size)]]</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-content sep">
+      <p class="additional">Additional Formats</p>
+      <div class="proptable vertical layout">
+        <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
+          <div class="row horizontal layout">
+            <span class="viewname">[[item.name]]</span>
+            <span class="viewdim">[[item.dimensions]]</span>
+            <span class="viewsize">[[item.size]]</span>
+            <span class="viewformat">[[item.format]]</span>
+            <span  class="viewdl">
+              <a href="[[item.data]]" title="download" class="viewdla">
+                <iron-icon icon="icons:file-download"></iron-icon>
+              </a>
+            </span>
           </div>
-        </div>
-        <div class="card-content sep">
-          <p class="additional">Additional Formats</p>
-          <div class="proptable vertical layout">
-            <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
-              <div class="row horizontal layout">
-                <span class="viewname">[[item.name]]</span>
-                <span class="viewdim">[[item.dimensions]]</span>
-                <span class="viewsize">[[item.size]]</span>
-                <span class="viewformat">[[item.format]]</span>
-                <span  class="viewdl">
-                  <a href="[[item.data]]" title="download" class="viewdla">
-                    <iron-icon icon="icons:file-download"></iron-icon>
-                  </a>
-                </span>
-              </div>
-            </template>
-          </div>
-        </div>
-      </paper-card>
+        </template>
+      </div>
     </div>
   </template>
 

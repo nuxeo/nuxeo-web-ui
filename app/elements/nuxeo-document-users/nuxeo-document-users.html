@@ -17,11 +17,11 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-dublincore-contrib`
+`nuxeo-dublincore-contribnuxeo-document-users`
 @group Nuxeo UI
-@element nuxeo-dublincore-contrib
+@element nuxeo-document-users
 -->
-<dom-module id="nuxeo-dublincore-contrib">
+<dom-module id="nuxeo-document-users">
 
   <template>
     <style>
@@ -43,46 +43,25 @@ Contributors:
         text-align: center;
         font-size: 0.9rem;
         border-radius: 2px;
-        @apply(--nuxeo-dublincore-contrib-theme);
+        @apply(--nuxeo-document-users-theme);
       }
 
       .icon {
         --iron-icon-height: 0.9rem;
         --iron-icon-width: 0.9rem;
         margin-right: 0.2rem;
-        @apply(--nuxeo-dublincore-contrib-icon-theme);
-      }
-
-      .sep {
-        border-top: 1px solid #e8e8e8;
-        @apply(--nuxeo-dublincore-contrib-sep-theme);
-      }
-
-      .content {
-        padding: 0.75rem 0rem;
-        box-sizing: border-box;
-        @apply(--nuxeo-dublincore-contrib-content-theme);
-      }
-
-      .title {
-        color: #213f7d;
-        font-size: 1.64rem;
-        @apply(--nuxeo-dublincore-contrib-title-theme);
+        @apply(--nuxeo-document-users-icon-theme);
       }
     </style>
 
-
-    <p class="title">Contributors</p>
-    <div class="horizontal layout wrap sep content">
-      <template is="dom-repeat" items="[[document.properties.dc:contributors]]" as="contributor">
-        <a class="badge" href="nuxeo/users/[[contributor]]">
-          <span class="layout horizontal center">
-            <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
-            [[contributor]]
-          </span>
-        </a>
-      </template>
-    </div>
+    <template is="dom-repeat" items="[[users]]" as="contributor">
+      <a class="badge" href="nuxeo/users/[[contributor]]">
+        <div class="layout horizontal center">
+          <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
+          <span>[[contributor]]</span>
+        </div>
+      </a>
+    </template>
   </template>
 
   <script>
@@ -90,10 +69,10 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-dublincore-contrib',
+        is: 'nuxeo-document-users',
         properties: {
-          document: {
-            type: Object
+          users: {
+            type: Array
           }
         }
       });

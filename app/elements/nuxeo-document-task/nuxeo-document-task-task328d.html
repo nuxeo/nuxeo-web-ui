@@ -16,12 +16,13 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<!--Parallel document review - Give your Opinion-->
 <!--
-`nuxeo-document-activity`
+`nuxeo-document-task-task328d`
 @group Nuxeo UI
-@element nuxeo-document-activity
+@element nuxeo-document-task-task328d
 -->
-<dom-module id="nuxeo-document-activity">
+<dom-module id="nuxeo-document-task-task328d">
 
   <template>
     <style>
@@ -29,20 +30,22 @@ Contributors:
         display: block;
       }
 
-      .audit_user a {
-        color: #039be5;
-        text-decoration: none;
-        @apply(--nuxeo-document-activity-user-theme);
+      .action-property {
+        padding: 0.75rem 0;
+        color: #434343;
+        @apply(--nuxeo-document-task-action-property);
+      }
+
+      .action-property-header {
+        font-weight: bolder;
+        @apply(--nuxeo-document-task-action-property-header);
       }
     </style>
 
-    <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
-    <template is="dom-repeat" items="[[audit.entries]]">
-      <p>
-        <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>&nbsp;</span>
-        <span>[[i18n('activity', item.eventId)]]</span>
-      </p>
-    </template>
+    <div class="action-property layout vertical">
+      <span class="action-property-header">Add a comment</span>
+      <paper-textarea label="your comment" value="{{comment}}"></paper-textarea>
+    </div>
   </template>
 
   <script>
@@ -50,11 +53,15 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-activity',
-        properties: {
-          document: {
-            type: Object
-          }
+        is: 'nuxeo-document-task-task328d',
+        behaviors: [Nuxeo.DocumentTaskBehavior],
+
+        genTaskData: function() {
+          return {
+            'entity-type': 'task',
+            id: this.task.id,
+            comment: this.comment
+          };
         }
       });
     })();

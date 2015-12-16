@@ -89,35 +89,31 @@ Contributors:
 
     </style>
 
-    <div class="docinfo vertical layout">
-      <paper-card>
-        <div class="vertical layout mainfile">
-          <a href="[[document.properties.file:content.data]]">
-            <div class="horizontal layout center mainfilename">
-              <iron-icon icon="editor:insert-drive-file" class="icon"></iron-icon>
-              [[document.title]]
-            </div>
-          </a>
-          <span>[[_formatSize(document.properties.common:size)]]</span>
+    <div class="vertical layout mainfile">
+      <a href="[[document.properties.file:content.data]]">
+        <div class="horizontal layout center mainfilename">
+          <iron-icon icon="editor:insert-drive-file" class="icon"></iron-icon>
+          [[document.title]]
         </div>
-        <div class="vertical layout attachcontainer">
-          <div class="horizontal layout center attchtitle">
-            <iron-icon icon="editor:attach-file" class="icon"></iron-icon>
-            Attachments
+      </a>
+      <span>[[_formatSize(document.properties.common:size)]]</span>
+    </div>
+    <div class="vertical layout attachcontainer">
+      <div class="horizontal layout center attchtitle">
+        <iron-icon icon="editor:attach-file" class="icon"></iron-icon>
+        Attachments
+      </div>
+      <div class="vertical layout">
+        <template is="dom-repeat" items="[[document.properties.files:files]]">
+          <div class="vertical layout attachment">
+            <a href="[[item.file.data]]" class="attachname">[[item.filename]]</a>
+            <span class="attchsize">[[_formatSize(item.file.length)]]</span>
           </div>
-          <div class="vertical layout">
-            <template is="dom-repeat" items="[[document.properties.files:files]]">
-              <div class="vertical layout attachment">
-                <a href="[[item.file.data]]" class="attachname">[[item.filename]]</a>
-                <span class="attchsize">[[_formatSize(item.file.length)]]</span>
-              </div>
-            </template>
-          </div>
-          <div class="addfiles">
-            + Complete the document with additional files
-          </div>
-        </div>
-      </paper-card>
+        </template>
+      </div>
+      <div class="addfiles">
+        + Complete the document with additional files
+      </div>
     </div>
   </template>
 

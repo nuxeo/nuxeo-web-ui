@@ -1,0 +1,251 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-task`
+@group Nuxeo UI
+@element nuxeo-document-task
+-->
+<dom-module id="nuxeo-document-task">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .startbutton {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-radius: 2px;
+        @apply(--nuxeo-document-task-button-theme);
+        margin-top: 0.5rem;
+      }
+
+      .icon {
+        --iron-icon-height: 0.9rem;
+        --iron-icon-width: 0.9rem;
+        margin-right: 0.2rem;
+        @apply(--nuxeo-document-task-icon-theme);
+      }
+
+      h4 {
+        font-size: 2.28rem;
+        font-weight: 400;
+        margin: 2rem 0;
+      }
+
+      .action-container {
+        overflow-y: auto;
+      }
+
+      .action-property {
+        padding: 0.75rem 0;
+        color: #434343;
+      }
+
+      .action-property-header {
+        font-weight: bolder;
+      }
+
+      .action-property-value {
+        font-weight: normal;
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+      }
+    </style>
+
+    <nuxeo-resource id="taskRequest"
+                    path="/task/[[task.id]]/[[action]]"
+                    data="{{taskData}}"
+                    response="{{taskResponse}}"
+                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+
+    <div class="layout vertical">
+      <div>
+        <span class="layout horizontal center">
+          <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
+          You have a task to do before [[_formatDate(task.dueDate)]]
+        </span>
+      </div>
+      <div>
+        <paper-dialog id="dialog"
+                      with-backdrop
+                      class="layout vertical">
+          <h4>Process Workflow</h4>
+          <div class="action-container layout vertical">
+            <div class="action-property layout horizontal">
+              <span class="action-property-header">
+                Workflow step:&nbsp;
+              </span>
+              <span class="action-property-value">
+                [[i18n(task.workflowModelName)]] - [[i18n(task.name)]]
+              </span>
+            </div>
+            <div class="action-property layout horizontal center">
+              <span class="action-property-header">
+                Actors:&nbsp;
+              </span>
+              <nuxeo-document-users users="[[_getActors(task)]]"></nuxeo-document-users>
+            </div>
+            <div class="action-property layout horizontal">
+              <span class="action-property-header">
+                Due date:&nbsp;
+              </span>
+              <span class="action-property-value">
+                [[_formatDate(task.dueDate)]]
+              </span>
+            </div>
+            <div class="action-property layout horizontal">
+              <span class="action-property-header">
+                Directive:&nbsp;
+              </span>
+              <span class="action-property-value">
+                [[i18n(task.directive)]]
+              </span>
+            </div>
+            <div id="task-container">
+              <!--dynamically loaded via _taskChanged-->
+            </div>
+          </div>
+          <div class="buttons sep">
+            <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
+              <paper-button dialog-confirm
+                            on-tap="_processTask"
+                            data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
+            </template>
+          </div>
+        </paper-dialog>
+        <paper-button class="startbutton" on-tap="_toggleDialog">Process</paper-button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-task',
+        properties: {
+          document: {
+            type: Object,
+            notify: true
+          },
+
+          task: {
+            type: Object,
+            observer: '_taskChanged'
+          },
+
+          currentTaskElement: {
+            type: Object
+          }
+        },
+        listeners: {
+          'response': '_handleResponse'
+        },
+
+        _handleResponse: function(e) {
+          if (e.detail.response['entity-type'] &&
+              e.detail.response['entity-type'] === 'task' &&
+              e.detail.response.id === this.task.id) {
+            this.fire('taskCompleted');
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(task) {
+          var node = Polymer.CaseMap.camelToDashCase(task.nodeName).toLowerCase();
+          return ['nuxeo', 'document', 'task', node].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current task node
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.task),
+              el = document.createElement(layout),
+              parent = this.$['task-container'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.task = this.task;
+          this.currentTaskElement = el;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current task node
+         */
+        _taskChanged: function() {
+          var layout = this._layoutFor(this.task);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl('../nuxeo-document-task/' + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find element layout for task ' + this.task.nodeName);
+                });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _getActors: function(task) {
+          return task.actors.map(function(user) {
+            return user.id.replace('user:','');
+          });
+        },
+
+        _toggleDialog: function() {
+          document.getElementById('dialog').toggle();
+        },
+
+        _processTask: function(e) {
+          this.action = e.target.dataset.args;
+          this.taskData = this.currentTaskElement.genTaskData(this.action);
+          this.$.taskRequest.put();
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
