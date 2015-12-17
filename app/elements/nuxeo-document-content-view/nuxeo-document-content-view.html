@@ -63,7 +63,7 @@ Contributors:
 
     <!-- TODO: use the 'params' attribute -->
 
-    <nuxeo-page-provider id="provider"
+    <nuxeo-page-provider id="provider" auto
        provider="{{providerName}}"
        page-size="{{pageSize}}"
        number-of-pages="{{pageCount}}"
@@ -125,10 +125,6 @@ Contributors:
           }
         },
 
-        observers: [
-          '_search(params, pageSize, pageNumber)'
-        ],
-
         listeners: {
           'batchFinished': 'importBatch'
         },
@@ -161,9 +157,6 @@ Contributors:
           this.$.toast.open();
         },
 
-        _search: function() {
-          this.$.provider.fetch();
-        }
       });
     })();
   </script>
