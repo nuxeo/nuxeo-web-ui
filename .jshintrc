@@ -21,6 +21,7 @@
     "Platform": true,
     "page": true,
     "Nuxeo": true,
-    "moment": true
+    "moment": true,
+    "jsPlumb": true
   }
 }

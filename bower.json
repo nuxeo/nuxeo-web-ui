@@ -10,7 +10,8 @@
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
     "polymer": "Polymer/polymer#^1.1.0",
-    "moment": "~2.10.6"
+    "moment": "~2.10.6",
+    "jsPlumb": "~2.0.5"
   },
   "devDependencies": {
     "web-component-tester": "*"

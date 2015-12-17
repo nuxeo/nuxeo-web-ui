@@ -75,6 +75,14 @@ Contributors:
       .sep {
         border-top: 1px solid #e8e8e8;
       }
+
+      .graph-container {
+        padding: 0.5rem 2rem;
+      }
+
+      .open-graph {
+        font-size: 0.8rem;
+      }
     </style>
 
     <nuxeo-resource id="taskRequest"
@@ -91,10 +99,20 @@ Contributors:
         </span>
       </div>
       <div>
-        <paper-dialog id="dialog"
+        <paper-dialog id="taskDialog"
                       with-backdrop
+                      no-cancel-on-esc-key
                       class="layout vertical">
-          <h4>Process Workflow</h4>
+          <div class="horizontal layout center">
+            <h4>Process Workflow</h4>
+            <paper-dialog id="graphDialog"
+                          with-backdrop>
+              <div class="graph-container">
+                <nuxeo-workflow-graph workflow="{{workflow}}"></nuxeo-workflow-graph>
+              </div>
+            </paper-dialog>
+            <paper-button class="open-graph" on-tap="_toggleGraphDialog">Show Graph</paper-button>
+          </div>
           <div class="action-container layout vertical">
             <div class="action-property layout horizontal">
               <span class="action-property-header">
@@ -138,7 +156,7 @@ Contributors:
             </template>
           </div>
         </paper-dialog>
-        <paper-button class="startbutton" on-tap="_toggleDialog">Process</paper-button>
+        <paper-button class="startbutton" on-tap="_toggleTaskDialog">Process</paper-button>
       </div>
     </div>
   </template>
@@ -151,8 +169,11 @@ Contributors:
         is: 'nuxeo-document-task',
         properties: {
           document: {
-            type: Object,
-            notify: true
+            type: Object
+          },
+
+          workflow: {
+            type: Object
           },
 
           task: {
@@ -235,8 +256,12 @@ Contributors:
           });
         },
 
-        _toggleDialog: function() {
-          document.getElementById('dialog').toggle();
+        _toggleTaskDialog: function() {
+          document.getElementById('taskDialog').toggle();
+        },
+
+        _toggleGraphDialog: function() {
+          document.getElementById('graphDialog').toggle();
         },
 
         _processTask: function(e) {
