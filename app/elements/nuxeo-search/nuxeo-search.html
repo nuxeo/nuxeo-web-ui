@@ -17,6 +17,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-select2.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="stylesheet" href="../../bower_components/select2/select2.css">
 <link rel="import" href="nuxeo-checkbox-aggregation.html">
 
@@ -79,7 +80,7 @@ Contributors:
 
       .row {
         box-sizing: border-box;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         padding: 0 1rem;
         width: 100%;
       }
@@ -103,6 +104,23 @@ Contributors:
         margin: 0;
         padding: .5rem;
         width: 100%;
+      }
+
+      paper-button {
+        padding: 0.5em;
+        width: 120px;
+      }
+
+      .filter {
+        background-color: #00adff;
+        border-color: #00adff;
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .clear {
+        background-color: #fafafa;
+        border-color: #fafafa;
       }
     </style>
 
@@ -198,6 +216,11 @@ Contributors:
                                         value="{{sizeAgg}}">
             </nuxeo-checkbox-aggregation>
           </div>
+
+          <div class="layout horizontal row">
+            <paper-button class="filter flex self-start" raised on-click="_filter">Filter</paper-button>
+            <paper-button class="clear flex self-end" raised on-click="_clear">Clear</paper-button>
+          </div>
         </div>
 
         <!-- quick search page -->
@@ -253,6 +276,14 @@ Contributors:
             params[name] = value;
           }
           return params;
+        },
+
+        _filter: function() {
+          this.$.cview.params = this._buildParams();
+        },
+
+        _clear: function() {
+          //TODO: clear values
         }
       });
     })();
