@@ -72,7 +72,7 @@ Contributors:
         color: var(--menu-link-color);
         text-decoration: none;
       }
-      
+
       [drawer] .card {
         margin: 0;
         padding: 20px;
@@ -131,15 +131,14 @@ Contributors:
             <paper-tabs selected="{{page}}" attr-for-selected="name">
               <paper-tab name="home">Home</paper-tab>
               <paper-tab name="browse">Browse</paper-tab>
-              <paper-tab name="search">Search</paper-tab>
               <paper-tab name="admin">Admin</paper-tab>
             </paper-tabs>
 
+            <paper-tabs selected="{{page}}" attr-for-selected="name" style="float: right">
+              <paper-tab name="search"><iron-icon icon="search" suffix></iron-icon></paper-tab>
+            </paper-tabs>
+
             <div class="horizontal flex center layout end-justified">
-              <!-- Search -->
-              <paper-input>
-                <iron-icon icon="search" suffix></iron-icon>
-              </paper-input>
 
               <!-- Profile -->
               <section class="profile">
@@ -234,6 +233,7 @@ Contributors:
             }
           }
           page(url);
+          this.fire('navigation', {page: this.page});
         },
 
         scrollPageToTop: function() {

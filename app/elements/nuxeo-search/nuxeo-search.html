@@ -122,6 +122,17 @@ Contributors:
         background-color: #fafafa;
         border-color: #fafafa;
       }
+
+      .searchBar {
+        margin-right: 16px;
+      }
+
+      .searchBar ::content .floated-label-placeholder,
+      .searchBar ::content .unfocused-line,
+      .searchBar ::content .focused-line {
+        display: none;
+      }
+
     </style>
 
     <div class="side-nav">
@@ -138,10 +149,6 @@ Contributors:
 
         <!-- faceted search page -->
         <div name="faceted">
-          <div class="row layout vertical">
-            <label>Text search</label>
-            <input type="text" name="ecm_fulltext" value={{textSearch::input}}>
-          </div>
 
           <div class="row layout vertical">
             <label>Tags</label>
@@ -233,7 +240,11 @@ Contributors:
 
     <paper-header-panel class="main flex">
       <div class="paper-header layout horizontal">
-        <span class="flex">Search</span>
+        <span class="flex searchBar">
+          <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
+            <iron-icon icon="search" prefix></iron-icon>
+          </paper-input>
+        </span>
       </div>
       <div class="content">
         <nuxeo-document-content-view id="cview"
@@ -259,10 +270,22 @@ Contributors:
             value: 'faceted'
           },
 
+          searchTerm: {
+            type: String
+          },
+
           params: {
             type: Object,
-            computed: '_buildParams(createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
+            computed: '_buildParams(searchTerm, createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
           }
+        },
+
+        ready: function() {
+          window.addEventListener('navigation', function(e) {
+            if (e.detail.page === 'search') {
+              this.$.searchInput.$.input.focus();
+            }
+          }.bind(this));
         },
 
         _buildParams: function() {
@@ -270,6 +293,9 @@ Contributors:
           // e.g. [name="faceted"] [name]
           var elements = document.querySelectorAll('[name="' + this.selectedSearch + '"] [name]');
           var params = {};
+          if (this.searchTerm) {
+            params['ecm_fulltext'] = this.searchTerm;
+          }
           for (var i = 0; i < elements.length; i++) {
             var name = elements[i].getAttribute('name');
             var value = elements[i].value;
