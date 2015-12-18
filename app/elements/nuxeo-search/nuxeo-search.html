@@ -18,6 +18,7 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-select2.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="stylesheet" href="../../bower_components/select2/select2.css">
 <link rel="import" href="nuxeo-checkbox-aggregation.html">
 
@@ -33,28 +34,23 @@ Contributors:
         display: block;
       }
 
-      .side-nav {
+      iron-collapse {
+        float: left;
         background-color: #fff;
-        height: 100%;
-        position: fixed;
-        width: 375px;
+      }
+
+      .side-nav {
+        min-width: 350px;
       }
 
       paper-header-panel {
         height: calc(100vh - 65px);
-        width: calc(100% - 375px);
-      }
-
-      .main {
-        left: 375px;
       }
 
       .paper-header {
         height: 60px;
         color: #039be5;
         background-color: var(--primary-background-color);
-        font-size: 24px;
-        padding-left: 20px;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
@@ -133,113 +129,36 @@ Contributors:
         display: none;
       }
 
+      .filterHeader {
+        background-color: #213f7d;
+        height: 60px;
+        margin-right: 20px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .filterHeader[opened] {
+        width: 350px;
+      }
+
+      .filterHeader paper-button {
+        color: #fff;
+        font-size: 22px;
+        text-transform: none;
+        width: 100%;
+      }
     </style>
-
-    <div class="side-nav">
-      <div class="search-selector-container">
-        <select class="browser-default" value="{{selectedSearch::change}}">
-          <option disabled>Searches</option>
-          <option value="faceted">Faceted Search</option>
-          <option value="quick">Quick Search</option>
-          <option value="nxql">NXQL Search</option>
-        </select>
-      </div>
-
-      <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
-
-        <!-- faceted search page -->
-        <div name="faceted">
-
-          <div class="row layout vertical">
-            <label>Tags</label>
-            <nuxeo-select2 operation="Tag.Suggestion"
-                           min-chars="1"
-                           multiple="true"
-                           placeholder="Search for tags..."
-                           value="{{tags::change}}"
-                           name="ecm_tags">
-            </nuxeo-select2>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Creation date</label>
-            <nuxeo-checkbox-aggregation name="dc_created_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{createdAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Modified date</label>
-            <nuxeo-checkbox-aggregation name="dc_modified_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{modifiedAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="row layout vertical">
-            <label>Author</label>
-            <input type="text">
-          </div>
-
-          <div class="row layout vertical">
-            <label>Collections</label>
-            <nuxeo-select2 operation="User.GetCollections"
-                           min-chars="0"
-                           placeholder="Select a value"
-                           value="{{collections::change}}"
-                           name="ecm_collections">
-            </nuxeo-select2>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Nature</label>
-            <nuxeo-checkbox-aggregation name="dc_nature_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{natureAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Subjects</label>
-            <nuxeo-checkbox-aggregation name="dc_subjects_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{subjectAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Coverage</label>
-            <nuxeo-checkbox-aggregation name="dc_coverage_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{coverageAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="layout vertical row">
-            <label>Size</label>
-            <nuxeo-checkbox-aggregation name="common_size_agg"
-                                        aggregations="[[aggregations]]"
-                                        value="{{sizeAgg}}">
-            </nuxeo-checkbox-aggregation>
-          </div>
-
-          <div class="layout horizontal row">
-            <paper-button class="filter flex self-start" raised on-click="_filter">Filter</paper-button>
-            <paper-button class="clear flex self-end" raised on-click="_clear">Clear</paper-button>
-          </div>
-        </div>
-
-        <!-- quick search page -->
-        <div name="quick">Quick Search</div>
-
-        <!-- NXQL search page -->
-        <div name="nxql">NXQL Search</div>
-      </iron-pages>
-    </div>
 
     <paper-header-panel class="main flex">
       <div class="paper-header layout horizontal">
+        <div class="filterHeader" opened$="[[filtersOpened]]">
+          <paper-button on-click="toggle" noink>
+            <iron-icon icon="filter-list"></iron-icon>
+            <template is="dom-if" if="[[filtersOpened]]">
+              Refine by filters
+            </template>
+          </paper-button>
+        </div>
         <span class="flex searchBar">
           <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
             <iron-icon icon="search" prefix></iron-icon>
@@ -247,6 +166,110 @@ Contributors:
         </span>
       </div>
       <div class="content">
+        <iron-collapse id="collapse" horizontal opened="{{filtersOpened}}">
+          <div class="side-nav">
+            <div class="search-selector-container">
+              <select class="browser-default" value="{{selectedSearch::change}}">
+                <option disabled>Searches</option>
+                <option value="faceted">Faceted Search</option>
+                <option value="quick">Quick Search</option>
+                <option value="nxql">NXQL Search</option>
+              </select>
+            </div>
+
+            <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
+
+              <!-- faceted search page -->
+              <div name="faceted">
+
+                <div class="row layout vertical">
+                  <label>Tags</label>
+                  <nuxeo-select2 operation="Tag.Suggestion"
+                                 min-chars="1"
+                                 multiple="true"
+                                 placeholder="Search for tags..."
+                                 value="{{tags::change}}"
+                                 name="ecm_tags">
+                  </nuxeo-select2>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Creation date</label>
+                  <nuxeo-checkbox-aggregation name="dc_created_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{createdAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Modified date</label>
+                  <nuxeo-checkbox-aggregation name="dc_modified_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{modifiedAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="row layout vertical">
+                  <label>Author</label>
+                  <input type="text">
+                </div>
+
+                <div class="row layout vertical">
+                  <label>Collections</label>
+                  <nuxeo-select2 operation="User.GetCollections"
+                                 min-chars="0"
+                                 placeholder="Select a value"
+                                 value="{{collections::change}}"
+                                 name="ecm_collections">
+                  </nuxeo-select2>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Nature</label>
+                  <nuxeo-checkbox-aggregation name="dc_nature_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{natureAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Subjects</label>
+                  <nuxeo-checkbox-aggregation name="dc_subjects_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{subjectAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Coverage</label>
+                  <nuxeo-checkbox-aggregation name="dc_coverage_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{coverageAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="layout vertical row">
+                  <label>Size</label>
+                  <nuxeo-checkbox-aggregation name="common_size_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{sizeAgg}}">
+                  </nuxeo-checkbox-aggregation>
+                </div>
+
+                <div class="layout horizontal row">
+                  <paper-button class="filter flex self-start" raised on-click="_filter">Filter</paper-button>
+                  <paper-button class="clear flex self-end" raised on-click="_clear">Clear</paper-button>
+                </div>
+              </div>
+
+              <!-- quick search page -->
+              <div name="quick">Quick Search</div>
+
+              <!-- NXQL search page -->
+              <div name="nxql">NXQL Search</div>
+            </iron-pages>
+          </div>
+        </iron-collapse>
         <nuxeo-document-content-view id="cview"
           provider-name="default_search"
           params="[[params]]"
@@ -277,6 +300,11 @@ Contributors:
           params: {
             type: Object,
             computed: '_buildParams(searchTerm, createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
+          },
+
+          filtersOpened: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -310,6 +338,10 @@ Contributors:
 
         _clear: function() {
           //TODO: clear values
+        },
+
+        toggle: function() {
+          this.$.collapse.toggle();
         }
       });
     })();
