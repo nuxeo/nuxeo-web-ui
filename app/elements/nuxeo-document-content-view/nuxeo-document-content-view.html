@@ -64,13 +64,13 @@ Contributors:
     <!-- TODO: use the 'params' attribute -->
 
     <nuxeo-page-provider id="provider" auto
-       provider="{{providerName}}"
-       page-size="{{pageSize}}"
+       provider="[[providerName]]"
+       page-size="[[pageSize]]"
        number-of-pages="{{pageCount}}"
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
        current-page="{{currentPage}}"
-       page="{{pageNumber}}"
+       page="[[pageNumber]]"
        params="[[params]]">
     </nuxeo-page-provider>
 
@@ -79,8 +79,8 @@ Contributors:
       </nuxeo-document-content-view-controls>
 
       <div class="bubbleBoxes">
-        <template is="dom-repeat" items="{{currentPage}}">
-          <nuxeo-document-listing-thumbnail doc="[[item]]" document="{{document}}"/>
+        <template is="dom-repeat" items="[[currentPage]]">
+          <nuxeo-document-listing-thumbnail doc="[[item]]" document="[[document]]"/>
         </template>
       </div>
     </div>
