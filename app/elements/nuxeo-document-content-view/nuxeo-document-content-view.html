@@ -87,7 +87,9 @@ Contributors:
 
     <paper-toast id="toast"></paper-toast>
 
-    <nuxeo-document-create-button parent="[[document]]"></nuxeo-document-create-button>
+    <template is="dom-if" if="[[canCreateDocuments]]">
+      <nuxeo-document-create-button parent="[[document]]"></nuxeo-document-create-button>
+    </template>
 
   </template>
 
@@ -124,6 +126,10 @@ Contributors:
           pageCount: {
             type: Number,
             value: 1
+          },
+          canCreateDocuments: {
+            type: Boolean,
+            value: false
           }
         },
 

@@ -114,9 +114,10 @@ Contributors:
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
             <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view document="{{document}}"
-                                           provider-name="document_content"
-                                           params="[[cvParams]]">
+              <nuxeo-document-content-view provider-name="document_content"
+                                           params="[[cvParams]]"
+                                           document="{{document}}"
+                                           can-create-documents>
               </nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">

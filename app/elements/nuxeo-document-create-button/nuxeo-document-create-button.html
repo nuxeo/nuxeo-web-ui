@@ -29,7 +29,7 @@ Contributors:
         display: block;
       }
 
-      .createbtn {
+      paper-icon-button {
         position: fixed;
         bottom: 45px;
         right: 24px;
@@ -39,6 +39,11 @@ Contributors:
         background-color: #00adff;
         border-radius: 50%;
         padding: 12px;
+        transition: all 0.2s linear;
+        --paper-icon-button-hover: {
+           box-shadow: 0px 5px 20px 0px rgba(0,0,0,0.45);
+           transition: all 0.2s ease-out;
+         }
         @apply(--nuxeo-document-create-button);
       }
 
@@ -65,8 +70,7 @@ Contributors:
                     data="[[document]]"
                     response="{{createResponse}}"></nuxeo-document>
 
-    <paper-icon-button class="createbtn"
-                       icon="editor:mode-edit"
+    <paper-icon-button icon="editor:mode-edit"
                        title="find"
                        on-tap="_toggleDialog"></paper-icon-button>
 
