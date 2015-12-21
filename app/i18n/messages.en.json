@@ -46,5 +46,8 @@
   "label.dublincore.coverage.info":"This property is used by virtual navigation.",
   "label.editComment.tooltip":"This comment will be visible in the logs displayed in the \"History\" tab.",
   "label.versioning.currentVersion.tooltip":"Current version of the document.",
-  "label.versioning.changeVersion.tooltip":"If a new version is created, the new archived version will hold the values presented in this form."
+  "label.versioning.changeVersion.tooltip":"If a new version is created, the new archived version will hold the values presented in this form.",
+  "label.document.type.file": "File",
+  "label.document.type.note": "Note",
+  "label.document.type.picture": "Picture"
 }

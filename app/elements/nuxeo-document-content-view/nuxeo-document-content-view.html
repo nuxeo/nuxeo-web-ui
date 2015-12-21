@@ -87,6 +87,8 @@ Contributors:
 
     <paper-toast id="toast"></paper-toast>
 
+    <nuxeo-document-create-button parent="[[document]]"></nuxeo-document-create-button>
+
   </template>
 
   <script>
@@ -126,7 +128,8 @@ Contributors:
         },
 
         listeners: {
-          'batchFinished': 'importBatch'
+          'batchFinished': 'importBatch',
+          'documentCreated': '_handleDocumentCreated'
         },
 
         ready: function() {
@@ -157,6 +160,9 @@ Contributors:
           this.$.toast.open();
         },
 
+        _handleDocumentCreated: function() {
+          this.$.provider.fetch();
+        }
       });
     })();
   </script>

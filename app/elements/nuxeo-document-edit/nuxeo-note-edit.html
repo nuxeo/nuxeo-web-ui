@@ -111,7 +111,9 @@ Contributors:
      </div>
    </div>
 
-   <nuxeo-dublincore-edit document="[[document]]"><nuxeo-dublincore-edit>
+   <template is="dom-if" if="[[!new]]">
+     <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+   </template>
  </template>
  <script>
   (function() {
@@ -123,6 +125,11 @@ Contributors:
       properties: {
         document: {
           type: Object
+        },
+
+        new: {
+          type: Boolean,
+          value: false
         }
       }
     });

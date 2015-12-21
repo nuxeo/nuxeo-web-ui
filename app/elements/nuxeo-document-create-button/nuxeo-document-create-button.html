@@ -1,0 +1,260 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-create-button`
+@group Nuxeo UI
+@element nuxeo-document-create-button
+-->
+<dom-module id="nuxeo-document-create-button">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .createbtn {
+        position: fixed;
+        bottom: 45px;
+        right: 24px;
+        width: 55.5px;
+        height: 55.5px;
+        color: #ffffff;
+        background-color: #00adff;
+        border-radius: 50%;
+        padding: 12px;
+        @apply(--nuxeo-document-create-button);
+      }
+
+      .container {
+        width: 640px;
+      }
+
+      .picker {
+        margin-left: 32px;
+      }
+
+      .sep {
+        border-top: 1px solid #e8e8e8;
+      }
+
+      .form {
+        overflow-y: auto;
+        padding-top: 16px;
+      }
+    </style>
+
+    <nuxeo-document id="docRequest"
+                    doc-path="[[parent.path]]"
+                    data="[[document]]"
+                    response="{{createResponse}}"></nuxeo-document>
+
+    <paper-icon-button class="createbtn"
+                       icon="editor:mode-edit"
+                       title="find"
+                       on-tap="_toggleDialog"></paper-icon-button>
+
+    <paper-dialog id="createDocDialog"
+                  with-backdrop
+                  class="container vertical layout">
+      <div class="horizontal layout">
+        <h1>New document</h1>
+        <paper-dropdown-menu class="picker" label="Document type">
+          <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
+            <template is="dom-repeat" items="[[documentTypes]]" as="type">
+              <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+        <!--<div class="flex">
+          <nuxeo-directory-suggestion directory-name="subject" value="{{oneDirectorySuggestion}}"></nuxeo-directory-suggestion>
+        </div>-->
+      </div>
+      <div class="horizontal layout center">
+        <span>Location: [[parent.path]]</span>
+      </div>
+      <form is="iron-form"
+            action="/"
+            id="form"
+            on-submit="_create" class="sep form vertical layout">
+        <div id="document-edit">
+          <!--dynamically loaded via _updateLayout-->
+        </div>
+        <button id="submitButton" style="display:none;">Submit</button>
+      </form>
+      <div class="buttons sep horizontal end-justified layout">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="_submit">Create</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-create-button',
+        properties: {
+          parent: {
+            type: Object
+          },
+
+          document: {
+            type: Object
+          },
+
+          documentTypes: {
+            type: Array,
+            value: [
+              {key: 'file', label: 'label.document.type.file'},
+              {key: 'note', label: 'label.document.type.note'},
+              {key: 'picture', label: 'label.document.type.picture'}
+            ]
+          },
+
+          documentTemplates: {
+            type: Object,
+            value: {
+              file: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'File',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              note: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Note',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': '',
+                    'note:note': '',
+                    'note:mime_type': 'text/html'
+                  }
+                };
+              },
+              picture: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Picture',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              }
+            }
+          },
+
+          selectedDocType: {
+            type: String,
+            value: 'file',
+            observer: '_updateLayout'
+          }
+        },
+        listeners: {
+          'response': '_handleResponse'
+        },
+
+        _toggleDialog: function() {
+          if (!this.$.createDocDialog.opened) {
+            this._updateLayout();
+          }
+          this.$.createDocDialog.toggle();
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          return ['nuxeo', type, 'edit'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document type
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(),
+              el = document.createElement(layout),
+              parent = this.$['document-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+          el.new = true;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current document type
+         */
+        _updateLayout: function() {
+          this.document = this.documentTemplates[this.selectedDocType]();
+
+          var layout = this._layoutFor(this.document);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find edit layout for ' + this.document.type);
+                });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _submit: function() {
+          document.getElementById('submitButton').click();
+        },
+
+        _create: function() {
+          var docRequest = this.$.docRequest;
+          var name = this.document.properties['dc:title'].replace(/[^a-z0-9]/gi, '_');
+          this.document.name = name;
+          docRequest.post();
+          this._toggleDialog();
+        },
+
+        _handleResponse: function() {
+          this.fire('documentCreated');
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

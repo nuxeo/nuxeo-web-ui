@@ -106,12 +106,14 @@ Contributors:
        <label>Content</label>
      </div>
      <paper-radio-group class="layout vertical">
-       <!-- keep choice -->
-       <div class="layout horizontal radio-container">
-         <paper-radio-button name="keep">Keep</paper-radio-button>
-         <img src="http://localhost:8080/nuxeo[[document.properties.common:icon]]" alt="[[document.properties.file:content.mime-type]]"/>
-         <a href="[[document.properties.file:content.data]]">[[document.properties.file:content.name]]</a>
-       </div>
+       <template is="dom-if" if="[[!new]]">
+         <!-- keep choice -->
+         <div class="layout horizontal radio-container">
+           <paper-radio-button name="keep">Keep</paper-radio-button>
+           <img src="http://localhost:8080/nuxeo[[document.properties.common:icon]]" alt="[[document.properties.file:content.mime-type]]"/>
+           <a href="[[document.properties.file:content.data]]">[[document.properties.file:content.name]]</a>
+         </div>
+       </template>
        <!-- upload choice -->
        <div class="layout horizontal radio-container">
          <paper-radio-button name="upload">Upload</paper-radio-button>
@@ -123,7 +125,9 @@ Contributors:
      </paper-radio-group>
    </div>
 
-   <nuxeo-dublincore-edit document="[[document]]"><nuxeo-dublincore-edit>
+   <template is="dom-if" if="[[!new]]">
+     <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+   </template>
  </template>
  <script>
    (function() {
@@ -135,6 +139,11 @@ Contributors:
        properties: {
          document: {
            type: Object
+         },
+
+         new: {
+           type: Boolean,
+           value: false
          }
        }
      });
