@@ -1,5 +1,5 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "nuxeo-web-ui",
   "private": true,
   "dependencies": {
     "app-layout": "PolymerLabs/app-layout#master",
