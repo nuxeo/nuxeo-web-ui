@@ -54,12 +54,12 @@ Contributors:
       .paper-header {
         height: 60px;
         color: #039be5;
-        background-color: var(--primary-background-color);
+        box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
+        background-color: #fff;
         font-size: 24px;
-        padding-left: 20px;
+        padding: 0 2em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        width: 80%;
       }
 
       .content {
@@ -100,7 +100,7 @@ Contributors:
 
     <!-- Main content -->
 
-    <paper-header-panel class="main flex">
+    <paper-header-panel class="main flex" mode="waterfall">
       <div class="paper-header layout horizontal">
         <span class="flex">[[document.title]] [[selectedTab]]</span>
 
