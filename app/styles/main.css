@@ -12,8 +12,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 */
 
-body {
-  background: #fafafa;
-  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #333;
-}
+/*
+The global styles should be added in shared-styles.html
+https://blog.polymer-project.org/announcements/2015/08/13/1.1-release/
+
+This file can be kept for testing purpose and should be removed
+for the release.
+*/

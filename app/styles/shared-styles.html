@@ -2,17 +2,36 @@
 <dom-module id="shared-styles">
   <template>
     <style>
-      .page-title {
-      @apply(--paper-font-display2);
+      /* --
+      Global styles
+      --*/
+      body {
+        background: #fafafa;
+        font-family: 'Open Sans', 'Roboto', Helvetica, Arial, sans-serif;
+        color: #333;
       }
-      paper-menu a > *, paper-menu paper-item > *, paper-menu paper-icon-item > * {
+
+      /* --
+      Header page and Header subview
+      --*/
+      paper-header-panel {
+        --paper-header-panel-shadow: {
+          box-shadow: inset 0px 3px 3px -3px rgba(0, 0, 0, 0.4);
+        };
+      }
+
+      /* --
+      Navigation & Dropdown list
+      --*/
+      paper-menu a > *,
+      paper-menu paper-item > *,
+      paper-menu paper-icon-item > * {
         pointer-events: none;
       }
-      @media (max-width: 600px) {
-        .page-title {
-          font-size: 24px!important;
-        }
-      }
+
+      /* --
+      Labels & Messages
+      --*/
       .empty {
         color: #a8a8a8;
         display: block;
@@ -21,6 +40,7 @@
         max-width: 28rem;
         margin: 0 auto;
       }
+
     </style>
   </template>
 </dom-module>
