@@ -20,6 +20,7 @@ Contributors:
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="nuxeo-checkbox-aggregation.html">
+<link rel="import" href="nuxeo-dropdown-aggregation.html">
 <link rel="stylesheet" href="../../bower_components/select2/select2.css">
 
 <!--
@@ -211,8 +212,13 @@ Contributors:
                 </div>
 
                 <div class="row layout vertical">
-                  <label>Author</label>
-                  <input type="text">
+                  <label>Authors</label>
+                  <nuxeo-dropdown-aggregation placeholder="Search for authors..."
+                                              name="dc_creator_agg"
+                                              aggregations="[[aggregations]]"
+                                              value="{{authorsAgg}}"
+                                              multiple="true">
+                  </nuxeo-dropdown-aggregation>
                 </div>
 
                 <div class="row layout vertical">
@@ -221,7 +227,8 @@ Contributors:
                                  min-chars="0"
                                  placeholder="Select a value"
                                  value="{{collections::change}}"
-                                 name="ecm_collections">
+                                 name="ecm_collections"
+                                 multiple="true">
                   </nuxeo-select2>
                 </div>
 
@@ -300,7 +307,8 @@ Contributors:
 
           params: {
             type: Object,
-            computed: '_buildParams(searchTerm, createdAgg, modifiedAgg, natureAgg, subjectAgg, coverageAgg, sizeAgg)'
+            computed: '_buildParams(searchTerm, createdAgg, modifiedAgg, natureAgg,' +
+              'subjectAgg, coverageAgg, sizeAgg, authorsAgg)'
           },
 
           filtersOpened: {
