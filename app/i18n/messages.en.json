@@ -49,5 +49,6 @@
   "label.versioning.changeVersion.tooltip":"If a new version is created, the new archived version will hold the values presented in this form.",
   "label.document.type.file": "File",
   "label.document.type.note": "Note",
-  "label.document.type.picture": "Picture"
+  "label.document.type.picture": "Picture",
+  "label.home.dashboard": "Dashboard"
 }

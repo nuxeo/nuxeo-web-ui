@@ -1,0 +1,93 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+icensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-task-widget`
+@group Nuxeo UI
+@element nuxeo-task-widget
+-->
+<dom-module id="nuxeo-task-widget">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      .task-list {
+        margin: 7.5px 0px 15px 0px;
+        border: 1px solid #ddd;
+      }
+
+      .task-box {
+        padding: 10px 20px;
+      }
+
+      .task-box + .task-box {
+        border-top: 1px solid #ddd;
+      }
+
+      .empty {
+        color: #e8e8e8;
+      }
+    </style>
+
+
+    <template is="dom-if" if="[[isEmpty]]">
+      <div class="horizontal layout center">
+        <span class="empty">There are no tasks to show.</span>
+      </div>
+    </template>
+    <template is="dom-if" if="[[!isEmpty]]">
+      <div class="task-list vertical layout container">
+        <template is="dom-repeat" items="[[tasks]]">
+          <div class="vertical layout task-box">
+            <nuxeo-task-widget-record task="[[item]]"></nuxeo-task-widget-record>
+          </div>
+        </template>
+      </div>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-task-widget',
+        properties: {
+          tasks: {
+            type: Array,
+            value: []
+          },
+          isEmpty: {
+            type: Boolean,
+            computed: '_computeIsEmpty(tasks)'
+          }
+        },
+
+        _computeIsEmpty: function(tasks) {
+          if (tasks) {
+            return tasks.length === 0;
+          } else {
+            return true;
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,179 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+icensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-query-widget`
+@group Nuxeo UI
+@element nuxeo-query-widget
+-->
+<dom-module id="nuxeo-query-widget">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      .doctable {
+        box-sizing: border-box;
+        margin: 7.5px 0px 15px 0px;
+      }
+
+      .doctable-header {
+        font-weight: bold;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #d0d0d0;
+      }
+
+      .doctable-header,
+      .doctable-row {
+        margin: 8px 0px;
+      }
+
+      a {
+        color: #039be5;
+        text-decoration: none;
+      }
+
+      .controls {
+        color: #777;
+        font-size: 0.8rem;
+      }
+
+      paper-icon-button {
+        width: 2rem;
+        height: 2rem;
+        display: block;
+      }
+
+      .visible {
+        visibility: visible;
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+    </style>
+
+    <nuxeo-page-provider auto
+                         id="query"
+                         query="{{query}}"
+                         current-page="{{currentPage}}"
+                         page="{{pageNumber}}"
+                         page-size="{{pageSize}}"
+                         number-of-pages="{{numberOfPages}}"></nuxeo-page-provider>
+
+    <template is="dom-if" if="[[isEmpty]]">
+      <div class="horizontal layout center">
+        <span class="empty">There are no documents to show.</span>
+      </div>
+    </template>
+    <template is="dom-if" if="[[!isEmpty]]">
+      <nuxeo-pageable-widget page="[[currentPage]]"></nuxeo-pageable-widget>
+      <div class="horizontal layout end-justified center">
+        <paper-icon-button icon="icons:chevron-left"
+                           title="Previous Page"
+                           on-tap="_previousPage"
+                           class$="{{previousVisibility}}"></paper-icon-button>
+        <span class="controls">[[pageNumber]]/[[numberOfPages]]</span>
+        <paper-icon-button icon="icons:chevron-right"
+                           title="Next Page"
+                           on-tap="_nextPage"
+                           class$="{{nextVisibility}}"></paper-icon-button>
+      </div>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-query-widget',
+        properties: {
+          query: {
+            type: String
+          },
+          pageNumber: {
+            type: Number,
+            value: 1,
+          },
+          pageSize: {
+            type: Number,
+            value: 5
+          },
+          numberOfPages: {
+            type: Number
+          },
+          currentPage: {
+            type: Object,
+            observer: '_currentPageObserver'
+          },
+          isEmpty: {
+            type: Boolean
+          },
+          previousVisibility: {
+            type: String,
+            notify: true
+          },
+          nextVisibility: {
+            type: String,
+            notify: true
+          }
+        },
+        observers: ['_observePageNumbers(currentPage, numberOfPages, pageSize, pageNumber)'],
+
+        _formatDate: function(date) {
+          return moment(date).format('MMM D, YYYY');
+        },
+
+        _currentPageObserver: function() {
+          if (this.currentPage) {
+            this.isEmpty = this.currentPage.length === 0;
+          } else {
+            this.isEmpty = true;
+          }
+        },
+
+        _observePageNumbers: function() {
+          if (this.pageNumber > 1) {
+            this.previousVisibility = 'visible';
+          } else {
+            this.previousVisibility = 'hidden';
+          }
+          if (this.pageNumber < this.numberOfPages) {
+            this.nextVisibility = 'visible';
+          } else {
+            this.nextVisibility = 'hidden';
+          }
+        },
+
+        _previousPage: function() {
+          if (this.pageNumber > 1) {
+            this.pageNumber -= 1;
+          }
+        },
+
+        _nextPage: function() {
+          if (this.pageNumber < this.numberOfPages) {
+            this.pageNumber += 1;
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

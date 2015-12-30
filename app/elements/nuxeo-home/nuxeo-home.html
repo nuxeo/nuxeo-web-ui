@@ -1,0 +1,191 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+icensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-home`
+@group Nuxeo UI
+@element nuxeo-home
+-->
+<dom-module id="nuxeo-home">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      .side-nav {
+        background-color: #213f7d;
+        height: 100%;
+        position: fixed;
+        width: 60px;
+      }
+
+      .side-nav paper-icon-button {
+        color: #fff;
+        width: 60px;
+        height: 60px;
+        padding: 15px;
+      }
+
+      .main {
+        left: 60px;
+      }
+
+      paper-header-panel {
+        height: calc(100vh - 65px);
+        width: calc(100% - 60px);
+      }
+
+      .paper-header {
+        height: 60px;
+        color: #039be5;
+        box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
+        background-color: #fff;
+        font-size: 24px;
+        padding: 0 2em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .title {
+        color: #213f7d;
+        font-size: 1.4rem;
+        margin: 0 0 .4em;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e8e8e8;
+      }
+
+      paper-card.card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin: 0 22px 22px 0;
+      }
+
+      a {
+        color: #039be5;
+        text-decoration: none;
+      }
+    </style>
+
+    <nuxeo-resource id="homeWorkflowsRequest"
+                    path="/workflow/[[taskResponse.id]]"
+                    data="{{workflowData}}"
+                    response="{{workflowResponse}}"></nuxeo-resource>
+
+    <!--hardcoded username-->
+    <nuxeo-resource auto
+                    id="homeTaskRequest"
+                    path="[[_getTaskPath('Administrator')]]"
+                    response="{{taskResponse}}"
+                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+
+    <nuxeo-operation auto
+                     op="Favorite.GetDocuments"
+                     input="/"
+                     response="{{favorites}}"></nuxeo-operation>
+
+    <!-- Left sidebar -->
+    <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
+      <paper-icon-button icon="icons:dashboard" name="dashboard">Dashboard</paper-icon-button>
+    </paper-menu>
+
+    <!-- Main content -->
+
+    <paper-header-panel class="main flex" mode="waterfall">
+      <div class="paper-header layout horizontal">
+        <span class="flex">[[_getLabel(selectedTab)]]</span>
+      </div>
+      <div class="content">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+          <section name="dashboard">
+            <div class="horizontal layout">
+              <div class="vertical layout flex">
+                <paper-card class="card">
+                  <div class="card-content vertical layout">
+                    <span class="title">My Documents</span>
+                    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+                  </div>
+                </paper-card>
+                <paper-card class="card">
+                  <div class="card-content vertical layout">
+                    <span class="title">My Last Edits</span>
+                    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+                  </div>
+                </paper-card>
+              </div>
+              <div class="vertical layout flex">
+                <paper-card class="card">
+                  <div class="card-content vertical layout">
+                    <span class="title">My Tasks</span>
+                    <nuxeo-task-widget tasks="{{taskResponse.entries}}"></nuxeo-task-widget>
+                  </div>
+                </paper-card>
+                <paper-card class="card">
+                  <div class="card-content vertical layout">
+                    <span class="title">My Favorites</span>
+                    <nuxeo-pageable-widget page="[[favorites.entries]]"></nuxeo-pageable-widget>
+                  </div>
+                </paper-card>
+              </div>
+            </div>
+          </section>
+        </iron-pages>
+      </div>
+    </paper-header-panel>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-home',
+        properties: {
+          labels: {
+            type: Object,
+            value: {
+              dashboard: 'label.home.dashboard'
+            }
+          },
+          selectedTab: {
+            type: String,
+            value: 'dashboard',
+            observer: '_navigate'
+          }
+        },
+
+        _getLabel: function(tab) {
+          var label = this.labels[tab];
+          return this.i18n(label);
+        },
+
+        _navigate: function() {
+          /*page('/home@' + this.selectedTab);*/
+        },
+
+        _getTaskPath: function(user) {
+          var path = '/task?';
+          if (user) {
+            path += 'userId=' + user;
+          }
+          return path;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
