@@ -79,7 +79,7 @@ Contributors:
 
        _computeData: function() {
          if (this.aggregations && this.aggregations[this.name]) {
-           return this.aggregations[this.name].buckets.map(function(item) {
+           return this.aggregations[this.name].extendedBuckets.map(function(item) {
              return {
                id: item.key,
                text: item.key + ' (' + item.docCount + ')'

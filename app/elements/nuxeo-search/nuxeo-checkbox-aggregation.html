@@ -42,8 +42,8 @@ Contributors:
    </style>
 
   <div class="layout vertical">
-    <template is="dom-repeat" items="[[_getBuckets(aggregations, name)]]">
-      <paper-checkbox value="[[item.key]]" on-change="_computeValues">[[item.key]] ([[item.docCount]])</paper-checkbox>
+    <template is="dom-repeat" items="{{buckets}}">
+      <paper-checkbox checked="{{item.checked}}" on-change="_computeValues">[[item.key]] ([[item.docCount]])</paper-checkbox>
     </template>
     <template is="dom-if" if="[[_isEmpty(aggregations, name)]]">
       <label>No available result</label>
@@ -73,27 +73,36 @@ Contributors:
            value: [],
            notify: true
          },
+
+         buckets: {
+           type: Object,
+           computed: '_computeBuckets(aggregations, name)'
+         }
+       },
+
+       _computeBuckets: function(aggregations, name) {
+         if (aggregations && aggregations[name]) {
+           var buckets = aggregations[name].extendedBuckets;
+           var selectedBuckets = aggregations[name].selection;
+           buckets.forEach(function(item) {
+             item.checked = selectedBuckets.indexOf(item.key) >= 0;
+           });
+           return buckets;
+         }
        },
 
        _computeValues: function() {
          var values = [];
-         var checkboxes = this.getElementsByTagName('paper-checkbox');
-         for (var i = 0; i < checkboxes.length; i++) {
-           if (checkboxes[i].checked) {
-             values.push(checkboxes[i].value);
+         this.buckets.forEach(function(item) {
+           if (item.checked) {
+             values.push(item.key);
            }
-         }
+         });
          this.value = values;
        },
 
-       _getBuckets: function(aggregations, name) {
-         if (aggregations && aggregations[name]) {
-           return aggregations[name].buckets;
-         }
-       },
-
        _isEmpty: function(aggregations, name) {
-         return aggregations && aggregations[name] && aggregations[name].buckets.length === 0;
+         return aggregations && aggregations[name] && aggregations[name].extendedBuckets.length === 0;
        }
      });
    })();
