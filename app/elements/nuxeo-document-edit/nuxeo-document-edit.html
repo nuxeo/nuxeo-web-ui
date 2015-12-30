@@ -1,0 +1,181 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-document-edit`
+@group Nuxeo UI
+@element nuxeo-document-edit
+-->
+<dom-module id="nuxeo-document-edit">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+        padding: 20px;
+        width: 800px;
+      }
+
+      a {
+        color: #039be5;
+        text-decoration: none;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+      }
+
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      .row {
+        margin-bottom: 1rem;
+        box-sizing: inherit;
+      }
+
+    </style>
+
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
+    <form id="form" is="iron-form" action="/" on-submit="_save">
+      <div id="document-edit">
+        <!-- Dynamic layout element will be inserted here -->
+        <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+      </div>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Change Comment</label>
+        </div>
+        <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip')]]"></nuxeo-help>
+        <textarea id="comment" class="flex"></textarea>
+      </div>
+      <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
+      <button>Submit</button>
+      <button on-click="_cancel">Cancel</button>
+    </form>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-edit',
+        behaviors: [Polymer.IronResizableBehavior],
+        properties: {
+          document: {
+            type: Object,
+            observer: '_documentChanged'
+          },
+
+          versioningType: {
+            type: String
+          },
+
+          headers: {
+            type: Object,
+            computed: '_computeHeaders(versioningType)'
+          }
+        },
+
+        _computeHeaders: function(versioningType) {
+          return {
+            'X-Versioning-Option': versioningType
+          };
+        },
+
+        _documentChanged: function() {
+          if (this.document) {
+            this._updateLayout();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(document) {
+          var type = Polymer.CaseMap.camelToDashCase(document.type).toLowerCase();
+          return ['nuxeo', type, 'edit'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.document),
+              el = document.createElement(layout),
+              parent = this.$['document-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+
+          // hack to force resize event and correctly display <nuxeo-helper> elements
+          this.notifyResize();
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current document
+         */
+        _updateLayout: function() {
+          var layout = this._layoutFor(this.document);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                console.error('Failed to find edit layout for ' + this.document.type);
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _save: function() {
+          var doc = document.getElementById('doc');
+          doc.put();
+        },
+
+        _cancel: function() {
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

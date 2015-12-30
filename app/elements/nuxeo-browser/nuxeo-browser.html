@@ -23,47 +23,72 @@ Contributors:
 <!--
 `nuxeo-browser`
 @group Nuxeo UI
-@element nuxeo-dbrowser
+@element nuxeo-browser
 -->
 <dom-module id="nuxeo-browser">
   <template>
     <style is="custom-style" include="shared-styles">
-      .side-nav {
-        background-color: #213f7d;
-        height: 100%;
-        position: fixed;
-        width: 60px;
+
+      #sidebar {
+        float: left;
+        height: calc(100vh);
       }
 
-      .side-nav paper-icon-button {
-        color: #fff;
+      #sidebar paper-toolbar {
+        background-color: #213f7d;
+        color: white;
+        width: 250px;
+      }
+
+      .toggle {
+        background-color: #213f7d;
+        color: white;
         width: 60px;
         height: 60px;
         padding: 15px;
       }
 
-      .main {
-        left: 60px;
+      .title {
+        margin-left: 15px;
       }
 
       paper-header-panel {
-        height: calc(100vh - 65px);
-        width: calc(100% - 60px);
+        height: calc(100vh);
       }
 
-      .paper-header {
+      paper-toolbar {
         height: 60px;
         color: #039be5;
         box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
         background-color: #fff;
         font-size: 24px;
-        padding: 0 2em;
+        padding-right: 2em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
 
       .content {
         background-color: var(--primary-background-color);
+      }
+
+      paper-dropdown-menu {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-input: {
+          font-size: 20px;
+          text-align: center;
+          border-right-style: solid;
+          border-width: 1px;
+          border-color: #ddd;
+        };
+        --paper-dropdown-menu-ripple: {
+          border-style: solid;
+          border-width: 1px;
+          border-color: #ddd;
+        }
+        width: 175px;
+        margin: 15px;
       }
 
       paper-icon-button[name="edit"] {
@@ -76,40 +101,55 @@ Contributors:
     </style>
 
     <!-- Left sidebar -->
-
-    <!-- Desktop: side icon toolbar -->
-    <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
-      <paper-icon-button icon="icons:visibility" name="view">View</paper-icon-button>
-      <paper-icon-button icon="icons:info-outline" name="metadata">Metadata</paper-icon-button>
-      <paper-icon-button icon="icons:restore" name="activity">Activity</paper-icon-button>
-      <paper-icon-button icon="communication:vpn-key" name="permissions">Permissions</paper-icon-button>
-      <paper-icon-button icon="icons:settings" name="settings">Settings</paper-icon-button>
-    </paper-menu>
-
-    <!-- Mobile: tabs ? -->
-    <!--
-    <iron-media-query query="min-width: 600px" query-matches="{{wideLayout}}"></iron-media-query>
-    <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" hidden$="{{!wideLayout}}">
-      <paper-tab name="view" href="/browser/view">View</paper-tab>
-      <paper-tab name="metadata" href="/browser/metadata">Metadata</paper-tab>
-      <paper-tab name="activity" href="/browser/activity">Activity</paper-tab>
-      <paper-tab name="permissions" href="/browser/permissions">Permissions</paper-tab>
-      <paper-tab name="settings" href="/browser/settings">Settings</paper-tab>
-    </paper-tabs>
-    -->
+    <iron-collapse id="sidebar" horizontal opened="{{sidebarOpened}}">
+      <paper-toolbar>
+        <paper-icon-button icon="folder-open" on-click="toggleSidebar"></paper-icon-button>
+        <span>Tree</span>
+      </paper-toolbar>
+      <div>
+        <!-- TODO: Tree explorer -->
+      </div>
+    </iron-collapse>
 
     <!-- Main content -->
-
     <paper-header-panel class="main flex" mode="waterfall">
-      <div class="paper-header layout horizontal">
-        <span class="flex">[[document.title]] [[selectedTab]]</span>
+
+      <paper-toolbar>
+        <paper-icon-button class="toggle" icon="folder-open"
+                           on-click="toggleSidebar"
+                           hidden="[[sidebarOpened]]"></paper-icon-button>
+        <span class="title">[[document.title]]</span>
+
+        <paper-dropdown-menu no-label-float>
+          <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
+            <paper-icon-item name="view">
+              <iron-icon icon="icons:visibility" item-icon></iron-icon> View
+            </paper-icon-item>
+            <paper-icon-item name="edit">
+              <iron-icon icon="editor:mode-edit" item-icon></iron-icon> Edit
+            </paper-icon-item>
+            <paper-icon-item name="metadata">
+              <iron-icon icon="icons:info-outline" item-icon></iron-icon> Metadata
+            </paper-icon-item>
+            <paper-icon-item name="activity">
+              <iron-icon icon="icons:restore" item-icon></iron-icon> Activity
+            </paper-icon-item>
+            <paper-icon-item name="permissions">
+              <iron-icon icon="communication:vpn-key" item-icon></iron-icon> Permissions
+            </paper-icon-item>
+            <paper-icon-item name="settings">
+              <iron-icon icon="icons:settings" item-icon></iron-icon> Settings
+            </paper-icon-item>
+          </paper-menu>
+        </paper-dropdown-menu>
 
         <template is="dom-if" if="[[_canView(document)]]">
-          <paper-menu selected="{{action}}" attr-for-selected="name">
+          <div class="horizontal flex layout end-justified">
             <paper-icon-button icon="icons:create" name="edit" href="/browser/edit">Edit</paper-icon-button>
-          </paper-menu>
+          </div>
         </template>
-      </div>
+      </paper-toolbar>
+
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
@@ -121,8 +161,12 @@ Contributors:
               </nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
-              <nuxeo-document-view document="{{document}}" mode="{{action}}"></nuxeo-document-view>
+              <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
             </template>
+          </section>
+
+          <section name="edit">
+            <nuxeo-document-edit document="{{document}}"></nuxeo-document-edit>
           </section>
 
           <section name="metadata">
@@ -156,6 +200,10 @@ Contributors:
           document: {
             type: Object
           },
+          sidebarOpen: {
+            type: Boolean,
+            value: false
+          },
           selectedTab: {
             type: String,
             value: 'view',
@@ -166,6 +214,10 @@ Contributors:
             computed: '_buildCvParams(document)',
             notify: true
           }
+        },
+
+        toggleSidebar: function() {
+          this.$.sidebar.toggle();
         },
 
         get _enrichers() {

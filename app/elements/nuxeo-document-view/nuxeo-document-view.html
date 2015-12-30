@@ -154,118 +154,93 @@ Contributors:
       }
     </style>
 
-    <div>
-      <iron-pages id="pages" selected="[[mode]]" attr-for-selected="name">
-        <div name="view">
+    <nuxeo-resource id="workflowsRequest" auto
+                    path="/id/[[document.uid]]/@workflow"
+                    data="{{workflowData}}"
+                    response="{{workflows}}"></nuxeo-resource>
 
-          <nuxeo-resource id="workflowsRequest" auto
-                          path="/id/[[document.uid]]/@workflow"
-                          data="{{workflowData}}"
-                          response="{{workflows}}"></nuxeo-resource>
-
-          <div class="docview horizontal layout">
-            <div class="docinfo vertical layout flex-2">
-              <paper-card>
-                <div id="document-view">
-                  <!-- Dynamic layout element will be inserted here -->
-                  <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
-                </div>
-              </paper-card>
+    <div class="docview horizontal layout">
+      <div class="docinfo vertical layout flex-2">
+        <paper-card>
+          <div id="document-view">
+            <!-- Dynamic layout element will be inserted here -->
+            <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
+          </div>
+        </paper-card>
+      </div>
+      <div class="sideinfo vertical layout flex">
+        <template is="dom-if" if="[[hasProcessInProgress]]">
+          <paper-card class="sidecard">
+            <div class="card-content">
+              <nuxeo-document-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-document-task-view>
             </div>
-            <div class="sideinfo vertical layout flex">
-              <template is="dom-if" if="[[hasProcessInProgress]]">
-                <paper-card class="sidecard">
-                  <div class="card-content">
-                    <nuxeo-document-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-document-task-view>
-                  </div>
-                </paper-card>
-              </template>
-              <paper-card class="sidecard">
-                <div class="card-content">
-                  <p class="title">Status</p>
-                  <div class="horizontal layout sep wrap content">
-                    <span class="state">[[document.state]]</span>
-                    <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
-                  </div>
-                </div>
-              </paper-card>
-              <paper-card class="sidecard">
-                <div class="card-content">
-                  <div class="vertical layout cardcontent">
-                    <span class="docreator">Created by <a href="nuxeo/user/[[document.properties.dc:creator]]">[[document.properties.dc:creator]]</a></span>
-                    <p>on [[_formatDate(document.properties.dc:created)]]</p>
-                  </div>
-                </div>
-              </paper-card>
-              <paper-card class="sidecard">
-                <div class="card-content">
-                  <p class="title">Contributors</p>
-                  <div class="horizontal layout wrap sep content">
-                    <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
-                  </div>
-                </div>
-              </paper-card>
-              <template is="dom-if" if="[[canStartProcess]]">
-                <paper-card class="sidecard">
-                  <div class="card-content">
-                    <p class="title">Process</p>
-                    <div class="sep vertical layout">
-                      <div>
-                        <paper-dropdown-menu label="Start a process">
-                          <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
-                            <template is="dom-repeat" items="[[processes]]" as="process">
-                              <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
-                            </template>
-                          </paper-menu>
-                        </paper-dropdown-menu>
-                      </div>
-                      <div>
-                        <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
-                      </div>
-                    </div>
-                  </div>
-                </paper-card>
-              </template>
-              <paper-card class="sidecard">
-                <div class="card-content">
-                  <p class="title">Tags</p>
-                  <div class="horizontal layout wrap sep content">
-                    <nuxeo-document-tags class="tags"></nuxeo-document-tags>
-                  </div>
-                </div>
-              </paper-card>
-              <paper-card class="sidecard">
-                <div class="card-content">
-                  <p class="title">Activity</p>
-                  <div class="vertical layout sep content audit">
-                    <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
-                  </div>
-                </div>
-              </paper-card>
+          </paper-card>
+        </template>
+        <paper-card class="sidecard">
+          <div class="card-content">
+            <p class="title">Status</p>
+            <div class="horizontal layout sep wrap content">
+              <span class="state">[[document.state]]</span>
+              <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
             </div>
           </div>
-        </div> <!-- view -->
-        <div name="edit" class="container">
-          <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-          <form is="iron-form" action="/" on-submit="_save">
-            <div id="document-edit">
-              <!-- Dynamic layout element will be inserted here -->
-              <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+        </paper-card>
+        <paper-card class="sidecard">
+          <div class="card-content">
+            <div class="vertical layout cardcontent">
+              <span class="docreator">Created by <a href="nuxeo/user/[[document.properties.dc:creator]]">[[document.properties.dc:creator]]</a></span>
+              <p>on [[_formatDate(document.properties.dc:created)]]</p>
             </div>
-            <div class="row layout horizontal">
-              <div class="label-container">
-                <label>Change Comment</label>
+          </div>
+        </paper-card>
+        <paper-card class="sidecard">
+          <div class="card-content">
+            <p class="title">Contributors</p>
+            <div class="horizontal layout wrap sep content">
+              <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
+            </div>
+          </div>
+        </paper-card>
+        <template is="dom-if" if="[[canStartProcess]]">
+          <paper-card class="sidecard">
+            <div class="card-content">
+              <p class="title">Process</p>
+              <div class="sep vertical layout">
+                <div>
+                  <paper-dropdown-menu label="Start a process">
+                    <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+                      <template is="dom-repeat" items="[[processes]]" as="process">
+                        <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
+                      </template>
+                    </paper-menu>
+                  </paper-dropdown-menu>
+                </div>
+                <div>
+                  <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
+                </div>
               </div>
-              <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip')]]"></nuxeo-help>
-              <textarea id="comment" class="flex"></textarea>
             </div>
-            <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
-            <button>Submit</button>
-            <button on-click="_cancel">Cancel</button>
-          </form>
-        </div>
-      </iron-pages>
+          </paper-card>
+        </template>
+        <paper-card class="sidecard">
+          <div class="card-content">
+            <p class="title">Tags</p>
+            <div class="horizontal layout wrap sep content">
+              <nuxeo-document-tags class="tags"></nuxeo-document-tags>
+            </div>
+          </div>
+        </paper-card>
+        <paper-card class="sidecard">
+          <div class="card-content">
+            <p class="title">Activity</p>
+            <div class="vertical layout sep content audit">
+              <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
+            </div>
+          </div>
+        </paper-card>
+      </div>
     </div>
+
   </template>
   <script>
     (function() {
@@ -277,11 +252,6 @@ Contributors:
           document: {
             type: Object,
             observer: '_documentChanged'
-          },
-
-          mode: {
-            type: String,
-            value: 'view'
           },
 
           workflows: {
@@ -307,21 +277,8 @@ Contributors:
 
           hasProcessInProgress: {
             type: Boolean
-          },
-
-          versioningType: {
-            type: String
-          },
-
-          headers: {
-            type: Object,
-            computed: '_computeHeaders(versioningType)'
           }
         },
-
-        observers: [
-          '_updateLayout(document, mode)'
-        ],
 
         listeners: {
           'taskCompleted': '_taskCompleted'
@@ -331,22 +288,16 @@ Contributors:
           this.selectedProcess = this.processes[0].key;
         },
 
-        _computeHeaders: function(versioningType) {
-          return {
-            'X-Versioning-Option': versioningType
-          };
-        },
-
         _documentChanged: function() {
-          this.mode = 'view';
+          this._updateLayout();
         },
 
         /**
          * Returns the name for the current layout element
          */
-        _layoutFor: function(document, mode) {
+        _layoutFor: function(document) {
           var type = Polymer.CaseMap.camelToDashCase(document.type).toLowerCase();
-          return ['nuxeo', type, mode].join('-');
+          return ['nuxeo', type, 'view'].join('-');
         },
 
         /**
@@ -360,9 +311,9 @@ Contributors:
          * Creates the layout for the current document and mode
          */
         _createLayout: function() {
-          var layout = this._layoutFor(this.document, this.mode),
+          var layout = this._layoutFor(this.document),
               el = document.createElement(layout),
-              parent = this.$['document-' + this.mode];
+              parent = this.$['document-view'];
           if (parent.hasChildNodes()) {
             parent.replaceChild(el, parent.firstChild);
           } else {
@@ -370,37 +321,23 @@ Contributors:
           }
           // setup data binding
           el.document = this.document;
-
-          // hack to force resize event and correctly display <nuxeo-helper> elements
-          var pages = this.$.pages;
-          pages.notifyResize();
         },
 
         /**
-         * Retrieves and creates the layout for the current document and mode
+         * Retrieves and creates the view layout for the current document
          */
         _updateLayout: function() {
-          var layout = this._layoutFor(this.document, this.mode);
+          var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl('../nuxeo-document-' + this.mode + '/' + layout + '.html');
+            var url = this.resolveUrl(layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find ' + this.mode + ' layout for ' + this.document.type);
+                console.error('Failed to find view layout for ' + this.document.type);
               });
           } else {
             this._createLayout();
           }
-        },
-
-        _save: function() {
-          var doc = document.getElementById('doc');
-          doc.put();
-          this.mode = 'view';
-        },
-
-        _cancel: function() {
-          this.mode = 'view';
         },
 
         _workflowsChanged: function() {
