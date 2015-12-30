@@ -83,42 +83,10 @@ Contributors:
         width: 100%;
       }
 
-      label {
-        color: #434343;
-        font-size: 0.8em;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-
-      input {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: .2em;
-        box-sizing: border-box;
-        color: rgba(0,0,0,.75);
-        display: block;
-        font-size: 0.8em;
-        height: 2rem;
-        margin: 0;
-        padding: .5rem;
-        width: 100%;
-      }
-
-      paper-button {
-        padding: 0.5em;
-        width: 120px;
-      }
-
-      .filter {
-        background-color: #00adff;
-        border-color: #00adff;
-        color: #fff;
-        font-weight: 700;
-      }
-
       .clear {
         background-color: #fafafa;
         border-color: #fafafa;
+        width: 100%;
       }
 
       .searchBar {
@@ -162,7 +130,7 @@ Contributors:
           </paper-button>
         </div>
         <span class="flex searchBar">
-          <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
+          <paper-input id="searchInput" autofocus="true" value="{{params.ecm_fulltext}}" tabindex="0" type="search" placeholder="Search something ...">
             <iron-icon icon="search" prefix></iron-icon>
           </paper-input>
         </span>
@@ -184,88 +152,9 @@ Contributors:
               <!-- faceted search page -->
               <div name="faceted">
 
-                <div class="row layout vertical">
-                  <label>Tags</label>
-                  <nuxeo-select2 operation="Tag.Suggestion"
-                                 min-chars="1"
-                                 multiple="true"
-                                 placeholder="Search for tags..."
-                                 value="{{tags::change}}"
-                                 name="ecm_tags">
-                  </nuxeo-select2>
-                </div>
+                <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
 
-                <div class="layout vertical row">
-                  <label>Creation date</label>
-                  <nuxeo-checkbox-aggregation name="dc_created_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{createdAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="layout vertical row">
-                  <label>Modified date</label>
-                  <nuxeo-checkbox-aggregation name="dc_modified_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{modifiedAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="row layout vertical">
-                  <label>Authors</label>
-                  <nuxeo-dropdown-aggregation placeholder="Search for authors..."
-                                              name="dc_creator_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{authorsAgg}}"
-                                              multiple="true">
-                  </nuxeo-dropdown-aggregation>
-                </div>
-
-                <div class="row layout vertical">
-                  <label>Collections</label>
-                  <nuxeo-select2 operation="User.GetCollections"
-                                 min-chars="0"
-                                 placeholder="Select a value"
-                                 value="{{collections::change}}"
-                                 name="ecm_collections"
-                                 multiple="true">
-                  </nuxeo-select2>
-                </div>
-
-                <div class="layout vertical row">
-                  <label>Nature</label>
-                  <nuxeo-checkbox-aggregation name="dc_nature_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{natureAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="layout vertical row">
-                  <label>Subjects</label>
-                  <nuxeo-checkbox-aggregation name="dc_subjects_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{subjectAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="layout vertical row">
-                  <label>Coverage</label>
-                  <nuxeo-checkbox-aggregation name="dc_coverage_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{coverageAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="layout vertical row">
-                  <label>Size</label>
-                  <nuxeo-checkbox-aggregation name="common_size_agg"
-                                              aggregations="[[aggregations]]"
-                                              value="{{sizeAgg}}">
-                  </nuxeo-checkbox-aggregation>
-                </div>
-
-                <div class="layout horizontal row">
-                  <paper-button class="filter flex self-start" raised on-click="_filter">Filter</paper-button>
+                <div class="row">
                   <paper-button class="clear flex self-end" raised on-click="_clear">Clear</paper-button>
                 </div>
               </div>
@@ -301,16 +190,6 @@ Contributors:
             value: 'faceted'
           },
 
-          searchTerm: {
-            type: String
-          },
-
-          params: {
-            type: Object,
-            computed: '_buildParams(searchTerm, createdAgg, modifiedAgg, natureAgg,' +
-              'subjectAgg, coverageAgg, sizeAgg, authorsAgg)'
-          },
-
           filtersOpened: {
             type: Boolean,
             value: false
@@ -325,28 +204,8 @@ Contributors:
           }.bind(this));
         },
 
-        _buildParams: function() {
-          // lookup all elements with a name attribute that are inside a specific search iron-page
-          // e.g. [name="faceted"] [name]
-          var elements = document.querySelectorAll('[name="' + this.selectedSearch + '"] [name]');
-          var params = {};
-          if (this.searchTerm) {
-            params['ecm_fulltext'] = this.searchTerm + '*';
-          }
-          for (var i = 0; i < elements.length; i++) {
-            var name = elements[i].getAttribute('name');
-            var value = elements[i].value;
-            params[name] = value;
-          }
-          return params;
-        },
-
-        _filter: function() {
-          this.$.cview.params = this._buildParams();
-        },
-
         _clear: function() {
-          //TODO: clear values
+          this.params = {};
         },
 
         toggle: function() {
