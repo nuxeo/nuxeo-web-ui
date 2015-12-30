@@ -36,8 +36,8 @@ Contributors:
       }
 
       iron-collapse {
-        float: left;
         background-color: #fff;
+        max-width: 350px;
       }
 
       .side-nav {
@@ -59,6 +59,20 @@ Contributors:
 
       .content {
         background-color: var(--primary-background-color);
+      }
+
+      .iron-collapse-opened ~ .content {
+        margin-left: 350px;
+      }
+
+
+      .iron-collapse-opened {
+        position: fixed;
+        top: 120px;
+        bottom: 0;
+        width: 350px;
+        overflow-y: auto;
+        left: 0;
       }
 
       .search-selector-container {
@@ -135,7 +149,7 @@ Contributors:
           </paper-input>
         </span>
       </div>
-      <div class="content">
+      <div>
         <iron-collapse id="collapse" horizontal opened="{{filtersOpened}}">
           <div class="side-nav">
             <div class="search-selector-container">
@@ -167,11 +181,13 @@ Contributors:
             </iron-pages>
           </div>
         </iron-collapse>
-        <nuxeo-document-content-view id="cview"
-          provider-name="default_search"
-          params="[[params]]"
-          aggregations={{aggregations}}>
-        </nuxeo-document-content-view>
+        <div class="content">
+          <nuxeo-document-content-view id="cview"
+            provider-name="default_search"
+            params="[[params]]"
+            aggregations={{aggregations}}>
+          </nuxeo-document-content-view>
+        </div>
       </div>
     </paper-header-panel>
 
