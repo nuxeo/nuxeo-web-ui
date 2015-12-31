@@ -1,0 +1,117 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-tree-node`
+@group Nuxeo UI
+@element nuxeo-tree-node
+-->
+<dom-module id="nuxeo-tree-node">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      a {
+        text-decoration: none;
+        color: #039be5;
+      }
+
+      .node {
+        color: #039be5;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .collapse-content {
+        padding-left: 1rem;
+      }
+    </style>
+    <div class="node">
+      <iron-icon icon="[[_expandIcon(opened)]]" on-tap="_toggle"></iron-icon>
+      <iron-icon icon="[[_icon(document)]]"></iron-icon>
+      <span class="flex"><a href$="[[_href(document)]]">[[document.title]]</a></span>
+    </div>
+
+    <nuxeo-page-provider id="provider" provider="tree_children" current-page="{{children}}">
+    </nuxeo-page-provider>
+
+    <iron-collapse id="collapse" opened="[[opened]]">
+      <div class="collapse-content">
+        <template is="dom-repeat" items="[[children]]" as="child">
+          <nuxeo-tree-node document="[[child]]"></nuxeo-tree-node>
+        </template>
+      </div>
+    </iron-collapse>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-tree-node',
+      properties: {
+        document: {
+          type: Object,
+          observer: '_documentChanged'
+        },
+        opened: {
+          type: Boolean,
+          value: false
+        },
+        children: Array
+      },
+
+      _documentChanged: function() {
+        this.children = [];
+      },
+
+      _href: function(doc) {
+        if (doc) {
+          return page.base() + '/browse' + doc.path;
+        }
+      },
+
+      _expandIcon: function() {
+        return 'hardware:keyboard-arrow-' + (this.opened ? 'down' : 'right');
+      },
+
+      _icon: function() {
+        return this._isFolderish ? 'folder' : 'file';
+      },
+
+      get _isFolderish() {
+        if (this.document) {
+          return this.document.facets.indexOf('Folderish') !== -1;
+        }
+      },
+
+      _toggle: function() {
+        if (this._updated) {
+          this.opened = !this.opened;
+        } else {
+          this.$.provider.params = [this.document.uid];
+          this.$.provider.fetch().then(function() {
+            this._updated = this.opened = true;
+          }.bind(this));
+        }
+      }
+    });
+  </script>
+</dom-module>
