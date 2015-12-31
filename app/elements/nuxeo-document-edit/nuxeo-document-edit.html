@@ -171,9 +171,11 @@ Contributors:
         _save: function() {
           var doc = document.getElementById('doc');
           doc.put();
+          page('/browse' + this.document.path + '@view');
         },
 
         _cancel: function() {
+          page('/browse' + this.document.path + '@view');
         }
       });
     })();
