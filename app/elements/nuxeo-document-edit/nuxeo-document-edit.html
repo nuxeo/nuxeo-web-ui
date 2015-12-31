@@ -63,7 +63,7 @@ Contributors:
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-    <form id="form" is="iron-form" action="/" on-submit="_save">
+    <form id="form" is="iron-form" action="/">
       <div id="document-edit">
         <!-- Dynamic layout element will be inserted here -->
         <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
@@ -76,7 +76,7 @@ Contributors:
         <textarea id="comment" class="flex"></textarea>
       </div>
       <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
-      <button>Submit</button>
+      <button on-click="_save">Submit</button>
       <button on-click="_cancel">Cancel</button>
     </form>
 
@@ -91,7 +91,8 @@ Contributors:
         properties: {
           document: {
             type: Object,
-            observer: '_documentChanged'
+            observer: '_documentChanged',
+            notify: true
           },
 
           versioningType: {
