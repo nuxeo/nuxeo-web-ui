@@ -32,16 +32,21 @@ Contributors:
       #sidebar {
         float: left;
         height: calc(100vh);
+        background-color: #fff;
+      }
+
+      #sidebar .side-bar {
+        padding: 1em;
       }
 
       #sidebar paper-toolbar {
-        background-color: #213f7d;
+        background-color: var(--branding-secondary-color);
         color: white;
         width: 250px;
       }
 
       .toggle {
-        background-color: #213f7d;
+        background-color: var(--branding-secondary-color);
         color: white;
         width: 60px;
         height: 60px;
@@ -49,7 +54,7 @@ Contributors:
       }
 
       .title {
-        margin-left: 15px;
+        margin: 0 15px;
       }
 
       paper-header-panel {
@@ -65,10 +70,6 @@ Contributors:
         padding-right: 2em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
-      }
-
-      .content {
-        background-color: var(--primary-background-color);
       }
 
       paper-dropdown-menu {
@@ -88,7 +89,6 @@ Contributors:
           border-color: #ddd;
         }
         width: 175px;
-        margin: 15px;
       }
 
       paper-icon-button[name="edit"] {
@@ -106,7 +106,7 @@ Contributors:
         <paper-icon-button icon="folder-open" on-click="toggleSidebar"></paper-icon-button>
         <span>Tree</span>
       </paper-toolbar>
-      <div>
+      <div class="side-bar">
         <nuxeo-tree root-path="/default-domain"></nuxeo-tree>
       </div>
     </iron-collapse>
@@ -114,41 +114,43 @@ Contributors:
     <!-- Main content -->
     <paper-header-panel class="main flex" mode="waterfall">
 
-      <paper-toolbar>
-        <paper-icon-button class="toggle" icon="folder-open"
-                           on-click="toggleSidebar"
-                           hidden="[[sidebarOpened]]"></paper-icon-button>
-        <span class="title">[[document.title]]</span>
+      <paper-header class="paper-header">
+        <paper-toolbar>
+          <paper-icon-button class="toggle" icon="folder-open"
+                             on-click="toggleSidebar"
+                             hidden="[[sidebarOpened]]"></paper-icon-button>
+          <span class="title">[[document.title]]</span>
 
-        <paper-dropdown-menu no-label-float>
-          <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
-            <paper-icon-item name="view">
-              <iron-icon icon="icons:visibility" item-icon></iron-icon> View
-            </paper-icon-item>
-            <paper-icon-item name="edit">
-              <iron-icon icon="editor:mode-edit" item-icon></iron-icon> Edit
-            </paper-icon-item>
-            <paper-icon-item name="metadata">
-              <iron-icon icon="icons:info-outline" item-icon></iron-icon> Metadata
-            </paper-icon-item>
-            <paper-icon-item name="activity">
-              <iron-icon icon="icons:restore" item-icon></iron-icon> Activity
-            </paper-icon-item>
-            <paper-icon-item name="permissions">
-              <iron-icon icon="communication:vpn-key" item-icon></iron-icon> Permissions
-            </paper-icon-item>
-            <paper-icon-item name="settings">
-              <iron-icon icon="icons:settings" item-icon></iron-icon> Settings
-            </paper-icon-item>
-          </paper-menu>
-        </paper-dropdown-menu>
+          <paper-dropdown-menu no-label-float>
+            <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
+              <paper-icon-item name="view">
+                <iron-icon icon="icons:visibility" item-icon></iron-icon> View
+              </paper-icon-item>
+              <paper-icon-item name="edit">
+                <iron-icon icon="editor:mode-edit" item-icon></iron-icon> Edit
+              </paper-icon-item>
+              <paper-icon-item name="metadata">
+                <iron-icon icon="icons:info-outline" item-icon></iron-icon> Metadata
+              </paper-icon-item>
+              <paper-icon-item name="activity">
+                <iron-icon icon="icons:restore" item-icon></iron-icon> Activity
+              </paper-icon-item>
+              <paper-icon-item name="permissions">
+                <iron-icon icon="communication:vpn-key" item-icon></iron-icon> Permissions
+              </paper-icon-item>
+              <paper-icon-item name="settings">
+                <iron-icon icon="icons:settings" item-icon></iron-icon> Settings
+              </paper-icon-item>
+            </paper-menu>
+          </paper-dropdown-menu>
 
-        <template is="dom-if" if="[[_canView(document)]]">
-          <div class="horizontal flex layout end-justified">
-            <paper-icon-button icon="icons:create" name="edit" href="/browser/edit">Edit</paper-icon-button>
-          </div>
-        </template>
-      </paper-toolbar>
+          <template is="dom-if" if="[[_canView(document)]]">
+            <div class="horizontal flex layout end-justified">
+              <paper-icon-button icon="icons:create" name="edit" href="/browser/edit">Edit</paper-icon-button>
+            </div>
+          </template>
+        </paper-toolbar>
+      </paper-header>
 
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">

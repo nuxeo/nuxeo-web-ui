@@ -33,15 +33,6 @@ Contributors:
         width: 800px;
       }
 
-      a {
-        color: #039be5;
-        text-decoration: none;
-      }
-
-      label {
-        font-weight: bold;
-      }
-
       .label-container {
         position: relative;
         width: 200px;
@@ -80,16 +71,6 @@ Contributors:
 
       .docreator {
         font-size: 1.2rem;
-      }
-
-      .title {
-        color: #213f7d;
-        font-size: 1.4rem;
-        margin: 0 0 .4em;
-      }
-
-      .sep {
-        border-top: 1px solid #e8e8e8;
       }
 
       .content {
@@ -179,7 +160,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="card-content">
             <p class="title">Status</p>
-            <div class="horizontal layout sep wrap content">
+            <div class="horizontal layout sep wrap card-content">
               <span class="state">[[document.state]]</span>
               <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
             </div>
@@ -196,7 +177,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="card-content">
             <p class="title">Contributors</p>
-            <div class="horizontal layout wrap sep content">
+            <div class="horizontal layout wrap sep card-content">
               <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
             </div>
           </div>
@@ -225,7 +206,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="card-content">
             <p class="title">Tags</p>
-            <div class="horizontal layout wrap sep content">
+            <div class="horizontal layout wrap sep card-content">
               <nuxeo-document-tags class="tags"></nuxeo-document-tags>
             </div>
           </div>
@@ -233,7 +214,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="card-content">
             <p class="title">Activity</p>
-            <div class="vertical layout sep content audit">
+            <div class="vertical layout sep card-content audit">
               <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
             </div>
           </div>

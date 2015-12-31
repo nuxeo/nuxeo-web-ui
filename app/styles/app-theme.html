@@ -35,6 +35,14 @@ Lesser General Public License for more details.
   /* Application theme */
 
   :root {
+    /* -- Branding -- */
+    --branding-primary-color: #00adff;
+    --branding-secondary-color: #213f7d;
+    --branding-title-color: #213f7d;
+    --branding-link-color: #213f7d;
+    --branding-link-hover-color: #00adff;
+    /* ----*/
+
     --dark-primary-color: #303F9F;
     --default-primary-color: #3F51B5;
     --light-primary-color: #C5CAE9;
@@ -46,7 +54,7 @@ Lesser General Public License for more details.
     --disabled-text-color: #bdbdbd;
     --divider-color: #B6B6B6;
 
-    /* Components */
+    /* -- Components -- */
 
     /* paper-drawer-panel */
     --drawer-menu-color: #ffffff;
@@ -56,6 +64,9 @@ Lesser General Public License for more details.
     /* paper-menu */
     --paper-menu-background-color: #fff;
     --menu-link-color: #111111;
+
+    /* paper-toolbar */
+
   }
 
   /* General styles */
@@ -91,11 +102,6 @@ Lesser General Public License for more details.
   paper-menu a {
     @apply(--layout-horizontal);
     @apply(--layout-center);
-    text-decoration: none;
-    color: var(--menu-link-color);
-    font-family: 'Roboto', 'Noto', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
     font-size: 14px;
     font-weight: 400;
     line-height: 24px;
