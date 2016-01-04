@@ -28,26 +28,6 @@ Contributors:
         display: block;
       }
 
-      #sidebar {
-        float: left;
-        height: calc(100vh);
-        background-color: #fff;
-      }
-
-      #sidebar paper-toolbar {
-        background-color: var(--branding-secondary-color);
-        color: white;
-        width: 250px;
-      }
-
-      .toggle {
-        background-color: var(--branding-secondary-color);
-        color: white;
-        width: 60px;
-        height: 60px;
-        padding: 15px;
-      }
-
       paper-header-panel {
         height: calc(100vh);
       }
@@ -108,7 +88,7 @@ Contributors:
         <paper-icon-button icon="filter-list" on-click="toggleSidebar"></paper-icon-button>
         <span>Refine by filters</span>
       </paper-toolbar>
-      <div class="side-bar">
+      <div>
         <div class="search-selector-container">
           <select class="browser-default" value="{{selectedSearch::change}}">
             <option disabled>Searches</option>
