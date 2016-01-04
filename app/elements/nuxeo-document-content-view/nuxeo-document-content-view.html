@@ -151,7 +151,7 @@ Contributors:
               this._toast('Imported ' + docs.length + ' documents.');
             }
             // refresh
-            this.$.nxresource.get();
+            this._handleDocumentCreated();
           }.bind(this));
         },
 
