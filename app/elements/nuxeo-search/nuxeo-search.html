@@ -15,13 +15,6 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
-<link rel="import" href="../../bower_components/nuxeo-elements/widgets/nuxeo-select2.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
-<link rel="import" href="nuxeo-checkbox-aggregation.html">
-<link rel="import" href="nuxeo-dropdown-aggregation.html">
-<link rel="stylesheet" href="../../bower_components/select2/select2.css">
 
 <!--
  `nuxeo-search`
@@ -35,40 +28,39 @@ Contributors:
         display: block;
       }
 
-      iron-collapse {
+      #sidebar {
+        float: left;
+        height: calc(100vh);
         background-color: #fff;
-        max-width: 350px;
       }
 
-      .side-nav {
-        min-width: 350px;
+      #sidebar paper-toolbar {
+        background-color: var(--branding-secondary-color);
+        color: white;
+        width: 250px;
+      }
+
+      .toggle {
+        background-color: var(--branding-secondary-color);
+        color: white;
+        width: 60px;
+        height: 60px;
+        padding: 15px;
       }
 
       paper-header-panel {
-        height: calc(100vh - 65px);
+        height: calc(100vh);
       }
 
-      .paper-header {
+      paper-toolbar {
         height: 60px;
         color: #039be5;
         box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
         background-color: #fff;
+        font-size: 24px;
+        padding-right: 2em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
-      }
-
-      .iron-collapse-opened ~ .content {
-        margin-left: 350px;
-      }
-
-
-      .iron-collapse-opened {
-        position: fixed;
-        top: 120px;
-        bottom: 0;
-        width: 350px;
-        overflow-y: auto;
-        left: 0;
       }
 
       .search-selector-container {
@@ -100,7 +92,7 @@ Contributors:
       }
 
       .searchBar {
-        margin-right: 16px;
+        margin-left: 20px;
       }
 
       .searchBar ::content .floated-label-placeholder,
@@ -108,83 +100,65 @@ Contributors:
       .searchBar ::content .focused-line {
         display: none;
       }
-
-      .filterHeader {
-        background-color: #213f7d;
-        height: 60px;
-        margin-right: 20px;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      .filterHeader[opened] {
-        width: 350px;
-      }
-
-      .filterHeader paper-button {
-        color: #fff;
-        font-size: 22px;
-        text-transform: none;
-        width: 100%;
-      }
     </style>
 
-    <paper-header-panel class="main flex" mode="waterfall">
-      <div class="paper-header layout horizontal">
-        <div class="filterHeader" opened$="[[filtersOpened]]">
-          <paper-button on-click="toggle" noink>
-            <iron-icon icon="filter-list"></iron-icon>
-            <template is="dom-if" if="[[filtersOpened]]">
-              Refine by filters
-            </template>
-          </paper-button>
+    <!-- Left sidebar -->
+    <iron-collapse id="sidebar" horizontal opened="{{sidebarOpened}}">
+      <paper-toolbar>
+        <paper-icon-button icon="filter-list" on-click="toggleSidebar"></paper-icon-button>
+        <span>Refine by filters</span>
+      </paper-toolbar>
+      <div class="side-bar">
+        <div class="search-selector-container">
+          <select class="browser-default" value="{{selectedSearch::change}}">
+            <option disabled>Searches</option>
+            <option value="faceted">Faceted Search</option>
+            <option value="quick">Quick Search</option>
+            <option value="nxql">NXQL Search</option>
+          </select>
         </div>
-        <span class="flex searchBar">
-          <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
-            <iron-icon icon="search" prefix></iron-icon>
-          </paper-input>
-        </span>
-      </div>
-      <div>
-        <iron-collapse id="collapse" horizontal opened="{{filtersOpened}}">
-          <div class="side-nav">
-            <div class="search-selector-container">
-              <select class="browser-default" value="{{selectedSearch::change}}">
-                <option disabled>Searches</option>
-                <option value="faceted">Faceted Search</option>
-                <option value="quick">Quick Search</option>
-                <option value="nxql">NXQL Search</option>
-              </select>
+
+        <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
+          <!-- faceted search page -->
+          <div name="faceted">
+            <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
+
+            <div class="row">
+              <paper-button class="clear" raised on-click="_clear">Clear</paper-button>
             </div>
-
-            <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
-
-              <!-- faceted search page -->
-              <div name="faceted">
-
-                <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
-
-                <div class="row">
-                  <paper-button class="clear flex self-end" raised on-click="_clear">Clear</paper-button>
-                </div>
-              </div>
-
-              <!-- quick search page -->
-              <div name="quick">Quick Search</div>
-
-              <!-- NXQL search page -->
-              <div name="nxql">NXQL Search</div>
-            </iron-pages>
           </div>
-        </iron-collapse>
-        <div class="content">
-          <nuxeo-document-content-view id="cview"
-            provider-name="default_search"
-            params="[[params]]"
-            aggregations="{{aggregations}}">
-          </nuxeo-document-content-view>
-        </div>
+
+          <!-- quick search page -->
+          <div name="quick">Quick Search</div>
+
+          <!-- NXQL search page -->
+          <div name="nxql">NXQL Search</div>
+        </iron-pages>
       </div>
+    </iron-collapse>
+
+    <!-- Main content -->
+    <paper-header-panel class="main flex" mode="waterfall">
+      <paper-header class="paper-header">
+        <paper-toolbar class="layout horizontal">
+          <paper-icon-button class="toggle" icon="filter-list"
+                             on-click="toggleSidebar"
+                             hidden="[[sidebarOpened]]"></paper-icon-button>
+          <span class="flex searchBar">
+            <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
+              <iron-icon icon="search" prefix></iron-icon>
+            </paper-input>
+          </span>
+        </paper-toolbar>
+      </paper-header>
+
+      <div class="content">
+        <nuxeo-document-content-view id="cview"
+          provider-name="default_search"
+          params="[[params]]"
+          aggregations="{{aggregations}}">
+        </nuxeo-document-content-view>
+      </paper-toolbar>
     </paper-header-panel>
 
   </template>
@@ -202,7 +176,7 @@ Contributors:
             value: 'faceted'
           },
 
-          filtersOpened: {
+          sidebarOpen: {
             type: Boolean,
             value: false
           },
@@ -225,14 +199,12 @@ Contributors:
           this.params = {};
         },
 
-        toggle: function() {
-          this.$.collapse.toggle();
+        toggleSidebar: function() {
+          this.$.sidebar.toggle();
         },
 
         _addFullTextSearch: function() {
-          if (this.searchTerm) {
-            this.set('params.ecm_fulltext', this.searchTerm + '*');
-          }
+          this.set('params.ecm_fulltext', this.searchTerm + '*');
         }
 
       });
