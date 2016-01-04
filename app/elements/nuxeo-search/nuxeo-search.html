@@ -140,7 +140,7 @@ Contributors:
           </paper-button>
         </div>
         <span class="flex searchBar">
-          <paper-input id="searchInput" autofocus="true" value="{{params.ecm_fulltext}}" tabindex="0" type="search" placeholder="Search something ...">
+          <paper-input id="searchInput" autofocus="true" value="{{searchTerm}}" tabindex="0" type="search" placeholder="Search something ...">
             <iron-icon icon="search" prefix></iron-icon>
           </paper-input>
         </span>
@@ -181,7 +181,7 @@ Contributors:
           <nuxeo-document-content-view id="cview"
             provider-name="default_search"
             params="[[params]]"
-            aggregations={{aggregations}}>
+            aggregations="{{aggregations}}">
           </nuxeo-document-content-view>
         </div>
       </div>
@@ -205,6 +205,11 @@ Contributors:
           filtersOpened: {
             type: Boolean,
             value: false
+          },
+
+          searchTerm: {
+            type: String,
+            observer: '_addFullTextSearch'
           }
         },
 
@@ -222,7 +227,14 @@ Contributors:
 
         toggle: function() {
           this.$.collapse.toggle();
+        },
+
+        _addFullTextSearch: function() {
+          if (this.searchTerm) {
+            this.set('params.ecm_fulltext', this.searchTerm + '*');
+          }
         }
+
       });
     })();
   </script>
