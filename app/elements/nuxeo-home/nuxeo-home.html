@@ -72,6 +72,9 @@ Contributors:
         box-shadow: none;
         border: 1px solid #ddd;
         margin: 0 22px 22px 0;
+        min-width: 560px;
+        width: calc(49.8% - 22px);
+        height: auto;
       }
 
       a {
@@ -111,35 +114,31 @@ Contributors:
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="dashboard">
-            <div class="horizontal layout">
-              <div class="vertical layout flex">
-                <paper-card class="card">
-                  <div class="card-content vertical layout">
-                    <span class="title">My Documents</span>
-                    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
-                  </div>
-                </paper-card>
-                <paper-card class="card">
-                  <div class="card-content vertical layout">
-                    <span class="title">My Last Edits</span>
-                    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
-                  </div>
-                </paper-card>
-              </div>
-              <div class="vertical layout flex">
-                <paper-card class="card">
-                  <div class="card-content vertical layout">
-                    <span class="title">My Tasks</span>
-                    <nuxeo-task-widget tasks="{{taskResponse.entries}}"></nuxeo-task-widget>
-                  </div>
-                </paper-card>
-                <paper-card class="card">
-                  <div class="card-content vertical layout">
-                    <span class="title">My Favorite Documents</span>
-                    <nuxeo-pageable-widget page="[[favorites.entries]]"></nuxeo-pageable-widget>
-                  </div>
-                </paper-card>
-              </div>
+            <div>
+              <paper-card class="card">
+                <div class="card-content vertical layout">
+                  <span class="title">My Documents</span>
+                  <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+                </div>
+              </paper-card>
+              <paper-card class="card">
+                <div class="card-content vertical layout">
+                  <span class="title">My Last Edits</span>
+                  <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+                </div>
+              </paper-card>
+              <paper-card class="card">
+                <div class="card-content vertical layout">
+                  <span class="title">My Tasks</span>
+                  <nuxeo-task-widget tasks="{{taskResponse.entries}}"></nuxeo-task-widget>
+                </div>
+              </paper-card>
+              <paper-card class="card">
+                <div class="card-content vertical layout">
+                  <span class="title">My Favorite Documents</span>
+                  <nuxeo-pageable-widget page="[[favorites.entries]]"></nuxeo-pageable-widget>
+                </div>
+              </paper-card>
             </div>
           </section>
         </iron-pages>
