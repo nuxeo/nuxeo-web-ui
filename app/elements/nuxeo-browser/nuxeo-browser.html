@@ -67,12 +67,20 @@ Contributors:
         width: 175px;
       }
 
-      paper-icon-button[name="edit"] {
+      paper-icon-button {
         color: #000;
       }
 
-      paper-icon-button[name="edit"]:hover {
+      paper-icon-button:hover {
         color: #039be5;
+      }
+
+      paper-tooltip {
+        --paper-tooltip: {
+            font-size: 1rem;
+            background-color: #123456;
+            color: white;
+         }
       }
     </style>
 
@@ -120,11 +128,44 @@ Contributors:
             </paper-menu>
           </paper-dropdown-menu>
 
-          <template is="dom-if" if="[[_canView(document)]]">
-            <div class="horizontal flex layout end-justified">
-              <paper-icon-button icon="icons:create" name="edit" href="/browser/edit">Edit</paper-icon-button>
-            </div>
-          </template>
+          <div class="horizontal flex layout end-justified">
+            <template is="dom-if" if="[[_canViewAsCollectionMember(document)]]">
+              <!--Add to Collection-->
+              <paper-icon-button icon="icons:book" id="addColBut"></paper-icon-button>
+              <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
+              <!--Add/Remove from Favorites-->
+              <paper-icon-button icon="icons:grade" id="favBut"></paper-icon-button>
+              <paper-tooltip for="favBut">Add to Favorites</paper-tooltip>
+            </template>
+            <template is="dom-if" if="[[_canView(document)]]">
+              <!--Download-->
+              <paper-icon-button icon="icons:file-download" id="downloadBut"></paper-icon-button>
+              <paper-tooltip for="downloadBut">Download</paper-tooltip>
+            </template>
+            <!--Share-->
+            <paper-icon-button icon="social:share" id="shareBut"></paper-icon-button>
+            <paper-tooltip for="shareBut">Share</paper-tooltip>
+            <template is="dom-if" if="[[_canView(document)]]">
+              <!--Notify me-->
+              <paper-icon-button icon="social:notifications" id="notifyBut"></paper-icon-button>
+              <paper-tooltip for="notifyBut">Notify me</paper-tooltip>
+              <!--Add to Clipboard-->
+              <paper-icon-button icon="image:add-to-photos" id="clipboardBut"></paper-icon-button>
+              <paper-tooltip for="clipboardBut">Add to Clipboard</paper-tooltip>
+              <!--Lock-->
+              <paper-icon-button icon="icons:lock-open" id="lockBut"></paper-icon-button>
+              <paper-tooltip for="lockBut">Lock</paper-tooltip>
+              <!--Preview-->
+              <paper-icon-button icon="icons:visibility" id="previewBut"></paper-icon-button>
+              <paper-tooltip for="previewBut">Preview</paper-tooltip>
+            </template>
+            <!--Export-->
+            <paper-icon-button icon="icons:archive" id="exportBut"></paper-icon-button>
+            <paper-tooltip for="exportBut">Export</paper-tooltip>
+            <!--Print-->
+            <paper-icon-button icon="icons:print" id="printBut"></paper-icon-button>
+            <paper-tooltip for="printBut">Print</paper-tooltip>
+          </div>
         </paper-toolbar>
       </paper-header>
 
@@ -210,6 +251,10 @@ Contributors:
 
         get _canReadChildren() {
           return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
+        },
+
+        _canViewAsCollectionMember: function(document) {
+          return document ? document.facets.indexOf('NotCollectionMember') === -1 : false;
         },
 
         _canView: function() {
