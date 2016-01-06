@@ -98,6 +98,16 @@ Contributors:
       .breadcrumb-divider:last-of-type {
         display: none;
       }
+
+      #previewDialog {
+        height: 100%;
+        width: 100%;
+      }
+
+      #previewDialog > * {
+        margin: 0;
+        padding: 0;
+      }
     </style>
 
     <!-- Left sidebar -->
@@ -178,7 +188,7 @@ Contributors:
               <paper-icon-button icon="icons:lock-open" id="lockBut"></paper-icon-button>
               <paper-tooltip for="lockBut">Lock</paper-tooltip>
               <!--Preview-->
-              <paper-icon-button icon="icons:visibility" id="previewBut"></paper-icon-button>
+              <paper-icon-button icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
               <paper-tooltip for="previewBut">Preview</paper-tooltip>
             </template>
             <!--Export-->
@@ -203,6 +213,10 @@ Contributors:
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
               <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
+
+              <paper-dialog id="previewDialog" with-backdrop>
+                <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+              </paper-dialog>
             </template>
           </section>
 
@@ -259,6 +273,11 @@ Contributors:
 
         toggleSidebar: function() {
           this.$.sidebar.toggle();
+        },
+
+        togglePreviewDialog: function() {
+          var element = document.getElementById('previewDialog');
+          element.toggle();
         },
 
         get _enrichers() {

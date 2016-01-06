@@ -86,9 +86,16 @@ Contributors:
         text-align: center;
       }
 
+      .preview-container {
+        height: 600px;
+        width: 100%;
+      }
     </style>
 
     <div class="vertical layout mainfile">
+      <div class="preview-container layout vertical">
+        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      </div>
       <a href="[[document.properties.file:content.data]]">
         <div class="horizontal layout center mainfilename">
           <iron-icon icon="editor:insert-drive-file" class="icon"></iron-icon>
