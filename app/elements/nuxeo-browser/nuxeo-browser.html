@@ -166,8 +166,7 @@ Contributors:
               <paper-icon-button icon="icons:book" id="addColBut"></paper-icon-button>
               <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
               <!--Add/Remove from Favorites-->
-              <paper-icon-button icon="icons:grade" id="favBut"></paper-icon-button>
-              <paper-tooltip for="favBut">Add to Favorites</paper-tooltip>
+              <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-icon-toggle>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
               <!--Download-->

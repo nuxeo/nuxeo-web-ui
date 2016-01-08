@@ -1,0 +1,111 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<!--
+`nuxeo-favorites-toggle-button`
+@group Nuxeo UI
+@element nuxeo-favorites-toggle-button
+-->
+<dom-module id="nuxeo-favorites-toggle-button">
+
+
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+      ::content iron-icon {
+        fill: var(--icon-toggle-color, rgba(0,0,0,0));
+        stroke: var(--icon-toggle-outline-color, currentcolor);
+      }
+      :host([favorite]) ::content iron-icon {
+        fill: var(--icon-toggle-pressed-color, currentcolor);
+      }
+    </style>
+
+    <nuxeo-operation id="addToFavOp"
+      op="Document.AddToFavorites"
+      input="[[doc.uid]]"></nuxeo-operation>
+
+    <nuxeo-operation id="removeFromFavOp"
+      op="Document.RemoveFromFavorites"
+      input="[[doc.uid]]"></nuxeo-operation>
+
+    <paper-icon-button icon="[[icon]]" id="favBut">
+    </paper-icon-button>
+    <paper-tooltip for="favBut" id="favButTooltip">init</paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-favorites-toggle-button',
+        properties: {
+          doc: {
+            type: Object
+          },
+          favorite: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          },
+          icon: {
+            type: String,
+            value: 'icons:grade'
+          },
+        },
+
+        listeners: {
+          'tap': 'toggle',
+        },
+
+        toggle: function() {
+          if (!this.favorite) {
+            this.$.addToFavOp.execute().then(function() {
+              this.doc.contextParameters.favorites.isFavorite = true;
+            }.bind(this));
+          } else {
+            this.$.removeFromFavOp.execute().then(function() {
+              this.doc.contextParameters.favorites.isFavorite = false;
+            }.bind(this));
+          }
+          this.favorite = !this.favorite;
+          this._updateTooltip(this.favorite);
+        },
+
+        _updateTooltip: function(isFavorite) {
+          var newTtVal = isFavorite ? 'Remove From Favorites' : 'Add to Favorites';
+          this.$.favButTooltip.$.tooltip.textContent =  newTtVal;
+        },
+
+        _isFavorite: function(doc) {
+          return doc ? doc.contextParameters.favorites.isFavorite : false;
+        },
+
+        ready: function() {
+          this.favorite = this._isFavorite(this.doc);
+          this._updateTooltip(this.favorite);
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
