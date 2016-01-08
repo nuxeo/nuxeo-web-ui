@@ -97,6 +97,11 @@ Contributors:
       .actions {
         color: var(--branding-action-color);
       }
+
+      .export-container {
+        min-width: 240px;
+        border: 1px solid #ddd;
+      }
     </style>
 
     <!-- Left sidebar -->
@@ -179,7 +184,7 @@ Contributors:
               <paper-tooltip for="previewBut">Preview</paper-tooltip>
             </template>
             <!--Export-->
-            <paper-icon-button icon="icons:archive" id="exportBut"></paper-icon-button>
+            <paper-icon-button icon="icons:archive" id="exportBut" on-tap="toggleExportDialog"></paper-icon-button>
             <paper-tooltip for="exportBut">Export</paper-tooltip>
             <!--Print-->
             <paper-icon-button icon="icons:print" id="printBut"></paper-icon-button>
@@ -203,6 +208,15 @@ Contributors:
 
               <paper-dialog id="previewDialog" with-backdrop>
                 <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+              </paper-dialog>
+
+              <paper-dialog id="exportDialog" with-backdrop>
+                <div class="vertical layout">
+                  <h1>Export</h1>
+                  <div class="export-container">
+                    <nuxeo-document-export document="[[document]]"></nuxeo-document-export>
+                  </div>
+                </div>
               </paper-dialog>
             </template>
           </section>
@@ -274,6 +288,11 @@ Contributors:
 
         togglePreviewDialog: function() {
           var element = document.getElementById('previewDialog');
+          element.toggle();
+        },
+
+        toggleExportDialog: function() {
+          var element = document.getElementById('exportDialog');
           element.toggle();
         },
 
