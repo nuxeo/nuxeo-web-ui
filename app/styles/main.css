@@ -19,3 +19,94 @@ https://blog.polymer-project.org/announcements/2015/08/13/1.1-release/
 This file can be kept for testing purpose and should be removed
 for the release.
 */
+
+/* --
+Document permissions
+XXX: remove
+--*/
+.bubbleBox {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  display: block;
+  margin: 0 1em 1em 0;
+  padding: 0 1em 1em;
+}
+.bubbleHeader {
+  border-color: #e6e9ef;
+  border-style: none none solid;
+  border-width: 1px;
+  margin: 0 0 1em;
+  overflow: hidden;
+  padding: 0.8em 0;
+  white-space: nowrap;
+}
+.bubbleHeader h3 {
+  float: left;
+  color: #213f7d;
+  font-weight: bold;
+  line-height: normal;
+  border: 0;
+  display: inline-block;
+  margin: 0;
+  padding: 0.3em 0;
+}
+.bubbleHeader paper-button {
+  float: right;
+  border: 1px solid #aaa;
+  font-weight: bold;
+  padding: 0.35em 0.8em;
+  text-transform: none;
+}
+.tag {
+  background: none #f3f6f9;
+  border-radius: 16px;
+  color: #333;
+  display: inline-block;
+  font-size: 13px !important;
+  line-height: inherit;
+  margin: 0 0.3em 0.5em 0;
+  padding: 0.1em 0.8em 0.2em;
+  text-decoration: none;
+  transition: none;
+}
+input {
+  width: 100%;
+  line-height: 1.4em;
+  padding: 0.5em;
+}
+.emptyResult {
+  color: #c6c6c6;
+  display: block;
+  font-style: italic;
+  font-weight: normal;
+  padding: 1em 0.7em 2em;
+  text-align: center;
+}
+.tips {
+  border: 1px solid #e6e9ef;
+  border-radius: 3px;
+  box-shadow: none;
+  color: #9a9a9a;
+  display: block;
+  margin: 0.1em 0 0.5em;
+  padding: 0.8em;
+  text-align: center;
+}
+.label, .chip {
+  background-color: #7e90a5;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.9em;
+  font-weight: bold;
+  line-height: 130%;
+  margin: 0 0.2em 0.2em 0;
+  padding: 0.06em 0.3em;
+  text-transform: uppercase;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+nuxeo-document-permissions .required::after {
+  content: '*';
+  color: red;
+}

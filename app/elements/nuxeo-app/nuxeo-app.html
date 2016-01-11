@@ -128,7 +128,10 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document auto doc-path="[[docPath]]" response="{{currentDocument}}" enrichers="permissions, breadcrumb, preview, favorites" headers='{"X-NXfetch.document": "lock"}'></nuxeo-document>
+    <nuxeo-document id="doc" auto doc-path="[[docPath]]"
+      response="{{currentDocument}}"
+      enrichers="permissions, breadcrumb, preview, favorites"
+      headers='{"X-NXfetch.document": "lock"}'></nuxeo-document>
 
     <app-drawer-layout force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
 
@@ -238,7 +241,15 @@ Contributors:
           taskCount: Number
         },
 
+        listeners: {
+          'documentUpdated': 'refresh'
+        },
+
         ready: function() {
+        },
+
+        refresh: function() {
+          this.$.doc.get();
         },
 
         _navigate: function() {

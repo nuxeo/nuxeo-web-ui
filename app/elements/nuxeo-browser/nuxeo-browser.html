@@ -52,17 +52,10 @@ Contributors:
           display: none;
         };
         --paper-input-container-input: {
-          font-size: 20px;
+          font-size: 18px;
+          font-weight: bold;
           text-align: center;
-          border-right-style: solid;
-          border-width: 1px;
-          border-color: #ddd;
         };
-        --paper-dropdown-menu-ripple: {
-          border-style: solid;
-          border-width: 1px;
-          border-color: #ddd;
-        }
         width: 175px;
       }
 
@@ -227,7 +220,7 @@ Contributors:
           </section>
 
           <section name="permissions">
-            Permissions
+            <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
           </section>
 
           <section name="settings">
@@ -263,6 +256,16 @@ Contributors:
             computed: '_buildCvParams(document)',
             notify: true
           }
+        },
+
+        listeners: {
+          'permissions.acecreated': '_documentUpdated',
+          'permissions.aceupdated': '_documentUpdated',
+          'permissions.acedeleted': '_documentUpdated'
+        },
+
+        _documentUpdated: function() {
+          this.fire('documentUpdated');
         },
 
         toggleSidebar: function() {
