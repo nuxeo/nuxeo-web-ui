@@ -85,6 +85,8 @@ Contributors:
      }
    </style>
 
+   <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
    <div class="row layout horizontal">
      <div class="label-container">
        <label>Title</label>
@@ -112,7 +114,7 @@ Contributors:
          <!-- keep choice -->
          <div class="layout horizontal radio-container">
            <paper-radio-button name="keep">Keep</paper-radio-button>
-           <img src="http://localhost:8080/nuxeo[[document.properties.common:icon]]" alt="[[document.properties.file:content.mime-type]]"/>
+           <img src="[[_icon(document)]]" alt="[[document.properties.file:content.mime-type]]"/>
            <a href="[[document.properties.file:content.data]]">[[document.properties.file:content.name]]</a>
          </div>
        </template>
@@ -137,19 +139,25 @@ Contributors:
    (function() {
      'use strict';
 
-     Polymer({
-       is: 'nuxeo-file-edit',
+    Polymer({
+      is: 'nuxeo-file-edit',
 
-       properties: {
-         document: {
-           type: Object
-         },
+      properties: {
+       document: {
+         type: Object
+       },
 
-         new: {
-           type: Boolean,
-           value: false
-         }
+       new: {
+         type: Boolean,
+         value: false
        }
+      },
+
+      _icon: function() {
+        var url = this.$.nxcon.url;
+        return url + this.document.properties['common:icon'];
+      }
+
      });
    })();
  </script>
