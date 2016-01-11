@@ -100,35 +100,6 @@ Contributors:
         box-sizing: border-box;
       }
 
-      .state {
-        position: relative;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #00adff;
-        color: #fff;
-        padding: 0.2rem 0.4rem;
-        margin-right: 3px;
-        margin-bottom: 3px;
-        vertical-align: middle;
-        text-align: center;
-        font-size: 0.9rem;
-        border-radius: 2px;
-      }
-
-      .version {
-        position: relative;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #eee;
-        color: #999;
-        padding: 0.2rem 0.4rem;
-        margin-right: 3px;
-        margin-bottom: 3px;
-        vertical-align: middle;
-        text-align: center;
-        font-size: 0.9rem;
-        border-radius: 2px;
-      }
     </style>
 
     <nuxeo-resource id="workflowsRequest" auto
@@ -157,15 +128,17 @@ Contributors:
           <div class="card-content">
             <p class="title">Status</p>
             <div class="horizontal layout sep wrap card-content">
-              <span class="state">[[document.state]]</span>
-              <span class="version">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+              <span class="state tag">[[document.state]]</span>
+              <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
             </div>
           </div>
         </paper-card>
         <paper-card class="sidecard">
           <div class="card-content">
             <div class="vertical layout cardcontent">
-              <span class="docreator">Created by <a href="nuxeo/user/[[document.properties.dc:creator]]">[[document.properties.dc:creator]]</a></span>
+              <span class="docreator">Created by <a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
+              <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
+              [[document.properties.dc:creator]]</a></span>
               <p>on [[_formatDate(document.properties.dc:created)]]</p>
             </div>
           </div>

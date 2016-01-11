@@ -52,7 +52,7 @@ Contributors:
       }
 
       app-header {
-        background-color: #fff;
+        background-color: var(--branding-header-background);
         border-bottom: 1px solid #eee;
       }
 
@@ -65,19 +65,18 @@ Contributors:
       }
 
       paper-badge {
-        --paper-badge-background: #f68500;
+        --paper-badge-background: var(--branding-badge-background);
       }
 
       paper-tabs {
         height: 100%;
-        --paper-tabs-selection-bar-color: #00adff;
+        --paper-tabs-selection-bar-color: var(--branding-primary-color);
         --paper-tabs-selection-bar: {
           top: 0;
          }
       }
 
       paper-tab {
-        --paper-tab-ink: #aaa;
         text-transform: uppercase;
        @apply(--layout-horizontal);
        @apply(--layout-center-center);
@@ -94,7 +93,7 @@ Contributors:
       }
 
       [drawer] .card h1 {
-        background-color: #213f7d;
+        background-color: var(--branding-secondary-color);
         color: #fff;
         font-size: 1.1rem;
         margin: -1.4rem -1.35rem 0;
@@ -115,7 +114,7 @@ Contributors:
         border-radius: 50%;
         width: var(--paper-badge-width, 20px);
         height: var(--paper-badge-height, 20px);
-        background-color: #f68500;
+        background-color: var(--branding-badge-background);
         opacity: var(--paper-badge-opacity, 1.0);
         color: var(--paper-badge-text-color, white);
         @apply(--layout);

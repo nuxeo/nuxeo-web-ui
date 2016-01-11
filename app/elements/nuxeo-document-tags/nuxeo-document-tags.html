@@ -30,24 +30,12 @@ Contributors:
       }
 
       .badge {
-        position: relative;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #00adff;
-        color: #fff;
-        padding: 0.2rem 0.4rem;
-        margin-right: 3px;
-        margin-bottom: 3px;
-        vertical-align: middle;
-        text-align: center;
-        font-size: 0.9rem;
-        border-radius: 2px;
         @apply(--nuxeo-document-tags-theme);
       }
     </style>
 
     <template is="dom-repeat" items="[[tags]]" as="tag">
-      <span class="badge">
+      <span class="tag">
         [[tag]]
       </span>
     </template>

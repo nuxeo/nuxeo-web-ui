@@ -12,7 +12,7 @@
       }
 
       ::content #mainPanel {
-        background-color: var(--primary-background-color);
+        background-color: var(--branding-page-background);
       }
 
       /* --
@@ -57,7 +57,7 @@
       }
 
       /* --
-      Navigation & Dropdown list
+      Navigation, Links & Dropdown list
       --*/
       ::content a {
         color: var(--branding-link-color);
@@ -83,10 +83,30 @@
       }
 
       /* --
-      Labels & Messages
+      Labels, Messages & Tooltips
       --*/
       label {
         font-weight: bold;
+      }
+
+      .tag {
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: var(--branding-tag-background);
+        color: var(--branding-tag-text);
+        padding: .2rem .4rem;
+        margin: 0 .3em .1em 0;
+        font-size: .8em;
+        border-radius: 2px;
+      }
+
+      .tag.user {
+        color: var(--branding-link-color);
+        text-decoration: none;
+      }
+
+      .tag.user:hover {
+        color: var(--branding-link-hover-color);
       }
 
       .empty {
