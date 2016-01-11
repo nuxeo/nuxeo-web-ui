@@ -22,7 +22,7 @@ Contributors:
 -->
 <dom-module id="nuxeo-faceted-search">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -146,7 +146,7 @@ Contributors:
           params: {
             type: Object,
             value: {},
-            notify: true            
+            notify: true
           },
 
           aggregations: Object

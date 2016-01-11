@@ -24,7 +24,7 @@ Contributors:
 <dom-module id="nuxeo-document-create-button">
 
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       paper-icon-button {
         position: fixed;
         bottom: 45px;
@@ -32,7 +32,7 @@ Contributors:
         width: 55.5px;
         height: 55.5px;
         color: #ffffff;
-        background-color: #00adff;
+        background-color: var(--branding-primary-color);
         border-radius: 50%;
         padding: 12px;
         transition: all 0.2s linear;
@@ -49,10 +49,6 @@ Contributors:
 
       .picker {
         margin-left: 32px;
-      }
-
-      .sep {
-        border-top: 1px solid #e8e8e8;
       }
 
       .form {
