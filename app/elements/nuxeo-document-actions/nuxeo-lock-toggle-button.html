@@ -25,9 +25,17 @@ Contributors:
 
   <template>
 
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--branding-link-hover-color);
+      }
+
+      :host([locked]) ::content iron-icon {
+        fill: var(--icon-toggle-pressed-color, --branding-action-color-activated);
       }
     </style>
 

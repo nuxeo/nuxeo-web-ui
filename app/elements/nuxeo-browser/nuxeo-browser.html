@@ -28,7 +28,6 @@ Contributors:
 <dom-module id="nuxeo-browser">
   <template>
     <style is="custom-style" include="shared-styles">
-
       .title {
         margin: 0 15px;
       }
@@ -67,20 +66,13 @@ Contributors:
         width: 175px;
       }
 
-      paper-icon-button {
-        color: #000;
+      .actions paper-icon-button {
+        color: var(--branding-action-color);
       }
 
-      paper-icon-button:hover {
-        color: #039be5;
-      }
-
-      paper-tooltip {
-        --paper-tooltip: {
-            font-size: 1rem;
-            background-color: #123456;
-            color: white;
-         }
+      .actions paper-icon-button:hover {
+        color: var(--branding-link-hover-color);
+        fill: var(--branding-link-hover-color);
       }
 
       .breadcrumb {
@@ -107,6 +99,10 @@ Contributors:
       #previewDialog > * {
         margin: 0;
         padding: 0;
+      }
+
+      .actions {
+        color: var(--branding-action-color);
       }
     </style>
 
@@ -160,7 +156,7 @@ Contributors:
             </paper-menu>
           </paper-dropdown-menu>
 
-          <div class="horizontal flex layout end-justified">
+          <div class="horizontal flex layout end-justified actions">
             <template is="dom-if" if="[[_canViewAsCollectionMember(document)]]">
               <!--Add to Collection-->
               <paper-icon-button icon="icons:book" id="addColBut"></paper-icon-button>
