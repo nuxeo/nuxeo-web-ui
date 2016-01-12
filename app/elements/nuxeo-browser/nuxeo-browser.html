@@ -68,6 +68,10 @@ Contributors:
         fill: var(--branding-link-hover-color);
       }
 
+      .actions paper-icon-button[active] {
+        color: var(--icon-toggle-pressed-color, --branding-action-color-activated);
+      }
+
       .breadcrumb {
         margin: 0 20px;
       }
@@ -179,7 +183,11 @@ Contributors:
               <paper-icon-button icon="social:notifications" id="notifyBut"></paper-icon-button>
               <paper-tooltip for="notifyBut">Notify me</paper-tooltip>
               <!--Add to Clipboard-->
-              <paper-icon-button icon="image:add-to-photos" id="clipboardBut"></paper-icon-button>
+              <paper-icon-button
+                id="clipboardBut"
+                icon="image:add-to-photos"
+                active="[[inClipboard]]"
+                on-tap="toggleClipboard"></paper-icon-button>
               <paper-tooltip for="clipboardBut">Add to Clipboard</paper-tooltip>
               <!--Lock-->
               <nuxeo-lock-toggle-button id="lockBut" doc="[[document]]"></nuxeo-lock-toggle-button>
@@ -273,6 +281,9 @@ Contributors:
           document: {
             type: Object
           },
+          inClipboard: {
+            type: Boolean
+          },
           sidebarOpen: {
             type: Boolean,
             value: false
@@ -293,6 +304,24 @@ Contributors:
           'permissions.acecreated': '_documentUpdated',
           'permissions.aceupdated': '_documentUpdated',
           'permissions.acedeleted': '_documentUpdated'
+        },
+
+        observers: [
+          '_inClipboard(document)'
+        ],
+
+        set clipboard(clipboard) {
+          this._clipboard = clipboard;
+          this._clipboard.addEventListener('documents-changed', this._inClipboard.bind(this));
+          this._inClipboard();
+        },
+
+        get clipboard() {
+          return this._clipboard;
+        },
+
+        _inClipboard: function() {
+          this.inClipboard = this.clipboard && this.document && this.clipboard.contains(this.document);
         },
 
         _documentUpdated: function() {
@@ -317,6 +346,14 @@ Contributors:
           var element = document.getElementById('shareDialog');
           element.toggle();
           this.$$('#docPermalink').inputElement.select();
+        },
+
+        toggleClipboard: function() {
+          if (this.clipboard.contains(this.document)) {
+            this.clipboard.remove(this.document);
+          } else {
+            this.clipboard.add(this.document);
+          }
         },
 
         get _enrichers() {
