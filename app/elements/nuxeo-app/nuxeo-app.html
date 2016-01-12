@@ -250,7 +250,7 @@ Contributors:
         set docId(id) {
           this.linkDocId = id;
           var self = this;
-          self.$.appDoc.get().then(function() {
+          self.$.doc.get().then(function() {
             self.docPath = self.currentDocument.path;
             self.linkDocId = '';
             self._navigate();
