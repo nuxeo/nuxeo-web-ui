@@ -115,7 +115,9 @@ Contributors:
             value: [
               {key: 'file', label: 'label.document.type.file'},
               {key: 'note', label: 'label.document.type.note'},
-              {key: 'picture', label: 'label.document.type.picture'}
+              {key: 'picture', label: 'label.document.type.picture'},
+              {key: 'folder', label: 'label.document.type.folder'},
+              {key: 'workspace', label: 'label.document.type.workspace'}
             ]
           },
 
@@ -151,6 +153,28 @@ Contributors:
                   'entity-type': 'document',
                   name: '',
                   type: 'Picture',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              folder: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Folder',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              workspace: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Workspace',
                   properties: {
                     'dc:title': '',
                     'dc:description': ''

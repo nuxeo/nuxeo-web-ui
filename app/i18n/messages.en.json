@@ -50,5 +50,7 @@
   "label.document.type.file": "File",
   "label.document.type.note": "Note",
   "label.document.type.picture": "Picture",
+  "label.document.type.folder": "Folder",
+  "label.document.type.workspace": "Workspace",
   "label.home.dashboard": "Dashboard"
 }
