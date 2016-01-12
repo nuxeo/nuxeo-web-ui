@@ -170,9 +170,9 @@ Contributors:
               <!--Add/Remove from Favorites-->
               <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-favorites-toggle-button>
             </template>
-            <template is="dom-if" if="[[_canView(document)]]">
+            <template is="dom-if" if="[[_canDownload(document)]]">
               <!--Download-->
-              <paper-icon-button icon="icons:file-download" id="downloadBut"></paper-icon-button>
+              <paper-icon-button icon="icons:file-download" id="downloadBut" on-tap="download"></paper-icon-button>
               <paper-tooltip for="downloadBut">Download</paper-tooltip>
             </template>
             <!--Share-->
@@ -356,6 +356,10 @@ Contributors:
           }
         },
 
+        download: function() {
+          location.href = this.document.properties['file:content'].data;
+        },
+
         get _enrichers() {
           if (this.document) {
             return this.document.contextParameters;
@@ -370,8 +374,16 @@ Contributors:
           return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
         },
 
+        get _hasFileContent() {
+          return this.document ? 'file:content' in this.document.properties : false;
+        },
+
         _canViewAsCollectionMember: function(document) {
           return document ? document.facets.indexOf('NotCollectionMember') === -1 : false;
+        },
+
+        _canDownload: function() {
+          return this._canView() && this._hasFileContent;
         },
 
         _canView: function() {
