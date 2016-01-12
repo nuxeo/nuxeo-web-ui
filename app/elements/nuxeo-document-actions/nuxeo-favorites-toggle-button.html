@@ -111,6 +111,17 @@ Contributors:
         _observeDoc: function() {
           this.favorite = this._isFavorite(this.doc);
           this._updateTooltip(this.favorite);
+        },
+
+        ready: function() {
+          window.addEventListener('removedFromFavorites', function(e) {
+            if (e.detail.docUid) {
+              if (e.detail.docUid === this.doc.uid) {
+                this.doc.contextParameters.favorites.isFavorite = false;
+                this._observeDoc();
+              }
+            }
+          }.bind(this));
         }
 
       });

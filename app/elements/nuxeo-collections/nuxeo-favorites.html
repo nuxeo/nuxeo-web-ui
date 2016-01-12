@@ -26,13 +26,20 @@ Contributors:
     <style is="custom-style" include="shared-styles">
     </style>
 
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
+    <nuxeo-operation id="removeFromFavOp"
+      op="Document.RemoveFromFavorites"></nuxeo-operation>
+
     <nuxeo-operation id="getFavOp"
       op="Favorite.GetDocuments"
       input="[[doc.uid]]" response="{{favorites}}"></nuxeo-operation>
 
     <template is="dom-repeat" items="[[favorites.entries]]">
       <div>
-        <a href="[[_href(item)]]" class="breadcrumb-item">[[item.title]]</a>
+        <img src="[[_icon(item)]]" />
+        <a class="favLink" href="[[_href(item)]]" >[[item.title]]</a>
+        <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
       </div>
     </template>
 
@@ -79,9 +86,24 @@ Contributors:
           this.$.getFavOp.execute();
         }.bind(this));
         window.addEventListener('removedFromFavorites', function() {
+          console.log('aaaaa');
           this.$.getFavOp.execute();
         }.bind(this));
+      },
+
+      _icon: function(document) {
+        var url = this.$.nxcon.url;
+        return url + document.properties['common:icon'];
+      },
+
+      _removeFromFavorites: function() {
+        var docUid = arguments[0].currentTarget.uid;
+        this.$.removeFromFavOp.input = docUid;
+        this.$.removeFromFavOp.execute().then(function() {
+          this.fire('removedFromFavorites', {docUid: docUid});
+        }.bind(this));
       }
+
     });
   </script>
 </dom-module>
