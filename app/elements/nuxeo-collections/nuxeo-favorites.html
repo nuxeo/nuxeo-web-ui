@@ -24,6 +24,18 @@ Contributors:
 <dom-module id="nuxeo-favorites">
   <template>
     <style is="custom-style" include="shared-styles">
+      .list {
+        @apply(--layout-vertical);
+      }
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .favIcon {
+        --iron-icon-height: 16px;
+        --iron-icon-width: 16px;
+        padding-right: 2px;
+      }
     </style>
 
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
@@ -35,13 +47,17 @@ Contributors:
       op="Favorite.GetDocuments"
       input="[[doc.uid]]" response="{{favorites}}"></nuxeo-operation>
 
-    <template is="dom-repeat" items="[[favorites.entries]]">
-      <div>
-        <img src="[[_icon(item)]]" />
-        <a class="favLink" href="[[_href(item)]]" >[[item.title]]</a>
-        <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
-      </div>
-    </template>
+    <div class="list">
+      <template is="dom-repeat" items="[[favorites.entries]]">
+        <div class="item">
+          <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
+          <div class="flex">
+            <a class="favLink" href="[[_href(item)]]" >[[item.title]]</a>
+          </div>
+          <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
+        </div>
+      </template>
+    <div>
 
     <template is="dom-if" if="[[!_hasFavorites(favorites)]]">
       <span class="empty">No favorites.</span>
