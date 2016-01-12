@@ -56,6 +56,18 @@ Contributors:
       app.page = 'browse';
     });
 
+    page(/^\/nxdoc\/[^@]*\/[^@]*/, function(data) {
+      var params = data.params[0].replace('/nxdoc/','').split('/'); // 0: repository, 1: docid
+      app.docId = params[1];
+      app.page = 'browse';
+    });
+
+    page(/^\/nxdoc\/[^@]*/, function(data) {
+      var params = data.params[0].replace('/nxdoc/','').split('/'); // 0: docid
+      app.docId = params[0];
+      app.page = 'browse';
+    });
+
     page('/admin', function() {
       app.page = 'admin';
     });

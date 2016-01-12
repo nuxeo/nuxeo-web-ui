@@ -102,6 +102,10 @@ Contributors:
         min-width: 240px;
         border: 1px solid #ddd;
       }
+
+      .share-container {
+        min-width: 640px;
+      }
     </style>
 
     <!-- Left sidebar -->
@@ -168,7 +172,7 @@ Contributors:
               <paper-tooltip for="downloadBut">Download</paper-tooltip>
             </template>
             <!--Share-->
-            <paper-icon-button icon="social:share" id="shareBut"></paper-icon-button>
+            <paper-icon-button icon="social:share" id="shareBut" on-tap="toggleShareDialog"></paper-icon-button>
             <paper-tooltip for="shareBut">Share</paper-tooltip>
             <template is="dom-if" if="[[_canView(document)]]">
               <!--Notify me-->
@@ -215,6 +219,19 @@ Contributors:
                   <h1>Export</h1>
                   <div class="export-container">
                     <nuxeo-document-export document="[[document]]"></nuxeo-document-export>
+                  </div>
+                </div>
+              </paper-dialog>
+
+              <paper-dialog id="shareDialog" with-backdrop>
+                <div class="vertical layout">
+                  <h1>Share the Document</h1>
+                  <div class="share-container">
+                    <paper-input id="docPermalink"
+                                 label="Copy the link and share the document {{document.properties.dc:title}}"
+                                 value="[[_buildPermalink(document)]]"
+                                 autofocus
+                                 readonly></paper-input>
                   </div>
                 </div>
               </paper-dialog>
@@ -296,6 +313,12 @@ Contributors:
           element.toggle();
         },
 
+        toggleShareDialog: function() {
+          var element = document.getElementById('shareDialog');
+          element.toggle();
+          this.$$('#docPermalink').inputElement.select();
+        },
+
         get _enrichers() {
           if (this.document) {
             return this.document.contextParameters;
@@ -344,6 +367,10 @@ Contributors:
 
         _href: function(doc) {
           return page.base() + '/browse' + doc.path;
+        },
+
+        _buildPermalink: function(document) {
+          return location.origin + location.pathname + '#!/nxdoc/' + document.uid;
         }
 
       });
