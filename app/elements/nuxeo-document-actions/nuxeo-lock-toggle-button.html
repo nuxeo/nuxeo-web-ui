@@ -60,7 +60,8 @@ Contributors:
         is: 'nuxeo-lock-toggle-button',
         properties: {
           doc: {
-            type: Object
+            type: Object,
+            observer: '_observeDoc'
           },
           locked: {
             type: Boolean,
@@ -107,7 +108,7 @@ Contributors:
           return false;
         },
 
-        ready: function() {
+        _observeDoc: function() {
           this.locked = this._isLocked(this.doc);
           this._updateTooltip(this.locked);
         }
