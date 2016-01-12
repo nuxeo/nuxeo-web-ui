@@ -65,7 +65,8 @@ Contributors:
         is: 'nuxeo-favorites-toggle-button',
         properties: {
           doc: {
-            type: Object
+            type: Object,
+            observer: '_observeDoc'
           },
           favorite: {
             type: Boolean,
@@ -86,10 +87,12 @@ Contributors:
           if (!this.favorite) {
             this.$.addToFavOp.execute().then(function() {
               this.doc.contextParameters.favorites.isFavorite = true;
+              this.fire('addedToFavorites', {doc: this.doc});
             }.bind(this));
           } else {
             this.$.removeFromFavOp.execute().then(function() {
               this.doc.contextParameters.favorites.isFavorite = false;
+              this.fire('removedFromFavorites', {doc: this.doc});
             }.bind(this));
           }
           this.favorite = !this.favorite;
@@ -105,7 +108,7 @@ Contributors:
           return doc ? doc.contextParameters.favorites.isFavorite : false;
         },
 
-        ready: function() {
+        _observeDoc: function() {
           this.favorite = this._isFavorite(this.doc);
           this._updateTooltip(this.favorite);
         }
