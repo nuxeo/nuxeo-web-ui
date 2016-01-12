@@ -27,15 +27,22 @@ Contributors:
       .list {
         @apply(--layout-vertical);
       }
+
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
+
+      .toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+
+      [hidden] {
+        display: none;
+      }
     </style>
-    <iron-localstorage
-      name="nuxeo-clipboard"
-      value="{{documents}}"
-      on-iron-localstorage-load-empty="initialize"></iron-localstorage>
+    <iron-localstorage name="nuxeo-clipboard" value="{{documents}}" on-iron-localstorage-load-empty="initialize"></iron-localstorage>
 
     <template is="dom-if" if="[[!documents.length]]">
       <span class="empty">Your clipboard is empty.</span>
@@ -48,10 +55,21 @@ Contributors:
           <div class="flex">
             <a href="#!/nxdoc/[[document.uid]]" class="flex">[[document.title]]</a>
           </div>
-          <paper-icon-button icon="icons:clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+          <paper-icon-button icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
         </div>
       </template>
     </div>
+
+    <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
+      <div class="toolbar">
+          <paper-icon-button id="paste" icon="content-copy" on-tap="execute" data-op="Document.Copy"></paper-icon-button>
+          <paper-tooltip for="paste">Paste</paper-tooltip>
+          <paper-icon-button id="move" icon="content-cut" on-tap="execute" data-op="Document.Move"></paper-icon-button>
+          <paper-tooltip for="move">Move</paper-tooltip>
+      </div>
+    </template>
+
+    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
   </template>
   <script>
     Polymer({
@@ -61,6 +79,9 @@ Contributors:
         documents: {
           type: Array,
           notify: true
+        },
+        targetDocument: {
+          type: Object
         }
       },
 
@@ -87,6 +108,18 @@ Contributors:
         this.splice('documents', this._indexOf(doc), 1);
       },
 
+      canPaste: function(documents, doc) {
+        return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
+      },
+
+      execute: function(evt) {
+        this.$.op.op = evt.currentTarget.dataset.op;
+        this.$.op.execute().then(function() {
+          this.documents = [];
+          this.fire('documentUpdated');
+        }.bind(this));
+      },
+
       _remove: function(evt) {
         this.remove(evt.model.document);
       },
@@ -95,6 +128,20 @@ Contributors:
         return this.documents.findIndex(function(e) {
           return e.uid === doc.uid;
         });
+      },
+
+      _uids: function() {
+        return this.documents.map(function(doc) {
+          return doc.uid;
+        }).join(',');
+      },
+
+      _opParams: function() {
+        if (this.targetDocument) {
+          return {
+            target: this.targetDocument.uid
+          };
+        }
       }
     });
   </script>
