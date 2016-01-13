@@ -110,6 +110,18 @@ Contributors:
       .share-container {
         min-width: 640px;
       }
+
+      section, iron-pages, .content {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
+      paper-header-panel {
+        --paper-header-panel-waterfall-container: {
+          display: -webkit-flex;
+          display: flex;
+        }
+      }
     </style>
 
     <!-- Left sidebar -->
@@ -124,7 +136,7 @@ Contributors:
     </iron-collapse>
 
     <!-- Main content -->
-    <paper-header-panel class="main flex" mode="waterfall">
+    <paper-header-panel class="main vertical layout flex" mode="waterfall">
 
       <paper-header class="paper-header">
         <paper-toolbar>

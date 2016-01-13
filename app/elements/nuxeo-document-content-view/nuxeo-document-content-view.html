@@ -25,8 +25,14 @@ Contributors:
   <template>
 
     <style is="custom-style" include="shared-styles">
+      :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
       .bubbleBoxes {
         margin: 2em -.4em 3em;
+        @apply(--layout-flex);
       }
 
       @media (max-width: 1132px) {
@@ -50,6 +56,11 @@ Contributors:
       .bubbleBoxes.hover {
         border: 2px dashed #aaa;
         @apply(--nuxeo-drop-zone-hover);
+      }
+
+      .content-view {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
       }
     </style>
 
