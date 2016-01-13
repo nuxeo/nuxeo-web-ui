@@ -160,7 +160,7 @@ Contributors:
         },
 
         _save: function() {
-          var doc = document.getElementById('doc');
+          var doc = this.$.doc;
           doc.put();
           page('/browse' + this.document.path + '@view');
         },
