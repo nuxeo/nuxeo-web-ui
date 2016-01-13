@@ -61,12 +61,17 @@ Contributors:
       }
 
       .sidecard {
+        padding: 1.5em;
         margin-bottom: 1em;
       }
 
-      .cardcontent {
-        padding: 0.75rem 0;
-        box-sizing: border-box;
+      .sidecard p.title {
+        margin-top: 0;
+        font-size: 1.1em;
+      }
+
+      paper-card .card-content {
+        padding: 1em 0;
       }
 
       .docreator {
@@ -91,6 +96,15 @@ Contributors:
         padding: 0.75rem 1.5rem;
         vertical-align: middle;
         border-radius: 2px;
+      }
+
+      .ctn {
+        width: 100%;
+        margin-bottom: 1em;
+      }
+
+      .ctn:last-child {
+        margin-bottom: 0;
       }
 
       .audit {
@@ -129,17 +143,23 @@ Contributors:
           </paper-card>
         </template>
         <paper-card class="sidecard">
-          <div class="card-content">
-            <p class="title">Status</p>
-            <div class="horizontal layout sep wrap card-content">
-              <span class="state tag">[[document.state]]</span>
-              <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+          <div class="">
+            <div class="horizontal layout wrap">
+              <div class="description ctn">[[document.properties.dc:description]]</div>
+              <div class="ctn">
+                <span class="state tag">[[document.state]]</span>
+                <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+              </div>
+              <div class="contributors ctn">
+                <nuxeo-document-users users="[[document.properties.dc:contributors]]">
+                </nuxeo-document-users>
+              </div>
             </div>
           </div>
         </paper-card>
         <paper-card class="sidecard">
-          <div class="card-content">
-            <div class="vertical layout cardcontent">
+          <div class="">
+            <div class="vertical layout">
               <span class="docreator">Created by <a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
               <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
               [[document.properties.dc:creator]]</a></span>
@@ -147,19 +167,11 @@ Contributors:
             </div>
           </div>
         </paper-card>
-        <paper-card class="sidecard">
-          <div class="card-content">
-            <p class="title">Contributors</p>
-            <div class="horizontal layout wrap sep card-content">
-              <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
-            </div>
-          </div>
-        </paper-card>
         <template is="dom-if" if="[[canStartProcess]]">
           <paper-card class="sidecard">
-            <div class="card-content">
+            <div class="">
               <p class="title">Process</p>
-              <div class="sep vertical layout">
+              <div class="sep vertical layout card-content">
                 <div>
                   <paper-dropdown-menu label="Start a process">
                     <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
@@ -177,7 +189,7 @@ Contributors:
           </paper-card>
         </template>
         <paper-card class="sidecard">
-          <div class="card-content">
+          <div class="">
             <p class="title">Tags</p>
             <div class="horizontal layout wrap sep card-content">
               <nuxeo-document-tags class="tags"></nuxeo-document-tags>
@@ -185,7 +197,7 @@ Contributors:
           </div>
         </paper-card>
         <paper-card class="sidecard">
-          <div class="card-content">
+          <div class="">
             <p class="title">Activity</p>
             <div class="vertical layout sep card-content audit">
               <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
