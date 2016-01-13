@@ -74,11 +74,17 @@ Contributors:
 
       .graph-container {
         padding: 0.5rem 2rem;
+        position: relative;
       }
 
       .open-graph {
         font-size: 0.8rem;
       }
+
+      nuxeo-workflow-graph {
+        position: relative;
+      }
+
     </style>
 
     <nuxeo-resource id="taskRequest"
@@ -101,8 +107,7 @@ Contributors:
                       class="layout vertical">
           <div class="horizontal layout center">
             <h4>Process Workflow</h4>
-            <paper-dialog id="graphDialog"
-                          with-backdrop>
+            <paper-dialog id="graphDialog" with-backdrop>
               <div class="graph-container">
                 <nuxeo-workflow-graph workflow="{{workflow}}"></nuxeo-workflow-graph>
               </div>

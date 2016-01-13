@@ -28,15 +28,9 @@ Contributors:
       :host {
         display: block;
       }
-
-      .content {
-        padding: 0.75rem 0rem;
-        box-sizing: border-box;
-        @apply(--nuxeo-document-task-view-content-theme);
-      }
     </style>
 
-    <div class="vertical layout content">
+    <div class="vertical layout">
       <template is="dom-repeat" items="{{workflows.entries}}" as="workflow">
         <!--using hardcoded Administrator-->
         <nuxeo-resource auto
