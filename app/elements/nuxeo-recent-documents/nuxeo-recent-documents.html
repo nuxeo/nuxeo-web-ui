@@ -1,0 +1,86 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-recent-documents`
+@group Nuxeo UI
+@element nuxeo-recent-documents
+-->
+<dom-module id="nuxeo-recent-documents">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        @apply(--layout-vertical-reverse);
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+
+      [hidden] {
+        display: none;
+      }
+    </style>
+    <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
+
+    <template is="dom-if" if="[[!documents.length]]">
+      <span class="empty">No recent documents.</span>
+    </template>
+
+    <template is="dom-repeat" items="[[documents]]" as="document">
+      <div class="item">
+        <iron-icon icon="receipt" item-icon></iron-icon>
+        <div class="flex">
+          <a href="#!/doc/[[document.uid]]" class="flex">[[document.title]]</a>
+        </div>
+      </div>
+    </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-recent-documents',
+
+      properties: {
+        documents: {
+          type: Array,
+          notify: true
+        },
+        maxSize: {
+          type: Number,
+          value: 5
+        }
+      },
+
+      add: function(doc) {
+        this.$.storage.add(doc);
+        if (this.documents.length > this.maxSize) {
+          this.splice('documents', 0, this.documents.length - this.maxSize);
+        }
+      }
+    });
+  </script>
+</dom-module>

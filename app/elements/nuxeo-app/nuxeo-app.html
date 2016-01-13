@@ -214,6 +214,11 @@ Contributors:
         </section>
 
         <section class="card">
+          <h1>Recently viewed</h1>
+          <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
+        </section>
+
+        <section class="card">
           <h1>Favorites</h1>
           <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
         </section>
@@ -244,7 +249,10 @@ Contributors:
             observer: '_navigate'
           },
 
-          currentDocument: Object,
+          currentDocument: {
+            type: Object,
+            observer: '_documentChanged'
+          },
           docPath: String,
           docAction: String,
           linkDocId: String,
@@ -294,6 +302,12 @@ Contributors:
 
         scrollPageToTop: function() {
           //this.$.selectedPage.scrollToTop(true);
+        },
+
+        _documentChanged: function() {
+          if (this.currentDocument) {
+            this.$.recent.add(this.currentDocument);
+          }
         }
       });
     })();

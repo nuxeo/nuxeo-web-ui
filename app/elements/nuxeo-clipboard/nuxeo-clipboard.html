@@ -24,7 +24,7 @@ Contributors:
 <dom-module id="nuxeo-clipboard">
   <template>
     <style is="custom-style" include="shared-styles">
-      .list {
+      :host {
         @apply(--layout-vertical);
       }
 
@@ -38,27 +38,22 @@ Contributors:
         @apply(--layout-end-justified);
       }
 
-      [hidden] {
-        display: none;
-      }
     </style>
-    <iron-localstorage name="nuxeo-clipboard" value="{{documents}}" on-iron-localstorage-load-empty="initialize"></iron-localstorage>
+    <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
     <template is="dom-if" if="[[!documents.length]]">
       <span class="empty">Your clipboard is empty.</span>
     </template>
 
-    <div class="list">
-      <template is="dom-repeat" items="[[documents]]" as="document">
-        <div class="item">
-          <iron-icon icon="receipt" item-icon></iron-icon>
-          <div class="flex">
-            <a href="#!/doc/[[document.uid]]" class="flex">[[document.title]]</a>
-          </div>
-          <paper-icon-button icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+    <template is="dom-repeat" items="[[documents]]" as="document">
+      <div class="item">
+        <iron-icon icon="receipt" item-icon></iron-icon>
+        <div class="flex">
+          <a href="#!/doc/[[document.uid]]" class="flex">[[document.title]]</a>
         </div>
-      </template>
-    </div>
+        <paper-icon-button icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+      </div>
+    </template>
 
     <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
       <div class="toolbar">
@@ -85,27 +80,16 @@ Contributors:
         }
       },
 
-      initialize: function() {
-        this.documents = [];
-      },
-
       add: function(doc) {
-        if (this.contains(doc)) {
-          return;
-        }
-        this.push('documents', {
-          uid: doc.uid,
-          title: doc.title,
-          type: doc.type
-        });
+        return this.$.storage.add(doc);
       },
 
       contains: function(doc) {
-        return this.documents && this._indexOf(doc) !== -1;
+        return this.$.storage.contains(doc);
       },
 
       remove: function(doc) {
-        this.splice('documents', this._indexOf(doc), 1);
+        return this.$.storage.remove(doc);
       },
 
       canPaste: function(documents, doc) {
