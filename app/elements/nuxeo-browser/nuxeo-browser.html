@@ -149,6 +149,8 @@ Contributors:
               <a href="[[_href(item)]]" class="breadcrumb-item">[[item.title]]</a>
               <span class="breadcrumb-divider">/</span>
             </template>
+            <nuxeo-document-prev-next-doc document="[[document]]">
+            </nuxeo-document-prev-next-doc>
           </div>
 
           <paper-dropdown-menu no-label-float>
@@ -222,9 +224,9 @@ Contributors:
           <section name="view">
             <template is="dom-if" if="[[_canViewContent(document)]]">
               <nuxeo-document-content-view provider-name="document_content"
-                                           params="[[cvParams]]"
-                                           document="{{document}}"
-                                           can-create-documents>
+                params="[[cvParams]]"
+                document="{{document}}"
+                can-create-documents>
               </nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">

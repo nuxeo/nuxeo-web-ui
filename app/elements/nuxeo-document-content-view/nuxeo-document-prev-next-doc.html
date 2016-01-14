@@ -1,0 +1,167 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume RENARD <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-prev-next-doc`
+@group Nuxeo UI
+@element nuxeo-document-prev-next-doc
+-->
+<dom-module id="nuxeo-document-prev-next-doc">
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+    </style>
+
+
+    <nuxeo-page-provider id="provider"
+       provider="[[providerName]]"
+       page-size="1"
+       page="[[pageNumber]]"
+       params="[[params]]"
+       enrichers="permissions, breadcrumb, preview, favorites, renditions"
+                    headers='{"X-NXfetch.document": "lock"}'>
+    </nuxeo-page-provider>
+
+    <template is="dom-if" if="[[_isDisplayControl(document)]]">
+      <paper-icon-button id="prevDoc" icon="icons:arrow-back"
+        on-tap="navigateToPrev" disabled="[[!isDisplayPrev]]" >
+      </paper-icon-button>
+      <paper-tooltip for="prevDoc">Previous Document</paper-tooltip>
+      <paper-icon-button id="nextDoc" icon="icons:arrow-forward"
+        on-tap="navigateToNext" disabled="[[!isDisplayNext]]" >
+      </paper-icon-button>
+      <paper-tooltip for="nextDoc">Next Document</paper-tooltip>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+
+        is: 'nuxeo-document-prev-next-doc',
+
+        behaviors: [
+          Polymer.IronA11yKeysBehavior
+        ],
+
+        properties: {
+          params: {
+            type: Object,
+            value: {}
+          },
+          providerName: {
+            type: String
+          },
+          pageNumber: {
+            type: Number
+          },
+          document: {
+            type: Object,
+            notify: true,
+          },
+          isNextPageAvailable: {
+            type: Object
+          },
+          isDisplayPrev: {
+            type: Boolean,
+            computed: '_computeIsDiplayPrev(pageNumber)'
+          },
+          isDisplayNext: {
+            type: Boolean,
+            computed: '_computeIsDiplayNext(isNextPageAvailable)'
+          },
+          keyEventTarget: {
+            type: Object,
+            value: function() {
+              return document.body;
+            }
+          }
+        },
+
+        keyBindings: {
+          'left': 'navigateToPrev',
+          'right': 'navigateToNext'
+        },
+
+        _isDisplayControl: function(doc) {
+          var results = new RegExp('[\?&]cvoffset=([^&#]*)').exec(window.location.href);
+          if (results === null) {
+            return false;
+          } else {
+            this.pageNumber = parseInt(results[1], 10);
+            return doc && doc.facets.indexOf('Folderish') === -1;
+          }
+        },
+
+        _computeIsDiplayPrev: function(pageNumber) {
+          return pageNumber > 1;
+        },
+
+        _computeIsDiplayNext: function(isNextPageAvailable) {
+          if (isNextPageAvailable !== undefined) {
+            return isNextPageAvailable;
+          }
+          return true;
+        },
+
+        navigateToPrev: function() {
+          if (this.isDisplayPrev) {
+            this.pageNumber--;
+            this.$.provider.fetch().then(function(response) {
+              page('/browse' + response.entries[0].path + '?cvoffset=' + this.pageNumber);
+              this.fire('navigateToDocFromCV', {
+                params: this.params,
+                providerName: this.providerName,
+                isNextPageAvailable: response.isNextPageAvailable
+              });
+            }.bind(this));
+          }
+        },
+
+        navigateToNext: function() {
+          if (this.isDisplayNext) {
+            this.pageNumber++;
+            this.$.provider.fetch().then(function(response) {
+              this.response = response;
+              page('/browse' + response.entries[0].path + '?cvoffset=' + this.pageNumber);
+              this.fire('navigateToDocFromCV', {
+                params: this.params,
+                providerName: this.providerName,
+                isNextPageAvailable: response.isNextPageAvailable
+              });
+            }.bind(this));
+          }
+        },
+
+        ready: function() {
+          window.addEventListener('navigateToDocFromCV', function(e) {
+            this.pageNumber = e.detail.ordinalOffset;
+            this.providerName = e.detail.providerName;
+            this.params = e.detail.params;
+            this.isNextPageAvailable = e.detail.isNextPageAvailable;
+          }.bind(this));
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -81,12 +81,10 @@ Contributors:
         toggle: function() {
           if (!this.locked) {
             this.$.lockOp.execute().then(function() {
-              //this.doc.contextParameters.favorites.isFavorite = true;
               this.icon = 'icons:lock';
             }.bind(this));
           } else {
             this.$.unLockOp.execute().then(function() {
-              //this.doc.contextParameters.favorites.isFavorite = false;
               this.icon = 'icons:lock-open';
             }.bind(this));
           }

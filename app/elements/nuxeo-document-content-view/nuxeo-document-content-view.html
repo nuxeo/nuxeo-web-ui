@@ -76,6 +76,7 @@ Contributors:
        enrichers="thumbnail"
        current-page="{{currentPage}}"
        page="[[pageNumber]]"
+       is-next-page-available="{{[isNextPageAvailable}}"
        params="[[params]]">
     </nuxeo-page-provider>
 
@@ -85,7 +86,10 @@ Contributors:
 
       <div class="bubbleBoxes">
         <template is="dom-repeat" items="[[currentPage]]">
-          <nuxeo-document-listing-thumbnail doc="[[item]]" />
+          <nuxeo-document-listing-thumbnail doc="[[item]]"
+            offset="[[index]]" provider-name="[[providerName]]"
+            page-number="[[pageNumber]]" page-size="[[pageSize]]"
+            params="[[params]]" is-next-page-available="[[isNextPageAvailable]]"/>
         </template>
       </div>
     </div>
@@ -135,6 +139,9 @@ Contributors:
           canCreateDocuments: {
             type: Boolean,
             value: false
+          },
+          isNextPageAvailable: {
+            type: Boolean
           }
         },
 
