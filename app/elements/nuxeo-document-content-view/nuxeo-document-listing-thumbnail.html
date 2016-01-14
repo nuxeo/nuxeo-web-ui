@@ -26,28 +26,27 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
       .bubbleBox {
-          box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-          display: inline-block;
-          vertical-align: top;
-          margin: 0 .4em .8em;
-          width: 220px;
-          position: relative;
-          background-color: #fff;
-          padding: .4em .4em .8em;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 .4em .8em;
+        width: 220px;
+        position: relative;
+        background-color: #fff;
+        padding: .4em .4em .8em;
       }
 
       .thumbnailContainer {
-          background-color: #fafafa;
-          border-radius: 3px 3px 0 0;
-          height: 11em;
+        background-color: #fafafa;
+        border-radius: 3px 3px 0 0;
+        width: 220px;
+        height: 218px;
       }
 
-      .thumbnailContainer, img.thumbnailImg { max-width: 100%; height: 218px; }
-
       input[type="checkbox"] {
-          position: absolute;
-          top: 13px;
-          left: 10px;
+        position: absolute;
+        top: 13px;
+        left: 10px;
       }
 
       a {
@@ -67,11 +66,9 @@ Contributors:
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
 
     <div class="bubbleBox">
+      <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"></iron-image>
       <div>
         <input type="checkbox">
-      </div>
-      <div class="thumbnailContainer folderishThumbnail">
-        <img src="[[_thumbnail(doc)]]" class="thumbnailImg" >
       </div>
       <div>
          <a href$="[[_href(doc)]]">[[doc.title]]</a>
