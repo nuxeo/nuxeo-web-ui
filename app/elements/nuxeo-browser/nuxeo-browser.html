@@ -72,22 +72,6 @@ Contributors:
         color: var(--icon-toggle-pressed-color, --branding-action-color-activated);
       }
 
-      .breadcrumb {
-        margin: 0 20px;
-      }
-
-      .breadcrumb-item {
-        text-decoration: none;
-      }
-
-      .breadcrumb-divider {
-        font-size: 20px;
-      }
-
-      .breadcrumb-divider:last-of-type {
-        display: none;
-      }
-
       #previewDialog {
         height: 100%;
         width: 100%;
@@ -143,15 +127,10 @@ Contributors:
           <paper-icon-button class="toggle" icon="folder-open"
                              on-click="toggleSidebar"
                              hidden="[[sidebarOpened]]"></paper-icon-button>
+          <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
 
-          <div class="breadcrumb">
-            <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-              <a href="[[_href(item)]]" class="breadcrumb-item">[[item.title]]</a>
-              <span class="breadcrumb-divider">/</span>
-            </template>
-            <nuxeo-document-prev-next-doc document="[[document]]">
-            </nuxeo-document-prev-next-doc>
-          </div>
+          <nuxeo-document-prev-next-doc document="[[document]]">
+          </nuxeo-document-prev-next-doc>
 
           <paper-dropdown-menu no-label-float>
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
@@ -420,16 +399,6 @@ Contributors:
             params.push(this.document.uid);
           }
           return params;
-        },
-
-        _breadcrumb: function() {
-          if (this._enrichers) {
-            return this._enrichers.breadcrumb.entries;
-          }
-        },
-
-        _href: function(doc) {
-          return page.base() + '/browse' + doc.path;
         },
 
         _buildPermalink: function(document) {

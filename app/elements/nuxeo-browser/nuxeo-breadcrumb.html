@@ -1,0 +1,115 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume RENARD <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-breadcrumb`
+@group Nuxeo UI
+@element nuxeo-breadcrumb
+-->
+<dom-module id="nuxeo-breadcrumb">
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+      .breadcrumb, .shortBreadcrumb {
+        margin: 0 20px;
+      }
+
+      .breadcrumb-item {
+        text-decoration: none;
+      }
+
+      .breadcrumb-divider {
+        font-size: 20px;
+      }
+
+      .breadcrumb-divider:last-of-type {
+        display: none;
+      }
+
+      @media (max-width: 1280px) {
+        .breadcrumb-item-ancestor {
+          display: none;
+        }
+
+        a.breadcrumb-item-parent:after {
+          content: '..';
+        }
+
+        a.breadcrumb-item-parent span {
+          display: none;
+        }
+      }
+
+    </style>
+
+    <div class="breadcrumb">
+      <template is="dom-repeat" items="[[_breadcrumb(document)]]">
+        <a href="[[_href(item)]]" class$="breadcrumb-item [[_computeCssClass(index, document)]]"><span>[[item.title]]</span></a>
+        <span class$="breadcrumb-divider [[_computeCssClass(index, document)]]">/</span>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+
+        is: 'nuxeo-breadcrumb',
+
+        properties: {
+          document: {
+            type: Object
+          }
+        },
+
+        _breadcrumb: function() {
+          if (this._enrichers) {
+            return this._enrichers.breadcrumb.entries;
+          }
+        },
+
+        _href: function(doc) {
+          return page.base() + '/browse' + doc.path;
+        },
+
+        _computeCssClass: function(index) {
+          if (this._enrichers) {
+            if (index === this._enrichers.breadcrumb.entries.length - 1) {
+              return 'breadcrumb-item-current';
+            } else if (index === this._enrichers.breadcrumb.entries.length - 2) {
+              return 'breadcrumb-item-parent';
+            } else {
+              return 'breadcrumb-item-ancestor';
+            }
+          }
+        },
+
+        get _enrichers() {
+          if (this.document) {
+            return this.document.contextParameters;
+          }
+        },
+
+      });
+    })();
+  </script>
+
+</dom-module>
