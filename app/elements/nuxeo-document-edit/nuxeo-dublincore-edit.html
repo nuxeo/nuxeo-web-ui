@@ -113,19 +113,23 @@ Contributors:
       </nuxeo-directory-suggestion>
     </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>Created at</label>
-      </div>
-      <span class="flex">[[format(document.properties.dc:created)]]</span>
-    </div>
+    <template is="dom-if" if="[[!new]]">
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>Modified at</label>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Created at</label>
+        </div>
+        <span class="flex">[[format(document.properties.dc:created)]]</span>
       </div>
-      <span class="flex">[[format(document.properties.dc:modified)]]</span>
-    </div>
+
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Modified at</label>
+        </div>
+        <span class="flex">[[format(document.properties.dc:modified)]]</span>
+      </div>
+
+    </template>
 
     <div class="row layout horizontal">
       <div class="label-container">
@@ -148,33 +152,37 @@ Contributors:
       <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
     </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>Author</label>
-      </div>
-      <nuxeo-help for="author" label="[[i18n('label.dublincore.author.info')]]"></nuxeo-help>
-      <span id="author" class="flex">{{document.properties.dc:creator::change}}</span>
-    </div>
+    <template is="dom-if" if="[[!new]]">
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>Contributors</label>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Author</label>
+        </div>
+        <nuxeo-help for="author" label="[[i18n('label.dublincore.author.info')]]"></nuxeo-help>
+        <span id="author" class="flex">{{document.properties.dc:creator::change}}</span>
       </div>
-      <nuxeo-help for="contributors" label="[[i18n('label.dublincore.contributors.info')]]"></nuxeo-help>
-      <div id="contributors" class="layout vertical">
-        <template is="dom-repeat" items={{document.properties.dc:contributors}}>
-          <span>{{item}}</span>
-        </template>
-      </div>
-    </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>Last contributor</label>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Contributors</label>
+        </div>
+        <nuxeo-help for="contributors" label="[[i18n('label.dublincore.contributors.info')]]"></nuxeo-help>
+        <div id="contributors" class="layout vertical">
+          <template is="dom-repeat" items={{document.properties.dc:contributors}}>
+            <span>{{item}}</span>
+          </template>
+        </div>
       </div>
-      <nuxeo-help for="lastContributor" label="[[i18n('label.dublincore.lastContributor.info')]]"></nuxeo-help>
-      <span id="lastContributor" class="flex">{{document.properties.dc:lastContributor::change}}</span>
-    </div>
+
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Last contributor</label>
+        </div>
+        <nuxeo-help for="lastContributor" label="[[i18n('label.dublincore.lastContributor.info')]]"></nuxeo-help>
+        <span id="lastContributor" class="flex">{{document.properties.dc:lastContributor::change}}</span>
+      </div>
+
+    </template>
 
   </template>
 
@@ -188,6 +196,11 @@ Contributors:
         properties: {
           document: {
             type: Object
+          },
+
+          new: {
+            type: Boolean,
+            value: false
           }
         },
 

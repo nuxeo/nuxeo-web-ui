@@ -58,6 +58,11 @@ Contributors:
         @apply(--nuxeo-drop-zone-hover);
       }
 
+      .bubbleBoxes.hoverSmartImport {
+        border: 2px dashed #0a0;
+        @apply(--nuxeo-drop-zone-hover-smart-import);
+      }
+
       .content-view {
         @apply(--layout-vertical);
         @apply(--layout-flex);
@@ -100,6 +105,7 @@ Contributors:
       <nuxeo-document-create-button parent="[[document]]"></nuxeo-document-create-button>
     </template>
 
+    <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
   </template>
 
   <script>
@@ -142,35 +148,62 @@ Contributors:
           },
           isNextPageAvailable: {
             type: Boolean
+          },
+          isSmartImport: {
+            type: Boolean,
+            value: false
+          },
+          dropZoneTimeout: {
+            type: Object
           }
         },
 
         listeners: {
           'batchFinished': 'importBatch',
-          'documentCreated': '_handleDocumentCreated'
+          'documentCreated': '_handleDocumentCreated',
+          'smartImport': '_handleSmartImport'
         },
 
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$$('.bubbleBoxes'));
+          this._dropZone.addEventListener('dragover', this._dragoverSmartImport.bind(this));
+          this._dropZone.addEventListener('dragleave', this._dragleaveSmartImport.bind(this));
+          this._dropZone.addEventListener('drop', this._dropSmartImport.bind(this));
         },
 
-        importBatch: function() {
-          this.batchExecute('FileManager.Import', {
-            context: {
-              currentDocument: this.document.path
-            }
-          }).then(function(response) {
-            var docs = response.entries;
-            if (docs.length === 1) {
-              var doc = docs[0];
-              this._toast('Imported ' + doc.type.toLowerCase() + ' ' + doc.title + '.');
-            } else {
-              this._toast('Imported ' + docs.length + ' documents.');
-            }
-            // refresh
-            this._handleDocumentCreated();
-          }.bind(this));
+        importBatch: function(data) {
+          if (this.isSmartImport) {
+            this.$.smartImport.uploader = this.uploader;
+            this.$.smartImport.batchId = data.detail.batchId;
+            this.$.smartImport.toggleDialog().then(function() {
+              this.isSmartImport = false;
+            }.bind(this));
+          } else {
+            this.batchExecute('FileManager.Import', {
+              context: {
+                currentDocument: this.document.path
+              }
+            }).then(function(response) {
+              this._notifyAndUpdate(response);
+            }.bind(this));
+          }
+        },
+
+        _handleSmartImport: function(data) {
+          this._notifyAndUpdate(data.detail);
+        },
+
+        _notifyAndUpdate: function(response) {
+          var docs = response.entries;
+          if (docs.length === 1) {
+            var doc = docs[0];
+            this._toast('Imported ' + doc.type.toLowerCase() + ' ' + doc.title + '.');
+          } else {
+            this._toast('Imported ' + docs.length + ' documents.');
+          }
+          // refresh
+          this._handleDocumentCreated();
         },
 
         _toast: function(msg) {
@@ -180,6 +213,28 @@ Contributors:
 
         _handleDocumentCreated: function() {
           this.$.provider.fetch();
+        },
+
+        _dragoverSmartImport: function() {
+          if (!this.dropZoneTimeout) {
+            this.dropZoneTimeout = setTimeout(function() {
+              this.toggleClass('hoverSmartImport', true, this._dropZone);
+              this.isSmartImport = true;
+            }.bind(this), 3000);
+          }
+        },
+
+        _dragleaveSmartImport: function() {
+          clearTimeout(this.dropZoneTimeout);
+          this.dropZoneTimeout = null;
+          this.toggleClass('hoverSmartImport', false, this._dropZone);
+          this.isSmartImport = false;
+        },
+
+        _dropSmartImport: function() {
+          clearTimeout(this.dropZoneTimeout);
+          this.dropZoneTimeout = null;
+          this.toggleClass('hoverSmartImport', false, this._dropZone);
         }
       });
     })();
