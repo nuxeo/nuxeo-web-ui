@@ -132,7 +132,7 @@ Contributors:
                 params: this.params,
                 pageNumber: this.pageNumber,
                 pageSize: this.pageSize,
-                isNextPageAvailable: this.isNextPageAvailable || (this.offset < this.pageSize)
+                isNextPageAvailable: this.isNextPageAvailable || (this.offset < (this.currentPageSize - 1))
               }
             );
           }
