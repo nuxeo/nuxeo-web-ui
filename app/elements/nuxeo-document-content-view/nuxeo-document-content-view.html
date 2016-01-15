@@ -89,7 +89,7 @@ Contributors:
       <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
       </nuxeo-document-content-view-controls>
 
-      <div class="bubbleBoxes">
+      <div id="dropzone" class="bubbleBoxes">
         <template is="dom-repeat" items="[[currentPage]]">
           <nuxeo-document-listing-thumbnail doc="[[item]]"
             offset="[[index]]" provider-name="[[providerName]]"
@@ -161,15 +161,15 @@ Contributors:
         listeners: {
           'batchFinished': 'importBatch',
           'documentCreated': '_handleDocumentCreated',
-          'smartImport': '_handleSmartImport'
+          'smartImport': '_handleSmartImport',
+          'dropzone.dragover': '_dragoverSmartImport',
+          'dropzone.dragleave': '_dragleaveSmartImport',
+          'dropzone.drop': '_dropSmartImport'
         },
 
         ready: function() {
           this.connection = this.$.nx;
-          this.setupDropZone(this.$$('.bubbleBoxes'));
-          this._dropZone.addEventListener('dragover', this._dragoverSmartImport.bind(this));
-          this._dropZone.addEventListener('dragleave', this._dragleaveSmartImport.bind(this));
-          this._dropZone.addEventListener('drop', this._dropSmartImport.bind(this));
+          this.setupDropZone(this.$.dropzone);
         },
 
         importBatch: function(data) {
