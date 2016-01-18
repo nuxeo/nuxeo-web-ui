@@ -260,7 +260,9 @@ Contributors:
           var docRequest = this.$.docRequest;
           var name = this.document.properties['dc:title'].replace(/[^a-z0-9]/gi, '_');
           this.document.name = name;
-          docRequest.post();
+          docRequest.post().then(function(response) {
+            page('/browse' + response.path);
+          });
           this._toggleDialog();
         },
 
