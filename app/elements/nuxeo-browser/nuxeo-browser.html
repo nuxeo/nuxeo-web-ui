@@ -201,19 +201,7 @@ Contributors:
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
-            <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view provider-name="document_content"
-                params="[[cvParams]]"
-                document="[[document]]">
-              </nuxeo-document-content-view>
-            </template>
-            <template is="dom-if" if="[[_canView(document)]]">
-              <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
-
-              <paper-dialog id="previewDialog" with-backdrop>
-                <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-              </paper-dialog>
-
+            <template is="dom-if" if="[[document]]">
               <paper-dialog id="exportDialog" with-backdrop>
                 <div class="vertical layout">
                   <h1>Export</h1>
@@ -234,6 +222,21 @@ Contributors:
                                  readonly></paper-input>
                   </div>
                 </div>
+              </paper-dialog>
+            </template>
+
+            <template is="dom-if" if="[[_canViewContent(document)]]">
+              <nuxeo-document-content-view provider-name="document_content"
+                params="[[cvParams]]"
+                document="[[document]]">
+              </nuxeo-document-content-view>
+            </template>
+
+            <template is="dom-if" if="[[_canView(document)]]">
+              <nuxeo-document-view document="{{document}}"></nuxeo-document-view>
+
+              <paper-dialog id="previewDialog" with-backdrop>
+                <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
               </paper-dialog>
             </template>
           </section>
