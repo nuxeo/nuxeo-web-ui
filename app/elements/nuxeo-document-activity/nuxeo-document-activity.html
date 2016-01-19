@@ -33,8 +33,8 @@ Contributors:
     <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
     <template is="dom-repeat" items="[[audit.entries]]">
       <p>
-        <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[item.principalName]]</a>&nbsp;</span>
-        <span>[[i18n('activity', item.eventId)]]</span>
+        <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[_user(item)]]</a>&nbsp;</span>
+        <span>[[_activity(item)]]</span>
       </p>
     </template>
   </template>
@@ -49,6 +49,12 @@ Contributors:
           document: {
             type: Object
           }
+        },
+        _user: function(event) {
+          return event.principalName;
+        },
+        _activity: function(event) {
+          return this.i18n('activity.' + event.eventId);
         }
       });
     })();

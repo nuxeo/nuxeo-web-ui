@@ -1,6 +1,5 @@
 <script>
   (function () {
-
     window.I18n = window.I18n || {};
 
     var language = window.I18n.language || 'en',
@@ -11,8 +10,7 @@
      * Translates the given key.
      * Also accepts multiple arguments which will be joined to build the key.
      */
-    Polymer.Base.i18n = function () {
-      var key = Array.prototype.join.call(arguments, '.');
+    Polymer.Base.i18n = function (key, defaultValue) {
       if (!locales[language]) {
         var url = baseUrl +  '/i18n/messages.' + language + '.json';
         var xhr = new XMLHttpRequest();
@@ -24,7 +22,7 @@
         xhr.send();
         locales[language] = JSON.parse(xhr.responseText); // cache this locale.
       }
-      return locales[language][key] || key;
+      return locales[language][key] || defaultValue || key;
     };
   })();
 </script>
