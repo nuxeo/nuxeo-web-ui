@@ -288,7 +288,7 @@ Contributors:
         },
 
         _navigate: function() {
-          var url = '/' + this.page;
+          var url = '/' + this.page, state;
           if (this.page === 'browse') {
             if (this.docPath) {
               url += this.docPath;
@@ -296,8 +296,11 @@ Contributors:
             if (this.docAction) {
               url += '@' + this.docAction;
             }
+            if (this.currentContentView) {
+              state = {contentView: this.currentContentView.provider};
+            }
           }
-          page(url);
+          page.show(url, state);
           this.fire('navigation', {page: this.page});
         },
 
