@@ -27,23 +27,20 @@ Contributors:
     <style is="custom-style" include="shared-styles">
     </style>
 
-
     <nuxeo-page-provider id="provider"
-       provider="[[providerName]]"
+       provider="[[provider]]"
        page-size="1"
-       page="[[pageNumber]]"
+       page="{{index}}"
        params="[[params]]"
-       enrichers="permissions, breadcrumb, preview, favorites, renditions"
-                    headers='{"X-NXfetch.document": "lock"}'>
+       is-next-page-available="{{hasNext}}">
     </nuxeo-page-provider>
 
-    <template is="dom-if" if="[[_isDisplayControl(document)]]">
-      <paper-icon-button id="prevDoc" icon="icons:arrow-back"
-        on-tap="navigateToPrev" disabled="[[!isDisplayPrev]]" >
+    <template is="dom-if" if="[[isVisible]]">
+      <paper-icon-button id="prevDoc" icon="icons:arrow-back" on-tap="previous" disabled="[[!hasPrevious]]">
       </paper-icon-button>
       <paper-tooltip for="prevDoc">Previous Document</paper-tooltip>
-      <paper-icon-button id="nextDoc" icon="icons:arrow-forward"
-        on-tap="navigateToNext" disabled="[[!isDisplayNext]]" >
+
+      <paper-icon-button id="nextDoc" icon="icons:arrow-forward" on-tap="next" disabled="[[!hasNext]]">
       </paper-icon-button>
       <paper-tooltip for="nextDoc">Next Document</paper-tooltip>
     </template>
@@ -67,95 +64,87 @@ Contributors:
             type: Object,
             value: {}
           },
-          providerName: {
+          provider: {
             type: String
           },
-          pageNumber: {
-            type: Number
+
+          /**
+           * Index of the document in the current page provider
+           **/
+          index: {
+            type: Number,
+            value: 0
           },
-          document: {
-            type: Object,
-            notify: true,
-          },
-          isNextPageAvailable: {
-            type: Object
-          },
-          isDisplayPrev: {
+          hasPrevious: {
             type: Boolean,
-            computed: '_computeIsDiplayPrev(pageNumber)'
-          },
-          isDisplayNext: {
-            type: Boolean,
-            computed: '_computeIsDiplayNext(isNextPageAvailable)'
+            computed: '_hasPrevious(index)'
           },
           keyEventTarget: {
             type: Object,
             value: function() {
               return document.body;
             }
+          },
+          isVisible: {
+            type: Boolean,
+            computed: '_isVisible(provider, hasPrevious, hasNext)'
           }
         },
+
+        observers: [
+            '_fetch(index)'
+        ],
 
         keyBindings: {
-          'left': 'navigateToPrev',
-          'right': 'navigateToNext'
+          'left': 'previous',
+          'right': 'next'
         },
 
-        _isDisplayControl: function(doc) {
-          var results = new RegExp('[\?&]cvoffset=([^&#]*)').exec(window.location.href);
-          if (results === null) {
-            return false;
+        set contentView(cv) {
+          this._contentView = cv;
+          if (cv) {
+            this.provider = cv.provider;
+            this.params = cv.params;
+            this.index = cv.currentIndex;
           } else {
-            this.pageNumber = parseInt(results[1], 10);
-            return doc && doc.facets.indexOf('Folderish') === -1;
+            this.provider = null;
           }
         },
 
-        _computeIsDiplayPrev: function(pageNumber) {
+        get contentView() {
+          return this._contentView;
+        },
+
+        _isVisible: function() {
+          return this.provider && (this.hasPrevious || this.hasNext);
+        },
+
+        _hasPrevious: function(pageNumber) {
           return pageNumber > 1;
         },
 
-        _computeIsDiplayNext: function(isNextPageAvailable) {
-          if (isNextPageAvailable !== undefined) {
-            return isNextPageAvailable;
-          }
-          return true;
-        },
-
-        navigateToPrev: function() {
-          if (this.isDisplayPrev) {
-            this.pageNumber--;
-            this.$.provider.fetch().then(function(response) {
-              page('/browse' + response.entries[0].path + '?cvoffset=' + this.pageNumber);
-              this.fire('navigateToDocFromCV', {
-                params: this.params,
-                providerName: this.providerName,
-                isNextPageAvailable: response.isNextPageAvailable
-              });
-            }.bind(this));
+        previous: function() {
+          if (!!this.hasPrevious) {
+            this.index--;
           }
         },
 
-        navigateToNext: function() {
-          if (this.isDisplayNext) {
-            this.pageNumber++;
-            this.$.provider.fetch().then(function(response) {
-              this.response = response;
-              page('/browse' + response.entries[0].path + '?cvoffset=' + this.pageNumber);
-              this.fire('navigateToDocFromCV', {
-                params: this.params,
-                providerName: this.providerName,
-                isNextPageAvailable: response.isNextPageAvailable
-              });
-            }.bind(this));
+        next: function() {
+          if (!!this.hasNext) {
+            this.index++;
           }
         },
 
-        ready: function() {
-          window.addEventListener('navigateToDocFromCV', function(e) {
-            this.providerName = e.detail.providerName;
-            this.params = e.detail.params;
-            this.isNextPageAvailable = e.detail.isNextPageAvailable;
+        _fetch: function() {
+          if (!this.contentView) {
+            return;
+          }
+          this.debounce('nuxeo-document-prev-next-doc', this._doFetch.bind(this));
+        },
+
+        _doFetch: function() {
+          this.$.provider.fetch().then(function(response) {
+            this.contentView.navigate(response.entries[0], this.index);
           }.bind(this));
         }
 

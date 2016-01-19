@@ -191,7 +191,7 @@ Contributors:
         <!-- The current document's page -->
         <iron-pages selected="[[page]]" attr-for-selected="name">
           <nuxeo-home name="home"></nuxeo-home>
-          <nuxeo-browser
+          <nuxeo-browser id="browser"
             name="browse"
             document="[[currentDocument]]"
             selected-tab="{{docAction}}"
@@ -275,7 +275,8 @@ Contributors:
         },
 
         listeners: {
-          'documentUpdated': 'refresh'
+          'documentUpdated': 'refresh',
+          'nuxeo-content-view-navigate': '_navigateCV',
         },
 
         ready: function() {
@@ -298,6 +299,19 @@ Contributors:
           }
           page(url);
           this.fire('navigation', {page: this.page});
+        },
+
+        _navigateCV: function(e) {
+          this.currentContentView = e.target;
+          page.show('/browse' + e.target.currentDocument.path, {contentView: e.target.provider});
+        },
+
+        get currentContentView() {
+          return this.$.browser.currentContentView;
+        },
+
+        set currentContentView(cv) {
+          this.$.browser.currentContentView = cv;
         },
 
         scrollPageToTop: function() {

@@ -129,8 +129,8 @@ Contributors:
                              hidden="[[sidebarOpened]]"></paper-icon-button>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
 
-          <nuxeo-document-prev-next-doc document="[[document]]">
-          </nuxeo-document-prev-next-doc>
+          <!-- Page provider navigation -->
+          <nuxeo-document-prev-next-doc id="contentViewNav"></nuxeo-document-prev-next-doc>
 
           <paper-dropdown-menu no-label-float>
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
@@ -204,8 +204,7 @@ Contributors:
             <template is="dom-if" if="[[_canViewContent(document)]]">
               <nuxeo-document-content-view provider-name="document_content"
                 params="[[cvParams]]"
-                document="{{document}}"
-                can-create-documents>
+                document="[[document]]">
               </nuxeo-document-content-view>
             </template>
             <template is="dom-if" if="[[_canView(document)]]">
@@ -288,7 +287,6 @@ Contributors:
           },
           cvParams: {
             type: Array,
-            computed: '_buildCvParams(document)',
             notify: true
           }
         },
@@ -300,7 +298,8 @@ Contributors:
         },
 
         observers: [
-          '_inClipboard(document)'
+          '_inClipboard(document)',
+          '_updateCvParams(document)'
         ],
 
         set clipboard(clipboard) {
@@ -315,6 +314,14 @@ Contributors:
 
         _inClipboard: function() {
           this.inClipboard = this.clipboard && this.document && this.clipboard.contains(this.document);
+        },
+
+        set currentContentView(cv) {
+          this.$.contentViewNav.contentView = cv;
+        },
+
+        get currentContentView() {
+          return this.$.contentViewNav.contentView;
         },
 
         _documentUpdated: function() {
@@ -393,12 +400,10 @@ Contributors:
           }
         },
 
-        _buildCvParams: function() {
-          var params = [];
+        _updateCvParams: function() {
           if (this._canViewContent()) {
-            params.push(this.document.uid);
+            this.cvParams = [this.document.uid];
           }
-          return params;
         },
 
         _buildPermalink: function(document) {

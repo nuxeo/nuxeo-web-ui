@@ -52,12 +52,18 @@ Contributors:
     page(/^\/browse\/([^@]*)(?:@(.*))?/, function(data) {
       app.docPath = '/' + data.params[0];
       app.docAction = data.params[1];
+      if (!data.state.contentView) {
+        app.currentContentView = null;
+      }
       // triggers the actual navigation thus must come last
       app.page = 'browse';
     });
 
     page('/doc/:repo?/:id', function(data) {
       app.docId = data.params.id;
+      if (!data.state.contentView) {
+        app.currentContentView = null;
+      }
       app.page = 'browse';
     });
 

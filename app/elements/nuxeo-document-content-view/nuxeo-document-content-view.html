@@ -74,7 +74,7 @@ Contributors:
     <!-- TODO: use the 'params' attribute -->
 
     <nuxeo-page-provider id="provider" auto
-       provider="[[providerName]]"
+       provider="[[provider]]"
        page-size="[[pageSize]]"
        number-of-pages="{{pageCount}}"
        aggregations="{{aggregations}}"
@@ -92,11 +92,7 @@ Contributors:
 
       <div id="dropzone" class="bubbleBoxes">
         <template is="dom-repeat" items="[[currentPage]]">
-          <nuxeo-document-listing-thumbnail doc="[[item]]"
-            offset="[[index]]" provider-name="[[providerName]]"
-            page-number="[[pageNumber]]" page-size="[[pageSize]]"
-            params="[[params]]" is-next-page-available="[[isNextPageAvailable]]"
-            current-page-size="[[currentPageSize]]"/>
+          <nuxeo-document-listing-thumbnail doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
         </template>
       </div>
     </div>
@@ -109,7 +105,6 @@ Contributors:
 
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
   </template>
-
   <script>
     (function() {
       'use strict';
@@ -123,7 +118,7 @@ Contributors:
             value: {},
             notify: true
           },
-          providerName: {
+          provider: {
             type: String,
             value: 'document_content'
           },
@@ -146,7 +141,7 @@ Contributors:
           },
           canCreateDocuments: {
             type: Boolean,
-            value: false
+            computed: '_canCreateDocuments(document)'
           },
           isNextPageAvailable: {
             type: Boolean
@@ -156,6 +151,13 @@ Contributors:
             value: false
           },
           dropZoneTimeout: {
+            type: Object
+          },
+          currentIndex: {
+            type: Number,
+            notify: true
+          },
+          currentDocument: {
             type: Object
           }
         },
@@ -213,8 +215,24 @@ Contributors:
           this.$.toast.open();
         },
 
+        _canCreateDocuments: function() {
+          return !!document;
+        },
+
         _handleDocumentCreated: function() {
           this.$.provider.fetch();
+        },
+
+        _navigate: function(e) {
+          var doc = e.model.item,
+              index = (this.pageSize * (this.pageNumber - 1)) + e.model.index + 1;
+          this.navigate(doc, index);
+        },
+
+        navigate: function(doc, index) {
+          this.currentDocument = doc;
+          this.currentIndex = index; // TODO - retrieve index from currentPage
+          this.fire('nuxeo-content-view-navigate');
         },
 
         _dragoverSmartImport: function() {

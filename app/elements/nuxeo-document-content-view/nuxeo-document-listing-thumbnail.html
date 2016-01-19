@@ -71,7 +71,7 @@ Contributors:
         <input type="checkbox">
       </div>
       <div>
-         <a id="docLink" href$="[[_href(doc)]]" on-click="handleClick">[[doc.title]]</a>
+         <a on-click="handleClick">[[doc.title]]</a>
          <p class="creator">[[_docType(doc)]]</p>
       </div>
     </div>
@@ -122,20 +122,7 @@ Contributors:
         },
 
         handleClick: function() {
-          if (this.offset > -1) {
-            this.$.docLink.href = this.$.docLink.href + '?cvoffset=' +
-              ((this.pageSize * (this.pageNumber - 1)) + this.offset + 1);
-            this.fire('navigateToDocFromCV',
-              {
-                doc: this.doc,
-                providerName: this.providerName,
-                params: this.params,
-                pageNumber: this.pageNumber,
-                pageSize: this.pageSize,
-                isNextPageAvailable: this.isNextPageAvailable || (this.offset < (this.currentPageSize - 1))
-              }
-            );
-          }
+          this.fire('navigate');
         }
       });
     })();
