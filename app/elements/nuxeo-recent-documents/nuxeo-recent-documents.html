@@ -54,7 +54,7 @@ Contributors:
       <div class="item">
         <iron-icon icon="receipt" item-icon></iron-icon>
         <div class="flex">
-          <a href="#!/doc/[[document.uid]]" class="flex">[[document.title]]</a>
+          <a href="[[_href(document)]]" class="flex">[[document.title]]</a>
         </div>
       </div>
     </template>
@@ -80,6 +80,10 @@ Contributors:
         if (this.documents.length > this.maxSize) {
           this.splice('documents', 0, this.documents.length - this.maxSize);
         }
+      },
+
+      _href: function(doc) {
+        return page.base() + '/doc/' + doc.uid;
       }
     });
   </script>
