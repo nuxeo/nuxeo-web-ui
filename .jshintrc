@@ -22,6 +22,7 @@
     "page": true,
     "Nuxeo": true,
     "moment": true,
-    "jsPlumb": true
+    "jsPlumb": true,
+    "AlloyEditor": true
   }
 }

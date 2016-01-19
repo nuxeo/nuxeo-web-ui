@@ -84,10 +84,28 @@ Contributors:
         text-align: center;
       }
 
+      .html-editor-container paper-button {
+        color: green;
+        position: absolute;
+        right: 20px;
+        top: 10px;
+      }
     </style>
 
     <div class="vertical layout notecontent">
-      <pre>[[document.properties.note:note]]</pre>
+      <template is="dom-if" if="[[_isHTML(document)]]">
+        <div class="html-editor-container">
+          <nuxeo-document id="note" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
+          <paper-button on-click="_editorSave">
+            <iron-icon icon="check"></iron-icon>Save
+          </paper-button>
+          <nuxeo-html-editor value="{{document.properties.note:note}}"></nuxeo-html-editor>
+          <paper-toast id="toast"></paper-toast>
+        </div>
+      </template>
+      <template is="dom-if" if="[[!_isHTML(document)]]">
+        <pre>[[document.properties.note:note]]</pre>
+      </template>
     </div>
     <div class="vertical layout attachcontainer">
       <div class="horizontal layout center attchtitle">
@@ -120,6 +138,7 @@ Contributors:
             notify: true
           }
         },
+
         _formatSize: function(size) {
           if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';
@@ -128,6 +147,18 @@ Contributors:
           } else {
             return size.toString() + ' B';
           }
+        },
+
+        _isHTML: function() {
+          return this.document && this.document.properties['note:mime_type'] === 'text/html';
+        },
+
+        _editorSave: function() {
+          this.$$('#note').put().then(function() {
+            var toast = this.$$('#toast');
+            toast.text = 'Note has been saved.';
+            toast.open();
+          }.bind(this));
         }
       });
     })();

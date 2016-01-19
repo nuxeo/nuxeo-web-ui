@@ -1,0 +1,114 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+	Andre Justo <ajusto@nuxeo.com>
+-->
+<script type="text/javascript">
+var CKEDITOR_BASEPATH = '/bower_components/alloyeditor/dist/alloy-editor/';
+var ALLOYEDITOR_BASEPATH = '/bower_components/alloyeditor/dist/alloy-editor/';
+</script>
+
+<link href="../../bower_components/alloyeditor/dist/alloy-editor/assets/alloy-editor-ocean-min.css" rel="stylesheet"></link>
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all-min.js" type="text/javascript" ></script>
+
+<!--
+`nuxeo-html-editor`
+@group Nuxeo UI
+@element nuxeo-html-editor
+-->
+
+<dom-module id="nuxeo-html-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #editor {
+        outline: none;
+        overflow: scroll;
+      }
+    </style>
+
+    <div id="editor"></div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-html-editor',
+
+        properties: {
+
+          element: Object,
+
+          value: {
+            type: String,
+            notify: true
+          }
+        },
+
+        ready: function() {
+          // init editor
+          var editor = AlloyEditor.editable(this.$.editor, {
+            toolbars: {
+              add: {
+                buttons: ['image', 'camera', 'hline', 'table'],
+                tabIndex: 2
+              },
+              styles: {
+                selections: [
+                  {
+                    name: 'link',
+                    buttons: ['linkEdit'],
+                    test: AlloyEditor.SelectionTest.link
+                  },
+                  {
+                    name: 'image',
+                    buttons: ['imageLeft', 'imageCenter', 'imageRight'],
+                    test: AlloyEditor.SelectionTest.image
+                  },
+                  {
+                    name: 'text',
+                    buttons: ['styles', 'bold', 'italic', 'underline', 'strike', 'paragraphLeft', 'paragraphCenter',
+                              'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
+                    test: AlloyEditor.SelectionTest.text
+                  },
+                  {
+                    name: 'table',
+                    buttons: ['tableRow', 'tableColumn', 'tableCell', 'tableRemove'],
+                    getArrowBoxClasses: AlloyEditor.SelectionGetArrowBoxClasses.table,
+                    setPosition: AlloyEditor.SelectionSetPosition.table,
+                    test: AlloyEditor.SelectionTest.table
+                  }
+                ],
+                tabIndex: 1
+              }
+            }
+          });
+          this.element = editor.get('nativeEditor');
+          // set initial value
+          this.element.setData(this.value);
+
+          this.element.on('change', function() {
+            this.value = this.element.getData();
+          }.bind(this));
+        }
+      });
+    })();
+  </script>
+</dom-module>

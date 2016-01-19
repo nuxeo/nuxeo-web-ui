@@ -34,7 +34,8 @@ Contributors:
      }
 
      input,
-     textarea {
+     textarea,
+     nuxeo-html-editor {
        background: none #fff;
        border: 1px solid #c6c6c6;
        border-radius: 3px;
@@ -72,6 +73,11 @@ Contributors:
        font-size: 0.9em;
        margin-right: 5px;
      }
+
+     nuxeo-html-editor {
+       height: 500px;
+       overflow: scroll;
+     }
    </style>
 
    <div class="row layout horizontal">
@@ -94,7 +100,12 @@ Contributors:
        <label>Note</label>
      </div>
      <div class="layout vertical flex">
-       <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
+       <template is="dom-if" if="[[_isHTML(document)]]">
+         <nuxeo-html-editor value="{{document.properties.note:note}}" class="flex" id="edit-editor"></nuxeo-html-editor>
+       </template>
+       <template is="dom-if" if="[[!_isHTML(document)]]">
+         <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
+       </template>
        <div class="layout horizontal">
          <span class="format">Format</span>
          <select value="{{document.properties.note:mime_type::change}}">
@@ -127,7 +138,11 @@ Contributors:
           type: Boolean,
           value: false
         }
-      }
+      },
+
+      _isHTML: function() {
+        return this.document && this.document.properties['note:mime_type'] === 'text/html';
+      },
     });
   })();
  </script>
