@@ -69,8 +69,7 @@ Contributors:
             reflectToAttribute: true
           },
           icon: {
-            type: String,
-            value: 'icons:lock-open'
+            type: String
           }
         },
 
@@ -108,7 +107,9 @@ Contributors:
 
         _observeDoc: function() {
           this.locked = this._isLocked(this.doc);
+          this.icon = this.locked ? 'icons:lock' : 'icons:lock-open';
           this._updateTooltip(this.locked);
+
         }
 
       });
