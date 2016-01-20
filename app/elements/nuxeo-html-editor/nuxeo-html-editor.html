@@ -44,9 +44,14 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
         outline: none;
         overflow: scroll;
       }
+
+      .ae-placeholder:empty:not(:focus):before {
+        color: grey;
+        font-style: italic;
+      }
     </style>
 
-    <div id="editor"></div>
+    <div id="editor" data-placeholder$="[[placeholder]]"></div>
   </template>
   <script>
     (function() {
@@ -62,6 +67,11 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
           value: {
             type: String,
             notify: true
+          },
+
+          placeholder: {
+            type: String,
+            value: "Type here..."
           }
         },
 
