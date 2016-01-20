@@ -66,8 +66,10 @@ Contributors:
       }
 
       .sidecard p.title {
-        margin-top: 0;
+        margin: 0;
         font-size: 1.1em;
+        padding-bottom: .5em;
+        border-bottom: 1px solid #e8e8e8;
       }
 
       paper-card .card-content {
@@ -171,7 +173,7 @@ Contributors:
           <paper-card class="sidecard">
             <div class="">
               <p class="title">Process</p>
-              <div class="sep vertical layout card-content">
+              <div class="vertical layout card-content">
                 <div>
                   <paper-dropdown-menu label="Start a process">
                     <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
@@ -191,7 +193,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="">
             <p class="title">Tags</p>
-            <div class="horizontal layout wrap sep card-content">
+            <div class="horizontal layout wrap card-content">
               <nuxeo-document-tags class="tags"></nuxeo-document-tags>
             </div>
           </div>
@@ -199,7 +201,7 @@ Contributors:
         <paper-card class="sidecard">
           <div class="">
             <p class="title">Activity</p>
-            <div class="vertical layout sep card-content audit">
+            <div class="vertical layout card-content audit">
               <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
             </div>
           </div>
