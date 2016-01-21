@@ -26,31 +26,7 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
       :host {
-        @apply(--layout-horizontal);
         @apply(--layout-flex);
-      }
-
-      .bubbleBoxes {
-        margin: 2em -.4em 3em;
-        @apply(--layout-flex-auto);
-      }
-
-      @media (max-width: 1132px) {
-        .bubbleBoxes {
-          max-width: 880px;
-        }
-      }
-
-      @media (max-width: 912px) {
-        .bubbleBoxes {
-          max-width: 660px;
-        }
-      }
-
-      @media (max-width: 692px) {
-        .bubbleBoxes {
-          max-width: 440px;
-        }
       }
 
       .bubbleBoxes.hover {
@@ -64,9 +40,54 @@ Contributors:
       }
 
       .content-view {
-        @apply(--layout-vertical);
         @apply(--layout-flex);
       }
+
+      .grid-ctn {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: flex-start;
+      }
+
+      .grid-box {
+        width: 20%;
+      }
+      /* mobile */
+      @media all and (min-width: 0) and (max-width: 480px) {
+        .grid-ctn {
+          flex-flow: column nowrap;
+        }
+
+        .grid-box {
+          width: 100%;
+        }
+      }
+      /* tablet-small-landscape */
+      @media all and (min-width: 481px) and (max-width: 840px) {
+        .grid-box {
+          width: 50%;
+        }
+      }
+
+      /* small desktop */
+      @media all and (min-width: 841px) and (max-width: 1024px) {
+        .grid-box {
+          width: 33%;
+        }
+      }
+
+      @media all and (min-width: 1025px) and (max-width: 1280px) {
+        .grid-box {
+          width: 25%;
+        }
+      }
+
+      @media all and (min-width: 1281px) and (max-width: 1480px) {
+        .grid-box {
+          width: 20%;
+        }
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -90,9 +111,9 @@ Contributors:
       <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
       </nuxeo-document-content-view-controls>
 
-      <div id="dropzone" class="bubbleBoxes">
+      <div id="dropzone" class="grid-ctn bubbleBoxes">
         <template is="dom-repeat" items="[[currentPage]]">
-          <nuxeo-document-listing-thumbnail doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
+          <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
         </template>
       </div>
     </div>

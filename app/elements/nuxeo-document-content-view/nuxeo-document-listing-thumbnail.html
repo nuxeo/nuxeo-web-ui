@@ -26,39 +26,44 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
       .bubbleBox {
-        box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-        display: inline-block;
-        vertical-align: top;
+        display: block;
         margin: 0 .4em .8em;
-        width: 220px;
         position: relative;
         background-color: #fff;
-        padding: .4em .4em .8em;
+        padding: 0;
       }
 
       .thumbnailContainer {
         background-color: #fafafa;
         border-radius: 3px 3px 0 0;
-        width: 220px;
-        height: 218px;
+        width: 100%;
+        min-height: 200px;
+      }
+
+      .dataContainer {
+        padding: .3em .8em;
+      }
+
+      .dataContainer p {
+        margin: 0 0 .4em;
+        font-size: .8em;
       }
 
       input[type="checkbox"] {
         position: absolute;
-        top: 13px;
-        left: 10px;
+        top: 10px;
+        left: 8px;
+        width: auto;
       }
 
-      a {
+      a.title {
         font-size: 20px;
-        text-decoration: none;
-        line-height: 40px;
-      }
-
-      @media (max-width: 489px) {
-        div.bubbleBox {
-          width: calc(100% - 16px);
-        }
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        margin-bottom: .4em;
       }
 
     </style>
@@ -70,9 +75,9 @@ Contributors:
       <div>
         <input type="checkbox">
       </div>
-      <div>
-         <a on-click="handleClick">[[doc.title]]</a>
-         <p class="creator">[[_docType(doc)]]</p>
+      <div class="dataContainer">
+         <a class="title" on-click="handleClick">[[doc.title]]</a>
+         <p class="tag">[[_docType(doc)]]</p>
       </div>
     </div>
 
