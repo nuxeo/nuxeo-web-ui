@@ -33,15 +33,31 @@ Contributors:
         width: 100%;
       }
 
-      iframe {
+      #preview {
         border: none;
         height: 100%;
         width: 100%;
       }
     </style>
 
-    <iframe id="frame" src="[[_preview(document)]]"></iframe>
+    <!-- Our available preview templates. First match will be used -->
+    <template mime-pattern="image.*">
+      <img src$="[[blob.data]]">
+    </template>
 
+    <template mime-pattern="video.*">
+      <nuxeo-video-viewer controls>
+        <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
+          <source src="[[conversion.content.data]]" type="[[conversion.content.mime-type]]" />
+        </template>
+      </nuxeo-video-viewer>
+    </template>
+
+    <template mime-pattern="*">
+      <iframe id="frame" src="[[document.contextParameters.preview.url]]"></iframe>
+    </template>
+
+    <div id="preview"></div>
   </template>
   <script>
     (function() {
@@ -49,16 +65,40 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-preview',
-
+        behaviors: [Polymer.Templatizer],
         properties: {
-          document: Object
-        },
-
-        _preview: function() {
-          if (this.document) {
-            return this.document.contextParameters.preview.url;
+          document: {
+            type: Object,
+            observer: '_updatePreview'
           }
         },
+
+        _updatePreview: function() {
+          // clear current previewer
+          while (this.$.preview.firstChild) {
+            this.$.preview.removeChild(this.$.preview.firstChild);
+          }
+
+          // fetch the main blob
+          var blob = this.document && this.document.properties['file:content'];
+          if (!blob) {
+            return;
+          }
+
+          // lookup the preview according to the blob's mimetype
+          var previewers = this.querySelectorAll("template");
+          for (var i = 0; i < previewers.length; i++) {
+            var previewer = previewers[i];
+            var regex = new RegExp(previewer.getAttribute("mime-pattern"));
+            if (blob['mime-type'].match(regex)) {
+              // Insert our previewer
+              this.templatize(previewer);
+              var instance = this.stamp({document: this.document, blob: blob});
+              this.$.preview.appendChild(instance.root);
+              break;
+            }
+          }
+        }
 
       });
     })();

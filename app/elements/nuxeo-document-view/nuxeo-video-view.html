@@ -1,0 +1,133 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-video-view`
+@group Nuxeo UI
+@element nuxeo-video-view
+-->
+<dom-module id="nuxeo-video-view">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .properties {
+        -moz-column-width: 25em; /* Firefox */
+        -webkit-column-width: 25em; /* webkit, Safari, Chrome */
+        column-width: 25em;
+        column-count: 3;
+        -moz-column-count: 3; /* Firefox */
+        -webkit-column-count: 3; /* webkit, Safari, Chrome */
+      }
+
+      .properties label {
+        width: 10em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
+      .item label {
+        color: #999;
+      }
+
+      .title {
+        font-size: 1.64rem;
+      }
+    </style>
+
+    <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+    <div class="card-content">
+      <p class="title">
+        <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
+      </p>
+    </div>
+    <div class="card-content sep">
+      <div class="properties">
+        <div class="item">
+          <label>Format</label>
+          [[document.properties.vid:info.format]]
+        </div>
+        <div class="item">
+          <label>Duration</label>
+          [[document.properties.vid:info.duration]]
+        </div>
+        <div class="item">
+          <label>Width</label>
+          [[document.properties.vid:info.width]]
+        </div>
+        <div class="item">
+          <label>Height</label>
+          [[document.properties.vid:info.height]]
+        </div>
+        <div class="item">
+          <label>Frame Rate</label>
+          [[document.properties.vid:info.frameRate]]
+        </div>
+      </div>
+    </div>
+    <div class="card-content sep">
+      <p class="title">Conversions</p>
+      <div class="conversions">
+        <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
+          <div class="item">
+            <label class="layout flex-2">[[conversion.name]]</label>
+            <span class="layout flex-2">[[conversion.info.width]] x [[conversion.info.height]]</span>
+            <span class="layout flex">[[_formatSize(conversion.content.length)]]</span>
+            <a href="[[conversion.content.data]]" title="download">
+              <iron-icon icon="icons:file-download"></iron-icon>
+            </a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-video-view',
+        properties: {
+          document: {
+            type: Object,
+            notify: true
+          }
+        },
+        _formatSize: function(size) {
+          if (size > 1048576) {
+            return parseFloat(size / 1048576).toFixed(2) + ' MB';
+          } else if (size > 1024) {
+            return parseFloat(size / 1024).toFixed(2) + ' KB';
+          } else {
+            return size + ' B';
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

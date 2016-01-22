@@ -8,6 +8,7 @@
     "nuxeo-elements": "nuxeo/nuxeo-elements#master",
     "nuxeo-document-permissions": "nuxeo/nuxeo-document-permissions#master",
     "nuxeo-document-distribution-chart": "nuxeo/nuxeo-document-distribution-chart#master",
+    "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#master",
     "page": "visionmedia/page.js#~1.6.4",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
