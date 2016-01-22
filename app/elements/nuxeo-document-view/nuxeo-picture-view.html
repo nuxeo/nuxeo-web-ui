@@ -28,89 +28,32 @@ Contributors:
         display: block;
       }
 
+      .properties {
+        -moz-column-width: 25em; /* Firefox */
+        -webkit-column-width: 25em; /* webkit, Safari, Chrome */
+        column-width: 25em;
+        column-count: 3;
+        -moz-column-count: 3; /* Firefox */
+        -webkit-column-count: 3; /* webkit, Safari, Chrome */
+      }
+
+      .properties label {
+        width: 10em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
+      .item label {
+        color: #999;
+      }
+
       .title {
         font-size: 1.64rem;
-        word-wrap: break-word;
-        white-space: normal;
-      }
-
-      .additional {
-        font-size: 1.64rem;
-      }
-
-      .propkey {
-        color: #999;
-        width: 15%;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-        box-sizing: inherit;
-      }
-
-      .propvalue {
-        width: 35%;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-        box-sizing: inherit;
-      }
-
-      .proptable {
-        padding-top: 1rem;
-        box-sizing: border-box;
-      }
-
-
-      .row {
-        margin-bottom: 1rem;
-        box-sizing: inherit;
-      }
-
-      .viewname {
-        color: #999;
-        width: 15%;
-        box-sizing: inherit;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .viewdim {
-        width: 30%;
-        box-sizing: inherit;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .viewsize {
-        color: #999;
-        width: 15%;
-        box-sizing: inherit;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .viewformat {
-        width: 30%;
-        box-sizing: inherit;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .viewdl {
-        width: 10%;
-        box-sizing: inherit;
-        padding-right: 0.8rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-
-      .viewdla {
-        color: inherit;
-        text-decoration: none;
       }
 
       nuxeo-document-preview {
@@ -125,39 +68,41 @@ Contributors:
       </p>
     </div>
     <div class="card-content sep">
-      <div class="proptable vertical layout">
-        <div class="row horizontal layout">
-          <span class="propkey">Dimensions</span>
-          <span class="propvalue">[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</span>
-          <span class="propkey">Format</span>
-          <span class="propvalue">[[document.properties.picture:info.format]]</span>
+      <div class="properties">
+        <div class="item">
+          <label>Dimensions</label>
+          [[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]
         </div>
-        <div class="row horizontal layout">
-          <span class="propkey">Color Profile</span>
-          <span class="propvalue">[[document.properties.picture:info.colorSpace]]</span>
-          <span class="propkey">Bit Depth</span>
-          <span class="propvalue">[[document.properties.picture:info.depth]]</span>
+        <div class="item">
+          <label>Format</label>
+          [[document.properties.picture:info.format]]
         </div>
-        <div class="row horizontal layout">
-          <span class="propkey">Weight</span>
-          <span class="propvalue">[[_formatSize(document.properties.common:size)]]</span>
+        <div class="item">
+          <label>Color Profile</label>
+          [[document.properties.picture:info.colorSpace]]
+        </div>
+        <div class="item">
+          <label>Bit Depth</label>
+          [[document.properties.picture:info.depth]]
+        </div>
+        <div class="item">
+          <label>Weight</label>
+          [[_formatSize(document.properties.common:size)]]
         </div>
       </div>
     </div>
     <div class="card-content sep">
-      <p class="additional">Additional Formats</p>
-      <div class="proptable vertical layout">
+      <p class="title">Additional Formats</p>
+      <div>
         <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
-          <div class="row horizontal layout">
-            <span class="viewname">[[item.name]]</span>
-            <span class="viewdim">[[item.dimensions]]</span>
-            <span class="viewsize">[[item.size]]</span>
-            <span class="viewformat">[[item.format]]</span>
-            <span  class="viewdl">
-              <a href="[[item.data]]" title="download" class="viewdla">
-                <iron-icon icon="icons:file-download"></iron-icon>
-              </a>
-            </span>
+          <div class="item">
+            <label class="layout flex">[[item.name]]</label>
+            <span class="layout flex-2">[[item.dimensions]]</span>
+            <span class="layout flex">[[item.size]]</span>
+            <span class="layout flex">[[item.format]]</span>
+            <a href="[[item.data]]" title="download" class="viewdla">
+              <iron-icon icon="icons:file-download"></iron-icon>
+            </a>
           </div>
         </template>
       </div>

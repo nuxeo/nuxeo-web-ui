@@ -28,91 +28,64 @@ Contributors:
         display: block;
       }
 
-      .docinfo {
-        padding: 0.75rem;
-        box-sizing: border-box;
-      }
-
-      .mainfile {
-        padding: 2rem;
-      }
-
-      .mainfilename {
+      .title {
         color: #039be5;
         font-size: 1.5rem;
-        padding: 1rem 0rem;
       }
 
-      .icon {
-        vertical-align: middle;
-      }
-
-      .attachcontainer {
+      .attachments {
         border-top: 1px dashed #ddd;
         background-color: #fafafd;
-        padding: 2rem;
       }
 
-      .attchtitle {
-        color: #213f7d;
-        font-size: 1.64rem;
-        padding-bottom: 1rem;
-      }
-
-      .attachment {
+      .item {
+        @apply(--layout-vertical);
         padding: 0.5rem 0rem;
       }
 
-      .attachname {
+      .item label {
         color: #039be5;
         font-size: 1.2rem;
       }
 
-      .attchsize {
+      .item span {
         font-size: 0.8rem;
         color: #999;
       }
 
-      .addfiles {
+      .droparea {
         border-top: 1px solid #e8e8e8;
         margin: 1rem 0;
         padding-top: 2rem;
         color: #a8a8a8;
         text-align: center;
       }
-
-      .preview-container {
-        height: 600px;
-        width: 100%;
-      }
     </style>
 
-    <div class="vertical layout mainfile">
-      <div class="preview-container layout vertical">
-        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-      </div>
-      <a href="[[document.properties.file:content.data]]">
-        <div class="horizontal layout center mainfilename">
-          <iron-icon icon="editor:insert-drive-file" class="icon"></iron-icon>
+    <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+    <div class="card-content">
+      <p class="title">
+        <a href="[[document.properties.file:content.data]]">
+          <iron-icon icon="editor:insert-drive-file"></iron-icon>
           [[document.title]]
-        </div>
-      </a>
+        </a>
+      </p>
       <span>[[_formatSize(document.properties.common:size)]]</span>
     </div>
-    <div class="vertical layout attachcontainer">
-      <div class="horizontal layout center attchtitle">
-        <iron-icon icon="editor:attach-file" class="icon"></iron-icon>
+    <div class="card-content attachments">
+      <p class="title">
+        <iron-icon icon="editor:attach-file"></iron-icon>
         Attachments
-      </div>
-      <div class="vertical layout">
+      </p>
+      <div>
         <template is="dom-repeat" items="[[document.properties.files:files]]">
-          <div class="vertical layout attachment">
-            <a href="[[item.file.data]]" class="attachname">[[item.filename]]</a>
-            <span class="attchsize">[[_formatSize(item.file.length)]]</span>
+          <div class="item">
+            <a href="[[item.file.data]]">[[item.filename]]</a>
+            <span>[[_formatSize(item.file.length)]]</span>
           </div>
         </template>
       </div>
-      <div class="addfiles">
+      <div class="droparea">
         + Complete the document with additional files
       </div>
     </div>
