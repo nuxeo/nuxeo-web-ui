@@ -93,10 +93,10 @@ Contributors:
           }
 
           // lookup the preview according to the blob's mimetype
-          var previewers = this.querySelectorAll("template");
+          var previewers = this.querySelectorAll('template');
           for (var i = 0; i < previewers.length; i++) {
             var previewer = previewers[i];
-            var regex = new RegExp(previewer.getAttribute("mime-pattern"));
+            var regex = new RegExp(previewer.getAttribute('mime-pattern'));
             if (blob['mime-type'].match(regex)) {
               // Insert our previewer
               this.templatize(previewer);
