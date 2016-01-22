@@ -37,7 +37,7 @@ Contributors:
         background-color: #fafafa;
         border-radius: 3px 3px 0 0;
         width: 100%;
-        min-height: 200px;
+        min-height: 190px;
       }
 
       .dataContainer {
@@ -46,7 +46,7 @@ Contributors:
 
       .dataContainer p {
         margin: 0 0 .4em;
-        font-size: .8em;
+        font-size: .75em;
       }
 
       input[type="checkbox"] {
@@ -56,14 +56,8 @@ Contributors:
         width: auto;
       }
 
-      a.title {
-        font-size: 20px;
-        width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: block;
-        margin-bottom: .4em;
+      .title {
+        font-size: 1.05em;
       }
 
     </style>
@@ -76,7 +70,7 @@ Contributors:
         <input type="checkbox">
       </div>
       <div class="dataContainer">
-         <a class="title" on-click="handleClick">[[doc.title]]</a>
+         <a class="title ellipsis" on-click="handleClick">[[doc.title]]</a>
          <p class="tag">[[_docType(doc)]]</p>
       </div>
     </div>

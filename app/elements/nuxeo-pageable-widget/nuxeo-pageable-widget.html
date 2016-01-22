@@ -52,7 +52,7 @@ Contributors:
       </div>
       <template is="dom-repeat" items="[[page]]">
         <div class="doctable-row horizontal layout">
-          <a href="[[_href(item)]]" class="flex">[[item.properties.dc:title]]</a>
+          <a href="[[_href(item)]]" class="flex ellipsis">[[item.properties.dc:title]]</a>
           <span class="flex">[[_formatDate(item.properties.dc:modified)]]</span>
           <a href="nuxeo/users/[[item.properties.dc:lastContributor]]" class="flex">[[item.properties.dc:lastContributor]]</a>
           <span class="flex">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</span>
