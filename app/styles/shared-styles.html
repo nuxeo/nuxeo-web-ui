@@ -19,7 +19,7 @@
       Page Layout elements
       -- */
       .end-space {
-        padding-bottom: 4em;
+        margin-bottom: 4em;
       }
 
       ::content .sep {
@@ -84,6 +84,29 @@
       paper-menu paper-item > *,
       paper-menu paper-icon-item > * {
         pointer-events: none;
+      }
+
+      /* --
+      Buttons
+      -- */
+      paper-button:hover,
+      paper-button:focus {
+        color: var(--branding-link-hover-color);
+      }
+
+      paper-button.primary {
+        background-color: var(--nuxeo-button-primary);
+        color: #fff;
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        background-color: var(--nuxeo-button-primary-focus);
+        color: #fff !important;
+      }
+
+      paper-button.disabled {
+        color: white;
       }
 
       /* --

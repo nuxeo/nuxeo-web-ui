@@ -25,8 +25,21 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         display: block;
-        padding: 20px;
-        width: 800px;
+        width: 100%;
+      }
+
+      paper-card {
+        display: block;
+        max-width: 50em;
+        margin: auto;
+      }
+
+      .card-content {
+        padding: 2em;
+      }
+
+      .card-actions {
+        padding: 1em 2em;
       }
 
       .label-container {
@@ -54,22 +67,28 @@ Contributors:
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-    <form id="form" is="iron-form" action="/">
-      <div id="document-edit">
-        <!-- Dynamic layout element will be inserted here -->
-        <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
-      </div>
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>Change Comment</label>
+    <paper-card class="end-space">
+      <form id="form" is="iron-form" action="/">
+        <div class="card-content">
+          <div id="document-edit">
+            <!-- Dynamic layout element will be inserted here -->
+            <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+          </div>
+          <div class="row layout horizontal">
+            <div class="label-container">
+              <label>Change Comment</label>
+            </div>
+            <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip')]]"></nuxeo-help>
+            <textarea id="comment" class="flex"></textarea>
+          </div>
+          <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
         </div>
-        <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip')]]"></nuxeo-help>
-        <textarea id="comment" class="flex"></textarea>
-      </div>
-      <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
-      <button on-click="_save">Submit</button>
-      <button on-click="_cancel">Cancel</button>
-    </form>
+        <div class="card-actions">
+          <paper-button class="primary" on-click="_save">Submit</paper-button>
+          <paper-button on-click="_cancel">Cancel</paper-button>
+        </div>
+      </form>
+    </paper-card>
 
   </template>
   <script>
