@@ -52,5 +52,7 @@
   "label.document.type.picture": "Picture",
   "label.document.type.folder": "Folder",
   "label.document.type.workspace": "Workspace",
-  "label.home.dashboard": "Dashboard"
+  "label.home.dashboard": "Dashboard",
+
+  "label.admin.repo": "Repository"
 }
