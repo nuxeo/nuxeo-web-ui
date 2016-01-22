@@ -4,7 +4,7 @@
     <style>
       /* --
       Global styles
-      --*/
+      -- */
       body {
         background: #fafafa;
         font-family: 'Open Sans', 'Roboto', Helvetica, Arial, sans-serif;
@@ -16,8 +16,19 @@
       }
 
       /* --
+      Page Layout elements
+      -- */
+      .end-space {
+        padding-bottom: 4em;
+      }
+
+      ::content .sep {
+        border-top: 1px solid #e8e8e8;
+      }
+
+      /* --
       Header page and Header subview
-      --*/
+      -- */
       paper-header-panel {
         --paper-header-panel-shadow: {
           box-shadow: inset 0px 3px 3px -3px rgba(0, 0, 0, 0.4);
@@ -31,7 +42,7 @@
 
       /* --
       Sidebar
-      --*/
+      -- */
       #sidebar {
         float: left;
         height: calc(100vh);
@@ -58,7 +69,7 @@
 
       /* --
       Navigation, Links & Dropdown list
-      --*/
+      -- */
       ::content a {
         color: var(--branding-link-color);
         text-decoration: none;
@@ -77,7 +88,7 @@
 
       /* --
       Cards
-      --*/
+      -- */
       paper-card {
         --paper-card: {
           box-shadow: none !important;
@@ -86,14 +97,21 @@
         };
       }
 
-
-      ::content .sep {
-        border-top: 1px solid #e8e8e8;
+      /* --
+      Text helpers
+      -- */
+      .ellipsis {
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        margin-bottom: .5em;
       }
 
       /* --
       Labels, Messages & Tooltips
-      --*/
+      -- */
       label {
         font-weight: bold;
       }
@@ -105,7 +123,7 @@
         color: var(--branding-tag-text);
         padding: .2rem .4rem;
         margin: 0 .3em .1em 0;
-        font-size: .8em;
+        font-size: .7em;
         border-radius: 2px;
       }
 
@@ -137,7 +155,7 @@
 
       /* --
       Alloy Editor toolbar
-      --*/
+      -- */
       .ae-ui {
         z-index: 200;
       }
