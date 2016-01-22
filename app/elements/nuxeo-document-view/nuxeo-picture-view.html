@@ -113,14 +113,12 @@ Contributors:
         text-decoration: none;
       }
 
-      img {
-        max-width:100%;
-        max-height:100%;
+      nuxeo-document-preview {
+        height: 600px;
       }
-
     </style>
 
-    <img src$="[[document.properties.file:content.data]]">
+    <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     <div class="card-content">
       <p class="title">
         <a href="[[document.properties.file:content.data]]">[[document.title]]</a>

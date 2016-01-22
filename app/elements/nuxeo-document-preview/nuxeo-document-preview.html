@@ -29,8 +29,6 @@ Contributors:
     <style>
       :host {
         display: block;
-        height: 100%;
-        width: 100%;
       }
 
       #preview {
@@ -38,11 +36,20 @@ Contributors:
         height: 100%;
         width: 100%;
       }
+
+      nuxeo-image-viewer {
+        height: 100%;
+        --nuxeo-image-viewer-height: 100%;
+      }
+
     </style>
 
     <!-- Our available preview templates. First match will be used -->
     <template mime-pattern="image.*">
-      <img src$="[[blob.data]]">
+      <nuxeo-image-viewer src="[[document.properties.file:content.data]]"
+                          controls
+                          responsive>
+      </nuxeo-image-viewer>
     </template>
 
     <template mime-pattern="video.*">
@@ -99,7 +106,6 @@ Contributors:
             }
           }
         }
-
       });
     })();
   </script>
