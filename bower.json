@@ -2,20 +2,21 @@
   "name": "nuxeo-web-ui",
   "private": true,
   "dependencies": {
+    "alloyeditor": "~0.7.5",
     "app-layout": "PolymerLabs/app-layout#0.0.6",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
+    "jsPlumb": "~2.0.5",
+    "marked-element": "PolymerElements/marked-element#~1.1.1",
+    "moment": "~2.10.6",
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",
-    "nuxeo-elements": "nuxeo/nuxeo-elements#master",
     "nuxeo-document-permissions": "nuxeo/nuxeo-document-permissions#master",
     "nuxeo-document-distribution-chart": "nuxeo/nuxeo-document-distribution-chart#master",
+    "nuxeo-elements": "nuxeo/nuxeo-elements#master",
     "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#master",
     "page": "visionmedia/page.js#~1.6.4",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
     "polymer": "Polymer/polymer#^1.1.0",
-    "moment": "~2.10.6",
-    "jsPlumb": "~2.0.5",
-    "alloyeditor": "~0.7.5"
   },
   "devDependencies": {
     "web-component-tester": "*"

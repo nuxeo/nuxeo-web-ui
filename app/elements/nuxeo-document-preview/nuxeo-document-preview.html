@@ -42,13 +42,14 @@ Contributors:
         --nuxeo-image-viewer-height: 100%;
       }
 
+      .markdown-html {
+        background-color: white;
+      }
     </style>
 
     <!-- Our available preview templates. First match will be used -->
     <template mime-pattern="image.*">
-      <nuxeo-image-viewer src="[[document.properties.file:content.data]]"
-                          controls
-                          responsive>
+      <nuxeo-image-viewer src="[[blob.data]]" controls responsive>
       </nuxeo-image-viewer>
     </template>
 
@@ -60,7 +61,13 @@ Contributors:
       </nuxeo-video-viewer>
     </template>
 
-    <template mime-pattern="*">
+    <template mime-pattern="text/(?:.*-)?markdown">
+      <marked-element markdown="[[blob.data]]">
+        <div class="markdown-html"></div>
+      </marked-element>
+    </template>
+
+    <template mime-pattern=".*">
       <iframe id="frame" src="[[document.contextParameters.preview.url]]"></iframe>
     </template>
 
@@ -74,9 +81,32 @@ Contributors:
         is: 'nuxeo-document-preview',
         behaviors: [Polymer.Templatizer],
         properties: {
-          document: {
-            type: Object,
-            observer: '_updatePreview'
+          document: Object,
+          blob: Object,
+          xpath: {
+            type: String,
+            value: 'file:content'
+          }
+        },
+
+        observers: [
+          '_updateBlob(document, xpath)'
+        ],
+
+        _updateBlob: function() {
+          // Adapt the Note to mimic a Blob
+          if (this.document.type === 'Note') {
+            this.blob = {
+              data: this.document.properties['note:note'],
+              'mime-type': this.document.properties['note:mime_type']
+            };
+          } else {
+            // by default just use the field at xpath as a Blob
+            this.blob = this.document && this.document.properties[this.xpath];
+          }
+          // Update our previewer
+          if (this.blob) {
+            this._updatePreview();
           }
         },
 
@@ -86,21 +116,18 @@ Contributors:
             this.$.preview.removeChild(this.$.preview.firstChild);
           }
 
-          // fetch the main blob
-          var blob = this.document && this.document.properties['file:content'];
-          if (!blob) {
-            return;
-          }
-
           // lookup the preview according to the blob's mimetype
           var previewers = this.querySelectorAll('template');
           for (var i = 0; i < previewers.length; i++) {
             var previewer = previewers[i];
             var regex = new RegExp(previewer.getAttribute('mime-pattern'));
-            if (blob['mime-type'].match(regex)) {
+            if (this.blob['mime-type'].match(regex)) {
               // Insert our previewer
               this.templatize(previewer);
-              var instance = this.stamp({document: this.document, blob: blob});
+              var instance = this.stamp({
+                document: this.document,
+                blob: this.blob
+              });
               this.$.preview.appendChild(instance.root);
               break;
             }

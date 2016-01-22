@@ -104,7 +104,7 @@ Contributors:
         </div>
       </template>
       <template is="dom-if" if="[[!_isHTML(document)]]">
-        <pre>[[document.properties.note:note]]</pre>
+        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
       </template>
     </div>
     <div class="vertical layout attachcontainer">
