@@ -28,16 +28,6 @@ Contributors:
         @apply(--layout-flex);
       }
 
-      .container {
-        padding: 20px;
-        width: 800px;
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-      }
-
       textarea {
         background: none #fff;
         border: 1px solid #c6c6c6;
@@ -50,9 +40,8 @@ Contributors:
         padding: 0.5em;
       }
 
-      .row {
-        margin-bottom: 1rem;
-        box-sizing: inherit;
+      paper-card {
+        @apply(--paper-card);
       }
 
       .sideinfo {
@@ -60,16 +49,12 @@ Contributors:
         box-sizing: border-box;
       }
 
-      paper-card {
-        @apply(--paper-card);
-      }
-
-      .sidecard {
+      .sideinfo paper-card {
         padding: 1.5em;
         margin-bottom: 1em;
       }
 
-      .sidecard p.title {
+      .title {
         margin: 0;
         font-size: 1.1em;
         padding-bottom: .5em;
@@ -82,10 +67,6 @@ Contributors:
 
       .docreator {
         font-size: 1.2rem;
-      }
-
-      .content {
-        padding: 0.75rem 0;
       }
 
       .startbutton {
@@ -144,65 +125,63 @@ Contributors:
           </paper-card>
         </template>
         <paper-card class="sidecard">
-          <div class="">
-            <div class="horizontal layout wrap">
-              <div class="description ctn">[[document.properties.dc:description]]</div>
-              <div class="ctn">
-                <span class="state tag">[[document.state]]</span>
-                <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
-              </div>
-              <div class="contributors ctn">
-                <nuxeo-document-users users="[[document.properties.dc:contributors]]">
-                </nuxeo-document-users>
-              </div>
+          <div class="horizontal layout wrap">
+            <div class="description ctn">[[document.properties.dc:description]]</div>
+            <div class="ctn">
+              <span class="state tag">[[document.state]]</span>
+              <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+            </div>
+            <div class="contributors ctn">
+              <nuxeo-document-users users="[[document.properties.dc:contributors]]">
+              </nuxeo-document-users>
             </div>
           </div>
         </paper-card>
         <paper-card class="sidecard">
-          <div class="">
-            <div class="vertical layout">
-              <span class="docreator">Created by <a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
-              <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
-              [[document.properties.dc:creator]]</a></span>
-              <p>on [[_formatDate(document.properties.dc:created)]]</p>
-            </div>
+          <div class="vertical layout">
+            <span class="docreator">Created by <a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
+            <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
+            [[document.properties.dc:creator]]</a></span>
+            <p>on [[_formatDate(document.properties.dc:created)]]</p>
           </div>
         </paper-card>
         <template is="dom-if" if="[[canStartProcess]]">
           <paper-card class="sidecard">
-            <div class="">
-              <p class="title">Process</p>
-              <div class="vertical layout card-content">
-                <div>
-                  <paper-dropdown-menu label="Start a process">
-                    <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
-                      <template is="dom-repeat" items="[[processes]]" as="process">
-                        <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
-                      </template>
-                    </paper-menu>
-                  </paper-dropdown-menu>
-                </div>
-                <div>
-                  <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
-                </div>
+            <p class="title">Process</p>
+            <div class="vertical layout card-content">
+              <div>
+                <paper-dropdown-menu label="Start a process">
+                  <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+                    <template is="dom-repeat" items="[[processes]]" as="process">
+                      <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
+                    </template>
+                  </paper-menu>
+                </paper-dropdown-menu>
+              </div>
+              <div>
+                <paper-button class="startbutton" on-tap="_startProcess">Start</paper-button>
               </div>
             </div>
           </paper-card>
         </template>
-        <paper-card class="sidecard">
-          <div class="">
-            <p class="title">Tags</p>
+        <template is="dom-if" if="[[_hasCollections(document)]]">
+          <paper-card class="sidecard">
+            <p class="title">Collections</p>
             <div class="horizontal layout wrap card-content">
-              <nuxeo-document-tags class="tags"></nuxeo-document-tags>
+              <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
             </div>
+          </paper-card>
+        </template>
+        <paper-card class="sidecard">
+          <p class="title">Tags</p>
+          <div class="horizontal layout wrap card-content">
+            <nuxeo-document-tags></nuxeo-document-tags>
           </div>
         </paper-card>
         <paper-card class="sidecard">
-          <div class="">
-            <p class="title">Activity</p>
-            <div class="vertical layout card-content audit">
-              <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
-            </div>
+          <p class="title">Activity</p>
+          <div class="vertical layout card-content audit">
+            <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
           </div>
         </paper-card>
       </div>
@@ -345,6 +324,14 @@ Contributors:
               workflowsRequest.get();
             }
           });
+        },
+
+        _hasCollections: function() {
+          if (this.document) {
+            var collections = this.document.properties['collectionMember:collectionIds'];
+            return collections && collections.length > 0;
+          }
+          return false;
         }
       });
     })();

@@ -83,7 +83,7 @@ Contributors:
           'collection': evt.currentTarget.dataset.uid
         };
         op.execute().then(function() {
-          this.$.toast.text = "Document removed from Collection.";
+          this.$.toast.text = 'Document removed from Collection.';
           this.$.toast.open();
           this.fire('documentUpdated');
         }.bind(this));
