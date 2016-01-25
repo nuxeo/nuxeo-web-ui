@@ -110,6 +110,21 @@ Contributors:
           display: flex;
         }
       }
+
+      .label-container {
+        position: relative;
+        width: 150px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
+      }
+
+      nuxeo-select2 {
+        width: 250px;
+      }
     </style>
 
     <!-- Left sidebar -->
@@ -162,7 +177,7 @@ Contributors:
           <div class="horizontal flex layout end-justified actions">
             <template is="dom-if" if="[[_canViewAsCollectionMember(document)]]">
               <!--Add to Collection-->
-              <paper-icon-button icon="icons:book" id="addColBut"></paper-icon-button>
+              <paper-icon-button icon="icons:book" id="addColBut" on-tap="toggleCollectionDialog"></paper-icon-button>
               <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
               <!--Add/Remove from Favorites-->
               <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-favorites-toggle-button>
@@ -203,6 +218,7 @@ Contributors:
       </paper-header>
 
       <div class="content">
+        <paper-toast id="toast"></paper-toast>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
             <template is="dom-if" if="[[document]]">
@@ -228,6 +244,29 @@ Contributors:
                 </div>
               </paper-dialog>
             </template>
+
+            <paper-dialog id="collectionDialog" with-backdrop>
+              <h1>Add to Collection</h1>
+              <div class="layout horizontal">
+                <div class="label-container">
+                  <label>Collections</label>
+                  <span class="required">*</span>
+                </div>
+                <nuxeo-select2 operation="Collection.Suggestion"
+                               min-chars="0"
+                               placeholder="Select a Collection..."
+                               value="{{collection}}">
+                </nuxeo-select2>
+                <nuxeo-operation op="Document.AddToCollection"
+                                 input="[[document.uid]]"
+                                 id="addToCollectionOp">
+                </nuxeo-operation>
+              </div>
+              <div class="buttons">
+               <paper-button dialog-dismiss>Cancel</paper-button>
+               <paper-button on-tap="_addToCollection">Add to Collection</paper-button>
+              </div>
+            </paper-dialog>
 
             <template is="dom-if" if="[[_canViewContent(document)]]">
               <nuxeo-document-content-view provider-name="document_content"
@@ -340,19 +379,20 @@ Contributors:
         },
 
         togglePreviewDialog: function() {
-          var element = document.getElementById('previewDialog');
-          element.toggle();
+          this.$$('#previewDialog').toggle();
         },
 
         toggleExportDialog: function() {
-          var element = document.getElementById('exportDialog');
-          element.toggle();
+          this.$$('#exportDialog').toggle();
         },
 
         toggleShareDialog: function() {
-          var element = document.getElementById('shareDialog');
-          element.toggle();
+          this.$$('#shareDialog').toggle();
           this.$$('#docPermalink').inputElement.select();
+        },
+
+        toggleCollectionDialog: function() {
+          this.$$('#collectionDialog').toggle();
         },
 
         toggleClipboard: function() {
@@ -415,6 +455,25 @@ Contributors:
 
         _buildPermalink: function(document) {
           return location.origin + location.pathname + '#!/doc/' + document.uid;
+        },
+
+        _addToCollection: function() {
+          if (this.collection) {
+            var op = this.$$('#addToCollectionOp');
+            op.params = {
+              'collection': this.collection
+            };
+            op.execute().then(function() {
+              this.toggleCollectionDialog();
+              this._toast('Document added to Collection.');
+              this.collection = '';
+            }.bind(this));
+          }
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
         }
 
       });
