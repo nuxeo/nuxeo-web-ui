@@ -5,7 +5,7 @@
     "alloyeditor": "~0.7.5",
     "app-layout": "PolymerLabs/app-layout#0.0.6",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
-    "jsPlumb": "~2.0.5",
+    "jsPlumb": "2.0.4",
     "marked-element": "PolymerElements/marked-element#~1.1.1",
     "moment": "~2.10.6",
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",

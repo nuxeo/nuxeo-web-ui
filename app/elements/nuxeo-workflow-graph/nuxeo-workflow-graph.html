@@ -13,9 +13,11 @@ Lesser General Public License for more details.
 
 Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
+    Nelson Silva <nsilva@nuxeo.com>
 -->
 
-<script src="../../bower_components/jsPlumb/dist/js/jsPlumb-2.0.5.js"></script>
+<!-- Note: support for user supplied segments was removed in 2.0.5 -->
+<script src="../../bower_components/jsPlumb/dist/js/jsPlumb-2.0.4.js"></script>
 
 <!--
 `nuxeo-workflow-graph`
@@ -29,8 +31,14 @@ Contributors:
         display: block;
       }
 
-      ::content .workflow_node {
+      #graph {
         position: relative;
+        width: 880px;
+        height: 720px;
+      }
+
+      ::content .workflow_node {
+        position: absolute;
         text-align: center;
         font-size: .92em;
         z-index: 100;
@@ -110,28 +118,22 @@ Contributors:
         transform: none !important;
       }
 
-      .targetDiv {
-        position: relative;
-        width: 880px;
-        height: 720px;
-      }
 
-      ::content ._jsPlumb_endpoint {
+      ::content .jsplumb-endpoint {
         z-index: 110;
       }
 
-      ::content ._jsPlumb_overlay {
+      ::content .jsplumb-overlay {
         z-index: 6;
       }
     </style>
 
-    <nuxeo-resource id="graphRequest"
+    <nuxeo-resource auto
                     path="/workflow/[[workflow.id]]/graph"
-                    response="{{graphResponse}}"
+                    response="{{graph}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
-    <div id="graph" class="targetDiv">
-    </div>
+    <div id="graph"></div>
   </template>
 
   <script>
@@ -140,10 +142,14 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-workflow-graph',
+        behaviors: [Polymer.IronResizableBehavior],
         properties: {
           workflow: {
             type: String,
-            observer: '_workflowChanged'
+          },
+
+          graph: {
+            type: Object
           },
 
           dynamicAnchors: {
@@ -180,34 +186,25 @@ Contributors:
               isSource: false,
               isTarget: true,
               reattach: true,
-              // without specifying this the targetEndpoint doesn't accept multiple
-              // connections
+              // without specifying this the targetEndpoint doesn't accept multiple connections
               maxConnections: -1
             }
           }
         },
 
-        _workflowChanged: function() {
-          var self = this;
-          this.$.graphRequest.get().then(function() {
-            jsPlumb.ready(function() {
-              self._jsPlumbInitializeDefault();
-              self._displayGraph();
-            });
-          });
+        observers: [
+          '_updateGraph(graph)'
+        ],
+
+        listeners: {
+          'iron-resize': '_resize'
         },
 
-        _countElement: function(item, array) {
-          var count = 0;
-          array.forEach(function(i, v) {
-            if (v === item) {
-              count++;
-            }
-          });
-          return count;
+        ready: function() {
+          this._initialize();
         },
 
-        _jsPlumbInitializeDefault: function() {
+        _initialize: function() {
           jsPlumb.importDefaults({
             DragOptions: {
               cursor: 'pointer',
@@ -234,81 +231,94 @@ Contributors:
           jsPlumb.setContainer(this.$.graph);
         },
 
-        _getConnectionOverlayLabel: function(colour, condition) {
-          return [['Arrow', {
-            location: 0.8
-          }, {
-            foldback: 0.9,
-            fillStyle: '#92e1aa',
-            width: 14
-          }], ['Label', {
-            label: '<span title="' + condition + '">' + condition + '</span>',
-            cssClass: 'workflow_connection_label',
-            location: 0.6
-          }]];
+        _transitionOverlay: function(transition) {
+          return [
+            ['Arrow', {location: 0.8}, {foldback: 0.9, fillStyle: '#92e1aa', width: 14}],
+            ['Label', {
+              label: '<span title="' + transition.label + '">' + transition.label + '</span>',
+              cssClass: 'workflow_connection_label',
+              location: 0.6
+            }]
+          ];
         },
 
-        _displayGraph: function() {
-          var self = this;
-          var graph = Polymer.dom(this.$.graph);
-          this.graphResponse.nodes.forEach(function(node) {
-            var element = self.$[node.id] = document.createElement('div');
-            element.id = node.id;
-            element.classList.add('workflow_node');
-            element.innerHTML = node.title;
-            element.style.display = 'block';
-            element.style.position = 'absolute';
+        _nodeClass: function(node) {
+          if (node.isStartNode) {
+            return 'workflow_start_node';
+          } else if (node.isEndNode) {
+            return 'workflow_end_node';
+          } else if (node.isMerge) {
+            return 'workflow_merge_node';
+          } else if (node.isMultiTask) {
+            return 'workflow_multiple_task';
+          } else if (node.hasSubWorkflow) {
+            return 'workflow_subworkflow_task';
+          } else {
+            return 'workflow_simple_task';
+          }
+        },
+
+        _updateGraph: function(data) {
+          if (!data) {
+            return;
+          }
+
+          // XXX: build these in the template
+          data.nodes.forEach(function(node) {
+            var element = this.create('div', {id: node.id, innerHTML: node.title});
             element.style.left = node.x + 'px';
             element.style.top = node.y + 'px';
 
-            if (node.isStartNode) {
-              element.classList.add('workflow_start_node');
-            } else if (node.isEndNode) {
-              element.classList.add('workflow_end_node');
-            } else if (node.isMerge) {
-              element.classList.add('workflow_merge_node');
-            } else if (node.isMultiTask) {
-              element.classList.add('workflow_multiple_task');
-            } else if (node.hasSubWorkflow) {
-              element.classList.add('workflow_subworkflow_task');
-            } else {
-              element.classList.add('workflow_simple_task');
-            }
+            element.classList.add('workflow_node');
+            element.classList.add(this._nodeClass(node));
             if (node.state === 'suspended') {
               element.classList.add('workflow_node_suspended');
             }
-
-            graph.appendChild(element);
-          });
-
-          Polymer.dom.flush();
+            this.$.graph.appendChild(element);
+          }.bind(this));
 
           // initialize connection source points
           var nodes = [];
 
           // determine number of source endpoints per node
           var sourceEndpoints = {};
-          this.graphResponse.transitions.forEach(function(transition) {
+          data.transitions.forEach(function(transition) {
             sourceEndpoints[transition.nodeSourceId] = (sourceEndpoints[transition.nodeSourceId] || 0) + 1;
           });
 
           // use fixed dynamic anchors, only 9 items supported, after this everything
           // is displayed on the center
-          this.graphResponse.transitions.forEach(function(transition) {
-            var anchorIndex = self._countElement(transition.nodeSourceId, nodes);
+          data.transitions.forEach(function(transition) {
+            var source = transition.nodeSourceId,
+                target = transition.nodeTargetId;
+
+            var anchorIndex = nodes.filter(function(v) { return v === source; }).length;
             if (anchorIndex > 9) {
               anchorIndex = 0;
             }
-            nodes.push(transition.nodeSourceId);
+            nodes.push(source);
+
             // determine anchors for transition node
-            var anchors = self.dynamicAnchors.slice(0, sourceEndpoints[transition.nodeSourceId]).sort();
-            // increase index
-            var endPointSource = jsPlumb.addEndpoint(transition.nodeSourceId, {
-              anchor: [anchors[anchorIndex], 1, 0, 1]
-            }, self.sourceEndpointOptions);
-            var endPointTarget = jsPlumb.addEndpoint(transition.nodeTargetId, {
-              anchor: 'TopCenter'
-            }, self.targetEndpointOptions);
+            var anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
+            // add endpoints
+            var endPointSource = this._addSourceEndpoint(source, anchors[anchorIndex]),
+                endPointTarget = this._addTargetEndpoint(target);
+
+            var connection = jsPlumb.connect({
+              connector: 'Flowchart',
+              source: endPointSource,
+              target: endPointTarget,
+              overlays: this._transitionOverlay(transition),
+              paintStyle: {
+                lineWidth: 3,
+                strokeStyle: this.connectionColors[anchorIndex],
+                outlineWidth: 2,
+                outlineColor: 'white',
+                joinstyle: 'round'
+              },
+              detachable: false
+            });
+
             // prepare the transition's path
             // ignore paths with only one segment
             var segments = [];
@@ -319,29 +329,24 @@ Contributors:
                   end: [transition.path[i].x, transition.path[i].y]
                 });
               }
+              connection.connector.setPath(segments);
             }
-            jsPlumb.connect({
-              source: endPointSource,
-              target: endPointTarget,
-              overlays: self._getConnectionOverlayLabel(self.connectionColors[anchorIndex],
-                  transition.label),
-              paintStyle: {
-                lineWidth: 3,
-                strokeStyle: self.connectionColors[anchorIndex],
-                outlineWidth: 2,
-                outlineColor: 'white',
-                joinstyle: 'round'
-              },
-              detachable: false,
-              path: segments
-            });
-          });
-          var input = document.createElement('input');
-          graph.appendChild(input);
-          input.setAttribute('type', 'hidden');
-          input.setAttribute('name', 'graphInitDone');
-          input.setAttribute('value', 'true');
+          }.bind(this));
+        },
+
+        _addTargetEndpoint: function(target) {
+          return jsPlumb.addEndpoint(target, {anchor: 'TopCenter'}, this.targetEndpointOptions);
+        },
+
+        _addSourceEndpoint: function(source, pos) {
+          var anchor = [pos, 1, 0, 1];
+          return jsPlumb.addEndpoint(source, {anchor: anchor}, this.sourceEndpointOptions);
+        },
+
+        _resize: function() {
+          jsPlumb.repaintEverything();
         }
+
       });
     })();
   </script>
