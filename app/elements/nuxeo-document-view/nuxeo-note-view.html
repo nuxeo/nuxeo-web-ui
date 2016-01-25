@@ -37,46 +37,36 @@ Contributors:
         word-wrap: break-word;                 /* IE 5.5+ and up */
       }
 
-      .docinfo {
-        padding: 0.75rem;
-        box-sizing: border-box;
-      }
-
       .notecontent {
         padding: 2rem;
       }
 
-      .icon {
-        vertical-align: middle;
+      .title {
+        color: #039be5;
+        font-size: 1.5rem;
       }
 
-      .attachcontainer {
+      .attachments {
         border-top: 1px dashed #ddd;
         background-color: #fafafd;
-        padding: 2rem;
       }
 
-      .attchtitle {
-        color: #213f7d;
-        font-size: 1.64rem;
-        padding-bottom: 1rem;
-      }
-
-      .attachment {
+      .item {
+        @apply(--layout-vertical);
         padding: 0.5rem 0rem;
       }
 
-      .attachname {
+      .item label {
         color: #039be5;
         font-size: 1.2rem;
       }
 
-      .attchsize {
+      .item span {
         font-size: 0.8rem;
         color: #999;
       }
 
-      .addfiles {
+      .droparea {
         border-top: 1px solid #e8e8e8;
         margin: 1rem 0;
         padding-top: 2rem;
@@ -92,7 +82,7 @@ Contributors:
       }
     </style>
 
-    <div class="vertical layout notecontent">
+    <div class="notecontent">
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
           <nuxeo-document id="note" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
@@ -107,20 +97,20 @@ Contributors:
         <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
       </template>
     </div>
-    <div class="vertical layout attachcontainer">
-      <div class="horizontal layout center attchtitle">
-        <iron-icon icon="editor:attach-file" class="icon"></iron-icon>
+    <div class="card-content attachments">
+      <p class="title">
+        <iron-icon icon="editor:attach-file"></iron-icon>
         Attachments
-      </div>
-      <div class="vertical layout">
+      </p>
+      <div>
         <template is="dom-repeat" items="[[document.properties.files:files]]">
-          <div class="vertical layout attachment">
-            <a href="[[item.file.data]]" class="attachname">[[item.filename]]</a>
-            <span class="attchsize">[[_formatSize(item.file.length)]]</span>
+          <div class="item">
+            <a href="[[item.file.data]]">[[item.filename]]</a>
+            <span>[[_formatSize(item.file.length)]]</span>
           </div>
         </template>
       </div>
-      <div class="addfiles">
+      <div class="droparea">
         + Complete the document with additional files
       </div>
     </div>
