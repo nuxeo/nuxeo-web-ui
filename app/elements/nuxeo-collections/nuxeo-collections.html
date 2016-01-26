@@ -13,6 +13,7 @@ Lesser General Public License for more details.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
@@ -23,12 +24,80 @@ Contributors:
 -->
 <dom-module id="nuxeo-collections">
   <template>
-    <style is="custom-style" include="shared-styles"></style>
-    <span class="empty">No collections.</span>
+    <style is="custom-style" include="shared-styles">
+      .title {
+        color: #213f7d;
+        margin-top: 10px;
+      }
+
+      .item {
+        display: inline-block;
+      }
+
+      .item a {
+        display: block;
+      }
+
+      iron-image {
+        margin-top: 5px;
+        height: 40px;
+        width: 55px;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-operation auto
+                     op="User.GetCollections"
+                     response="{{collections}}"
+                     params='{"searchTerm":"%"}'>
+    </nuxeo-operation>
+
+    <template is="dom-repeat" items="[[collections.entries]]" as="collection">
+      <nuxeo-operation auto
+                       op="Collection.GetDocumentsFromCollection"
+                       input="[[collection.uid]]"
+                       enrichers="thumbnail"
+                       response="{{collection.docs}}">
+      </nuxeo-operation>
+      <template is="dom-if" if="[[!_isEmpty(collection.docs)]]">
+        <div class="title">
+          <iron-icon icon="icons:book"></iron-icon>
+          <span>[[collection.title]]</span>
+        </div>
+        <div>
+          <template is="dom-repeat" items="[[collection.docs.entries]]" as="doc">
+            <div class="item">
+              <a href="[[_href(doc)]]">
+                <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center"></iron-image>
+              </a>
+              <paper-tooltip animation-delay="0" offset="0">[[doc.title]]</paper-tooltip>
+            </div>
+          </template>
+        </div>
+      </template>
+    </template>
+
+    <!-- <span class="empty">No collections.</span> -->
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-collections'
+      is: 'nuxeo-collections',
+      _href: function(doc) {
+        return page.base() + '/browse' + doc.path;
+      },
+
+      _thumbnail: function(doc) {
+        if (doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        } else {
+          var baseUrl = this.$.nxcon.url;
+          return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+        }
+      },
+
+      _isEmpty: function(docs) {
+        return docs && docs.entries.length === 0;
+      }
     });
   </script>
 </dom-module>
