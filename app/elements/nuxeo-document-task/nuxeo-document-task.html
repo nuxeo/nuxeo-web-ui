@@ -112,7 +112,7 @@ Contributors:
                 <nuxeo-workflow-graph workflow="{{workflow}}"></nuxeo-workflow-graph>
               </div>
             </paper-dialog>
-            <paper-button class="open-graph" on-tap="_toggleGraphDialog">Show Graph</paper-button>
+            <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">Show Graph</paper-button>
           </div>
           <div class="action-container layout vertical">
             <div class="action-property layout horizontal">
@@ -151,13 +151,13 @@ Contributors:
           </div>
           <div class="buttons sep">
             <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-              <paper-button dialog-confirm
+              <paper-button noink dialog-confirm
                             on-tap="_processTask"
                             data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
             </template>
           </div>
         </paper-dialog>
-        <paper-button class="startbutton" on-tap="_toggleTaskDialog">Process</paper-button>
+        <paper-button noink class="startbutton" on-tap="_toggleTaskDialog">Process</paper-button>
       </div>
     </div>
   </template>

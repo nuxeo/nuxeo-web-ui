@@ -156,7 +156,7 @@ Contributors:
           <!-- Page provider navigation -->
           <nuxeo-document-prev-next-doc id="contentViewNav"></nuxeo-document-prev-next-doc>
 
-          <paper-dropdown-menu no-label-float>
+          <paper-dropdown-menu noink no-animations no-label-float>
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon> View
@@ -182,25 +182,25 @@ Contributors:
           <div class="horizontal flex layout end-justified actions">
             <template is="dom-if" if="[[_canViewAsCollectionMember(document)]]">
               <!--Add to Collection-->
-              <paper-icon-button icon="icons:book" id="addColBut" on-tap="toggleCollectionDialog"></paper-icon-button>
+              <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="toggleCollectionDialog"></paper-icon-button>
               <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
               <!--Add/Remove from Favorites-->
               <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-favorites-toggle-button>
             </template>
             <template is="dom-if" if="[[_canDownload(document)]]">
               <!--Download-->
-              <paper-icon-button icon="icons:file-download" id="downloadBut" on-tap="download"></paper-icon-button>
+              <paper-icon-button noink icon="icons:file-download" id="downloadBut" on-tap="download"></paper-icon-button>
               <paper-tooltip for="downloadBut">Download</paper-tooltip>
             </template>
             <!--Share-->
-            <paper-icon-button icon="social:share" id="shareBut" on-tap="toggleShareDialog"></paper-icon-button>
+            <paper-icon-button noink icon="social:share" id="shareBut" on-tap="toggleShareDialog"></paper-icon-button>
             <paper-tooltip for="shareBut">Share</paper-tooltip>
             <template is="dom-if" if="[[_canView(document)]]">
               <!--Notify me-->
-              <paper-icon-button icon="social:notifications" id="notifyBut"></paper-icon-button>
+              <paper-icon-button noink icon="social:notifications" id="notifyBut"></paper-icon-button>
               <paper-tooltip for="notifyBut">Notify me</paper-tooltip>
               <!--Add to Clipboard-->
-              <paper-icon-button
+              <paper-icon-button noink
                 id="clipboardBut"
                 icon="image:add-to-photos"
                 active="[[inClipboard]]"
@@ -209,14 +209,14 @@ Contributors:
               <!--Lock-->
               <nuxeo-lock-toggle-button id="lockBut" doc="[[document]]"></nuxeo-lock-toggle-button>
               <!--Preview-->
-              <paper-icon-button icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
+              <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
               <paper-tooltip for="previewBut">Preview</paper-tooltip>
             </template>
             <!--Export-->
-            <paper-icon-button icon="icons:archive" id="exportBut" on-tap="toggleExportDialog"></paper-icon-button>
+            <paper-icon-button noink icon="icons:archive" id="exportBut" on-tap="toggleExportDialog"></paper-icon-button>
             <paper-tooltip for="exportBut">Export</paper-tooltip>
             <!--Print-->
-            <paper-icon-button icon="icons:print" id="printBut"></paper-icon-button>
+            <paper-icon-button noink icon="icons:print" id="printBut"></paper-icon-button>
             <paper-tooltip for="printBut">Print</paper-tooltip>
           </div>
         </paper-toolbar>
@@ -269,7 +269,7 @@ Contributors:
               </div>
               <div class="buttons sep">
                <paper-button dialog-dismiss>Cancel</paper-button>
-               <paper-button class="primary" on-tap="_addToCollection">Add to Collection</paper-button>
+               <paper-button noink class="primary" on-tap="_addToCollection">Add to Collection</paper-button>
               </div>
             </paper-dialog>
 
