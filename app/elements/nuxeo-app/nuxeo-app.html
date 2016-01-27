@@ -124,6 +124,11 @@ Contributors:
       [hidden] {
         display: none !important;
       }
+
+      nuxeo-task-widget {
+        --nuxeo-task-widget-box-padding: 10px 0px;
+        font-size: 0.9em;
+      }
     </style>
 
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
@@ -209,7 +214,7 @@ Contributors:
 
         <section class="card">
           <h1>Tasks <div class="badge">[[taskCount]]</div></h1>
-          <nuxeo-task-list count="{{taskCount}}"></nuxeo-task-list>
+          <nuxeo-task-widget username="Administrator" count="{{taskCount}}"></nuxeo-task-widget>
         </section>
 
         <section class="card">

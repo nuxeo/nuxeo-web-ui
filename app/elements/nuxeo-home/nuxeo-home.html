@@ -64,19 +64,13 @@ Contributors:
         width: calc(49.8% - 22px);
         height: auto;
       }
+
+      nuxeo-task-widget {
+        --nuxeo-task-widget-layout-border: 1px solid #ddd;
+        --nuxeo-task-widget-box-padding: 10px 20px;
+        --nuxeo-task-widget-layout-margin: 7.5px 0px 15px 0px;
+      }
     </style>
-
-    <nuxeo-resource id="homeWorkflowsRequest"
-                    path="/workflow/[[taskResponse.id]]"
-                    data="{{workflowData}}"
-                    response="{{workflowResponse}}"></nuxeo-resource>
-
-    <!--hardcoded username-->
-    <nuxeo-resource auto
-                    id="homeTaskRequest"
-                    path="[[_getTaskPath('Administrator')]]"
-                    response="{{taskResponse}}"
-                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
     <nuxeo-operation auto
                      op="Favorite.GetDocuments"
@@ -113,7 +107,7 @@ Contributors:
               <paper-card class="card">
                 <div class="card-content vertical layout">
                   <span class="title">My Tasks</span>
-                  <nuxeo-task-widget tasks="{{taskResponse.entries}}"></nuxeo-task-widget>
+                  <nuxeo-task-widget username="Administrator"></nuxeo-task-widget>
                 </div>
               </paper-card>
               <paper-card class="card">
@@ -157,14 +151,6 @@ Contributors:
 
         _navigate: function() {
           /*page('/home@' + this.selectedTab);*/
-        },
-
-        _getTaskPath: function(user) {
-          var path = '/task?';
-          if (user) {
-            path += 'userId=' + user;
-          }
-          return path;
         }
       });
     })();

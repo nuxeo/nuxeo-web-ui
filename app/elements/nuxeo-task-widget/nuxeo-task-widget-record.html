@@ -61,7 +61,9 @@ Contributors:
                     response="{{workflow}}"></nuxeo-resource>
 
     <div class="task-info horizontal layout center">
-      <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
+      <div class="vertical layout center">
+        <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
+      </div>
       <span class="task-name">[[i18n(task.workflowModelName)]] - [[i18n(task.name)]]</span>
     </div>
     <div class="horizontal layout center">

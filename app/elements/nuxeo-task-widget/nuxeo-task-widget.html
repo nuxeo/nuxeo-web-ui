@@ -27,19 +27,25 @@ Contributors:
   <template>
     <style is="custom-style" include="shared-styles">
       .task-list {
-        margin: 7.5px 0px 15px 0px;
-        border: 1px solid #ddd;
+        margin: var(--nuxeo-task-widget-layout-margin);
+        border: var(--nuxeo-task-widget-layout-border);
+        @apply(--nuxeo-task-widget-layout);
       }
 
       .task-box {
-        padding: 10px 20px;
+        padding: var(--nuxeo-task-widget-box-padding);
       }
 
       .task-box + .task-box {
-        border-top: 1px solid #ddd;
+        border-top: var(--nuxeo-task-widget-sep-border, 1px solid #ddd);
       }
     </style>
 
+    <nuxeo-resource auto
+                    id="homeTaskRequest"
+                    path="[[_getTaskPath(username)]]"
+                    response="{{tasks}}"
+                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
     <template is="dom-if" if="[[isEmpty]]">
       <div class="horizontal layout center">
@@ -48,7 +54,7 @@ Contributors:
     </template>
     <template is="dom-if" if="[[!isEmpty]]">
       <div class="task-list vertical layout container">
-        <template is="dom-repeat" items="[[tasks]]">
+        <template is="dom-repeat" items="[[tasks.entries]]">
           <div class="vertical layout task-box">
             <nuxeo-task-widget-record task="[[item]]"></nuxeo-task-widget-record>
           </div>
@@ -65,22 +71,36 @@ Contributors:
       Polymer({
         is: 'nuxeo-task-widget',
         properties: {
-          tasks: {
-            type: Array,
-            value: []
-          },
           isEmpty: {
             type: Boolean,
-            computed: '_computeIsEmpty(tasks)'
+            value: false,
+            notify: true
+          },
+          username: String,
+          count: {
+            type: Number,
+            value: 0,
+            notify: true
+          }
+        },
+        observers: ['_observeTasks(tasks)'],
+
+        _observeTasks: function(tasks) {
+          if (tasks) {
+            this.count = tasks.entries.length;
+            this.isEmpty = tasks.entries.length === 0;
+          } else {
+            this.isEmpty = false;
+            this.count = 0;
           }
         },
 
-        _computeIsEmpty: function(tasks) {
-          if (tasks) {
-            return tasks.length === 0;
-          } else {
-            return true;
+        _getTaskPath: function() {
+          var path = '/task?';
+          if (this.username) {
+            path += 'userId=' + this.username;
           }
+          return path;
         }
       });
     })();

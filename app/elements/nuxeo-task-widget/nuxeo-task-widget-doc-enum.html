@@ -35,7 +35,9 @@ Contributors:
                     doc-id="[[docId]]"
                     doc-path="[[docPath]]"
                     response="{{doc}}"></nuxeo-document>
-    <a href="#!/browse[[doc.path]]" class="task-doc">[[doc.properties.dc:title]]</a>
+    <template is="dom-if" if="[[doc]]">
+      <a href="[[_href(doc)]]" class="task-doc">[[doc.properties.dc:title]]</a>
+    </template>
 
   </template>
 
@@ -52,7 +54,11 @@ Contributors:
           docPath: {
             type: String
           }
-        }
+        },
+
+        _href: function(doc) {
+          return page.base() + '/browse' + doc.path;
+        },
       });
     })();
   </script>
