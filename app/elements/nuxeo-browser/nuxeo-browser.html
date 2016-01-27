@@ -99,6 +99,11 @@ Contributors:
         min-width: 640px;
       }
 
+      .paper-content {
+        padding: 1.6em;
+        min-height: 8em;
+      }
+
       section, iron-pages, .content {
         @apply(--layout-horizontal);
         @apply(--layout-flex);
@@ -247,7 +252,7 @@ Contributors:
 
             <paper-dialog id="collectionDialog" with-backdrop>
               <h1>Add to Collection</h1>
-              <div class="layout horizontal">
+              <div class="paper-content layout horizontal">
                 <div class="label-container">
                   <label>Collections</label>
                   <span class="required">*</span>
@@ -262,9 +267,9 @@ Contributors:
                                  id="addToCollectionOp">
                 </nuxeo-operation>
               </div>
-              <div class="buttons">
+              <div class="buttons sep">
                <paper-button dialog-dismiss>Cancel</paper-button>
-               <paper-button on-tap="_addToCollection">Add to Collection</paper-button>
+               <paper-button class="primary" on-tap="_addToCollection">Add to Collection</paper-button>
               </div>
             </paper-dialog>
 
