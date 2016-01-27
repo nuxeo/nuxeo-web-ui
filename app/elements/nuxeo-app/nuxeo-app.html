@@ -77,15 +77,13 @@ Contributors:
       }
 
       paper-tab {
-        --paper-tab-ink: rgba(0,0,0,0.1);
         text-transform: uppercase;
        @apply(--layout-horizontal);
        @apply(--layout-center-center);
-     }
+      }
 
-      paper-tab a {
-        color: var(--menu-link-color);
-        text-decoration: none;
+      paper-tab:focus ::content .tab-content {
+        font-weight: normal;
       }
 
       [drawer] .card {
@@ -150,13 +148,13 @@ Contributors:
             </section>
 
             <!-- Navigation (MAIN_TABS) -->
-            <paper-tabs selected="{{page}}" attr-for-selected="name">
+            <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name">
               <paper-tab name="home">Home</paper-tab>
               <paper-tab name="browse">Browse</paper-tab>
               <paper-tab name="admin">Admin</paper-tab>
             </paper-tabs>
 
-            <paper-tabs selected="{{page}}" attr-for-selected="name" style="float: right">
+            <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name" style="float: right">
               <paper-tab name="search"><iron-icon icon="search" suffix></iron-icon></paper-tab>
             </paper-tabs>
 
