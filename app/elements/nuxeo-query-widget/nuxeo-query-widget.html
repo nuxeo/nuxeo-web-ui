@@ -67,7 +67,7 @@ Contributors:
                          query="{{query}}"
                          current-page="{{currentPage}}"
                          page="{{pageNumber}}"
-                         page-size="{{pageSize}}"
+                         current-page-size="{{pageSize}}"
                          number-of-pages="{{numberOfPages}}"></nuxeo-page-provider>
 
     <template is="dom-if" if="[[isEmpty]]">
@@ -78,12 +78,14 @@ Contributors:
     <template is="dom-if" if="[[!isEmpty]]">
       <nuxeo-pageable-widget page="[[currentPage]]"></nuxeo-pageable-widget>
       <div class="horizontal layout end-justified center">
-        <paper-icon-button icon="icons:chevron-left"
+        <paper-icon-button id="prevBut"
+                           icon="icons:chevron-left"
                            title="Previous Page"
                            on-tap="_previousPage"
                            class$="{{previousVisibility}}"></paper-icon-button>
         <span class="controls">[[pageNumber]]/[[numberOfPages]]</span>
-        <paper-icon-button icon="icons:chevron-right"
+        <paper-icon-button id="nextBut"
+                           icon="icons:chevron-right"
                            title="Next Page"
                            on-tap="_nextPage"
                            class$="{{nextVisibility}}"></paper-icon-button>

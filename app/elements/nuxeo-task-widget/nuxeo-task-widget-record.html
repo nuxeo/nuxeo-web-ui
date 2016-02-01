@@ -41,12 +41,8 @@ Contributors:
       }
 
       .task-property,
-      .task-name {
+      #task-name {
         margin-left: 5px;
-      }
-
-      .task-name,
-      a .task-name {
         color: #00adff;
         font-weight: 700;
       }
@@ -57,6 +53,7 @@ Contributors:
     </style>
 
     <nuxeo-resource auto
+                    id="taskWorkflowRequest"
                     path="/workflow/[[task.workflowInstanceId]]"
                     response="{{workflow}}"></nuxeo-resource>
 
@@ -64,12 +61,12 @@ Contributors:
       <div class="vertical layout center">
         <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
       </div>
-      <span class="task-name">[[i18n(task.workflowModelName)]] - [[i18n(task.name)]]</span>
+      <span id="task-name">[[i18n(task.workflowModelName)]] - [[i18n(task.name)]]</span>
     </div>
     <div class="horizontal layout center">
       <iron-icon class="task-property-icon" icon="icons:account-circle"></iron-icon>
       <span class="task-property">Initiated by: &nbsp;</span>
-      <a href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
+      <a id="initiator" href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
     </div>
     <div class="horizontal layout center">
       <iron-icon class="task-property-icon" icon="icons:assignment"></iron-icon>
@@ -80,7 +77,7 @@ Contributors:
     </div>
     <div class="horizontal layout center">
       <iron-icon class="task-property-icon" icon="icons:today"></iron-icon>
-      <span class="task-property">Due date: [[_formatDate(task.dueDate)]]</span>
+      <span id="due-date" class="task-property">Due date: [[_formatDate(task.dueDate)]]</span>
     </div>
 
   </template>

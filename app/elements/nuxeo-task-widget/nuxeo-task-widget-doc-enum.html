@@ -26,17 +26,18 @@ Contributors:
 <dom-module id="nuxeo-task-widget-doc-enum">
   <template>
     <style is="custom-style" include="shared-styles">
-      .task-doc {
+      #taskDoc {
          margin-right: 4px;
       }
     </style>
 
     <nuxeo-document auto
+                    id="taskDocRequest"
                     doc-id="[[docId]]"
                     doc-path="[[docPath]]"
                     response="{{doc}}"></nuxeo-document>
     <template is="dom-if" if="[[doc]]">
-      <a href="[[_href(doc)]]" class="task-doc">[[doc.properties.dc:title]]</a>
+      <a href="[[_href(doc)]]" id="taskDoc">[[doc.properties.dc:title]]</a>
     </template>
 
   </template>
