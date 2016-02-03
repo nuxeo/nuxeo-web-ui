@@ -1,4 +1,10 @@
 {
+  "name": "nuxeo-web-ui",
+  "description": "Nuxeo Web UI",
+  "version": "0.0.1",
+  "homepage": "http://www.nuxeo.com",
+  "license": "Apache-2.0",
+  "vendor": "Nuxeo",
   "private": true,
   "devDependencies": {
     "browser-sync": "^2.10.0",
@@ -42,5 +48,10 @@
   },
   "engines": {
     "node": ">=0.10.0"
+  },
+  "nuxeo": {
+    "platforms": [
+      "cap-8.2-SNAPSHOT"
+    ]
   }
 }
