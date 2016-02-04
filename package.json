@@ -36,6 +36,7 @@
     "jshint": "^2.8.0",
     "jshint-stylish": "^2.1.0",
     "merge-stream": "^1.0.0",
+    "proxy-middleware": "^0.15.0",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.1.5",
     "vulcanize": ">= 1.14.0",

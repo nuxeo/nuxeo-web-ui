@@ -245,6 +245,9 @@ gulp.task('clean', function() {
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'styles', 'elements', 'images'], function() {
+  // setup our local proxy
+  var proxyOptions = require('url').parse('http://localhost:8080/nuxeo');
+  proxyOptions.route = '/nuxeo';
   browserSync({
     port: 5000,
     notify: false,
@@ -263,7 +266,7 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'images'], function() {
     // https: true,
     server: {
       baseDir: ['.tmp', 'app'],
-      middleware: [historyApiFallback()],
+      middleware: [require('proxy-middleware')(proxyOptions), historyApiFallback()],
       routes: {
         '/bower_components': 'bower_components'
       }
