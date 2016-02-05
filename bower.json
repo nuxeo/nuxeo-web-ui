@@ -19,7 +19,7 @@
     "polymer": "Polymer/polymer#^1.1.0"
   },
   "devDependencies": {
-    "web-component-tester": "*"
+    "web-component-tester": "^4.0.0"
   },
   "resolutions": {
     "nuxeo-elements": "master"

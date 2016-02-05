@@ -9,5 +9,10 @@ module.exports = {
   'suites': ['app/test'],
   'webserver': {
     'pathMappings': [mapping]
+  },
+  "plugins": {
+    "local": {
+      "browsers": ["chrome"]
+    }
   }
 };
