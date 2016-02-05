@@ -81,6 +81,10 @@ Contributors:
             type: Number,
             value: 0,
             notify: true
+          },
+          tasks: {
+            type: Array,
+            notify: true
           }
         },
         observers: ['_observeTasks(tasks)'],

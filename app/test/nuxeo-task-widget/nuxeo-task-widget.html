@@ -23,19 +23,19 @@ Contributors:
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="../../../bower_components/web-component-tester/browser.js"></script>
-  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
 
   <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget.html">
-  <link rel="import" href="../../../bower_components/nuxeo-elements/nuxeo-resource.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 
-  <script src="../../../bower_components/moment/moment.js"></script>
+  <script src="../../bower_components/moment/moment.js"></script>
   <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget-record.html">
 
-  <script src="../../../bower_components/page/page.js"></script>
+  <script src="../../bower_components/page/page.js"></script>
   <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget-doc-enum.html">
-  <link rel="import" href="../../../bower_components/nuxeo-elements/nuxeo-document.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 
   <script src="nuxeo-task-widget-catalog.js"></script>
   <script src="../test-helpers.js"></script>
@@ -76,7 +76,7 @@ Contributors:
       return promise;
     });
 
-    suite('tasks available', function() {
+    suite('when tasks are available', function() {
       setup(function() {
         server.respondWith(
           'GET',
@@ -125,23 +125,26 @@ Contributors:
         );
       });
 
-      test('display tasks', function(done) {
-        var tasks = fixture('tasks');
-
-        timePasses(20).then(function() {
-          flush(function() {
-            expect(tasks.count).to.be.equal(2);
-            var records = tasks.getElementsByTagName('nuxeo-task-widget-record');
-            expect(records.length).to.be.equal(2);
-            validateRecord(records[0], 'Administrator', 'January 28, 2016', docResponse1, function() {
-              validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2, done);
-            });
-          });
+      test('it should display tasks', function() {
+        var tasks = fixture('tasks'), records;
+        return waitChanged(tasks, 'tasks')
+        .then(function() {
+          expect(tasks.count).to.be.equal(2);
+          records = tasks.getElementsByTagName('nuxeo-task-widget-record');
+          expect(records.length).to.be.equal(2);
+          return Promise.all([
+            waitChanged(records[0], 'workflow'),
+            waitChanged(records[1], 'workflow')
+          ]);
+        })
+        .then(function() {
+          validateRecord(records[0], 'Administrator', 'January 28, 2016', docResponse1);
+          validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2);
         });
       });
     });
 
-    suite('no tasks available', function() {
+    suite('when no tasks available', function() {
       setup(function() {
         server.respondWith(
           'GET',
@@ -154,14 +157,10 @@ Contributors:
         );
       });
 
-      test('display "There are no tasks to show."', function(done) {
+      test('it should display "There are no tasks to show."', function() {
         var tasks = fixture('tasks');
-
-        timePasses(20).then(function() {
-          flush(function() {
-            expect(tasks.querySelector('.empty').textContent).to.be.equal('There are no tasks to show.');
-            done();
-          })
+        waitChanged(tasks, 'tasks').then(function() {
+          expect(tasks.querySelector('.empty').textContent).to.be.equal('There are no tasks to show.');
         });
       });
     });

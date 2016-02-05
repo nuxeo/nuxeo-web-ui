@@ -23,14 +23,15 @@ Contributors:
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="../../../bower_components/web-component-tester/browser.js"></script>
-  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <script src="../../bower_components/lodash/lodash.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-  <script src="../../../bower_components/page/page.js"></script>
-  <script src="../../../bower_components/moment/moment.js"></script>
-  <script src="../../../bower_components/iron-test-helpers/mock-interactions.js"></script>
-  <link rel="import" href="../../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+  <script src="../../bower_components/page/page.js"></script>
+  <script src="../../bower_components/moment/moment.js"></script>
+  <link rel="import" href="../../bower_components/iron-test-helpers/mock-interactions.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
   <link rel="import" href="../../elements/nuxeo-query-widget/nuxeo-query-widget.html">
   <link rel="import" href="../../elements/nuxeo-pageable-widget/nuxeo-pageable-widget.html">
   <script src="../test-helpers.js"></script>
@@ -43,9 +44,9 @@ Contributors:
   </template>
 </test-fixture>
 
-<test-fixture id="queryW">
-  <template>
-    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator'"></nuxeo-query-widget>
+<test-fixture id="query">
+  <template is="dom-template">
+    <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator'" page-number="[[page]]"></nuxeo-query-widget>
   </template>
 </test-fixture>
 
@@ -53,7 +54,7 @@ Contributors:
   suite('<nuxeo-query-widget>', function() {
     var server;
     var page1, page2;
-    var queryW;
+    var query;
 
     setup(function() {
       server = sinon.fakeServer.create();
@@ -75,14 +76,27 @@ Contributors:
       return promise;
     });
 
-    suite('files present', function() {
+    suite('when documents are returned', function() {
       setup(function() {
         page1 = {
           "entity-type": "documents",
           "pageSize": 5,
           "currentPageSize": 5,
           "numberOfPages": 2,
-          "entries": []
+          "entries": _.times(5, function(i) {
+            return {
+              "entity-type": "document",
+              "path": "/default-domain/workspaces/My Workspace/My Folder/file" + i,
+              "type": "File",
+              "properties": {
+                "uid:major_version": 0,
+                "uid:minor_version": 0,
+                "dc:modified": "2016-01-27T17:36:28.27Z",
+                "dc:lastContributor": "Administrator",
+                "dc:title": "File " + i
+              }
+            };
+          })
         };
 
         page2 = {
@@ -90,37 +104,21 @@ Contributors:
           "pageSize": 5,
           "currentPageSize": 3,
           "numberOfPages": 2,
-          "entries": []
-        }
-
-        for (var i = 0; i < page1.currentPageSize; i++) {
-          page1.entries.push({
-            "entity-type": "document",
-            "path": "/default-domain/workspaces/My Workspace/My Folder/file" + i,
-            "type": "File",
-            "properties": {
-              "uid:major_version": 0,
-              "uid:minor_version": 0,
-              "dc:modified": "2016-01-27T17:36:28.27Z",
-              "dc:lastContributor": "Administrator",
-              "dc:title": "File " + i
+          "entries": _.times(3, function(i) {
+            i = page1.currentPageSize + i;
+            return {
+              "entity-type": "document",
+              "path": "/default-domain/workspaces/My Workspace/My Folder/file" + i,
+              "type": "File",
+              "properties": {
+                "uid:major_version": 0,
+                "uid:minor_version": 0,
+                "dc:modified": "2016-01-27T17:36:28.27Z",
+                "dc:lastContributor": "Administrator",
+                "dc:title": "File " + i
+              }
             }
-          });
-        }
-
-        for (var i = page1.currentPageSize; i < page2.currentPageSize + page1.currentPageSize; i++) {
-          page2.entries.push({
-            "entity-type": "document",
-            "path": "/default-domain/workspaces/My Workspace/My Folder/file" + i,
-            "type": "File",
-            "properties": {
-              "uid:major_version": 0,
-              "uid:minor_version": 0,
-              "dc:modified": "2016-01-27T17:36:28.27Z",
-              "dc:lastContributor": "Administrator",
-              "dc:title": "File " + i
-            }
-          });
+          })
         }
 
         server.respondWith(
@@ -144,70 +142,51 @@ Contributors:
         );
       });
 
-      test('display first page', function(done) {
-        queryW = fixture('queryW');
-        timePasses(400).then(function() {
-          flush(function() {
-            validatePage1(done);
-          });
-        });
+      test('should display the first page by default', function() {
+        query = fixture('query');
+        return waitChanged(query, 'current-page').then(validatePage1);
       });
 
-      test('display second page', function(done) {
-        queryW = fixture('queryW');
-        queryW.pageNumber = 2;
-        timePasses(400).then(function() {
-          flush(function() {
-            validatePage2(done);
-          });
-        });
+      test('should allow setting the page', function() {
+        query = fixture('query', {page: 2});
+        return waitChanged(query, 'current-page').then(validatePage2);
       });
 
-      test('switch from first to second page and back to first', function(done) {
-        queryW = fixture('queryW');
-        timePasses(400).then(function() {
-          flush(function() {
-            validatePage1();
-            var but = queryW.$$('#nextBut');
-            MockInteractions.tap(but);
-            timePasses(400).then(function() {
-              flush(function() {
-                validatePage2();
-                but = queryW.$$('#prevBut');
-                MockInteractions.tap(but);
-                timePasses(400).then(function() {
-                  validatePage1(done);
-                });
-              });
-            });
-          });
-        });
+      test('should allow switching between pages', function() {
+        query = fixture('query');
+        return waitChanged(query, 'current-page')
+        .then(validatePage1)
+        .then(function() {
+          var but = query.$$('#nextBut');
+          MockInteractions.tap(but);
+          return waitChanged(query, 'current-page');
+        })
+        .then(validatePage2)
+        .then(function() {
+          MockInteractions.tap(query.$$('#prevBut'));
+          return waitChanged(query, 'current-page');
+        })
+        .then(validatePage1);
       });
 
-      function validatePage1(done) {
-        expect(queryW.numberOfPages).to.be.equal(2);
-        expect(queryW.pageSize).to.be.equal(5);
+      function validatePage1() {
+        expect(query.numberOfPages).to.be.equal(2);
+        expect(query.pageSize).to.be.equal(5);
         for (var i = 0; i < page1.currentPageSize; i++) {
-          expect(queryW.currentPage[i].properties['dc:title']).to.be.equal('File ' + i);
-        }
-        if (done) {
-          done();
+          expect(query.currentPage[i].properties['dc:title']).to.be.equal('File ' + i);
         }
       }
 
-      function validatePage2(done) {
-        expect(queryW.numberOfPages).to.be.equal(2);
-        expect(queryW.pageSize).to.be.equal(3);
+      function validatePage2() {
+        expect(query.numberOfPages).to.be.equal(2);
+        expect(query.pageSize).to.be.equal(3);
         for (var i = 0; i < page2.currentPageSize; i++) {
-          expect(queryW.currentPage[i].properties['dc:title']).to.be.equal('File ' + (i + page1.currentPageSize));
-        }
-        if (done) {
-          done();
+          expect(query.currentPage[i].properties['dc:title']).to.be.equal('File ' + (i + page1.currentPageSize));
         }
       }
     });
 
-    suite('no files present', function() {
+    suite('when no documents are returned', function() {
       setup(function() {
         page1 = {
           "entity-type": "documents",
@@ -227,13 +206,10 @@ Contributors:
         );
       });
 
-      test('display "There are no documents to show."', function(done) {
-        queryW = fixture('queryW');
-        timePasses(20).then(function() {
-          flush(function() {
-            expect(queryW.querySelector('.empty').textContent).to.be.equal('There are no documents to show.');
-            done();
-          });
+      test('should be empyy', function() {
+        query = fixture('query');
+        return waitChanged(query, 'current-page').then(function() {
+          expect(query.querySelector('.empty').textContent).to.be.equal('There are no documents to show.');
         });
       })
     });

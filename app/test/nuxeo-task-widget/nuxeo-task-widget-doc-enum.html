@@ -24,13 +24,13 @@ Contributors:
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-  <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="../../../bower_components/web-component-tester/browser.js"></script>
-  <link rel="import" href="../../../bower_components/polymer/polymer.html">
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-  <script src="../../../bower_components/page/page.js"></script>
+  <script src="../../bower_components/page/page.js"></script>
   <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget-doc-enum.html">
-  <link rel="import" href="../../../bower_components/nuxeo-elements/nuxeo-document.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 
   <script src="nuxeo-task-widget-catalog.js"></script>
   <script src="../test-helpers.js"></script>
@@ -50,8 +50,8 @@ Contributors:
 </test-fixture>
 
 <script>
-  suite('<nuxeo-task-widget>', function() {
-    var server;
+  suite('<nuxeo-task-widget-doc-enum>', function() {
+    var server, docenum;
 
     setup(function() {
       server = sinon.fakeServer.create();
@@ -65,13 +65,7 @@ Contributors:
           '{"entity-type": "login"}'
         ]
       );
-      // login
-      var nx = fixture('nx');
-      var promise = nx.connect();
-      return promise;
-    });
-    test('display documents involved in workflow', function(done) {
-      var docenum = fixture('docenum');
+
       server.respondWith(
         'GET',
         '/dummy/site/api/v1/id/739cfadf-ab66-4611-aafc-9e3c96aa367d',
@@ -82,7 +76,16 @@ Contributors:
         ]
       );
 
-      validateDocEnum(docenum, docResponse1, done);
+      // login
+      var nx = fixture('nx');
+      var promise = nx.connect();
+      docenum = fixture('docenum');
+      return promise;
+    });
+    test('should display documents involved in workflow', function() {
+      return waitChanged(docenum, 'doc').then(function() {
+        validateDocEnum(docenum, docResponse1);
+      });
     });
   });
 </script>

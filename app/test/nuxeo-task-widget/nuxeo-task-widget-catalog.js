@@ -66,27 +66,18 @@ var docResponse2 = {
   }
 };
 
-function validateDocEnum(docenum, docResponse, done) {
-  timePasses(10).then(function() {
-    flush(function() {
-      var a = docenum.$$('#taskDoc');
-      expect(a.href.indexOf(docResponse.path.split(' ').join('%20'))).to.be.above(-1);
-      expect(a.text).to.be.equal(docResponse.properties['dc:title']);
-      done();
-    });
-  });
+function validateDocEnum(docenum, docResponse) {
+  var a = docenum.$$('#taskDoc');
+  expect(a.href.indexOf(docResponse.path.split(' ').join('%20'))).to.be.above(-1);
+  expect(a.text).to.be.equal(docResponse.properties['dc:title']);
 }
 
-function validateRecord(record, user, date, docResponse, done) {
-  timePasses(10).then(function() {
-    flush(function() {
-      var initiator = record.$$('#initiator');
-      expect(initiator.text).to.be.equal(user);
-      var dueDate = record.$$('#due-date');
-      expect(dueDate.textContent.replace("Due date: ", "")).to.be.equal(date);
-      var docEnums =  record.getElementsByTagName('nuxeo-task-widget-doc-enum');
-      expect(docEnums.length).to.be.equal(1);
-      validateDocEnum(docEnums[0], docResponse, done);
-    });
-  });
-};
+function validateRecord(record, user, date, docResponse) {
+  var initiator = record.$$('#initiator'),
+      dueDate = record.$$('#due-date'),
+      docEnums =  record.getElementsByTagName('nuxeo-task-widget-doc-enum');
+  expect(initiator.text).to.be.equal(user);
+  expect(dueDate.textContent.replace("Due date: ", "")).to.be.equal(date);
+  expect(docEnums.length).to.be.equal(1);
+  validateDocEnum(docEnums[0], docResponse);
+}

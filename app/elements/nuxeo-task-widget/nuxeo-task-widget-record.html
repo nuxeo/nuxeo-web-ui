@@ -65,12 +65,12 @@ Contributors:
     </div>
     <div class="horizontal layout center">
       <iron-icon class="task-property-icon" icon="icons:account-circle"></iron-icon>
-      <span class="task-property">Initiated by: &nbsp;</span>
+      <span class="task-property">Initiated by: </span>
       <a id="initiator" href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
     </div>
     <div class="horizontal layout center">
       <iron-icon class="task-property-icon" icon="icons:assignment"></iron-icon>
-      <span class="task-property">Documents:&nbsp;</span>
+      <span class="task-property">Documents: </span>
       <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
         <nuxeo-task-widget-doc-enum doc-id="[[doc.id]]"></nuxeo-task-widget-doc-enum>
       </template>
@@ -91,6 +91,10 @@ Contributors:
         properties: {
           task: {
             type: Object
+          },
+          workflow: {
+            type: Object,
+            notify: true
           },
           icons: {
             type: String,

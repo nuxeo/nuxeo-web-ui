@@ -21,6 +21,35 @@ function timePasses(ms) {
   return new Promise(function(resolve) {
     window.setTimeout(function() {
       resolve();
-    }, ms);
+    }, ms || 1);
   });
+}
+
+var flushCb = window.flush;
+window.flush = function() {
+  return new Promise(function(resolve) {
+    flushCb(function() {
+      resolve();
+    });
+  });
+}
+
+function waitForEvent(el, event, times) {
+  times = times || 1;
+  return new Promise(function(resolve) {
+    var listener = function(event) {
+      if (--times === 0) {
+        el.removeEventListener(event, listener);
+        resolve(event);
+      }
+    };
+    el.addEventListener(event, listener);
+  });
+}
+
+function waitChanged(el, prop, times) {
+  return waitForEvent(el, prop + '-changed', times)
+    .then(function(evt) {
+      return evt.detail;
+    });
 }
