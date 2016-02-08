@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-Vendor: Nuxeo
+Nuxeo-RequiredBy: org.nuxeo.ecm.war
+Bundle-Version: 0.0.1
+Bundle-Name: Nuxeo Web UI
+Bundle-ManifestVersion: 1
+Bundle-SymbolicName: org.nuxeo.web.ui;singleton:=true
+Nuxeo-Component: OSGI-INF/auth-config.xml

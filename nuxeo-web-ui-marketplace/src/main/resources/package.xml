@@ -1,0 +1,20 @@
+<package type="addon" name="nuxeo-web-ui" version="@VERSION@">
+  <title>Nuxeo Web UI</title>
+  <description>
+    <p>Ongoing work to build a new Nuxeo Web UI.</p>
+  </description>
+  <home-page>https://github.com/nuxeo/nuxeo-web-ui</home-page>
+  <vendor>Nuxeo</vendor>
+  <installer restart="true" />
+  <uninstaller restart="true" />
+  <nuxeo-validation>nuxeo_certified</nuxeo-validation>
+  <production-state>proto</production-state>
+  <supported>false</supported>
+  <platforms>
+    <platform>cap-@DISTRIB_VERSION@</platform>
+    <platform>cap-@DISTRIB_VERSION@-HF*</platform>
+  </platforms>
+  <license>Apache License, Version 2.0</license>
+  <license-url>http://www.apache.org/licenses/LICENSE-2.0.html</license-url>
+  <visibility>PUBLIC</visibility>
+</package>

@@ -1,0 +1,4 @@
+<!-- See documentation at http://doc.nuxeo.com/x/IgIz -->
+<install>
+  @BUNDLES@
+</install>
