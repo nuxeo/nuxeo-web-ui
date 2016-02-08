@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.nuxeo.ecm.distribution</groupId>
+    <artifactId>nuxeo-distribution</artifactId>
+    <version>8.2-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.nuxeo.web.ui</groupId>
+  <artifactId>nuxeo-web-ui-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Nuxeo Web UI - Parent</name>
+  <description>Nuxeo Web UI - Parent</description>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <modules>
+    <module>nuxeo-web-ui</module>
+    <module>nuxeo-web-ui-marketplace</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>ftest</id>
+      <modules>
+        <module>nuxeo-web-ui-ftest/webdriver</module>
+      </modules>
+    </profile>
+  </profiles>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.nuxeo.web.ui</groupId>
+        <artifactId>nuxeo-web-ui</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.web.ui</groupId>
+        <artifactId>nuxeo-web-ui-marketplace</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>public</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>public-snapshot</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <scm>
+    <connection>scm:git:git://github.com/nuxeo/plugin-nuxeo-web-ui.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:nuxeo/plugin-nuxeo-web-ui.git</developerConnection>
+    <url>https://github.com/nuxeo/plugin-nuxeo-web-ui</url>
+  </scm>
+
+</project>
