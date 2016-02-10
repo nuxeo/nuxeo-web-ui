@@ -58,11 +58,27 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+    <nuxeo-document-view-dropzone document="{{document}}"
+                                  message="Drop to replace the video"
+                                  message-empty="Click here or drop to replace the video"
+                                  empty="[[!document.properties.file:content.data]]" use-op>
+      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+    </nuxeo-document-view-dropzone>
     <div class="card-content">
-      <p class="title">
-        <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
-      </p>
+      <div class="horizontal layout center">
+        <template is="dom-if" if="[[document.properties.file:content]]">
+          <p class="title">
+            <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
+          </p>
+          <nuxeo-document-view-delete-blob document="{{document}}"
+                                           tool-tip="Delete video"></nuxeo-document-view-delete-blob>
+        </template>
+        <template is="dom-if" if="[[!document.properties.file:content]]">
+          <p class="title">
+            <span>[[document.title]]</span>
+          </p>
+        </template>
+      </div>
     </div>
     <div class="card-content sep">
       <div class="properties">
