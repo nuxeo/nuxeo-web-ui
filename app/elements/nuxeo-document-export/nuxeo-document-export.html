@@ -73,9 +73,13 @@ Contributors:
         },
 
         _filterRenditions: function(document) {
-          return document.contextParameters.renditions.filter(function(rendition) {
-            return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
-          });
+          if (document && document.contextParameters) {
+            return document.contextParameters.renditions.filter(function(rendition) {
+              return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
+            });
+          } else {
+            return [];
+          }
         }
 
       });
