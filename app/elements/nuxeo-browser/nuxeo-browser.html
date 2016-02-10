@@ -114,6 +114,7 @@ Contributors:
           display: -webkit-flex;
           display: flex;
         }
+        height: calc(100vh - 61px);
       }
 
       .label-container {
@@ -144,7 +145,7 @@ Contributors:
     </iron-collapse>
 
     <!-- Main content -->
-    <paper-header-panel class="main vertical layout flex" mode="waterfall">
+    <paper-header-panel class="main vertical layout flex">
 
       <paper-header class="paper-header">
         <paper-toolbar>
@@ -214,7 +215,7 @@ Contributors:
         </paper-toolbar>
       </paper-header>
 
-      <div class="content">
+      <div class="content" id="nxContent">
         <paper-toast id="toast"></paper-toast>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
