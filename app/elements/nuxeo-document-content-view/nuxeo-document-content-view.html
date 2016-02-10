@@ -26,6 +26,11 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
       :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
+      .bubbleBoxes {
         @apply(--layout-flex);
       }
 
@@ -40,6 +45,7 @@ Contributors:
       }
 
       .content-view {
+        @apply(--layout-vertical);
         @apply(--layout-flex);
       }
 
