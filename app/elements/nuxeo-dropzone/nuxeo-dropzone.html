@@ -18,11 +18,11 @@ Contributors:
 -->
 
 <!--
-`nuxeo-document-view-dropzone`
+`nuxeo-dropzone`
 @group Nuxeo UI
-@element nuxeo-document-view-dropzone
+@element nuxeo-dropzone
 -->
-<dom-module id="nuxeo-document-view-dropzone">
+<dom-module id="nuxeo-dropzone">
 
   <template>
     <style is="custom-style" include="shared-styles">
@@ -30,21 +30,17 @@ Contributors:
         display: block;
         position: relative;
         width: 100%;
-        height: 100%;
+        height: calc(100% - 40px);
       }
 
       #dropzone {
+        display: flex;
         position: absolute;
-        width: calc(100% - 24px);
-        height: calc(100% - 44px);
-        top: 0;
-        left: 0;
-        margin: 12px;
+        width: calc(100% + 20px);
+        height: calc(100%);
+        left: -10px;
+        top: -10px;
         visibility: hidden;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-flex);
-        @apply(--layout-center-justified);
       }
 
       #dropzone.visible {
@@ -52,14 +48,24 @@ Contributors:
         cursor: pointer;
       }
 
-      #dropzone.hover {
-        width: calc(100% - 28px);
-        height: calc(100% - 48px);
-        border: 2px dashed #aaa;
-        border-radius: 8px;
+      #dzContainer {
+        position: relative;
+        margin: var(--nuxeo-dropzone-border-margin, 16px);
+        pointer-events: none;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-flex);
+        @apply(--layout-center-justified);
       }
 
-      #dropzoneLabel {
+      #dzContainer.hover {
+        border: 2px dashed #aaa;
+        border-radius: 8px;
+        @apply(--nuxeo-dropzone-hover-layout);
+      }
+
+      #dzLabel {
+        pointer-events: none;
         color: #aaa;
         text-align: center;
       }
@@ -72,22 +78,26 @@ Contributors:
         bottom: -10px;
         padding: 10px;
         width: 100%;
-        height: calc(100% + 200px);
       }
 
       #content.hover {
         filter: brightness(30%);
         -webkit-filter: brightness(30%);
+        @apply(--nuxeo-dropzone-content-fade-layout);
       }
 
-      #innerContent.visible {
+      #innerContent.invisible {
         visibility: hidden;
         display: none;
+      }
+
+      #emptydz {
+        min-height: var(--nuxeo-dropzone-min-empty-height, 300px);
       }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
 
     <paper-toast id="toast"></paper-toast>
     <div id="content">
@@ -96,18 +106,20 @@ Contributors:
       </div>
       <template is="dom-if" if="[[empty]]">
         <input hidden id="input" type="file" on-change="_filesChanged">
-        <div style$="min-height:[[minHeight]]px"></div>
+        <div id="emptydz"></div>
       </template>
     </div>
     <div id="dropzone">
-      <span id="dropzoneLabel">
-        <template is="dom-if" if="[[!empty]]">
-          [[message]]
-        </template>
-        <template is="dom-if" if="[[empty]]">
-          [[messageEmpty]]
-        </template>
-      </span>
+      <div id="dzContainer">
+        <span id="dzLabel">
+          <template is="dom-if" if="[[!empty]]">
+            [[message]]
+          </template>
+          <template is="dom-if" if="[[empty]]">
+            [[messageEmpty]]
+          </template>
+        </span>
+      </div>
     </div>
   </template>
 
@@ -116,7 +128,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-view-dropzone',
+        is: 'nuxeo-dropzone',
         behaviors: [Nuxeo.UploaderBehavior],
         properties: {
           document: {
@@ -138,17 +150,17 @@ Contributors:
             value: false
           },
           xpath: {
-            type: Boolean,
+            type: String,
             value: 'file:content'
           },
-          minHeight: {
-            type: Number,
-            value: 300
+          uploadedMessage: {
+            type: String,
+            value: 'File uploaded'
           }
         },
         listeners: {
           'batchFinished': 'importBatch',
-          'content.dragover': '_showOverlay'
+          'content.dragenter': '_showOverlay'
         },
         observers: ['_observeEmpty(empty)'],
 
@@ -158,14 +170,29 @@ Contributors:
         },
 
         importBatch: function(data) {
-          this.document.properties[this.xpath] = {
-            'upload-batch': data.detail.batchId,
-            'upload-fileId': '0'
-          };
-          this.$.doc.put().then(function(response) {
-            this.document = response;
-            this._toast('Imported ' + response.type.toLowerCase() + ' ' + response.title + '.');
-          }.bind(this));
+          data.stopPropagation();
+          if (this.useOp) {
+            this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
+              params: {
+                useMainBlob: false
+              },
+              context: {
+                currentDocument: this.document.path
+              }
+            }).then(function() {
+              return this.$.doc.get().then(function() {
+                this._toast(this.uploadedMessage);
+              }.bind(this));
+            }.bind(this));
+          } else {
+            this.document.properties[this.xpath] = {
+              'upload-batch': data.detail.batchId,
+              'upload-fileId': '0'
+            };
+            this.$.doc.put().then(function() {
+              this._toast(this.uploadedMessage);
+            }.bind(this));
+          }
         },
 
         _filesChanged: function(e) {
@@ -179,15 +206,15 @@ Contributors:
             }.bind(this);
           }
           if (this.empty) {
-            this.toggleClass('hover', true, this.$.dropzone);
+            this.toggleClass('hover', true, this.$.dzContainer);
             this.toggleClass('visible', true, this.$.dropzone);
-            this.toggleClass('visible', true, this.$.innerContent);
+            this.toggleClass('invisible', true, this.$.innerContent);
             this.$.dropzone.addEventListener('click', this.handleDlClick);
           } else {
             this.$.dropzone.removeEventListener('click', this.handleDlClick);
-            this.toggleClass('hover', false, this.$.dropzone);
+            this.toggleClass('hover', false, this.$.dzContainer);
             this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('visible', false, this.$.innerContent);
+            this.toggleClass('invisible', false, this.$.innerContent);
           }
           Polymer.dom.flush();
         },
@@ -206,23 +233,23 @@ Contributors:
         _dragover: function(e) {
           e.preventDefault();
           if (!this.empty) {
-            this.toggleClass('hover', true, this.$.dropzone);
+            this.toggleClass('hover', true, this.$.dzContainer);
             this.toggleClass('hover', true, this.$.content);
           }
         },
 
         _dragleave: function() {
           if (!this.empty) {
+            this.toggleClass('hover', false, this.$.dzContainer);
             this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('hover', false, this.$.dropzone);
             this.toggleClass('hover', false, this.$.content);
           }
         },
 
         _drop: function(e) {
           if (!this.empty) {
+            this.toggleClass('hover', false, this.$.dzContainer);
             this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('hover', false, this.$.dropzone);
             this.toggleClass('hover', false, this.$.content);
           }
           e.preventDefault();

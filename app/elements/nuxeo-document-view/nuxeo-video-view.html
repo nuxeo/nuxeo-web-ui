@@ -56,22 +56,37 @@ Contributors:
       .title {
         font-size: 1.64rem;
       }
+
+      .attachments {
+        border-top: 1px dashed #ddd;
+        background-color: #fafafd;
+      }
     </style>
 
-    <nuxeo-document-view-dropzone document="{{document}}"
-                                  message="Drop to replace the video"
-                                  message-empty="Click here or drop to replace the video"
-                                  empty="[[!document.properties.file:content.data]]" use-op>
+    <nuxeo-dropzone document="{{document}}"
+                    message="Drop to replace the video"
+                    message-empty="Click here or drop to replace the video"
+                    uploaded-message="Video uploaded"
+                    empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-    </nuxeo-document-view-dropzone>
+    </nuxeo-dropzone>
     <div class="card-content">
       <div class="horizontal layout center">
         <template is="dom-if" if="[[document.properties.file:content]]">
           <p class="title">
             <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
           </p>
-          <nuxeo-document-view-delete-blob document="{{document}}"
-                                           tool-tip="Delete video"></nuxeo-document-view-delete-blob>
+          <div class="horizontal flex end-justified layout">
+            <nuxeo-document-view-delete-blob document="{{document}}"
+                                             tool-tip="Delete video"
+                                             confirm-message="Do you really want to delete this video?"
+                                             delete-message="Video deleted"
+                                             hidden="[[!document.properties.file:content]]">
+            </nuxeo-document-view-delete-blob>
+            <nuxeo-upload-blob-button document="{{document}}"
+                                      uploaded-message="Video uploaded"
+                                      tool-tip="Upload video"></nuxeo-upload-blob-button>
+          </div>
         </template>
         <template is="dom-if" if="[[!document.properties.file:content]]">
           <p class="title">
@@ -118,6 +133,9 @@ Contributors:
           </div>
         </template>
       </div>
+    </div>
+    <div class="card-content attachments">
+      <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
     </div>
   </template>
 

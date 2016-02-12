@@ -106,19 +106,21 @@ Contributors:
         ],
 
         _updateBlob: function() {
-          // Adapt the Note to mimic a Blob
-          if (this.document.type === 'Note') {
-            this.blob = {
-              data: this.document.properties['note:note'],
-              'mime-type': this.document.properties['note:mime_type']
-            };
-          } else {
-            // by default just use the field at xpath as a Blob
-            this.blob = this.document && this.document.properties[this.xpath];
-          }
-          // Update our previewer
-          if (this.blob) {
-            this._updatePreview();
+          if (this.document) {
+            // Adapt the Note to mimic a Blob
+            if (this.document.type === 'Note') {
+              this.blob = {
+                data: this.document.properties['note:note'],
+                'mime-type': this.document.properties['note:mime_type']
+              };
+            } else {
+              // by default just use the field at xpath as a Blob
+              this.blob = this.document && this._deepFind(this.document.properties, this.xpath);
+            }
+            // Update our previewer
+            if (this.blob) {
+              this._updatePreview();
+            }
           }
         },
 
@@ -144,7 +146,18 @@ Contributors:
               break;
             }
           }
+        },
+
+        _deepFind: function(obj, props) {
+          for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+            if (!obj || obj === []) {
+              break;
+            }
+            obj = obj[path[i]];
+          }
+          return obj;
         }
+
       });
     })();
   </script>

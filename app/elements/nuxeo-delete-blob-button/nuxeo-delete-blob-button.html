@@ -18,11 +18,11 @@ Contributors:
 -->
 
 <!--
-`nuxeo-document-view-delete-blob`
+`nuxeo-delete-blob-button`
 @group Nuxeo UI
-@element nuxeo-document-view-delete-blob
+@element nuxeo-delete-blob-button
 -->
-<dom-module id="nuxeo-document-view-delete-blob">
+<dom-module id="nuxeo-delete-blob-button">
 
   <template>
     <style is="custom-style" include="shared-styles">
@@ -33,7 +33,7 @@ Contributors:
       paper-icon-button {
         height: 32px;
         width: 32px;
-        margin: 8px;
+        @apply(--nuxeo-delete-blob-button-layout);
       }
 
       paper-icon-button:hover {
@@ -44,7 +44,8 @@ Contributors:
     <nuxeo-operation id="deleteBlobOp"
                      op="Blob.RemoveFromDocument"
                      input="[[document.uid]]"
-                     params="[[_opParams(xpath)]]"></nuxeo-operation>
+                     params="[[_opParams(xpath)]]"
+                     response="{{document}}"></nuxeo-operation>
 
     <paper-icon-button noink icon="icons:clear" id="removeBut" on-tap="_toggleDialog"></paper-icon-button>
     <paper-tooltip for="removeBut">[[toolTip]]</paper-tooltip>
@@ -53,7 +54,7 @@ Contributors:
                   modal
                   class="container vertical layout">
       <div class="horizontal layout">
-        <p>[[message]]</p>
+        <p>[[confirmMessage]]</p>
       </div>
       <div class="buttons horizontal end-justified layout">
         <paper-button dialog-dismiss>No</paper-button>
@@ -68,7 +69,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-view-delete-blob',
+        is: 'nuxeo-delete-blob-button',
         properties: {
           document: {
             type: Object,
@@ -80,11 +81,15 @@ Contributors:
           },
           toolTip: {
             type: String,
-            value: 'Delete'
+            value: 'Delete file'
           },
-          message: {
+          confirmMessage: {
             type: String,
             value: 'Do you really want to delete this file?'
+          },
+          deleteMessage: {
+            type: String,
+            value: 'File deleted'
           }
         },
 
@@ -99,9 +104,14 @@ Contributors:
         },
 
         _remove: function() {
-          this.$.deleteBlobOp.execute().then(function(response) {
-            this.document = response;
+          this.$.deleteBlobOp.execute().then(function() {
+            this._toast(this.deleteMessage);
           }.bind(this));
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
         }
       });
     })();
