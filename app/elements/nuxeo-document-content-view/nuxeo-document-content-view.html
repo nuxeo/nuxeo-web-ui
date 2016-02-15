@@ -75,6 +75,12 @@ Contributors:
       .grid-box {
         width: 20%;
       }
+
+      paper-icon-button.giant {
+        width: 100px;
+        height: 100px;
+      }
+
       /* mobile */
       @media all and (min-width: 0) and (max-width: 480px) {
         .grid-ctn {
@@ -140,10 +146,16 @@ Contributors:
             <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
           </template>
         </div>
-        <div id="loader" class="loadingIndicator" hidden$="[[!isNextPageAvailable]]">
-          <paper-spinner active="true">
-          </paper-spinner>
-          Loading more data ...
+        <div id="loader" hidden$="[[!isNextPageAvailable]]">
+          <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
+            <paper-spinner active="true">
+            </paper-spinner>
+            Loading more data ...
+          </div>
+          <div class="manualLoading" hidden$="[[!manualLoading]]" style="text-align: center;">
+            <paper-icon-button id="loadMore" icon="expand-more" class="giant" on-tap="_loadMoreData"></paper-icon-button>
+            <paper-tooltip for="loadMore" id="lockButTooltip" position="top">Load more data</paper-tooltip>
+          </div>
         </div>
       </iron-scroll-threshold>
     </div>
@@ -214,6 +226,19 @@ Contributors:
           docItems: {
             type: Array,
             value: []
+          },
+          manualLoading: {
+            type: Boolean,
+            value: false,
+            computed: '_computeManualLoading(_nbLoading)'
+          },
+          _nbLoading: {
+            type: Number,
+            value: 0
+          },
+          manualLoadingThreshold: {
+            type: Number,
+            value: 5
           }
         },
 
@@ -336,15 +361,23 @@ Contributors:
           }.bind(this), 1);
         },
 
-        _loadMoreData: function() {
-          if (this.provider && this.isNextPageAvailable) {
+        _loadMoreData: function(e) {
+          if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
+            this.provider &&
+            this.isNextPageAvailable) {
             this.pageNumber = this.pageNumber + 1;
+            this._nbLoading++;
           }
         },
 
         _resetResults: function() {
+          this._nbLoading = 0;
           this.pageNumber = 1;
           this.docItems = [];
+        },
+
+        _computeManualLoading: function(_nbLoading) {
+          return _nbLoading >= this.manualLoadingThreshold;
         }
 
       });
