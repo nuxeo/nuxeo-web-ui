@@ -43,7 +43,7 @@ Contributors:
 
     <nuxeo-resource id="batchOp"></nuxeo-resource>
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
 
     <paper-icon-button noink icon="icons:file-upload" id="uploadBut" on-tap="_upload"></paper-icon-button>
     <paper-tooltip for="uploadBut">[[toolTip]]</paper-tooltip>
@@ -72,7 +72,7 @@ Contributors:
             type: String,
             value: 'Upload file'
           },
-          useOp: {
+          blobList: {
             type: Boolean,
             value: false
           },
@@ -91,7 +91,7 @@ Contributors:
 
         importBatch: function(data) {
           data.stopPropagation();
-          if (this.useOp) {
+          if (this.blobList) {
             this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
               params: {
                 useMainBlob: false
@@ -100,7 +100,9 @@ Contributors:
                 currentDocument: this.document.path
               }
             }).then(function() {
-              return this.$.doc.get().then(function() {
+              return this.$.doc.get().then(function(response) {
+                this.document.properties[this.xpath] = response.properties[this.xpath];
+                this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
                 this._toast(this.uploadedMessage);
               }.bind(this));
             }.bind(this));
@@ -109,7 +111,8 @@ Contributors:
               'upload-batch': data.detail.batchId,
               'upload-fileId': '0'
             };
-            this.$.doc.put().then(function() {
+            this.$.doc.put().then(function(response) {
+              this.document = response;
               this._toast(this.uploadedMessage);
             }.bind(this));
           }

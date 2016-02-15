@@ -44,8 +44,7 @@ Contributors:
     <nuxeo-operation id="deleteBlobOp"
                      op="Blob.RemoveFromDocument"
                      input="[[document.uid]]"
-                     params="[[_opParams(xpath)]]"
-                     response="{{document}}"></nuxeo-operation>
+                     params="[[_opParams(xpath)]]"></nuxeo-operation>
 
     <paper-icon-button noink icon="icons:clear" id="removeBut" on-tap="_toggleDialog"></paper-icon-button>
     <paper-tooltip for="removeBut">[[toolTip]]</paper-tooltip>
@@ -90,6 +89,10 @@ Contributors:
           deleteMessage: {
             type: String,
             value: 'File deleted'
+          },
+          blobList: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -104,7 +107,13 @@ Contributors:
         },
 
         _remove: function() {
-          this.$.deleteBlobOp.execute().then(function() {
+          this.$.deleteBlobOp.execute().then(function(response) {
+            if (this.blobList) {
+              this.document.properties = response.properties;
+              this.notifyPath('document.properties', this.document.properties);
+            } else {
+              this.document = response;
+            }
             this._toast(this.deleteMessage);
           }.bind(this));
         },

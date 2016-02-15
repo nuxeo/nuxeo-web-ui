@@ -77,19 +77,19 @@ Contributors:
       </p>
       <div class="horizontal flex end-justified layout center" hidden="[[!_hasAttachments(document)]]">
         <nuxeo-upload-blob-button document="{{document}}"
-                                  xpath="files:files"
                                   tool-tip="Upload an attachment"
                                   uploaded-message="Attachment uploaded"
-                                  use-op></nuxeo-upload-blob-button>
+                                  xpath="files:files"
+                                  blob-list></nuxeo-upload-blob-button>
       </div>
     </div>
     <nuxeo-dropzone document="{{document}}"
                     message="Drop to attach file"
                     message-empty="+ Complete the document with additional files"
-                    xpath="files:files"
                     uploaded-message="Attachment uploaded"
-                    empty="[[!_hasAttachments(document)]]"
-                    use-op>
+                    empty="[[!_hasAttachments(document, document.properties, document.properties.files:files)]]"
+                    xpath="files:files"
+                    blob-list>
       <div>
         <paper-dialog id="previewDialog" with-backdrop></paper-dialog>
         <template is="dom-repeat" items="[[document.properties.files:files]]">
@@ -103,7 +103,8 @@ Contributors:
                                         tool-tip="Delete attachment"
                                         confirm-message="Do you really want to delete this attachment?"
                                         delete-message="Attachment deleted"
-                                        xpath="files:files/[[index]]"></nuxeo-delete-blob-button>
+                                        xpath="files:files/[[index]]"
+                                        blob-list></nuxeo-delete-blob-button>
               <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
               <paper-tooltip for="previewBut">Preview attachment</paper-tooltip>
             </div>
