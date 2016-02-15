@@ -46,13 +46,26 @@ Contributors:
 
       .content-view {
         @apply(--layout-vertical);
-        @apply(--layout-flex);
+        @apply(--layout-fit);
       }
 
       .grid-ctn {
         display: flex;
         flex-flow: row wrap;
         align-items: flex-start;
+      }
+
+      .loadingIndicator {
+        text-align: center;
+        height: 40px;
+        background-color: #0b8043;
+        color: white;
+        padding-top: 10px;
+      }
+      .loadingIndicator paper-spinner {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
       }
 
       .grid-box {
@@ -106,22 +119,29 @@ Contributors:
        number-of-pages="{{pageCount}}"
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
-       current-page="{{currentPage}}"
        page="[[pageNumber]]"
+       current-page="{{currentPage}}"
        is-next-page-available="{{isNextPageAvailable}}"
        current-page-size="{{currentPageSize}}"
-       params="[[params]]">
+       params="[[params]]"
+       on-update="_updateResults">
     </nuxeo-page-provider>
 
     <div class="content-view end-space">
-      <nuxeo-document-content-view-controls page-number="{{pageNumber}}" page-size="{{pageSize}}" page-count="[[pageCount]]">
-      </nuxeo-document-content-view-controls>
-
-      <div id="dropzone" class="grid-ctn bubbleBoxes">
-        <template is="dom-repeat" items="[[currentPage]]">
-          <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
-        </template>
-      </div>
+      <iron-scroll-threshold id="scrollThreshold"
+        lower-threshold="100"
+        on-lower-threshold="_loadMoreData">
+        <div id="dropzone" class="grid-ctn bubbleBoxes">
+          <template is="dom-repeat" items="[[docItems]]">
+            <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
+          </template>
+        </div>
+        <div id="loader" class="loadingIndicator" hidden$="[[!isNextPageAvailable]]">
+          <paper-spinner active="true">
+          </paper-spinner>
+          Loading more data ...
+        </div>
+      </iron-scroll-threshold>
     </div>
 
     <paper-toast id="toast"></paper-toast>
@@ -146,8 +166,7 @@ Contributors:
             notify: true
           },
           provider: {
-            type: String,
-            value: 'document_content'
+            type: String
           },
           aggregations: {
             type: Object,
@@ -171,7 +190,8 @@ Contributors:
             computed: '_canCreateDocuments(document)'
           },
           isNextPageAvailable: {
-            type: Boolean
+            type: Boolean,
+            value: false
           },
           isSmartImport: {
             type: Boolean,
@@ -186,6 +206,10 @@ Contributors:
           },
           currentDocument: {
             type: Object
+          },
+          docItems: {
+            type: Array,
+            value: []
           }
         },
 
@@ -197,6 +221,10 @@ Contributors:
           'dropzone.dragleave': '_dragleaveSmartImport',
           'dropzone.drop': '_dropSmartImport'
         },
+
+        observers: [
+          '_resetResults(provider, params.*)'
+        ],
 
         ready: function() {
           this.connection = this.$.nx;
@@ -283,7 +311,30 @@ Contributors:
           clearTimeout(this.dropZoneTimeout);
           this.dropZoneTimeout = null;
           this.toggleClass('hoverSmartImport', false, this._dropZone);
+        },
+
+        _updateResults: function() {
+          console.log('_didRespond');
+          var docs = this.$.provider.currentPage;
+          docs.forEach(function(doc) {
+            this.push('docItems', doc);
+          }.bind(this));
+          this.$.scrollThreshold.clearTriggers();
+        },
+
+        _loadMoreData: function() {
+          console.log('_loadMoreData');
+          if (this.provider && this.isNextPageAvailable) {
+            this.pageNumber = this.pageNumber + 1;
+          }
+        },
+
+        _resetResults: function() {
+          console.log('_resetResults');
+          this.pageNumber = 1;
+          this.docItems = [];
         }
+
       });
     })();
   </script>
