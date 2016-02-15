@@ -318,7 +318,6 @@ Contributors:
         },
 
         _updateResults: function() {
-          console.log('_didRespond');
           var docs = this.$.provider.currentPage;
           docs.forEach(function(doc) {
             this.push('docItems', doc);
@@ -327,14 +326,12 @@ Contributors:
         },
 
         _loadMoreData: function() {
-          console.log('_loadMoreData');
           if (this.provider && this.isNextPageAvailable) {
             this.pageNumber = this.pageNumber + 1;
           }
         },
 
         _resetResults: function() {
-          console.log('_resetResults');
           this.pageNumber = 1;
           this.docItems = [];
         }
