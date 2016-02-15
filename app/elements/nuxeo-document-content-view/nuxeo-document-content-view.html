@@ -68,6 +68,10 @@ Contributors:
         margin-right: 10px;
       }
 
+      #scrollThreshold {
+        padding: 3em 3em 0 3em;
+      }
+
       .grid-box {
         width: 20%;
       }
@@ -127,7 +131,7 @@ Contributors:
        on-update="_updateResults">
     </nuxeo-page-provider>
 
-    <div class="content-view end-space">
+    <div class="content-view">
       <iron-scroll-threshold id="scrollThreshold"
         lower-threshold="100"
         on-lower-threshold="_loadMoreData">
@@ -280,7 +284,7 @@ Contributors:
 
         _navigate: function(e) {
           var doc = e.model.item,
-              index = (this.pageSize * (this.pageNumber - 1)) + e.model.index + 1;
+              index = e.model.index + 1;
           this.navigate(doc, index);
         },
 
