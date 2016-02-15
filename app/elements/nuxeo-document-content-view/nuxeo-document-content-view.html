@@ -323,6 +323,17 @@ Contributors:
             this.push('docItems', doc);
           }.bind(this));
           this.$.scrollThreshold.clearTriggers();
+
+          setTimeout(function() {
+            var vpH = jQuery(window).height(), // Viewport Height
+              st = jQuery(window).scrollTop(), // Scroll Top
+              y = jQuery(this.$.loader).offset().top,
+              elementHeight = jQuery(this.$.loader).height();
+
+            if (this.isNextPageAvailable && (y < (vpH + st)) && (y >= (st - elementHeight))) {
+              this.pageNumber = this.pageNumber + 1;
+            }
+          }.bind(this), 1);
         },
 
         _loadMoreData: function() {

@@ -24,6 +24,7 @@
     "moment": true,
     "jsPlumb": true,
     "AlloyEditor": true,
-    "CKEDITOR": true
+    "CKEDITOR": true,
+    "jQuery": true
   }
 }
