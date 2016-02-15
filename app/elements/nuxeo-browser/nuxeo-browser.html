@@ -187,11 +187,6 @@ Contributors:
               <!--Add/Remove from Favorites-->
               <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-favorites-toggle-button>
             </template>
-            <template is="dom-if" if="[[_canDownload(document)]]">
-              <!--Download-->
-              <paper-icon-button noink icon="icons:file-download" id="downloadBut" on-tap="download"></paper-icon-button>
-              <paper-tooltip for="downloadBut">Download</paper-tooltip>
-            </template>
             <!--Share-->
             <paper-icon-button noink icon="social:share" id="shareBut" on-tap="toggleShareDialog"></paper-icon-button>
             <paper-tooltip for="shareBut">Share</paper-tooltip>
@@ -215,9 +210,6 @@ Contributors:
             <!--Export-->
             <paper-icon-button noink icon="icons:archive" id="exportBut" on-tap="toggleExportDialog"></paper-icon-button>
             <paper-tooltip for="exportBut">Export</paper-tooltip>
-            <!--Print-->
-            <paper-icon-button noink icon="icons:print" id="printBut"></paper-icon-button>
-            <paper-tooltip for="printBut">Print</paper-tooltip>
           </div>
         </paper-toolbar>
       </paper-header>
