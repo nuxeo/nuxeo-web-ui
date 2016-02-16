@@ -223,7 +223,8 @@ Contributors:
               </paper-dialog>
             </template>
 
-            <paper-dialog id="collectionDialog" with-backdrop>
+            <paper-dialog id="collectionDialog" with-backdrop
+                          on-iron-overlay-closed="_resetCollectionPopup">
               <h1>Add to Collection</h1>
               <nuxeo-add-to-collection-popup
                 document="[[document]]"
@@ -430,6 +431,10 @@ Contributors:
           this.toggleCollectionDialog();
           this._toast('Document added to Collection.');
           this._documentUpdated();
+        },
+
+        _resetCollectionPopup: function() {
+          this.$$('#addToCollection')._reset();
         }
       });
     })();

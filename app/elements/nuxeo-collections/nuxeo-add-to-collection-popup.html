@@ -161,7 +161,7 @@ Contributors:
           };
           return op.execute().then(function() {
             this.fire('documentAddedToCollection');
-            this.collection = '';
+            this._reset();
           }.bind(this));
         },
 
@@ -179,6 +179,11 @@ Contributors:
 
         _isNew: function() {
           return this.collection === '-1';
+        },
+
+        _reset: function() {
+          this.collection = '';
+          this.description = '';
         }
       });
     })();
