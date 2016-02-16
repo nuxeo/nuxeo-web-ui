@@ -28,8 +28,6 @@ Contributors:
   <link rel="import" href="../common.html">
   <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
-  <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget-record.html">
-  <link rel="import" href="../../elements/nuxeo-task-widget/nuxeo-task-widget-doc-enum.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
   <script src="nuxeo-task-widget-catalog.js"></script>
 </head>
@@ -123,11 +121,15 @@ Contributors:
         return waitChanged(tasks, 'tasks')
         .then(function() {
           expect(tasks.count).to.be.equal(2);
-          records = tasks.getElementsByTagName('nuxeo-task-widget-record');
+          records = tasks.getElementsByClassName('task-box');
           expect(records.length).to.be.equal(2);
+          var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
+          expect(workflows1).to.not.be.undefined;
+          var workflows2 = records[1].querySelector('.task-box > nuxeo-resource');
+          expect(workflows2).to.not.be.undefined;
           return Promise.all([
-            waitChanged(records[0], 'workflow'),
-            waitChanged(records[1], 'workflow')
+            waitChanged(workflows1, 'response'),
+            waitChanged(workflows2, 'response')
           ]);
         })
         .then(function() {
@@ -135,6 +137,23 @@ Contributors:
           validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2);
         });
       });
+
+      function validateRecord(record, user, date, docResponse) {
+        var initiators = record.getElementsByClassName('initiator'),
+            dueDates = record.getElementsByClassName('due-date'),
+            docEnums = record.getElementsByClassName('taskDoc');
+        expect(initiators.length).to.be.equal(1);
+        expect(initiators[0].text).to.be.equal(user);
+        expect(dueDates.length).to.be.equal(1);
+        expect(dueDates[0].textContent.replace("Due date: ", "")).to.be.equal(date);
+        expect(docEnums.length).to.be.equal(1);
+        var docs = docEnums[0].getElementsByTagName('nuxeo-document');
+        expect(docs.length).to.be.equal(1);
+        var a = docEnums[0].getElementsByTagName('a');
+        expect(a.length).to.be.equal(1);
+        expect(a[0].href.indexOf(docResponse.path.split(' ').join('%20'))).to.be.above(-1);
+        expect(a[0].text).to.be.equal(docResponse.properties['dc:title']);
+      }
     });
 
     suite('when no tasks available', function() {
@@ -152,7 +171,7 @@ Contributors:
 
       test('it should display "There are no tasks to show."', function() {
         var tasks = fixture('tasks');
-        waitChanged(tasks, 'tasks').then(function() {
+        return waitChanged(tasks, 'tasks').then(function() {
           expect(tasks.querySelector('.empty').textContent).to.be.equal('There are no tasks to show.');
         });
       });

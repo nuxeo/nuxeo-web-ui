@@ -39,6 +39,41 @@ Contributors:
       .task-box + .task-box {
         border-top: var(--nuxeo-task-widget-sep-border, 1px solid #ddd);
       }
+
+      iron-icon.task-property-icon  {
+        --iron-icon-height: 1rem;
+        --iron-icon-width: 1rem;
+      }
+
+      iron-icon.task-name-icon {
+        --iron-icon-height: 1rem;
+        --iron-icon-width: 1rem;
+        border-radius: 50px;
+        background-color: #46a7de;
+        color: white;
+        padding: 3px;
+      }
+
+      .task-name {
+        margin-left: 5px;
+        color: #00adff;
+        font-weight: 700;
+      }
+
+      .task-info {
+        margin: 5px 0px;
+      }
+
+      .task-property{
+        margin-left: 5px;
+        color: #00adff;
+        font-weight: 700;
+      }
+
+      .taskDoc .docTitle, .initiator {
+        margin-left: 4px;
+        margin-right: 4px;
+      }
     </style>
 
     <nuxeo-resource auto
@@ -54,9 +89,38 @@ Contributors:
     </template>
     <template is="dom-if" if="[[!isEmpty]]">
       <div class="task-list vertical layout container">
-        <template is="dom-repeat" items="[[tasks.entries]]">
-          <div class="vertical layout task-box">
-            <nuxeo-task-widget-record task="[[item]]"></nuxeo-task-widget-record>
+        <template is="dom-repeat" items="[[tasks.entries]]" as="task">
+          <div class="task-box vertical layout">
+            <nuxeo-resource auto
+                            path="/workflow/[[task.workflowInstanceId]]"
+                            response="{{workflow}}"></nuxeo-resource>
+            <div class="task-info horizontal layout center">
+              <div class="vertical layout center">
+                <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
+              </div>
+              <span class="task-name">[[i18n(task.workflowModelName)]] - [[i18n(task.name)]]</span>
+            </div>
+            <div class="horizontal layout center">
+              <iron-icon class="task-property-icon" icon="icons:account-circle"></iron-icon>
+              <span class="task-property">Initiated by: </span>
+              <a class="initiator"
+                 href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
+            </div>
+            <div class="taskDoc horizontal layout center">
+              <iron-icon class="task-property-icon" icon="icons:assignment"></iron-icon>
+              <span class="task-property">Documents: </span>
+              <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
+                <nuxeo-document auto
+                                doc-id="[[doc.id]]"
+                                response="{{doc}}"></nuxeo-document>
+                <a href="[[_href(doc)]]"
+                   class="docTitle">[[doc.properties.dc:title]]</a>
+              </template>
+            </div>
+            <div class="horizontal layout center">
+              <iron-icon class="task-property-icon" icon="icons:today"></iron-icon>
+              <span class="due-date task-property">Due date: [[_formatDate(task.dueDate)]]</span>
+            </div>
           </div>
         </template>
       </div>
@@ -85,6 +149,21 @@ Contributors:
           tasks: {
             type: Array,
             notify: true
+          },
+          icons: {
+            type: String,
+            value: {
+              ParallelDocumentReview: 'icons:content-paste',
+              SerialDocumentReview: 'icons:content-paste'
+            }
+          },
+          taskNumber: {
+            type: Number,
+            value: 10
+          },
+          collapsedView: {
+            type: Boolean,
+            value: false
           }
         },
         observers: ['_observeTasks(tasks)'],
@@ -105,6 +184,28 @@ Contributors:
             path += 'userId=' + this.username;
           }
           return path;
+        },
+
+        _getIcon: function(workflowModelName) {
+          var icon = this.icons[workflowModelName];
+          return icon ? icon : 'icons:assignment';
+        },
+
+        _genDynamicVar: function(name, id) {
+          this[name + '-' + id] = {};
+          return this[name + '-' + id];
+        },
+
+        _getDynamicVarProp: function(name, id, prop) {
+          return this[name + '-' + id][prop];
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _href: function(doc) {
+          return page.base() + '/browse' + doc.path;
         }
       });
     })();

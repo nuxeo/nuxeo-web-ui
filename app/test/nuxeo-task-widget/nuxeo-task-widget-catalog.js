@@ -21,6 +21,7 @@ var taskResponse = {
   "entity-type": "tasks",
   "entries": [{
     "entity-type": "task",
+    "id": "1",
     "name": "wf.parallelDocumentReview.chooseParticipants.title",
     "workflowInstanceId": "84ba0c6f-2fb7-46b7-afdc-084f0143d777",
     "workflowModelName": "ParallelDocumentReview",
@@ -28,6 +29,7 @@ var taskResponse = {
     "targetDocumentIds": [{"id": "739cfadf-ab66-4611-aafc-9e3c96aa367d"}],
   }, {
     "entity-type": "task",
+    "id": "2",
     "name": "wf.serialDocumentReview.chooseParticipants",
     "workflowInstanceId": "7dce44c3-ed75-47c2-9433-6ca92ff8a866",
     "workflowModelName": "SerialDocumentReview",
@@ -65,19 +67,3 @@ var docResponse2 = {
     "dc:title": "Kitty"
   }
 };
-
-function validateDocEnum(docenum, docResponse) {
-  var a = docenum.$$('#taskDoc');
-  expect(a.href.indexOf(docResponse.path.split(' ').join('%20'))).to.be.above(-1);
-  expect(a.text).to.be.equal(docResponse.properties['dc:title']);
-}
-
-function validateRecord(record, user, date, docResponse) {
-  var initiator = record.$$('#initiator'),
-      dueDate = record.$$('#due-date'),
-      docEnums =  record.getElementsByTagName('nuxeo-task-widget-doc-enum');
-  expect(initiator.text).to.be.equal(user);
-  expect(dueDate.textContent.replace("Due date: ", "")).to.be.equal(date);
-  expect(docEnums.length).to.be.equal(1);
-  validateDocEnum(docEnums[0], docResponse);
-}
