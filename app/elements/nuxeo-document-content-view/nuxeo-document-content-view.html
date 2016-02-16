@@ -348,25 +348,33 @@ Contributors:
             this.push('docItems', doc);
           }.bind(this));
           this.$.scrollThreshold.clearTriggers();
-
           setTimeout(function() {
             var vpH = jQuery(window).height(), // Viewport Height
               st = jQuery(window).scrollTop(), // Scroll Top
               y = jQuery(this.$.loader).offset().top,
               elementHeight = jQuery(this.$.loader).height();
-
-            if (this.isNextPageAvailable && (y < (vpH + st)) && (y >= (st - elementHeight))) {
+            if (this.isNextPageAvailable && (y < (vpH + st)) &&
+              (y > (st - elementHeight))) {
               this.pageNumber = this.pageNumber + 1;
             }
-          }.bind(this), 1);
+          }.bind(this), 400);
         },
 
         _loadMoreData: function(e) {
-          if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
-            this.provider &&
-            this.isNextPageAvailable) {
-            this.pageNumber = this.pageNumber + 1;
-            this._nbLoading++;
+          if (e.currentTarget.id === 'scrollThreshold' && !this.manualLoading) {
+            setTimeout(function() {
+              if (this.provider &&
+                  this.isNextPageAvailable) {
+                this.pageNumber = this.pageNumber + 1;
+                this._nbLoading++;
+              }
+            }.bind(this), 400);
+          } else if (e.currentTarget.id !== 'scrollThreshold' && this.manualLoading) {
+            if (this.provider &&
+                this.isNextPageAvailable) {
+              this.pageNumber = this.pageNumber + 1;
+              this._nbLoading++;
+            }
           }
         },
 
