@@ -99,11 +99,6 @@ Contributors:
         min-width: 640px;
       }
 
-      .paper-content {
-        padding: 1.6em;
-        min-height: 8em;
-      }
-
       section, iron-pages, .content {
         @apply(--layout-horizontal);
         @apply(--layout-flex);
@@ -115,21 +110,6 @@ Contributors:
           display: flex;
         }
         height: calc(100vh - 61px);
-      }
-
-      .label-container {
-        position: relative;
-        width: 150px;
-      }
-
-      .required {
-        color: red;
-        position: absolute;
-        right: 10px;
-      }
-
-      nuxeo-select2 {
-        width: 250px;
       }
     </style>
 
@@ -245,25 +225,10 @@ Contributors:
 
             <paper-dialog id="collectionDialog" with-backdrop>
               <h1>Add to Collection</h1>
-              <div class="paper-content layout horizontal">
-                <div class="label-container">
-                  <label>Collections</label>
-                  <span class="required">*</span>
-                </div>
-                <nuxeo-select2 operation="Collection.Suggestion"
-                               min-chars="0"
-                               placeholder="Select a Collection..."
-                               value="{{collection}}">
-                </nuxeo-select2>
-                <nuxeo-operation op="Document.AddToCollection"
-                                 input="[[document.uid]]"
-                                 id="addToCollectionOp">
-                </nuxeo-operation>
-              </div>
-              <div class="buttons sep">
-               <paper-button dialog-dismiss>Cancel</paper-button>
-               <paper-button noink class="primary" on-tap="_addToCollection">Add to Collection</paper-button>
-              </div>
+              <nuxeo-add-to-collection-popup
+                document="[[document]]"
+                id="addToCollection">
+              </nuxeo-add-to-collection-popup>
             </paper-dialog>
 
             <template is="dom-if" if="[[_canViewContent(document)]]">
@@ -338,7 +303,8 @@ Contributors:
         listeners: {
           'permissions.acecreated': '_documentUpdated',
           'permissions.aceupdated': '_documentUpdated',
-          'permissions.acedeleted': '_documentUpdated'
+          'permissions.acedeleted': '_documentUpdated',
+          'documentAddedToCollection': '_documentAddedToCollection'
         },
 
         observers: [
@@ -455,26 +421,16 @@ Contributors:
           return location.origin + location.pathname + '#!/doc/' + document.uid;
         },
 
-        _addToCollection: function() {
-          if (this.collection) {
-            var op = this.$$('#addToCollectionOp');
-            op.params = {
-              'collection': this.collection
-            };
-            op.execute().then(function() {
-              this.toggleCollectionDialog();
-              this._toast('Document added to Collection.');
-              this.collection = '';
-              this._documentUpdated();
-            }.bind(this));
-          }
-        },
-
         _toast: function(msg) {
           this.$.toast.text = msg;
           this.$.toast.open();
-        }
+        },
 
+        _documentAddedToCollection: function() {
+          this.toggleCollectionDialog();
+          this._toast('Document added to Collection.');
+          this._documentUpdated();
+        }
       });
     })();
   </script>
