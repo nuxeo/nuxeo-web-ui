@@ -58,14 +58,22 @@ Contributors:
       .loadingIndicator {
         text-align: center;
         height: 40px;
-        background-color: #0b8043;
-        color: white;
+        background-color: #fff;
+        color: var(--nuxeo-text-light);
         padding-top: 10px;
+        border-radius: .2em;
+        border: 1px solid #eee;
+        margin: 1em 0 2em;
       }
+
       .loadingIndicator paper-spinner {
         width: 20px;
         height: 20px;
         margin-right: 10px;
+      }
+
+      .manualLoading paper-icon-button {
+        color: var(--nuxeo-primary-color);
       }
 
       #scrollThreshold {
@@ -82,7 +90,7 @@ Contributors:
       }
 
       /* mobile */
-      @media all and (min-width: 0) and (max-width: 480px) {
+      @media all and (min-width: 0) and (max-width: 590px) {
         .grid-ctn {
           flex-flow: column nowrap;
         }
@@ -92,7 +100,7 @@ Contributors:
         }
       }
       /* tablet-small-landscape */
-      @media all and (min-width: 481px) and (max-width: 840px) {
+      @media all and (min-width: 591px) and (max-width: 840px) {
         .grid-box {
           width: 50%;
         }
