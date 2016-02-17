@@ -50,10 +50,10 @@ Contributors:
     <nuxeo-page-provider id="provider" provider="tree_children" current-page="{{children}}">
     </nuxeo-page-provider>
 
-    <iron-collapse id="collapse" opened="[[opened]]">
+    <iron-collapse id="collapse" opened="[[opened]]" no-animation="true">
       <div class="collapse-content">
         <template is="dom-repeat" items="[[children]]" as="child">
-          <nuxeo-tree-node document="[[child]]"></nuxeo-tree-node>
+          <nuxeo-tree-node document="[[child]]" current-document="[[currentDocument]]"></nuxeo-tree-node>
         </template>
       </div>
     </iron-collapse>
@@ -65,6 +65,10 @@ Contributors:
         document: {
           type: Object,
           observer: '_documentChanged'
+        },
+        currentDocument: {
+          type: Object,
+          observer: '_currentDocumentChanged'
         },
         opened: {
           type: Boolean,
@@ -101,11 +105,37 @@ Contributors:
         if (this._updated) {
           this.opened = !this.opened;
         } else {
-          this.$.provider.params = [this.document.uid];
-          this.$.provider.fetch().then(function() {
-            this._updated = this.opened = true;
-          }.bind(this));
+          this._fetchChildren();
         }
+      },
+
+      _currentDocumentChanged: function() {
+        if (this.currentDocument) {
+          var shouldExpand = this._pathEntries.indexOf(this.document.path) >= 0;
+          if (shouldExpand) {
+            if (!this._updated) {
+              this._fetchChildren();
+            }
+          }
+          this.opened = shouldExpand;
+        }
+      },
+
+      _fetchChildren: function() {
+        this.$.provider.params = [this.document.uid];
+        this.$.provider.fetch().then(function() {
+          this._updated = this.opened = true;
+        }.bind(this));
+      },
+
+      get _breadcrumb() {
+        return this.currentDocument.contextParameters.breadcrumb.entries;
+      },
+
+      get _pathEntries() {
+        return this._breadcrumb.map(function(entry) {
+          return entry.path;
+        });
       }
     });
   </script>
