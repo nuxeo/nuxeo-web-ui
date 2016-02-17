@@ -78,27 +78,46 @@ Contributors:
 
       paper-tab {
         text-transform: uppercase;
-       @apply(--layout-horizontal);
-       @apply(--layout-center-center);
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
       }
 
       paper-tab:focus ::content .tab-content {
         font-weight: normal;
       }
 
-      [drawer] .card {
+      #rightPanel {
+        border-left: 1px solid #eee;
+        overflow: scroll;
+      }
+
+      #rightPanel .side-bar {
+        padding: 0;
+        width: 300px;
+      }
+
+      #rightPanel .card {
         margin: 0;
+      }
+
+      #rightPanel .card .content {
         padding: 20px;
       }
 
-      [drawer] .card h1 {
+      #rightPanel .card .header {
         background-color: var(--nuxeo-secondary-color);
+        border-bottom: 1px solid #edeff0;
+        box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
+        height: 60px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      #rightPanel .card h1 {
         color: #fff;
         font-size: 1.1rem;
-        margin: -1.4rem -1.35rem 0;
-        padding: .5rem 1.3rem;
+        margin-left: 20px;
         font-weight: 700;
-        border-bottom: 1px solid #edeff0;
       }
 
       .header-badge {
@@ -129,71 +148,70 @@ Contributors:
         --nuxeo-task-widget-box-padding: 10px 0px;
         font-size: 0.9em;
       }
-
     </style>
 
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
                     doc-id="[[linkDocId]]"
                     response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions"
-                    headers='{"X-NXfetch.document": "lock"}'></nuxeo-document>
+                    headers='{"X-NXfetch.document": "lock"}'>
+    </nuxeo-document>
 
-    <app-drawer-layout force-narrow="true" drawer-width="288px" drawer-position="right" responsive-width="1280px">
+    <app-header-layout main>
 
-      <app-header-layout main>
+      <!-- Top -->
+      <app-header fixed>
+        <app-toolbar class="flex">
 
-        <!-- Top -->
-        <app-header fixed>
-          <app-toolbar class="flex">
+          <!-- Logo -->
+          <section id="logo">
+            <a href="/home/">
+              <img src="{{baseUrl}}images/nuxeo.png">
+            </a>
+          </section>
 
-            <!-- Logo -->
-            <section id="logo">
-              <a href="/home/">
-                <img src="{{baseUrl}}images/nuxeo.png">
-              </a>
+          <!-- Navigation (MAIN_TABS) -->
+          <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name">
+            <paper-tab name="home">Home</paper-tab>
+            <paper-tab name="browse">Browse</paper-tab>
+            <paper-tab name="admin">Admin</paper-tab>
+          </paper-tabs>
+
+          <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name" style="float: right">
+            <paper-tab name="search"><iron-icon icon="search" suffix></iron-icon></paper-tab>
+          </paper-tabs>
+
+          <div class="horizontal flex center layout end-justified">
+
+            <!-- Profile -->
+            <section class="profile">
+              <paper-menu-button noink no-animations>
+                <paper-button class="dropdown-trigger">
+                  <img src$="{{baseUrl}}images/avatar.png">
+                  <span>Lise Kemen</span>
+                </paper-button>
+                <paper-menu class="dropdown-content">
+                  <paper-item>Profile</paper-item>
+                  <paper-item>Notifications</paper-item>
+                  <paper-item>Drive</paper-item>
+                  <paper-item>Cloud Services</paper-item>
+                  <paper-item>Sign out</paper-item>
+                </paper-menu>
+              </paper-menu-button>
             </section>
+          </div>
 
-            <!-- Navigation (MAIN_TABS) -->
-            <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name">
-              <paper-tab name="home">Home</paper-tab>
-              <paper-tab name="browse">Browse</paper-tab>
-              <paper-tab name="admin">Admin</paper-tab>
-            </paper-tabs>
+          <!-- Toggle right panel button -->
+          <div id="toggle">
+            <paper-badge label="[[taskCount]]" class="header-badge"></paper-badge>
+            <paper-icon-button icon="menu" on-tap="_toggleRightPanel" aria-label="menu"></paper-icon-button>
+          </div>
+        </app-toolbar>
+      </app-header>
 
-            <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name" style="float: right">
-              <paper-tab name="search"><iron-icon icon="search" suffix></iron-icon></paper-tab>
-            </paper-tabs>
-
-            <div class="horizontal flex center layout end-justified">
-
-              <!-- Profile -->
-              <section class="profile">
-                <paper-menu-button noink no-animations>
-                  <paper-button class="dropdown-trigger">
-                    <img src$="{{baseUrl}}images/avatar.png">
-                    <span>Lise Kemen</span>
-                  </paper-button>
-                  <paper-menu class="dropdown-content">
-                    <paper-item>Profile</paper-item>
-                    <paper-item>Notifications</paper-item>
-                    <paper-item>Drive</paper-item>
-                    <paper-item>Cloud Services</paper-item>
-                    <paper-item>Sign out</paper-item>
-                  </paper-menu>
-                </paper-menu-button>
-              </section>
-            </div>
-
-            <!-- Toggle right panel button -->
-            <div id="toggle">
-              <paper-badge label="[[taskCount]]" class="header-badge"></paper-badge>
-              <paper-icon-button icon="menu" drawer-toggle aria-label="menu"></paper-icon-button>
-            </div>
-          </app-toolbar>
-        </app-header>
-
+      <div class="layout horizontal">
         <!-- The current document's page -->
-        <iron-pages selected="[[page]]" attr-for-selected="name">
+        <iron-pages selected="[[page]]" attr-for-selected="name" class="flex">
           <nuxeo-home name="home"></nuxeo-home>
           <nuxeo-browser id="browser"
             name="browse"
@@ -204,38 +222,56 @@ Contributors:
           <nuxeo-admin name="admin"></nuxeo-admin>
         </iron-pages>
 
-      </app-header-layout>
+        <!-- right panel -->
+        <iron-collapse id="rightPanel" horizontal>
+          <div class="side-bar">
+            <section class="card">
+              <div class="header">
+                <h1>Clipboard</h1>
+              </div>
+              <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+            </section>
 
-      <!-- right panel -->
-      <div drawer>
-        <section class="card">
-          <h1>Clipboard</h1>
-          <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
-        </section>
+            <section class="card">
+              <div class="header">
+                <h1>Tasks <div class="badge">[[taskCount]]</div></h1>
+              </div>
+              <div class="content">
+                <nuxeo-task-widget username="Administrator" count="{{taskCount}}"></nuxeo-task-widget>
+              </div>
+            </section>
 
-        <section class="card">
-          <h1>Tasks <div class="badge">[[taskCount]]</div></h1>
-          <nuxeo-task-widget username="Administrator"
-                             count="{{taskCount}}"></nuxeo-task-widget>
-        </section>
+            <section class="card">
+              <div class="header">
+                <h1>Recently viewed</h1>
+              </div>
+              <div class="content">
+                <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
+              </div>
+            </section>
 
-        <section class="card">
-          <h1>Recently viewed</h1>
-          <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
-        </section>
+            <section class="card">
+              <div class="header">
+                <h1>Favorites</h1>
+              </div>
+              <div class="content">
+                <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
+              </div>
+            </section>
 
-        <section class="card">
-          <h1>Favorites</h1>
-          <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
-        </section>
-
-        <section class="card">
-          <h1>Collections</h1>
-          <nuxeo-collections></nuxeo-collections>
-        </section>
+            <section class="card">
+              <div class="header">
+                <h1>Collections</h1>
+              </div>
+              <div class="content">
+                <nuxeo-collections></nuxeo-collections>
+              </div>
+            </section>
+          </div>
+        </iron-collapse>
       </div>
 
-    </app-drawer-layout>
+    </app-header-layout>
   </template>
 
   <script>
@@ -331,7 +367,11 @@ Contributors:
           if (this.currentDocument) {
             this.$.recent.add(this.currentDocument);
           }
-        }
+        },
+
+        _toggleRightPanel: function() {
+          this.$.rightPanel.toggle();
+        },
       });
     })();
   </script>

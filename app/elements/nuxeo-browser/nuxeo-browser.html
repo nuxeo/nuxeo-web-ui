@@ -115,17 +115,19 @@ Contributors:
 
     <!-- Left sidebar -->
     <iron-collapse id="sidebar" horizontal opened="{{sidebarOpened}}">
-      <paper-toolbar>
-        <paper-icon-button icon="folder-open" on-click="toggleSidebar"></paper-icon-button>
-        <span>Tree</span>
-      </paper-toolbar>
-      <div class="side-bar">
-        <nuxeo-tree root-path="/default-domain"></nuxeo-tree>
-      </div>
+      <paper-scroll-header-panel>
+        <paper-toolbar>
+          <paper-icon-button icon="folder-open" on-click="toggleSidebar"></paper-icon-button>
+          <span>Tree</span>
+        </paper-toolbar>
+        <div class="side-bar">
+          <nuxeo-tree root-path="/default-domain"></nuxeo-tree>
+        </div>
+      </paper-scroll-header-panel>
     </iron-collapse>
 
     <!-- Main content -->
-    <paper-header-panel class="main vertical layout flex">
+    <paper-header-panel class="main flex">
 
       <paper-header class="paper-header">
         <paper-toolbar>
