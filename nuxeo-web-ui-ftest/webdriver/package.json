@@ -1,0 +1,18 @@
+{
+  "name": "nuxeo-web-ui-webdriver",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "scripts/test.js",
+    "test:watch": "chimp --chai --path=test/features --baseUrl=http://localhost:8080/nuxeo --watch"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chimp": "^0.30.0",
+    "cucumber-junit": "^1.5.0",
+    "nuxeo": "^0.22.0"
+  },
+  "dependencies": {
+    "cucumber-html-report": "^0.2.2"
+  }
+}

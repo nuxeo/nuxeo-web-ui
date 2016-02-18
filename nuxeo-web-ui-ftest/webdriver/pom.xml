@@ -56,24 +56,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <argLine>-Dlog4j.configuration=${file.uri.prefix}${basedir}/src/test/resources/log4j.xml
-                -Dnuxeo.log.dir=${project.build.directory}
-                ${it.failsafe.argLine}
-              </argLine>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.nuxeo.build</groupId>
         <artifactId>ant-assembly-maven-plugin</artifactId>
         <configuration>
@@ -91,6 +73,16 @@
                 <target>prepare-environment</target>
                 <target>start</target>
               </targets>
+            </configuration>
+          </execution>
+          <execution>
+            <id>run-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <target>run-tests</target>
             </configuration>
           </execution>
           <execution>
