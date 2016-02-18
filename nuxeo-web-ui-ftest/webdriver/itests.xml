@@ -16,4 +16,16 @@
     </copy>
   </target>
 
+  <target name="run-tests" depends="_init">
+    <condition property="cmd.npm" value="npm.cmd" else="npm">
+      <os family="windows"/>
+    </condition>
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="install" />
+    </exec>
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="test" />
+    </exec>
+  </target>
+
 </project>
