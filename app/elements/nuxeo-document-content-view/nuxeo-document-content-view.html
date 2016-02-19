@@ -151,7 +151,7 @@ Contributors:
 
     <div class="content-view">
       <iron-scroll-threshold id="scrollThreshold"
-        lower-threshold="600"
+        lower-threshold="1000"
         on-lower-threshold="_loadMoreData">
         <div id="dropzone" class="grid-ctn bubbleBoxes">
           <template is="dom-repeat" items="[[docItems]]">
@@ -373,6 +373,9 @@ Contributors:
           this.pageNumber = 1;
           this.docItems = [];
           this.pageSize = 40;
+          this.isNextPageAvailable = false;
+          this.$.scrollThreshold.scroll(0, 0);
+          this.$.scrollThreshold.clearTriggers();
         },
 
         _computeManualLoading: function(pageNumber) {
