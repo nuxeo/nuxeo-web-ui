@@ -1,0 +1,133 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<html>
+<head>
+  <title>nuxeo-favorites-toggle-button tests</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../common.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+  <link rel="import" href="../../elements/nuxeo-document-actions/nuxeo-favorites-toggle-button.html">
+</head>
+<body>
+  <test-fixture id="nx">
+    <template>
+      <nuxeo-connection url="/dummy"></nuxeo-connection>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="toggleFavorite">
+    <template is="dom-template">
+       <nuxeo-favorites-toggle-button doc="[[doc]]"></nuxeo-favorites-toggle-button>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<nuxeo-favorites-toggle-button>', function() {
+      var server, doc;
+      setup(function() {
+        doc = {
+          "entity-type": "document",
+          "uid": "1",
+          "contextParameters": {
+            "favorites": {
+              "isFavorite": true
+            }
+          }
+        };
+        server = sinon.fakeServer.create();
+        server.autoRespond = true;
+        server.respondWith(
+          'POST',
+          '/dummy/site/api/v1/automation/login',
+          [
+            200,
+            {'Content-Type': 'application/json'},
+            '{"entity-type": "login"}'
+          ]
+        );
+        // login
+        var nx = fixture('nx');
+        var promise = nx.connect();
+        return promise;
+      });
+
+      suite('when a document is a favorite', function() {
+        var element;
+        setup(function() {
+          element = fixture('toggleFavorite', {doc: doc});
+          server.respondWith(
+            'POST',
+            '/dummy/site/api/v1/automation/Document.RemoveFromFavorites',
+            [
+              200,
+              {'Content-Type': 'application/json'},
+              '{"entity-type": "document","uid": "1"}'
+            ]
+          );
+        });
+
+        test('it should display the document as favorite', function() {
+          expect(element.favorite).to.be.true;
+        });
+
+        test('toggle should remove document from favorites', function() {
+          // Remove document from favorites by toggling
+          element.toggle();
+          return waitChanged(element, 'favorite').then(function() {
+            expect(element.favorite).to.be.false;
+          });
+        });
+      });
+
+      suite('when a document is not in favorites', function() {
+        var element;
+        setup(function() {
+          // Set mock doc as not favorite
+          doc.contextParameters.favorites.isFavorite = false;
+          element = fixture('toggleFavorite', {doc: doc});
+          server.respondWith(
+            'POST',
+            '/dummy/site/api/v1/automation/Document.AddToFavorites',
+            [
+              200,
+              {'Content-Type': 'application/json'},
+              '{"entity-type": "document","uid": "1"}'
+            ]
+          );
+        });
+
+        test('it should display the document as not favorite', function() {
+          expect(element.favorite).to.be.false;
+        });
+
+        test('toggle should add the document to favorites', function() {
+          // Add the documents to favorites by toggling
+          element.toggle();
+          return waitChanged(element, 'favorite').then(function() {
+            expect(element.favorite).to.be.true;
+          });
+        });
+      });
+    });
+  </script>
+</body>
