@@ -203,7 +203,9 @@ Contributors:
       test('should be empty', function() {
         query = fixture('query');
         return waitChanged(query, 'current-page').then(function() {
-          expect(query.querySelector('.empty').textContent).to.be.equal('There are no documents to show.');
+          var placeholder = query.querySelector('.empty');
+          expect(isHidden(placeholder)).to.be.false;
+          expect(placeholder.textContent).to.be.equal('There are no documents to show.');
         });
       })
     });

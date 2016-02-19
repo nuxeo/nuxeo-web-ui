@@ -172,7 +172,10 @@ Contributors:
       test('it should display "There are no tasks to show."', function() {
         var tasks = fixture('tasks');
         return waitChanged(tasks, 'tasks').then(function() {
-          expect(tasks.querySelector('.empty').textContent).to.be.equal('There are no tasks to show.');
+          expect(tasks.count).to.be.equal(0);
+          var placeholder = tasks.querySelector('.empty');
+          expect(isHidden(placeholder)).to.be.false;
+          expect(placeholder.textContent).to.be.equal('There are no tasks to show.');
         });
       });
     });

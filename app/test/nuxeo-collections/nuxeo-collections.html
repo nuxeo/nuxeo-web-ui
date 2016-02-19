@@ -118,9 +118,12 @@ Contributors:
         });
 
         test('it should display empty collections placeholder', function() {
-          var collections = fixture('collections');
-          return waitChanged(collections, 'collections').then(function() {
-            expect(collections.querySelector('.empty').textContent).to.be.equal('No collections.');
+          var element = fixture('collections');
+          return waitChanged(element, 'collections').then(function() {
+            expect(element.collections.entries.length).to.be.equal(0);
+            var placeholder = element.querySelector('.empty');
+            expect(isHidden(placeholder)).to.be.false;
+            expect(placeholder.textContent).to.be.equal('No collections.');
           });
         });
       });
