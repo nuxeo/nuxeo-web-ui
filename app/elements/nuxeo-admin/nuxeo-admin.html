@@ -69,6 +69,7 @@ Contributors:
     <!-- Left sidebar -->
     <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
       <paper-icon-button icon="editor:insert-chart" name="repository">Repository Monitoring</paper-icon-button>
+      <paper-icon-button icon="social:people" name="userManagement">Users & Groups</paper-icon-button>
     </paper-menu>
 
     <paper-header-panel class="main flex" >
@@ -90,6 +91,13 @@ Contributors:
                 </div>
               </paper-card>
           </section>
+          <section name="userManagement">
+            <paper-card class="card">
+              <div class="card-content vertical layout">
+                <nuxeo-user-management></nuxeo-user-management>
+              </div>
+            </paper-card>
+          </section>
         </iron-pages>
       </div>
     </paper-header-panel>
@@ -106,7 +114,8 @@ Contributors:
           labels: {
             type: Object,
             value: {
-              repository: 'label.admin.repo'
+              repository: 'label.admin.repo',
+              userManagement: 'label.admin.users'
             }
           },
           selectedTab: {
