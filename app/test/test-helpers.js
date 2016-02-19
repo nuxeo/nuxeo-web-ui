@@ -53,3 +53,7 @@ function waitChanged(el, prop, times) {
       return evt.detail;
     });
 }
+
+function isHidden(el) {
+  return el.style.display === 'none';
+}
