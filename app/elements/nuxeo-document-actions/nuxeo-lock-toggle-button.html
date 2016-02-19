@@ -49,7 +49,7 @@ Contributors:
 
     <paper-icon-button icon="[[icon]]" id="lockBut">
     </paper-icon-button>
-    <paper-tooltip for="lockBut" id="lockButTooltip">init</paper-tooltip>
+    <paper-tooltip for="lockBut" id="lockButTooltip">[[tooltip]]</paper-tooltip>
 
   </template>
 
@@ -61,6 +61,7 @@ Contributors:
         properties: {
           doc: {
             type: Object,
+            notify: true,
             observer: '_observeDoc'
           },
           locked: {
@@ -69,7 +70,12 @@ Contributors:
             reflectToAttribute: true
           },
           icon: {
-            type: String
+            type: String,
+            computed: '_computeIcon(locked)'
+          },
+          tooltip: {
+            type: String,
+            computed: '_computeTooltip(locked)'
           }
         },
 
@@ -80,20 +86,21 @@ Contributors:
         toggle: function() {
           if (!this.locked) {
             this.$.lockOp.execute().then(function() {
-              this.icon = 'icons:lock';
+              this.locked = true;
             }.bind(this));
           } else {
             this.$.unLockOp.execute().then(function() {
-              this.icon = 'icons:lock-open';
+              this.locked = false;
             }.bind(this));
           }
-          this.locked = !this.locked;
-          this._updateTooltip(this.locked);
         },
 
-        _updateTooltip: function(locked) {
-          var newTtVal = locked ? 'Unlock' : 'Lock';
-          this.$.lockButTooltip.$.tooltip.textContent =  newTtVal;
+        _computeTooltip: function(locked) {
+          return locked ? 'Unlock' : 'Lock';
+        },
+
+        _computeIcon: function(locked) {
+          return locked ? 'icons:lock' : 'icons:lock-open';
         },
 
         _isLocked: function(doc) {
@@ -107,11 +114,7 @@ Contributors:
 
         _observeDoc: function() {
           this.locked = this._isLocked(this.doc);
-          this.icon = this.locked ? 'icons:lock' : 'icons:lock-open';
-          this._updateTooltip(this.locked);
-
         }
-
       });
     })();
   </script>
