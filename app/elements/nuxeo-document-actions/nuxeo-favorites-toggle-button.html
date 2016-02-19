@@ -54,7 +54,7 @@ Contributors:
 
     <paper-icon-button icon="[[icon]]" id="favBut">
     </paper-icon-button>
-    <paper-tooltip for="favBut" id="favButTooltip">init</paper-tooltip>
+    <paper-tooltip for="favBut" id="favButTooltip">[[tooltip]]</paper-tooltip>
 
   </template>
 
@@ -77,6 +77,10 @@ Contributors:
             type: String,
             value: 'icons:grade'
           },
+          tooltip: {
+            type: String,
+            computed: '_computeTooltip(favorite)'
+          }
         },
 
         listeners: {
@@ -86,22 +90,19 @@ Contributors:
         toggle: function() {
           if (!this.favorite) {
             this.$.addToFavOp.execute().then(function() {
-              this.doc.contextParameters.favorites.isFavorite = true;
               this.fire('addedToFavorites', {doc: this.doc});
+              this.favorite = true;
             }.bind(this));
           } else {
             this.$.removeFromFavOp.execute().then(function() {
-              this.doc.contextParameters.favorites.isFavorite = false;
               this.fire('removedFromFavorites', {doc: this.doc});
+              this.favorite = false;
             }.bind(this));
           }
-          this.favorite = !this.favorite;
-          this._updateTooltip(this.favorite);
         },
 
-        _updateTooltip: function(isFavorite) {
-          var newTtVal = isFavorite ? 'Remove From Favorites' : 'Add to Favorites';
-          this.$.favButTooltip.$.tooltip.textContent =  newTtVal;
+        _computeTooltip: function(isFavorite) {
+          return isFavorite ? 'Remove From Favorites' : 'Add to Favorites';
         },
 
         _isFavorite: function(doc) {
@@ -110,20 +111,15 @@ Contributors:
 
         _observeDoc: function() {
           this.favorite = this._isFavorite(this.doc);
-          this._updateTooltip(this.favorite);
         },
 
         ready: function() {
           window.addEventListener('removedFromFavorites', function(e) {
-            if (e.detail.docUid) {
-              if (e.detail.docUid === this.doc.uid) {
-                this.doc.contextParameters.favorites.isFavorite = false;
-                this._observeDoc();
-              }
+            if (e.detail.docUid && e.detail.docUid === this.doc.uid) {
+              this.favorite = false;
             }
           }.bind(this));
         }
-
       });
     })();
   </script>
