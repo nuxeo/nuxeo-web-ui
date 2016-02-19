@@ -92,7 +92,7 @@ Contributors:
 
         test('toggle should remove document from favorites', function() {
           // Remove document from favorites by toggling
-          element.toggle();
+          MockInteractions.tap(element.querySelector('#favBut'));
           return waitChanged(element, 'favorite').then(function() {
             expect(element.favorite).to.be.false;
           });
@@ -122,7 +122,7 @@ Contributors:
 
         test('toggle should add the document to favorites', function() {
           // Add the documents to favorites by toggling
-          element.toggle();
+          MockInteractions.tap(element.querySelector('#favBut'));
           return waitChanged(element, 'favorite').then(function() {
             expect(element.favorite).to.be.true;
           });
