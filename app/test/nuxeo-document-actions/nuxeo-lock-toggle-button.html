@@ -1,0 +1,129 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<html>
+<head>
+  <title>nuxeo-lock-toggle-button tests</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../common.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+  <link rel="import" href="../../elements/nuxeo-document-actions/nuxeo-lock-toggle-button.html">
+</head>
+<body>
+  <test-fixture id="nx">
+    <template>
+      <nuxeo-connection url="/dummy"></nuxeo-connection>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="toggleLock">
+    <template is="dom-template">
+       <nuxeo-lock-toggle-button doc="[[doc]]"></nuxeo-lock-toggle-button>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<nuxeo-lock-toggle-button>', function() {
+      var server, doc;
+      setup(function() {
+        doc = {
+          "entity-type": "document",
+          "uid": "1",
+          "lockCreated": "2016-02-19T12:47:40.501+01:00"
+        };
+        server = sinon.fakeServer.create();
+        server.autoRespond = true;
+        server.respondWith(
+          'POST',
+          '/dummy/site/api/v1/automation/login',
+          [
+            200,
+            {'Content-Type': 'application/json'},
+            '{"entity-type": "login"}'
+          ]
+        );
+        // login
+        var nx = fixture('nx');
+        var promise = nx.connect();
+        return promise;
+      });
+
+      suite('when a document is locked', function() {
+        var element;
+        setup(function() {
+          element = fixture('toggleLock', {doc: doc});
+          server.respondWith(
+            'POST',
+            '/dummy/site/api/v1/automation/Document.Unlock',
+            [
+              200,
+              {'Content-Type': 'application/json'},
+              '{"entity-type": "document","uid": "1"}'
+            ]
+          );
+        });
+
+        test('it should display the document as locked', function() {
+          expect(element.locked).to.be.true;
+        });
+
+        test('toggle should unlock the document', function() {
+          // Unlock the document by toggling
+          element.toggle();
+          return waitChanged(element, 'locked').then(function() {
+            expect(element.locked).to.be.false;
+          });
+        });
+      });
+
+      suite('when a document is unlocked', function() {
+        var element;
+        setup(function() {
+          // Remove lockCreated prop from object
+          delete doc['lockCreated'];
+          element = fixture('toggleLock', {doc: doc});
+          server.respondWith(
+            'POST',
+            '/dummy/site/api/v1/automation/Document.Lock',
+            [
+              200,
+              {'Content-Type': 'application/json'},
+              JSON.stringify(doc)
+            ]
+          );
+        });
+
+        test('it should display the document as unlocked', function() {
+          expect(element.locked).to.be.false;
+        });
+
+        test('toggle should lock the document', function() {
+          // Lock the document by toggling
+          element.toggle();
+          return waitChanged(element, 'locked').then(function() {
+            expect(element.locked).to.be.true;
+          });
+        });
+      });
+    });
+  </script>
+</body>
