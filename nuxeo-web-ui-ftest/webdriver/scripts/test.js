@@ -1,43 +1,36 @@
 #!/usr/bin/env node
 
-"use strict";
+'use strict';
 
-const fs = require('fs'),
-      path = require('path'),
-      spawn = require('child_process').spawn,
-      chimpBin = path.resolve(process.cwd() + '/node_modules/.bin/chimp');
+const fs = require('fs');
+const path = require('path');
+const spawn = require('child_process').spawn;
+const chimpBin = path.resolve(path.join(process.cwd(), '/node_modules/.bin/chimp'));
 
-const HtmlReporter = require('cucumber-html-report'),
-      JUnitReporter = require('cucumber-junit'),
-      reportsFolder = './reports',
-      jsonReport = `${reportsFolder}/report.json`,
-      junitReport = `${reportsFolder}/report.xml`,
-      htmlReporter = new HtmlReporter({
-        source: jsonReport,
-        dest: reportsFolder,
-        name: 'report.html'
-      });
+const jUnitReporter = require('cucumber-junit');
+const reportsFolder = './target/cucumber-reports';
+const jsonReport = `${reportsFolder}/report.json`;
+const junitReport = `${reportsFolder}/report.xml`;
 
-let writeHtmlReport = () => htmlReporter.createReport();
-let writeJUnitReport = () => fs.writeFileSync(junitReport, JUnitReporter(fs.readFileSync(jsonReport)));
-
-let args = [
-  "--chai",
-  "--screenshotsOnError=true",
-  "--saveScreenshotsToDisk=true",
+const args = [
+  '--chai',
+  '--screenshotsOnError=true',
+  '--saveScreenshotsToDisk=true',
   `--jsonOutput=${jsonReport}`,
-  "--path=test/features",
-  "--baseUrl=http://localhost:8080/nuxeo"
+  '--path=test/features',
+  '--baseUrl=http://localhost:8080/nuxeo',
 ];
 
-var chimp = spawn(chimpBin, args);
+function writeJUnitReport(file) {
+  fs.writeFileSync(file, jUnitReporter(fs.readFileSync(jsonReport)));
+}
+
+const chimp = spawn(chimpBin, args);
 
 chimp.stdout.pipe(process.stdout);
 chimp.stderr.pipe(process.stderr);
 
 chimp.on('close', (code) => {
-  writeHtmlReport();
-  writeJUnitReport();
-
+  writeJUnitReport(junitReport);
   process.exit(code);
 });

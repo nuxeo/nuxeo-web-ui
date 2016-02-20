@@ -1,10 +1,4 @@
-"use strict";
-
-class Card {
-  constructor(selector) {
-    this.selector = selector;
-  }
-}
+'use strict';
 
 export default class Home {
 
@@ -13,11 +7,11 @@ export default class Home {
   }
 
   get classList() {
-    return driver.getAttribute(this.selector, "class").split(" ");
+    return driver.getAttribute(this.selector, 'class').split(' ');
   }
 
   get isSelected() {
-    return this.classList.indexOf("iron-selected") !== -1
+    return this.classList.indexOf('iron-selected') !== -1;
   }
 
 }

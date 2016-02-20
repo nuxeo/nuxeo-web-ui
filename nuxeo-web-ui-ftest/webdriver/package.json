@@ -2,6 +2,7 @@
   "name": "nuxeo-web-ui-webdriver",
   "version": "1.0.0",
   "scripts": {
+    "lint": "eslint scripts test",
     "test": "scripts/test.js",
     "test:watch": "chimp --chai --path=test/features --baseUrl=http://localhost:8080/nuxeo --watch"
   },
@@ -10,9 +11,8 @@
     "chai": "^3.5.0",
     "chimp": "^0.30.0",
     "cucumber-junit": "^1.5.0",
+    "eslint": "^1.10.3",
+    "eslint-config-airbnb": "^5.0.1",
     "nuxeo": "^0.22.0"
-  },
-  "dependencies": {
-    "cucumber-html-report": "^0.2.2"
   }
 }
