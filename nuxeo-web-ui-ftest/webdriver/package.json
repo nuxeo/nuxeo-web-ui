@@ -13,6 +13,7 @@
     "cucumber-junit": "^1.5.0",
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^5.0.1",
+    "mkdirp": "^0.5.1",
     "nuxeo": "^0.22.0"
   }
 }
