@@ -83,7 +83,6 @@
             </goals>
             <configuration>
               <target>run-tests</target>
-              <summaryFile>${project.build.directory}/cucumber-reports/report.xml</summaryFile>
             </configuration>
           </execution>
           <execution>
