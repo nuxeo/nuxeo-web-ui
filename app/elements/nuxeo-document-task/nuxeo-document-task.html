@@ -202,8 +202,9 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function(task) {
-          var node = Polymer.CaseMap.camelToDashCase(task.nodeName).toLowerCase();
-          return ['nuxeo', 'document', 'task', node].join('-');
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
+          return ['nuxeo', 'document', 'task', Polymer.CaseMap.camelToDashCase(node)].join('-');
         },
 
         /**
