@@ -22,6 +22,10 @@ Contributors:
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script>
+    // force use of polyfill: see ELEMENTS-56
+    window.fetch = null;
+  </script>
   <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../bower_components/web-component-tester/browser.js"></script>
   <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -53,21 +57,9 @@ Contributors:
     setup(function() {
       server = sinon.fakeServer.create();
       server.autoRespond = true;
-
-      server.respondWith(
-        'POST',
-        '/dummy/site/api/v1/automation/login',
-        [
-          200,
-          {'Content-Type': 'application/json'},
-          '{"entity-type": "login"}'
-        ]
-      );
-
       // login
       var nx = fixture('nx');
-      var promise = nx.connect();
-      return promise;
+      return login(server, nx);
     });
 
     suite('when documents are returned', function() {
@@ -117,7 +109,7 @@ Contributors:
 
         server.respondWith(
           'GET',
-          /.*\/dummy\/site\/api\/v1\/query\?currentPageIndex=0.*/,
+          /.*\/dummy\/api\/v1\/query\?currentPageIndex=0.*/,
           [
             200,
             {'Content-Type': 'application/json'},
@@ -127,7 +119,7 @@ Contributors:
 
         server.respondWith(
           'GET',
-          /.*\/dummy\/site\/api\/v1\/query\?currentPageIndex=1.*/,
+          /.*\/dummy\/api\/v1\/query\?currentPageIndex=1.*/,
           [
             200,
             {'Content-Type': 'application/json'},
@@ -151,14 +143,20 @@ Contributors:
         return waitChanged(query, 'current-page')
         .then(validatePage1)
         .then(function() {
-          var but = query.$$('#nextBut');
-          MockInteractions.tap(but);
-          return waitChanged(query, 'current-page');
+          return flush()
+          .then(function() {
+            var but = query.$$('#nextBut');
+            MockInteractions.tap(but);
+            return waitChanged(query, 'current-page');
+          });
         })
         .then(validatePage2)
         .then(function() {
-          MockInteractions.tap(query.$$('#prevBut'));
-          return waitChanged(query, 'current-page');
+          return flush()
+          .then(function() {
+            MockInteractions.tap(query.$$('#prevBut'));
+            return waitChanged(query, 'current-page');
+          });
         })
         .then(validatePage1);
       });
@@ -191,7 +189,7 @@ Contributors:
         };
         server.respondWith(
           'GET',
-          /.*\/dummy\/site\/api\/v1\/query\?currentPageIndex=0.*/,
+          /.*\/dummy\/api\/v1\/query\?currentPageIndex=0.*/,
           [
             200,
             {'Content-Type': 'application/json'},

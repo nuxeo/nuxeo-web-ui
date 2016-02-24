@@ -20,6 +20,10 @@ Contributors:
 <head>
   <title>nuxeo-lock-toggle-button tests</title>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script>
+    // force use of polyfill: see ELEMENTS-56
+    window.fetch = null;
+  </script>
   <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../bower_components/web-component-tester/browser.js"></script>
   <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -52,19 +56,9 @@ Contributors:
         };
         server = sinon.fakeServer.create();
         server.autoRespond = true;
-        server.respondWith(
-          'POST',
-          '/dummy/site/api/v1/automation/login',
-          [
-            200,
-            {'Content-Type': 'application/json'},
-            '{"entity-type": "login"}'
-          ]
-        );
         // login
         var nx = fixture('nx');
-        var promise = nx.connect();
-        return promise;
+        return login(server, nx);
       });
 
       suite('when a document is locked', function() {
@@ -73,7 +67,7 @@ Contributors:
           element = fixture('toggleLock', {doc: doc});
           server.respondWith(
             'POST',
-            '/dummy/site/api/v1/automation/Document.Unlock',
+            '/dummy/api/v1/automation/Document.Unlock',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -103,7 +97,7 @@ Contributors:
           element = fixture('toggleLock', {doc: doc});
           server.respondWith(
             'POST',
-            '/dummy/site/api/v1/automation/Document.Lock',
+            '/dummy/api/v1/automation/Document.Lock',
             [
               200,
               {'Content-Type': 'application/json'},

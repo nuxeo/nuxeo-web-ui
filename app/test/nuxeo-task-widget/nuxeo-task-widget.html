@@ -22,6 +22,10 @@ Contributors:
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <script>
+    // force use of polyfill: see ELEMENTS-56
+    window.fetch = null;
+  </script>
   <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../bower_components/web-component-tester/browser.js"></script>
   <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -52,26 +56,16 @@ Contributors:
     setup(function() {
       server = sinon.fakeServer.create();
       server.autoRespond = true;
-      server.respondWith(
-        'POST',
-        '/dummy/site/api/v1/automation/login',
-        [
-          200,
-          {'Content-Type': 'application/json'},
-          '{"entity-type": "login"}'
-        ]
-      );
       // login
       var nx = fixture('nx');
-      var promise = nx.connect();
-      return promise;
+      return login(server, nx);
     });
 
     suite('when tasks are available', function() {
       setup(function() {
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/task?userId=Administrator',
+          '/dummy/api/v1/task?userId=Administrator',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -80,7 +74,7 @@ Contributors:
         );
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/workflow/84ba0c6f-2fb7-46b7-afdc-084f0143d777',
+          '/dummy/api/v1/workflow/84ba0c6f-2fb7-46b7-afdc-084f0143d777?',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -89,7 +83,7 @@ Contributors:
         );
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/workflow/7dce44c3-ed75-47c2-9433-6ca92ff8a866',
+          '/dummy/api/v1/workflow/7dce44c3-ed75-47c2-9433-6ca92ff8a866?',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -98,7 +92,7 @@ Contributors:
         );
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/id/739cfadf-ab66-4611-aafc-9e3c96aa367d',
+          '/dummy/api/v1/id/739cfadf-ab66-4611-aafc-9e3c96aa367d?',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -107,7 +101,7 @@ Contributors:
         );
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/id/b00985aa-48e2-409f-890b-4f6e51f6a150',
+          '/dummy/api/v1/id/b00985aa-48e2-409f-890b-4f6e51f6a150?',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -120,19 +114,22 @@ Contributors:
         var tasks = fixture('tasks'), records;
         return waitChanged(tasks, 'tasks')
         .then(function() {
-          expect(tasks.count).to.be.equal(2);
-          records = tasks.getElementsByClassName('task-box');
-          expect(records.length).to.be.equal(2);
-          var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
-          expect(workflows1).to.not.be.undefined;
-          var workflows2 = records[1].querySelector('.task-box > nuxeo-resource');
-          expect(workflows2).to.not.be.undefined;
-          return Promise.all([
-            waitChanged(workflows1, 'response'),
-            waitChanged(workflows2, 'response')
-          ]);
+          return flush()
+          .then(function() {
+            expect(tasks.count).to.be.equal(2);
+            records = tasks.getElementsByClassName('task-box');
+            expect(records.length).to.be.equal(2);
+            var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
+            expect(workflows1).to.not.be.undefined;
+            var workflows2 = records[1].querySelector('.task-box > nuxeo-resource');
+            expect(workflows2).to.not.be.undefined;
+            return Promise.all([
+              waitChanged(workflows1, 'response'),
+              waitChanged(workflows2, 'response')
+            ]);
+          });
         })
-        .then(function() {
+        flush().then(function() {
           validateRecord(records[0], 'Administrator', 'January 28, 2016', docResponse1);
           validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2);
         });
@@ -160,7 +157,7 @@ Contributors:
       setup(function() {
         server.respondWith(
           'GET',
-          '/dummy/site/api/v1/task?userId=Administrator',
+          '/dummy/api/v1/task?userId=Administrator',
           [
             200,
             {'Content-Type': 'application/json'},
@@ -171,12 +168,12 @@ Contributors:
 
       test('it should display "There are no tasks to show."', function() {
         var tasks = fixture('tasks');
-        return waitChanged(tasks, 'tasks').then(function() {
+        return waitChanged(tasks, 'tasks').then(flush().then(function() {
           expect(tasks.count).to.be.equal(0);
           var placeholder = tasks.querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
           expect(placeholder.textContent).to.be.equal('There are no tasks to show.');
-        });
+        }));
       });
     });
 
