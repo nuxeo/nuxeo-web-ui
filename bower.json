@@ -23,6 +23,7 @@
     "web-component-tester": "^4.0.0"
   },
   "resolutions": {
-    "nuxeo-elements": "master"
+    "nuxeo-elements": "master",
+    "nuxeo": "^0.23.0"
   }
 }
