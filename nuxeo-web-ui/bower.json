@@ -5,6 +5,7 @@
     "nuxeo-web-ui": "nuxeo/nuxeo-web-ui#master"
   },
   "resolutions": {
-    "nuxeo-elements": "master"
+    "nuxeo-elements": "master",
+    "nuxeo": "^0.23.0"
   }
 }
