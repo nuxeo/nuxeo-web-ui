@@ -25,6 +25,44 @@ Contributors:
   <template>
 
     <style is="custom-style" include="shared-styles">
+      paper-icon-button {
+        height: 30vh;
+        width: 2.3em;
+        padding: 0;
+        position: absolute;
+        top: 40%;
+        z-index: 100;
+      }
+      paper-icon-button#prevDoc {
+        left: 0;
+      }
+      paper-icon-button#nextDoc {
+        right: 0;
+      }
+      ::content iron-icon {
+        width: 2.2em;
+      }
+
+      paper-icon-button {
+        color: var(--nuxeo-action-color);
+        opacity: .2;
+      }
+
+      paper-icon-button:hover {
+        color: var(--nuxeo-link-hover-color);
+        fill: var(--nuxeo-link-hover-color);
+        opacity: 1;
+      }
+
+      paper-icon-button[active] {
+        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+        opacity: 1;
+      }
+
+      paper-icon-button[disabled] {
+        display: none;
+      }
+
     </style>
 
     <nuxeo-page-provider id="provider"
@@ -36,13 +74,13 @@ Contributors:
     </nuxeo-page-provider>
 
     <template is="dom-if" if="[[isVisible]]">
-      <paper-icon-button id="prevDoc" icon="icons:arrow-back" on-tap="previous" disabled="[[!hasPrevious]]">
+      <paper-icon-button id="prevDoc" icon="icons:chevron-left" on-tap="previous" disabled="[[!hasPrevious]]">
       </paper-icon-button>
-      <paper-tooltip for="prevDoc">Previous Document</paper-tooltip>
+      <paper-tooltip for="prevDoc" position="right">Previous Document</paper-tooltip>
 
-      <paper-icon-button id="nextDoc" icon="icons:arrow-forward" on-tap="next" disabled="[[!hasNext]]">
+      <paper-icon-button id="nextDoc" icon="icons:chevron-right" on-tap="next" disabled="[[!hasNext]]">
       </paper-icon-button>
-      <paper-tooltip for="nextDoc">Next Document</paper-tooltip>
+      <paper-tooltip for="nextDoc" position="left">Next Document</paper-tooltip>
     </template>
 
   </template>
