@@ -24,6 +24,6 @@
   },
   "resolutions": {
     "nuxeo-elements": "master",
-    "nuxeo": "^0.23.0"
+    "nuxeo": "^0.24.0"
   }
 }
