@@ -31,13 +31,31 @@ Contributors:
         position: relative;
         background-color: #fff;
         padding: 0;
+        filter: 0.1s ease-out, filter 0.1s ease-out;
+        -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
+      }
+
+      .bubbleBox:hover {
+        cursor: pointer;
+        filter: brightness(102%);
+        -webkit-filter: brightness(102%);
+        z-index: 500;
+        box-shadow: 0 3px 0 rgba(33, 53, 125, 0.9), 0 0 10px rgba(0, 0, 0, 0.25);
+      }
+
+      .bubbleBox .title {
+        color: var(--nuxeo-link-color);
+      }
+
+      .bubbleBox:hover .title {
+        color: var(--nuxeo-link-hover-color);
       }
 
       .thumbnailContainer {
         background-color: #fafafa;
-        border-radius: 3px 3px 0 0;
         width: 100%;
-        min-height: 190px;
+        height: 190px;
+        z-index: 1;
       }
 
       .dataContainer {
@@ -54,10 +72,41 @@ Contributors:
         top: 10px;
         left: 8px;
         width: auto;
+        z-index: 2;
+      }
+
+      input[type="checkbox"]:hover {
+        cursor: pointer;
       }
 
       .title {
         font-size: 1.05em;
+      }
+
+      .bubbleBox .actions {
+        display: none;
+        text-align: right;
+      }
+      .bubbleBox:hover .actions {
+        display: block;
+        background-color: rgba(255,255,255,0.9);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .actions paper-icon-button {
+        color: var(--nuxeo-action-color);
+      }
+
+      .actions paper-icon-button:hover {
+        color: var(--nuxeo-link-hover-color);
+        fill: var(--nuxeo-link-hover-color);
+      }
+
+      .actions paper-icon-button[active] {
+        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
 
     </style>
@@ -65,13 +114,21 @@ Contributors:
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
 
     <div class="bubbleBox">
-      <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"></iron-image>
+      <a class="title ellipsis" on-click="handleClick">
+        <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"></iron-image>
+        <div class="dataContainer">
+          <div class="title ellipsis">[[doc.title]]</div>
+          <p class="tag">[[_docType(doc)]]</p>
+        </div>
+      </a>
+      <div class="actions">
+        <paper-icon-button icon="icons:file-download" title="download"></paper-icon-button>
+        <paper-icon-button icon="icons:star-border" title="favorite"></paper-icon-button>
+        <paper-icon-button icon="icons:content-copy" title="copy"></paper-icon-button>
+        <paper-icon-button icon="icons:more-horiz" title="more"></paper-icon-button>
+      </div>
       <div>
         <input type="checkbox">
-      </div>
-      <div class="dataContainer">
-         <a class="title ellipsis" on-click="handleClick">[[doc.title]]</a>
-         <p class="tag">[[_docType(doc)]]</p>
       </div>
     </div>
 
