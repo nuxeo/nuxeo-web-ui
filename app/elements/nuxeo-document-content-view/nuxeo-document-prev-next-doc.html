@@ -70,7 +70,8 @@ Contributors:
        page-size="1"
        page="{{index}}"
        params="[[params]]"
-       is-next-page-available="{{hasNext}}">
+       is-next-page-available="{{hasNext}}"
+       on-update="_update">
     </nuxeo-page-provider>
 
     <template is="dom-if" if="[[isVisible]]">
@@ -181,9 +182,11 @@ Contributors:
         },
 
         _doFetch: function() {
-          this.$.provider.fetch().then(function(response) {
-            this.contentView.navigate(response.entries[0], this.index);
-          }.bind(this));
+          this.$.provider.fetch().then();
+        },
+
+        _update: function() {
+          this.contentView.navigate(this.$.provider.currentPage[0], this.index);
         }
 
       });
