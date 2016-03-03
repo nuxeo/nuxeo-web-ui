@@ -37,7 +37,7 @@ Contributors:
         color: #039be5;
         box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
         background-color: #fff;
-        font-size: 24px;
+        font-size: 1.2em;
         padding-right: 2em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -49,10 +49,20 @@ Contributors:
         };
         --paper-input-container-input: {
           font-size: 18px;
-          font-weight: bold;
-          text-align: center;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-link-hover-color);
         };
-        width: 175px;
+        padding: .5em 0 .5em .5em;
+        border-left: 1px solid #eee;
+      }
+
+      ::content paper-input-container .input-content.paper-input-container {
+        flex-direction: row-reverse;
+      }
+
+      ::content paper-input-container .input-content iron-icon {
+        margin-right: .3em;
       }
 
       .actions paper-icon-button {

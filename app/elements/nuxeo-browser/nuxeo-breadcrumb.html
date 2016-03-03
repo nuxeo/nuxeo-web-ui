@@ -25,33 +25,58 @@ Contributors:
   <template>
 
     <style is="custom-style" include="shared-styles">
+      :host {
+        min-width: 8em;
+      }
       .breadcrumb, .shortBreadcrumb {
         margin: 0 20px;
+        color: var(--nuxeo-text-light);
+        font-weight: 300;
+        white-space: nowrap;
       }
 
       .breadcrumb-item {
         text-decoration: none;
       }
 
+      a.breadcrumb-item-current {
+        font-weight: 400;
+        max-width: 20em;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+      }
+
       .breadcrumb-divider {
         font-size: 20px;
       }
 
-      .breadcrumb-divider:last-of-type {
+      a.breadcrumb-item-parent {
+        opacity: .8;
+      }
+
+      a.breadcrumb-item-parent:hover {
+        opacity: 1;
+      }
+
+      a.breadcrumb-item-parent:before{
+        content: '« ';
+      }
+
+      .breadcrumb-divider:last-of-type,
+      .breadcrumb-item-ancestor {
         display: none;
       }
 
       @media (max-width: 1280px) {
-        .breadcrumb-item-ancestor {
-          display: none;
-        }
-
-        a.breadcrumb-item-parent:after {
-          content: '..';
-        }
-
+        .breadcrumb-divider,
         a.breadcrumb-item-parent span {
           display: none;
+        }
+        a.breadcrumb-item-parent:before{
+          padding: .5em .5em .5em 0;
         }
       }
 
