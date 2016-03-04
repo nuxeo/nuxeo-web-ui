@@ -55,7 +55,8 @@ Contributors:
         align-items: flex-start;
       }
 
-      .loadingIndicator {
+      .loadingIndicator,
+      .manualLoading {
         text-align: center;
         height: 40px;
         background-color: #fff;
@@ -66,14 +67,20 @@ Contributors:
         margin: 1em 0 2em;
       }
 
+      .manualLoading {
+        color: var(--nuxeo-link-color);
+      }
+
+      .manualLoading:hover {
+        cursor: pointer;
+        color: var(--nuxeo-link-hover-color);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+      }
+
       .loadingIndicator paper-spinner {
         width: 20px;
         height: 20px;
         margin-right: 10px;
-      }
-
-      .manualLoading paper-icon-button {
-        color: var(--nuxeo-primary-color);
       }
 
       #scrollThreshold {
@@ -162,11 +169,10 @@ Contributors:
           <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
             <paper-spinner active="true">
             </paper-spinner>
-            Loading more data ...
+            Loading more ...
           </div>
-          <div class="manualLoading" hidden$="[[!manualLoading]]" style="text-align: center;">
-            <paper-icon-button id="loadMore" icon="expand-more" class="giant" on-tap="_loadMoreData"></paper-icon-button>
-            <paper-tooltip for="loadMore" id="lockButTooltip" position="top">Load more data</paper-tooltip>
+          <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
+            Show more
           </div>
         </div>
       </iron-scroll-threshold>
