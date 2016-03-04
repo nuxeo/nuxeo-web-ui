@@ -66,16 +66,37 @@ Contributors:
         font-size: .75em;
       }
 
-      input[type="checkbox"] {
+      .bubbleBox .select {
+        display: none;
         position: absolute;
-        top: 10px;
-        left: 8px;
-        width: auto;
+        top: -.3em;
+        left: -.3em;
+        border: 2px solid #ddd;
+        background-color: #fff;
         z-index: 2;
+        border-radius: 3em;
       }
 
-      input[type="checkbox"]:hover {
+      .select paper-icon-button {
+        margin: 0;
+        padding: .3em;
+        box-sizing: border-box;
+      }
+
+      .bubbleBox .select,
+      .select paper-icon-button {
+        width: 1.9em;
+        height: 1.9em;
+      }
+
+      .bubbleBox:hover .select:hover {
+        border:1px solid #00adff;
+        background-color: #00adff;
         cursor: pointer;
+      }
+
+      .select:hover paper-icon-button {
+        color: #fff;
       }
 
       .title {
@@ -85,14 +106,15 @@ Contributors:
       .bubbleBox .actions {
         display: none;
         text-align: right;
-      }
-      .bubbleBox:hover .actions {
-        display: block;
         background-color: rgba(255,255,255,0.9);
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
+      }
+      .bubbleBox:hover .actions,
+      .bubbleBox:hover .select {
+        display: block;
       }
 
       .actions paper-icon-button {
@@ -126,8 +148,8 @@ Contributors:
         <paper-icon-button icon="icons:content-copy" title="copy"></paper-icon-button>
         <paper-icon-button icon="icons:more-horiz" title="more"></paper-icon-button>
       </div>
-      <div>
-        <input type="checkbox">
+      <div class="select">
+        <paper-icon-button icon="icons:check" title="download"></paper-icon-button>
       </div>
     </div>
 
