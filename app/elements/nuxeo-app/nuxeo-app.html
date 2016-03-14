@@ -23,89 +23,46 @@ Contributors:
 <dom-module id="nuxeo-app">
   <template>
     <style is="custom-style" include="shared-styles">
-      #logo {
-        margin-right: 2.5em;
-      }
-
-      #logo img {
-        max-height: 30px;
-        max-width: 90px;
-        margin: 0 .8em;
-      }
-
-      #toggle {
-        right: 1rem;
-        top: 1rem;
-      }
-
-      .profile img {
-        margin-right: .5em;
-        max-height: 24px;
-        max-width: 24px;
-        border-radius: 2em;
-        background-color: #eee;
-      }
-
-      .dropdown-trigger {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      app-header {
-        background-color: var(--nuxeo-header-background);
-        border-bottom: 1px solid #eee;
-      }
-
-      app-toolbar {
-        height: 50px;
-      }
-
-      section.profile {
-        font-size: 14px;
+      .logo {
+        background: #fafafa;
+        height: 60px;
+        padding: 15px;
+        position: absolute;
+        top: 0;
+        width: 60px;
       }
 
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
       }
 
-      paper-tabs {
-        height: 100%;
-        --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
-        --paper-tabs-selection-bar: {
-          top: 0;
-         }
-      }
-
-      paper-tab {
-        text-transform: uppercase;
-        @apply(--layout-horizontal);
-        @apply(--layout-center-center);
-      }
-
-      paper-tab:focus ::content .tab-content {
-        font-weight: normal;
-      }
-
-      #rightPanel {
-        border-left: 1px solid #eee;
+      iron-collapse {
         overflow: scroll;
       }
 
-      #rightPanel .side-bar {
-        padding: 0;
-        width: 300px;
+      #sidebar {
+        width: 350px;
       }
 
-      #rightPanel .card {
+      #sidebar > div {
+        background: #fff;
+        border-right: 1px solid #edeff0;
+        height: 1000vh;
+        margin-left: 60px;
+        padding: 0;
+        position: relative;
+      }
+
+      #sidebar .card {
         margin: 0;
       }
 
-      #rightPanel .card .content {
+      #sidebar .card .content {
         padding: 20px;
       }
 
-      #rightPanel .card .header {
-        background-color: var(--nuxeo-secondary-color);
+      #sidebar .card .header {
+        background-color: #edf1f5;
         border-bottom: 1px solid #edeff0;
         box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
         height: 60px;
@@ -113,44 +70,42 @@ Contributors:
         @apply(--layout-center);
       }
 
-      #rightPanel .card h1 {
-        color: #fff;
+      #sidebar .card h1 {
+        color: #213f7d;
         font-size: 1.1rem;
         margin-left: 20px;
-        font-weight: 700;
+        font-weight: normal;
       }
 
       .header-badge {
-        margin-left: -.2em;
-        margin-top: .4em;
-      }
-
-      .badge {
-        float: right;
-        font-weight: 600;
-        font-size: 12px;
-        border-radius: 50%;
-        width: var(--paper-badge-width, 20px);
-        height: var(--paper-badge-height, 20px);
-        background-color: var(--nuxeo-badge-background);
-        opacity: var(--paper-badge-opacity, 1.0);
-        color: var(--paper-badge-text-color, white);
-        @apply(--layout);
-        @apply(--layout-center-center);
-        display: block;
+        margin-left: -1em;
+        margin-top: 1em;
+        z-index: 100;
       }
 
       [hidden] {
         display: none !important;
       }
 
-      .profile paper-menu-button {
-        padding: 0;
-      }
-
       nuxeo-task-widget {
         --nuxeo-task-widget-box-padding: 10px 0px;
         font-size: 0.9em;
+      }
+
+      .side-nav {
+        height: 100vh;
+        margin-top: 60px;
+      }
+
+      .side-nav paper-icon-button {
+        color: #00adff;
+        height: 60px;
+        padding: 15px;
+        width: 60px;
+      }
+
+      .side-nav paper-icon-button.iron-selected {
+        color: #fff;
       }
     </style>
 
@@ -161,121 +116,118 @@ Contributors:
                     headers='{"X-NXfetch.document": "lock"}'>
     </nuxeo-document>
 
-    <app-header-layout main>
+    <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
+      <div drawer>
+        <a href="/home/">
+          <paper-icon-button src="/images/touch/icon-128x128.png" class="logo"></paper-icon-button>
+        </a>
+        <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
+          <paper-icon-button icon="icons:folder-open" name="browser"></paper-icon-button>
+          <paper-icon-button icon="icons:restore" name="recents"></paper-icon-button>
+          <paper-icon-button icon="icons:search" name="search"></paper-icon-button>
+          <!-- <paper-badge label="[[taskCount]]" class="header-badge"></paper-badge> -->
+          <paper-icon-button icon="icons:check-box" name="tasks"></paper-icon-button>
+          <paper-icon-button icon="icons:star" name="favorites"></paper-icon-button>
+          <paper-icon-button icon="icons:book" name="collections"></paper-icon-button>
+          <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
+          <paper-icon-button icon="editor:insert-invitation" name="clipboard"></paper-icon-button>
+        </paper-menu>
 
-      <!-- Top -->
-      <app-header fixed>
-        <app-toolbar class="flex">
+        <iron-collapse id="sidebar" horizontal opened>
+          <div>
+            <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
+              <section class="card" name="browser">
+                <div class="header">
+                  <h1>Browse</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-tree root-path="/default-domain" current-document="[[document]]"></nuxeo-tree>
+                </div>
+              </section>
 
-          <!-- Logo -->
-          <section id="logo">
-            <a href="/home/">
-              <img src="{{baseUrl}}images/nuxeo.png">
-            </a>
-          </section>
+              <section class="card" name="recents">
+                <div class="header">
+                  <h1>Recently Viewed</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
+                </div>
+              </section>
 
-          <!-- Navigation (MAIN_TABS) -->
-          <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name">
-            <paper-tab name="home">Home</paper-tab>
-            <paper-tab name="browse">Browse</paper-tab>
-            <paper-tab name="admin">Admin</paper-tab>
-          </paper-tabs>
+              <section class="card" name="search">
+                <div class="header">
+                  <h1>Search Filters</h1>
+                </div>
+                <div class="content">
 
-          <paper-tabs noink no-slide selected="{{page}}" attr-for-selected="name" style="float: right">
-            <paper-tab name="search"><iron-icon icon="search" suffix></iron-icon></paper-tab>
-          </paper-tabs>
+                </div>
+              </section>
 
-          <div class="horizontal flex center layout end-justified">
+              <section class="card" name="tasks">
+                <div class="header">
+                  <h1>Tasks</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-task-widget username="Administrator" count="{{taskCount}}"></nuxeo-task-widget>
+                </div>
+              </section>
 
-            <!-- Profile -->
-            <section class="profile">
-              <paper-menu-button noink no-animations>
-                <paper-button class="dropdown-trigger">
-                  <img src$="{{baseUrl}}images/avatar.png">
-                  <span>Lise Kemen</span>
-                </paper-button>
-                <paper-menu class="dropdown-content">
-                  <paper-item>Profile</paper-item>
-                  <paper-item>Notifications</paper-item>
-                  <paper-item>Drive</paper-item>
-                  <paper-item>Cloud Services</paper-item>
-                  <paper-item>Sign out</paper-item>
-                </paper-menu>
-              </paper-menu-button>
-            </section>
-          </div>
+              <section class="card" name="favorites">
+                <div class="header">
+                  <h1>Favorites</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
+                </div>
+              </section>
 
-          <!-- Toggle right panel button -->
-          <div id="toggle">
-            <paper-badge label="[[taskCount]]" class="header-badge"></paper-badge>
-            <paper-icon-button icon="menu" on-tap="_toggleRightPanel" aria-label="menu"></paper-icon-button>
-          </div>
-        </app-toolbar>
-      </app-header>
+              <section class="card" name="collections">
+                <div class="header">
+                  <h1>Working Collections</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-collections></nuxeo-collections>
+                </div>
+              </section>
 
-      <div class="layout horizontal">
-        <!-- The current document's page -->
-        <iron-pages selected="[[page]]" attr-for-selected="name" class="flex">
-          <nuxeo-home name="home"></nuxeo-home>
-          <nuxeo-browser id="browser"
-            name="browse"
-            document="[[currentDocument]]"
-            selected-tab="{{docAction}}"
-            clipboard="[[clipboard]]"></nuxeo-browser>
-          <nuxeo-search name="search"></nuxeo-search>
-          <nuxeo-admin name="admin"></nuxeo-admin>
-        </iron-pages>
+              <section class="card" name="personalWorkspace">
+                <div class="header">
+                  <h1>Personal Space</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-tree root-path="/default-domain/UserWorkspaces/Administrator/" current-document="[[currentDocument]]"></nuxeo-tree>
+                </div>
+              </section>
 
-        <!-- right panel -->
-        <iron-collapse id="rightPanel" horizontal>
-          <div class="side-bar">
-            <section class="card">
-              <div class="header">
-                <h1>Clipboard</h1>
-              </div>
-              <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
-            </section>
-
-            <section class="card">
-              <div class="header">
-                <h1>Tasks <div class="badge">[[taskCount]]</div></h1>
-              </div>
-              <div class="content">
-                <nuxeo-task-widget username="Administrator" count="{{taskCount}}"></nuxeo-task-widget>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="header">
-                <h1>Recently viewed</h1>
-              </div>
-              <div class="content">
-                <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="header">
-                <h1>Favorites</h1>
-              </div>
-              <div class="content">
-                <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="header">
-                <h1>Collections</h1>
-              </div>
-              <div class="content">
-                <nuxeo-collections></nuxeo-collections>
-              </div>
-            </section>
+              <section class="card" name="clipboard">
+                <div class="header">
+                  <h1>Clipboard</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+                </div>
+              </section>
+            </iron-pages>
           </div>
         </iron-collapse>
       </div>
 
-    </app-header-layout>
+      <paper-header-panel main>
+        <div class="layout horizontal">
+          <!-- The current document's page -->
+          <iron-pages selected="[[page]]" attr-for-selected="name" class="flex">
+            <nuxeo-home name="home"></nuxeo-home>
+            <nuxeo-browser id="browser"
+              name="browse"
+              document="[[currentDocument]]"
+              selected-tab="{{docAction}}"
+              clipboard="[[clipboard]]"></nuxeo-browser>
+            <nuxeo-search name="search"></nuxeo-search>
+            <nuxeo-admin name="admin"></nuxeo-admin>
+          </iron-pages>
+        </div>
+      </paper-header-panel>
+    </paper-drawer-panel>
   </template>
 
   <script>
@@ -295,6 +247,10 @@ Contributors:
             observer: '_navigate'
           },
 
+          selectedTab: {
+            type: String
+          },
+
           currentDocument: {
             type: Object,
             observer: '_documentChanged'
@@ -303,7 +259,17 @@ Contributors:
           docAction: String,
           linkDocId: String,
 
-          taskCount: Number
+          taskCount: Number,
+
+          drawerWidth: {
+            type: String,
+            value: '60px'
+          },
+
+          drawerOpened: {
+            type: Boolean,
+            value: false
+          }
         },
 
         get docId() {
@@ -373,9 +339,18 @@ Contributors:
           }
         },
 
-        _toggleRightPanel: function() {
-          this.$.rightPanel.toggle();
-        },
+        _toggleDrawer: function(e) {
+          if (!this.drawerOpened) {
+            this.drawerWidth = '350px';
+            this.$.sidebar.style.width = '100%';
+          } else {
+            if (this._selected === e.detail.selected) {
+              this.drawerWidth = '60px';
+            }
+          }
+          this.drawerOpened = !this.drawerOpened;
+          this._selected = e.detail.selected;
+        }
       });
     })();
   </script>

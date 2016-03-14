@@ -119,27 +119,11 @@ Contributors:
       }
     </style>
 
-    <!-- Left sidebar -->
-    <iron-collapse id="sidebar" horizontal opened="{{sidebarOpened}}">
-      <paper-scroll-header-panel>
-        <paper-toolbar>
-          <paper-icon-button icon="folder-open" on-click="toggleSidebar"></paper-icon-button>
-          <span>Tree</span>
-        </paper-toolbar>
-        <div class="side-bar">
-          <nuxeo-tree root-path="/default-domain" current-document="[[document]]"></nuxeo-tree>
-        </div>
-      </paper-scroll-header-panel>
-    </iron-collapse>
-
     <!-- Main content -->
     <paper-header-panel class="main flex">
 
       <paper-header class="paper-header">
         <paper-toolbar>
-          <paper-icon-button class="toggle" icon="folder-open"
-                             on-click="toggleSidebar"
-                             hidden="[[sidebarOpened]]"></paper-icon-button>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
 
           <!-- Page provider navigation -->
@@ -294,10 +278,6 @@ Contributors:
           inClipboard: {
             type: Boolean
           },
-          sidebarOpen: {
-            type: Boolean,
-            value: false
-          },
           selectedTab: {
             type: String,
             value: 'view',
@@ -345,10 +325,6 @@ Contributors:
 
         _documentUpdated: function() {
           this.fire('documentUpdated');
-        },
-
-        toggleSidebar: function() {
-          this.$.sidebar.toggle();
         },
 
         togglePreviewDialog: function() {
