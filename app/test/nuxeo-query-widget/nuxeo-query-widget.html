@@ -171,7 +171,7 @@ Contributors:
 
       function validatePage2() {
         expect(query.numberOfPages).to.be.equal(2);
-        expect(query.pageSize).to.be.equal(3);
+        expect(query.pageSize).to.be.equal(5);
         for (var i = 0; i < page2.currentPageSize; i++) {
           expect(query.currentPage[i].properties['dc:title']).to.be.equal('File ' + (i + page1.currentPageSize));
         }
