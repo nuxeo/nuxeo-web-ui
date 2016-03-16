@@ -41,11 +41,10 @@ Contributors:
       }
 
       #sidebar {
-        width: 350px;
+        border-right: 1px solid #edeff0;
       }
 
       #sidebar > div {
-        border-right: 1px solid #edeff0;
         margin-left: 60px;
       }
 
@@ -67,6 +66,30 @@ Contributors:
         font-size: 1.1rem;
         margin-left: 20px;
         font-weight: normal;
+      }
+
+      #sidebar .profile .content {
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        height: calc(100vh - 60px);
+        padding: 0;
+      }
+
+      #sidebar .profile .item {
+        border-bottom: 1px solid #edeff0;
+        text-transform: uppercase;
+      }
+
+      #sidebar .profile .item a {
+        display: block;
+        padding: 20px;
+      }
+
+      #sidebar .profile .item:last-of-type {
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        border: none;
+        justify-content: flex-end;
       }
 
       .header-badge {
@@ -99,6 +122,11 @@ Contributors:
       .side-nav paper-icon-button.iron-selected {
         color: #fff;
       }
+
+      .side-nav .profile-icon {
+        bottom: 65px;
+        position: absolute;
+      }
     </style>
 
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
@@ -117,13 +145,14 @@ Contributors:
           <paper-icon-button icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button icon="icons:restore" name="recents"></paper-icon-button>
           <paper-icon-button icon="icons:search" name="search"></paper-icon-button>
-          <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
           <paper-icon-button icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
           <paper-icon-button icon="icons:star" name="favorites"></paper-icon-button>
           <paper-icon-button icon="icons:book" name="collections"></paper-icon-button>
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
           <paper-icon-button icon="editor:insert-invitation" name="clipboard"></paper-icon-button>
+          <paper-icon-button src="{{baseUrl}}images/avatar.png" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
+        <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
 
         <iron-collapse id="sidebar" horizontal opened>
           <div>
@@ -197,6 +226,29 @@ Contributors:
                 </div>
                 <div class="content">
                   <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+                </div>
+              </section>
+
+              <section class="card profile" name="profile">
+                <div class="header">
+                  <h1>Lise Kemen</h1>
+                </div>
+                <div class="content">
+                  <div class="item">
+                    <a href="">Profile</a>
+                  </div>
+                  <div class="item">
+                    <a href="">Notifications</a>
+                  </div>
+                  <div class="item">
+                    <a href="">Drive</a>
+                  </div>
+                  <div class="item">
+                    <a href="">Cloud Services</a>
+                  </div>
+                  <div class="item layout vertical">
+                    <a href="">Sign Out</a>
+                  </div>
                 </div>
               </section>
             </iron-pages>
