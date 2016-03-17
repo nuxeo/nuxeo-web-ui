@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
+  Andre Justo <ajusto@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
 -->
 
@@ -27,12 +28,8 @@ Contributors:
 <dom-module id="nuxeo-admin">
   <template>
     <style is="custom-style" include="shared-styles">
-      .main {
-        margin-left: 60px;
-      }
-
       paper-header-panel {
-        height: calc(100vh - 65px);
+        height: 100vh;
       }
 
       .paper-header {
@@ -61,18 +58,12 @@ Contributors:
       paper-card.card {
         margin: 0 22px 22px 0;
         min-width: 560px;
-        width: calc(100% - 22px);
+        width: 100%;
         height: 100%;
       }
     </style>
 
-    <!-- Left sidebar -->
-    <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name">
-      <paper-icon-button icon="editor:insert-chart" name="repository">Repository Monitoring</paper-icon-button>
-      <paper-icon-button icon="social:people" name="userManagement">Users & Groups</paper-icon-button>
-    </paper-menu>
-
-    <paper-header-panel class="main flex" >
+    <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
         <span class="flex">[[_getLabel(selectedTab)]]</span>
       </div>
@@ -120,22 +111,15 @@ Contributors:
           },
           selectedTab: {
             type: String,
-            value: 'repository',
-            observer: '_navigate'
+            value: 'repository'
           }
-        },
-
-        _navigate: function() {
-          /*page('/admin@' + this.selectedTab);*/
         },
 
         _getLabel: function(tab) {
           var label = this.labels[tab];
           return this.i18n(label);
         }
-
       });
     })();
   </script>
-
 </dom-module>

@@ -12,6 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 Contributors:
+  Andre Justo <ajusto@nuxeo.com>
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -68,21 +69,20 @@ Contributors:
         font-weight: normal;
       }
 
-      #sidebar .profile .content {
+      #sidebar .profile .content,
+      #sidebar .administration .content {
         @apply(--layout-flex);
         @apply(--layout-vertical);
         height: calc(100vh - 60px);
         padding: 0;
       }
 
-      #sidebar .profile .item {
+      #sidebar .profile .item a,
+      #sidebar .administration .item a {
         border-bottom: 1px solid #edeff0;
-        text-transform: uppercase;
-      }
-
-      #sidebar .profile .item a {
         display: block;
         padding: 20px;
+        text-transform: uppercase;
       }
 
       #sidebar .profile .item:last-of-type {
@@ -149,7 +149,8 @@ Contributors:
           <paper-icon-button icon="icons:star" name="favorites"></paper-icon-button>
           <paper-icon-button icon="icons:book" name="collections"></paper-icon-button>
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
-          <paper-icon-button icon="editor:insert-invitation" name="clipboard"></paper-icon-button>
+          <paper-icon-button icon="icons:content-paste" name="clipboard"></paper-icon-button>
+          <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
           <paper-icon-button src="{{baseUrl}}images/avatar.png" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
         <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
@@ -229,6 +230,22 @@ Contributors:
                 </div>
               </section>
 
+              <section class="card administration" name="administration">
+                <div class="header">
+                  <h1>Administration</h1>
+                </div>
+                <div class="content">
+                  <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
+                    <div class="item" name="repository">
+                      <a href="{{baseUrl}}admin/">Repository Monitoring</a>
+                    </div>
+                    <div class="item" name="userManagement">
+                      <a href="{{baseUrl}}admin/">Users & Groups</a>
+                    </div>
+                  </iron-selector>
+                </div>
+              </section>
+
               <section class="card profile" name="profile">
                 <div class="header">
                   <h1>Lise Kemen</h1>
@@ -267,7 +284,7 @@ Contributors:
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
             <nuxeo-search name="search"></nuxeo-search>
-            <nuxeo-admin name="admin"></nuxeo-admin>
+            <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]"></nuxeo-admin>
           </iron-pages>
         </div>
       </paper-header-panel>
@@ -294,6 +311,8 @@ Contributors:
           selectedTab: {
             type: String
           },
+
+          selectedAdminTab: String,
 
           currentDocument: {
             type: Object,
