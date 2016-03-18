@@ -101,7 +101,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-edit',
-        behaviors: [Polymer.IronResizableBehavior],
+
+        behaviors: [Polymer.IronResizableBehavior,
+                    Nuxeo.I18nBehavior],
+
         properties: {
           document: {
             type: Object,

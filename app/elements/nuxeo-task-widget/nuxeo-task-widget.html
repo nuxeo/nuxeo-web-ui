@@ -122,6 +122,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task-widget',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
         properties: {
           username: String,
           tasks: {

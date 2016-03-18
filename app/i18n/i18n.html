@@ -1,33 +1,25 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
 <script>
   (function () {
-    window.I18n = window.I18n || {};
-
-    var language = window.I18n.language || 'en',
-        baseUrl = window.I18n.baseUrl || location.origin + location.pathname,
-        locales = window.I18n.locales || {};
-
-    /**
-     * Translates the given key.
-     * Also accepts multiple arguments which will be joined to build the key.
-     */
-    Polymer.Base.i18n = function (key, defaultValue) {
-      if (!locales[language]) {
-        var url = baseUrl +  '/i18n/messages.' + language + '.json';
-        var xhr = new XMLHttpRequest();
-        // XXX synchronous requests are deprecated
-        xhr.open('GET', url, false);
-        xhr.onerror = function(e) {
-         console.error("Failed to load " + url);
-        };
-        xhr.send();
-        locales[language] = JSON.parse(xhr.responseText); // cache this locale.
-      }
-      var value = locales[language][key] || defaultValue || key;
-      var params = Array.prototype.slice.call(arguments, 2);
-      for (var i = 0; i < params.length; i++) {
-        value = value.replace('{' + i + '}', params[i]);
-      }
-      return value;
-    };
+    var msgFolder = (window.nuxeo.I18n.baseUrl || location.origin + location.pathname) + '/i18n';
+    window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
+    window.nuxeo.I18n.loadLocale();
   })();
 </script>

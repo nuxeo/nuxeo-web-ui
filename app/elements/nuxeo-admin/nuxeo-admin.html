@@ -51,7 +51,7 @@ Contributors:
 
     <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
-        <span class="flex">[[_getLabel(selectedTab)]]</span>
+        <span class="flex">[[i18n(selectedLabel)]]</span>
       </div>
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
@@ -90,6 +90,8 @@ Contributors:
       Polymer({
         is: 'nuxeo-admin',
 
+        behaviors: [Nuxeo.I18nBehavior],
+
         properties: {
           labels: {
             type: Object,
@@ -106,12 +108,15 @@ Contributors:
             type: Object,
             value: {},
             observer: '_entityChanged'
+          },
+          selectedLabel: {
+            type: String,
+            computed: '_computeLabel(selectedTab)'
           }
         },
 
-        _getLabel: function(tab) {
-          var label = this.labels[tab];
-          return this.i18n(label);
+        _computeLabel: function(tab) {
+          return this.labels[tab];
         },
 
         _entityChanged: function() {

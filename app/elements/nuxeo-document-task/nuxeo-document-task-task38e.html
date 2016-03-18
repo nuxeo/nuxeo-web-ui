@@ -90,7 +90,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task-task38e',
-        behaviors: [Nuxeo.DocumentTaskBehavior],
+        behaviors: [Nuxeo.DocumentTaskBehavior,
+                    Nuxeo.I18nBehavior],
+
         properties: {
           validationOrReview: {
             type: Array,

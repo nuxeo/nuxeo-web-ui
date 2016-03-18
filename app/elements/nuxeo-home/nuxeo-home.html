@@ -80,7 +80,7 @@ Contributors:
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
-        <span class="flex">[[_getLabel(selectedTab)]]</span>
+        <span class="flex">[[i18n(selectedLabel)]]</span>
       </div>
       <div class="content">
         <section name="dashboard">
@@ -120,6 +120,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-home',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
         properties: {
           labels: {
             type: Object,
@@ -131,12 +134,15 @@ Contributors:
             type: String,
             value: 'dashboard',
             observer: '_navigate'
+          },
+          selectedLabel: {
+            type: String,
+            computed: '_computeLabel(selectedTab)'
           }
         },
 
-        _getLabel: function(tab) {
-          var label = this.labels[tab];
-          return this.i18n(label);
+        _computeLabel: function(tab) {
+          return this.labels[tab];
         },
 
         _navigate: function() {
