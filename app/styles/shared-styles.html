@@ -6,8 +6,8 @@
       Global styles
       -- */
       body {
-        background: #fafafa;
-        font-family: 'Open Sans', 'Roboto', Helvetica, Arial, sans-serif;
+        background: var(--nuxeo-page-background);
+        font-family: 'Open Sans', Arial, sans-serif;
         color: #333;
         margin: 0;
       }
@@ -15,7 +15,6 @@
       ::content #mainPanel {
         background-color: var(--nuxeo-page-background);
       }
-
       /* --
       Page Layout elements
       -- */
@@ -32,7 +31,7 @@
       -- */
       paper-header-panel {
         --paper-header-panel-shadow: {
-          box-shadow: inset 0px 3px 3px -3px rgba(0, 0, 0, 0.4);
+          box-shadow: none;
         };
         background-color: #fff;
       }
@@ -86,20 +85,13 @@
         pointer-events: none;
       }
 
-      /* Side nav in Home & Admin */
+      /* Side nav */
       .side-nav {
         background-color: var(--nuxeo-secondary-color);
         height: 100%;
         position: fixed;
         width: 60px;
         padding-top: 0;
-      }
-
-      .side-nav paper-icon-button {
-        color: #fff;
-        width: 60px;
-        height: 60px;
-        padding: 15px;
       }
 
       /* --
@@ -133,12 +125,13 @@
         --paper-card: {
           box-shadow: none !important;
           background-color: #fff;
-          border: 1px solid #ededed;
+          border: var(--nuxeo-border);
         };
       }
 
       .card-actions {
         text-align: right;
+        background-color: var(--nuxeo-light-background);
       }
 
       /* --
