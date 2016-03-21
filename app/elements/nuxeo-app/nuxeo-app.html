@@ -25,12 +25,15 @@ Contributors:
   <template>
     <style is="custom-style" include="shared-styles">
       .logo {
-        background: #fafafa;
-        height: 60px;
-        padding: 15px;
-        position: absolute;
+        background: #fafcfd;
+        border-right: var(--nuxeo-border);
+        height: 59px;
+        padding: 18px;
+        position: fixed;
         top: 0;
+        left: 0;
         width: 60px;
+        z-index: 1;
       }
 
       paper-badge {
@@ -41,48 +44,53 @@ Contributors:
         overflow: scroll;
       }
 
-      #sidebar {
-        border-right: 1px solid #edeff0;
+      ::content --paper-icon-button-hover {
+        filter: brightness(102%);
+        webkit-filter: brightness(102%);
       }
 
       #sidebar > div {
         margin-left: 60px;
       }
 
+      #sidebar section {
+        height: 100vh;
+        border-right: var(--nuxeo-border);
+      }
+
       #sidebar .card .content {
-        padding: 20px;
+        padding: 15px;
+        font-size: .9rem;
       }
 
       #sidebar .card .header {
-        background-color: #edf1f5;
-        border-bottom: 1px solid #edeff0;
-        box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
-        height: 60px;
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        border-bottom: var(--nuxeo-border);
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
 
       #sidebar .card h1 {
-        color: #213f7d;
-        font-size: 1.1rem;
-        margin-left: 20px;
-        font-weight: normal;
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
       }
 
       #sidebar .profile .content,
       #sidebar .administration .content {
         @apply(--layout-flex);
         @apply(--layout-vertical);
-        height: calc(100vh - 60px);
+        height: calc(100vh - 59px);
         padding: 0;
       }
 
-      #sidebar .profile .item a,
-      #sidebar .administration .item a {
+      #sidebar .item a {
         border-bottom: 1px solid #edeff0;
         display: block;
-        padding: 20px;
-        text-transform: uppercase;
+        padding: 15px;
       }
 
       #sidebar .profile .item:last-of-type {
@@ -92,10 +100,14 @@ Contributors:
         justify-content: flex-end;
       }
 
+      .icon-badge {
+        position: relative;
+      }
+
       .header-badge {
-        margin-left: -1em;
-        margin-top: 1em;
-        z-index: 100;
+        left: 33px !important;
+        top: 6px !important;
+        position: absolute;
       }
 
       [hidden] {
@@ -108,24 +120,33 @@ Contributors:
       }
 
       .side-nav {
-        height: 100vh;
-        margin-top: 60px;
+        height: calc(100vh - 120px);
+        padding: 60px 0;
+        overflow: auto;
       }
 
       .side-nav paper-icon-button {
         color: #00adff;
-        height: 60px;
-        padding: 15px;
+        height: 50px;
+        padding: 14px;
         width: 60px;
       }
 
       .side-nav paper-icon-button.iron-selected {
         color: #fff;
+
+      }
+
+      .side-nav paper-icon-button.iron-selected,
+      .side-nav paper-icon-button:hover {
+        background-color: rgba(255,255,255,.03);
       }
 
       .side-nav .profile-icon {
-        bottom: 65px;
-        position: absolute;
+        bottom: 0;
+        position: fixed;
+        left: 0;
+        height: 59px;
       }
     </style>
 
@@ -145,7 +166,10 @@ Contributors:
           <paper-icon-button icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button icon="icons:restore" name="recents"></paper-icon-button>
           <paper-icon-button icon="icons:search" name="search"></paper-icon-button>
-          <paper-icon-button icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
+          <div class="icon-badge">
+            <paper-icon-button icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
+            <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
+          </div>
           <paper-icon-button icon="icons:star" name="favorites"></paper-icon-button>
           <paper-icon-button icon="icons:book" name="collections"></paper-icon-button>
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
@@ -153,7 +177,6 @@ Contributors:
           <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
           <paper-icon-button src="{{baseUrl}}images/avatar.png" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
-        <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
 
         <iron-collapse id="sidebar" horizontal opened>
           <div>
