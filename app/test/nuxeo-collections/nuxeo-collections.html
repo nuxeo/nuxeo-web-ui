@@ -82,19 +82,20 @@ Contributors:
 
         test('it should display collections', function() {
           var element = fixture('collections'), collections;
-          return waitChanged(element, 'collections').then(flush().then(function() {
+          return waitChanged(element, 'collections').then(function() {
             expect(element.collections.entries.length).to.be.equal(1);
+            Polymer.dom.flush();
             collections = element.getElementsByClassName('collection');
             expect(collections.length).to.be.equal(1);
             var docs = collections[0].querySelector('nuxeo-operation');
             expect(docs).to.not.be.undefined;
-            return waitChanged(docs, 'response').then(flush().then(function() {
+            return waitChanged(docs, 'response').then(function() {
+              Polymer.dom.flush();
               expect(collections[0].querySelector('.title span').textContent).to.be.equal('My Collection');
-              expect(collections[0].getElementsByClassName('item').length).to.be.equal(2);
               expect(collections[0].querySelectorAll('.item paper-tooltip')[0].textContent).to.be.equal('My picture in Collection');
               expect(collections[0].querySelectorAll('.item paper-tooltip')[1].textContent).to.be.equal('My video in Collection');
-            }));
-          }));
+            });
+          });
         });
       });
 
@@ -113,12 +114,13 @@ Contributors:
 
         test('it should display empty collections placeholder', function() {
           var element = fixture('collections');
-          return waitChanged(element, 'collections').then(flush().then(function() {
+          return waitChanged(element, 'collections').then(function() {
             expect(element.collections.entries.length).to.be.equal(0);
+            Polymer.dom.flush();
             var placeholder = element.querySelector('.empty');
             expect(isHidden(placeholder)).to.be.false;
             expect(placeholder.textContent).to.be.equal('No collections.');
-          }));
+          });
         });
       });
     });

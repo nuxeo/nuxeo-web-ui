@@ -112,27 +112,22 @@ Contributors:
 
       test('it should display tasks', function() {
         var tasks = fixture('tasks'), records;
-        return waitChanged(tasks, 'tasks')
-        .then(function() {
-          return flush()
-          .then(function() {
-            expect(tasks.count).to.be.equal(2);
-            records = tasks.getElementsByClassName('task-box');
-            expect(records.length).to.be.equal(2);
-            var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
-            expect(workflows1).to.not.be.undefined;
-            var workflows2 = records[1].querySelector('.task-box > nuxeo-resource');
-            expect(workflows2).to.not.be.undefined;
-            return Promise.all([
-              waitChanged(workflows1, 'response'),
-              waitChanged(workflows2, 'response')
-            ]);
-          });
-        })
-        flush().then(function() {
-          validateRecord(records[0], 'Administrator', 'January 28, 2016', docResponse1);
-          validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2);
+        return waitChanged(tasks, 'tasks').then(function() {
+          Polymer.dom.flush();
+          expect(tasks.count).to.be.equal(2);
+          records = tasks.getElementsByClassName('task-box');
+          expect(records.length).to.be.equal(2);
+          var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
+          expect(workflows1).to.not.be.undefined;
+          var workflows2 = records[1].querySelector('.task-box > nuxeo-resource');
+          expect(workflows2).to.not.be.undefined;
+          return Promise.all([
+            waitChanged(workflows1, 'response'),
+            waitChanged(workflows2, 'response')
+          ]);
         });
+        validateRecord(records[0], 'Administrator', 'January 28, 2016', docResponse1);
+        validateRecord(records[1], 'Administrator', 'February 1, 2016', docResponse2);
       });
 
       function validateRecord(record, user, date, docResponse) {
@@ -168,12 +163,13 @@ Contributors:
 
       test('it should display "There are no tasks to show."', function() {
         var tasks = fixture('tasks');
-        return waitChanged(tasks, 'tasks').then(flush().then(function() {
+        return waitChanged(tasks, 'tasks').then(function() {
+          Polymer.dom.flush();
           expect(tasks.count).to.be.equal(0);
           var placeholder = tasks.querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
           expect(placeholder.textContent).to.be.equal('There are no tasks to show.');
-        }));
+        });
       });
     });
 

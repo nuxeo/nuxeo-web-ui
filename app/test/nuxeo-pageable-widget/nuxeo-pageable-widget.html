@@ -71,30 +71,24 @@ Contributors:
       });
       test('it should list entries', function() {
         var pageable = fixture('pageable', {docs: docs});
-
-        return flush()
-        .then(function() {
-          var rows = pageable.getElementsByClassName('doctable-row');
-          expect(rows.length).to.be.equal(docs.length);
-          var title, modified, lastContributor, version;
-          for (var i = 0; i < docs.length; i++) {
-            expect(rows[i].querySelector('#title').text).to.be.equal(docs[i].properties['dc:title']);
-            expect(rows[i].querySelector('#modified').textContent).to.be.equal(pageable._formatDate(docs[i].properties['dc:modified']));
-            expect(rows[i].querySelector('#lastContributor').text).to.be.equal(docs[i].properties['dc:lastContributor']);
-            expect(rows[i].querySelector('#version').textContent).to.be.equal(docs[i].properties['uid:major_version'] + '.' + docs[i].properties['uid:minor_version']);
-          }
-        });
+        Polymer.dom.flush();
+        var rows = pageable.getElementsByClassName('doctable-row');
+        expect(rows.length).to.be.equal(docs.length);
+        var title, modified, lastContributor, version;
+        for (var i = 0; i < docs.length; i++) {
+          expect(rows[i].querySelector('#title').text).to.be.equal(docs[i].properties['dc:title']);
+          expect(rows[i].querySelector('#modified').textContent).to.be.equal(pageable._formatDate(docs[i].properties['dc:modified']));
+          expect(rows[i].querySelector('#lastContributor').text).to.be.equal(docs[i].properties['dc:lastContributor']);
+          expect(rows[i].querySelector('#version').textContent).to.be.equal(docs[i].properties['uid:major_version'] + '.' + docs[i].properties['uid:minor_version']);
+        }
       });
     });
     suite('when the page is empty', function() {
       test('it should be empty', function() {
         var pageable = fixture('pageable', {docs: []});
-
-        return flush()
-        .then(function() {
-          var rows = pageable.getElementsByClassName('doctable-row');
-          expect(rows.length).to.be.equal(0);
-        });
+        Polymer.dom.flush();
+        var rows = pageable.getElementsByClassName('doctable-row');
+        expect(rows.length).to.be.equal(0);
       });
     });
   });
