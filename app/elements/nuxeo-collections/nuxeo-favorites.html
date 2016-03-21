@@ -36,6 +36,18 @@ Contributors:
         --iron-icon-width: 16px;
         padding-right: 2px;
       }
+
+      .favRemove {
+        padding: 0;
+        width: 1.5em;
+        height: 1.5em;
+      }
+
+      .favLink.ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+      }
     </style>
 
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
@@ -50,10 +62,10 @@ Contributors:
     <div class="list">
       <template is="dom-repeat" items="[[favorites.entries]]">
         <div class="item">
-          <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
-          <div class="flex">
-            <a class="favLink" href="[[_href(item)]]" >[[item.title]]</a>
-          </div>
+          <span class="flex">
+            <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
+            <a class="favLink ellipsis" href="[[_href(item)]]" >[[item.title]]</a>
+          </span>
           <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
         </div>
       </template>

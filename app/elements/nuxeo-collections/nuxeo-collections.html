@@ -34,10 +34,6 @@ Contributors:
         display: inline-block;
       }
 
-      .item a {
-        display: block;
-      }
-
       iron-image {
         margin-top: 5px;
         height: 40px;
@@ -61,19 +57,19 @@ Contributors:
                            response="{{collection.docs}}">
           </nuxeo-operation>
           <template is="dom-if" if="[[!_isEmpty(collection.docs)]]">
-            <div class="title">
-              <iron-icon icon="icons:book"></iron-icon>
-              <span>[[collection.title]]</span>
-            </div>
-            <div>
-              <template is="dom-repeat" items="[[collection.docs.entries]]" as="doc">
-                <div class="item">
+            <div class="item">
+              <div class="title">
+                <iron-icon icon="icons:book"></iron-icon>
+                <span>[[collection.title]]</span>
+              </div>
+              <div>
+                <template is="dom-repeat" items="[[collection.docs.entries]]" as="doc">
                   <a href="[[_href(doc)]]">
                     <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center"></iron-image>
                   </a>
                   <paper-tooltip animation-delay="0" offset="0">[[doc.title]]</paper-tooltip>
-                </div>
-              </template>
+                </template>
+              </div>
             </div>
           </template>
         </div>

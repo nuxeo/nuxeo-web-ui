@@ -52,10 +52,10 @@ Contributors:
 
     <template is="dom-repeat" items="[[documents]]" as="document">
       <div class="item">
-        <iron-icon icon="receipt" item-icon></iron-icon>
-        <div class="flex">
-          <a href="[[_href(document)]]" class="flex ellipsis">[[document.title]]</a>
-        </div>
+        <a href="[[_href(document)]]" class="flex ellipsis">
+          <iron-icon icon="receipt" item-icon></iron-icon>
+          <span>[[document.title]]</span>
+        </a>
       </div>
     </template>
 

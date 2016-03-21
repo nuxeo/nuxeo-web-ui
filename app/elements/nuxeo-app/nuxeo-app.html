@@ -58,9 +58,11 @@ Contributors:
         border-right: var(--nuxeo-border);
       }
 
-      #sidebar .card .content {
-        padding: 15px;
+      #sidebar .content {
         font-size: .9rem;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        height: calc(100vh - 59px);
       }
 
       #sidebar .card .header {
@@ -79,18 +81,20 @@ Contributors:
         font-weight: 500;
       }
 
-      #sidebar .profile .content,
-      #sidebar .administration .content {
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-        height: calc(100vh - 59px);
-        padding: 0;
+      #sidebar .browse .content,
+      #sidebar .search .content,
+      #sidebar .personal-space .content {
+        padding: 1em;
+      }
+
+      #sidebar .item {
+        border-bottom: var(--nuxeo-border);
+        display: block;
+        padding: 1em;
       }
 
       #sidebar .item a {
-        border-bottom: 1px solid #edeff0;
-        display: block;
-        padding: 15px;
+        margin-bottom: 0;
       }
 
       #sidebar .profile .item:last-of-type {
@@ -181,8 +185,8 @@ Contributors:
         <iron-collapse id="sidebar" horizontal opened>
           <div>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
-              <section class="card" name="browser">
-                <div class="header">
+              <section class="card browse" name="browser">
+                <div class="header ellipsis">
                   <h1>Browse</h1>
                 </div>
                 <div class="content">
@@ -190,8 +194,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="recents">
-                <div class="header">
+              <section class="card recents" name="recents">
+                <div class="header ellipsis">
                   <h1>Recently Viewed</h1>
                 </div>
                 <div class="content">
@@ -199,8 +203,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="search">
-                <div class="header">
+              <section class="card search" name="search">
+                <div class="header ellipsis">
                   <h1>Search Filters</h1>
                 </div>
                 <div class="content">
@@ -208,8 +212,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="tasks">
-                <div class="header">
+              <section class="card tasks" name="tasks">
+                <div class="header ellipsis">
                   <h1>Tasks</h1>
                 </div>
                 <div class="content">
@@ -217,8 +221,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="favorites">
-                <div class="header">
+              <section class="card favorites" name="favorites">
+                <div class="header ellipsis">
                   <h1>Favorites</h1>
                 </div>
                 <div class="content">
@@ -226,8 +230,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="collections">
-                <div class="header">
+              <section class="card collections" name="collections">
+                <div class="header ellipsis">
                   <h1>Working Collections</h1>
                 </div>
                 <div class="content">
@@ -235,8 +239,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="personalWorkspace">
-                <div class="header">
+              <section class="card personal-space" name="personalWorkspace">
+                <div class="header ellipsis">
                   <h1>Personal Space</h1>
                 </div>
                 <div class="content">
@@ -244,8 +248,8 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card" name="clipboard">
-                <div class="header">
+              <section class="card clipboard" name="clipboard">
+                <div class="header ellipsis">
                   <h1>Clipboard</h1>
                 </div>
                 <div class="content">
@@ -254,7 +258,7 @@ Contributors:
               </section>
 
               <section class="card administration" name="administration">
-                <div class="header">
+                <div class="header ellipsis">
                   <h1>Administration</h1>
                 </div>
                 <div class="content">
@@ -270,7 +274,7 @@ Contributors:
               </section>
 
               <section class="card profile" name="profile">
-                <div class="header">
+                <div class="header ellipsis">
                   <h1>Lise Kemen</h1>
                 </div>
                 <div class="content">

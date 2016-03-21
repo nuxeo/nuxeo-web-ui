@@ -33,6 +33,18 @@ Contributors:
         @apply(--layout-center);
       }
 
+      .ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+      }
+
+      .remove {
+        padding: 0;
+        width: 1.5em;
+        height: 1.5em;
+      }
+
       .toolbar {
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
@@ -47,11 +59,11 @@ Contributors:
 
     <template is="dom-repeat" items="[[documents]]" as="document">
       <div class="item">
-        <iron-icon icon="receipt" item-icon></iron-icon>
-        <div class="flex">
-          <a href="[[_href(document)]]" class="flex ellipsis">[[document.title]]</a>
-        </div>
-        <paper-icon-button icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+        <span class="flex">
+          <iron-icon icon="receipt" item-icon></iron-icon>
+          <a href="[[_href(document)]]" class="ellipsis">[[document.title]]</a>
+        </span>
+        <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
       </div>
     </template>
 
