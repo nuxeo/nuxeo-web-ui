@@ -33,9 +33,10 @@ Contributors:
       }
 
       paper-toolbar {
-        height: 60px;
+        height: 59px;
         color: #039be5;
-        box-shadow: 0 0 1px rgba(0,0,0,0.1) inset;
+        box-shadow: none;
+        border-bottom: var(--nuxeo-border);
         background-color: #fff;
         font-size: 1.2em;
         padding-right: 2em;
@@ -53,8 +54,8 @@ Contributors:
           text-align: left;
           color: var(--nuxeo-link-hover-color);
         };
-        padding: .5em 0 .5em .5em;
-        border-left: 1px solid #eee;
+        padding: .3em 0 .5em .5em;
+        border-left: var(--nuxeo-border);
       }
 
       ::content paper-input-container .input-content.paper-input-container {
@@ -120,7 +121,7 @@ Contributors:
     </style>
 
     <!-- Main content -->
-    <paper-header-panel class="main flex">
+    <paper-header-panel class="main">
 
       <paper-header class="paper-header">
         <paper-toolbar>

@@ -27,6 +27,7 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         min-width: 8em;
+        margin-top: -.2em;
       }
       .breadcrumb, .shortBreadcrumb {
         margin: 0 20px;
@@ -40,9 +41,10 @@ Contributors:
       }
 
       a.breadcrumb-item-current {
-        font-weight: 400;
+        font-weight: 600;
         max-width: 20em;
         display: inline-block;
+        color: var(--nuxeo-link-color);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
