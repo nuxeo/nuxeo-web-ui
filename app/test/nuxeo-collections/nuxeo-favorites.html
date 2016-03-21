@@ -89,24 +89,26 @@ Contributors:
         test('it should display favorites', function() {
           var element = fixture('favorites', {doc: doc});
           var items;
-          return waitChanged(element, 'favorites').then(flush().then(function() {
+          return waitChanged(element, 'favorites').then(function() {
             // Assert we have two documents in favorites
             expect(element.favorites.entries.length).to.be.equal(2);
+            Polymer.dom.flush();
             items = element.getElementsByClassName('item');
             // Assert all items are displayed
             expect(items.length).to.be.equal(2);
             // Assert items names
             expect(items[0].querySelector('.favLink').textContent).to.be.equal('My picture in Favorites');
             expect(items[1].querySelector('.favLink').textContent).to.be.equal('My video in Favorites');
-          }));
+          });
         });
 
         test('it should be able to remove a favorite document', function() {
           var element = fixture('favorites', {doc: doc});
           var items;
-          return waitChanged(element, 'favorites').then(flush().then(function() {
+          return waitChanged(element, 'favorites').then(function() {
             // Assert we have two documents in favorites
             expect(element.favorites.entries.length).to.be.equal(2);
+            Polymer.dom.flush();
             items = element.getElementsByClassName('item');
             // Remove first item
             var removeButton = items[0].querySelector('.favRemove');
@@ -114,13 +116,14 @@ Contributors:
             favoritesResponse.entries.shift();
             performFavoritesResponse();
             MockInteractions.tap(removeButton);
-            return waitChanged(element, 'favorites').then(flush().then(function() {
+            return waitChanged(element, 'favorites').then(function() {
               // Assert we only have one document in favorites
               expect(element.favorites.entries.length).to.be.equal(1);
+              Polymer.dom.flush();
               items = element.getElementsByClassName('item');
               expect(items[0].querySelector('.favLink').textContent).to.be.equal('My video in Favorites');
-            }));
-          }));
+            });
+          });
         });
 
         function performFavoritesResponse() {

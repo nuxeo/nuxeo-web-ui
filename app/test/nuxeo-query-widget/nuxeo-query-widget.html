@@ -143,20 +143,16 @@ Contributors:
         return waitChanged(query, 'current-page')
         .then(validatePage1)
         .then(function() {
-          return flush()
-          .then(function() {
-            var but = query.$$('#nextBut');
-            MockInteractions.tap(but);
-            return waitChanged(query, 'current-page');
-          });
+          Polymer.dom.flush();
+          var but = query.$$('#nextBut');
+          MockInteractions.tap(but);
+          return waitChanged(query, 'current-page');
         })
         .then(validatePage2)
         .then(function() {
-          return flush()
-          .then(function() {
-            MockInteractions.tap(query.$$('#prevBut'));
-            return waitChanged(query, 'current-page');
-          });
+          Polymer.dom.flush();
+          MockInteractions.tap(query.$$('#prevBut'));
+          return waitChanged(query, 'current-page');
         })
         .then(validatePage1);
       });
