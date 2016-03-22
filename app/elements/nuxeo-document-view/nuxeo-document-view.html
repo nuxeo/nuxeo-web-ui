@@ -65,10 +65,6 @@ Contributors:
         padding: 1em 0;
       }
 
-      .docreator {
-        font-size: 1.2rem;
-      }
-
       .startbutton {
         position: relative;
         display: inline-block;
@@ -100,6 +96,29 @@ Contributors:
         box-sizing: border-box;
       }
 
+      .sidecard .details {
+        color: var(--nuxeo-tag-text);
+        font-size: .9em;
+        padding-bottom: 1em;
+        border-bottom: var(--nuxeo-border);
+      }
+
+      .details .col {
+        width: 30%;
+        display: inline-block;
+        line-height: 1.9em;
+      }
+
+      .details .user {
+        vertical-align: top;
+      }
+
+      .sidecard .icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+        margin-right: .2rem;
+      }
+
     </style>
 
     <nuxeo-resource id="workflowsRequest" auto
@@ -127,22 +146,21 @@ Contributors:
         <paper-card class="sidecard">
           <div class="horizontal layout wrap">
             <div class="description ctn">[[document.properties.dc:description]]</div>
+            <div class="details ctn">
+              <div><span class="col">Added on</span> [[_formatDate(document.properties.dc:created)]]</div>
+              <div><span class="col">By</span><a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
+                <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
+                [[document.properties.dc:creator]]</a></div>
+              <div><span class="col">Contributors</span>
+                <nuxeo-document-users users="[[document.properties.dc:contributors]]">
+                </nuxeo-document-users>
+              </div>
+            </div>
+
             <div class="ctn">
               <span class="state tag">[[document.state]]</span>
               <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
             </div>
-            <div class="contributors ctn">
-              <nuxeo-document-users users="[[document.properties.dc:contributors]]">
-              </nuxeo-document-users>
-            </div>
-          </div>
-        </paper-card>
-        <paper-card class="sidecard">
-          <div class="vertical layout">
-            <span class="docreator">Created by <a class="tag user" href="nuxeo/user/[[document.properties.dc:creator]]">
-            <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
-            [[document.properties.dc:creator]]</a></span>
-            <p>on [[_formatDate(document.properties.dc:created)]]</p>
           </div>
         </paper-card>
         <template is="dom-if" if="[[canStartProcess]]">
