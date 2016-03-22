@@ -90,7 +90,7 @@ Contributors:
             expect(docs).to.not.be.undefined;
             return waitChanged(docs, 'response').then(flush).then(function() {
               expect(collections[0].querySelector('.title span').textContent).to.be.equal('My Collection');
-              expect(collections[0].getElementsByClassName('item').length).to.be.equal(2);
+              expect(collections[0].querySelectorAll('.item a').length).to.be.equal(2);
               expect(collections[0].querySelectorAll('.item paper-tooltip')[0].textContent).to.be.equal('My picture in Collection');
               expect(collections[0].querySelectorAll('.item paper-tooltip')[1].textContent).to.be.equal('My video in Collection');
             });
