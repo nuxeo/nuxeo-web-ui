@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Andre Justo <ajusto@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
+  Gabriel Barata <gbarata@nuxeo.com>
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -38,7 +39,7 @@ Contributors:
         border-bottom: var(--nuxeo-border);
         font-size: 1.2em;
         font-weight: 600;
-        padding: 0 2.5em;
+        padding: 0 4em 0 2.5em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
@@ -82,10 +83,10 @@ Contributors:
                 </div>
               </paper-card>
           </section>
-          <section name="userManagement">
+          <section name="user-group-management">
             <paper-card class="card">
               <div class="card-content vertical layout">
-                <nuxeo-user-group-management></nuxeo-user-group-management>
+                <nuxeo-user-group-management id="management"></nuxeo-user-group-management>
               </div>
             </paper-card>
           </section>
@@ -106,18 +107,38 @@ Contributors:
             type: Object,
             value: {
               repository: 'label.admin.repo',
-              userManagement: 'label.admin.users'
+              'user-group-management': 'label.admin.users'
             }
           },
           selectedTab: {
             type: String,
             value: 'repository'
+          },
+          entity: {
+            type: Object,
+            value: {},
+            observer: '_entityChanged'
           }
         },
 
         _getLabel: function(tab) {
           var label = this.labels[tab];
           return this.i18n(label);
+        },
+
+        _entityChanged: function() {
+          if (this.entity && this.entity.id && this.entity.type) {
+            if (this.entity.type === 'group') {
+              this.$.management.selectedGroup = this.entity.id;
+              this.$.management.page = 'manage-group';
+            } else if (this.entity.type === 'user') {
+              this.$.management.selectedUser = this.entity.id;
+              this.$.management.page = 'manage-user';
+            }
+          } else {
+            this.$.management.page = 'search';
+            this.$.management.$$('nuxeo-user-group-search')._searchTermChanged();
+          }
         }
       });
     })();

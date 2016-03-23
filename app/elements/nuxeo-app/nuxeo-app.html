@@ -1,21 +1,25 @@
 <!--
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
-All rights reserved. This program and the accompanying materials
-are made available under the terms of the GNU Lesser General Public License
-(LGPL) version 2.1 which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/lgpl.html
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 Contributors:
   Andre Justo <ajusto@nuxeo.com>
   Nelson Silva <nsilva@nuxeo.com>
+  Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+
 <!--
 `nuxeo-app`
 @group Nuxeo UI
@@ -156,11 +160,12 @@ Contributors:
     </style>
 
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
-                    doc-id="[[linkDocId]]"
                     response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions"
-                    headers='{"X-NXfetch.document": "lock"}'>
-    </nuxeo-document>
+                    headers='{"X-NXfetch.document": "lock"}'></nuxeo-document>
+    <nuxeo-document id="idResolver"
+                    doc-id="[[linkDocId]]"
+                    response="{{resolvedDocument}}"></nuxeo-document>
 
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
@@ -265,10 +270,10 @@ Contributors:
                 <div class="content">
                   <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                     <div class="item" name="repository">
-                      <a href="{{baseUrl}}admin/">Repository Monitoring</a>
+                      <a href="{{baseUrl}}admin/repository">Repository Monitoring</a>
                     </div>
-                    <div class="item" name="userManagement">
-                      <a href="{{baseUrl}}admin/">Users & Groups</a>
+                    <div class="item" name="user-group-management">
+                      <a href="{{baseUrl}}admin/user-group-management">Users & Groups</a>
                     </div>
                   </iron-selector>
                 </div>
@@ -312,11 +317,19 @@ Contributors:
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
             <nuxeo-search name="search"></nuxeo-search>
-            <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]"></nuxeo-admin>
+            <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
           </iron-pages>
         </div>
+        <nuxeo-suggester id="suggester"></nuxeo-suggester>
       </paper-header-panel>
     </paper-drawer-panel>
+
+    <iron-a11y-keys
+      id="keys"
+      keys="ctrl+space"
+      target="[[keyPressTarget]]"
+      on-keys-pressed="_handleKeyPresses">
+    </iron-a11y-keys>
   </template>
 
   <script>
@@ -350,6 +363,8 @@ Contributors:
           docAction: String,
           linkDocId: String,
 
+          entity: Object,
+
           taskCount: Number,
 
           drawerWidth: {
@@ -360,6 +375,13 @@ Contributors:
           drawerOpened: {
             type: Boolean,
             value: false
+          },
+
+          keyPressTarget: {
+            type: Object,
+            value: function() {
+              return document.body;
+            }
           }
         },
 
@@ -369,17 +391,19 @@ Contributors:
 
         set docId(id) {
           this.linkDocId = id;
-          var self = this;
-          self.$.doc.get().then(function() {
-            self.docPath = self.currentDocument.path;
-            self.linkDocId = '';
-            self._navigate();
-          });
+          this.$.idResolver.get().then(function() {
+            this.docPath = this.resolvedDocument.path;
+            this.linkDocId = '';
+            this._navigate();
+          }.bind(this));
         },
 
         listeners: {
           'documentUpdated': 'refresh',
           'nuxeo-content-view-navigate': '_navigateCV',
+          'goHome': '_handleUGMgoHome',
+          'manageUser': '_handleUGMmanageUser',
+          'manageGroup': '_handleUGMmanageGroup'
         },
 
         ready: function() {
@@ -401,6 +425,14 @@ Contributors:
             }
             if (this.currentContentView) {
               state = {contentView: this.currentContentView.provider};
+            }
+          } else if (this.page === 'admin') {
+            if (this.selectedAdminTab) {
+              url += '/' + this.selectedAdminTab;
+              if (this.selectedAdminTab === 'user-group-management' &&
+                  this.entity && this.entity.id && this.entity.type) {
+                url += '/' + this.entity.type + '/' + this.entity.id;
+              }
             }
           }
           page.show(url, state);
@@ -441,6 +473,25 @@ Contributors:
           }
           this.drawerOpened = !this.drawerOpened;
           this._selected = e.detail.selected;
+        },
+
+        _handleKeyPresses: function() {
+          this.$.suggester.toggle();
+        },
+
+        _handleUGMgoHome: function() {
+          this.entity = {};
+          this._navigate();
+        },
+
+        _handleUGMmanageUser: function(e) {
+          this.entity = {type: 'user', id: e.detail.user};
+          this._navigate();
+        },
+
+        _handleUGMmanageGroup: function(e) {
+          this.entity = {type: 'group', id: e.detail.group};
+          this._navigate();
         }
       });
     })();
