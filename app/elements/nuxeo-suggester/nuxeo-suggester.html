@@ -169,7 +169,6 @@ Contributors:
                        no-label-float></paper-input>
         </div>
         <div id="results" hidden$="[[!_canShowResuls(searchTerm, items)]]">
-          <!--<iron-list items="[[response]]" as="item">-->
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
               <a class="result" href="[[_href(item)]]" on-click="_itemClicked">
@@ -178,7 +177,6 @@ Contributors:
               </a>
             </template>
           </iron-selector>
-          <!--</iron-list>-->
         </div>
       </div>
       <paper-icon-button id="searchButton" icon="icons:search" name="browser"
@@ -256,9 +254,9 @@ Contributors:
         _href: function(item) {
           switch (item.type) {
             case 'document':
-              return page.base() + item.url.replace('nxdoc', 'doc').replace('/view_documents', '');
+              return page.base() + '/' + item.url.replace('nxdoc', 'doc').replace('/view_documents', '');
             default:
-              return page.base() + item.url;
+              return page.base() + '/' + item.url;
           }
         },
 
