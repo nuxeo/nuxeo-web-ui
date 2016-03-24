@@ -30,16 +30,19 @@ Contributors:
       }
 
       .startbutton {
-        position: relative;
+        @apply(--nuxeo-document-task-button-theme);
+        position: absolute;
         display: inline-block;
         text-transform: uppercase;
         background-color: #f68500;
         color: #fff;
-        padding: 0.75rem 1.5rem;
-        vertical-align: middle;
+        padding: 0.3rem .8rem;
+        vertical-align: baseline;
         border-radius: 2px;
-        @apply(--nuxeo-document-task-button-theme);
-        margin-top: 0.5rem;
+        font-size: .9em;
+        font-weight: 700;
+        right: .5em;
+        top: .8em;
       }
 
       .icon {
@@ -93,14 +96,12 @@ Contributors:
                     response="{{taskResponse}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
-    <div class="layout vertical">
-      <div>
-        <span class="layout horizontal center">
-          <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-          You have a task to do before [[_formatDate(task.dueDate)]]
-        </span>
-      </div>
-      <div>
+    <div>
+      <span class="tt">
+        <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
+        You have a task to process <strong>before [[_formatDate(task.dueDate)]]</strong>
+      </span>
+      <span class="action">
         <paper-dialog id="taskDialog"
                       with-backdrop
                       no-cancel-on-esc-key
@@ -158,7 +159,7 @@ Contributors:
           </div>
         </paper-dialog>
         <paper-button noink class="startbutton" on-tap="_toggleTaskDialog">Process</paper-button>
-      </div>
+      </span>
     </div>
   </template>
 

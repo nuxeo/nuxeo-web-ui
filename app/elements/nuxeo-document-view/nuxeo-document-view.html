@@ -45,7 +45,7 @@ Contributors:
       }
 
       .sideinfo {
-        padding: 0.75rem;
+        padding: 0.75rem 0 .75em .75em;
         box-sizing: border-box;
       }
 
@@ -119,12 +119,30 @@ Contributors:
         margin-right: .2rem;
       }
 
+      .wf-running {
+        display: block;
+        padding: 0 2em;
+        border: 0;
+        border-radius: 0;
+        min-height: 3.2em;
+        background-color: #333;
+        color: #fff;
+      }
+
     </style>
 
     <nuxeo-resource id="workflowsRequest" auto
                     path="/id/[[document.uid]]/@workflow"
                     data="{{workflowData}}"
                     response="{{workflows}}"></nuxeo-resource>
+
+    <template is="dom-if" if="[[hasProcessInProgress]]">
+      <paper-card class="wf-running">
+        <div class="card-content">
+          <nuxeo-document-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-document-task-view>
+        </div>
+      </paper-card>
+    </template>
 
     <div class="docview horizontal layout end-space">
       <div class="docinfo vertical layout flex-2">
@@ -136,13 +154,6 @@ Contributors:
         </paper-card>
       </div>
       <div class="sideinfo vertical layout flex">
-        <template is="dom-if" if="[[hasProcessInProgress]]">
-          <paper-card class="sidecard">
-            <div class="card-content">
-              <nuxeo-document-task-view document="{{document}}" workflows="{{workflows}}"></nuxeo-document-task-view>
-            </div>
-          </paper-card>
-        </template>
         <paper-card class="sidecard">
           <div class="horizontal layout wrap">
             <div class="description ctn">[[document.properties.dc:description]]</div>
