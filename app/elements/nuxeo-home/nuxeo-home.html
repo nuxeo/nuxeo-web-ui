@@ -46,7 +46,13 @@ Contributors:
         font-size: 1.4rem;
         margin: 0 0 .4em;
         padding-bottom: 8px;
-        border-bottom: 1px solid #e8e8e8;
+        border-bottom: var(--nuxeo-border);
+      }
+
+      .title iron-icon {
+        width: .8em;
+        vertical-align: bottom;
+        margin-right: .4rem;
       }
 
       paper-card {
@@ -82,25 +88,25 @@ Contributors:
         <section name="dashboard">
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title">My Documents</span>
-              <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
-            </div>
-          </paper-card>
-          <paper-card class="card">
-            <div class="card-content vertical layout">
-              <span class="title">My Last Edits</span>
+              <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>Latest Documents Edited</span>
               <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
             </div>
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title">My Tasks</span>
+              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>Tasks</span>
               <nuxeo-task-widget username="Administrator"></nuxeo-task-widget>
             </div>
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title">My Favorite Documents</span>
+              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>Latest Documents Created</span>
+              <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+            </div>
+          </paper-card>
+          <paper-card class="card">
+            <div class="card-content vertical layout">
+              <span class="title"><iron-icon icon="icons:star" name="Favorites"></iron-icon>Favorite Documents</span>
               <nuxeo-pageable-widget page="[[favorites.entries]]"></nuxeo-pageable-widget>
             </div>
           </paper-card>
