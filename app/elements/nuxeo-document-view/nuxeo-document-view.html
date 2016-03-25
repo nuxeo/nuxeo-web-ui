@@ -65,6 +65,15 @@ Contributors:
         padding: 1em 0;
       }
 
+      paper-card.tags {
+        margin: 1em 0;
+        padding: 0 1em;
+      }
+
+      .tags iron-icon {
+        margin-right: .5em;
+      }
+
       .startbutton {
         position: relative;
         display: inline-block;
@@ -86,7 +95,7 @@ Contributors:
       }
 
       .audit {
-        max-height: 10rem;
+        max-height: 17rem;
         overflow-y: auto;
         @apply(--nuxeo-document-activity-audit-theme);
       }
@@ -152,6 +161,11 @@ Contributors:
             <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
           </div>
         </paper-card>
+        <paper-card class="tags">
+          <div class="horizontal layout wrap card-content">
+            <iron-icon class="icon" icon="icons:label"></iron-icon><nuxeo-document-tags></nuxeo-document-tags>
+          </div>
+        </paper-card>
       </div>
       <div class="sideinfo vertical layout flex">
         <paper-card class="sidecard">
@@ -201,12 +215,6 @@ Contributors:
             </div>
           </paper-card>
         </template>
-        <paper-card class="sidecard">
-          <p class="title">Tags</p>
-          <div class="horizontal layout wrap card-content">
-            <nuxeo-document-tags></nuxeo-document-tags>
-          </div>
-        </paper-card>
         <paper-card class="sidecard">
           <p class="title">Activity</p>
           <div class="vertical layout card-content audit">
