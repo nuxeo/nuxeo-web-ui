@@ -27,17 +27,16 @@ Contributors:
   <template>
     <style is="custom-style" include="shared-styles">
       .task-list {
-        margin: var(--nuxeo-task-widget-layout-margin);
-        border: var(--nuxeo-task-widget-layout-border);
         @apply(--nuxeo-task-widget-layout);
       }
 
       .task-box {
         padding: var(--nuxeo-task-widget-box-padding);
+        line-height: 155%;
       }
 
       .task-box + .task-box {
-        border-top: var(--nuxeo-task-widget-sep-border, 1px solid #ddd);
+        border-top: var(--nuxeo-border);
       }
 
       iron-icon.task-property-icon  {
@@ -46,33 +45,34 @@ Contributors:
       }
 
       iron-icon.task-name-icon {
-        --iron-icon-height: 1rem;
-        --iron-icon-width: 1rem;
+        --iron-icon-height: .9em;
+        --iron-icon-width: .9em;
         border-radius: 50px;
-        background-color: #46a7de;
+        background-color: var(--nuxeo-secondary-color);
         color: white;
-        padding: 3px;
+        padding: .4em;
       }
 
       .task-name {
-        margin-left: 5px;
-        color: #00adff;
         font-weight: 700;
+        margin-left: .5em;
       }
 
-      .task-info {
-        margin: 5px 0px;
+      .task-detail {
+        margin-left: 2.2em;
       }
 
       .task-property{
-        margin-left: 5px;
-        color: #00adff;
-        font-weight: 700;
+        color: var(--nuxeo-text-light);
       }
 
       .taskDoc .docTitle, .initiator {
         margin-left: 4px;
         margin-right: 4px;
+      }
+
+      .due-date .date {
+        color: var(--nuxeo-warn-text);
       }
     </style>
 
@@ -98,28 +98,28 @@ Contributors:
               <div class="vertical layout center">
                 <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
               </div>
-              <span class="task-name">[[i18n(task.workflowModelName)]] - [[i18n(task.name)]]</span>
+              <span class="task-name">[[i18n(task.name)]]</span>
             </div>
-            <div class="horizontal layout center">
-              <iron-icon class="task-property-icon" icon="icons:account-circle"></iron-icon>
-              <span class="task-property">Initiated by: </span>
-              <a class="initiator"
-                 href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
-            </div>
-            <div class="taskDoc horizontal layout center">
-              <iron-icon class="task-property-icon" icon="icons:assignment"></iron-icon>
-              <span class="task-property">Documents: </span>
-              <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
-                <nuxeo-document auto
-                                doc-id="[[doc.id]]"
-                                response="{{doc}}"></nuxeo-document>
-                <a href="[[_href(doc)]]"
-                   class="docTitle">[[doc.properties.dc:title]]</a>
-              </template>
-            </div>
-            <div class="horizontal layout center">
-              <iron-icon class="task-property-icon" icon="icons:today"></iron-icon>
-              <span class="due-date task-property">Due date: [[_formatDate(task.dueDate)]]</span>
+            <div class="task-detail">
+              <div class="taskDoc horizontal layout center">
+                <span class="task-property">On  </span>
+                <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
+                  <nuxeo-document auto
+                                  doc-id="[[doc.id]]"
+                                  response="{{doc}}"></nuxeo-document>
+                  <a href="[[_href(doc)]]"
+                     class="docTitle">[[doc.properties.dc:title]]</a>
+                </template>
+              </div>
+              <div class="horizontal layout center">
+                <span class="due-date task-property">Due date
+                <span class="date">[[_formatDate(task.dueDate)]]</span></span>
+              </div>
+              <div class="layout center">
+                <span class="task-property">Initiated by </span>
+                <a class="tag user initiator"
+                   href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
+              </div>
             </div>
           </div>
         </template>
