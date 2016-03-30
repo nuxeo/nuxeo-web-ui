@@ -149,9 +149,10 @@ Contributors:
         add: function() {
           if (this._isNew()) {
             var op = this.$$('#createCollectionOp');
+            var name = this.$.nxSelect.textContent.trim();
             op.input = undefined;
             op.params = {
-              'name': this.$.nxSelect.innerText,
+              'name': name,
               'description': this.description
             };
             return op.execute().then(function(response) {
