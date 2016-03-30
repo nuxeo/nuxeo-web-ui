@@ -359,6 +359,7 @@ Contributors:
 
         _updateResults: function() {
           var docs = this.$.provider.currentPage;
+          this.docItems = [];
           docs.forEach(function(doc) {
             this.push('docItems', doc);
           }.bind(this));
