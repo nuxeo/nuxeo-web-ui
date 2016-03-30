@@ -93,9 +93,7 @@ Contributors:
           data.stopPropagation();
           if (this.blobList) {
             this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
-              params: {
-                useMainBlob: false
-              },
+              useMainBlob: false,
               context: {
                 currentDocument: this.document.path
               }

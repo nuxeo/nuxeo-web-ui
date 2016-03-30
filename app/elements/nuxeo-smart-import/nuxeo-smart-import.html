@@ -46,7 +46,7 @@ Contributors:
       }
     </style>
 
-
+    <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="batchRequest"
                     path="/upload/[[batchId]]"
                     response="{{batch}}"
@@ -173,9 +173,7 @@ Contributors:
             }
           };
           if (this.selectedImportOp.key === 'smartImportWithMetadata') {
-            params.params = {
-              properties: this.newDocument.properties
-            };
+            params.properties = this.newDocument.properties;
           }
           this.batchExecute(this.selectedImportOp.operation, params).then(function(response) {
             this.$.smartImportDialog.toggle();
