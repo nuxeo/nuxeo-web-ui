@@ -22,7 +22,12 @@
         xhr.send();
         locales[language] = JSON.parse(xhr.responseText); // cache this locale.
       }
-      return locales[language][key] || defaultValue || key;
+      var value = locales[language][key] || defaultValue || key;
+      var params = Array.prototype.slice.call(arguments, 2);
+      for (var i = 0; i < params.length; i++) {
+        value = value.replace('{' + i + '}', params[i]);
+      }
+      return value;
     };
   })();
 </script>
