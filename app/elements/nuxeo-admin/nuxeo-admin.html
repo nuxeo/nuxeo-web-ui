@@ -86,7 +86,10 @@ Contributors:
           <section name="user-group-management">
             <paper-card class="card">
               <div class="card-content vertical layout">
-                <nuxeo-user-group-management id="management"></nuxeo-user-group-management>
+                <nuxeo-user-group-management id="management" page="{{userManagementPage}}"></nuxeo-user-group-management>
+                <template is="dom-if" if="[[_displayLatest(userManagementPage)]]">
+                  <nuxeo-user-group-latest ></nuxeo-user-group-latest>
+                </template>
               </div>
             </paper-card>
           </section>
@@ -139,7 +142,12 @@ Contributors:
             this.$.management.page = 'search';
             this.$.management.$$('nuxeo-user-group-search')._searchTermChanged();
           }
+        },
+
+        _displayLatest: function(userManagementPage) {
+          return userManagementPage === 'search';
         }
+
       });
     })();
   </script>
