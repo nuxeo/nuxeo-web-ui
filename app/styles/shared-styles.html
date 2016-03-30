@@ -34,11 +34,38 @@
         --paper-header-panel-shadow: {
           box-shadow: none;
         };
+        --paper-header-panel-waterfall-container: {
+          display: -webkit-flex;
+          display: flex;
+        };
+        height: 100vh;
         background-color: #fff;
       }
 
       paper-header-panel ::content #mainContainer .content {
         padding: 2.5em 2em;
+      }
+
+      .paper-header {
+        height: 59px;
+        color: var(--nuxeo-title-color);
+        border-bottom: var(--nuxeo-border);
+        font-size: 1.2em;
+        font-weight: 600;
+        padding: 0 2.5em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      paper-toolbar {
+        height: 59px;
+        color: #039be5;
+        border-bottom: var(--nuxeo-border);
+        background-color: #fff;
+        font-size: 1.2em;
+        padding-right: 2em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
       }
 
       /* --

@@ -56,6 +56,14 @@ Contributors:
       }
     </style>
 
+    <div class="layout vertical row">
+      <label>Full Text</label>
+      <paper-input id="searchInput" autofocus="true"
+        value="{{searchTerm}}" tabindex="0"
+        type="search" placeholder="Search something ...">
+      </paper-input>
+    </div>
+
     <div class="row layout vertical">
       <label>Tags</label>
       <nuxeo-select2 operation="Tag.Suggestion"
@@ -149,7 +157,24 @@ Contributors:
             notify: true
           },
 
+          searchTerm: {
+            type: String,
+            observer: '_addFullTextSearch'
+          },
+
           aggregations: Object
+        },
+
+        ready: function() {
+          window.addEventListener('navigation', function(e) {
+            if (e.detail.page === 'search') {
+              this.$.searchInput.$.input.focus();
+            }
+          }.bind(this));
+        },
+
+        _addFullTextSearch: function() {
+          this.set('params.ecm_fulltext', this.searchTerm + '*');
         }
       });
     })();

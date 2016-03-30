@@ -1,0 +1,126 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+ `nuxeo-search-selection`
+ @group Nuxeo UI
+ @element nuxeo-search-selection
+ -->
+<dom-module id="nuxeo-search-selection">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .search-selector-container {
+        background-color: #213f7d;
+        margin-bottom: .8rem;
+        padding: 15px;
+      }
+
+      select {
+        background-color: rgba(255,255,255,.9);
+        border: 1px solid #ddd;
+        border-radius: 2px;
+        height: 2rem;
+        padding: 5px;
+        width: 100%;
+      }
+
+      .row {
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      .clear {
+        background-color: #fafafa;
+        border-color: #fafafa;
+        width: 100%;
+      }
+
+    </style>
+
+    <div>
+      <div class="search-selector-container">
+        <select class="browser-default" value="{{selectedSearch::change}}">
+          <option disabled>Searches</option>
+          <option value="faceted">Faceted Search</option>
+          <option value="quick">Quick Search</option>
+          <option value="nxql">NXQL Search</option>
+        </select>
+      </div>
+
+      <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
+        <!-- faceted search page -->
+        <div name="faceted">
+          <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
+
+          <div class="row">
+            <paper-button noink class="clear" raised on-click="_clear">Clear</paper-button>
+          </div>
+        </div>
+
+        <!-- quick search page -->
+        <div name="quick">Quick Search</div>
+
+        <!-- NXQL search page -->
+        <div name="nxql">NXQL Search</div>
+      </iron-pages>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-search-selection',
+
+        properties: {
+
+          selectedSearch: {
+            type: String,
+            value: 'faceted'
+          },
+
+          searchTerm: {
+            type: String,
+            observer: '_addFullTextSearch'
+          },
+
+          aggregations: {
+            type: Object
+          },
+
+          params: {
+            type: Object,
+            notify: true
+          }
+        },
+
+        _clear: function() {
+          this.params = {};
+        },
+
+      });
+    })();
+  </script>
+</dom-module>

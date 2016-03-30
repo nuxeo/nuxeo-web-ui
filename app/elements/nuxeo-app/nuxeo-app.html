@@ -208,7 +208,7 @@ Contributors:
                   <h1>Search Filters</h1>
                 </div>
                 <div class="content">
-
+                  <nuxeo-search-selection aggregations="[[aggregations]]" params="{{params}}"></nuxeo-search-selection>
                 </div>
               </section>
 
@@ -310,7 +310,7 @@ Contributors:
               document="[[currentDocument]]"
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
-            <nuxeo-search name="search"></nuxeo-search>
+            <nuxeo-search name="search" aggregations="{{aggregations}}" params="[[params]]"></nuxeo-search>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
           </iron-pages>
         </div>
@@ -344,7 +344,8 @@ Contributors:
           },
 
           selectedTab: {
-            type: String
+            type: String,
+            observer: '_observeSelectedTab'
           },
 
           selectedAdminTab: String,
@@ -486,7 +487,14 @@ Contributors:
         _handleUGMmanageGroup: function(e) {
           this.entity = {type: 'group', id: e.detail.group};
           this._navigate();
+        },
+
+        _observeSelectedTab: function() {
+          if (this.selectedTab === 'search') {
+            this.page = this.selectedTab;
+          }
         }
+
       });
     })();
   </script>
