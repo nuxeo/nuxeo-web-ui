@@ -212,8 +212,7 @@ Contributors:
               </paper-dialog>
             </template>
 
-            <paper-dialog id="collectionDialog" with-backdrop
-                          on-iron-overlay-closed="_resetCollectionPopup">
+            <paper-dialog id="collectionDialog" modal on-iron-overlay-closed="_resetCollectionPopup" no-auto-focus>
               <h1>Add to Collection</h1>
               <nuxeo-add-to-collection-popup
                 document="[[document]]"

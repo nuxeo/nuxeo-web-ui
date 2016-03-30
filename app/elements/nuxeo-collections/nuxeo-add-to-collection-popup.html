@@ -84,6 +84,8 @@ Contributors:
                          value="{{collection}}"
                          tagging="true"
                          query-results-filter="[[resultsFilter]]"
+                         result-formatter="[[resultAndSelectionFormatter]]"
+                         selection-formatter="[[resultAndSelectionFormatter]]"
                          new-entry-formatter="[[newEntryFormatter]]">
           </nuxeo-select2>
         </div>
@@ -129,6 +131,13 @@ Contributors:
             }
           },
 
+          resultAndSelectionFormatter: {
+            type: Function,
+            value: function() {
+              return this._resultAndSelectionFormatter.bind(this);
+            }
+          },
+
           newEntryFormatter: {
             type: Function,
             value: function() {
@@ -167,6 +176,13 @@ Contributors:
 
         _resultsFilter: function(entry) {
           return entry.id.indexOf('-999999') === -1;
+        },
+
+        _resultAndSelectionFormatter: function(item) {
+          var label = item.displayLabel || item.title;
+          // if we are adding a new entry with the _newEntryFormatter
+          // we don't want to escape the HTML
+          return item.id === -1 ? label : this.$.nxSelect.escapeHTML(label);
         },
 
         _newEntryFormatter: function(term) {
