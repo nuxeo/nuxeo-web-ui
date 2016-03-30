@@ -17,30 +17,15 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
- `nuxeo-search-selection`
+ `nuxeo-search-form`
  @group Nuxeo UI
- @element nuxeo-search-selection
+ @element nuxeo-search-form
  -->
-<dom-module id="nuxeo-search-selection">
+<dom-module id="nuxeo-search-form">
   <template>
     <style is="custom-style" include="shared-styles">
       :host {
         display: block;
-      }
-
-      .search-selector-container {
-        background-color: #213f7d;
-        margin-bottom: .8rem;
-        padding: 15px;
-      }
-
-      select {
-        background-color: rgba(255,255,255,.9);
-        border: 1px solid #ddd;
-        border-radius: 2px;
-        height: 2rem;
-        padding: 5px;
-        width: 100%;
       }
 
       .row {
@@ -57,17 +42,22 @@ Contributors:
       }
 
     </style>
+    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-page-provider id="provider" auto
+       provider="[[provider]]"
+       page-size="[[pageSize]]"
+       number-of-pages="{{pageCount}}"
+       aggregations="{{aggregations}}"
+       enrichers="thumbnail"
+       page="[[pageNumber]]"
+       current-page="{{currentPage}}"
+       is-next-page-available="{{isNextPageAvailable}}"
+       current-page-size="{{currentPageSize}}"
+       params="[[params]]"
+       on-update="_updateSearchResults">
+    </nuxeo-page-provider>
 
     <div>
-      <div class="search-selector-container">
-        <select class="browser-default" value="{{selectedSearch::change}}">
-          <option disabled>Searches</option>
-          <option value="faceted">Faceted Search</option>
-          <option value="quick">Quick Search</option>
-          <option value="nxql">NXQL Search</option>
-        </select>
-      </div>
-
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
         <!-- faceted search page -->
         <div name="faceted">
@@ -92,7 +82,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-search-selection',
+        is: 'nuxeo-search-form',
 
         properties: {
 
@@ -101,24 +91,58 @@ Contributors:
             value: 'faceted'
           },
 
-          searchTerm: {
-            type: String,
-            observer: '_addFullTextSearch'
-          },
-
-          aggregations: {
-            type: Object
-          },
-
           params: {
             type: Object,
+            value: {},
+            notify: true
+          },
+          provider: {
+            type: String,
+            value: 'default_search'
+          },
+          aggregations: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          pageNumber: {
+            type: Number,
+            value: 1
+          },
+          pageSize: {
+            type: Number,
+            value: 40
+          },
+          pageCount: {
+            type: Number,
+            value: 1
+          },
+          currentIndex: {
+            type: Number,
             notify: true
           }
+
         },
+
+        observers: [
+          '_resetResults(provider, params.*)'
+        ],
 
         _clear: function() {
           this.params = {};
         },
+
+        _updateSearchResults: function() {
+          this.fire('initSearchResults', {
+            provider: this.$.provider,
+          });
+        },
+
+        _resetResults: function() {
+          this.pageNumber = 1;
+          this.pageSize = 40;
+          this.fire('resetSearchResults');
+        }
 
       });
     })();

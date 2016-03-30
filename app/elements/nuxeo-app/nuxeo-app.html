@@ -208,7 +208,8 @@ Contributors:
                   <h1>Search Filters</h1>
                 </div>
                 <div class="content">
-                  <nuxeo-search-selection aggregations="[[aggregations]]" params="{{params}}"></nuxeo-search-selection>
+                  <nuxeo-search-form>
+                  </nuxeo-search-form>
                 </div>
               </section>
 
@@ -310,7 +311,8 @@ Contributors:
               document="[[currentDocument]]"
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
-            <nuxeo-search name="search" aggregations="{{aggregations}}" params="[[params]]"></nuxeo-search>
+            <nuxeo-search-results name="search">
+            </nuxeo-search-results>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
           </iron-pages>
         </div>
