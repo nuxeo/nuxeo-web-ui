@@ -44,11 +44,16 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
       #editor {
         outline: none;
         overflow: scroll;
+        height: 100%;
       }
 
       .ae-placeholder:empty:not(:focus):before {
         color: grey;
         font-style: italic;
+      }
+
+      div#editor ::content > * {
+        margin-top: 0;
       }
     </style>
 
