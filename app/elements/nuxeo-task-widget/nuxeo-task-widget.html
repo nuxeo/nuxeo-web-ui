@@ -76,11 +76,9 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource auto
-                    id="homeTaskRequest"
-                    path="[[_getTaskPath(username)]]"
-                    response="{{tasks}}"
-                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+    <nuxeo-resource id="homeTaskRequest"
+                    path="[[_getTaskPath(username)]]">
+    </nuxeo-resource>
 
     <template is="dom-if" if="[[isEmpty]]">
       <div class="horizontal layout center">
@@ -166,16 +164,28 @@ Contributors:
             value: false
           }
         },
-        observers: ['_observeTasks(tasks)'],
 
-        _observeTasks: function(tasks) {
-          if (tasks) {
-            this.count = tasks.entries.length;
-            this.isEmpty = tasks.entries.length === 0;
-          } else {
-            this.isEmpty = true;
-            this.count = 0;
-          }
+        ready: function() {
+          this._fetchTasks();
+          // setup listeners to refresh tasks when a wf starts/task ends
+          window.addEventListener('workflowStarted', function() {
+            this._fetchTasks();
+          }.bind(this));
+          window.addEventListener('workflowTaskProcessed', function() {
+            this._fetchTasks();
+          }.bind(this));
+        },
+
+        _fetchTasks: function() {
+          // hack to force dom-repeat to re-render everything again and do not reuse any templates
+          // need this since we have some chained dom-repeats with nuxeo-resource inside
+          // and the rendering becomes erroneous when tasks are refreshed
+          this.tasks = {};
+          this.$.homeTaskRequest.get().then(function(response) {
+            this.tasks = response;
+            this.count = response.entries.length;
+            this.isEmpty = response.entries.length === 0;
+          }.bind(this));
         },
 
         _getTaskPath: function() {

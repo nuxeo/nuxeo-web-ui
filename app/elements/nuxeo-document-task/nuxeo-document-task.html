@@ -270,7 +270,9 @@ Contributors:
         _processTask: function(e) {
           this.action = e.target.dataset.args;
           this.taskData = this.currentTaskElement.genTaskData(this.action);
-          this.$.taskRequest.put();
+          this.$.taskRequest.put().then(function() {
+            this.fire('workflowTaskProcessed');
+          }.bind(this));
         }
       });
     })();

@@ -339,29 +339,28 @@ Contributors:
         },
 
         _startProcess: function() {
-          var workflows = document.getElementById('workflowsRequest');
+          var workflows = this.$.workflowsRequest;
 
           this.workflowData = {
             'entity-type': 'workflow',
             'workflowModelName': this.selectedProcess,
             'attachedDocumentIds': [this.document.uid]
           };
-          workflows.post().then(
-              function() {
-                workflows.get();
-              }
-          );
+          workflows.post().then(function() {
+            this.fire('workflowStarted');
+            workflows.get();
+          }.bind(this));
         },
 
         _taskCompleted: function() {
           var doc = document.getElementById('doc');
           doc.method = 'get';
           doc.$.nxResource.execute().then(function() {
-            var workflowsRequest = document.getElementById('workflowsRequest');
+            var workflowsRequest = this.$.workflowsRequest;
             if (workflowsRequest) {
               workflowsRequest.get();
             }
-          });
+          }.bind(this));
         },
 
         _hasCollections: function() {
