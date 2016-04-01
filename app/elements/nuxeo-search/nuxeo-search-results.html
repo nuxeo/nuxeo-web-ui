@@ -139,26 +139,31 @@ Contributors:
 
     </style>
 
-    <div class="content-view">
-      <iron-scroll-threshold id="scrollThreshold"
-        lower-threshold="1000"
-        on-lower-threshold="_loadMoreData">
-        <div id="dropzone" class="grid-ctn bubbleBoxes">
-          <template is="dom-repeat" items="[[docItems]]">
-            <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
-          </template>
-        </div>
-        <div id="loader" hidden$="[[!pageProvider.isNextPageAvailable]]">
-          <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
-            <paper-spinner active="true">
-            </paper-spinner>
-            Loading more ...
+    <paper-header-panel class="flex" >
+      <div class="paper-header layout horizontal">
+        <span class="flex">[[i18n('Search Results')]]</span>
+      </div>
+      <div class="content-view">
+        <iron-scroll-threshold id="scrollThreshold"
+          lower-threshold="1000"
+          on-lower-threshold="_loadMoreData">
+          <div id="dropzone" class="grid-ctn bubbleBoxes">
+            <template is="dom-repeat" items="[[docItems]]">
+              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
+            </template>
           </div>
-          <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
-            Show more
+          <div id="loader" hidden$="[[!pageProvider.isNextPageAvailable]]">
+            <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
+              <paper-spinner active="true">
+              </paper-spinner>
+              Loading more ...
+            </div>
+            <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
+              Show more
+            </div>
           </div>
-        </div>
-    </div>
+      </div>
+    </paper-header-panel>
 
   </template>
   <script>
