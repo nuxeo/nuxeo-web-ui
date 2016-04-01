@@ -29,44 +29,13 @@ Contributors:
         padding: 1em;
       }
 
-      .row {
-        box-sizing: border-box;
-        margin-bottom: 10px;
-        padding: 0 1rem;
-        width: 100%;
-      }
-
-      .clear {
-        background-color: #fafafa;
-        border-color: #fafafa;
-        width: 100%;
-      }
-
     </style>
-    <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-page-provider id="provider" auto
-       provider="[[provider]]"
-       page-size="[[pageSize]]"
-       number-of-pages="{{pageCount}}"
-       aggregations="{{aggregations}}"
-       enrichers="thumbnail"
-       page="[[pageNumber]]"
-       current-page="{{currentPage}}"
-       is-next-page-available="{{isNextPageAvailable}}"
-       current-page-size="{{currentPageSize}}"
-       params="[[params]]"
-       on-update="_updateSearchResults">
-    </nuxeo-page-provider>
 
     <div>
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
         <!-- faceted search page -->
         <div name="faceted">
           <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
-
-          <div class="row">
-            <paper-button noink class="clear" raised on-click="_clear">Clear</paper-button>
-          </div>
         </div>
 
         <!-- quick search page -->
@@ -92,58 +61,7 @@ Contributors:
             value: 'faceted'
           },
 
-          params: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          provider: {
-            type: String,
-            value: 'default_search'
-          },
-          aggregations: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          pageNumber: {
-            type: Number,
-            value: 1
-          },
-          pageSize: {
-            type: Number,
-            value: 40
-          },
-          pageCount: {
-            type: Number,
-            value: 1
-          },
-          currentIndex: {
-            type: Number,
-            notify: true
-          }
-
         },
-
-        observers: [
-          '_resetResults(provider, params.*)'
-        ],
-
-        _clear: function() {
-          this.params = {};
-        },
-
-        _updateSearchResults: function() {
-          this.fire('initSearchResults', {
-            provider: this.$.provider,
-          });
-        },
-
-        _resetResults: function() {
-          this.pageNumber = 1;
-          this.pageSize = 40;
-          this.fire('resetSearchResults');
-        }
 
       });
     })();

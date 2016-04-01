@@ -54,7 +54,26 @@ Contributors:
         padding: .5rem;
         width: 100%;
       }
+
+      .clear {
+        background-color: #fafafa;
+        border-color: #fafafa;
+        width: 100%;
+      }
+
     </style>
+
+    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-page-provider id="provider" auto
+       provider="[[provider]]"
+       aggregations="{{aggregations}}"
+       enrichers="thumbnail"
+       current-page="{{currentPage}}"
+       is-next-page-available="{{isNextPageAvailable}}"
+       current-page-size="{{currentPageSize}}"
+       params="[[params]]"
+       on-update="_updateSearchResults">
+    </nuxeo-page-provider>
 
     <div class="layout vertical row">
       <label>Full Text</label>
@@ -141,6 +160,9 @@ Contributors:
                                   value="{{params.common_size_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
+    <div class="layout vertical row">
+     <paper-button noink class="clear" raised on-click="_clear">Clear</paper-button>
+    </div>
   </template>
   <script>
     (function() {
@@ -156,13 +178,46 @@ Contributors:
             value: {},
             notify: true
           },
+          provider: {
+            type: String,
+            value: 'default_search'
+          },
+          aggregations: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          currentIndex: {
+            type: Number,
+            notify: true
+          },
 
           searchTerm: {
             type: String,
             observer: '_addFullTextSearch'
           },
 
-          aggregations: Object
+        },
+
+        observers: [
+          '_resetResults(provider, params.*)'
+        ],
+
+        _clear: function() {
+          this.params = {};
+          this.searchTerm = null;
+        },
+
+        _updateSearchResults: function() {
+          this.fire('initSearchResults', {
+            provider: this.$.provider,
+          });
+        },
+
+        _resetResults: function() {
+          this.$.provider.page = 1;
+          this.$.provider.pageSize = 40;
+          this.fire('resetSearchResults');
         },
 
         ready: function() {
@@ -174,8 +229,11 @@ Contributors:
         },
 
         _addFullTextSearch: function() {
-          this.set('params.ecm_fulltext', this.searchTerm + '*');
+          if (this.searchTerm) {
+            this.set('params.ecm_fulltext', this.searchTerm + '*');
+          }
         }
+
       });
     })();
   </script>
