@@ -66,7 +66,11 @@ Contributors:
 
     </style>
 
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}" headers="[[headers]]"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]"
+                    data="{{document}}" response="{{document}}"
+                    headers="[[headers]]"
+                    enrichers="permissions, breadcrumb, preview, favorites, renditions">
+    </nuxeo-document>
     <paper-card class="end-space">
       <form id="form" is="iron-form" action="/">
         <div class="card-content">
@@ -117,7 +121,8 @@ Contributors:
 
         _computeHeaders: function(versioningType) {
           return {
-            'X-Versioning-Option': versioningType
+            'X-Versioning-Option': versioningType,
+            'X-NXfetch.document': 'lock'
           };
         },
 
