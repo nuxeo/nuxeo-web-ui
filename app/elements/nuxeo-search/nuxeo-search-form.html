@@ -35,6 +35,18 @@ Contributors:
 
     </style>
 
+    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-page-provider id="provider" auto
+       provider="[[provider]]"
+       aggregations="{{aggregations}}"
+       enrichers="thumbnail"
+       current-page="{{currentPage}}"
+       is-next-page-available="{{isNextPageAvailable}}"
+       current-page-size="{{currentPageSize}}"
+       params="[[params]]"
+       on-update="_updateSearchResults">
+    </nuxeo-page-provider>
+
     <div>
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
         <!-- faceted search page -->
@@ -65,6 +77,31 @@ Contributors:
             value: 'faceted'
           },
 
+          provider: {
+            type: String,
+            value: 'default_search'
+          },
+          currentIndex: {
+            type: Number,
+            notify: true
+          },
+
+        },
+
+        observers: [
+          '_resetResults(provider, params.*)'
+        ],
+
+        _updateSearchResults: function() {
+          this.fire('initSearchResults', {
+            provider: this.$.provider,
+          });
+        },
+
+        _resetResults: function() {
+          this.$.provider.page = 1;
+          this.$.provider.pageSize = 40;
+          this.fire('resetSearchResults');
         },
 
       });

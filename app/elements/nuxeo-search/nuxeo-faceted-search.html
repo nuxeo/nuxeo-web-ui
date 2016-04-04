@@ -63,18 +63,6 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-page-provider id="provider" auto
-       provider="[[provider]]"
-       aggregations="{{aggregations}}"
-       enrichers="thumbnail"
-       current-page="{{currentPage}}"
-       is-next-page-available="{{isNextPageAvailable}}"
-       current-page-size="{{currentPageSize}}"
-       params="[[params]]"
-       on-update="_updateSearchResults">
-    </nuxeo-page-provider>
-
     <div class="layout vertical row">
       <label>Full Text</label>
       <paper-input id="searchInput" autofocus="true"
@@ -178,20 +166,11 @@ Contributors:
             value: {},
             notify: true
           },
-          provider: {
-            type: String,
-            value: 'default_search'
-          },
           aggregations: {
             type: Object,
             value: {},
             notify: true
           },
-          currentIndex: {
-            type: Number,
-            notify: true
-          },
-
           searchTerm: {
             type: String,
             observer: '_addFullTextSearch'
@@ -199,25 +178,9 @@ Contributors:
 
         },
 
-        observers: [
-          '_resetResults(provider, params.*)'
-        ],
-
         _clear: function() {
           this.params = {};
           this.searchTerm = null;
-        },
-
-        _updateSearchResults: function() {
-          this.fire('initSearchResults', {
-            provider: this.$.provider,
-          });
-        },
-
-        _resetResults: function() {
-          this.$.provider.page = 1;
-          this.$.provider.pageSize = 40;
-          this.fire('resetSearchResults');
         },
 
         ready: function() {
