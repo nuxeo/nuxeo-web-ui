@@ -1,0 +1,186 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-search-queue`
+@group Nuxeo UI
+@element nuxeo-search-queue
+-->
+<dom-module id="nuxeo-search-queue">
+  <template>
+
+  <style is="custom-style" include="shared-styles">
+    #scrollThreshold {
+      @apply(--layout-flex);
+    }
+    .item {
+      @apply(--layout-horizontal);
+      cursor: pointer;
+      padding: 16px 22px;
+      border-bottom: 1px solid #DDD;
+    }
+    .item:focus,
+    .item.selected:focus {
+      outline: 0;
+      background-color: #ddd;
+    }
+    .item.selected {
+      color: var(--paper-blue-600);
+    }
+    .item.selected {
+      background-color: var(--google-grey-300);
+      border-bottom: 1px solid #ccc;
+    }
+    .nxicon {
+      height: 40px;
+      width: 40px;
+      border-radius: 20px;
+      box-sizing: border-box;
+      background-color: #ddd;
+    }
+    .pad {
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      padding: 0 16px;
+    }
+    .primary {
+      font-size: 16px;
+    }
+    .secondary {
+      font-size: 14px;
+    }
+    .dim {
+      color: gray;
+    }
+    .loadingIndicator {
+      text-align: center;
+      height: 40px;
+      background-color: #0b8043;
+      color: white;
+      padding-top: 10px;
+    }
+    .loadingIndicator paper-spinner {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+  </style>
+
+  <iron-scroll-threshold id="scrollThreshold"
+    lower-threshold="100"
+    on-lower-threshold="_loadMoreData">
+    <iron-list id="itemsList" items="[[docItems]]">
+      <template>
+        <div>
+          <div>
+            <div class="pad">
+              <div class="primary">
+                [[item.title]]
+              </div>
+              <div class="secondary dim">[[item.path]]</div>
+            </div>
+          </div>
+          <div class="border"></div>
+        </div>
+      </template>
+      <!-- this element will load more data when the user scrolls down and reached the lower threshold -->
+    </iron-list>
+    <div id="loader" class="loadingIndicator"><paper-spinner active="true"></paper-spinner>Loading more data ...</div>
+  </iron-scroll-threshold>
+
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-search-queue',
+
+        properties: {
+          docItems: {
+            type: Array,
+            value: []
+          },
+          manualLoading: {
+            type: Boolean,
+            value: false
+          },
+          manualLoadingThreshold: {
+            type: Number,
+            value: 10
+          },
+          pageProvider: {
+            type: Object
+          },
+          showMore: {
+            type: Object,
+            value: false
+          }
+        },
+
+        _updateResults: function() {
+          console.log('_updateResults');
+          this.$.scrollThreshold.clearTriggers();
+          this.showMore = this.pageProvider.isNextPageAvailable;
+        },
+
+        _loadMoreData: function(e) {
+          console.log('queue-_loadMoreData');
+          if (this.pageProvider) {
+            if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
+              this.pageProvider.isNextPageAvailable) {
+              if (this.pageProvider.page === 1) {
+                this.pageProvider.pageSize = 20;
+              }
+              this.pageProvider.page = this.pageProvider.page + 1;
+              this.manualLoading = this._computeManualLoading(this.pageProvider.page);
+            }
+          }
+        },
+
+        _computeManualLoading: function(pageNumber) {
+          return pageNumber > this.manualLoadingThreshold;
+        },
+
+        ready: function() {
+          window.addEventListener('initSearchResults', function(e) {
+            this._initSearchResults(e);
+          }.bind(this));
+          window.addEventListener('resetSearchResults', function() {
+            this._resetSearchResults();
+          }.bind(this));
+        },
+
+        _initSearchResults: function(e) {
+          console.log('queue-_initSearchResults');
+          this.pageProvider = e.detail.provider;
+          this._updateResults();
+        },
+
+        _resetSearchResults: function() {
+          console.log('queue-_resetSearchResults');
+          this.docItems = [];
+          this.pageProvider = null;
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

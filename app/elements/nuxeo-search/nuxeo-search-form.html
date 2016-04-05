@@ -47,21 +47,18 @@ Contributors:
        on-update="_updateSearchResults">
     </nuxeo-page-provider>
 
-    <div>
+    <div id="filters" hidden$="{{_isQueue}}">
       <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
         <!-- faceted search page -->
         <div name="faceted">
           <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
         </div>
 
-        <!-- quick search page -->
-        <div name="quick">Quick Search</div>
-
-        <!-- NXQL search page -->
-        <div name="nxql">NXQL Search</div>
       </iron-pages>
     </div>
-
+    <div id="queues" hidden$="{{!_isQueue}}">
+      <nuxeo-search-queue id="queue"></nuxeo-search-queue>
+    </div>
   </template>
   <script>
     (function() {
@@ -85,6 +82,10 @@ Contributors:
             type: Number,
             notify: true
           },
+          _isQueue: {
+            type: Boolean,
+            value: false
+          }
 
         },
 
@@ -93,6 +94,11 @@ Contributors:
         ],
 
         _updateSearchResults: function() {
+          console.log('search-form_updateSearchResults');
+          var docs = this.$.provider.currentPage;
+          docs.forEach(function(doc) {
+            this.$.queue.push('docItems', doc);
+          }.bind(this));
           this.fire('initSearchResults', {
             provider: this.$.provider,
           });
@@ -101,8 +107,19 @@ Contributors:
         _resetResults: function() {
           this.$.provider.page = 1;
           this.$.provider.pageSize = 40;
+          this.$.queue.docItems = [];
           this.fire('resetSearchResults');
         },
+
+        displayQueue: function(index) {
+          console.log('displayQueue ' + index);
+          this._isQueue = true;
+        },
+
+        displayFilters: function() {
+          console.log('displayFilters');
+          this._isQueue = false;
+        }
 
       });
     })();

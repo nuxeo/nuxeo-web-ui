@@ -147,19 +147,19 @@ Contributors:
         <iron-scroll-threshold id="scrollThreshold"
           lower-threshold="1000"
           on-lower-threshold="_loadMoreData">
-          <div id="dropzone" class="grid-ctn bubbleBoxes">
+          <div class="grid-ctn bubbleBoxes">
             <template is="dom-repeat" items="[[docItems]]">
-              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
+              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigateFromSearch"></nuxeo-document-listing-thumbnail>
             </template>
           </div>
           <div id="loader" hidden$="[[!pageProvider.isNextPageAvailable]]">
             <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
               <paper-spinner active="true">
               </paper-spinner>
-              Loading more ...
+              [[i18n('Loading more ...')]]
             </div>
             <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
-              Show more
+              [[i18n('Show more')]]
             </div>
           </div>
       </div>
@@ -194,16 +194,10 @@ Contributors:
           }
         },
 
-        _navigate: function(e) {
+        _navigateFromSearch: function(e) {
           var doc = e.model.item,
               index = e.model.index + 1;
-          this.navigate(doc, index);
-        },
-
-        navigate: function(doc, index) {
-          this.currentDocument = doc;
-          this.currentIndex = index; // TODO - retrieve index from currentPage
-          this.fire('nuxeo-content-view-navigate');
+          this.fire('document-clicked', {doc: doc, index: index});
         },
 
         _updateResults: function() {
@@ -242,11 +236,13 @@ Contributors:
         },
 
         _initSearchResults: function(e) {
+          console.log('results-_initSearchResults');
           this.pageProvider = e.detail.provider;
           this._updateResults();
         },
 
         _resetSearchResults: function() {
+          console.log('results-_resetSearchResults');
           this.docItems = [];
           this.pageProvider = null;
         }

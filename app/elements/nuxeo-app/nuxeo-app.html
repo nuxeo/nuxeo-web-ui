@@ -206,9 +206,11 @@ Contributors:
               <section class="card search" name="search">
                 <div class="header ellipsis">
                   <h1>Search Filters</h1>
+                  <nuxeo-search-queue-toggle-button id="displayQueue" on-switch="_queueFormSwitch">
+                  </nuxeo-search-queue-toggle-button>
                 </div>
                 <div class="content">
-                  <nuxeo-search-form>
+                  <nuxeo-search-form id="searchForm">
                   </nuxeo-search-form>
                 </div>
               </section>
@@ -311,7 +313,7 @@ Contributors:
               document="[[currentDocument]]"
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
-            <nuxeo-search-results name="search">
+            <nuxeo-search-results name="search" on-document-clicked="_navigateFromSearch">
             </nuxeo-search-results>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
           </iron-pages>
@@ -397,7 +399,7 @@ Contributors:
 
         listeners: {
           'documentUpdated': 'refresh',
-          'nuxeo-content-view-navigate': '_navigateCV',
+          'nuxeo-content-view-navigate': '_navigateFromCV',
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup'
@@ -436,9 +438,24 @@ Contributors:
           this.fire('navigation', {page: this.page});
         },
 
-        _navigateCV: function(e) {
+        _navigateFromCV: function(e) {
           this.currentContentView = e.target;
           page.show('/browse' + e.target.currentDocument.path, {contentView: e.target.provider});
+        },
+
+        _navigateFromSearch: function(e) {
+          console.log('_navigateFromSearch');
+          page.show('/browse' + e.detail.doc.path);
+          this.$.searchForm.switchToQueue(e.detail.index);
+          this.$.displayQueue.displayQueue();
+        },
+
+        _queueFormSwitch: function(e) {
+          if (e.detail.displayQueue) {
+            this.$.searchForm.displayQueue();
+          } else {
+            this.$.searchForm.displayFilters();
+          }
         },
 
         get currentContentView() {
