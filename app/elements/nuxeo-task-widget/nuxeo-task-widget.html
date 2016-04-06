@@ -116,7 +116,7 @@ Contributors:
               <div class="layout center">
                 <span class="task-property">Initiated by </span>
                 <a class="tag user initiator"
-                   href="nuxeo/users/[[workflow.initiator]]">[[workflow.initiator]]</a>
+                   href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
               </div>
             </div>
           </div>
@@ -154,14 +154,6 @@ Contributors:
               ParallelDocumentReview: 'icons:content-paste',
               SerialDocumentReview: 'icons:content-paste'
             }
-          },
-          taskNumber: {
-            type: Number,
-            value: 10
-          },
-          collapsedView: {
-            type: Boolean,
-            value: false
           }
         },
 
@@ -199,15 +191,6 @@ Contributors:
         _getIcon: function(workflowModelName) {
           var icon = this.icons[workflowModelName];
           return icon ? icon : 'icons:assignment';
-        },
-
-        _genDynamicVar: function(name, id) {
-          this[name + '-' + id] = {};
-          return this[name + '-' + id];
-        },
-
-        _getDynamicVarProp: function(name, id, prop) {
-          return this[name + '-' + id][prop];
         },
 
         _formatDate: function(date) {
