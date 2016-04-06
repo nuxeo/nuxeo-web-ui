@@ -29,28 +29,48 @@ Contributors:
         display: block;
       }
 
+      paper-card {
+        font-size: .9em;
+        display: flex;
+        padding: .5em 1em;
+      }
+
       .action-property {
-        padding: 0.75rem 0;
+        margin-bottom: 0.5em;
+        padding: .5em 0;
         color: #434343;
         @apply(--nuxeo-document-task-action-property);
       }
 
       .action-property-header {
         font-weight: bolder;
+        margin-bottom: 0.5em;
         @apply(--nuxeo-document-task-action-property-header);
+      }
+
+      paper-textarea {
+        --paper-input-container: {
+          padding: 0;
+        };
       }
     </style>
 
-    <div class="action-property layout horizontal center">
-      <span class="action-property-header">
-        Participants on the Review:&nbsp;
-      </span>
-      <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
-    </div>
-    <div class="action-property layout vertical">
-      <span class="action-property-header">Add a comment</span>
-      <paper-textarea label="your comment" value="{{comment}}"></paper-textarea>
-    </div>
+    <paper-card class="layout vertical">
+      <div class="action-property layout vertical">
+        <span class="action-property-header">
+          Participants
+        </span>
+        <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
+      </div>
+      <div class="action-property layout vertical">
+        <span class="action-property-header">Initiator Comment</span>
+        <span>[[task.variables.initiatorComment]]</span>
+      </div>
+      <div class="action-property layout vertical">
+        <span class="action-property-header">Comment</span>
+        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+      </div>
+    </paper-card>
   </template>
 
   <script>

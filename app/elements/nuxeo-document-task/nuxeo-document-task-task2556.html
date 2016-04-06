@@ -29,38 +29,54 @@ Contributors:
         display: block;
       }
 
+      paper-card {
+        font-size: .9em;
+        display: flex;
+        padding: .5em 1em;
+      }
+
       .action-property {
-        padding: 0.75rem 0;
+        margin-bottom: 0.5em;
+        padding: .5em 0;
         color: #434343;
         @apply(--nuxeo-document-task-action-property);
       }
 
       .action-property-header {
         font-weight: bolder;
+        margin-bottom: 0.5em;
         @apply(--nuxeo-document-task-action-property-header);
+      }
+
+      paper-input,
+      paper-textarea {
+        --paper-input-container: {
+          padding: 0;
+        };
       }
     </style>
 
-    <nuxeo-operation auto op="UserGroup.Suggestion"
-                     params="[[parameters]]"
-                     response="{{response}}"></nuxeo-operation>
+    <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
-    <div class="action-property layout horizontal center">
-      <span class="action-property-header">Participants:&nbsp;</span>
-      <div class="flex">
-        <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
-                               multiple="true"
-                               value="{{selectedParticipants}}"></nuxeo-user-suggestion>
+    <paper-card class="layout vertical">
+      <div class="action-property layout vertical">
+        <span class="action-property-header">Participants</span>
+        <div class="flex">
+          <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
+                                 multiple="true"
+                                 value="{{selectedParticipants}}">
+          </nuxeo-user-suggestion>
+        </div>
       </div>
-    </div>
-    <div class="action-property layout vertical">
-      <span class="action-property-header">Add a comment</span>
-      <paper-textarea label="your comment" value="{{comment}}"></paper-textarea>
-    </div>
-    <div class="action-property layout vertical">
-      <span class="action-property-header">End date:</span>
-      <paper-input type="date" id="end_date" value="{{selectedDate}}"></paper-input>
-    </div>
+      <div class="action-property layout vertical">
+        <span class="action-property-header">Comment</span>
+        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+      </div>
+      <div class="action-property layout vertical">
+        <span class="action-property-header">End date</span>
+        <paper-input type="date" id="end_date" value="{{selectedDate}}" no-label-float></paper-input>
+      </div>
+    </paper-card>
   </template>
 
   <script>
