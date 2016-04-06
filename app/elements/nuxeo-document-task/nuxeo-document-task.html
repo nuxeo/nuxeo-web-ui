@@ -13,6 +13,7 @@ Lesser General Public License for more details.
 
 Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
@@ -29,50 +30,84 @@ Contributors:
         display: block;
       }
 
-      .startbutton {
-        @apply(--nuxeo-document-task-button-theme);
-        position: absolute;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #f68500;
-        color: #fff;
-        padding: 0.3rem .8rem;
-        vertical-align: baseline;
-        border-radius: 2px;
+      paper-card {
         font-size: .9em;
-        font-weight: 700;
-        right: .5em;
-        top: .8em;
+        display: flex;
+        padding: .5em 1em;
       }
 
-      .icon {
-        --iron-icon-height: 0.9rem;
-        --iron-icon-width: 0.9rem;
-        margin-right: 0.2rem;
+      paper-tabs {
+        --paper-tabs-selection-bar-color: var(--nuxeo-secondary-color);
+      }
+
+      iron-pages {
+        padding: 1em 0;
+      }
+
+      iron-icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+      }
+
+      iron-icon.task-name-icon {
+        border-radius: 50px;
+        background-color: var(--nuxeo-secondary-color);
+        color: white;
+        padding: .4em;
+        margin-right: .5em;
         @apply(--nuxeo-document-task-icon-theme);
       }
 
-      h4 {
-        font-size: 2.28rem;
-        font-weight: 400;
-        margin: 2rem 0;
+      iron-icon.tag-icon {
+        margin-right: .2em;
       }
 
-      .action-container {
+      .task-header {
+        background-color: #fafcfd;
+        border-bottom: 1px solid #e5e5e5;
+        color: var(--nuxeo-secondary-color);
+        padding: 1em;
+      }
+
+      .task-body {
+        padding: .5em 1.5em;
         overflow-y: auto;
       }
 
+      .task-name {
+        font-weight: bold;
+      }
+
+      .workflow-name {
+        font-size: .8em;
+        font-weight: 300;
+        margin-top: .5em;
+      }
+
+      .task-directive {
+        display: block;
+        font-weight: bold;
+        margin: 1em 0;
+      }
+
+      .task-buttons {
+        margin-top: 2em;
+      }
+
+      .task-buttons paper-button {
+        padding: 0 0.5em;
+      }
+
       .action-property {
-        padding: 0.75rem 0;
         color: #434343;
+        margin-bottom: 0.5em;
+        padding: .5em 0;
       }
 
-      .action-property-header {
-        font-weight: bolder;
-      }
-
-      .action-property-value {
-        font-weight: normal;
+      #graphDialog paper-button {
+        position: absolute;
+        bottom: 0;
+        right: 0;
       }
 
       .graph-container {
@@ -93,73 +128,83 @@ Contributors:
     <nuxeo-resource id="taskRequest"
                     path="/task/[[task.id]]/[[action]]"
                     data="{{taskData}}"
-                    response="{{taskResponse}}"
-                    headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+                    response="{{taskResponse}}">
+    </nuxeo-resource>
 
-    <div>
-      <span class="tt">
-        <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-        You have a task to process <strong>before [[_formatDate(task.dueDate)]]</strong>
-      </span>
-      <span class="action">
-        <paper-dialog id="taskDialog"
-                      with-backdrop
-                      no-cancel-on-esc-key
-                      class="layout vertical">
-          <div class="horizontal layout center">
-            <h4>Process Workflow</h4>
-            <paper-dialog id="graphDialog" with-backdrop>
-              <div class="graph-container">
-                <nuxeo-workflow-graph workflow="{{workflow}}"></nuxeo-workflow-graph>
-              </div>
-            </paper-dialog>
-            <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">Show Graph</paper-button>
+    <div class="layout horizontal center task-header">
+      <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+      <div class="layout vertical flex">
+        <span class="task-name">[[i18n(task.name)]]</span>
+        <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+      </div>
+      <paper-dialog id="graphDialog" with-backdrop>
+        <div class="graph-container">
+          <nuxeo-workflow-graph workflow="[[workflow]]"></nuxeo-workflow-graph>
+        </div>
+        <paper-button noink dialog-dismiss>Close</paper-button>
+      </paper-dialog>
+      <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">View Graph</paper-button>
+    </div>
+
+    <div class="action-container layout vertical task-body">
+      <paper-tabs selected="{{_selectedTab}}" attr-for-selected="name">
+        <paper-tab name="resolution">Task Resolution</paper-tab>
+        <paper-tab name="comments">Comments</paper-tab>
+      </paper-tabs>
+
+      <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
+        <div name="resolution">
+          <paper-card class="layout vertical">
+            <div class="layout horizontal center action-property">
+              <span class="flex-3">Due Date</span>
+              <span class="flex-9">
+                <iron-icon icon="icons:today"></iron-icon> [[_formatDate(task.dueDate)]]
+              </span>
+            </div>
+            <div class="layout horizontal center action-property">
+              <span class="flex-3">From</span>
+              <span class="flex-9">
+                <a class="tag user" href="/user/[[workflow.initiator]]">
+                  <iron-icon icon="social:person" class="tag-icon"></iron-icon>[[workflow.initiator]]
+                </a>
+              </span>
+            </div>
+            <div class="layout horizontal center action-property">
+              <span class="flex-3">Assigned to</span>
+              <span class="flex-9">
+                <template is="dom-repeat" items="[[task.actors]]" as="actor">
+                  <a class="tag user" href="[[_actorHref(actor.id)]]">
+                    <iron-icon icon="[[_actorIcon(actor.id)]]" class="tag-icon"></iron-icon>
+                    [[_actorName(actor.id)]]
+                  </a>
+                </template>
+              </span>
+            </div>
+          </paper-card>
+
+          <span class="task-directive">
+            [[i18n(task.directive)]]
+          </span>
+
+          <div id="task-container">
+            <!--dynamically loaded via _taskChanged-->
           </div>
-          <div class="action-container layout vertical">
-            <div class="action-property layout horizontal">
-              <span class="action-property-header">
-                Workflow step:&nbsp;
-              </span>
-              <span class="action-property-value">
-                [[i18n(task.workflowModelName)]] - [[i18n(task.name)]]
-              </span>
+
+          <div class="task-buttons layout horizontal">
+            <div>
+              <paper-button noink>Process later</paper-button>
             </div>
-            <div class="action-property layout horizontal center">
-              <span class="action-property-header">
-                Actors:&nbsp;
-              </span>
-              <nuxeo-document-users users="[[_getActors(task)]]"></nuxeo-document-users>
-            </div>
-            <div class="action-property layout horizontal">
-              <span class="action-property-header">
-                Due date:&nbsp;
-              </span>
-              <span class="action-property-value">
-                [[_formatDate(task.dueDate)]]
-              </span>
-            </div>
-            <div class="action-property layout horizontal">
-              <span class="action-property-header">
-                Directive:&nbsp;
-              </span>
-              <span class="action-property-value">
-                [[i18n(task.directive)]]
-              </span>
-            </div>
-            <div id="task-container">
-              <!--dynamically loaded via _taskChanged-->
+            <div class="flex horizontal layout end-justified">
+              <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
+                <paper-button noink dialog-confirm on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
+              </template>
             </div>
           </div>
-          <div class="buttons sep">
-            <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-              <paper-button noink dialog-confirm
-                            on-tap="_processTask"
-                            data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
-            </template>
-          </div>
-        </paper-dialog>
-        <paper-button noink class="startbutton" on-tap="_toggleTaskDialog">Process</paper-button>
-      </span>
+        </div>
+        <div name="comments">
+          <p>There are no comments to show.</p>
+        </div>
+      </iron-pages>
     </div>
   </template>
 
@@ -170,21 +215,21 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-task',
         properties: {
-          document: {
-            type: Object
-          },
+          document: Object,
 
-          workflow: {
-            type: Object
-          },
+          workflow: Object,
 
           task: {
             type: Object,
-            observer: '_taskChanged'
+            observer: '_taskChanged',
+            notify: true
           },
 
-          currentTaskElement: {
-            type: Object
+          _currentTaskElement: Object,
+
+          _selectedTab: {
+            type: String,
+            value: 'resolution'
           }
         },
         listeners: {
@@ -229,7 +274,7 @@ Contributors:
           }
           // setup data binding
           el.task = this.task;
-          this.currentTaskElement = el;
+          this._currentTaskElement = el;
         },
 
         /**
@@ -253,26 +298,30 @@ Contributors:
           return moment(date).format('MMMM D, YYYY');
         },
 
-        _getActors: function(task) {
-          return task.actors.map(function(user) {
-            return user.id.replace('user:','');
-          });
-        },
-
-        _toggleTaskDialog: function() {
-          document.getElementById('taskDialog').toggle();
-        },
-
         _toggleGraphDialog: function() {
-          document.getElementById('graphDialog').toggle();
+          this.$.graphDialog.toggle();
         },
 
         _processTask: function(e) {
           this.action = e.target.dataset.args;
-          this.taskData = this.currentTaskElement.genTaskData(this.action);
+          this.taskData = this._currentTaskElement.genTaskData(this.action);
           this.$.taskRequest.put().then(function() {
             this.fire('workflowTaskProcessed');
           }.bind(this));
+        },
+
+        _actorIcon: function(actor) {
+          return actor.startsWith('user:') ? 'social:person' : 'social:people';
+        },
+
+        _actorName: function(actor) {
+          return actor.substring(actor.indexOf(':') + 1);
+        },
+
+        _actorHref: function(actor) {
+          // user:name or group:name
+          var split = actor.split(':');
+          return '/' + split[0] + '/' + split[1];
         }
       });
     })();
