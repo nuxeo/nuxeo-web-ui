@@ -132,19 +132,18 @@ Contributors:
     </nuxeo-page-provider>
 
     <div class="header ellipsis search-header">
-      <h1>Search Filters</h1>
-      <div id="switch">
-        <template is="dom-if" if="[[_isQueue]]">
-          <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
-          </paper-icon-button>
-          <paper-tooltip for="toogleFilter">[[i18n('display_filter', 'Switch to filter view')]]</paper-tooltip>
-        </template>
-        <template is="dom-if" if="[[!_isQueue]]">
-           <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
-           </paper-icon-button>
-          <paper-tooltip for="toogleQueue">[[i18n('display_queue', 'Switch to queue view')]]</paper-tooltip>
-        </template>
-      </div>
+      <template is="dom-if" if="[[_isQueue]]">
+        <h1>[[i18n('search_queue', 'Search Queue')]]</h1>
+        <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
+        </paper-icon-button>
+        <paper-tooltip for="toogleFilter">[[i18n('display_filter', 'Switch to filter view')]]</paper-tooltip>
+      </template>
+      <template is="dom-if" if="[[!_isQueue]]">
+        <h1>[[i18n('search_filters', 'Search Filters')]]</h1>
+        <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+        </paper-icon-button>
+        <paper-tooltip for="toogleQueue">[[i18n('display_queue', 'Switch to queue view')]]</paper-tooltip>
+      </template>
     </div>
 
     <div class="content">
