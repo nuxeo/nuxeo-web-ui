@@ -67,6 +67,7 @@ Contributors:
         @apply(--layout-flex);
         @apply(--layout-vertical);
         height: calc(100vh - 59px);
+        overflow: auto;
         width: 290px;
       }
 
@@ -204,15 +205,8 @@ Contributors:
               </section>
 
               <section class="card search" name="search">
-                <div class="header ellipsis">
-                  <h1>Search Filters</h1>
-                  <nuxeo-search-queue-toggle-button id="displayQueue" on-switch="_queueFormSwitch">
-                  </nuxeo-search-queue-toggle-button>
-                </div>
-                <div class="content">
-                  <nuxeo-search-form id="searchForm">
-                  </nuxeo-search-form>
-                </div>
+                <nuxeo-search-form id="searchForm">
+                </nuxeo-search-form>
               </section>
 
               <section class="card tasks" name="tasks">
@@ -402,7 +396,8 @@ Contributors:
           'nuxeo-content-view-navigate': '_navigateFromCV',
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
-          'manageGroup': '_handleUGMmanageGroup'
+          'manageGroup': '_handleUGMmanageGroup',
+          'resetSearchResults': '_resetSearchResults'
         },
 
         ready: function() {
@@ -444,18 +439,13 @@ Contributors:
         },
 
         _navigateFromSearch: function(e) {
-          console.log('_navigateFromSearch');
           page.show('/browse' + e.detail.doc.path);
-          this.$.searchForm.switchToQueue(e.detail.index);
-          this.$.displayQueue.displayQueue();
+          this.$.searchForm.displayQueue(e.detail.doc, e.detail.index);
         },
 
-        _queueFormSwitch: function(e) {
-          if (e.detail.displayQueue) {
-            this.$.searchForm.displayQueue();
-          } else {
-            this.$.searchForm.displayFilters();
-          }
+        _resetSearchResults: function() {
+          this.selectedTab = 'search';
+          this.page = 'search';
         },
 
         get currentContentView() {
