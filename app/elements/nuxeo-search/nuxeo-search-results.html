@@ -236,13 +236,11 @@ Contributors:
         },
 
         _initSearchResults: function(e) {
-          console.log('results-_initSearchResults');
           this.pageProvider = e.detail.provider;
           this._updateResults();
         },
 
         _resetSearchResults: function() {
-          console.log('results-_resetSearchResults');
           this.docItems = [];
           this.pageProvider = null;
         }
