@@ -145,14 +145,14 @@ Contributors:
       </div>
       <div class="content-view">
         <iron-scroll-threshold id="scrollThreshold"
-          lower-threshold="1000"
+          lower-threshold="800"
           on-lower-threshold="_loadMoreData">
           <div class="grid-ctn bubbleBoxes">
             <template is="dom-repeat" items="[[docItems]]">
               <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigateFromSearch"></nuxeo-document-listing-thumbnail>
             </template>
           </div>
-          <div id="loader" hidden$="[[!pageProvider.isNextPageAvailable]]">
+          <div id="loader" hidden$="[[!showMore]]">
             <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
               <paper-spinner active="true">
               </paper-spinner>
@@ -213,9 +213,6 @@ Contributors:
           if (this.pageProvider) {
             if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
               this.pageProvider.isNextPageAvailable) {
-              if (this.pageProvider.page === 1) {
-                this.pageProvider.pageSize = 20;
-              }
               this.pageProvider.page = this.pageProvider.page + 1;
               this.manualLoading = this._computeManualLoading(this.pageProvider.page);
             }

@@ -168,7 +168,7 @@ Contributors:
 
       <div id="queue" hidden$="{{!_isQueue}}">
         <iron-scroll-threshold id="scrollTheshold"
-          lower-threshold="500"
+          lower-threshold="800"
           on-lower-threshold="_loadMoreData">
           <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
             <template>
@@ -281,9 +281,6 @@ Contributors:
         _loadMoreData: function() {
           if (this.$.provider) {
             if (this.$.provider.isNextPageAvailable) {
-              if (this.$.provider.page === 1) {
-                this.$.provider.pageSize = 20;
-              }
               this.$.provider.page = this.$.provider.page + 1;
             }
           }
