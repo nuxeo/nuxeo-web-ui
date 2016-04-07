@@ -172,7 +172,7 @@ Contributors:
           on-lower-threshold="_loadMoreData">
           <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
             <template>
-              <div class$="[[_computedClass(selected)]]">
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="primary">
                   <img class="nxicon" src="[[_icon(item)]]">
                   [[item.title]]
