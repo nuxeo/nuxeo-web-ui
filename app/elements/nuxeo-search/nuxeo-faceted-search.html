@@ -194,6 +194,11 @@ Contributors:
         _addFullTextSearch: function() {
           if (this.searchTerm) {
             this.set('params.ecm_fulltext', this.searchTerm + '*');
+          } else {
+            this.set('params.ecm_fulltext', '');
+            // dirty but needed, the above line for
+            // ecm_fulltext removal being observed
+            delete this.params.ecm_fulltext;
           }
         }
 
