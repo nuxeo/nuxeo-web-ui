@@ -29,6 +29,12 @@ Contributors:
       @apply(--layout-flex);
       display: block;
     }
+    #scrollTheshold {
+      /* scrollTheshold has to have
+         an explicit height else infinite
+         scrolling breaks */
+      height: calc(100vh - 61px);
+    }
     .item {
       cursor: pointer;
       padding: 2px 10px;
@@ -119,7 +125,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider" auto
        provider="[[provider]]"
        aggregations="{{aggregations}}"
@@ -159,25 +165,32 @@ Contributors:
       </div>
 
       <div id="queue" hidden$="{{!_isQueue}}">
-        <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled>
-          <template>
-            <div class$="[[_computedClass(selected)]]">
+        <iron-scroll-threshold id="scrollTheshold"
+          lower-threshold="500"
+          on-lower-threshold="_loadMoreData">
+          <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
+            <template>
+              <div class$="[[_computedClass(selected)]]">
+                <div class="primary">
+                  <img class="nxicon" src="[[_icon(item)]]">
+                  [[item.title]]
+                </div>
+                <div class="secondary dim">[[item.type]]</div>
+              </div>
+            </template>
+          </iron-list>
+          <template is="dom-if" if="[[showMore]]">
+            <div class="item loading">
               <div class="primary">
-                <img class="nxicon" src="http://localhost:8080/nuxeo/[[item.properties.common:icon]]">
-                [[item.title]]
+                <paper-spinner class="nxicon" active="true"></paper-spinner>
+                [[i18n('loading_more', 'Loading more data')]]
               </div>
               <div class="secondary dim">[[item.type]]</div>
             </div>
           </template>
-        </iron-list>
-        <template is="dom-if" if="[[showMore]]" >
-          <div class="item">
-            <div class="primary manualLoading" on-tap="_loadMoreData">
-              [[i18n('show_more', 'Show more')]]
-            </div>
-          </div>
-        </template>
+        </iron-scroll-threshold>
       </div>
+
     </div>
 
   </template>
@@ -231,7 +244,9 @@ Contributors:
           docs.forEach(function(doc) {
             this.push('docItems', doc);
           }.bind(this));
+          this.$.itemsList.fire('iron-resize');
           this.showMore = this.$.provider.isNextPageAvailable;
+          this.$.scrollTheshold.clearTriggers();
           this.fire('initSearchResults', {
             provider: this.$.provider,
           });
@@ -243,15 +258,17 @@ Contributors:
           this.docItems = [];
           this.selectedDocument = null;
           this.displayFilters();
+          this.$.itemsList.fire('iron-resize');
+          this.showMore = false;
+          this.$.scrollTheshold.clearTriggers();
           this.fire('resetSearchResults');
         },
 
         displayQueue: function(doc, index) {
           this._isQueue = true;
-          this.$.itemsList.notifyResize();
           if (doc && doc.uid) {
             this.$.itemsList.selectItem(doc);
-            this.$.itemsList.scrollToIndex(index);
+            this.$.itemsList.scrollToIndex(Math.max(0, index - 5));
           }
         },
 
@@ -282,7 +299,12 @@ Contributors:
           if (doc) {
             page.show('/browse' + doc.path);
           }
-        }
+        },
+
+        _icon: function(doc) {
+          var url = this.$.nxcon.url;
+          return url + doc.properties['common:icon'];
+        },
 
       });
     })();
