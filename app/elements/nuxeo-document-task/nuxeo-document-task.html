@@ -190,10 +190,8 @@ Contributors:
             <!--dynamically loaded via _taskChanged-->
           </div>
 
-          <div class="task-buttons layout horizontal">
-            <div>
-              <paper-button noink>Process later</paper-button>
-            </div>
+          <div class="task-buttons layout horizontal center">
+            <content select=".buttons"></content>
             <div class="flex horizontal layout end-justified">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
                 <paper-button noink dialog-confirm on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>

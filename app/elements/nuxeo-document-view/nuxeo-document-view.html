@@ -153,12 +153,12 @@ Contributors:
     </style>
 
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow" response="{{workflows}}"></nuxeo-resource>
-    <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task" response="{{tasks}}"></nuxeo-resource>
+    <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
 
     <template is="dom-if" if="[[hasTaskToProcess]]">
       <paper-card class="wf-running">
         <div class="card-content">
-          <template is="dom-repeat" items="{{tasks.entries}}" as="task">
+          <template is="dom-repeat" items="[[tasks]]" as="task">
             <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
             You have a task to process <strong>before [[_formatDate(task.dueDate)]]</strong>
             <paper-button noink class="process-task" on-tap="_processTask">Process</paper-button>
@@ -183,10 +183,14 @@ Contributors:
       </div>
       <div class="sideinfo vertical layout flex">
         <template is="dom-if" if="[[isProcessingTask]]" restamp>
-          <template is="dom-repeat" items="{{workflows.entries}}" as="workflow">
-            <template is="dom-repeat" items="{{tasks.entries}}" as="task">
+          <template is="dom-repeat" items="[[workflows.entries]]" as="workflow">
+            <template is="dom-repeat" items="[[tasks]]" as="task">
               <paper-card class="document-task">
-                <nuxeo-document-task document="[[document]]" workflow="[[workflow]]" task="[[task]]"></nuxeo-document-task>
+                <nuxeo-document-task document="[[document]]" workflow="[[workflow]]" task="[[task]]">
+                  <div class="buttons">
+                    <paper-button noink on-tap="_cancelProcessTask">Process later</paper-button>
+                  </div>
+                </nuxeo-document-task>
               </paper-card>
             </template>
           </template>
@@ -248,7 +252,7 @@ Contributors:
           <paper-card class="sidecard">
             <p class="title">Activity</p>
             <div class="vertical layout card-content audit">
-              <nuxeo-document-activity class="activity" document="{{document}}"></nuxeo-document-activity>
+              <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
             </div>
           </paper-card>
         </template>
@@ -276,7 +280,7 @@ Contributors:
 
           /* Tasks of the workflows running on the document whom actor is the current user */
           tasks: {
-            type: Object,
+            type: Array,
             observer: '_tasksChanged'
           },
 
@@ -321,10 +325,7 @@ Contributors:
         _documentChanged: function() {
           this._updateLayout();
           this.$.workflows.get();
-          this.$.tasks.params = {
-            userId: 'Administrator'
-          };
-          this.$.tasks.get();
+          this._fetchTasks();
           this.isProcessingTask = false;
         },
 
@@ -377,6 +378,20 @@ Contributors:
           }
         },
 
+        _fetchTasks: function() {
+          // another hack to fetch tasks with user prefix and without prefix
+          // some tasks are prefixed, to be reviewed later
+          this._tmpTasks = [];
+          this.$.tasks.params = {'userId': 'Administrator'};
+          this.$.tasks.get().then(function(response) {
+            this._tmpTasks = response.entries;
+            this.$.tasks.params = {'userId': 'user:Administrator'};
+            this.$.tasks.get().then(function(response) {
+              this.tasks = this._tmpTasks.concat(response.entries);
+            }.bind(this));
+          }.bind(this));
+        },
+
         _workflowsChanged: function() {
           this.hasWorkflowRunning = this.workflows &&
               this.workflows.entries &&
@@ -385,8 +400,8 @@ Contributors:
 
         _tasksChanged: function() {
           this.hasTaskToProcess = this.tasks &&
-              this.tasks.entries &&
-              this.tasks.entries.length > 0;
+              this.tasks &&
+              this.tasks.length > 0;
         },
 
         _startWorkflow: function() {
@@ -399,10 +414,7 @@ Contributors:
           workflows.post().then(function() {
             this.fire('workflowStarted');
             workflows.get();
-            this.$.tasks.params = {
-              userId: 'Administrator'
-            };
-            this.$.tasks.get();
+            this._fetchTasks();
           }.bind(this));
         },
 
@@ -410,13 +422,14 @@ Contributors:
           this.isProcessingTask = true;
         },
 
+        _cancelProcessTask: function() {
+          this.isProcessingTask = false;
+        },
+
         _taskCompleted: function() {
-          var doc = document.getElementById('doc');
-          doc.method = 'get';
-          doc.$.nxResource.execute().then(function() {
-            this.$.workflows.get();
-            this.isProcessingTask = false;
-          }.bind(this));
+          this.$.workflows.get();
+          this._fetchTasks();
+          this.isProcessingTask = false;
         },
 
         _hasCollections: function() {

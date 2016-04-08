@@ -15,6 +15,7 @@ limitations under the License.
 
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
@@ -76,22 +77,21 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="homeTaskRequest"
-                    path="[[_getTaskPath(username)]]">
-    </nuxeo-resource>
+    <nuxeo-resource id="homeTaskRequest" path="/task"></nuxeo-resource>
 
-    <template is="dom-if" if="[[isEmpty]]">
+    <template is="dom-if" if="[[_isEmpty(tasks)]]">
       <div class="horizontal layout center">
         <span class="empty">There are no tasks to show.</span>
       </div>
     </template>
-    <template is="dom-if" if="[[!isEmpty]]">
+    <template is="dom-if" if="[[!_isEmpty(tasks)]]">
       <div class="task-list vertical layout container">
-        <template is="dom-repeat" items="[[tasks.entries]]" as="task">
+        <template is="dom-repeat" items="[[tasks]]" as="task">
           <div class="task-box vertical layout">
             <nuxeo-resource auto
                             path="/workflow/[[task.workflowInstanceId]]"
-                            response="{{workflow}}"></nuxeo-resource>
+                            response="{{workflow}}">
+            </nuxeo-resource>
             <div class="task-info horizontal layout center">
               <div class="vertical layout center">
                 <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
@@ -102,11 +102,8 @@ Contributors:
               <div class="taskDoc horizontal layout center">
                 <span class="task-property">On  </span>
                 <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
-                  <nuxeo-document auto
-                                  doc-id="[[doc.id]]"
-                                  response="{{doc}}"></nuxeo-document>
-                  <a href="[[_href(doc)]]"
-                     class="docTitle">[[doc.properties.dc:title]]</a>
+                  <nuxeo-document auto doc-id="[[doc.id]]" response="{{doc}}"></nuxeo-document>
+                  <a href="[[_href(doc)]]" class="docTitle">[[doc.properties.dc:title]]</a>
                 </template>
               </div>
               <div class="horizontal layout center">
@@ -115,17 +112,14 @@ Contributors:
               </div>
               <div class="layout center">
                 <span class="task-property">Initiated by </span>
-                <a class="tag user initiator"
-                   href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
+                <a class="tag user initiator" href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
               </div>
             </div>
           </div>
         </template>
       </div>
     </template>
-
   </template>
-
   <script>
     (function() {
       'use strict';
@@ -133,17 +127,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-task-widget',
         properties: {
-          isEmpty: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
           username: String,
-          count: {
-            type: Number,
-            value: 0,
-            notify: true
-          },
           tasks: {
             type: Array,
             notify: true
@@ -172,20 +156,25 @@ Contributors:
           // hack to force dom-repeat to re-render everything again and do not reuse any templates
           // need this since we have some chained dom-repeats with nuxeo-resource inside
           // and the rendering becomes erroneous when tasks are refreshed
-          this.tasks = {};
+          this.tasks = [];
+
+          // another hack to fetch tasks with user prefix and without prefix
+          // some tasks are prefixed, to be reviewed later
+          this._tmpTasks = [];
+          this.$.homeTaskRequest.params = {'userId': this.username};
           this.$.homeTaskRequest.get().then(function(response) {
-            this.tasks = response;
-            this.count = response.entries.length;
-            this.isEmpty = response.entries.length === 0;
+            this._tmpTasks = response.entries;
+            this.$.homeTaskRequest.params = {'userId': 'user:' + this.username};
+            this.$.homeTaskRequest.get().then(function(response) {
+              this.tasks = this._tmpTasks.concat(response.entries);
+              this.count = this.tasks.length;
+              this.isEmpty = this.tasks.length === 0;
+            }.bind(this));
           }.bind(this));
         },
 
-        _getTaskPath: function() {
-          var path = '/task?';
-          if (this.username) {
-            path += 'userId=' + this.username;
-          }
-          return path;
+        _isEmpty: function(tasks) {
+          return tasks && tasks.length === 0;
         },
 
         _getIcon: function(workflowModelName) {
@@ -203,5 +192,4 @@ Contributors:
       });
     })();
   </script>
-
 </dom-module>

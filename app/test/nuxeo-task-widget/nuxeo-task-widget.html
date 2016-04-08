@@ -74,6 +74,15 @@ Contributors:
         );
         server.respondWith(
           'GET',
+          '/dummy/api/v1/task?userId=user%3AAdministrator',
+          [
+            200,
+            {'Content-Type': 'application/json'},
+            JSON.stringify(emptyTaskResponse)
+          ]
+        );
+        server.respondWith(
+          'GET',
           '/dummy/api/v1/workflow/84ba0c6f-2fb7-46b7-afdc-084f0143d777?',
           [
             200,
@@ -158,6 +167,15 @@ Contributors:
         server.respondWith(
           'GET',
           '/dummy/api/v1/task?userId=Administrator',
+          [
+            200,
+            {'Content-Type': 'application/json'},
+            JSON.stringify(emptyTaskResponse)
+          ]
+        );
+         server.respondWith(
+          'GET',
+          '/dummy/api/v1/task?userId=user%3AAdministrator',
           [
             200,
             {'Content-Type': 'application/json'},
