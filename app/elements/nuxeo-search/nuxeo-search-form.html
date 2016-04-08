@@ -305,6 +305,25 @@ Contributors:
           return url + doc.properties['common:icon'];
         },
 
+        ready: function() {
+          this.$.itemsList.selectQueuePrevious = function() {
+            this._didMoveUp();
+            var model = this._focusedItem._templateInstance;
+            if (model) {
+              this.toggleSelectionForItem(model[this.as]);
+            }
+          };
+          this.$.itemsList.selectQueueNext = function() {
+            this._didMoveDown();
+            var model = this._focusedItem._templateInstance;
+            if (model) {
+              this.toggleSelectionForItem(model[this.as]);
+            }
+          };
+          this.$.itemsList.addOwnKeyBinding('left', 'selectQueuePrevious');
+          this.$.itemsList.addOwnKeyBinding('right', 'selectQueueNext');
+        }
+
       });
     })();
   </script>
