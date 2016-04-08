@@ -119,8 +119,8 @@ Contributors:
                 id: this.task.id,
                 variables: {
                   comment: this.comment,
-                  participants: JSON.stringify(this.selectedParticipants),
-                  assignees: JSON.stringify(this.selectedParticipants),
+                  participants: this.selectedParticipants,
+                  assignees: this.selectedParticipants,
                   'validationOrReview': this.selectedValidationOrReview
                 },
               };
