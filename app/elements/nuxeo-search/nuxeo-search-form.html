@@ -308,17 +308,21 @@ Contributors:
         ready: function() {
           this.$.itemsList.selectQueuePrevious = function() {
             this._didMoveUp();
-            var model = this._focusedItem._templateInstance;
-            if (model) {
-              this.toggleSelectionForItem(model[this.as]);
-            }
+            this.debounce('selectQueuePrevious', function() {
+              var model = this._focusedItem._templateInstance;
+              if (model) {
+                this.toggleSelectionForItem(model[this.as]);
+              }
+            }.bind(this), 300);
           };
           this.$.itemsList.selectQueueNext = function() {
             this._didMoveDown();
-            var model = this._focusedItem._templateInstance;
-            if (model) {
-              this.toggleSelectionForItem(model[this.as]);
-            }
+            this.debounce('selectQueueNext', function() {
+              var model = this._focusedItem._templateInstance;
+              if (model) {
+                this.toggleSelectionForItem(model[this.as]);
+              }
+            }.bind(this), 300);
           };
           this.$.itemsList.addOwnKeyBinding('left', 'selectQueuePrevious');
           this.$.itemsList.addOwnKeyBinding('right', 'selectQueueNext');
