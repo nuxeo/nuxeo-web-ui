@@ -173,11 +173,11 @@ Contributors:
           <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                <div class="primary">
+                <div class="primary ellipsis">
                   <img class="nxicon" src="[[_icon(item)]]">
                   [[item.title]]
                 </div>
-                <div class="secondary dim">[[item.type]]</div>
+                <div class="secondary dim ellipsis">[[item.type]]</div>
               </div>
             </template>
           </iron-list>
@@ -308,24 +308,24 @@ Contributors:
         ready: function() {
           this.$.itemsList.selectQueuePrevious = function() {
             this._didMoveUp();
-            this.debounce('selectQueuePrevious', function() {
-              var model = this._focusedItem._templateInstance;
-              if (model) {
-                this.toggleSelectionForItem(model[this.as]);
-              }
-            }.bind(this), 300);
+            this.toggleSelectionForFocusedItem();
           };
           this.$.itemsList.selectQueueNext = function() {
             this._didMoveDown();
-            this.debounce('selectQueueNext', function() {
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.itemsList.toggleSelectionForFocusedItem = function() {
+            this.debounce('toggleSelectionForFocusedItem', function() {
               var model = this._focusedItem._templateInstance;
               if (model) {
                 this.toggleSelectionForItem(model[this.as]);
               }
             }.bind(this), 300);
           };
-          this.$.itemsList.addOwnKeyBinding('left', 'selectQueuePrevious');
-          this.$.itemsList.addOwnKeyBinding('right', 'selectQueueNext');
+          this.$.itemsList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+          this.$.itemsList.addOwnKeyBinding('k', 'selectQueuePrevious');
+          this.$.itemsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+          this.$.itemsList.addOwnKeyBinding('j', 'selectQueueNext');
         }
 
       });
