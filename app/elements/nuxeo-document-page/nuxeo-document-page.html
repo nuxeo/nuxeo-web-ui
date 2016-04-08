@@ -170,10 +170,7 @@ Contributors:
     <div class="horizontal layout">
       <div class="docinfo vertical layout flex-2">
         <paper-card>
-          <div id="document-view">
-            <!-- Dynamic layout element will be inserted here -->
-            <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
-          </div>
+          <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
         </paper-card>
         <paper-card class="tags">
           <div class="horizontal layout wrap card-content">
@@ -323,59 +320,21 @@ Contributors:
         },
 
         _documentChanged: function() {
-          this._updateLayout();
           this.$.workflows.get();
           this._fetchTasks();
           this.isProcessingTask = false;
         },
 
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function(document) {
-          // lower case first letter to avoid extra dash in camelToDashCase
-          var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
-          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'view'].join('-');
+        _workflowsChanged: function() {
+          this.hasWorkflowRunning = this.workflows &&
+              this.workflows.entries &&
+              this.workflows.entries.length > 0;
         },
 
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document and mode
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(this.document),
-              el = document.createElement(layout),
-              parent = this.$['document-view'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          // setup data binding
-          el.document = this.document;
-        },
-
-        /**
-         * Retrieves and creates the view layout for the current document
-         */
-        _updateLayout: function() {
-          var layout = this._layoutFor(this.document);
-          if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl(layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                console.error('Failed to find view layout for ' + this.document.type);
-              });
-          } else {
-            this._createLayout();
-          }
+        _tasksChanged: function() {
+          this.hasTaskToProcess = this.tasks &&
+              this.tasks &&
+              this.tasks.length > 0;
         },
 
         _fetchTasks: function() {
@@ -390,18 +349,6 @@ Contributors:
               this.tasks = this._tmpTasks.concat(response.entries);
             }.bind(this));
           }.bind(this));
-        },
-
-        _workflowsChanged: function() {
-          this.hasWorkflowRunning = this.workflows &&
-              this.workflows.entries &&
-              this.workflows.entries.length > 0;
-        },
-
-        _tasksChanged: function() {
-          this.hasTaskToProcess = this.tasks &&
-              this.tasks &&
-              this.tasks.length > 0;
         },
 
         _startWorkflow: function() {
