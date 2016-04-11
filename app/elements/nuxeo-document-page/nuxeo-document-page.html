@@ -125,6 +125,7 @@ Contributors:
         margin-right: .2rem;
       }
 
+      /* Tasks */
       .wf-running {
         display: block;
         padding: 0 2em;
@@ -149,6 +150,56 @@ Contributors:
         font-weight: 700;
         right: .5em;
         top: .8em;
+      }
+
+      .process-tag {
+        color: #f68500
+      }
+
+      .task-header {
+        background-color: #fafcfd;
+        border-bottom: 1px solid #e5e5e5;
+        color: var(--nuxeo-secondary-color);
+        padding: 1em;
+      }
+
+      .task-name {
+        font-weight: bold;
+      }
+
+      iron-icon.task-name-icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+        border-radius: 50px;
+        background-color: var(--nuxeo-secondary-color);
+        color: white;
+        padding: .4em;
+        margin-right: .5em;
+      }
+
+      .workflow-name {
+        font-size: .8em;
+        font-weight: 300;
+        margin-top: .5em;
+      }
+
+      #graphDialog paper-button {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+      }
+
+      .graph-container {
+        padding: 0.5rem 2rem;
+        position: relative;
+      }
+
+      .open-graph {
+        font-size: 0.8rem;
+      }
+
+      nuxeo-workflow-graph {
+        position: relative;
       }
     </style>
 
@@ -183,7 +234,21 @@ Contributors:
           <template is="dom-repeat" items="[[workflows.entries]]" as="workflow">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <paper-card class="document-task">
-                <nuxeo-document-task document="[[document]]" workflow="[[workflow]]" task="[[task]]">
+                <div class="layout horizontal center task-header">
+                  <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+                  <div class="layout vertical flex">
+                    <span class="task-name">[[i18n(task.name)]]</span>
+                    <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+                  </div>
+                  <paper-dialog id="graphDialog" with-backdrop>
+                    <div class="graph-container">
+                      <nuxeo-workflow-graph workflow="[[workflow]]"></nuxeo-workflow-graph>
+                    </div>
+                    <paper-button noink dialog-dismiss>Close</paper-button>
+                  </paper-dialog>
+                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">View Graph</paper-button>
+                </div>
+                <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
                   <div class="buttons">
                     <paper-button noink on-tap="_cancelProcessTask">Process later</paper-button>
                   </div>
@@ -210,7 +275,7 @@ Contributors:
 
               <div class="ctn">
                 <template is="dom-if" if="[[hasWorkflowRunning]]">
-                  <span class="tag">
+                  <span class="tag process-tag">
                     Process running
                   </span>
                 </template>
@@ -312,7 +377,7 @@ Contributors:
         },
 
         listeners: {
-          'taskCompleted': '_taskCompleted'
+          'workflowTaskProcessed': '_taskCompleted'
         },
 
         ready: function() {
@@ -377,6 +442,10 @@ Contributors:
           this.$.workflows.get();
           this._fetchTasks();
           this.isProcessingTask = false;
+        },
+
+        _toggleGraphDialog: function() {
+          this.$$('#graphDialog').toggle();
         },
 
         _hasCollections: function() {

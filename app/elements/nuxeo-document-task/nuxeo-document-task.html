@@ -49,39 +49,13 @@ Contributors:
         --iron-icon-width: .9rem;
       }
 
-      iron-icon.task-name-icon {
-        border-radius: 50px;
-        background-color: var(--nuxeo-secondary-color);
-        color: white;
-        padding: .4em;
-        margin-right: .5em;
-        @apply(--nuxeo-document-task-icon-theme);
-      }
-
       iron-icon.tag-icon {
         margin-right: .2em;
-      }
-
-      .task-header {
-        background-color: #fafcfd;
-        border-bottom: 1px solid #e5e5e5;
-        color: var(--nuxeo-secondary-color);
-        padding: 1em;
       }
 
       .task-body {
         padding: .5em 1.5em;
         overflow-y: auto;
-      }
-
-      .task-name {
-        font-weight: bold;
-      }
-
-      .workflow-name {
-        font-size: .8em;
-        font-weight: 300;
-        margin-top: .5em;
       }
 
       .task-directive {
@@ -103,48 +77,9 @@ Contributors:
         margin-bottom: 0.5em;
         padding: .5em 0;
       }
-
-      #graphDialog paper-button {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-      }
-
-      .graph-container {
-        padding: 0.5rem 2rem;
-        position: relative;
-      }
-
-      .open-graph {
-        font-size: 0.8rem;
-      }
-
-      nuxeo-workflow-graph {
-        position: relative;
-      }
-
     </style>
 
-    <nuxeo-resource id="taskRequest"
-                    path="/task/[[task.id]]/[[action]]"
-                    data="{{taskData}}"
-                    response="{{taskResponse}}">
-    </nuxeo-resource>
-
-    <div class="layout horizontal center task-header">
-      <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
-      <div class="layout vertical flex">
-        <span class="task-name">[[i18n(task.name)]]</span>
-        <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
-      </div>
-      <paper-dialog id="graphDialog" with-backdrop>
-        <div class="graph-container">
-          <nuxeo-workflow-graph workflow="[[workflow]]"></nuxeo-workflow-graph>
-        </div>
-        <paper-button noink dialog-dismiss>Close</paper-button>
-      </paper-dialog>
-      <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">View Graph</paper-button>
-    </div>
+    <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
     <div class="action-container layout vertical task-body">
       <paper-tabs selected="{{_selectedTab}}" attr-for-selected="name">
@@ -213,14 +148,11 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-task',
         properties: {
-          document: Object,
-
           workflow: Object,
 
           task: {
             type: Object,
-            observer: '_taskChanged',
-            notify: true
+            observer: '_taskChanged'
           },
 
           _currentTaskElement: Object,
@@ -230,25 +162,16 @@ Contributors:
             value: 'resolution'
           }
         },
-        listeners: {
-          'response': '_handleResponse'
-        },
-
-        _handleResponse: function(e) {
-          if (e.detail.response['entity-type'] &&
-              e.detail.response['entity-type'] === 'task' &&
-              e.detail.response.id === this.task.id) {
-            this.fire('taskCompleted');
-          }
-        },
 
         /**
          * Returns the name for the current layout element
          */
         _layoutFor: function(task) {
-          // lower case first letter to avoid extra dash in camelToDashCase
-          var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
-          return ['nuxeo', 'document', 'task', Polymer.CaseMap.camelToDashCase(node)].join('-');
+          if (task) {
+            // lower case first letter to avoid extra dash in camelToDashCase
+            var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
+            return ['nuxeo', 'document', 'task', Polymer.CaseMap.camelToDashCase(node)].join('-');
+          }
         },
 
         /**
@@ -296,10 +219,6 @@ Contributors:
           return moment(date).format('MMMM D, YYYY');
         },
 
-        _toggleGraphDialog: function() {
-          this.$.graphDialog.toggle();
-        },
-
         _processTask: function(e) {
           this.action = e.target.dataset.args;
           this.taskData = this._currentTaskElement.genTaskData(this.action);
@@ -309,7 +228,8 @@ Contributors:
         },
 
         _actorIcon: function(actor) {
-          return actor.startsWith('user:') ? 'social:person' : 'social:people';
+          var split = actor.split(':');
+          return (split.length === 1 || split[0] === 'user:') ? 'social:person' : 'social:people';
         },
 
         _actorName: function(actor) {
@@ -319,6 +239,9 @@ Contributors:
         _actorHref: function(actor) {
           // user:name or group:name
           var split = actor.split(':');
+          if (split.length === 1) {
+            return '/user/' + split[0];
+          }
           return '/' + split[0] + '/' + split[1];
         }
       });

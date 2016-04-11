@@ -51,9 +51,11 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function(document) {
-          // lower case first letter to avoid extra dash in camelToDashCase
-          var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
-          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'view'].join('-');
+          if (document) {
+            // lower case first letter to avoid extra dash in camelToDashCase
+            var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
+            return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'view'].join('-');
+          }
         },
 
         /**

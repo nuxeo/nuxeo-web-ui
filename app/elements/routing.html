@@ -96,6 +96,11 @@ Contributors:
       app.page = 'search';
     });
 
+    page('/tasks', function() {
+      app.page = 'tasks';
+      app.$$('#tasks-dashboard').current = null;
+    });
+
     // add #! before urls
     page({
       hashbang: true

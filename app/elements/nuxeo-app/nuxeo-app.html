@@ -96,6 +96,12 @@ Contributors:
         margin-bottom: 0;
       }
 
+      #sidebar .tasks .link {
+        font-size: 1.2em;
+        padding: 1em 1em 2em 1em;
+        text-align: center;
+      }
+
       #sidebar .profile .item:last-of-type {
         @apply(--layout-flex);
         @apply(--layout-vertical);
@@ -155,10 +161,13 @@ Contributors:
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
                     response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions"
-                    headers='{"X-NXfetch.document": "lock"}'></nuxeo-document>
+                    headers='{"X-NXfetch.document": "lock"}'>
+    </nuxeo-document>
     <nuxeo-document id="idResolver"
                     doc-id="[[linkDocId]]"
-                    response="{{resolvedDocument}}"></nuxeo-document>
+                    response="{{resolvedDocument}}">
+    </nuxeo-document>
+    <nuxeo-resource id="tasks" path="/task"></nuxeo-resource>
 
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
@@ -211,8 +220,11 @@ Contributors:
                 <div class="header ellipsis">
                   <h1>Tasks</h1>
                 </div>
-                <div class="content">
-                  <nuxeo-task-widget username="Administrator" count="{{taskCount}}"></nuxeo-task-widget>
+                <div class="content layout vertical">
+                  <nuxeo-task-widget username="Administrator" class="flex"></nuxeo-task-widget>
+                  <div class="link">
+                    <a href="{{baseUrl}}tasks">» view Tasks Dashboard</a>
+                  </div>
                 </div>
               </section>
 
@@ -308,6 +320,9 @@ Contributors:
             <nuxeo-search-results name="search" on-document-clicked="_navigateFromSearch">
             </nuxeo-search-results>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
+            <div name="tasks">
+              <nuxeo-tasks id="tasks-dashboard" tasks="[[tasks]]"></nuxeo-tasks>
+            </div>
           </iron-pages>
         </div>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
@@ -339,6 +354,11 @@ Contributors:
             observer: '_navigate'
           },
 
+          username: {
+            type: String,
+            value: 'Administrator'
+          },
+
           selectedTab: {
             type: String,
             observer: '_observeSelectedTab'
@@ -355,6 +375,8 @@ Contributors:
           linkDocId: String,
 
           entity: Object,
+
+          tasks: Array,
 
           taskCount: Number,
 
@@ -395,11 +417,14 @@ Contributors:
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup',
-          'resetSearchResults': '_resetSearchResults'
+          'resetSearchResults': '_resetSearchResults',
+          'workflowStarted': '_fetchTasks',
+          'workflowTaskProcessed': '_fetchTasks'
         },
 
         ready: function() {
           this.clipboard = this.$.clipboard;
+          this._fetchTasks();
         },
 
         refresh: function() {
@@ -500,8 +525,22 @@ Contributors:
           if (this.selectedTab === 'search') {
             this.page = this.selectedTab;
           }
-        }
+        },
 
+        _fetchTasks: function() {
+          // hack to fetch tasks with user prefix and without prefix
+          // some tasks are prefixed, to be reviewed later
+          this._tmpTasks = [];
+          this.$.tasks.params = {'userId': this.username};
+          this.$.tasks.get().then(function(response) {
+            this._tmpTasks = response.entries;
+            this.$.tasks.params = {'userId': 'user:' + this.username};
+            this.$.tasks.get().then(function(response) {
+              this.tasks = this._tmpTasks.concat(response.entries);
+              this.taskCount = this.tasks.length;
+            }.bind(this));
+          }.bind(this));
+        },
       });
     })();
   </script>
