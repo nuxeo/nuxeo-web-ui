@@ -121,9 +121,9 @@ Contributors:
             [[i18n(task.directive)]]
           </span>
 
-          <div id="task-container">
+          <form id="task-container" is="iron-form">
             <!--dynamically loaded via _taskChanged-->
-          </div>
+          </form>
 
           <div class="task-buttons layout horizontal center">
             <content select=".buttons"></content>
@@ -220,11 +220,13 @@ Contributors:
         },
 
         _processTask: function(e) {
-          this.action = e.target.dataset.args;
-          this.taskData = this._currentTaskElement.genTaskData(this.action);
-          this.$.taskRequest.put().then(function() {
-            this.fire('workflowTaskProcessed');
-          }.bind(this));
+          if (this.$['task-container'].validate()) {
+            this.action = e.target.dataset.args;
+            this.taskData = this._currentTaskElement.genTaskData(this.action);
+            this.$.taskRequest.put().then(function() {
+              this.fire('workflowTaskProcessed');
+            }.bind(this));
+          }
         },
 
         _actorIcon: function(actor) {
