@@ -490,15 +490,14 @@ Contributors:
         },
 
         _toggleDrawer: function(e) {
-          if (!this.drawerOpened) {
+          if (this._selected === e.detail.selected && this.drawerOpened) {
+            this.drawerWidth = '60px';
+            this.drawerOpened = false;
+          } else {
             this.drawerWidth = '350px';
             this.$.sidebar.style.width = '100%';
-          } else {
-            if (this._selected === e.detail.selected) {
-              this.drawerWidth = '60px';
-            }
+            this.drawerOpened = true;
           }
-          this.drawerOpened = !this.drawerOpened;
           this._selected = e.detail.selected;
         },
 
