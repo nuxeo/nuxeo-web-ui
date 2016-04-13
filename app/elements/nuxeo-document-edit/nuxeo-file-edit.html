@@ -26,7 +26,7 @@ Contributors:
   <template>
     <style is="custom-style" include="shared-styles">
       :host {
-       display: block;
+        display: block;
       }
 
       .row {
@@ -76,54 +76,43 @@ Contributors:
       }
     </style>
 
-    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <div class="row layout horizontal">
-     <div class="label-container">
-       <label>Title</label>
-       <span class="required">*</span>
-     </div>
-     <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
+      <div class="label-container">
+        <label>Title</label>
+        <span class="required">*</span>
+      </div>
+      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
     </div>
 
     <div class="row layout horizontal">
-     <div class="label-container">
-       <label>Description</label>
-     </div>
-     <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+      <div class="label-container">
+        <label>Description</label>
+      </div>
+      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <div class="row layout horizontal">
-     <div class="label-container">
-       <label>Content</label>
-     </div>
-     <paper-radio-group class="layout vertical">
-       <template is="dom-if" if="[[new]]">
-         <paper-radio-button name="none">None</paper-radio-button>
-       </template>
-       <template is="dom-if" if="[[!new]]">
-         <!-- keep choice -->
-         <div class="layout horizontal radio-container">
-           <paper-radio-button name="keep">Keep</paper-radio-button>
-           <img src="[[_icon(document)]]" alt="[[document.properties.file:content.mime-type]]"/>
-           <a href="[[document.properties.file:content.data]]">[[document.properties.file:content.name]]</a>
-         </div>
-       </template>
-       <!-- upload choice -->
-       <div class="layout horizontal radio-container">
-         <paper-radio-button name="upload">Upload</paper-radio-button>
-         <span>[[document.properties.file:content]]</span>
-         <nuxeo-file value="{{document.properties.file:content}}"></nuxeo-file>
-       </div>
-       <!-- delete choice -->
-       <template is="dom-if" if="[[!new]]">
-         <paper-radio-button name="delete">Delete</paper-radio-button>
-       </template>
-     </paper-radio-group>
-    </div>
+
+    <template is="dom-if" if="[[new]]">
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>Content</label>
+        </div>
+        <div class="vertical layout">
+          <paper-radio-group class="layout vertical" selected="none">
+            <!-- none choice -->
+            <paper-radio-button name="none" on-tap="_noneSelected">None</paper-radio-button>
+            <!-- upload choice -->
+            <paper-radio-button name="upload"  on-tap="_uploadSelected">Upload</paper-radio-button>
+          </paper-radio-group>
+          <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
+        </div>
+      </div>
+    </template>
 
     <template is="dom-if" if="[[!new]]">
-     <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
     </template>
   </template>
   <script>
@@ -147,6 +136,14 @@ Contributors:
         _icon: function() {
           var url = this.$.nxcon.url;
           return url + this.document.properties['common:icon'];
+        },
+
+        _noneSelected: function() {
+          this.document.properties['file:content'] = null;
+        },
+
+        _uploadSelected: function() {
+          this.document.properties['file:content'] = this.$$('#nxFile').value;
         }
 
       });
