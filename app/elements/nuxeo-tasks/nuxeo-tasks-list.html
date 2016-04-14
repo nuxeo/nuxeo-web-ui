@@ -106,7 +106,7 @@ Contributors:
                   <span class="task-property">On  </span>
                   <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
                     <nuxeo-document auto doc-id="[[doc.id]]" response="{{task.doc}}"></nuxeo-document>
-                    <a href="[[_href(task.doc)]]" class="docTitle">[[task.doc.properties.dc:title]]</a>
+                    <a href="[[_href(task.doc)]]" class="docTitle ellipsis">[[task.doc.properties.dc:title]]</a>
                   </template>
                 </div>
                 <div class="horizontal layout center">
