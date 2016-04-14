@@ -325,7 +325,7 @@ Contributors:
             </nuxeo-search-results>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
             <div name="tasks">
-              <nuxeo-tasks id="tasks-dashboard" tasks="[[tasks]]"></nuxeo-tasks>
+              <nuxeo-tasks id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
             </div>
           </iron-pages>
         </div>
@@ -399,6 +399,10 @@ Contributors:
             value: function() {
               return document.body;
             }
+          },
+
+          currentTask: {
+            type: Object
           }
         },
 
@@ -423,7 +427,8 @@ Contributors:
           'manageGroup': '_handleUGMmanageGroup',
           'resetSearchResults': '_resetSearchResults',
           'workflowStarted': '_fetchTasks',
-          'workflowTaskProcessed': '_fetchTasks'
+          'workflowTaskProcessed': '_fetchTasks',
+          'taskChanged': '_onTaskChanged'
         },
 
         ready: function() {
@@ -544,6 +549,11 @@ Contributors:
             }.bind(this));
           }.bind(this));
         },
+
+        _onTaskChanged: function(e) {
+          this.page = 'tasks';
+          this.currentTask = e.detail.task;
+        }
       });
     })();
   </script>

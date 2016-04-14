@@ -263,6 +263,12 @@ Contributors:
             return;
           }
 
+          // clear when re-rendering
+          while (this.$.graph.firstChild) {
+            this.$.graph.removeChild(this.$.graph.firstChild);
+          }
+          jsPlumb.reset();
+
           // XXX: build these in the template
           data.nodes.forEach(function(node) {
             var element = this.create('div', {id: node.id, innerHTML: node.title});
