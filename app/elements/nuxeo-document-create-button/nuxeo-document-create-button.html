@@ -25,21 +25,13 @@ Contributors:
 
   <template>
     <style is="custom-style" include="shared-styles">
-      paper-icon-button {
+      paper-fab {
         position: absolute;
-        bottom: 45px;
-        right: 24px;
-        width: 55.5px;
-        height: 55.5px;
+        bottom: 32px;
+        right: 32px;
         color: #ffffff;
-        background-color: var(--nuxeo-primary-color);
-        border-radius: 50%;
-        padding: 12px;
-        transition: all 0.2s linear;
-        --paper-icon-button-hover: {
-           box-shadow: 0px 5px 20px 0px rgba(0,0,0,0.45);
-           transition: all 0.2s ease-out;
-         }
+        --paper-fab-background: var(--nuxeo-primary-color);
+        --paper-fab-keyboard-focus-background: var(--nuxeo-secondary-color);
         @apply(--nuxeo-document-create-button);
       }
 
@@ -62,9 +54,8 @@ Contributors:
                     data="[[document]]"
                     response="{{createResponse}}"></nuxeo-document>
 
-    <paper-icon-button icon="editor:mode-edit"
-                       title="Create Document"
-                       on-tap="_toggleDialog"></paper-icon-button>
+    <paper-fab id="createBtn" icon="add" on-tap="_toggleDialog"></paper-fab>
+    <paper-tooltip for="createBtn" position="left">Create a New Document</paper-tooltip>
 
     <paper-dialog id="createDocDialog"
                   modal

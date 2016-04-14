@@ -183,10 +183,6 @@ Contributors:
 
     <paper-toast id="toast"></paper-toast>
 
-    <template is="dom-if" if="[[canCreateDocuments]]">
-      <nuxeo-document-create-button parent="[[document]]"></nuxeo-document-create-button>
-    </template>
-
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
   </template>
   <script>
@@ -221,10 +217,6 @@ Contributors:
           pageCount: {
             type: Number,
             value: 1
-          },
-          canCreateDocuments: {
-            type: Boolean,
-            computed: '_canCreateDocuments(document)'
           },
           isNextPageAvailable: {
             type: Boolean,
@@ -314,10 +306,6 @@ Contributors:
         _toast: function(msg) {
           this.$.toast.text = msg;
           this.$.toast.open();
-        },
-
-        _canCreateDocuments: function() {
-          return !!document;
         },
 
         _handleDocumentCreated: function() {
