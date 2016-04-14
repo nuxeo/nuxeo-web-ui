@@ -1,0 +1,211 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-tasks-list`
+@group Nuxeo UI
+@element nuxeo-tasks-list
+-->
+
+<dom-module id="nuxeo-tasks-list">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .task-box {
+        line-height: 155%;
+      }
+
+      .task-box + .task-box {
+        border-top: var(--nuxeo-border);
+      }
+
+      iron-icon.task-name-icon {
+        --iron-icon-height: .9em;
+        --iron-icon-width: .9em;
+        border-radius: 50px;
+        background-color: var(--nuxeo-secondary-color);
+        color: white;
+        padding: .4em;
+      }
+
+      .task-name {
+        font-weight: 700;
+        margin-left: .5em;
+      }
+
+      .task-detail {
+        margin-left: 2.2em;
+      }
+
+      .task-property {
+        color: var(--nuxeo-text-light);
+      }
+
+      .taskDoc .docTitle, .initiator {
+        margin-left: 4px;
+        margin-right: 4px;
+      }
+
+      .due-date .date {
+        color: var(--nuxeo-warn-text);
+      }
+
+      .item {
+        cursor: pointer;
+        outline: none;
+      }
+
+      .item:focus,
+      .item.selected:focus {
+        outline: 0;
+        background-color: #ddd;
+      }
+
+      .item.selected {
+        background-color: var(--google-grey-300);
+      }
+    </style>
+
+    <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
+      <span class="empty">There are no tasks to show.</span>
+    </div>
+    <div hidden$="[[_hidden(tasks)]]">
+      <iron-list id="list" items="[[tasks]]" as="task" selection-enabled selected-item="{{_selection}}">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="task-box vertical layout">
+              <nuxeo-resource auto path="/workflow/[[task.workflowInstanceId]]" response="{{workflow}}"></nuxeo-resource>
+              <div class="task-info horizontal layout center">
+                <div class="vertical layout center">
+                  <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
+                </div>
+                <span class="task-name">[[i18n(task.name)]]</span>
+              </div>
+              <div class="task-detail">
+                <div class="taskDoc horizontal layout center">
+                  <span class="task-property">On  </span>
+                  <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
+                    <nuxeo-document auto doc-id="[[doc.id]]" response="{{task.doc}}"></nuxeo-document>
+                    <a href="[[_href(task.doc)]]" class="docTitle">[[task.doc.properties.dc:title]]</a>
+                  </template>
+                </div>
+                <div class="horizontal layout center">
+                  <span class="due-date task-property">Due date
+                  <span class="date">[[_formatDate(task.dueDate)]]</span></span>
+                </div>
+                <div class="layout center">
+                  <span class="task-property">Initiated by </span>
+                  <a class="tag user initiator" href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-tasks-list',
+
+        properties: {
+          tasks: Array,
+
+          current: {
+            type: Object,
+            observer: '_currentChanged'
+          },
+
+          _selection: {
+            type: Object,
+            observer: '_selectionChanged'
+          },
+        },
+
+        ready: function() {
+          this.$.list.selectQueuePrevious = function() {
+            this._didMoveUp();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.list.selectQueueNext = function() {
+            this._didMoveDown();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.list.toggleSelectionForFocusedItem = function() {
+            this.debounce('toggleSelectionForFocusedItem', function() {
+              var model = this._focusedItem._templateInstance;
+              if (model) {
+                this.toggleSelectionForItem(model[this.as]);
+              }
+            }.bind(this), 300);
+          };
+          this.$.list.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+          this.$.list.addOwnKeyBinding('k', 'selectQueuePrevious');
+          this.$.list.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+          this.$.list.addOwnKeyBinding('j', 'selectQueueNext');
+        },
+
+        _selectionChanged: function() {
+          if (this._selection) {
+            this.fire('taskChanged', {task: this._selection});
+          }
+        },
+
+        _currentChanged: function(newVal, oldVal) {
+          if (newVal) {
+            this.$.list.selectItem(newVal);
+          } else {
+            if (oldVal) {
+              this.$.list.deselectItem(oldVal);
+            }
+          }
+        },
+
+        _hidden: function(tasks) {
+          return tasks && tasks.length === 0;
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _href: function(doc) {
+          if (doc) {
+            return page.base() + '/browse' + doc.path;
+          }
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'item';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        }
+      });
+    })();
+  </script>
+</dom-module>

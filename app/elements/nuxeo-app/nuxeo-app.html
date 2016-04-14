@@ -128,6 +128,10 @@ Contributors:
         font-size: .9em;
       }
 
+      nuxeo-tasks-list {
+        font-size: .9em;
+      }
+
       .side-nav {
         padding: 60px 0;
         overflow: auto;
@@ -221,7 +225,7 @@ Contributors:
                   <h1>Tasks</h1>
                 </div>
                 <div class="content layout vertical">
-                  <nuxeo-task-widget username="Administrator" class="flex"></nuxeo-task-widget>
+                  <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
                     <a href="{{baseUrl}}tasks">» view Tasks Dashboard</a>
                   </div>
