@@ -178,7 +178,9 @@ Contributors:
           if (newVal) {
             this.$.list.selectItem(newVal);
           } else {
-            if (oldVal) {
+            var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
+            // make sure this task still exists to avoid iron-list exceptions
+            if (_exists) {
               this.$.list.deselectItem(oldVal);
             }
           }
