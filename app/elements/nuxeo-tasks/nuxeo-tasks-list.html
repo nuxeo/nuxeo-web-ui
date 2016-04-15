@@ -94,7 +94,6 @@ Contributors:
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="task-box vertical layout">
-              <nuxeo-resource auto path="/workflow/[[task.workflowInstanceId]]" response="{{workflow}}"></nuxeo-resource>
               <div class="task-info horizontal layout center">
                 <div class="vertical layout center">
                   <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
@@ -104,10 +103,7 @@ Contributors:
               <div class="task-detail">
                 <div class="taskDoc horizontal layout center">
                   <span class="task-property">On  </span>
-                  <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
-                    <nuxeo-document auto doc-id="[[doc.id]]" response="{{task.doc}}"></nuxeo-document>
-                    <a href="[[_href(task.doc)]]" class="docTitle ellipsis">[[task.doc.properties.dc:title]]</a>
-                  </template>
+                  <a href="[[_href(task.document)]]" class="docTitle ellipsis">[[task.document.properties.dc:title]]</a>
                 </div>
                 <div class="horizontal layout center">
                   <span class="due-date task-property">Due date
@@ -115,7 +111,7 @@ Contributors:
                 </div>
                 <div class="layout center">
                   <span class="task-property">Initiated by </span>
-                  <a class="tag user initiator" href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
+                  <a class="tag user initiator" href="/user/[[task.workflow.initiator]]">[[task.workflow.initiator]]</a>
                 </div>
               </div>
             </div>
@@ -142,7 +138,7 @@ Contributors:
           _selection: {
             type: Object,
             observer: '_selectionChanged'
-          },
+          }
         },
 
         ready: function() {

@@ -546,7 +546,27 @@ Contributors:
             this.$.tasks.get().then(function(response) {
               this.tasks = this._tmpTasks.concat(response.entries);
               this.taskCount = this.tasks.length;
+              for (var idx = 0; idx < this.tasks.length; idx++) {
+                this._fetchTaskDocument(idx);
+                this._fetchTaskWorkflow(idx);
+              }
             }.bind(this));
+          }.bind(this));
+        },
+
+        _fetchTaskDocument: function(idx) {
+          this._docRequest = document.createElement('nuxeo-document');
+          this._docRequest.docId = this.tasks[idx].targetDocumentIds[0].id;
+          return this._docRequest.get().then(function(doc) {
+            this.set('tasks.' + idx + '.document', doc);
+          }.bind(this));
+        },
+
+        _fetchTaskWorkflow: function(idx) {
+          this._wfRequest = document.createElement('nuxeo-resource');
+          this._wfRequest.path = '/workflow/' + this.tasks[idx].workflowInstanceId;
+          return this._wfRequest.get().then(function(workflow) {
+            this.set('tasks.' + idx + '.workflow', workflow);
           }.bind(this));
         },
 

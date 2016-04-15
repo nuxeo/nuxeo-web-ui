@@ -213,10 +213,6 @@ Contributors:
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <div class="task-box layout horizontal">
-                <nuxeo-resource auto
-                                path="/workflow/[[task.workflowInstanceId]]"
-                                response="{{workflow}}">
-                </nuxeo-resource>
                 <div class="layout vertical flex-4">
                   <div class="layout horizontal">
                     <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
@@ -225,23 +221,17 @@ Contributors:
                         <span class="task-name">[[i18n(task.name)]]</span>
                         <span class="task-initiator">
                           From
-                          <a class="tag user initiator" href="/user/[[workflow.initiator]]">
+                          <a class="tag user initiator" href="/user/[[task.workflow.initiator]]">
                             <iron-icon icon="social:person" class="tag-icon"></iron-icon>
-                            [[workflow.initiator]]
+                            [[task.workflow.initiator]]
                           </a>
                         </span>
                       </div>
                       <span class="task-directive">[[i18n(task.directive)]]</span>
-                      <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
-                        <nuxeo-document auto
-                                        doc-id="[[doc.id]]"
-                                        response="{{task.doc}}">
-                        </nuxeo-document>
-                        <span class="task-document">
-                          <iron-icon icon="icons:description"></iron-icon>
-                          <a href="[[_href(task.doc)]]">[[task.doc.properties.dc:title]]</a>
-                        </span>
-                      </template>
+                      <span class="task-document">
+                        <iron-icon icon="icons:description"></iron-icon>
+                        <a href="[[_href(task.document)]]">[[task.document.properties.dc:title]]</a>
+                      </span>
                     </div>
                   </div>
                 </div>
