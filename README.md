@@ -1,6 +1,6 @@
 ## Nuxeo Web UI
 
-> Ongoing work to build a new Nuxeo Web UI
+> Ongoing work to build a new Nuxeo Web UI. See [demo](http://nuxeo.github.io/nuxeo-web-ui/).
 
 ## Getting Started
 
