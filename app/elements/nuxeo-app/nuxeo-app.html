@@ -333,7 +333,7 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <nuxeo-document-create-button parent="[[currentDocument]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-button parent="[[currentParent]]"></nuxeo-document-create-button>
 
     <iron-a11y-keys
       id="keys"
@@ -376,6 +376,7 @@ Contributors:
             type: Object,
             observer: '_documentChanged'
           },
+          currentParent: Object,
           docPath: String,
           docAction: String,
           linkDocId: String,
@@ -497,6 +498,8 @@ Contributors:
         _documentChanged: function() {
           if (this.currentDocument) {
             this.$.recent.add(this.currentDocument);
+            this.currentParent = this.currentDocument.facets.indexOf('Folderish') > -1 ? this.currentDocument :
+              this.currentDocument.contextParameters.breadcrumb.entries.slice(-2,-1)[0];
           }
         },
 

@@ -35,6 +35,12 @@ Contributors:
         @apply(--nuxeo-document-create-button);
       }
 
+      nuxeo-path-suggestion {
+      --nuxeo-path-suggestion-results: {
+         z-index: 200;
+       }
+      }
+
       .container {
         width: 640px;
       }
@@ -47,10 +53,15 @@ Contributors:
         overflow-y: auto;
         padding-top: 16px;
       }
+
+      .in {
+        padding-right: 8px;
+        font-weight: bold;
+      }
     </style>
 
     <nuxeo-document id="docRequest"
-                    doc-path="[[parent.path]]"
+                    doc-path="[[targetPath]]"
                     data="[[document]]"
                     response="{{createResponse}}"></nuxeo-document>
 
@@ -58,17 +69,27 @@ Contributors:
     <paper-tooltip for="createBtn" position="left">Create a New Document</paper-tooltip>
 
     <paper-dialog id="createDocDialog"
+                  class="container vertical layout"
                   modal
-                  class="container vertical layout">
-      <div class="horizontal layout">
-        <h1>New document</h1>
-        <paper-dropdown-menu class="picker" label="Document type">
-          <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-            <template is="dom-repeat" items="[[documentTypes]]" as="type">
-              <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
+                  no-auto-focus>
+      <div class="vertical layout">
+        <div class="horizontal layout">
+          <h1>New document</h1>
+          <paper-dropdown-menu class="picker" label="Document type">
+            <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
+              <template is="dom-repeat" items="[[documentTypes]]" as="type">
+                <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+        </div>
+        <div class="horizontal layout center">
+          <span class="in">In:</span>
+          <nuxeo-path-suggestion class="flex"
+                                 id="pathSuggester"
+                                 value="{{targetPath}}"
+                                 no-label-float></nuxeo-path-suggestion>
+        </div>
       </div>
       <form is="iron-form"
             action="/"
@@ -95,6 +116,10 @@ Contributors:
         properties: {
           parent: {
             type: Object
+          },
+
+          targetPath: {
+            type: String
           },
 
           document: {
@@ -188,6 +213,7 @@ Contributors:
         _toggleDialog: function() {
           if (!this.$.createDocDialog.opened) {
             this._updateLayout();
+            this.targetPath = this.parent ? this.parent.path + '/' : '/default-domain/';
           }
           this.$.createDocDialog.toggle();
         },
