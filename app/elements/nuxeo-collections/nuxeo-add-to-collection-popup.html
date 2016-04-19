@@ -78,15 +78,15 @@ Contributors:
             <span class="required">*</span>
           </div>
           <nuxeo-select2 id="nxSelect"
-                         operation="Collection.Suggestion"
-                         min-chars="0"
-                         placeholder="Select a Collection..."
-                         value="{{collection}}"
-                         tagging="true"
-                         query-results-filter="[[resultsFilter]]"
-                         result-formatter="[[resultAndSelectionFormatter]]"
-                         selection-formatter="[[resultAndSelectionFormatter]]"
-                         new-entry-formatter="[[newEntryFormatter]]">
+             operation="Collection.Suggestion"
+             min-chars="0"
+             placeholder="Select a Collection..."
+             value="{{collection}}"
+             tagging="true"
+             query-results-filter="[[resultsFilter]]"
+             result-formatter="[[resultAndSelectionFormatter]]"
+             selection-formatter="[[resultAndSelectionFormatter]]"
+             new-entry-formatter="[[newEntryFormatter]]">
           </nuxeo-select2>
         </div>
         <div class="row layout horizontal" hidden$="{{!_isNew(collection)}}">
@@ -170,7 +170,7 @@ Contributors:
             'collection': this.collection
           };
           return op.execute().then(function() {
-            this.fire('documentAddedToCollection');
+            this.fire('addedToCollection', {docId: this.document.uid, collectionId: this.collection});
             this._reset();
           }.bind(this));
         },
@@ -201,7 +201,12 @@ Contributors:
         _reset: function() {
           this.collection = '';
           this.description = '';
+        },
+
+        focus: function() {
+          jQuery(this.$.nxSelect.$.select2).select2('open');
         }
+
       });
     })();
   </script>

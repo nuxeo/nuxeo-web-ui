@@ -41,43 +41,23 @@ Contributors:
       }
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-operation auto
-                     op="User.GetCollections"
-                     response="{{collections}}"
-                     params='{"searchTerm":"%"}'>
-    </nuxeo-operation>
+    <nuxeo-page-provider id="provider" auto
+       provider="user_collections"
+       current-page="{{collections}}"
+       params='{"searchTerm":"%","user":"$currentUser"}'
+       sort='{"dc:modified":"desc"}'>
+    </nuxeo-page-provider>
     <template is="dom-if" if="[[!_isEmpty(collections)]]">
-      <template is="dom-repeat" items="[[collections.entries]]" as="collection">
-        <div class="collection">
-          <nuxeo-operation auto
-                           op="Collection.GetDocumentsFromCollection"
-                           input="[[collection.uid]]"
-                           enrichers="thumbnail"
-                           response="{{collection.docs}}">
-          </nuxeo-operation>
-          <template is="dom-if" if="[[!_isEmpty(collection.docs)]]">
-            <div class="item">
-              <div class="title">
-                <iron-icon icon="icons:book"></iron-icon>
-                <span>[[collection.title]]</span>
-              </div>
-              <div>
-                <template is="dom-repeat" items="[[collection.docs.entries]]" as="doc">
-                  <a href="[[_href(doc)]]">
-                    <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center"></iron-image>
-                  </a>
-                  <paper-tooltip animation-delay="0" offset="0">[[doc.title]]</paper-tooltip>
-                </template>
-              </div>
-            </div>
-          </template>
-        </div>
+      <template is="dom-repeat" items="[[collections]]" as="collection">
+        <nuxeo-collection-menu-item id="[[collection.uid]]" collection="[[collection]]">
+        </nuxeo-collection-menu-item>
       </template>
     </template>
+
     <template is="dom-if" if="[[_isEmpty(collections)]]">
       <span class="empty">No collections.</span>
     </template>
+
   </template>
   <script>
     Polymer({
@@ -89,22 +69,19 @@ Contributors:
         }
       },
 
-      _href: function(doc) {
-        return page.base() + '/browse' + doc.path;
+      _isEmpty: function(items) {
+        return items && items.length === 0;
       },
 
-      _thumbnail: function(doc) {
-        if (doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
-        } else {
-          var baseUrl = this.$.nxcon.url;
-          return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
-        }
+      ready: function() {
+        window.addEventListener('addedToCollection', function() {
+          this.$.provider.fetch();
+        }.bind(this));
+        window.addEventListener('removedFromCollection', function() {
+          this.$.provider.fetch();
+        }.bind(this));
       },
 
-      _isEmpty: function(docs) {
-        return docs && docs.entries.length === 0;
-      }
     });
   </script>
 </dom-module>

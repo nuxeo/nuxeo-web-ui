@@ -195,7 +195,8 @@ Contributors:
               </paper-dialog>
             </template>
 
-            <paper-dialog id="collectionDialog" modal on-iron-overlay-closed="_resetCollectionPopup" no-auto-focus>
+            <paper-dialog id="collectionDialog" modal on-iron-overlay-closed="_resetCollectionPopup"
+              on-iron-overlay-opened="_focusCollectionPopup" no-auto-focus>
               <h1>Add to Collection</h1>
               <nuxeo-add-to-collection-popup
                 document="[[document]]"
@@ -267,7 +268,8 @@ Contributors:
           'permissions.acecreated': '_documentUpdated',
           'permissions.aceupdated': '_documentUpdated',
           'permissions.acedeleted': '_documentUpdated',
-          'documentAddedToCollection': '_documentAddedToCollection'
+          'addedToCollection': '_documentAddedToCollection',
+          'removedFromCollection': '_documentRemovedFromCollection'
         },
 
         observers: [
@@ -391,9 +393,19 @@ Contributors:
           this._documentUpdated();
         },
 
+        _documentRemovedFromCollection: function() {
+          this._toast('Document removed from Collection.');
+          this._documentUpdated();
+        },
+
         _resetCollectionPopup: function() {
           this.$$('#addToCollection')._reset();
+        },
+
+        _focusCollectionPopup: function() {
+          this.$$('#addToCollection').focus();
         }
+
       });
     })();
   </script>

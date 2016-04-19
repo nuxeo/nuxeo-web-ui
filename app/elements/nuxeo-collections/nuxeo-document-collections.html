@@ -40,9 +40,9 @@ Contributors:
       }
     </style>
 
-    <nuxeo-page-provider auto
+    <nuxeo-page-provider id="provider" auto
                          page-size="10"
-                         query="[[query(document.properties.collectionMember:collectionIds)]]"
+                         query="[[query(document)]]"
                          current-page="{{collections}}">
     </nuxeo-page-provider>
 
@@ -68,13 +68,10 @@ Contributors:
         document: Object
       },
 
-      query: function(entries) {
-        if (entries && entries.length > 0) {
-          var values = entries.map(function(entry) {
-            return '\'' + entry + '\'';
-          }).join(',');
-          return 'select * from Document WHERE ecm:uuid IN (' + values + ')';
-        }
+      query: function(doc) {
+        return 'select * from Collection WHERE collection:documentIds/* = "' +
+          doc.uid +
+          '" AND  ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != "deleted"';
       },
 
       remove: function(evt) {
@@ -85,9 +82,23 @@ Contributors:
         op.execute().then(function() {
           this.$.toast.text = 'Document removed from Collection.';
           this.$.toast.open();
-          this.fire('documentUpdated');
+          this.fire('removedFromCollection', {docId: this.document.uid, collectionId: evt.target.dataset.uid});
+        }.bind(this));
+      },
+
+      ready: function() {
+        window.addEventListener('addedToCollection', function(e) {
+          if (e.detail && e.detail.docId === this.document.uid) {
+            this.$.provider.fetch();
+          }
+        }.bind(this));
+        window.addEventListener('removedFromCollection', function(e) {
+          if (e.detail && e.detail.docId === this.document.uid) {
+            this.$.provider.fetch();
+          }
         }.bind(this));
       }
+
     });
   </script>
 </dom-module>
