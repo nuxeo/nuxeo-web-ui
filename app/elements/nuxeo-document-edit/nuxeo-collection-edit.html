@@ -1,0 +1,126 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+    Guillaume RENARD <grenard@nuxeo.com>
+-->
+
+<link rel="import" href="nuxeo-dublincore-edit.html">
+
+<!--
+`nuxeo-collection-edit`
+@group Nuxeo UI
+@element nuxeo-collection-edit
+-->
+<dom-module id="nuxeo-collection-edit">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      input,
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      img {
+        height: 16px;
+        width: 16px;
+      }
+
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
+      }
+
+      .radio-container {
+        padding: 0;
+      }
+
+      .radio-container > * {
+        margin-right: 10px;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>Title</label>
+        <span class="required">*</span>
+      </div>
+      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>Description</label>
+      </div>
+      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+    </div>
+
+    <template is="dom-if" if="[[!new]]">
+      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+    </template>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-collection-edit',
+
+        properties: {
+          document: {
+            type: Object
+          },
+
+          new: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        _icon: function() {
+          var url = this.$.nxcon.url;
+          return url + this.document.properties['common:icon'];
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

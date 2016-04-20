@@ -14,74 +14,411 @@ Lesser General Public License for more details.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
   Andre Justo <ajusto@nuxeo.com>
+  Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-collections`
-@group Nuxeo UI
-@element nuxeo-collections
--->
+ `nuxeo-collections`
+ @group Nuxeo UI
+ @element nuxeo-collections
+ -->
 <dom-module id="nuxeo-collections">
   <template>
     <style is="custom-style" include="shared-styles">
-      .title {
-        color: #213f7d;
-        margin-top: 10px;
+    :host {
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+      display: block;
+    }
+    .scrollThreshold {
+      /* scrollThreshold has to have
+         an explicit height else infinite
+         scrolling breaks */
+      height: calc(100vh - 61px);
+    }
+    .item {
+      cursor: pointer;
+      padding: 2px 10px;
+      border-bottom: 1px solid #DDD;
+    }
+    .item:focus,
+    .item.selected:focus {
+      outline: 0;
+      background-color: #ddd;
+    }
+    .item.selected {
+      color: var(--paper-blue-600);
+    }
+    .item.selected {
+      background-color: var(--google-grey-300);
+      border-bottom: 1px solid #ccc;
+    }
+    .nxicon {
+      height: 16px;
+      width: 16px;
+    }
+    .primary {
+      font-size: 16px;
+    }
+    .secondary {
+      font-size: 14px;
+    }
+    .dim {
+      color: gray;
+    }
+    .manualLoading {
+      color: var(--nuxeo-link-color);
+      text-align: center;
+    }
+
+    .manualLoading:hover {
+      cursor: pointer;
+      color: var(--nuxeo-link-hover-color);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    .collections {
+      height: calc(100vh - 61px);
+      overflow: auto;
+    }
+
+    .switch {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      padding: 16px;
+      z-index: 101;
+      border: var(--nuxeo-border);
+      background-color: var(--nuxeo-light-background);
+    }
+
+    .switch:hover {
+        background-color: var(--nuxeo-button-primary);
+        color: var(--nuxeo-button-primary-text);
       }
 
-      .item {
-        display: inline-block;
-      }
+    /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
+    .content {
+      font-size: .9rem;
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      height: calc(100vh - 61px);
+      width: 290px;
+    }
 
-      iron-image {
-        margin-top: 5px;
-        height: 40px;
-        width: 55px;
-      }
+    .header {
+      height: 59px;
+      background-color: var(--nuxeo-light-background);
+      border-bottom: var(--nuxeo-border);
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .header h1 {
+      color: var(--nuxeo-tag-text);
+      text-transform: uppercase;
+      font-size: 1rem;
+      margin: .1em .2em 0 1.1em;
+      font-weight: 500;
+    }
+    /* End TODO Lise :) */
+
     </style>
 
-    <nuxeo-page-provider id="provider" auto
-       provider="user_collections"
-       current-page="{{collections}}"
-       params='{"searchTerm":"%","user":"$currentUser"}'
-       sort='{"dc:modified":"desc"}'>
-    </nuxeo-page-provider>
-    <template is="dom-if" if="[[!_isEmpty(collections)]]">
-      <template is="dom-repeat" items="[[collections]]" as="collection">
-        <nuxeo-collection-menu-item id="[[collection.uid]]" collection="[[collection]]">
-        </nuxeo-collection-menu-item>
-      </template>
-    </template>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <template is="dom-if" if="[[_isEmpty(collections)]]">
-      <span class="empty">No collections.</span>
-    </template>
+    <div class="header ellipsis search-header">
+      <template is="dom-if" if="[[_isQueue]]">
+        <h1>[[i18n('collection_content', 'Collection content')]]</h1>
+        <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayFilters">
+        </paper-icon-button>
+        <paper-tooltip for="backToCollections">[[i18n('display_filter', 'Back to all collections')]]</paper-tooltip>
+      </template>
+      <template is="dom-if" if="[[!_isQueue]]">
+        <h1>[[i18n('collections', 'Collections')]]</h1>
+      </template>
+    </div>
+
+    <div class="content">
+
+      <div id="collections" class="collections" hidden$="{{_isQueue}}">
+        <nuxeo-page-provider id="collectionsProvider" auto
+           provider="user_collections"
+           page-size="40"
+           params='{"searchTerm":"%","user":"$currentUser"}'
+           sort='{"dc:modified":"desc"}'
+           on-update="_updateCollectionResults">
+        </nuxeo-page-provider>
+        <iron-scroll-threshold id="collectionsScrollThreshold"
+          lower-threshold="800"
+          class="scrollThreshold"
+          on-lower-threshold="_loadMoreCollections">
+          <iron-list id="collectionsList" items="[[collections]]"
+            selected-item="{{selectedCollection}}"
+            selection-enabled
+            scroll-target="collectionsScrollThreshold" as="collection">
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="primary ellipsis">
+                  <img class="nxicon" src="[[_icon(collection)]]">
+                  [[collection.title]]
+                </div>
+                <div class="secondary dim ellipsis">[[collection.description]]</div>
+              </div>
+            </template>
+          </iron-list>
+          <template is="dom-if" if="[[showMoreCollections]]">
+            <div class="item loading">
+              <div class="primary">
+                <paper-spinner class="nxicon" active="true"></paper-spinner>
+                [[i18n('loading_more', 'Loading more data')]]
+              </div>
+            </div>
+          </template>
+        </iron-scroll-threshold>
+      </div>
+
+      <div id="queue" hidden$="{{!_isQueue}}">
+        <nuxeo-page-provider id="memberProvider"
+           provider="default_content_collection"
+           enrichers="thumbnail"
+           is-next-page-available="{{isNextPageAvailable}}"
+           current-page-size="{{currentPageSize}}"
+           on-update="_updateMemberResults">
+        </nuxeo-page-provider>
+        <iron-scroll-threshold id="membersScrollThreshold"
+          class="scrollThreshold"
+          lower-threshold="800"
+          on-lower-threshold="_loadMoreMembers">
+          <iron-list id="membersList" items="[[members]]" selected-item="{{selectedMember}}" selection-enabled scroll-target="membersScrollThreshold" as="member">
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="primary ellipsis">
+                  <img class="nxicon" src="[[_icon(member)]]">
+                  [[member.title]]
+                </div>
+                <div class="secondary dim ellipsis">[[member.type]]</div>
+              </div>
+            </template>
+          </iron-list>
+          <template is="dom-if" if="[[showMoreMembers]]">
+            <div class="item loading">
+              <div class="primary">
+                <paper-spinner class="nxicon" active="true"></paper-spinner>
+                [[i18n('loading_more', 'Loading more data')]]
+              </div>
+            </div>
+          </template>
+        </iron-scroll-threshold>
+      </div>
+
+    </div>
 
   </template>
   <script>
-    Polymer({
-      is: 'nuxeo-collections',
-      properties: {
-        collections: {
-          type: Object,
-          notify: true
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-collections',
+
+        properties: {
+
+          selectedSearch: {
+            type: String,
+            value: 'faceted'
+          },
+
+          currentIndex: {
+            type: Number,
+            notify: true
+          },
+          _isQueue: {
+            type: Boolean,
+            value: false
+          },
+          collections: {
+            type: Array,
+            value: []
+          },
+          members: {
+            type: Array,
+            value: []
+          },
+          showMoreCollections: {
+            type: Object,
+            value: false
+          },
+          showMoreMembers: {
+            type: Object,
+            value: false
+          },
+          selectedCollection: {
+            type: Object,
+            observer: '_selectedCollectionChanged',
+            notify: true
+          },
+          selectedMember: {
+            type: Object,
+            observer: '_selectedMemberChanged',
+            notify: true
+          }
+        },
+
+        _updateCollectionResults: function() {
+          var collections = this.$.collectionsProvider.currentPage;
+          collections.forEach(function(collection) {
+            this.push('collections', collection);
+          }.bind(this));
+          this.$.collectionsList.fire('iron-resize');
+          this.showMoreCollections = this.$.collectionsProvider.isNextPageAvailable;
+          this.$.collectionsScrollThreshold.clearTriggers();
+        },
+
+        _updateMemberResults: function() {
+          var memberResults = this.$.memberProvider.currentPage;
+          memberResults.forEach(function(member) {
+            this.push('members', member);
+          }.bind(this));
+          this.$.membersList.fire('iron-resize');
+          this.showMoreMembers = this.$.memberProvider.isNextPageAvailable;
+          this.$.membersScrollThreshold.clearTriggers();
+          this.fire('initCollectionResults', {
+            provider: this.$.memberProvider,
+          });
+        },
+
+        _resetMemberResults: function() {
+          this.$.memberProvider.page = 1;
+          this.$.memberProvider.pageSize = 40;
+          this.members = [];
+          this.selectedMember = null;
+          this.displayFilters();
+          this.$.membersList.fire('iron-resize');
+          this.showMoreMembers = false;
+          this.$.membersScrollThreshold.clearTriggers();
+          this.fire('resetCollectionResults');
+        },
+
+        displayQueue: function(member, index) {
+          this._isQueue = true;
+          if (member && member.uid) {
+            this.$.membersList.selectItem(member);
+            this.$.membersList.scrollToIndex(Math.max(0, index - 5));
+          }
+        },
+
+        displayFilters: function() {
+          this._isQueue = false;
+        },
+
+        _loadMoreCollections: function() {
+          if (this.$.collectionsProvider) {
+            if (this.$.collectionsProvider.isNextPageAvailable) {
+              this.$.collectionsProvider.page = this.$.collectionsProvider.page + 1;
+            }
+          }
+        },
+
+        _loadMoreMembers: function() {
+          if (this.$.memberProvider) {
+            if (this.$.memberProvider.isNextPageAvailable) {
+              this.$.memberProvider.page = this.$.memberProvider.page + 1;
+            }
+          }
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'item';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
+
+        _selectedMemberChanged: function(member) {
+          if (member) {
+            page.show('/browse' + member.path);
+          }
+        },
+
+        _selectedCollectionChanged: function(collection) {
+          this._resetMemberResults();
+          if (collection) {
+            this.fire('browseCollection', {
+              collection: collection,
+            });
+            this.$.memberProvider.params = [collection.uid];
+            this.$.memberProvider.fetch();
+          }
+        },
+
+        _icon: function(doc) {
+          var url = this.$.nxcon.url;
+          return url + doc.properties['common:icon'];
+        },
+
+        _isEmpty: function(items) {
+          return items && items.length === 0;
+        },
+
+        ready: function() {
+          window.addEventListener('addedToCollection', function() {
+            this.collections = [];
+            this.$.collectionsProvider.fetch();
+          }.bind(this));
+          window.addEventListener('removedFromCollection', function() {
+            this.collections = [];
+            this.$.collectionsProvider.fetch();
+          }.bind(this));
+
+          this.$.collectionsList.selectQueuePrevious = function() {
+            this._didMoveUp();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.collectionsList.selectQueueNext = function() {
+            this._didMoveDown();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.collectionsList.toggleSelectionForFocusedItem = function() {
+            this.debounce('toggleSelectionForFocusedItem', function() {
+              var model = this._focusedItem._templateInstance;
+              if (model) {
+                this.toggleSelectionForItem(model[this.as]);
+              }
+            }.bind(this), 300);
+          };
+          this.$.collectionsList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+          this.$.collectionsList.addOwnKeyBinding('k', 'selectQueuePrevious');
+          this.$.collectionsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+          this.$.collectionsList.addOwnKeyBinding('j', 'selectQueueNext');
+
+          this.$.membersList.selectQueuePrevious = function() {
+            this._didMoveUp();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.membersList.selectQueueNext = function() {
+            this._didMoveDown();
+            this.toggleSelectionForFocusedItem();
+          };
+          this.$.membersList.toggleSelectionForFocusedItem = function() {
+            this.debounce('toggleSelectionForFocusedItem', function() {
+              var model = this._focusedItem._templateInstance;
+              if (model) {
+                this.toggleSelectionForItem(model[this.as]);
+              }
+            }.bind(this), 300);
+          };
+          this.$.membersList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+          this.$.membersList.addOwnKeyBinding('k', 'selectQueuePrevious');
+          this.$.membersList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+          this.$.membersList.addOwnKeyBinding('j', 'selectQueueNext');
         }
-      },
 
-      _isEmpty: function(items) {
-        return items && items.length === 0;
-      },
-
-      ready: function() {
-        window.addEventListener('addedToCollection', function() {
-          this.$.provider.fetch();
-        }.bind(this));
-        window.addEventListener('removedFromCollection', function() {
-          this.$.provider.fetch();
-        }.bind(this));
-      },
-
-    });
+      });
+    })();
   </script>
 </dom-module>

@@ -242,12 +242,7 @@ Contributors:
               </section>
 
               <section class="card collections" name="collections">
-                <div class="header ellipsis">
-                  <h1>Working Collections</h1>
-                </div>
-                <div class="content">
-                  <nuxeo-collections></nuxeo-collections>
-                </div>
+                <nuxeo-collections id="collectionsForm"></nuxeo-collections>
               </section>
 
               <section class="card personal-space" name="personalWorkspace">
@@ -322,6 +317,9 @@ Contributors:
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
             <nuxeo-search-results name="search" on-document-clicked="_navigateFromSearch">
+            </nuxeo-search-results>
+            <nuxeo-collection-browse id="collectionBrowse"
+              name="collection" on-document-clicked="_navigateFromCollection">
             </nuxeo-search-results>
             <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
             <div name="tasks">
@@ -429,6 +427,7 @@ Contributors:
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup',
           'resetSearchResults': '_resetSearchResults',
+          'browseCollection': '_navigateToCollection',
           'workflowStarted': '_fetchTasks',
           'workflowTaskProcessed': '_fetchTasks',
           'taskChanged': '_onTaskChanged'
@@ -478,9 +477,20 @@ Contributors:
           this.$.searchForm.displayQueue(e.detail.doc, e.detail.index);
         },
 
+        _navigateFromCollection: function(e) {
+          page.show('/browse' + e.detail.doc.path);
+          this.$.collectionsForm.displayQueue(e.detail.doc, e.detail.index);
+        },
+
         _resetSearchResults: function() {
           this.selectedTab = 'search';
           this.page = 'search';
+        },
+
+        _navigateToCollection: function(e) {
+          this.selectedTab = 'collections';
+          this.page = 'collection';
+          this.$.collectionBrowse.headerLabel = e.detail.collection.title;
         },
 
         get currentContentView() {

@@ -12,17 +12,16 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-search-results`
+`nuxeo-collection-browse`
 @group Nuxeo UI
-@element nuxeo-search-results
+@element nuxeo-collection-browse
 -->
-<dom-module id="nuxeo-search-results">
+<dom-module id="nuxeo-collection-browse">
   <template>
 
     <style is="custom-style" include="shared-styles">
@@ -142,7 +141,7 @@ Contributors:
 
     <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n('search_result', 'Search Results')]]</span>
+        <span class="flex">[[headerLabel]]</span>
       </div>
       <div class="content-view">
         <iron-scroll-threshold id="scrollThreshold"
@@ -172,7 +171,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-search-results',
+        is: 'nuxeo-collection-browse',
         properties: {
           docItems: {
             type: Array,
@@ -225,20 +224,20 @@ Contributors:
         },
 
         ready: function() {
-          window.addEventListener('initSearchResults', function(e) {
-            this._initSearchResults(e);
+          window.addEventListener('initCollectionResults', function(e) {
+            this._initCollectionResults(e);
           }.bind(this));
-          window.addEventListener('resetSearchResults', function() {
-            this._resetSearchResults();
+          window.addEventListener('resetCollectionResults', function() {
+            this._resetCollectionResults();
           }.bind(this));
         },
 
-        _initSearchResults: function(e) {
+        _initCollectionResults: function(e) {
           this.pageProvider = e.detail.provider;
           this._updateResults();
         },
 
-        _resetSearchResults: function() {
+        _resetCollectionResults: function() {
           this.docItems = [];
           this.pageProvider = null;
         }
