@@ -155,7 +155,7 @@ Contributors:
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isQueue]]">
         <h1>[[selectedCollection.title]]</h1>
-        <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayFilters">
+        <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
         <paper-tooltip for="backToCollections">[[i18n('display_filter', 'Back to all collections')]]</paper-tooltip>
       </template>
@@ -175,7 +175,7 @@ Contributors:
            on-update="_updateCollectionResults">
         </nuxeo-page-provider>
         <iron-scroll-threshold id="collectionsScrollThreshold"
-          lower-threshold="800"
+          lower-threshold="800" hidden$="[[!hasCollection]]"
           class="scrollThreshold"
           on-lower-threshold="_loadMoreCollections">
           <iron-list id="collectionsList" items="[[collections]]"
@@ -214,8 +214,8 @@ Contributors:
             </div>
           </template>
         </iron-scroll-threshold>
-        <div hidden$="[[_isEmpty(collections)]]" class="noResult">
-          <span class="empty">[[i18n('no_collections', 'No Collections')]]</span>
+        <div hidden$="[[hasCollection]]">
+          <span class="empty">[[i18n('no_collections', 'No collections.')]]</span>
         </div>
       </div>
 
@@ -251,9 +251,6 @@ Contributors:
             </div>
           </template>
         </iron-scroll-threshold>
-        <div hidden$="[[!hasCollection]]" class="noResult">
-          <span class="empty">[[i18n('no_collections', 'No collections')]]</span>
-        </div>
       </div>
 
     </div>
@@ -282,11 +279,11 @@ Contributors:
             value: false
           },
           collections: {
-            type: Array,
+            type: Object,
             value: []
           },
           members: {
-            type: Array,
+            type: Object,
             value: []
           },
           showMoreCollections: {
@@ -319,9 +316,21 @@ Contributors:
             this.push('collections', collection);
           }.bind(this));
           this.$.collectionsList.fire('iron-resize');
-          this.hasCollection = this.collections && this.collections.length === 0;
+          this.hasCollection = !(this.collections && this.collections.length === 0);
           this.showMoreCollections = this.$.collectionsProvider.isNextPageAvailable;
           this.$.collectionsScrollThreshold.clearTriggers();
+        },
+
+        _resetCollectionResults: function() {
+          this.$.collectionsProvider.page = 1;
+          this.$.collectionsProvider.pageSize = 40;
+          this.collections = [];
+          this.selectedCollection = null;
+          this.displayCollections();
+          this.$.collectionsList.fire('iron-resize');
+          this.showMoreCollections = false;
+          this.$.collectionsScrollThreshold.clearTriggers();
+          this.fire('resetCollectionResults');
         },
 
         _updateMemberResults: function() {
@@ -342,14 +351,14 @@ Contributors:
           this.$.memberProvider.pageSize = 40;
           this.members = [];
           this.selectedMember = null;
-          this.displayFilters();
+          this.displayCollections();
           this.$.membersList.fire('iron-resize');
           this.showMoreMembers = false;
           this.$.membersScrollThreshold.clearTriggers();
           this.fire('resetCollectionResults');
         },
 
-        displayQueue: function(member, index) {
+        displayMembers: function(member, index) {
           this._isQueue = true;
           if (member && member.uid) {
             this.$.membersList.selectItem(member);
@@ -357,7 +366,7 @@ Contributors:
           }
         },
 
-        displayFilters: function() {
+        displayCollections: function() {
           this._isQueue = false;
         },
 

@@ -315,14 +315,17 @@ Contributors:
 
         ready: function() {
           this.$.itemsList.selectQueuePrevious = function() {
+            console.log('selectQueuePrevious');
             this._didMoveUp();
             this.toggleSelectionForFocusedItem();
           };
           this.$.itemsList.selectQueueNext = function() {
+            console.log('selectQueueNext');
             this._didMoveDown();
             this.toggleSelectionForFocusedItem();
           };
           this.$.itemsList.toggleSelectionForFocusedItem = function() {
+            console.log('toggleSelectionForFocusedItem');
             this.debounce('toggleSelectionForFocusedItem', function() {
               var model = this._focusedItem._templateInstance;
               if (model) {
