@@ -159,9 +159,13 @@ Contributors:
               [[i18n('Loading more ...')]]
             </div>
             <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
-              [[i18n('Show more')]]
+              [[i18n('show_more', 'Show more')]]
             </div>
           </div>
+        </iron-scroll-threshold>
+        <div hidden$="[[!emptyCollection]]" class="noResult">
+          <span class="empty">[[i18n('empty_collection', 'Empty collection')]]</span>
+        </div>
       </div>
     </paper-header-panel>
 
@@ -191,6 +195,10 @@ Contributors:
           showMore: {
             type: Object,
             value: false
+          },
+          emptyCollection: {
+            type: Boolean,
+            boolean: false
           }
         },
 
@@ -205,6 +213,7 @@ Contributors:
           docs.forEach(function(doc) {
             this.push('docItems', doc);
           }.bind(this));
+          this.emptyCollection = this.docItems && this.docItems.length === 0;
           this.$.scrollThreshold.clearTriggers();
           this.showMore = this.pageProvider.isNextPageAvailable;
         },
@@ -214,6 +223,7 @@ Contributors:
             if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
               this.pageProvider.isNextPageAvailable) {
               this.pageProvider.page = this.pageProvider.page + 1;
+              this.pageProvider.fetch();
               this.manualLoading = this._computeManualLoading(this.pageProvider.page);
             }
           }

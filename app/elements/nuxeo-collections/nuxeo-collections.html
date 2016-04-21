@@ -54,19 +54,6 @@ Contributors:
       background-color: var(--google-grey-300);
       border-bottom: 1px solid #ccc;
     }
-    .nxicon {
-      height: 16px;
-      width: 16px;
-    }
-    .primary {
-      font-size: 16px;
-    }
-    .secondary {
-      font-size: 14px;
-    }
-    .dim {
-      color: gray;
-    }
     .manualLoading {
       color: var(--nuxeo-link-color);
       text-align: center;
@@ -126,13 +113,48 @@ Contributors:
     }
     /* End TODO Lise :) */
 
+    .collection-box {
+      line-height: 155%;
+    }
+
+    .collection-box + .collection-box {
+      border-top: var(--nuxeo-border);
+    }
+
+    iron-icon.collection-name-icon {
+      --iron-icon-height: .9em;
+      --iron-icon-width: .9em;
+      border-radius: 50px;
+      background-color: var(--nuxeo-secondary-color);
+      color: white;
+      padding: .4em;
+    }
+
+    .collection-name {
+      font-weight: 700;
+      margin-left: .5em;
+    }
+
+    .collection-detail {
+      margin-left: 2.2em;
+    }
+
+    .collection-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
+    }
+
+    .date {
+      color: var(--nuxeo-warn-text);
+    }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isQueue]]">
-        <h1>[[i18n('collection_content', 'Collection content')]]</h1>
+        <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayFilters">
         </paper-icon-button>
         <paper-tooltip for="backToCollections">[[i18n('display_filter', 'Back to all collections')]]</paper-tooltip>
@@ -162,11 +184,24 @@ Contributors:
             scroll-target="collectionsScrollThreshold" as="collection">
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                <div class="primary ellipsis">
-                  <img class="nxicon" src="[[_icon(collection)]]">
-                  [[collection.title]]
+                <div class="collection-box vertical layout">
+                  <div class="collection-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <iron-icon class="collection-name-icon" icon="icons:book"></iron-icon>
+                    </div>
+                    <span class="collection-name">[[collection.title]]</span>
+                  </div>
+                  <div class="collection-detail">
+                    <div class="date horizontal layout center">
+                      <span class="collection-property">[[i18n('last_updated', 'Last updated on ')]] </span>
+                      <span>[[_formatDate(collection.properties.dc:modified)]]</span>
+                    </div>
+                    <div class="layout center">
+                      <span class="collection-property">[[i18n('owned_by', 'Owned by')]] </span>
+                      <a class="tag user initiator" href="/user/[[collection.properties.dc:creator]]">[[collection.properties.dc:creator]]</a>
+                    </div>
+                  </div>
                 </div>
-                <div class="secondary dim ellipsis">[[collection.description]]</div>
               </div>
             </template>
           </iron-list>
@@ -179,6 +214,9 @@ Contributors:
             </div>
           </template>
         </iron-scroll-threshold>
+        <div hidden$="[[_isEmpty(collections)]]" class="noResult">
+          <span class="empty">[[i18n('no_collections', 'No Collections')]]</span>
+        </div>
       </div>
 
       <div id="queue" hidden$="{{!_isQueue}}">
@@ -213,6 +251,9 @@ Contributors:
             </div>
           </template>
         </iron-scroll-threshold>
+        <div hidden$="[[!hasCollection]]" class="noResult">
+          <span class="empty">[[i18n('no_collections', 'No collections')]]</span>
+        </div>
       </div>
 
     </div>
@@ -265,6 +306,10 @@ Contributors:
             type: Object,
             observer: '_selectedMemberChanged',
             notify: true
+          },
+          hasCollection: {
+            type: Boolean,
+            value: true
           }
         },
 
@@ -274,6 +319,7 @@ Contributors:
             this.push('collections', collection);
           }.bind(this));
           this.$.collectionsList.fire('iron-resize');
+          this.hasCollection = this.collections && this.collections.length === 0;
           this.showMoreCollections = this.$.collectionsProvider.isNextPageAvailable;
           this.$.collectionsScrollThreshold.clearTriggers();
         },
@@ -416,6 +462,10 @@ Contributors:
           this.$.membersList.addOwnKeyBinding('k', 'selectQueuePrevious');
           this.$.membersList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
           this.$.membersList.addOwnKeyBinding('j', 'selectQueueNext');
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
         }
 
       });
