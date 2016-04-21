@@ -30,6 +30,9 @@ Contributors:
   <link rel="import" href="../common.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+  <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+  <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+  <link rel="import" href="../../bower_components/iron-list/iron-list.html">
   <link rel="import" href="../../elements/nuxeo-collections/nuxeo-collections.html">
   <script src="nuxeo-collections-responses.js"></script>
 </head>
@@ -61,39 +64,24 @@ Contributors:
       suite('when collections are available', function() {
         setup(function() {
           server.respondWith(
-            'POST',
-            '/dummy/api/v1/automation/User.GetCollections',
+            'GET',
+            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&searchTerm=%25&sortBy=dc%3Amodified&sortOrder=desc&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
               JSON.stringify(collectionsResponse)
             ]
           );
-          server.respondWith(
-            'POST',
-            '/dummy/api/v1/automation/Collection.GetDocumentsFromCollection',
-            [
-              200,
-              {'Content-Type': 'application/json'},
-              JSON.stringify(docsResponse)
-            ]
-          );
         });
 
         test('it should display collections', function() {
+          debugger
           var element = fixture('collections'), collections;
           return waitChanged(element, 'collections').then(flush).then(function() {
-            expect(element.collections.entries.length).to.be.equal(1);
-            collections = element.getElementsByClassName('collection');
+            expect(element.collections.length).to.be.equal(1);
+            collections = element.getElementsByClassName('collection-box');
             expect(collections.length).to.be.equal(1);
-            var docs = collections[0].querySelector('nuxeo-operation');
-            expect(docs).to.not.be.undefined;
-            return waitChanged(docs, 'response').then(flush).then(function() {
-              expect(collections[0].querySelector('.title span').textContent).to.be.equal('My Collection');
-              expect(collections[0].querySelectorAll('.item a').length).to.be.equal(2);
-              expect(collections[0].querySelectorAll('.item paper-tooltip')[0].textContent).to.be.equal('My picture in Collection');
-              expect(collections[0].querySelectorAll('.item paper-tooltip')[1].textContent).to.be.equal('My video in Collection');
-            });
+            expect(collections[0].querySelector('.collection-name').textContent).to.be.equal('My Collection');
           });
         });
       });
@@ -101,8 +89,8 @@ Contributors:
       suite('when no collections available', function() {
         setup(function() {
           server.respondWith(
-            'POST',
-            '/dummy/api/v1/automation/User.GetCollections',
+            'GET',
+            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&searchTerm=%25&sortBy=dc%3Amodified&sortOrder=desc&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -114,7 +102,7 @@ Contributors:
         test('it should display empty collections placeholder', function() {
           var element = fixture('collections');
           return waitChanged(element, 'collections').then(flush).then(function() {
-            expect(element.collections.entries.length).to.be.equal(0);
+            expect(element.collections.length).to.be.equal(0);
             var placeholder = element.querySelector('.empty');
             expect(isHidden(placeholder)).to.be.false;
             expect(placeholder.textContent).to.be.equal('No collections.');
