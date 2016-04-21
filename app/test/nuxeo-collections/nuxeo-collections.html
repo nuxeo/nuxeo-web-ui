@@ -101,11 +101,12 @@ Contributors:
 
         test('it should display empty collections placeholder', function() {
           var element = fixture('collections');
-          return waitChanged(element, 'collections').then(flush).then(function() {
+          element.collections = [];
+          element.$.collectionsProvider.fetch();
+          return flush().then(function() {
             expect(element.collections.length).to.be.equal(0);
             var placeholder = element.querySelector('.empty');
             expect(isHidden(placeholder)).to.be.false;
-            expect(placeholder.textContent).to.be.equal('No collections.');
           });
         });
       });
