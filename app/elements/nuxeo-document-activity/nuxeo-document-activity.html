@@ -15,6 +15,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-document-activity`
@@ -33,7 +34,7 @@ Contributors:
     <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
     <template is="dom-repeat" items="[[audit.entries]]">
       <p>
-        <span class="audit_user"><a href="nuxeo/user/[[item.principalName]]">[[_user(item)]]</a>&nbsp;</span>
+        <span class="audit_user"><a href$="[[urlFor('user', item.principalName)]]">[[_user(item)]]</a>&nbsp;</span>
         <span>[[_activity(item)]]</span>
       </p>
     </template>
@@ -45,14 +46,19 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-activity',
+
         properties: {
           document: {
             type: Object
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
+
         _user: function(event) {
           return event.principalName;
         },
+
         _activity: function(event) {
           return this.i18n('activity.' + event.eventId);
         }

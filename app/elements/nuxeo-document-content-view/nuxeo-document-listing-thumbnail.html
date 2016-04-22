@@ -15,6 +15,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-document-listing-thumbnail`
@@ -173,6 +174,8 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.RoutingBehavior],
+
         _icon: function() {
           var url = this.$.nxcon.url;
           return url + this.doc.properties['common:icon'];
@@ -193,10 +196,6 @@ Contributors:
 
         _docType: function() {
           return this.doc.type;
-        },
-
-        _href: function(doc) {
-          return page.base() + '/browse' + doc.path;
         },
 
         handleClick: function() {

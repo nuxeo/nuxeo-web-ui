@@ -16,6 +16,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
     Andre Justo <ajusto@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-document-page`
@@ -264,7 +265,7 @@ Contributors:
               <div class="description ctn">[[document.properties.dc:description]]</div>
               <div class="details ctn">
                 <div><span class="col">Added on</span> [[_formatDate(document.properties.dc:created)]]</div>
-                <div><span class="col">By</span><a class="tag user" href="/user/[[document.properties.dc:creator]]">
+                <div><span class="col">By</span><a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">
                   <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
                   [[document.properties.dc:creator]]</a></div>
                 <div><span class="col">Contributors</span>
@@ -375,6 +376,8 @@ Contributors:
             value: false
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
 
         listeners: {
           'workflowTaskProcessed': '_taskCompleted'

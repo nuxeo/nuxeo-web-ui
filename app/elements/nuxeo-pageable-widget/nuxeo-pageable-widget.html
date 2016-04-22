@@ -17,6 +17,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-pageable-widget`
@@ -52,9 +53,9 @@ Contributors:
       </div>
       <template is="dom-repeat" items="[[page]]">
         <div class="doctable-row horizontal layout">
-          <a id="title" href="[[_href(item)]]" class="flex ellipsis">[[item.properties.dc:title]]</a>
+          <a id="title" href$="[[urlFor('document', item.uid)]]" class="flex ellipsis">[[item.properties.dc:title]]</a>
           <span id="modified" class="flex">[[_formatDate(item.properties.dc:modified)]]</span>
-          <a id="lastContributor" href="nuxeo/users/[[item.properties.dc:lastContributor]]" class="flex">[[item.properties.dc:lastContributor]]</a>
+          <a id="lastContributor" href$="[[urlFor('user', item.properties.dc:lastContributor)]]" class="flex">[[item.properties.dc:lastContributor]]</a>
           <span id="version" class="flex">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</span>
         </div>
       </template>
@@ -75,12 +76,10 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.RoutingBehavior],
+
         _formatDate: function(date) {
           return moment(date).format('MMM D, YYYY');
-        },
-
-        _href: function(document) {
-          return page.base() + '/browse' + document.path;
         }
       });
     })();

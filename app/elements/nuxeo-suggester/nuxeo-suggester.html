@@ -17,6 +17,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-suggester`
@@ -176,7 +177,7 @@ Contributors:
         <div id="results" hidden$="[[!_canShowResuls(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="result" href="[[_href(item)]]" on-click="_itemClicked">
+              <a class="result" href$="[[urlFor(item.type, item.id)]]" on-click="_itemClicked">
                 <iron-icon src="[[_getIcon(item)]]"></iron-icon>
                 <span>[[item.label]]</span>
               </a>
@@ -196,7 +197,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-suggester',
 
-        behaviors: [Polymer.IronA11yKeysBehavior],
+        behaviors: [Polymer.IronA11yKeysBehavior, Nuxeo.RoutingBehavior],
 
         properties: {
           toggled: {
@@ -254,15 +255,6 @@ Contributors:
 
         _getIcon: function(item) {
           return this.$.nxcon.url + item.icon;
-        },
-
-        _href: function(item) {
-          switch (item.type) {
-            case 'document':
-              return page.base() + '/' + item.url.replace('nxdoc', 'doc').replace('/view_documents', '');
-            default:
-              return page.base() + '/' + item.url;
-          }
         },
 
         _upPressed: function() {

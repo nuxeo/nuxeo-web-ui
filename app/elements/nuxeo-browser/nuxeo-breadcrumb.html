@@ -15,6 +15,7 @@ Contributors:
   Guillaume RENARD <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-breadcrumb`
@@ -87,7 +88,7 @@ Contributors:
 
     <div class="breadcrumb">
       <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-        <a href="[[_href(item)]]" class$="breadcrumb-item [[_computeCssClass(index, document)]]"><span>[[item.title]]</span></a>
+        <a href$="[[urlFor('browse', item.path)]]" class$="breadcrumb-item [[_computeCssClass(index, document)]]"><span>[[item.title]]</span></a>
         <span class$="breadcrumb-divider [[_computeCssClass(index, document)]]">/</span>
       </template>
     </div>
@@ -108,14 +109,12 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.RoutingBehavior],
+
         _breadcrumb: function() {
           if (this._enrichers) {
             return this._enrichers.breadcrumb.entries;
           }
-        },
-
-        _href: function(doc) {
-          return page.base() + '/browse' + doc.path;
         },
 
         _computeCssClass: function(index) {

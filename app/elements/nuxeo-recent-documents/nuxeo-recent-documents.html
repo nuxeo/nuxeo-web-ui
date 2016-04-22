@@ -17,6 +17,7 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-recent-documents`
@@ -52,7 +53,7 @@ Contributors:
 
     <template is="dom-repeat" items="[[documents]]" as="document">
       <div class="item">
-        <a href="[[_href(document)]]" class="flex ellipsis">
+        <a href$="[[urlFor('document', document.uid)]]" class="flex ellipsis">
           <iron-icon icon="receipt" item-icon></iron-icon>
           <span>[[document.title]]</span>
         </a>
@@ -75,15 +76,13 @@ Contributors:
         }
       },
 
+      behaviors: [Nuxeo.RoutingBehavior],
+
       add: function(doc) {
         this.$.storage.add(doc);
         if (this.documents.length > this.maxSize) {
           this.splice('documents', 0, this.documents.length - this.maxSize);
         }
-      },
-
-      _href: function(doc) {
-        return page.base() + '/doc/' + doc.uid;
       }
     });
   </script>

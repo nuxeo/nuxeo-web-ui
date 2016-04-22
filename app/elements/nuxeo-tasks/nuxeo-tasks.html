@@ -17,6 +17,7 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-tasks`
@@ -221,7 +222,7 @@ Contributors:
                         <span class="task-name">[[i18n(task.name)]]</span>
                         <span class="task-initiator">
                           From
-                          <a class="tag user initiator" href="/user/[[task.workflow.initiator]]">
+                          <a class="tag user initiator" href$="[[urlFor('user', task.workflow.initiator)]]">
                             <iron-icon icon="social:person" class="tag-icon"></iron-icon>
                             [[task.workflow.initiator]]
                           </a>
@@ -284,6 +285,8 @@ Contributors:
           _currentIdx: Number,
         },
 
+        behaviors: [Nuxeo.RoutingBehavior],
+
         _tasksChanged: function() {
           if (this.current) {
             if (this._currentIdx > (this.tasks.length - 1)) {
@@ -311,7 +314,7 @@ Contributors:
 
         _href: function(doc) {
           if (doc) {
-            return page.base() + '/browse' + doc.path;
+            return this.urlFor('browse', doc.path);
           }
         },
 
@@ -332,9 +335,9 @@ Contributors:
           // user:name or group:name
           var split = participant.split(':');
           if (split.length === 1) {
-            return '/user/' + split[0];
+            return this.urlFor('user', split[0]);
           }
-          return '/' + split[0] + '/' + split[1];
+          return this.urlFor(split[0], split[1]);
         },
 
         _toggleGraphDialog: function() {

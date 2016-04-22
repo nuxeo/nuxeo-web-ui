@@ -15,6 +15,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-dublincore-contribnuxeo-document-users`
@@ -34,7 +35,7 @@ Contributors:
     </style>
 
     <template is="dom-repeat" items="[[users]]" as="contributor">
-      <a class="tag user" href="/user/[[contributor]]">
+      <a class="tag user" href$="[[urlFor('user', contributor)]]">
         <div class="layout horizontal center">
           <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
           <span>[[contributor]]</span>
@@ -53,7 +54,8 @@ Contributors:
           users: {
             type: Array
           }
-        }
+        },
+        behaviors: [Nuxeo.RoutingBehavior]
       });
     })();
   </script>

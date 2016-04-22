@@ -19,6 +19,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-app`
@@ -175,8 +176,8 @@ Contributors:
 
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
-        <a href="{{baseUrl}}home/">
-          <paper-icon-button src="{{baseUrl}}images/touch/icon-128x128.png" class="logo"></paper-icon-button>
+        <a href$="[[urlFor('home')]]">
+          <paper-icon-button src$="[[urlFor('/images/touch/icon-128x128.png')]]" class="logo"></paper-icon-button>
         </a>
         <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
           <paper-icon-button icon="icons:folder-open" name="browser"></paper-icon-button>
@@ -191,7 +192,7 @@ Contributors:
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
           <paper-icon-button icon="icons:content-paste" name="clipboard"></paper-icon-button>
           <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
-          <paper-icon-button src="{{baseUrl}}images/avatar.png" name="profile" class="profile-icon"></paper-icon-button>
+          <paper-icon-button src$="[[urlFor('/images/avatar.png')]]" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
 
         <iron-collapse id="sidebar" horizontal opened>
@@ -227,7 +228,7 @@ Contributors:
                 <div class="content layout vertical">
                   <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
-                    <a href="{{baseUrl}}tasks">» view Tasks Dashboard</a>
+                    <a href$="[[urlFor('tasks')]]">» view Tasks Dashboard</a>
                   </div>
                 </div>
               </section>
@@ -270,10 +271,10 @@ Contributors:
                 <div class="content">
                   <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                     <div class="item" name="repository">
-                      <a href="{{baseUrl}}admin/repository">Repository Monitoring</a>
+                      <a href$="[[urlFor('administration', 'repository')]]">Repository Monitoring</a>
                     </div>
                     <div class="item" name="user-group-management">
-                      <a href="{{baseUrl}}admin/user-group-management">Users & Groups</a>
+                      <a href$="[[urlFor('administration', 'user-group-management')]]">Users & Groups</a>
                     </div>
                   </iron-selector>
                 </div>
@@ -406,6 +407,8 @@ Contributors:
             type: Object
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
 
         get docId() {
           return this.linkDocId;

@@ -18,6 +18,7 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-task-widget`
@@ -98,7 +99,7 @@ Contributors:
                 <span class="task-property">On  </span>
                 <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
                   <nuxeo-document auto doc-id="[[doc.id]]" response="{{doc}}"></nuxeo-document>
-                  <a href="[[_href(doc)]]" class="docTitle">[[doc.properties.dc:title]]</a>
+                  <a href$="[[urlFor('browse', doc.path)]]" class="docTitle">[[doc.properties.dc:title]]</a>
                 </template>
               </div>
               <div class="horizontal layout center">
@@ -107,7 +108,7 @@ Contributors:
               </div>
               <div class="layout center">
                 <span class="task-property">Initiated by </span>
-                <a class="tag user initiator" href="/user/[[workflow.initiator]]">[[workflow.initiator]]</a>
+                <a class="tag user initiator" href$="[[urlFor('user', workflow.initiator)]]">[[workflow.initiator]]</a>
               </div>
             </div>
           </div>
@@ -135,6 +136,8 @@ Contributors:
             }
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
 
         ready: function() {
           this._fetchTasks();
@@ -179,10 +182,6 @@ Contributors:
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
-        },
-
-        _href: function(doc) {
-          return page.base() + '/browse' + doc.path;
         }
       });
     })();

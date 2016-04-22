@@ -16,6 +16,7 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-document-task`
@@ -99,7 +100,7 @@ Contributors:
             <div class="layout horizontal center action-property">
               <span class="flex-3">From</span>
               <span class="flex-9">
-                <a class="tag user" href="/user/[[workflow.initiator]]">
+                <a class="tag user" href$="[[urlFor('user', workflow.initiator)]]">
                   <iron-icon icon="social:person" class="tag-icon"></iron-icon>[[workflow.initiator]]
                 </a>
               </span>
@@ -162,6 +163,8 @@ Contributors:
             value: 'resolution'
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
 
         /**
          * Returns the name for the current layout element
@@ -242,9 +245,9 @@ Contributors:
           // user:name or group:name
           var split = actor.split(':');
           if (split.length === 1) {
-            return '/user/' + split[0];
+            return this.urlFor('user', split[0]);
           }
-          return '/' + split[0] + '/' + split[1];
+          return this.urlFor(split[0], split[1]);
         }
       });
     })();

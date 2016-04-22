@@ -15,6 +15,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-favorites`
@@ -64,7 +65,7 @@ Contributors:
         <div class="item">
           <span class="flex">
             <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
-            <a class="favLink ellipsis" href="[[_href(item)]]" >[[item.title]]</a>
+            <a class="favLink ellipsis" href$="[[urlFor('browse', item.path)]]" >[[item.title]]</a>
           </span>
           <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
         </div>
@@ -90,6 +91,8 @@ Contributors:
         }
       },
 
+      behaviors: [Nuxeo.RoutingBehavior],
+
       _contextDocObserver: function(newDoc, oldDoc) {
         if (newDoc) {
           if (oldDoc) {
@@ -107,10 +110,6 @@ Contributors:
           return favorites.entries.length > 0;
         }
         return false;
-      },
-
-      _href: function(doc) {
-        return page.base() + '/browse' + doc.path;
       },
 
       ready: function() {
