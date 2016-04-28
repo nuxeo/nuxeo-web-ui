@@ -198,7 +198,7 @@ Contributors:
       </template>
     </div>
 
-    <div class="content">
+    <div id="queues" class="content">
 
       <div id="collections" class="collections" hidden$="{{_isQueue}}">
         <nuxeo-page-provider id="collectionsProvider" auto
@@ -263,7 +263,7 @@ Contributors:
         </nuxeo-page-provider>
         <iron-scroll-threshold id="membersScrollThreshold"
           class="scrollThreshold"
-          lower-threshold="800"
+          lower-threshold="800" hidden$="[[!hasMember]]"
           on-lower-threshold="_loadMoreMembers">
           <iron-list id="membersList" items="[[members]]" selected-item="{{selectedMember}}" selection-enabled scroll-target="membersScrollThreshold" as="member">
             <template>
@@ -281,10 +281,7 @@ Contributors:
                         [[member.type]]
                         <iron-icon  id="removeFromCollection" class="remove"
                           icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
-                          </iron-icon>
-                        <paper-tooltip for="removeFromCollection">
-                          [[i18n('remove_from_collection', 'Remove from')]] [[selectedCollection]]
-                        </paper-tooltip>
+                        </iron-icon>
                       </span>
                     </div>
                   </div>
@@ -301,6 +298,9 @@ Contributors:
             </div>
           </template>
         </iron-scroll-threshold>
+        <div hidden$="[[hasMember]]">
+          <span class="empty">[[i18n('empty_collection', 'Empty collection')]]</span>
+        </div>
       </div>
 
     </div>
@@ -357,6 +357,78 @@ Contributors:
           hasCollection: {
             type: Boolean,
             value: true
+          },
+          hasMember: {
+            type: Boolean,
+            value: true
+          },
+          keyEventTarget: {
+            type: Object,
+            value: function() {
+              return document.body;
+            }
+          }
+        },
+
+        behaviors: [
+          Polymer.IronA11yKeysBehavior
+        ],
+
+        keyBindings: {
+          'right': '_navigateOnRight',
+          'left': '_navigateOnLeft',
+          'down': '_navigateOnDown',
+          'up': '_navigateOnUp'
+        },
+
+        _navigateOnRight: function() {
+          if (!this._isQueue) {
+            if (this.selectedCollection) {
+              this.displayMembers();
+              this.$.membersScrollThreshold.clearTriggers();
+              this.$.membersList.fire('iron-resize');
+              if (this.hasMember) {
+                this.$.membersList.selectItem(0);
+              }
+            }
+            this._tmpJustRight = true;
+          }
+        },
+
+        _navigateOnLeft: function() {
+          if (this._isQueue) {
+            this.displayCollections();
+            this.$.collectionsScrollThreshold.clearTriggers();
+            this.$.collectionsList.fire('iron-resize');
+          }
+          this._tmpJustLeft = true;
+        },
+
+        _navigateOnDown: function() {
+          if (this._isQueue) {
+            if (this._tmpJustRight) {
+              this.$.membersList.selectQueueNext();
+              this._tmpJustRight = false;
+            }
+          } else {
+            if (this._tmpJustLeft) {
+              this.$.collectionsList.selectQueueNext();
+              this._tmpJustLeft = false;
+            }
+          }
+        },
+
+        _navigateOnUp: function() {
+          if (this._isQueue) {
+            if (this._tmpJustRight) {
+              this.$.membersList.selectQueuePrevious();
+              this._tmpJustRight = false;
+            }
+          } else {
+            if (this._tmpJustLeft) {
+              this.$.collectionsList.selectQueuePrevious();
+              this._tmpJustLeft = false;
+            }
           }
         },
 
@@ -389,6 +461,7 @@ Contributors:
             this.push('members', member);
           }.bind(this));
           this.$.membersList.fire('iron-resize');
+          this.hasMember = !(this.members && this.members.length === 0);
           this.showMoreMembers = this.$.memberProvider.isNextPageAvailable;
           this.$.membersScrollThreshold.clearTriggers();
           this.fire('initCollectionResults', {
