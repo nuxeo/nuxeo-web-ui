@@ -482,8 +482,8 @@ Contributors:
         },
 
         _selectedCollectionChanged: function(collection) {
-          this._resetMemberResults();
           if (collection) {
+            this._resetMemberResults();
             this.fire('browseCollection', {
               collection: collection,
             });
