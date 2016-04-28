@@ -37,20 +37,20 @@ Contributors:
          scrolling breaks */
       height: calc(100vh - 61px);
     }
-    .item {
+    .list-item {
       cursor: pointer;
-      padding: 2px 10px;
+      padding: 1em;
       border-bottom: 1px solid #DDD;
     }
-    .item:focus,
-    .item.selected:focus {
+    .list-item:focus,
+    .list-item.selected:focus {
       outline: 0;
       background-color: #ddd;
     }
-    .item.selected {
+    .list-item.selected {
       color: var(--paper-blue-600);
     }
-    .item.selected {
+    .list-item.selected {
       background-color: var(--google-grey-300);
       border-bottom: 1px solid #ccc;
     }
@@ -70,6 +70,12 @@ Contributors:
       overflow: auto;
     }
 
+    .remove {
+      width: 16px;
+      height: 16px;
+      border-radius: 8px;
+    }
+
     .switch {
       position: absolute;
       top: 0;
@@ -82,10 +88,19 @@ Contributors:
       background-color: var(--nuxeo-light-background);
     }
 
-    .switch:hover {
-        background-color: var(--nuxeo-button-primary);
-        color: var(--nuxeo-button-primary-text);
-      }
+    .switch:hover,
+    .remove:hover {
+      background-color: var(--nuxeo-button-primary);
+      color: var(--nuxeo-button-primary-text);
+    }
+
+    .queue-thumbnail {
+      height: 32px;
+      width: 32px;
+      border-radius: 20px;
+      box-sizing: border-box;
+      background-color: #ddd;
+    }
 
     /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
     .content {
@@ -144,6 +159,19 @@ Contributors:
       margin-right: .2em;
     }
 
+    .member-title {
+      margin-left: 8px;
+    }
+
+    .member-detail {
+      margin-left: 40px;
+    }
+
+    .member-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
+    }
+
     .date {
       color: var(--nuxeo-warn-text);
     }
@@ -151,6 +179,12 @@ Contributors:
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <nuxeo-operation op="Collection.RemoveFromCollection"
+                     id="removeFromCollectionOp">
+    </nuxeo-operation>
+
+    <paper-toast id="toast"></paper-toast>
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isQueue]]">
@@ -206,7 +240,7 @@ Contributors:
             </template>
           </iron-list>
           <template is="dom-if" if="[[showMoreCollections]]">
-            <div class="item loading">
+            <div class="list-item loading">
               <div class="primary">
                 <paper-spinner class="nxicon" active="true"></paper-spinner>
                 [[i18n('loading_more', 'Loading more data')]]
@@ -234,16 +268,32 @@ Contributors:
           <iron-list id="membersList" items="[[members]]" selected-item="{{selectedMember}}" selection-enabled scroll-target="membersScrollThreshold" as="member">
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                <div class="primary ellipsis">
-                  <img class="nxicon" src="[[_icon(member)]]">
-                  [[member.title]]
+                <div class="member-box vertical layout">
+                  <div class="member-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
+                    </div>
+                    <span class="member-title ellipsis">[[member.title]]</span>
+                  </div>
+                  <div class="member-detail">
+                    <div class="layout center">
+                      <span class="member-property ellipsis">
+                        [[member.type]]
+                        <iron-icon  id="removeFromCollection" class="remove"
+                          icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
+                          </iron-icon>
+                        <paper-tooltip for="removeFromCollection">
+                          [[i18n('remove_from_collection', 'Remove from')]] [[selectedCollection]]
+                        </paper-tooltip>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div class="secondary dim ellipsis">[[member.type]]</div>
               </div>
             </template>
           </iron-list>
           <template is="dom-if" if="[[showMoreMembers]]">
-            <div class="item loading">
+            <div class="list-item loading">
               <div class="primary">
                 <paper-spinner class="nxicon" active="true"></paper-spinner>
                 [[i18n('loading_more', 'Loading more data')]]
@@ -382,12 +432,43 @@ Contributors:
           if (this.$.memberProvider) {
             if (this.$.memberProvider.isNextPageAvailable) {
               this.$.memberProvider.page = this.$.memberProvider.page + 1;
+              this.$.memberProvider.fetch();
             }
           }
         },
 
+        _removeFromCollection: function(evt) {
+          var op = this.$.removeFromCollectionOp;
+          var memberId = evt.currentTarget.dataset.uid;
+          op.input = memberId;
+          op.params = {
+            'collection': this.selectedCollection
+          };
+          op.execute().then(function() {
+            var memberIndex;
+            this.members = this.members.filter(function(el, index) {
+              if (el.uid === evt.target.dataset.uid) {
+                memberIndex = index;
+                return false;
+              }
+              return true;
+            });
+            this.$.membersList.selectItem(memberIndex);
+            this.$.toast.text = 'Document removed from Collection.';
+            this.$.toast.open();
+            this.fire('removedFromCollection',
+              {
+                innerRemove: true,
+                docId: memberId,
+                collectionId: evt.target.dataset.uid
+
+              }
+            );
+          }.bind(this));
+        },
+
         _computedClass: function(isSelected) {
-          var classes = 'item';
+          var classes = 'list-item';
           if (isSelected) {
             classes += ' selected';
           }
@@ -416,6 +497,15 @@ Contributors:
           return url + doc.properties['common:icon'];
         },
 
+        _thumbnail: function(doc) {
+          if (doc.contextParameters.thumbnail.url) {
+            return doc.contextParameters.thumbnail.url;
+          } else {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+          }
+        },
+
         _isEmpty: function(items) {
           return items && items.length === 0;
         },
@@ -425,7 +515,10 @@ Contributors:
             this.collections = [];
             this.$.collectionsProvider.fetch();
           }.bind(this));
-          window.addEventListener('removedFromCollection', function() {
+          window.addEventListener('removedFromCollection', function(e) {
+            if (e.detail.innerRemove) {
+              return;
+            }
             this.collections = [];
             this.$.collectionsProvider.fetch();
           }.bind(this));
