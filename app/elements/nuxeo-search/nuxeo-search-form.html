@@ -35,35 +35,34 @@ Contributors:
          scrolling breaks */
       height: calc(100vh - 61px);
     }
-    .item {
+    .list-item {
       cursor: pointer;
-      padding: 2px 10px;
+      padding: 1em;
       border-bottom: 1px solid #DDD;
     }
-    .item:focus,
-    .item.selected:focus {
+    .list-item:focus,
+    .list-item.selected:focus {
       outline: 0;
       background-color: #ddd;
     }
-    .item.selected {
+    .list-item.selected {
       color: var(--paper-blue-600);
     }
-    .item.selected {
+    .list-item.selected {
       background-color: var(--google-grey-300);
       border-bottom: 1px solid #ccc;
     }
-    .nxicon {
-      height: 16px;
-      width: 16px;
+    .list-item-title {
+      margin-left: 8px;
     }
-    .primary {
-      font-size: 16px;
+
+    .list-item-detail {
+      margin-left: 40px;
     }
-    .secondary {
-      font-size: 14px;
-    }
-    .dim {
-      color: gray;
+
+    .list-item-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
     }
     .manualLoading {
       color: var(--nuxeo-link-color);
@@ -173,11 +172,21 @@ Contributors:
           <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                <div class="primary ellipsis">
-                  <img class="nxicon" src="[[_icon(item)]]">
-                  [[item.title]]
+                <div class="list-item-box vertical layout">
+                  <div class="list-item-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                    </div>
+                    <span class="list-item-title ellipsis">[[item.title]]</span>
+                  </div>
+                  <div class="list-item-detail">
+                    <div class="layout center">
+                      <span class="list-item-property ellipsis">
+                        [[item.type]]
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div class="secondary dim ellipsis">[[item.type]]</div>
               </div>
             </template>
           </iron-list>
@@ -295,7 +304,7 @@ Contributors:
         },
 
         _computedClass: function(isSelected) {
-          var classes = 'item';
+          var classes = 'list-item';
           if (isSelected) {
             classes += ' selected';
           }
@@ -308,9 +317,13 @@ Contributors:
           }
         },
 
-        _icon: function(doc) {
-          var url = this.$.nxcon.url;
-          return url + doc.properties['common:icon'];
+        _thumbnail: function(doc) {
+          if (doc.contextParameters.thumbnail.url) {
+            return doc.contextParameters.thumbnail.url;
+          } else {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+          }
         },
 
         ready: function() {

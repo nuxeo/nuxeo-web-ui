@@ -224,6 +224,43 @@
         z-index: 200;
       }
 
+      /* Document queue */
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid #DDD;
+      }
+      .list-item:focus,
+      .list-item.selected:focus {
+        outline: 0;
+        background-color: #ddd;
+      }
+      .list-item.selected {
+        color: var(--paper-blue-600);
+        background-color: var(--google-grey-300);
+        border-bottom: 1px solid #ccc;
+      }
+
+      .list-item-title {
+        margin-left: 8px;
+      }
+
+      .list-item-detail {
+        margin-left: 40px;
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
+
+      .queue-thumbnail {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+      }
+
     </style>
   </template>
 </dom-module>

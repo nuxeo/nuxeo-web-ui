@@ -94,14 +94,6 @@ Contributors:
       color: var(--nuxeo-button-primary-text);
     }
 
-    .queue-thumbnail {
-      height: 32px;
-      width: 32px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      background-color: #ddd;
-    }
-
     /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
     .content {
       font-size: .9rem;
@@ -155,19 +147,6 @@ Contributors:
     }
 
     .collection-property {
-      color: var(--nuxeo-text-light);
-      margin-right: .2em;
-    }
-
-    .member-title {
-      margin-left: 8px;
-    }
-
-    .member-detail {
-      margin-left: 40px;
-    }
-
-    .member-property {
       color: var(--nuxeo-text-light);
       margin-right: .2em;
     }
@@ -274,16 +253,16 @@ Contributors:
               <iron-list id="membersList" items="[[members]]" selected-item="{{selectedMember}}" selection-enabled scroll-target="membersScrollThreshold" as="member">
                 <template>
                   <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                    <div class="member-box vertical layout">
-                      <div class="member-info horizontal layout center">
+                    <div class="list-item-box vertical layout">
+                      <div class="list-item-info horizontal layout center">
                         <div class="vertical layout center">
                           <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
                         </div>
-                        <span class="member-title ellipsis">[[member.title]]</span>
+                        <span class="list-item-title ellipsis">[[member.title]]</span>
                       </div>
-                      <div class="member-detail">
+                      <div class="list-item-detail">
                         <div class="layout center">
-                          <span class="member-property ellipsis">
+                          <span class="list-item-property ellipsis">
                             [[member.type]]
                             <iron-icon  id="removeFromCollection" class="remove"
                               icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
