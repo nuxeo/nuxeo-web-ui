@@ -418,6 +418,9 @@ Contributors:
 
         displayCollections: function() {
           this._isQueue = false;
+          this.fire('browseCollection', {
+            collection: this.selectedCollection,
+          });
         },
 
         _loadMoreCollections: function() {
