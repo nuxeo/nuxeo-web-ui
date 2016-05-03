@@ -13,6 +13,7 @@ Lesser General Public License for more details.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
+  Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
@@ -48,7 +49,7 @@ Contributors:
         min-height: 75vh;
       }
 
-      .content-view {
+      .content-view, #grid  {
         @apply(--layout-vertical);
         @apply(--layout-fit);
       }
@@ -87,8 +88,12 @@ Contributors:
         margin-right: 10px;
       }
 
-      #scrollThreshold {
+      #scrollThreshold, #table {
         padding: 2.5em 0em .8em;
+      }
+
+      #table {
+        padding: 2.5em 2em .8em;
       }
 
       #itemList {
@@ -145,11 +150,31 @@ Contributors:
         }
       }
 
+      paper-fab {
+        position: absolute;
+        top: 32px;
+        right: 32px;
+        color: #ffffff;
+        --paper-fab-background: #5ADA5A;
+        --paper-fab-keyboard-focus-background: #008000;
+        @apply(--nuxeo-document-create-button);
+        z-index: 1000;
+      }
+
+      #table iron-data-table {
+        background-color: #fff;
+        min-height: 85vh;
+      }
+
+      #table .queue-thumbnail {
+        margin-right: 1em;
+      }
+
     </style>
 
-    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-page-provider id="provider" auto
+    <nuxeo-page-provider id="provider"
        provider="[[provider]]"
        page-size="[[pageSize]]"
        number-of-pages="{{pageCount}}"
@@ -160,32 +185,71 @@ Contributors:
        is-next-page-available="{{isNextPageAvailable}}"
        current-page-size="{{currentPageSize}}"
        params="[[params]]"
+       sort="[[sort]]"
        on-update="_updateResults">
     </nuxeo-page-provider>
 
-    <div class="content-view">
-      <iron-scroll-threshold id="scrollThreshold"
-        lower-threshold="1000"
-        on-lower-threshold="_loadMoreData">
-        <div id="dropzone" class="grid-ctn bubbleBoxes">
-          <iron-list id="itemList" items="[[docItems]]" scroll-target="scrollThreshold" grid>
+    <template is="dom-if" if="[[_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
+      </paper-fab>
+      <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
+    </template>
+    <template is="dom-if" if="[[!_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
+      </paper-fab>
+      <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
+    </template>
+
+    <div id="dropzone" class="content-view">
+      <div id="grid"  hidden$="[[_isDisplayTable]]">
+        <iron-scroll-threshold id="scrollThreshold"
+          lower-threshold="1000"
+          on-lower-threshold="_loadMoreData">
+          <div class="grid-ctn bubbleBoxes">
+            <iron-list id="itemList" items="[[docItems]]" scroll-target="scrollThreshold" grid>
+              <template>
+                <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate">
+                </nuxeo-document-listing-thumbnail>
+              </template>
+            </iron-list>
+          </div>
+          <div id="loader" hidden$="[[!isNextPageAvailable]]">
+            <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
+              <paper-spinner active="true">
+              </paper-spinner>
+              Loading more ...
+            </div>
+            <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
+              Show more
+            </div>
+          </div>
+        </iron-scroll-threshold>
+      </div>
+      <div id="table" hidden$="[[!_isDisplayTable]]">
+        <iron-data-table id="datatable" selection-enabled multi-selection data-source="[[tableDataSource]]" size="{{size}}"
+          page-size="[[pageSize]]">
+          <data-table-column name="Title" flex="100" sort-by="dc:title">
             <template>
-              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate">
-              </nuxeo-document-listing-thumbnail>
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
-          </iron-list>
-        </div>
-        <div id="loader" hidden$="[[!isNextPageAvailable]]">
-          <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
-            <paper-spinner active="true">
-            </paper-spinner>
-            Loading more ...
-          </div>
-          <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
-            Show more
-          </div>
-        </div>
-      </iron-scroll-threshold>
+          </data-table-column>
+          <data-table-column name="Modified" sort-by="dc:modified">
+            <template>[[_formatDate(item.properties.dc:modified)]]</template>
+          </data-table-column>
+          <data-table-column name="Last Name">
+            <template>
+              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
+            </template>
+          </data-table-column>
+          <data-table-column name="Version">
+            <template>[[_displayVersion(item)]]</template>
+          </data-table-column>
+          <data-table-column name="State">
+            <template>[[item.state]]</template>
+          </data-table-column>
+        </iron-data-table>
+      </div>
     </div>
 
     <paper-toast id="toast"></paper-toast>
@@ -201,6 +265,11 @@ Contributors:
         behaviors: [Nuxeo.UploaderBehavior],
         properties: {
           params: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          sort: {
             type: Object,
             value: {},
             notify: true
@@ -255,6 +324,10 @@ Contributors:
           manualLoadingThreshold: {
             type: Number,
             value: 3
+          },
+          _isDisplayTable: {
+            type: Boolean,
+            value: true
           }
         },
 
@@ -274,6 +347,39 @@ Contributors:
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
+
+          // plug iron-data-table datasource
+          this.tableDataSource = function(opts, cb) {
+            this.$.provider.page = opts.page + 1;
+            var tmpSort = {};
+            if (opts.sortOrder && opts.sortOrder.length > 0) {
+              opts.sortOrder.forEach(function(sortItem) {
+                tmpSort[sortItem.path] = sortItem.direction;
+              });
+            }
+            if (JSON.stringify(this.sort) !== JSON.stringify(tmpSort)) {
+              this.sort = tmpSort;
+              this.$.datatable.size = 0;
+            }
+            this.$.provider.fetch().then(function() {
+              if (!this.$.provider.isNextPageAvailable) {
+                this.$.datatable.size = this.$.provider.currentPageSize +
+                  ((this.$.provider.page - 1) * this.$.provider.pageSize);
+
+              } else {
+                if (this.$.datatable.size === 0) {
+                  this.$.datatable.size = this.$.provider.pageSize;
+                }
+                // if last page is reached, increment the size.
+                if (this.$.datatable.size / opts.pageSize >= opts.page) {
+                  this.$.datatable.size += opts.pageSize;
+                }
+              }
+              cb(this.$.provider.currentPage);
+            }.bind(this));
+
+          }.bind(this);
+
         },
 
         importBatch: function(data) {
@@ -376,12 +482,45 @@ Contributors:
         _resetResults: function() {
           this.pageNumber = 1;
           this.docItems = [];
-          this.pageSize = 40;
           this.isNextPageAvailable = false;
+          this.$.datatable.clearCache();
+          this.$.datatable.clearSelection();
+          this.$.datatable.size = 0;
         },
 
         _computeManualLoading: function(pageNumber) {
           return pageNumber > this.manualLoadingThreshold;
+        },
+
+        displayGrid: function() {
+          this._isDisplayTable = false;
+          this.$.itemList.fire('iron-resize');
+        },
+
+        displayTable: function() {
+          this._isDisplayTable = true;
+          this.$.datatable.notifyResize();
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _thumbnail: function(doc) {
+          if (doc && doc.uid) {
+            if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
+              return doc.contextParameters.thumbnail.url;
+            } else {
+              var baseUrl = this.$.nxcon.url;
+              return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+            }
+          }
+        },
+
+        _displayVersion: function(doc) {
+          if (doc.properties && doc.properties['uid:major_version']) {
+            return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+          }
         }
 
       });

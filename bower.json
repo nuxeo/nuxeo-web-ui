@@ -16,7 +16,8 @@
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
     "polymer": "Polymer/polymer#^1.1.0",
-    "neon-animation": "PolymerElements/neon-animation#^1.2.2"
+    "neon-animation": "PolymerElements/neon-animation#^1.2.2",
+    "iron-data-table": "^1.0.0-alpha6"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
