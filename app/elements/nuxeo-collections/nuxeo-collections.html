@@ -611,6 +611,16 @@ Contributors:
             this.$.collectionsProvider.fetch();
           }.bind(this));
 
+          // tmp fix
+          // see https://github.com/PolymerElements/iron-list/issues/236
+          this.$.collectionsList._didMoveDown = function(e) {
+            this._focusPhysicalItem(this._focusedIndex + 1);
+          };
+          this.$.membersList._didMoveDown = function(e) {
+            this._focusPhysicalItem(this._focusedIndex + 1);
+          };
+          // end tmp fix
+
           this.$.collectionsList.selectQueuePrevious = function() {
             this._didMoveUp();
             this.toggleSelectionForFocusedItem();
