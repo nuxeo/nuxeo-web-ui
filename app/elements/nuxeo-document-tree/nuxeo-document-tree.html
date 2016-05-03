@@ -1,0 +1,100 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-tree`
+@group Nuxeo UI
+@element nuxeo-document-tree
+-->
+
+<dom-module id="nuxeo-document-tree">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      nuxeo-tree {
+        padding: 1em;
+      }
+
+      ::content iron-icon {
+        cursor: pointer;
+      }
+    </style>
+
+    <nuxeo-document auto doc-path="/default-domain" response="{{rootDocument}}"></nuxeo-document>
+    <nuxeo-page-provider id="children" provider="tree_children"></nuxeo-page-provider>
+
+    <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
+      <template>
+        <iron-icon icon="[[_icon(opened)]]" toggle></iron-icon>
+        <span class="flex"><a href$="/browse/[[item.path]]">[[item.title]]</a></span>
+      </template>
+    </nuxeo-tree>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-tree',
+
+        properties: {
+          controller: Object,
+
+          currentDocument: {
+            type: Object,
+            observer: '_currentDocumentChanged'
+          }
+        },
+
+        ready: function() {
+          this.controller = {
+            getChildren: function(node) {
+              this.$.children.params = [node.uid];
+              return this.$.children.fetch().then(function(data) {
+                return data.entries;
+              }.bind(this));
+            }.bind(this),
+
+            isLeaf: function() {
+              return false;
+            }
+          };
+        },
+
+        _currentDocumentChanged: function() {
+          if (this.currentDocument) {
+            var ids = this.currentDocument.contextParameters.breadcrumb.entries.map(function(entry) {
+              return entry.uid;
+            });
+            this.$.tree.open(ids);
+          }
+        },
+
+        _icon: function(opened) {
+          return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+        }
+      });
+    })();
+  </script>
+</dom-module>

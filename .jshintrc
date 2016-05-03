@@ -25,6 +25,7 @@
     "jsPlumb": true,
     "AlloyEditor": true,
     "CKEDITOR": true,
-    "jQuery": true
+    "jQuery": true,
+    "Promise": true
   }
 }
