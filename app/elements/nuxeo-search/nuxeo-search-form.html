@@ -329,7 +329,7 @@ Contributors:
         ready: function() {
           // tmp fix
           // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.itemsList._didMoveDown = function(e) {
+          this.$.itemsList._didMoveDown = function() {
             this._focusPhysicalItem(this._focusedIndex + 1);
           };
           // end tmp fix

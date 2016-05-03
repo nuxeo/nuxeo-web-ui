@@ -353,6 +353,7 @@ Contributors:
           keyEventTarget: {
             type: Object,
             value: function() {
+              console.log();
               return document.body;
             }
           },
@@ -613,10 +614,10 @@ Contributors:
 
           // tmp fix
           // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.collectionsList._didMoveDown = function(e) {
+          this.$.collectionsList._didMoveDown = function() {
             this._focusPhysicalItem(this._focusedIndex + 1);
           };
-          this.$.membersList._didMoveDown = function(e) {
+          this.$.membersList._didMoveDown = function() {
             this._focusPhysicalItem(this._focusedIndex + 1);
           };
           // end tmp fix
