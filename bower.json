@@ -4,7 +4,7 @@
   "dependencies": {
     "alloyeditor": "~0.7.5",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
-    "iron-list": "PolymerElements/iron-list#1.2.8",
+    "iron-list": "PolymerElements/iron-list#^1.2.8",
     "jsPlumb": "2.0.4",
     "marked-element": "PolymerElements/marked-element#~1.1.1",
     "moment": "~2.10.6",

@@ -85,7 +85,11 @@ Contributors:
       }
 
       #scrollThreshold {
-        padding: 2.5em 2em .8em;
+        padding: 2.5em 0em .8em;
+      }
+
+      #itemList {
+        width: 95%;
       }
 
       .grid-box {
@@ -149,9 +153,12 @@ Contributors:
           lower-threshold="800"
           on-lower-threshold="_loadMoreData">
           <div class="grid-ctn bubbleBoxes">
-            <template is="dom-repeat" items="[[docItems]]">
-              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigateFromSearch"></nuxeo-document-listing-thumbnail>
-            </template>
+            <iron-list id="itemList" items="[[docItems]]" scroll-target="scrollThreshold" grid>
+              <template>
+                <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigateFromSearch">
+                </nuxeo-document-listing-thumbnail>
+              </template>
+            </iron-list>
           </div>
           <div id="loader" hidden$="[[!showMore]]">
             <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">

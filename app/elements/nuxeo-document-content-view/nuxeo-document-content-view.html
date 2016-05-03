@@ -88,7 +88,11 @@ Contributors:
       }
 
       #scrollThreshold {
-        padding: 2.5em 2em .8em;
+        padding: 2.5em 0em .8em;
+      }
+
+      #itemList {
+        width: 95%;
       }
 
       .grid-box {
@@ -164,9 +168,12 @@ Contributors:
         lower-threshold="1000"
         on-lower-threshold="_loadMoreData">
         <div id="dropzone" class="grid-ctn bubbleBoxes">
-          <template is="dom-repeat" items="[[docItems]]">
-            <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate"></nuxeo-document-listing-thumbnail>
-          </template>
+          <iron-list id="itemList" items="[[docItems]]" scroll-target="scrollThreshold" grid>
+            <template>
+              <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate">
+              </nuxeo-document-listing-thumbnail>
+            </template>
+          </iron-list>
         </div>
         <div id="loader" hidden$="[[!isNextPageAvailable]]">
           <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
@@ -362,9 +369,6 @@ Contributors:
           if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
               this.provider &&
               this.isNextPageAvailable) {
-            if (this.pageNumber === 1) {
-              this.pageSize = 20;
-            }
             this.pageNumber = this.pageNumber + 1;
           }
         },
