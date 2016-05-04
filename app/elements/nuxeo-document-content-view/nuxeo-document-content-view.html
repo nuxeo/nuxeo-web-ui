@@ -518,7 +518,7 @@ Contributors:
         },
 
         _displayVersion: function(doc) {
-          if (doc.properties && doc.properties['uid:major_version']) {
+          if (doc.properties && doc.properties['uid:major_version'] !== undefined) {
             return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
           }
         }
