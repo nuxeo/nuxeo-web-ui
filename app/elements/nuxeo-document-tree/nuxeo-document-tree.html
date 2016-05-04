@@ -40,7 +40,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document auto doc-path="/default-domain" response="{{rootDocument}}"></nuxeo-document>
+    <nuxeo-document auto doc-path="[[rootPath]]" doc-id="[[rootId]]" response="{{rootDocument}}"></nuxeo-document>
     <nuxeo-page-provider id="children" provider="tree_children"></nuxeo-page-provider>
 
     <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
@@ -59,6 +59,10 @@ Contributors:
         is: 'nuxeo-document-tree',
 
         properties: {
+          rootPath: String,
+
+          rootId: String,
+
           controller: Object,
 
           currentDocument: {
@@ -87,7 +91,7 @@ Contributors:
             var ids = this.currentDocument.contextParameters.breadcrumb.entries.map(function(entry) {
               return entry.uid;
             });
-            this.$.tree.open(ids);
+            this.$.tree.open.apply(this.$.tree, ids);
           }
         },
 
