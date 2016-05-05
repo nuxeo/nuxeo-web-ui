@@ -26,7 +26,7 @@ Contributors:
 
 <dom-module id="nuxeo-document-tree">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -35,18 +35,37 @@ Contributors:
         padding: 1em;
       }
 
+      nuxeo-tree ::content nuxeo-tree-node {
+        min-height: 24px;
+      }
+
+      nuxeo-tree ::content .node-name {
+        display: inline;
+        left: 2em;
+        position: absolute;
+      }
+
       ::content iron-icon {
+        color: #213f7d
+      }
+
+      [toggle] {
         cursor: pointer;
       }
     </style>
 
-    <nuxeo-document auto doc-path="[[rootPath]]" doc-id="[[rootId]]" response="{{rootDocument}}"></nuxeo-document>
-    <nuxeo-page-provider id="children" provider="tree_children"></nuxeo-page-provider>
+    <nuxeo-document auto doc-path="[[rootPath]]" doc-id="[[rootId]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
+    <nuxeo-page-provider id="children" provider="tree_children" enrichers="children"></nuxeo-page-provider>
 
     <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
       <template>
-        <iron-icon icon="[[_icon(opened)]]" toggle></iron-icon>
-        <span class="flex"><a href$="/browse/[[item.path]]">[[item.title]]</a></span>
+        <template is="dom-if" if="[[!isLeaf]]">
+          <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+        </template>
+        <span class="flex node-name ellipsis">
+          <iron-icon icon="[[_icon(opened)]]"></iron-icon>
+          <a href$="/browse/[[item.path]]">[[item.title]]</a>
+        </span>
       </template>
     </nuxeo-tree>
 
@@ -80,8 +99,12 @@ Contributors:
               }.bind(this));
             }.bind(this),
 
-            isLeaf: function() {
-              return false;
+            isLeaf: function(node) {
+              var children = node.contextParameters.children;
+              var folders = children.entries.filter(function(item) {
+                return item.facets.indexOf('Folderish') >= 0;
+              });
+              return folders.length === 0;
             }
           };
         },
@@ -95,8 +118,12 @@ Contributors:
           }
         },
 
-        _icon: function(opened) {
+        _expandIcon: function(opened) {
           return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+        },
+
+        _icon: function(opened) {
+          return opened ? 'icons:folder-open' : 'icons:folder';
         }
       });
     })();
