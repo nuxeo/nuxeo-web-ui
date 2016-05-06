@@ -7,5 +7,6 @@ module.exports = function () {
     this.ui = UI.get();
   });
 
-  this.When('I click the "$tab" tab', (tab) => this.ui.goTo(tab));
+  this.When('I click the "$button" button', (button) => this.ui.goTo(button));
+
 };

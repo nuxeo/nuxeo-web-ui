@@ -8,5 +8,5 @@ Feature: Browser
 
   @ignore
   Scenario: Browse
-    When I click the "browse" tab
+    When I click the browser button
     Then I can see the browser

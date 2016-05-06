@@ -8,7 +8,7 @@ Feature: Home
 
   @ignore
   Scenario: My dashboard
-    When I click the "home" tab
+    When I click the Nuxeo logo
     Then I can see my home
     # And I have a "My Documents" card
     # And I have a "My Last Edits" card
