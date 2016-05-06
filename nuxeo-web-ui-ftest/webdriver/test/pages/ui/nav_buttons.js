@@ -1,6 +1,6 @@
 'use strict';
 
-export default class Browser {
+export default class NavButtons {
 
   constructor(selector) {
     this.selector = selector;

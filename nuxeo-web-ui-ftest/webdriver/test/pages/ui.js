@@ -1,19 +1,31 @@
 'use strict';
 
-import Admin from './ui/admin';
-import Browser from './ui/browser';
-import Home from './ui/home';
+import NavButtons from './ui/nav_buttons';
 
 export default class UI {
 
   constructor() {
-    this.home = new Home('nuxeo-home');
-    this.browser = new Browser('nuxeo-browser');
-    this.admin = new Admin('nuxeo-admin');
+    this.home = new NavButtons('nuxeo-home');
+    this.browser = new NavButtons('section.browse');
+    this.search = new NavButtons('section.search');
+    this.admin = new NavButtons('section.administration');
+    this.recents = new NavButtons('section.recents');
+    this.tasks = new NavButtons('section.tasks');
+    this.favorites = new NavButtons('section.favorites');
+    this.collections = new NavButtons('section.collections');
+    this.personal = new NavButtons('section.personal-space');
   }
 
-  goTo(tab) {
-    driver.click(`paper-tab[name='${tab}']`);
+  goTo(button) {
+    driver.click(`paper-icon-button[name='${button}']`);
+  }
+
+  goHome() {
+    driver.click('paper-icon-button.logo');
+  }
+
+  goToBrowser() {
+    driver.click(`paper-icon-button[icon="icons:folder-open"]`);
   }
 
   static get() {

@@ -8,5 +8,5 @@ Feature: Admin center
 
   @ignore
   Scenario: Admin center
-    When I click the "admin" tab
-    Then I can see the Admin center
+    When I click the "administration" button
+    Then I can see the administration menu
