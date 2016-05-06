@@ -6,7 +6,6 @@ Feature: Admin center
     When I login as "Administrator"
     And I go to the UI
 
-  @ignore
   Scenario: Admin center
     When I click the "administration" button
     Then I can see the administration menu
