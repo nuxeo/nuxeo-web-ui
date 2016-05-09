@@ -205,7 +205,7 @@ Contributors:
             </paper-dialog>
 
             <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view provider="document_content"
+              <nuxeo-document-content-view provider="advanced_document_content"
                 params="[[cvParams]]"
                 document="[[document]]">
               </nuxeo-document-content-view>
@@ -259,7 +259,7 @@ Contributors:
             observer: '_navigate'
           },
           cvParams: {
-            type: Array,
+            type: Object,
             notify: true
           }
         },
@@ -374,7 +374,7 @@ Contributors:
 
         _updateCvParams: function() {
           if (this._canViewContent()) {
-            this.cvParams = [this.document.uid];
+            this.cvParams = {'ecm_parentId': this.document.uid};
           }
         },
 

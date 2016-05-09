@@ -170,6 +170,10 @@ Contributors:
         margin-right: 1em;
       }
 
+      nuxeo-dropdown-aggregation {
+        width: 100%;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -184,7 +188,7 @@ Contributors:
        current-page="{{currentPage}}"
        is-next-page-available="{{isNextPageAvailable}}"
        current-page-size="{{currentPageSize}}"
-       params="[[params]]"
+       params="[[_computedParams]]"
        sort="[[sort]]"
        on-update="_updateResults">
     </nuxeo-page-provider>
@@ -228,16 +232,33 @@ Contributors:
       <div id="table" hidden$="[[!_isDisplayTable]]">
         <iron-data-table id="datatable" selection-enabled multi-selection data-source="[[tableDataSource]]" size="{{size}}"
           page-size="[[pageSize]]">
-          <data-table-column name="Title" flex="100" sort-by="dc:title">
+          <data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
           </data-table-column>
-          <data-table-column name="Modified" sort-by="dc:modified">
-            <template>[[_formatDate(item.properties.dc:modified)]]</template>
+          <data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
+            <template is="header">
+                <nuxeo-dropdown-aggregation name="dc_modified_agg"
+                    placeholder="[[i18n('modified', 'Modified')]]"
+                    aggregations="[[aggregations]]"
+                    value="{{column.filterValue}}">
+                </nuxeo-dropdown-aggregation>
+            </template>
+            <template>
+              [[_formatDate(item.properties.dc:modified)]]
+            </template>
           </data-table-column>
-          <data-table-column name="Last Name">
+          <data-table-column filter-by="dc_lastContributor_agg" flex="50" sort-by="dc:lastContributor"
+            filter-by="dc_last_contributor_agg">
+            <template is="header">
+                <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
+                    placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
+                    aggregations="[[aggregations]]"
+                    value="{{column.filterValue}}">
+                </nuxeo-dropdown-aggregation>
+            </template>
             <template>
               <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
             </template>
@@ -271,8 +292,15 @@ Contributors:
           },
           sort: {
             type: Object,
-            value: {},
-            notify: true
+            value: {}
+          },
+          filters: {
+            type: Object,
+            value: {}
+          },
+          _computedParams: {
+            type: Object,
+            computed: '_computeParams(params, filters)'
           },
           provider: {
             type: String
@@ -351,6 +379,7 @@ Contributors:
           // plug iron-data-table datasource
           this.tableDataSource = function(opts, cb) {
             this.$.provider.page = opts.page + 1;
+
             var tmpSort = {};
             if (opts.sortOrder && opts.sortOrder.length > 0) {
               opts.sortOrder.forEach(function(sortItem) {
@@ -361,11 +390,26 @@ Contributors:
               this.sort = tmpSort;
               this.$.datatable.size = 0;
             }
+
+            var tmpFilters = {};
+            if (opts.filter && opts.filter.length > 0) {
+              opts.filter.forEach(function(filterItem) {
+                if (filterItem.path === 'title') {
+                  tmpFilters[filterItem.path] = filterItem.filter + '*';
+                } else {
+                  tmpFilters[filterItem.path] = filterItem.filter;
+                }
+              });
+            }
+            if (JSON.stringify(this.filter) !== JSON.stringify(tmpFilters)) {
+              this.filters = tmpFilters;
+              this.$.datatable.size = 0;
+            }
+
             this.$.provider.fetch().then(function() {
               if (!this.$.provider.isNextPageAvailable) {
                 this.$.datatable.size = this.$.provider.currentPageSize +
                   ((this.$.provider.page - 1) * this.$.provider.pageSize);
-
               } else {
                 if (this.$.datatable.size === 0) {
                   this.$.datatable.size = this.$.provider.pageSize;
@@ -380,6 +424,12 @@ Contributors:
 
           }.bind(this);
 
+        },
+
+        _computeParams: function(params, filters) {
+          var result = {};
+          jQuery().extend(result, params, filters);
+          return result;
         },
 
         importBatch: function(data) {
@@ -486,6 +536,7 @@ Contributors:
           this.$.datatable.clearCache();
           this.$.datatable.clearSelection();
           this.$.datatable.size = 0;
+          this.filters = {};
         },
 
         _computeManualLoading: function(pageNumber) {
