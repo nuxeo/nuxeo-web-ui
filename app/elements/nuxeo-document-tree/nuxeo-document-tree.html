@@ -64,7 +64,7 @@ Contributors:
         </template>
         <span class="flex node-name ellipsis">
           <iron-icon icon="[[_icon(opened)]]"></iron-icon>
-          <a href$="/browse/[[item.path]]">[[item.title]]</a>
+          <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
         </span>
       </template>
     </nuxeo-tree>
@@ -89,6 +89,8 @@ Contributors:
             observer: '_currentDocumentChanged'
           }
         },
+
+        behaviors: [Nuxeo.RoutingBehavior],
 
         ready: function() {
           this.controller = {
