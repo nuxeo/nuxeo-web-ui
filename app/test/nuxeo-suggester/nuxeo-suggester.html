@@ -87,7 +87,7 @@ Contributors:
           .then(function() {
             var items = suggester.querySelectorAll('a');
             expect(items.length).to.be.equal(3);
-            expect(items[0].href).to.contain('/doc/default/5e839dd0-6603-4286-bfdd-ddbdc9aa1918');
+            expect(items[0].href).to.contain('/doc/5e839dd0-6603-4286-bfdd-ddbdc9aa1918');
             expect(items[1].href).to.contain('/user/Administrator');
             expect(items[2].href).to.contain('/group/administrators');
             MockInteractions.tap(suggester.$.searchButton);
