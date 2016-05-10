@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
   Gabriel Barata <gbarata@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
 -->
 
 <script src="../bower_components/page/page.js"></script>
@@ -109,5 +110,39 @@ Contributors:
     page({
       hashbang: true
     });
+
+    Polymer.Base._addFeature({
+      router: {
+        browse: function(path) {
+          return page.base() + '/browse' + path;
+        },
+
+        document: function(id) {
+          return page.base() + '/doc/' + id;
+        },
+
+        home: function() {
+          return page.base() + '/home';
+        },
+
+        tasks: function() {
+          return page.base() + '/tasks';
+        },
+
+        administration: function(tab) {
+          return page.base() + '/admin/' + tab;
+        },
+
+        user: function(name) {
+          return page.base() + '/user/' + name;
+        },
+
+        group: function(name) {
+          return page.base() + '/group/' + name;
+        },
+      },
+      baseUrl: page.base()
+    });
+    document.dispatchEvent(new Event('router-changed'));
   });
 </script>
