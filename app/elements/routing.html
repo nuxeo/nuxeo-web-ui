@@ -26,7 +26,7 @@ Contributors:
     var app = document.querySelector('nuxeo-app');
 
     // strip final /
-    page.base(app.baseUrl.replace(/\/$/, ''));
+    page.base(app.baseUrl.replace(/\/$/, '') + '/#!');
 
     // Middleware
     function scrollToTop(ctx, next) {
