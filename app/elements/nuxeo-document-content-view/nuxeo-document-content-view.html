@@ -31,245 +31,72 @@ Contributors:
         @apply(--layout-flex);
       }
 
-      .bubbleBoxes {
-        @apply(--layout-flex);
-      }
-
-      .bubbleBoxes.hover {
-        border: 2px dashed #aaa;
-        @apply(--nuxeo-drop-zone-hover);
-      }
-
-      .bubbleBoxes.hoverSmartImport {
-        border: 2px dashed #0a0;
-        @apply(--nuxeo-drop-zone-hover-smart-import);
-      }
-
-      #dropzone {
-        min-height: 75vh;
-      }
-
-      .content-view, #grid  {
+      .content-view  {
         @apply(--layout-vertical);
         @apply(--layout-fit);
       }
 
-      .grid-ctn {
-        display: flex;
-        flex-flow: row wrap;
-        align-items: flex-start;
-      }
-
-      .loadingIndicator,
-      .manualLoading {
-        text-align: center;
-        height: 40px;
-        background-color: #fff;
-        color: var(--nuxeo-text-light);
-        padding-top: 10px;
-        border-radius: .2em;
-        border: 1px solid #eee;
-        margin: 1em 0 2em;
-      }
-
-      .manualLoading {
-        color: var(--nuxeo-link-color);
-      }
-
-      .manualLoading:hover {
-        cursor: pointer;
-        color: var(--nuxeo-link-hover-color);
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-      }
-
-      .loadingIndicator paper-spinner {
-        width: 20px;
-        height: 20px;
-        margin-right: 10px;
-      }
-
-      #scrollThreshold, #table {
-        padding: 2.5em 0em .8em;
-      }
-
-      #table {
-        padding: 2.5em 2em .8em;
-      }
-
-      #itemList {
-        width: 95%;
-      }
-
-      .grid-box {
-        width: 20%;
-        min-width: 16em;
-      }
-
-      paper-icon-button.giant {
-        width: 100px;
-        height: 100px;
-      }
-
-      /* mobile */
-      @media all and (min-width: 0) and (max-width: 600px) {
-        #scrollThreshold {
-          padding: 2em 1em 0;
-        }
-
-        .grid-ctn {
-          flex-flow: column nowrap;
-        }
-
-        .grid-box {
-          width: 100%;
-        }
-      }
-      /* tablet-small-landscape */
-      @media all and (min-width: 601px) and (max-width: 840px) {
-        .grid-box {
-          width: 50%;
-        }
-      }
-
-      /* small desktop */
-      @media all and (min-width: 841px) and (max-width: 1024px) {
-        .grid-box {
-          width: 33%;
-        }
-      }
-
-      @media all and (min-width: 1025px) and (max-width: 1280px) {
-        .grid-box {
-          width: 25%;
-        }
-      }
-
-      @media all and (min-width: 1281px) and (max-width: 1480px) {
-        .grid-box {
-          width: 20%;
-        }
-      }
-
-      paper-fab {
-        position: absolute;
-        top: 32px;
-        right: 32px;
-        color: #ffffff;
-        --paper-fab-background: #5ADA5A;
-        --paper-fab-keyboard-focus-background: #008000;
-        @apply(--nuxeo-document-create-button);
-        z-index: 1000;
-      }
-
-      #table iron-data-table {
+      nuxeo-data-table {
         background-color: #fff;
         min-height: 85vh;
-      }
-
-      #table .queue-thumbnail {
-        margin-right: 1em;
       }
 
       nuxeo-dropdown-aggregation {
         width: 100%;
       }
 
+      nuxeo-data-table {
+        padding: 2.5em 2em .8em;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-page-provider id="provider"
-       provider="[[provider]]"
-       page-size="[[pageSize]]"
-       number-of-pages="{{pageCount}}"
-       aggregations="{{aggregations}}"
-       enrichers="thumbnail"
-       page="[[pageNumber]]"
-       current-page="{{currentPage}}"
-       is-next-page-available="{{isNextPageAvailable}}"
-       current-page-size="{{currentPageSize}}"
-       params="[[_computedParams]]"
-       sort="[[sort]]"
-       on-update="_updateResults">
-    </nuxeo-page-provider>
-
-    <template is="dom-if" if="[[_isDisplayTable]]">
-      <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
-      </paper-fab>
-      <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
-    </template>
-    <template is="dom-if" if="[[!_isDisplayTable]]">
-      <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
-      </paper-fab>
-      <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
-    </template>
-
     <div id="dropzone" class="content-view">
-      <div id="grid"  hidden$="[[_isDisplayTable]]">
-        <iron-scroll-threshold id="scrollThreshold"
-          lower-threshold="1000"
-          on-lower-threshold="_loadMoreData">
-          <div class="grid-ctn bubbleBoxes">
-            <iron-list id="itemList" items="[[docItems]]" scroll-target="scrollThreshold" grid>
-              <template>
-                <nuxeo-document-listing-thumbnail class="grid-box" doc="[[item]]" on-navigate="_navigate">
-                </nuxeo-document-listing-thumbnail>
-              </template>
-            </iron-list>
-          </div>
-          <div id="loader" hidden$="[[!isNextPageAvailable]]">
-            <div class="autoLoading loadingIndicator" hidden$="[[manualLoading]]">
-              <paper-spinner active="true">
-              </paper-spinner>
-              Loading more ...
-            </div>
-            <div class="manualLoading" hidden$="[[!manualLoading]]" on-tap="_loadMoreData">
-              Show more
-            </div>
-          </div>
-        </iron-scroll-threshold>
-      </div>
-      <div id="table" hidden$="[[!_isDisplayTable]]">
-        <iron-data-table id="datatable" selection-enabled multi-selection data-source="[[tableDataSource]]"
-          page-size="[[pageSize]]">
-          <data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
-            <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-              <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
-            </template>
-          </data-table-column>
-          <data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
-            <template is="header">
-                <nuxeo-dropdown-aggregation name="dc_modified_agg"
-                    placeholder="[[i18n('modified', 'Modified')]]"
-                    aggregations="[[aggregations]]"
-                    value="{{column.filterValue}}" multiple>
-                </nuxeo-dropdown-aggregation>
-            </template>
-            <template>
-              [[_formatDate(item.properties.dc:modified)]]
-            </template>
-          </data-table-column>
-          <data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
-            <template is="header">
-                <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
-                    placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
-                    aggregations="[[aggregations]]"
-                    value="{{column.filterValue}}" multiple>
-                </nuxeo-dropdown-aggregation>
-            </template>
-            <template>
-              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
-            </template>
-          </data-table-column>
-          <data-table-column name="Version">
-            <template>[[_displayVersion(item)]]</template>
-          </data-table-column>
-          <data-table-column name="State">
-            <template>[[item.state]]</template>
-          </data-table-column>
-        </iron-data-table>
-      </div>
+      <nuxeo-data-table id="datatable"
+        provider="[[provider]]"
+        enrichers="thumbnail"
+        params="[[params]]"
+        aggregations="{{aggregations}}"
+        page-size="[[pageSize]]">
+        <data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+          <template>
+            <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+            <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+          </template>
+        </data-table-column>
+        <data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
+          <template is="header">
+              <nuxeo-dropdown-aggregation name="dc_modified_agg"
+                  placeholder="[[i18n('modified', 'Modified')]]"
+                  aggregations="[[aggregations]]"
+                  value="{{column.filterValue}}" multiple>
+              </nuxeo-dropdown-aggregation>
+          </template>
+          <template>
+            [[_formatDate(item.properties.dc:modified)]]
+          </template>
+        </data-table-column>
+        <data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
+          <template is="header">
+              <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
+                  placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
+                  aggregations="[[aggregations]]"
+                  value="{{column.filterValue}}" multiple>
+              </nuxeo-dropdown-aggregation>
+          </template>
+          <template>
+            <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
+          </template>
+        </data-table-column>
+        <data-table-column name="Version">
+          <template>[[_displayVersion(item)]]</template>
+        </data-table-column>
+        <data-table-column name="State">
+          <template>[[item.state]]</template>
+        </data-table-column>
+      </nuxeo-data-table>
     </div>
 
     <paper-toast id="toast"></paper-toast>
@@ -289,41 +116,12 @@ Contributors:
             value: {},
             notify: true
           },
-          sort: {
-            type: Object,
-            value: {}
-          },
-          filters: {
-            type: Object,
-            value: {}
-          },
-          _computedParams: {
-            type: Object,
-            computed: '_computeParams(params, filters)'
-          },
           provider: {
             type: String
-          },
-          aggregations: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          pageNumber: {
-            type: Number,
-            value: 1
           },
           pageSize: {
             type: Number,
             value: 40
-          },
-          pageCount: {
-            type: Number,
-            value: 1
-          },
-          isNextPageAvailable: {
-            type: Boolean,
-            value: false
           },
           isSmartImport: {
             type: Boolean,
@@ -338,23 +136,6 @@ Contributors:
           },
           currentDocument: {
             type: Object
-          },
-          docItems: {
-            type: Array,
-            value: []
-          },
-          manualLoading: {
-            type: Boolean,
-            value: false,
-            computed: '_computeManualLoading(pageNumber)'
-          },
-          manualLoadingThreshold: {
-            type: Number,
-            value: 3
-          },
-          _isDisplayTable: {
-            type: Boolean,
-            value: true
           }
         },
 
@@ -367,70 +148,9 @@ Contributors:
           'dropzone.drop': '_dropSmartImport'
         },
 
-        observers: [
-          '_resetResults(provider, params.*)'
-        ],
-
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
-
-          // plug iron-data-table datasource
-          this.tableDataSource = function(opts, cb) {
-            this.$.provider.page = opts.page + 1;
-
-            var tmpSort = {};
-            if (opts.sortOrder && opts.sortOrder.length > 0) {
-              opts.sortOrder.forEach(function(sortItem) {
-                tmpSort[sortItem.path] = sortItem.direction;
-              });
-            }
-            if (JSON.stringify(this.sort) !== JSON.stringify(tmpSort)) {
-              this.sort = tmpSort;
-              this.$.datatable.size = 0;
-            }
-
-            var tmpFilters = {};
-            if (opts.filter && opts.filter.length > 0) {
-              opts.filter.forEach(function(filterItem) {
-                if (filterItem.filter.length > 0) {
-                  if (filterItem.path === 'title') {
-                    tmpFilters[filterItem.path] = filterItem.filter + '*';
-                  } else {
-                    tmpFilters[filterItem.path] = filterItem.filter;
-                  }
-                }
-              });
-            }
-            if (JSON.stringify(this.filters) !== JSON.stringify(tmpFilters)) {
-              this.filters = tmpFilters;
-              this.$.datatable.size = 0;
-            }
-
-            this.$.provider.fetch().then(function() {
-              if (!this.$.provider.isNextPageAvailable) {
-                this.$.datatable.size = this.$.provider.currentPageSize +
-                  ((this.$.provider.page - 1) * this.$.provider.pageSize);
-              } else {
-                if (this.$.datatable.size === 0) {
-                  this.$.datatable.size = this.$.provider.pageSize;
-                }
-                // if last page is reached, increment the size.
-                if (this.$.datatable.size / opts.pageSize >= opts.page) {
-                  this.$.datatable.size += opts.pageSize;
-                }
-              }
-              cb(this.$.provider.currentPage);
-            }.bind(this));
-
-          }.bind(this);
-
-        },
-
-        _computeParams: function(params, filters) {
-          var result = {};
-          jQuery().extend(result, params, filters);
-          return result;
         },
 
         importBatch: function(data) {
@@ -509,49 +229,6 @@ Contributors:
           clearTimeout(this.dropZoneTimeout);
           this.dropZoneTimeout = null;
           this.toggleClass('hoverSmartImport', false, this._dropZone);
-        },
-
-        _updateResults: function() {
-          if (this.$.provider.page === 1) {
-            this.docItems = [];
-          }
-          var docs = this.$.provider.currentPage;
-          docs.forEach(function(doc) {
-            this.push('docItems', doc);
-          }.bind(this));
-          this.$.scrollThreshold.clearTriggers();
-        },
-
-        _loadMoreData: function(e) {
-          if ((e.currentTarget.id === 'scrollThreshold' ? !this.manualLoading : this.manualLoading) &&
-              this.provider &&
-              this.isNextPageAvailable) {
-            this.pageNumber = this.pageNumber + 1;
-          }
-        },
-
-        _resetResults: function() {
-          this.pageNumber = 1;
-          this.docItems = [];
-          this.isNextPageAvailable = false;
-          this.$.datatable.clearCache();
-          this.$.datatable.clearSelection();
-          this.$.datatable.size = 0;
-          this.filters = {};
-        },
-
-        _computeManualLoading: function(pageNumber) {
-          return pageNumber > this.manualLoadingThreshold;
-        },
-
-        displayGrid: function() {
-          this._isDisplayTable = false;
-          this.$.itemList.fire('iron-resize');
-        },
-
-        displayTable: function() {
-          this._isDisplayTable = true;
-          this.$.datatable.notifyResize();
         },
 
         _formatDate: function(date) {
