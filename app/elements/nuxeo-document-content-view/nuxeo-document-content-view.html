@@ -243,20 +243,19 @@ Contributors:
                 <nuxeo-dropdown-aggregation name="dc_modified_agg"
                     placeholder="[[i18n('modified', 'Modified')]]"
                     aggregations="[[aggregations]]"
-                    value="{{column.filterValue}}">
+                    value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
             </template>
             <template>
               [[_formatDate(item.properties.dc:modified)]]
             </template>
           </data-table-column>
-          <data-table-column filter-by="dc_lastContributor_agg" flex="50" sort-by="dc:lastContributor"
-            filter-by="dc_last_contributor_agg">
+          <data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
             <template is="header">
                 <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
                     placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
                     aggregations="[[aggregations]]"
-                    value="{{column.filterValue}}">
+                    value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
             </template>
             <template>
