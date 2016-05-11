@@ -230,7 +230,7 @@ Contributors:
         </iron-scroll-threshold>
       </div>
       <div id="table" hidden$="[[!_isDisplayTable]]">
-        <iron-data-table id="datatable" selection-enabled multi-selection data-source="[[tableDataSource]]" size="{{size}}"
+        <iron-data-table id="datatable" selection-enabled multi-selection data-source="[[tableDataSource]]"
           page-size="[[pageSize]]">
           <data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
@@ -393,14 +393,16 @@ Contributors:
             var tmpFilters = {};
             if (opts.filter && opts.filter.length > 0) {
               opts.filter.forEach(function(filterItem) {
-                if (filterItem.path === 'title') {
-                  tmpFilters[filterItem.path] = filterItem.filter + '*';
-                } else {
-                  tmpFilters[filterItem.path] = filterItem.filter;
+                if (filterItem.filter.length > 0) {
+                  if (filterItem.path === 'title') {
+                    tmpFilters[filterItem.path] = filterItem.filter + '*';
+                  } else {
+                    tmpFilters[filterItem.path] = filterItem.filter;
+                  }
                 }
               });
             }
-            if (JSON.stringify(this.filter) !== JSON.stringify(tmpFilters)) {
+            if (JSON.stringify(this.filters) !== JSON.stringify(tmpFilters)) {
               this.filters = tmpFilters;
               this.$.datatable.size = 0;
             }
