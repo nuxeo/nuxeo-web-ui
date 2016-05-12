@@ -69,14 +69,17 @@
 
     <div id="container">
       <div id="header">
-        <data-table-row header>
+        <nuxeo-data-table-row header>
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <data-table-cell header column="[[column]]" bind="[[_bind(column)]]">
-              <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
-            </data-table-cell>
+            <nuxeo-data-table-cell header column="[[column]]" bind="[[_bind(column)]]">
+              <nuxeo-data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]"
+                on-sort-direction-changed="_sortDirectionChanged"
+                hidden$="[[!column.sortBy]]">
+              </nuxeo-data-table-column-sort>
+            </nuxeo-data-table-cell>
           </template>
           <nuxeo-data-table-mode header value="{{selectedMode}}"></nuxeo-data-table-mode>
-        </data-table-row>
+        </nuxeo-data-table-row>
       </div>
 
       <iron-scroll-threshold id="scrollThreshold"
@@ -86,24 +89,23 @@
           scroll-target="scrollThreshold">
           <template>
             <div class="item">
-              <data-table-row tabindex$="[[tabIndex]]"
+              <nuxeo-data-table-row tabindex$="[[tabIndex]]"
                               bind="[[_bind(item, index)]]"
                               before-bind="[[beforeRowBind]]"
                               even$="[[!_isEven(index)]]">
                 <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                  <data-table-cell column="[[column]]" bind="[[_bind(item, index)]]"
+                  <nuxeo-data-table-cell column="[[column]]" bind="[[_bind(item, index)]]"
                     before-bind="[[beforeCellBind]]">
-                  </data-table-cell>
+                  </nuxeo-data-table-cell>
                 </template>
-                <data-table-checkbox></data-table-checkbox>
-              </data-table-row>
+              </nuxeo-data-table-row>
             </div>
           </template>
         </iron-list>
       </iron-scroll-threshold>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
-    <content select="data-table-column"></content>
+    <content select="nuxeo-data-table-column"></content>
   </template>
 
   <script>
@@ -259,7 +261,7 @@
       },
 
       observers: [
-        '_resetResults(provider, params.*, _ppSort.*)'
+        '_resetResults(provider, params.*, _ppSort.*, _ppFilters.*)'
       ],
 
       _computeParams: function(params, _ppFilters) {
@@ -299,18 +301,17 @@
         this.pageNumber = 1;
         this.docItems = [];
         this.isNextPageAvailable = false;
-        this._ppFilters = {};
       },
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
           var hasColumns = function(node) {
-            return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'DATA-TABLE-COLUMN');
+            return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'NUXEO-DATA-TABLE-COLUMN');
           };
 
           if (info.addedNodes.filter(hasColumns).length > 0 ||
             info.removedNodes.filter(hasColumns).length > 0) {
-            this.set('columns', this.getContentChildren('[select=data-table-column]'));
+            this.set('columns', this.getContentChildren('[select=nuxeo-data-table-column]'));
             this.notifyResize();
           }
 
