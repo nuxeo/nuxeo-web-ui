@@ -60,13 +60,13 @@ Contributors:
         params="[[params]]"
         aggregations="{{aggregations}}"
         page-size="[[pageSize]]">
-        <data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+       <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
           <template>
             <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
             <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
           </template>
-        </data-table-column>
-        <data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
+       </nuxeo-data-table-column>
+       <nuxeo-data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
           <template is="header">
               <nuxeo-dropdown-aggregation name="dc_modified_agg"
                   placeholder="[[i18n('modified', 'Modified')]]"
@@ -77,8 +77,8 @@ Contributors:
           <template>
             [[_formatDate(item.properties.dc:modified)]]
           </template>
-        </data-table-column>
-        <data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
+       </nuxeo-data-table-column>
+       <nuxeo-data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
           <template is="header">
               <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
                   placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
@@ -89,13 +89,13 @@ Contributors:
           <template>
             <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
           </template>
-        </data-table-column>
-        <data-table-column name="Version">
+       </nuxeo-data-table-column>
+       <nuxeo-data-table-column name="Version">
           <template>[[_displayVersion(item)]]</template>
-        </data-table-column>
-        <data-table-column name="State">
+       </nuxeo-data-table-column>
+       <nuxeo-data-table-column name="State">
           <template>[[item.state]]</template>
-        </data-table-column>
+       </nuxeo-data-table-column>
       </nuxeo-data-table>
     </div>
 

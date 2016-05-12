@@ -4,7 +4,7 @@
       :host {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
-        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
+        min-height: 10px;
         height: 48px;
         display: flex;
         align-items: center;
@@ -55,8 +55,7 @@
       observers: ['_bindData(_instance, bind)'],
 
       ready: function() {
-        // cell is supposed to be placed outside the local dom of iron-data-table.
-        Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+        Polymer.StyleTransformer.dom(this, 'nuxeo-data-table', this._scopeCssViaAttr, true);
       },
 
       _orderChanged: function(e) {
