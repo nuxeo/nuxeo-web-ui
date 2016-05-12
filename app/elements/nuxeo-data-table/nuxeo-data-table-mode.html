@@ -1,0 +1,66 @@
+<dom-module id="nuxeo-data-table-mode">
+  <template>
+    <style>
+      :host {
+        height: 48px;
+        flex-basis: 48px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 0 8px 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #e3e3e3;
+      }
+
+      :host([header]) {
+        height: 56px;
+      }
+
+      :host([hidden]) {
+        display: none;
+      }
+
+      #container {
+        position: relative;
+        box-sizing: border-box;
+        height: 18px;
+        width: 18px;
+        border: solid 2px;
+        border-color: var(--primary-text-color);
+        border-radius: 2px;
+        pointer-events: none;
+        -webkit-transition: background-color 140ms, border-color 140ms;
+        transition: background-color 140ms, border-color 140ms;
+      }
+
+    </style>
+
+    <div id="container">aaaaaa
+      <paper-dropdown-menu noink no-animations no-label-float>
+        <paper-menu class="dropdown-content" selected="{{selectedMode}}" attr-for-selected="name">
+          <paper-icon-item name="table">
+            <iron-icon icon="icons:view-list" item-icon></iron-icon>
+          </paper-icon-item>
+          <paper-icon-item name="grid">
+            <iron-icon icon="icons:view-module" item-icon></iron-icon>
+          </paper-icon-item>
+        </paper-menu>
+      </paper-dropdown-menu>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-data-table-mode',
+
+      properties: {
+        selectedMode: {
+          type: String,
+          value: 'table'
+        }
+      }
+
+    });
+  </script>
+</dom-module>
