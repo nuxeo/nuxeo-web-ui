@@ -7,5 +7,5 @@ Feature: Browser
     And I go to the UI
 
   Scenario: Browse
-    When I click the browser button
+    When I click the "browser" button
     Then I can see the browser
