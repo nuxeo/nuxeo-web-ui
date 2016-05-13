@@ -14,6 +14,12 @@ export default class UI {
     this.favorites = new NavButtons('section.favorites');
     this.collections = new NavButtons('section.collections');
     this.personal = new NavButtons('section.personal-space');
+    this.createDialog = new IsVisible('paper-dialog.nuxeo-document-create-button');
+    this.createFile = new IsVisible('nuxeo-file-edit');
+    // this.createNote = new IsVisible('nuxeo-note-edit');
+    // this.createPicture = new IsVisible('nuxeo-picture-edit');
+    // this.createFolder = new IsVisible('nuxeo-folder-edit');
+    // this.createWorkspace = new IsVisible('nuxeo-workspace-edit');
   }
 
   goTo(button) {
@@ -30,6 +36,18 @@ export default class UI {
 
   goToBrowser() {
     driver.click(`nuxeo-menu-icon[icon="icons:folder-open"]`);
+  }
+
+  openCreateDocDialog() {
+    driver.click('paper-fab.nuxeo-document-create-button');
+  }
+
+  selectDocType(docType) {
+    driver.click('paper-dropdown-menu.nuxeo-document-create-button paper-menu-button');
+    driver.waitUntil(function() {
+      return driver.isVisible('#createDocDialog paper-dropdown-menu[label="Document type"] paper-item') ;
+    });
+    //driver.click(`paper-menu div paper-item='${docType}'`);
   }
 
   static get() {

@@ -8,5 +8,8 @@ module.exports = function () {
   });
 
   this.When('I click the "$button" button', (button) => this.ui.goTo(button));
+
+  this.When('I select "$docType"', (docType) => this.ui.selectDocType(docType));
+
   this.When('I click the "$button" search button', (button) => this.ui.goToSearch(button));
 };
