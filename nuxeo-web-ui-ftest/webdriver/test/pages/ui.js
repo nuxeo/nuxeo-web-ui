@@ -1,5 +1,6 @@
 'use strict';
 
+import CreateDialog from './ui/create_dialog';
 import NavButtons from './ui/nav_buttons';
 
 export default class UI {
@@ -14,7 +15,6 @@ export default class UI {
     this.favorites = new NavButtons('section.favorites');
     this.collections = new NavButtons('section.collections');
     this.personal = new NavButtons('section.personal-space');
-    this.createDialog = new IsVisible('paper-dialog.nuxeo-document-create-button');
     this.createFile = new IsVisible('nuxeo-file-edit');
     // this.createNote = new IsVisible('nuxeo-note-edit');
     // this.createPicture = new IsVisible('nuxeo-picture-edit');
@@ -39,15 +39,11 @@ export default class UI {
   }
 
   openCreateDocDialog() {
-    driver.click('paper-fab.nuxeo-document-create-button');
+    driver.click('#createBtn');
   }
 
-  selectDocType(docType) {
-    driver.click('paper-dropdown-menu.nuxeo-document-create-button paper-menu-button');
-    driver.waitUntil(function() {
-      return driver.isVisible('#createDocDialog paper-dropdown-menu[label="Document type"] paper-item') ;
-    });
-    //driver.click(`paper-menu div paper-item='${docType}'`);
+  get createDialog() {
+    return new CreateDialog('#createDocDialog');
   }
 
   static get() {

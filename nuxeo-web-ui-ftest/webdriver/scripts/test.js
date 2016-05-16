@@ -9,7 +9,6 @@ const spawn = require('child_process').spawn;
 const chimpBin = path.resolve(path.join(process.cwd(), '/node_modules/.bin/chimp'));
 
 const jUnitReporter = require('cucumber-junit');
-const screenshots = './target/screenshots/';
 const jsonReport = `./target/cucumber-reports/report.json`;
 const junitReport = `./target/surefire-reports/TEST-report.xml`;
 
