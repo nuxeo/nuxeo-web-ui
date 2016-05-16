@@ -83,27 +83,26 @@ Contributors:
 
     <div class="layout vertical row">
       <label>Creation date</label>
-      <nuxeo-checkbox-aggregation name="dc_created_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_created_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_created_agg]]"
+        value="{{params.dc_created_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div class="layout vertical row">
       <label>Modified date</label>
-      <nuxeo-checkbox-aggregation name="dc_modified_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_modified_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_modified_agg]]"
+        value="{{params.dc_modified_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div class="row layout vertical">
       <label>Authors</label>
-      <nuxeo-dropdown-aggregation name="dc_creator_agg"
-                                  placeholder="Search for authors..."
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_creator_agg}}"
-                                  multiple="true">
+      <nuxeo-dropdown-aggregation placeholder="Search for authors..."
+        data="[[aggregations.dc_creator_agg]]"
+        value="{{params.dc_creator_agg}}"
+        multiple="true">
       </nuxeo-dropdown-aggregation>
     </div>
 
@@ -119,33 +118,33 @@ Contributors:
 
     <div class="layout vertical row">
       <label>Nature</label>
-      <nuxeo-checkbox-aggregation name="dc_nature_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_nature_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_nature_agg]]"
+        value="{{params.dc_nature_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div class="layout vertical row">
       <label>Subjects</label>
-      <nuxeo-checkbox-aggregation name="dc_subjects_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_subjects_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_subjects_agg]]"
+        value="{{params.dc_subjects_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div class="layout vertical row">
       <label>Coverage</label>
-      <nuxeo-checkbox-aggregation name="dc_coverage_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.dc_coverage_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_coverage_agg]]"
+        value="{{params.dc_coverage_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div class="layout vertical row">
       <label>Size</label>
-      <nuxeo-checkbox-aggregation name="common_size_agg"
-                                  aggregations="[[aggregations]]"
-                                  value="{{params.common_size_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.common_size_agg]]"
+        value="{{params.common_size_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
     <div class="layout vertical row">
