@@ -3,8 +3,7 @@ Feature: Admin center
   As an Administrator I have an Admin center
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   Scenario: Admin center
     When I click the "administration" button

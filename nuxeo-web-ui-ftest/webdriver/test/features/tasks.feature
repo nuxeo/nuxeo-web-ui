@@ -1,8 +1,7 @@
 Feature: Tasks
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   Scenario: Tasks
     When I click the "tasks" button

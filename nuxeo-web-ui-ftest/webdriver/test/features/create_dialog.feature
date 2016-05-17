@@ -1,10 +1,9 @@
-Feature: Create Document
+Feature: Create Document Dialog
 
   I can view the Create Document Dialog
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   Scenario: Open Create Dialog
     When I click the Create Document button

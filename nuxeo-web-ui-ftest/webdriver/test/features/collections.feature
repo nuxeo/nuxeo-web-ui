@@ -1,8 +1,7 @@
 Feature: Collections
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   Scenario: Collections
     When I click the "collections" button
