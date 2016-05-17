@@ -3,8 +3,7 @@ Feature: Browser
   I can browse the repository
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   Scenario: Browse
     When I click the "browser" button

@@ -1,15 +1,17 @@
-Feature: Create Document
+Feature: Edit Document
 
-  I can create a Document
+  I can edit a Document
 
   Background:
     Given I login as "Administrator"
     And I click the Create Document button
 
-  Scenario Outline: Create <doctype>
+  Scenario Outline: Edit <doctype>
     Given I select <doctype> from the Document Type menu
-    Then I create a <doctype>
-    And I go to the <doctype>
+    And I create a <doctype>
+    When I go to the <doctype>
+    And I select "Edit" from the View menu
+    Then I can edit the <doctype>
 
   Examples:
     |doctype  |

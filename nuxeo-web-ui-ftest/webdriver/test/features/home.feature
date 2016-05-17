@@ -3,8 +3,7 @@ Feature: Home
   I have a home page
 
   Background:
-    When I login as "Administrator"
-    And I go to the UI
+    Given I login as "Administrator"
 
   @ignore
   Scenario: My dashboard

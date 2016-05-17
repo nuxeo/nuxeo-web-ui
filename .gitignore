@@ -8,4 +8,5 @@ npm-debug.log
 .settings/
 bin/
 .DS_Store
+.screenshots/
 

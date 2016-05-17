@@ -2,6 +2,7 @@
 
 import CreateDialog from './ui/create_dialog';
 import NavButtons from './ui/nav_buttons';
+import EditDoc from './ui/edit_doc';
 
 export default class UI {
 
@@ -15,11 +16,7 @@ export default class UI {
     this.favorites = new NavButtons('section.favorites');
     this.collections = new NavButtons('section.collections');
     this.personal = new NavButtons('section.personal-space');
-    this.createFile = new IsVisible('nuxeo-file-edit');
-    // this.createNote = new IsVisible('nuxeo-note-edit');
-    // this.createPicture = new IsVisible('nuxeo-picture-edit');
-    // this.createFolder = new IsVisible('nuxeo-folder-edit');
-    // this.createWorkspace = new IsVisible('nuxeo-workspace-edit');
+    this.edit_doc = new EditDoc('nuxeo-document-edit paper-card #form');
   }
 
   goTo(button) {
@@ -48,8 +45,39 @@ export default class UI {
 
   static get() {
     driver.url('/ui');
-    driver.waitForExist('nuxeo-app');
+    driver.waitForExist('nuxeo-app', 2000);
     return new UI();
   }
 
+  title(docType) {
+    const doctype = docType.toLowerCase();
+    if (doctype === 'picture') {
+      driver.waitForVisible('input.nuxeo-file-edit', 2000);
+      driver.setValue(`input.nuxeo-file-edit`, `Test_${docType}`);
+    } else {
+    driver.waitForVisible(`input.nuxeo-${doctype}-edit`, 2000);
+    driver.setValue(`input.nuxeo-${doctype}-edit`, `Test_${docType}`);
+    }
+  }
+
+  preview(docType) {
+    driver.waitForVisible(`//nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]`, 2000);
+    return driver.element(`//nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]`);
+    ////nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]
+    // if (doctype === 'workspace' || doctype === 'folder') {
+    //   driver.waitForVisible('#dropzone', 1000);
+    //   return driver.element('#dropzone');
+    // } else {
+    // driver.waitForVisible('#document-view', 1000);
+    // return driver.element(`#document-view nuxeo-${doctype}-view`);
+    // }
+  }
+
+  view(option) {
+    const selection = option.toLowerCase();
+    const dropdown = driver.element('paper-toolbar paper-dropdown-menu #menuButton');
+    dropdown.click('#trigger');
+    dropdown.waitForVisible('#dropdown');
+    dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
+  }
 }

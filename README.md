@@ -26,7 +26,7 @@ Install the nuxeo-web-ui package:
 
 ### Manually
 
-To deploy on Nuxeo Platform manually: copy the builded JAR bundles into `$NUXEO_HOME/nxserver/bundles`.
+To deploy on Nuxeo Platform manually: copy the builded JAR bundles into `$NUXEO_HOME/nxserver/bundles.
 
 # Resources
 

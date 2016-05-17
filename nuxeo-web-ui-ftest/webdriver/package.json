@@ -4,7 +4,9 @@
   "scripts": {
     "lint": "eslint scripts test",
     "test": "scripts/test.js",
-    "test:watch": "chimp --chai --path=test/features --webdriverio.baseUrl=http://localhost:8080/nuxeo --watch"
+    "test:watch": "chimp --chai --path=test/features --webdriverio.baseUrl=http://localhost:8080/nuxeo --watch",
+    "test:brkDebug": "chimp --debugBrkCucumber --chai --path=test/features --webdriverio.baseUrl=http://localhost:8080/nuxeo --watch",
+    "test:debug": "chimp --debugCucumber --chai --path=test/features --webdriverio.baseUrl=http://localhost:8080/nuxeo --watch"
   },
   "license": "Apache-2.0",
   "devDependencies": {
