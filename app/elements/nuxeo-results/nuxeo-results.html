@@ -1,0 +1,182 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-results`
+@group Nuxeo UI
+@element nuxeo-results
+-->
+<dom-module id="nuxeo-results">
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+
+      #container  {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+      }
+
+      nuxeo-data-table {
+        background-color: #fff;
+      }
+
+      nuxeo-data-table, nuxeo-data-grid {
+        min-height: calc(100vh - 61px);
+      }
+
+      paper-fab {
+        position: absolute;
+        top: 32px;
+        right: 32px;
+        color: #ffffff;
+        --paper-fab-background: #5ADA5A;
+        --paper-fab-keyboard-focus-background: #008000;
+        @apply(--nuxeo-document-create-button);
+        z-index: 1000;
+      }
+
+      .queue-thumbnail {
+        margin-right: 1em;
+      }
+
+    </style>
+
+    <template is="dom-if" if="[[_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
+      </paper-fab>
+      <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
+    </template>
+    <template is="dom-if" if="[[!_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
+      </paper-fab>
+      <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
+    </template>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <div id="container">
+      <div id="grid" hidden$="[[_isDisplayTable]]">
+        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]" on-item-clicked="_navigate">
+          // TODO make it composable
+        </nuxeo-data-grid>
+      </div>
+      <div id="table" hidden$="[[!_isDisplayTable]]">
+        <nuxeo-data-table id="datatable"
+          nx-provider="[[nxProvider]]">
+         <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100">
+            <template>
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+            </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="[[i18n('modified', 'Modified')]]" flex="50">
+            <template>
+              [[_formatDate(item.properties.dc:modified)]]
+            </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="[[i18n('last_contributor', 'Last Contibutor')]]"
+          flex="50">
+          <template>
+            <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
+          </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="Version">
+            <template>[[_displayVersion(item)]]</template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="State">
+            <template>[[item.state]]</template>
+         </nuxeo-data-table-column>
+        </nuxeo-data-table>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-results',
+        properties: {
+          nxProvider: {
+            type: Object
+          },
+          _isDisplayTable: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        behaviors: [Nuxeo.RoutingBehavior],
+
+        displayTable: function() {
+          this._isDisplayTable = true;
+          this.$.datatable.notifyResize();
+        },
+
+        displayGrid: function() {
+          this._isDisplayTable = false;
+          this.$.datagrid.notifyResize();
+        },
+
+        _navigate: function(e) {
+          var detail;
+          if (e.detail.item) {
+            detail = {
+              doc: e.detail.item,
+              index: e.detail.index
+            };
+          } else {
+            detail = {
+              doc: e.model.item,
+              index: e.model.index + 1
+            };
+          }
+          this.fire('navigate', detail);
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _thumbnail: function(doc) {
+          if (doc && doc.uid) {
+            if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
+              return doc.contextParameters.thumbnail.url;
+            } else {
+              var baseUrl = this.$.nxcon.url;
+              return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+            }
+          }
+        },
+
+        _displayVersion: function(doc) {
+          if (doc.properties && doc.properties['uid:major_version'] !== undefined) {
+            return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+          }
+        },
+
+        _displayModifiedCol: function() {
+          return typeof this.aggregation !== undefined;
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

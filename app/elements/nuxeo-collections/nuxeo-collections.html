@@ -381,6 +381,10 @@ Contributors:
           'k': '_navigateOnUp'
         },
 
+        get nxProvider() {
+          return this.$.memberProvider;
+        },
+
         _navigateOnRight: function() {
           if (!this._isDisplayMembers) {
             if (this.selectedCollection) {
@@ -464,7 +468,6 @@ Contributors:
           this.$.collectionsList.fire('iron-resize');
           this.showMoreCollections = false;
           this.$.collectionsScrollThreshold.clearTriggers();
-          this.fire('resetCollectionResults');
         },
 
         _updateMemberResults: function() {
@@ -476,9 +479,6 @@ Contributors:
           this.hasMember = !(this.members && this.members.length === 0);
           this.showMoreMembers = this.$.memberProvider.isNextPageAvailable;
           this.$.membersScrollThreshold.clearTriggers();
-          this.fire('initCollectionResults', {
-            provider: this.$.memberProvider,
-          });
         },
 
         _resetMemberResults: function() {

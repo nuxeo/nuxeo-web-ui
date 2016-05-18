@@ -12,17 +12,16 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 
 Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-search-results`
+`nuxeo-collection-results`
 @group Nuxeo UI
-@element nuxeo-search-results
+@element nuxeo-collection-results
 -->
-<dom-module id="nuxeo-search-results">
+<dom-module id="nuxeo-collection-results">
   <template>
 
     <style is="custom-style" include="shared-styles">
@@ -31,7 +30,7 @@ Contributors:
 
     <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n('search_result', 'Search Results')]]</span>
+        <span class="flex">[[headerLabel]]</span>
       </div>
       <nuxeo-results id="results"></nuxeo-results>
     </paper-header-panel>
@@ -42,7 +41,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-search-results',
+        is: 'nuxeo-collection-results',
 
         set nxProvider(nxProvider) {
           this.$.results.nxProvider = nxProvider;

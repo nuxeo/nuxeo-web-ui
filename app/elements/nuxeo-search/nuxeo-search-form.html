@@ -229,6 +229,10 @@ Contributors:
           '_resetResults(provider, params.*)'
         ],
 
+        get nxProvider() {
+          return this.$.provider;
+        },
+
         _updateSearchResults: function() {
           var docs = this.$.provider.currentPage;
           docs.forEach(function(doc) {
@@ -238,9 +242,6 @@ Contributors:
           this.hasResults = !(this.docItems && this.docItems.length === 0);
           this.showMore = this.$.provider.isNextPageAvailable;
           this.$.scrollTheshold.clearTriggers();
-          this.fire('initSearchResults', {
-            provider: this.$.provider,
-          });
         },
 
         _resetResults: function() {
@@ -252,7 +253,6 @@ Contributors:
           this.$.itemsList.fire('iron-resize');
           this.showMore = false;
           this.$.scrollTheshold.clearTriggers();
-          this.fire('resetSearchResults');
         },
 
         displayQueue: function(doc, index) {
