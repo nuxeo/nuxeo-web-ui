@@ -26,10 +26,6 @@ Contributors:
   <template>
 
     <style is="custom-style" include="shared-styles">
-      :host {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-      }
 
       .content-view  {
         @apply(--layout-vertical);
@@ -38,65 +34,93 @@ Contributors:
 
       nuxeo-data-table {
         background-color: #fff;
-        min-height: 85vh;
       }
 
-      nuxeo-dropdown-aggregation {
-        width: 100%;
+      nuxeo-data-table, nuxeo-data-grid {
+        min-height: calc(100vh - 61px);
       }
 
-      nuxeo-data-table {
-        padding: 2.5em 2em .8em;
+      paper-fab {
+        position: absolute;
+        top: 32px;
+        right: 32px;
+        color: #ffffff;
+        --paper-fab-background: #5ADA5A;
+        --paper-fab-keyboard-focus-background: #008000;
+        @apply(--nuxeo-document-create-button);
+        z-index: 1000;
       }
 
     </style>
 
+    <template is="dom-if" if="[[_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
+      </paper-fab>
+      <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
+    </template>
+    <template is="dom-if" if="[[!_isDisplayTable]]">
+      <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
+      </paper-fab>
+      <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
+    </template>
+
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
+    <nuxeo-page-provider id="cvProvider" auto
+       provider="[[provider]]"
+       page-size="[[pageSize]]"
+       aggregations="{{aggregations}}"
+       enrichers="thumbnail"
+       page="[[pageNumber]]"
+       params="[[params]]">
+    </nuxeo-page-provider>
+
     <div id="dropzone" class="content-view">
-      <nuxeo-data-table id="datatable"
-        provider="[[provider]]"
-        enrichers="thumbnail"
-        params="[[params]]"
-        aggregations="{{aggregations}}"
-        page-size="[[pageSize]]">
-       <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
-          <template>
-            <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-            <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
-          </template>
-       </nuxeo-data-table-column>
-       <nuxeo-data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
-          <template is="header">
-              <nuxeo-dropdown-aggregation name="dc_modified_agg"
-                  placeholder="[[i18n('modified', 'Modified')]]"
-                  aggregations="[[aggregations]]"
-                  value="{{column.filterValue}}" multiple>
-              </nuxeo-dropdown-aggregation>
-          </template>
-          <template>
-            [[_formatDate(item.properties.dc:modified)]]
-          </template>
-       </nuxeo-data-table-column>
-       <nuxeo-data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
-          <template is="header">
-              <nuxeo-dropdown-aggregation name="dc_last_contributor_agg"
-                  placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
-                  aggregations="[[aggregations]]"
-                  value="{{column.filterValue}}" multiple>
-              </nuxeo-dropdown-aggregation>
-          </template>
-          <template>
-            <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
-          </template>
-       </nuxeo-data-table-column>
-       <nuxeo-data-table-column name="Version">
-          <template>[[_displayVersion(item)]]</template>
-       </nuxeo-data-table-column>
-       <nuxeo-data-table-column name="State">
-          <template>[[item.state]]</template>
-       </nuxeo-data-table-column>
-      </nuxeo-data-table>
+      <div id="grid" hidden$="[[_isDisplayTable]]">
+        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider" on-item-clicked="_navigate">
+        </nuxeo-data-grid>
+      </div>
+      <div id="table" hidden$="[[!_isDisplayTable]]">
+        <nuxeo-data-table id="datatable"
+          nx-provider="cvProvider">
+         <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+            <template>
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+            </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
+            <template is="header">
+                <nuxeo-dropdown-aggregation
+                    placeholder="[[i18n('modified', 'Modified')]]"
+                    data="[[aggregations.dc_modified_agg]]"
+                    value="{{column.filterValue}}" multiple>
+                </nuxeo-dropdown-aggregation>
+            </template>
+            <template>
+              [[_formatDate(item.properties.dc:modified)]]
+            </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
+            <template is="header">
+                <nuxeo-dropdown-aggregation
+                    placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
+                    data="[[aggregations.dc_last_contributor_agg]]"
+                    value="{{column.filterValue}}" multiple>
+                </nuxeo-dropdown-aggregation>
+            </template>
+            <template>
+              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
+            </template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="Version">
+            <template>[[_displayVersion(item)]]</template>
+         </nuxeo-data-table-column>
+         <nuxeo-data-table-column name="State">
+            <template>[[item.state]]</template>
+         </nuxeo-data-table-column>
+        </nuxeo-data-table>
+      </div>
     </div>
 
     <paper-toast id="toast"></paper-toast>
@@ -136,6 +160,10 @@ Contributors:
           },
           currentDocument: {
             type: Object
+          },
+          _isDisplayTable: {
+            type: Boolean,
+            value: true
           }
         },
 
@@ -151,6 +179,16 @@ Contributors:
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
+        },
+
+        displayTable: function() {
+          this._isDisplayTable = true;
+          this.$.datatable.notifyResize();
+        },
+
+        displayGrid: function() {
+          this._isDisplayTable = false;
+          this.$.datagrid.notifyResize();
         },
 
         importBatch: function(data) {
@@ -197,8 +235,8 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var doc = e.model.item,
-              index = e.model.index + 1;
+          var doc = e.detail.item,
+              index = e.detail.index;
           this.navigate(doc, index);
         },
 
