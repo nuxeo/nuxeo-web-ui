@@ -235,9 +235,19 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var doc = e.detail.item,
-              index = e.detail.index;
-          this.navigate(doc, index);
+          var detail;
+          if (e.detail.item) {
+            detail = {
+              doc: e.detail.item,
+              index: e.detail.index
+            };
+          } else {
+            detail = {
+              doc: e.model.item,
+              index: e.model.index + 1
+            };
+          }
+          this.navigate(detail.doc, detail.index);
         },
 
         navigate: function(doc, index) {
