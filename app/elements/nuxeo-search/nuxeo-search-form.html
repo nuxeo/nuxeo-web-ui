@@ -249,7 +249,7 @@ Contributors:
           this.$.provider.pageSize = 40;
           this.docItems = [];
           this.selectedDocument = null;
-          this.displayFilters();
+          this._isQueue = false;
           this.$.itemsList.fire('iron-resize');
           this.showMore = false;
           this.$.scrollTheshold.clearTriggers();
@@ -265,6 +265,7 @@ Contributors:
 
         displayFilters: function() {
           this._isQueue = false;
+          this.fire('display-filters');
         },
 
         _loadMoreData: function() {

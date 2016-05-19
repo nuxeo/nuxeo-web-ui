@@ -217,7 +217,7 @@ Contributors:
               </section>
 
               <section class="card search" name="search">
-                <nuxeo-search-form id="searchForm">
+                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults">
                 </nuxeo-search-form>
               </section>
 
@@ -429,7 +429,6 @@ Contributors:
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup',
-          'resetSearchResults': '_resetSearchResults',
           'browseCollection': '_navigateToCollection',
           'workflowStarted': '_fetchTasks',
           'workflowTaskProcessed': '_fetchTasks',
