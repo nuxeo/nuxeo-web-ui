@@ -74,7 +74,7 @@ Contributors:
 
         return flush()
         .then(function() {
-          var rows = pageable.getElementsByClassName('doctable-row');
+          var rows = Polymer.dom(pageable.root).querySelectorAll('.doctable-row');
           expect(rows.length).to.be.equal(docs.length);
           var title, modified, lastContributor, version;
           for (var i = 0; i < docs.length; i++) {

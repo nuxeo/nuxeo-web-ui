@@ -126,7 +126,7 @@ Contributors:
           return flush()
           .then(function() {
             expect(tasks.count).to.be.equal(2);
-            records = tasks.getElementsByClassName('task-box');
+            records = Polymer.dom(tasks.root).querySelectorAll('.task-box');
             expect(records.length).to.be.equal(2);
             var workflows1 = records[0].querySelector('.task-box > nuxeo-resource');
             expect(workflows1).to.not.be.undefined;
@@ -188,7 +188,7 @@ Contributors:
         var tasks = fixture('tasks');
         return waitChanged(tasks, 'tasks').then(flush).then(function() {
           expect(tasks.count).to.be.equal(0);
-          var placeholder = tasks.querySelector('.empty');
+          var placeholder = Polymer.dom(tasks.root).querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
           expect(placeholder.textContent).to.be.equal('There are no tasks to show.');
         });

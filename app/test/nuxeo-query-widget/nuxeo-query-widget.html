@@ -201,7 +201,7 @@ Contributors:
       test('should be empty', function() {
         query = fixture('query');
         return waitChanged(query, 'current-page').then(function() {
-          var placeholder = query.querySelector('.empty');
+          var placeholder = Polymer.dom(query.root).querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
           expect(placeholder.textContent).to.be.equal('There are no documents to show.');
         });

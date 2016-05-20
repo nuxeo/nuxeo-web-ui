@@ -26,7 +26,7 @@ Lesser General Public License for more details.
 
   <body>
     <script>
-      WCT.loadSuites([
+      var tests = [
         'nuxeo-pageable-widget/nuxeo-pageable-widget.html',
         'nuxeo-query-widget/nuxeo-query-widget.html',
         'nuxeo-task-widget/nuxeo-task-widget.html',
@@ -35,7 +35,10 @@ Lesser General Public License for more details.
         'nuxeo-document-actions/nuxeo-favorites-toggle-button.html',
         'nuxeo-document-actions/nuxeo-lock-toggle-button.html',
         'nuxeo-suggester/nuxeo-suggester.html'
-      ]);
+      ];
+      WCT.loadSuites(tests.concat(tests.map(function (test) {
+        return test + '?dom=shadow'
+      })));
     </script>
   </body>
 

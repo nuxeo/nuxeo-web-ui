@@ -85,7 +85,7 @@ Contributors:
         return waitChanged(suggester.$.op, 'response')
           .then(flush)
           .then(function() {
-            var items = suggester.querySelectorAll('a');
+            var items = Polymer.dom(suggester.root).querySelectorAll('a');
             expect(items.length).to.be.equal(3);
             expect(items[0].href).to.contain('/doc/5e839dd0-6603-4286-bfdd-ddbdc9aa1918');
             expect(items[1].href).to.contain('/user/Administrator');
@@ -122,7 +122,7 @@ Contributors:
         return waitChanged(suggester.$.op, 'response')
           .then(flush)
           .then(function() {
-            var items = suggester.querySelectorAll('a');
+            var items = Polymer.dom(suggester.root).querySelectorAll('a');
             expect(items.length).to.be.equal(0);
             MockInteractions.tap(suggester.$.searchButton);
             expect(suggester.$.suggester.hidden).to.be.true;
