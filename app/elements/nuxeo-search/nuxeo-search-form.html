@@ -119,6 +119,10 @@ Contributors:
     .reset {
       width: 100%;
     }
+
+    #saveDialog {
+      width: 400px;
+    }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -132,6 +136,8 @@ Contributors:
        params="[[params]]"
        on-update="_updateSearchResults">
     </nuxeo-page-provider>
+
+    <nuxeo-search id="saved-search"></nuxeo-search>
 
     <div class="header ellipsis search-header">
       <nuxeo-search id="saved-searches" auto searches="{{searches}}" params='{"pageProviderName": "default_search"}'></nuxeo-search>
@@ -208,9 +214,24 @@ Contributors:
           <span class="empty">[[i18n('ui.searchForm.noResults', 'No results found')]]</span>
         </div>
       </div>
-
     </div>
 
+    <paper-dialog id="saveDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>Save Search</h1>
+        <div>
+          <paper-input id="savedSearchTitle"
+                       label="Enter a name for your saved search"
+                       autofocus
+                       no-label-float>
+          </paper-input>
+        </div>
+        <div class="buttons">
+         <paper-button dialog-dismiss>Cancel</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">Save</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
   </template>
   <script>
     (function() {
@@ -414,6 +435,49 @@ Contributors:
             this.dirty = false;
           }.bind(this));
         },
+
+        saveAs: function() {
+          this.$.saveDialog.open();
+          this._saveAs = true;
+        },
+
+        save: function() {
+          if (this.selectedSearchIdx === 0) {
+            this.saveAs();
+          } else {
+            this._saveSearch();
+          }
+        },
+
+        _saveSearch: function() {
+          var _el = this.$['saved-search'];
+          // save a new search
+          if (this.selectedSearchIdx === 0 || this._saveAs) {
+            _el.searchId = '';
+            _el.data = {
+              'entity-type': 'savedSearch',
+              'langOrProviderName': this.provider,
+              'params': this.params,
+              'searchType': 'pageProvider',
+              'title': this.$$('#savedSearchTitle').value
+            };
+            _el.post().then(function(response) {
+              this.$.saveDialog.close();
+              this.selectedSearch = response;
+              this.$['saved-searches'].get().then(function() {
+                this.selectedSearchIdx = this.searches.length;
+              }.bind(this));
+            }.bind(this));
+          } else {
+            // update an existing search
+            _el.searchId = this.selectedSearch.id;
+            _el.data = this.selectedSearch;
+            _el.put().then(function() {
+              this.dirty = false;
+            }.bind(this));
+          }
+          this._saveAs = false;
+        }
       });
     })();
   </script>

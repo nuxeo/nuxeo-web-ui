@@ -163,6 +163,17 @@ Contributors:
         height: 59px;
       }
 
+      nuxeo-search-results .actions paper-button {
+        font-size: .8em;
+        font-weight: normal;
+        margin: 0;
+        text-transform: none;
+      }
+
+      nuxeo-search-results .actions paper-button[disabled] {
+        background: none;
+      }
+
       paper-card {
         margin: 0 22px 22px 0;
         min-width: 560px;
@@ -247,8 +258,7 @@ Contributors:
               </section>
 
               <section class="card search" name="search">
-                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults">
-                </nuxeo-search-form>
+                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults" dirty="{{dirty}}"></nuxeo-search-form>
               </section>
 
               <section class="card tasks" name="tasks">
@@ -354,6 +364,19 @@ Contributors:
               clipboard="[[clipboard]]"></nuxeo-browser>
 
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
+              <div class="actions">
+                <paper-button on-click="_saveSearch" disabled$="[[!dirty]]">
+                   <iron-icon icon="check"></iron-icon>Save
+                </paper-button>
+                <paper-menu-button horizontal-align="right" vertical-offset="40">
+                  <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
+                  <paper-menu class="dropdown-content layout vertical">
+                    <paper-item class="layout horizontal center" on-tap="_saveSearchAs">
+                      <iron-icon icon="icons:add"></iron-icon>Save New Search
+                    </paper-item>
+                  </paper-menu>
+                </paper-menu-button>
+              </div>
             </nuxeo-search-results>
 
             <nuxeo-collection-results id="collectionResults"
@@ -660,6 +683,14 @@ Contributors:
         _onTaskChanged: function(e) {
           this.page = 'tasks';
           this.currentTask = e.detail.task;
+        },
+
+        _saveSearch: function() {
+          this.$$('nuxeo-search-form').save();
+        },
+
+        _saveSearchAs: function() {
+          this.$$('nuxeo-search-form').saveAs();
         },
 
         _onAddToClipboard: function(e) {
