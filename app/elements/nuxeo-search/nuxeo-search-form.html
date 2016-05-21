@@ -1,15 +1,17 @@
 <!--
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 
-All rights reserved. This program and the accompanying materials
-are made available under the terms of the GNU Lesser General Public License
-(LGPL) version 2.1 which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/lgpl.html
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 Contributors:
     Andre Justo <ajusto@nuxeo.com>
@@ -67,9 +69,13 @@ Contributors:
     }
 
     .switch:hover {
-        background-color: var(--nuxeo-button-primary);
-        color: var(--nuxeo-button-primary-text);
-      }
+      background-color: var(--nuxeo-button-primary);
+      color: var(--nuxeo-button-primary-text);
+    }
+
+    paper-dropdown-menu {
+      margin-left: 1em;
+    }
 
     /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
     .content {
@@ -97,6 +103,22 @@ Contributors:
     }
     /* End TODO Lise :) */
 
+    .row {
+      box-sizing: border-box;
+      margin-bottom: 1rem;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    .clear {
+      background-color: #fafafa;
+      border-color: #fafafa;
+      width: 100%;
+    }
+
+    .reset {
+      width: 100%;
+    }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -112,6 +134,15 @@ Contributors:
     </nuxeo-page-provider>
 
     <div class="header ellipsis search-header">
+      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params='{"pageProviderName": "default_search"}'></nuxeo-search>
+      <paper-dropdown-menu no-label-float horizontal-align="left">
+        <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
+          <paper-item>Search Filters</paper-item>
+          <template is="dom-repeat" items="[[searches]]" as="search">
+            <paper-item>[[search.title]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
       <template is="dom-if" if="[[_isQueue]]">
         <h1>[[i18n('ui.searchForm.searchQueue', 'Search Queue')]]</h1>
         <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
@@ -129,13 +160,13 @@ Contributors:
     <div class="content">
 
       <div id="filters" class="filters" hidden$="{{_isQueue}}">
-        <iron-pages selected="[[selectedSearch]]" attr-for-selected="name">
-          <!-- faceted search page -->
-          <div name="faceted">
-            <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
-          </div>
-
-        </iron-pages>
+        <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
+        <div class="layout vertical row">
+          <paper-button noink class="primary clear" raised on-click="_clear">Clear</paper-button>
+        </div>
+        <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+          <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">Reset</paper-button>
+        </div>
       </div>
 
       <div id="queue" hidden$="{{!_isQueue}}">
@@ -191,15 +222,22 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
-
           selectedSearch: {
-            type: String,
-            value: 'faceted'
+            type: Object,
+            notify: true,
+            observer: '_selectedSearchChanged'
           },
-
+          selectedSearchIdx: {
+            type: Number,
+            value: 0,
+            observer: '_selectedSearchIdxChanged'
+          },
           provider: {
             type: String,
             value: 'default_search'
+          },
+          params: {
+            type: Object
           },
           currentIndex: {
             type: Number,
@@ -225,11 +263,17 @@ Contributors:
           hasResults: {
             type: Boolean,
             value: true
+          },
+          dirty: {
+            type: Boolean,
+            value: false,
+            notify: true
           }
         },
 
         observers: [
-          '_resetResults(provider, params.*)'
+          '_resetResults(provider, params.*)',
+          '_paramsChanged(params.*)'
         ],
 
         get nxProvider() {
@@ -330,8 +374,46 @@ Contributors:
           this.$.itemsList.addOwnKeyBinding('k', 'selectQueuePrevious');
           this.$.itemsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
           this.$.itemsList.addOwnKeyBinding('j', 'selectQueueNext');
-        }
+        },
 
+        _paramsChanged: function() {
+          this.dirty = true;
+        },
+
+        _selectedSearchIdxChanged: function() {
+          if (this._isSavedSearch()) {
+            this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
+            this.params = this.selectedSearch.params;
+          } else {
+            this.selectedSearch = {};
+            this._clear();
+          }
+          this.dirty = false;
+        },
+
+        _selectedSearchChanged: function() {
+          this.params = this.selectedSearch.params;
+        },
+
+        _isSavedSearch: function() {
+          return this.selectedSearchIdx > 0;
+        },
+
+        _clear: function() {
+          this.params = {};
+          if (!this._isSavedSearch()) {
+            this.dirty = false;
+          }
+        },
+
+        _reset: function() {
+          var _el = this.$['saved-search'];
+          _el.searchId = this.selectedSearch.id;
+          _el.get().then(function(response) {
+            this.params = response.params;
+            this.dirty = false;
+          }.bind(this));
+        },
       });
     })();
   </script>
