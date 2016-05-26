@@ -165,7 +165,7 @@ Contributors:
 
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows"
+                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections"
                     headers='{"X-NXfetch.document": "lock"}'>
     </nuxeo-document>
     <nuxeo-document id="idResolver"
@@ -443,6 +443,7 @@ Contributors:
         },
 
         refresh: function() {
+          console.log('refresh');
           this.$.doc.get();
         },
 

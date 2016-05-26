@@ -449,10 +449,8 @@ Contributors:
 
         _hasCollections: function() {
           if (this.document) {
-            // TODO, improve this, currentUser might not have permission to access all collections of doc
-            // i.e. all collections are not necessarily visible from the currentUser
-            var collections = this.document.properties['collectionMember:collectionIds'];
-            return collections && collections.length > 0;
+            return this.document.contextParameters.collections &&
+              this.document.contextParameters.collections.length > 0;
           }
           return false;
         },

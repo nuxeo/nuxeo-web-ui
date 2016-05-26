@@ -541,7 +541,9 @@ Contributors:
               }
               return true;
             });
-            this.$.membersList.selectItem(memberIndex);
+            if (this.$.membersList.length > memberIndex) {
+              this.$.membersList.selectItem(memberIndex);
+            }
             this.$.toast.text = 'Document removed from Collection.';
             this.$.toast.open();
             this.fire('removedFromCollection',
@@ -599,16 +601,25 @@ Contributors:
         },
 
         ready: function() {
-          window.addEventListener('addedToCollection', function() {
+          window.addEventListener('addedToCollection', function(e) {
             this.collections = [];
             this.$.collectionsProvider.fetch();
+            if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+              this.members = [];
+              this.$.memberProvider.fetch();
+            }
           }.bind(this));
           window.addEventListener('removedFromCollection', function(e) {
             if (e.detail.innerRemove) {
               return;
             }
-            this.collections = [];
-            this.$.collectionsProvider.fetch();
+            if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+              this.members = [];
+              this.$.memberProvider.fetch();
+            } else if (!this._isDisplayMembers) {
+              this.collections = [];
+              this.$.collectionsProvider.fetch();
+            }
           }.bind(this));
 
           // tmp fix

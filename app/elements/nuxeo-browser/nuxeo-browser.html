@@ -264,9 +264,7 @@ Contributors:
         listeners: {
           'permissions.acecreated': '_documentUpdated',
           'permissions.aceupdated': '_documentUpdated',
-          'permissions.acedeleted': '_documentUpdated',
-          'addedToCollection': '_documentAddedToCollection',
-          'removedFromCollection': '_documentRemovedFromCollection'
+          'permissions.acedeleted': '_documentUpdated'
         },
 
         observers: [
@@ -401,6 +399,15 @@ Contributors:
 
         _focusCollectionPopup: function() {
           this.$$('#addToCollection').focus();
+        },
+
+        ready: function() {
+          window.addEventListener('addedToCollection', function() {
+            this._documentAddedToCollection();
+          }.bind(this));
+          window.addEventListener('removedFromCollection', function(e) {
+            this._documentRemovedFromCollection();
+          }.bind(this));
         }
 
       });

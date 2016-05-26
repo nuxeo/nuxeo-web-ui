@@ -40,12 +40,6 @@ Contributors:
       }
     </style>
 
-    <nuxeo-page-provider id="provider" auto
-                         page-size="10"
-                         query="[[query(document)]]"
-                         current-page="{{collections}}">
-    </nuxeo-page-provider>
-
     <nuxeo-operation op="Collection.RemoveFromCollection"
                      input="[[document.uid]]"
                      id="op">
@@ -53,7 +47,7 @@ Contributors:
 
     <paper-toast id="toast"></paper-toast>
 
-    <template is="dom-repeat" items="[[collections]]">
+    <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <span class="tag">
         [[item.title]]
         <iron-icon icon="icons:clear" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
@@ -68,12 +62,6 @@ Contributors:
         document: Object
       },
 
-      query: function(doc) {
-        return 'select * from Collection WHERE collection:documentIds/* = "' +
-          doc.uid +
-          '" AND  ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != "deleted"';
-      },
-
       remove: function(evt) {
         var op = this.$.op;
         op.params = {
@@ -83,19 +71,6 @@ Contributors:
           this.$.toast.text = 'Document removed from Collection.';
           this.$.toast.open();
           this.fire('removedFromCollection', {docId: this.document.uid, collectionId: evt.target.dataset.uid});
-        }.bind(this));
-      },
-
-      ready: function() {
-        window.addEventListener('addedToCollection', function(e) {
-          if (e.detail && e.detail.docId === this.document.uid) {
-            this.$.provider.fetch();
-          }
-        }.bind(this));
-        window.addEventListener('removedFromCollection', function(e) {
-          if (e.detail && e.detail.docId === this.document.uid) {
-            this.$.provider.fetch();
-          }
         }.bind(this));
       }
 
