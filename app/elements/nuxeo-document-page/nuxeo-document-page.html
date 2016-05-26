@@ -293,7 +293,7 @@ Contributors:
                   <paper-dropdown-menu label="Start a process">
                     <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
                       <template is="dom-repeat" items="[[processes]]" as="process">
-                        <paper-item key="[[process.key]]">[[i18n(process.label)]]</paper-item>
+                        <paper-item key="[[process.key]]">[[i18n(process.title)]]</paper-item>
                       </template>
                     </paper-menu>
                   </paper-dropdown-menu>
@@ -352,11 +352,7 @@ Contributors:
           },
 
           processes: {
-            type: Array,
-            value: [
-              {key: 'ParallelDocumentReview', label: 'wf.parallelDocumentReview.ParallelDocumentReview'},
-              {key: 'SerialDocumentReview', label: 'wf.serialDocumentReview.SerialDocumentReview'}
-            ]
+            type: Array
           },
 
           /* Whether are running workflows on the document or not */
@@ -390,13 +386,13 @@ Contributors:
         _documentChanged: function() {
           this.workflows = this.document.contextParameters.runningWorkflows;
           this.tasks = this.document.contextParameters.pendingTasks;
+          this.processes = this.document.contextParameters.runnableWorkflows;
           this.isProcessingTask = false;
         },
 
         _workflowsChanged: function() {
           this.hasWorkflowRunning = this.workflows &&
-              this.workflows.entries &&
-              this.workflows.entries.length > 0;
+              this.workflows.length > 0;
         },
 
         _tasksChanged: function() {
