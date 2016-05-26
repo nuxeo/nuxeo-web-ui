@@ -388,8 +388,8 @@ Contributors:
         },
 
         _documentChanged: function() {
-          this.$.workflows.get();
-          this._fetchTasks();
+          this.workflows = this.document.contextParameters.runningWorkflows;
+          this.tasks = this.document.contextParameters.pendingTasks;
           this.isProcessingTask = false;
         },
 
