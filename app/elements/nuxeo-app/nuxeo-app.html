@@ -473,8 +473,9 @@ Contributors:
         },
 
         _navigateFromCV: function(e) {
-          this.currentContentView = e.target;
-          page.show('/browse' + e.target.currentDocument.path, {contentView: e.target.provider});
+          this.currentContentView = Polymer.dom(e).rootTarget;
+          page.show('/browse' + this.currentContentView.currentDocument.path,
+                    {contentView: this.currentContentView.provider});
         },
 
         _navigateFromSearch: function(e) {
