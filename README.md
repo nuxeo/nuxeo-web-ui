@@ -1,5 +1,4 @@
-[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=plugins_nuxeo-web-ui-master-master)](https://qa.nuxeo.org/jenkins/job/plugins_nuxeo-web-ui-master-master/)
-
+[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=master/plugins_nuxeo-web-ui-master-master)](https://qa.nuxeo.org/jenkins/job/master/plugins_nuxeo-web-ui-master-master)
 ## Nuxeo Web UI
 
 > Ongoing work to build a new Nuxeo Web UI
