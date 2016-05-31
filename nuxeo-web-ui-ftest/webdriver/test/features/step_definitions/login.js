@@ -1,6 +1,7 @@
 'use strict';
 
 import LoginPage from '../../pages/login';
+import UI from '../../pages/ui';
 
 const USERS = {
   Administrator: 'Administrator',
@@ -14,13 +15,14 @@ module.exports = function () {
     login.username = username;
     login.password = USERS[username];
     login.submit();
+    this.ui = UI.get();
   });
 
   this.When(/^I visit (.*)$/, (url) => driver.url(url));
 
   this.When('I logout', () => driver.url('/logout'));
 
-  this.Then('I am logged in as "$username"', (username) => driver.isVisible(`span.${username}`).should.be.true);
+  this.Then('I am logged in as "$username"', (username) => driver.isExisting(`//nuxeo-task-widget[@username="${username}"]`).should.be.true);
 
   this.Then('I am logged out', () => driver.isVisible('#username').should.be.true);
 };

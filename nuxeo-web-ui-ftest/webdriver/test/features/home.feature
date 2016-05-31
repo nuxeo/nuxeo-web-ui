@@ -6,6 +6,7 @@ Feature: Home
     When I login as "Administrator"
     And I go to the UI
 
+  @ignore
   Scenario: My dashboard
     When I click the Nuxeo logo
     Then I can see my home
