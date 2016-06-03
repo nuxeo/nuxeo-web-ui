@@ -31,8 +31,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="auditRequest" auto path="/id/[[document.uid]]/@audit" response="{{audit}}"></nuxeo-resource>
-    <template is="dom-repeat" items="[[audit.entries]]">
+    <template is="dom-repeat" items="[[document.contextParameters.audit]]">
       <p>
         <span class="audit_user"><a href$="[[urlFor('user', item.principalName)]]">[[_user(item)]]</a>&nbsp;</span>
         <span>[[_activity(item)]]</span>

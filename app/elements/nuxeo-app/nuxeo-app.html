@@ -163,9 +163,9 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document id="doc" auto doc-path="[[docPath]]"
+      <nuxeo-document id="doc" auto doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections"
+                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
                     headers='{"X-NXfetch.document": "lock"}'>
     </nuxeo-document>
     <nuxeo-document id="idResolver"
