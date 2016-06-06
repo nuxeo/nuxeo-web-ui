@@ -121,7 +121,7 @@ Contributors:
         lower-threshold="1000"
         on-lower-threshold="_loadMoreData">
         <div class="grid-ctn bubbleBoxes">
-          <iron-list id="list" scroll-target="scrollThreshold" grid></iron-list>
+          <iron-list id="list" scroll-target="scrollThreshold" grid as="[[as]]"></iron-list>
         </div>
       </iron-scroll-threshold>
       <div hidden$="[[hasResults]]" class="noResult">
@@ -158,6 +158,10 @@ Contributors:
             notify: true,
             reflectToAttribute: true,
             value: false
+          },
+          as: {
+            type: String,
+            value: 'item'
           }
         },
 

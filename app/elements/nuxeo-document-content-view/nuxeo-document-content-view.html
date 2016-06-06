@@ -77,9 +77,9 @@ Contributors:
 
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider">
+        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider" as="document">
           <template>
-            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
+            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[document]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
@@ -243,18 +243,11 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var detail;
-          if (e.detail.item) {
-            detail = {
-              doc: e.detail.item,
-              index: e.detail.index
-            };
-          } else {
-            detail = {
-              doc: e.model.item,
-              index: e.model.index + 1
-            };
-          }
+          var as = this.$.datagrid.as;
+          var detail = {
+            doc: e.model[as],
+            index: e.model.index + 1
+          };
           this.navigate(detail.doc, detail.index);
         },
 

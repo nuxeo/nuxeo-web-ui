@@ -67,9 +67,9 @@ Contributors:
 
     <div id="container">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]">
+        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]" as="document">
           <template>
-            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
+            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[document]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
