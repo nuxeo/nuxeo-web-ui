@@ -58,6 +58,20 @@ Lesser General Public License for more details.
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
+  <script>
+    function getQueryParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.href);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    if (getQueryParam('dom') == 'shadow') {
+      window.Polymer = {
+          dom: 'shadow',
+          lazyRegister: true
+      };
+    }
+  </script>
+
   <!-- build:js vendor/jquery.js -->
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <!-- endbuild-->
