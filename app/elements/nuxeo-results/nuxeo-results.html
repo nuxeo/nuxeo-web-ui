@@ -67,8 +67,11 @@ Contributors:
 
     <div id="container">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]" on-item-clicked="_navigate">
-          // TODO make it composable
+        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]">
+          <template>
+            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
+            </nuxeo-document-grid-thumbnail>
+          </template>
         </nuxeo-data-grid>
       </div>
       <div id="table" hidden$="[[!_isDisplayTable]]">

@@ -59,7 +59,7 @@ Contributors:
         height: 100vh;
       }
 
-      .grid-box {
+      ::content .grid-box {
         width: 20%;
         min-width: 16em;
       }
@@ -85,32 +85,32 @@ Contributors:
           flex-flow: column nowrap;
         }
 
-        .grid-box {
+        ::content .grid-box {
           width: 100%;
         }
       }
       /* tablet-small-landscape */
       @media all and (min-width: 601px) and (max-width: 840px) {
-        .grid-box {
+        ::content .grid-box {
           width: 50%;
         }
       }
 
       /* small desktop */
       @media all and (min-width: 841px) and (max-width: 1024px) {
-        .grid-box {
+        ::content .grid-box {
           width: 33%;
         }
       }
 
       @media all and (min-width: 1025px) and (max-width: 1280px) {
-        .grid-box {
+        ::content .grid-box {
           width: 25%;
         }
       }
 
       @media all and (min-width: 1281px) and (max-width: 1480px) {
-        .grid-box {
+        ::content .grid-box {
           width: 20%;
         }
       }
@@ -121,12 +121,7 @@ Contributors:
         lower-threshold="1000"
         on-lower-threshold="_loadMoreData">
         <div class="grid-ctn bubbleBoxes">
-          <iron-list id="list" items="[[items]]" scroll-target="scrollThreshold" grid>
-            <template>
-              <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_itemClicked">
-              </nuxeo-document-grid-thumbnail>
-            </template>
-          </iron-list>
+          <iron-list id="list" scroll-target="scrollThreshold" grid></iron-list>
         </div>
       </iron-scroll-threshold>
       <div hidden$="[[hasResults]]" class="noResult">
@@ -143,7 +138,6 @@ Contributors:
         is: 'nuxeo-data-grid',
 
         behaviors: [
-          Polymer.Templatizer,
           Polymer.IronResizableBehavior
         ],
 
@@ -218,6 +212,20 @@ Contributors:
           this.$.list.notifyResize();
           this.$.scrollThreshold.clearTriggers();
 
+          if (!this._templateStamped) {
+            // use nuxeo-data-grid parent's datahost in the iron-list
+            // functions used in the template should be declared
+            // in the nuxeo-data-grid parent element and not here
+            this.$.list.dataHost = this.dataHost;
+            // get template from nuxeo-data-grid definition
+            this._template = Polymer.dom(this).querySelector('template');
+            // append template in the <iron-list>
+            Polymer.dom(this.$.list).appendChild(this._template);
+            this._templateStamped = true;
+          }
+          // set binding to items
+          // iron-list will look for our template and stamp the items
+          this.$.list.items = this.items;
           this.loading = false;
         },
 
@@ -232,15 +240,6 @@ Contributors:
           this.$.list.notifyResize();
           this.notifyResize();
           this.$.scrollThreshold.clearTriggers();
-        },
-
-        _itemClicked: function(e) {
-          this.fire('item-clicked',
-            {
-              item: e.model.item,
-              index: e.model.index + 1
-            }
-          );
         }
 
       });
