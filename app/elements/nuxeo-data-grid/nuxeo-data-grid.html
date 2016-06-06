@@ -142,10 +142,6 @@ Contributors:
         ],
 
         properties: {
-          items: {
-            type: Array,
-            value: []
-          },
           nxProvider: {
             type: HTMLElement
           },
@@ -206,16 +202,6 @@ Contributors:
           if (!this._isPPLoaded()) {
             return;
           }
-          if (this.nxProvider.page === 1) {
-            this.items = [];
-          }
-          var docs = this.nxProvider.currentPage;
-          docs.forEach(function(doc) {
-            this.push('items', doc);
-          }.bind(this));
-          this.$.list.notifyResize();
-          this.$.scrollThreshold.clearTriggers();
-
           if (!this._templateStamped) {
             // use nuxeo-data-grid parent's datahost in the iron-list
             // functions used in the template should be declared
@@ -225,11 +211,20 @@ Contributors:
             this._template = Polymer.dom(this).querySelector('template');
             // append template in the <iron-list>
             Polymer.dom(this.$.list).appendChild(this._template);
+            // set binding to items
+            // iron-list will look for our template and stamp the items
+            this.$.list.items = [];
             this._templateStamped = true;
           }
-          // set binding to items
-          // iron-list will look for our template and stamp the items
-          this.$.list.items = this.items;
+          if (this.nxProvider.page === 1) {
+            this.$.list.items = [];
+          }
+          var docs = this.nxProvider.currentPage;
+          docs.forEach(function(doc) {
+            this.$.list.push('items', doc);
+          }.bind(this));
+          this.$.list.notifyResize();
+          this.$.scrollThreshold.clearTriggers();
           this.loading = false;
         },
 
@@ -239,7 +234,7 @@ Contributors:
           }
           this.loading = true;
           this.nxProvider.page = 1;
-          this.items = [];
+          this.$.list.items = [];
           this.nxProvider.isNextPageAvailable = false;
           this.$.list.notifyResize();
           this.notifyResize();
