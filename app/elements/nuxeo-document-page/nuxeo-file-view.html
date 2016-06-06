@@ -66,7 +66,7 @@ Contributors:
                     empty="[[!document.properties.file:content.data]]">
         <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
-    <div class="card-content">
+    <div class="card-section">
       <div class="horizontal layout center">
         <template is="dom-if" if="[[document.properties.file:content]]">
           <p class="title">
@@ -91,7 +91,7 @@ Contributors:
       </div>
       <span>[[_formatSize(document.properties.common:size)]]</span>
     </div>
-    <div class="card-content attachments">
+    <div class="card-section attachments">
       <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
     </div>
   </template>

@@ -28,11 +28,18 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         @apply(--layout-flex);
+
       }
 
       paper-card {
         @apply(--paper-card);
         min-width: 22em;
+      }
+
+      .sideinfo paper-card {
+        --paper-card-content: {
+          padding: 1em 0;
+        };
       }
 
       paper-tooltip {
@@ -52,7 +59,7 @@ Contributors:
         margin-bottom: 1em;
       }
 
-      .sideinfo paper-card.document-task {
+      .sideinfo paper-card .document-task {
         padding: 0;
       }
 
@@ -61,10 +68,6 @@ Contributors:
         font-size: 1.1em;
         padding-bottom: .5em;
         border-bottom: var(--nuxeo-border);
-      }
-
-      paper-card .card-content {
-        padding: 1em 0;
       }
 
       paper-card.tags {
@@ -222,7 +225,9 @@ Contributors:
     <div class="horizontal layout">
       <div class="docinfo vertical layout flex-2">
         <paper-card>
-          <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
+          <div class="card-content">
+            <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
+          </div>
         </paper-card>
         <paper-card class="tags">
           <div class="horizontal layout wrap card-content">

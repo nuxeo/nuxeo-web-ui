@@ -308,8 +308,9 @@ Contributors:
             // determine anchors for transition node
             var anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
             // add endpoints
-            var endPointSource = this._addSourceEndpoint(this.$.graph.querySelector('#' + source), anchors[anchorIndex]),
-                endPointTarget = this._addTargetEndpoint(this.$.graph.querySelector('#' + target));
+            var endPointSource = this._addSourceEndpoint(Polymer.dom(this.$.graph).querySelector('#' + source),
+                                                         anchors[anchorIndex]),
+                endPointTarget = this._addTargetEndpoint(Polymer.dom(this.$.graph).querySelector('#' + target));
 
             var connection = jsPlumb.connect({
               connector: 'Flowchart',

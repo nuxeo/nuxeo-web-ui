@@ -29,23 +29,24 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         display: block;
+        --nuxeo-tree-theme: {
+          padding: 1em;
+        };
+        --nuxeo-tree-node-theme: {
+          min-height: 24px;
+        };
+        --nuxeo-tree-children-theme: {
+          padding-left: 1em;
+        };
       }
 
-      nuxeo-tree {
-        padding: 1em;
-      }
-
-      nuxeo-tree ::content nuxeo-tree-node {
-        min-height: 24px;
-      }
-
-      nuxeo-tree ::content .node-name {
+      .node-name {
         display: inline;
         left: 2em;
         position: absolute;
       }
 
-      ::content iron-icon {
+      iron-icon {
         color: #213f7d
       }
 

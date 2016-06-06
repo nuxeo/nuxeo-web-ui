@@ -161,6 +161,14 @@ Contributors:
         left: 0;
         height: 59px;
       }
+
+      .experimental {
+        position: absolute;
+        color: var(--nuxeo-button-primary);
+        right: 5px;
+        bottom: 5px;
+        font-size: .7em;
+      }
     </style>
 
       <nuxeo-document id="doc" auto doc-path="[[docPath]]"
@@ -440,6 +448,12 @@ Contributors:
           this._fetchTasks();
           this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
+          if (this.shadowRoot) {
+            var experimental = document.createElement('div');
+            experimental.innerHTML = 'shadow dom enabled';
+            experimental.className = 'experimental';
+            Polymer.dom(this.root).appendChild(experimental);
+          }
         },
 
         refresh: function() {

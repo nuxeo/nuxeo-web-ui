@@ -70,7 +70,7 @@ Contributors:
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
-    <div class="card-content">
+    <div class="card-section">
       <div class="horizontal layout center">
         <template is="dom-if" if="[[document.properties.file:content]]">
           <p class="title">
@@ -95,7 +95,7 @@ Contributors:
         </template>
       </div>
     </div>
-    <div class="card-content sep">
+    <div class="card-section sep">
       <div class="properties">
         <div class="item">
           <label>Format</label>
@@ -119,7 +119,7 @@ Contributors:
         </div>
       </div>
     </div>
-    <div class="card-content sep">
+    <div class="card-section sep">
       <p class="title">Conversions</p>
       <div>
         <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
@@ -134,7 +134,7 @@ Contributors:
         </template>
       </div>
     </div>
-    <div class="card-content attachments">
+    <div class="card-section attachments">
       <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
     </div>
   </template>

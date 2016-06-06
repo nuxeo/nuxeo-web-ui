@@ -120,11 +120,6 @@ Contributors:
         margin-right: .5em;
       }
 
-      .document-view paper-card,
-      .task-view paper-card {
-        display: flex;
-      }
-
       nuxeo-document-task,
       nuxeo-document-view {
         width: 100%;
@@ -197,14 +192,18 @@ Contributors:
               <paper-icon-button icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
-              <div class="flex-2 document-view">
+              <div class="vertical layout flex-2 document-view">
                 <paper-card>
-                  <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
+                  <div class="card-content">
+                    <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
+                  </div>
                 </paper-card>
               </div>
               <div class="flex task-view">
                 <paper-card>
-                  <nuxeo-document-task workflow="[[currentTaskWf]]" task="[[current]]"></nuxeo-document-task>
+                  <div class="card-content">
+                    <nuxeo-document-task workflow="[[currentTaskWf]]" task="[[current]]"></nuxeo-document-task>
+                  </div>
                 </paper-card>
               </div>
             </div>

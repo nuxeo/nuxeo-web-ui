@@ -12,10 +12,6 @@
         margin: 0;
       }
 
-      ::content #mainPanel {
-        background-color: var(--nuxeo-page-background);
-        box-shadow: 0 0 10px rgba(0,0,0,0.1) inset;
-      }
       /* --
       Page Layout elements
       -- */
@@ -23,7 +19,7 @@
         margin-bottom: 4em;
       }
 
-      ::content .sep {
+      .sep {
         border-top: 1px solid #e8e8e8;
       }
 
@@ -31,6 +27,10 @@
       Header page and Header subview
       -- */
       paper-header-panel {
+        --paper-header-panel-body: {
+           background-color: var(--nuxeo-page-background);
+           box-shadow: 0 0 10px rgba(0,0,0,0.1) inset;
+         }
         --paper-header-panel-shadow: {
           box-shadow: none;
         };
@@ -42,7 +42,7 @@
         background-color: #fff;
       }
 
-      paper-header-panel ::content #mainContainer .content {
+      paper-header-panel .content {
         padding: 2.5em 2em;
       }
 
@@ -75,16 +75,14 @@
         overflow-y: auto;
       }
 
-      ::content #sidebar .item {
-        border-bottom: var(--nuxeo-border);
-        display: block;
-        padding: 1em;
-        margin: 0;
-        white-space: nowrap;
-      }
-
-      ::content #sidebar .item a {
-        margin-bottom: 0;
+      nuxeo-app {
+        --nuxeo-sidebar-item-theme: {
+            border-bottom: var(--nuxeo-border);
+            display: block;
+            padding: 1em;
+            margin: 0;
+            white-space: nowrap;
+        }
       }
 
       #sidebar paper-toolbar {
@@ -96,12 +94,12 @@
       /* --
       Navigation, Links & Dropdown list
       -- */
-      ::content a {
+      a {
         color: var(--nuxeo-link-color);
         text-decoration: none;
       }
 
-      ::content a:hover {
+      a:hover {
         color: var(--nuxeo-link-hover-color);
       }
 
@@ -159,6 +157,11 @@
       .card-actions {
         text-align: right;
         background-color: var(--nuxeo-light-background);
+      }
+
+      .card-section {
+        padding: 16px 0;
+        position: relative;;
       }
 
       /* --

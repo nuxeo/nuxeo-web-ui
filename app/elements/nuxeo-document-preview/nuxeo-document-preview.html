@@ -26,9 +26,10 @@ Contributors:
 -->
 <dom-module id="nuxeo-document-preview">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
+        height: var(--nuxeo-document-preview-height);
       }
 
       #preview {
@@ -139,7 +140,7 @@ Contributors:
           }
 
           // lookup the preview according to the blob's mimetype
-          var previewers = this.querySelectorAll('template');
+          var previewers = Polymer.dom(this.root).querySelectorAll('template');
           for (var i = 0; i < previewers.length; i++) {
             var previewer = previewers[i];
             var regex = new RegExp(previewer.getAttribute('mime-pattern'));

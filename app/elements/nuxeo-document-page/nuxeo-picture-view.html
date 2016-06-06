@@ -26,6 +26,7 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         display: block;
+        --nuxeo-document-preview-height: 600px;
       }
 
       .properties {
@@ -61,10 +62,6 @@ Contributors:
         word-wrap: break-word;
         display: inline-block;
       }
-
-      nuxeo-document-preview {
-        height: 600px;
-      }
     </style>
 
     <nuxeo-dropzone document="{{document}}"
@@ -74,7 +71,7 @@ Contributors:
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
-    <div class="card-content">
+    <div class="card-section">
       <div class="horizontal layout center">
         <template is="dom-if" if="[[document.properties.file:content]]">
           <p class="title">
@@ -98,7 +95,7 @@ Contributors:
         </template>
       </div>
     </div>
-    <div class="card-content sep">
+    <div class="card-section sep">
       <div class="properties">
         <div class="item">
           <label>Dimensions</label>
@@ -122,7 +119,7 @@ Contributors:
         </div>
       </div>
     </div>
-    <div class="card-content sep">
+    <div class="card-section sep">
       <p class="title">Additional Formats</p>
       <div>
         <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
