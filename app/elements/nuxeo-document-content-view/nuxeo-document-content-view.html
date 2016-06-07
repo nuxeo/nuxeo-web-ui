@@ -176,6 +176,10 @@ Contributors:
           'dropzone.drop': '_dropSmartImport'
         },
 
+        observers: [
+          '_cvParamsChanged(params)'
+        ],
+
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
@@ -298,6 +302,10 @@ Contributors:
           if (doc.properties && doc.properties['uid:major_version'] !== undefined) {
             return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
           }
+        },
+
+        _cvParamsChanged: function() {
+          this.$.cvProvider.page = 1;
         }
 
       });
