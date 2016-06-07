@@ -77,9 +77,9 @@ Contributors:
 
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider" as="document">
+        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider">
           <template>
-            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[document]]" on-clicked="_navigate">
+            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
