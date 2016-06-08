@@ -132,13 +132,27 @@ Contributors:
         color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
 
+
+      ::host.selected ::content .bubbleBox .select paper-icon-button {
+        color: #fff;
+      }
+
+      ::host.selected ::content .bubbleBox .select {
+        border:1px solid #00adff;
+        background-color: #00adff;
+        cursor: pointer;
+        display: block;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
 
     <div class="bubbleBox">
+
+      <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer">
+      </iron-image>
       <a class="title ellipsis" on-click="handleClick">
-        <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"></iron-image>
         <div class="dataContainer">
           <div class="title ellipsis">[[doc.title]]</div>
           <p class="tag">[[_docType(doc)]]</p>
@@ -171,6 +185,10 @@ Contributors:
           offset: {
             type: Number,
             value: -1
+          },
+          selected: {
+            type: Boolean,
+            value: false
           }
         },
 

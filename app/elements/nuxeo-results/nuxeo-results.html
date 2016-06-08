@@ -50,6 +50,13 @@ Contributors:
         z-index: 1000;
       }
 
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select {
+        border:1px solid #00adff;
+        background-color: #00adff;
+        cursor: pointer;
+        display: block;
+      }
+
     </style>
 
     <template is="dom-if" if="[[_isDisplayTable]]">
@@ -69,14 +76,17 @@ Contributors:
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]">
           <template>
-            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
+            <nuxeo-document-grid-thumbnail class="grid-box"
+              class$="[[_computedClass(selected)]]"
+              doc="[[item]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
       </div>
       <div id="table" hidden$="[[!_isDisplayTable]]">
         <nuxeo-data-table id="datatable"
-          nx-provider="[[nxProvider]]">
+          nx-provider="[[nxProvider]]"
+          selection-enabled multi-selection>
          <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
@@ -172,7 +182,15 @@ Contributors:
 
         _displayModifiedCol: function() {
           return typeof this.aggregation !== undefined;
-        }
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'grid-box';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
 
       });
     })();

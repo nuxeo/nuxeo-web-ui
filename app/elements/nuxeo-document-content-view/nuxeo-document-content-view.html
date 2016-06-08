@@ -51,6 +51,13 @@ Contributors:
         z-index: 1000;
       }
 
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select {
+        border:1px solid #00adff;
+        background-color: #00adff;
+        cursor: pointer;
+        display: block;
+      }
+
     </style>
 
     <template is="dom-if" if="[[_isDisplayTable]]">
@@ -79,14 +86,17 @@ Contributors:
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider">
           <template>
-            <nuxeo-document-grid-thumbnail class="grid-box" doc="[[item]]" on-clicked="_navigate">
+            <nuxeo-document-grid-thumbnail class="grid-box"
+              class$="[[_computedClass(selected)]]"
+              doc="[[item]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
       </div>
       <div id="table" hidden$="[[!_isDisplayTable]]">
         <nuxeo-data-table id="datatable"
-          nx-provider="cvProvider">
+          nx-provider="cvProvider"
+          selection-enabled multi-selection>
          <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
@@ -168,6 +178,9 @@ Contributors:
           _isDisplayTable: {
             type: Boolean,
             value: true
+          },
+          selectedItems: {
+            type: Object
           }
         },
 
@@ -183,6 +196,19 @@ Contributors:
         observers: [
           '_cvParamsChanged(params)'
         ],
+
+        _selectionChanged: function() {
+          console.log('_selectionChanged');
+          this._toast(this.selectedItems.length + ' Document(s) selected');
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'grid-box';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
 
         ready: function() {
           this.connection = this.$.nx;
