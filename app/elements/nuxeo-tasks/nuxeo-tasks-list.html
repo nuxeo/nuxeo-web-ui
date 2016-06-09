@@ -62,7 +62,7 @@ Contributors:
         color: var(--nuxeo-text-light);
       }
 
-      .taskDoc .docTitle, .initiator {
+      .taskDoc .docTitle, .actor {
         margin-left: 4px;
         margin-right: 4px;
       }
@@ -105,15 +105,11 @@ Contributors:
               <div class="task-detail">
                 <div class="taskDoc horizontal layout center">
                   <span class="task-property">On  </span>
-                  <a href$="[[urlFor('browse', task.document.path)]]" class="docTitle ellipsis">[[task.document.properties.dc:title]]</a>
+                  <a href$="[[urlFor('browse', task.targetDocumentIds.0.title)]]" class="docTitle ellipsis">[[task.targetDocumentIds.0.title]]</a>
                 </div>
                 <div class="horizontal layout center">
                   <span class="due-date task-property">Due date
                   <span class="date">[[_formatDate(task.dueDate)]]</span></span>
-                </div>
-                <div class="layout center">
-                  <span class="task-property">Initiated by </span>
-                  <a class="tag user initiator" href$="[[urlFor('user', task.workflow.initiator)]]">[[task.workflow.initiator]]</a>
                 </div>
               </div>
             </div>

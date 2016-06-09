@@ -129,7 +129,7 @@ Contributors:
     </style>
 
     <nuxeo-resource auto
-                    path="/workflow/[[workflow.id]]/graph"
+                    path="/workflow/[[workflowId]]/graph"
                     response="{{graph}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
@@ -144,7 +144,7 @@ Contributors:
         is: 'nuxeo-workflow-graph',
         behaviors: [Polymer.IronResizableBehavior],
         properties: {
-          workflow: {
+          workflowId: {
             type: String,
           },
 

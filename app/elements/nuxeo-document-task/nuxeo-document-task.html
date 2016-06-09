@@ -98,14 +98,6 @@ Contributors:
               </span>
             </div>
             <div class="layout horizontal center action-property">
-              <span class="flex-3">From</span>
-              <span class="flex-9">
-                <a class="tag user" href$="[[urlFor('user', workflow.initiator)]]">
-                  <iron-icon icon="social:person" class="tag-icon"></iron-icon>[[workflow.initiator]]
-                </a>
-              </span>
-            </div>
-            <div class="layout horizontal center action-property">
               <span class="flex-3">Assigned to</span>
               <span class="flex-9">
                 <template is="dom-repeat" items="[[task.actors]]" as="actor">
@@ -149,7 +141,6 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-task',
         properties: {
-          workflow: Object,
 
           task: {
             type: Object,

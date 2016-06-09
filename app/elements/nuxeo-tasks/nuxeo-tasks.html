@@ -70,15 +70,10 @@ Contributors:
         font-weight: bold;
       }
 
-      .task-initiator,
       .task-directive,
       .task-document {
         color: #9a9a9a;
         font-size: .8em;
-      }
-
-      .task-initiator {
-        margin-left: .5em;
       }
 
       .task-document iron-icon {
@@ -160,7 +155,6 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="currentWf" path="/workflow/[[current.workflowInstanceId]]" response="{{currentTaskWf}}"></nuxeo-resource>
     <nuxeo-document id="currentTaskDoc" doc-id="[[_docId(current)]]" response="{{currentTaskDocument}}"></nuxeo-document>
 
     <paper-header-panel class="flex">
@@ -180,11 +174,11 @@ Contributors:
               <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
               <div class="layout horizontal center flex">
                 <h3 class="task-name">[[i18n(current.name)]]</h3>
-                <span class="workflow-name">[[i18n(currentTaskWf.workflowModelName)]]</span>
+                <span class="workflow-name">[[current.workflowModelName]]</span>
               </div>
               <paper-dialog id="graphDialog" with-backdrop>
                 <div class="graph-container">
-                  <nuxeo-workflow-graph workflow="[[currentTaskWf]]"></nuxeo-workflow-graph>
+                  <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
                 </div>
                 <paper-button noink dialog-dismiss>Close</paper-button>
               </paper-dialog>
@@ -202,7 +196,7 @@ Contributors:
               <div class="flex task-view">
                 <paper-card>
                   <div class="card-content">
-                    <nuxeo-document-task workflow="[[currentTaskWf]]" task="[[current]]"></nuxeo-document-task>
+                    <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
                   </div>
                 </paper-card>
               </div>
@@ -219,18 +213,11 @@ Contributors:
                     <div class="task-info layout vertical">
                       <div>
                         <span class="task-name">[[i18n(task.name)]]</span>
-                        <span class="task-initiator">
-                          From
-                          <a class="tag user initiator" href$="[[urlFor('user', task.workflow.initiator)]]">
-                            <iron-icon icon="social:person" class="tag-icon"></iron-icon>
-                            [[task.workflow.initiator]]
-                          </a>
-                        </span>
                       </div>
                       <span class="task-directive">[[i18n(task.directive)]]</span>
                       <span class="task-document">
                         <iron-icon icon="icons:description"></iron-icon>
-                        <a href="[[_href(task.document)]]">[[task.document.properties.dc:title]]</a>
+                        <a href="[[_href(task.targetDocumentIds.0)]]">[[task.targetDocumentIds.0.title]]</a>
                       </span>
                     </div>
                   </div>
@@ -279,8 +266,6 @@ Contributors:
 
           currentTaskDocument: Object,
 
-          currentTaskWf: Object,
-
           _currentIdx: Number,
         },
 
@@ -302,7 +287,6 @@ Contributors:
         _currentChanged: function() {
           if (this.current) {
             this.$.currentTaskDoc.get();
-            this.$.currentWf.get();
             this._currentIdx = this.tasks.indexOf(this.current);
           }
         },
@@ -351,7 +335,7 @@ Contributors:
 
         _docId: function() {
           if (this.current) {
-            return this.current.targetDocumentIds[0].id;
+            return this.current.targetDocumentIds[0].uid;
           }
         },
 
