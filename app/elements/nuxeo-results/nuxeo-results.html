@@ -114,6 +114,10 @@ Contributors:
       </div>
     </div>
 
+    <iron-localstorage name="[[_displayModeStorageName(name)]]"
+      value="{{displayMode}}">
+    </iron-localstorage>
+
   </template>
   <script>
     (function() {
@@ -122,25 +126,51 @@ Contributors:
       Polymer({
         is: 'nuxeo-results',
         properties: {
-          nxProvider: {
-            type: Object
+          displayMode: {
+            type: String,
+            value: 'table'
           },
           _isDisplayTable: {
             type: Boolean,
+            value: true
+          },
+          _isDisplayGrid: {
+            type: Boolean,
             value: false
-          }
+          },
+          name: {
+            type: String
+          },
         },
 
         behaviors: [Nuxeo.RoutingBehavior],
 
+        observers: [
+          '_observeDisplayMode(displayMode)'
+        ],
+
         displayTable: function() {
-          this._isDisplayTable = true;
+          this.displayMode = 'table';
           this.$.datatable.notifyResize();
         },
 
         displayGrid: function() {
-          this._isDisplayTable = false;
+          this.displayMode = 'grid';
           this.$.datagrid.notifyResize();
+        },
+
+        _observeDisplayMode: function() {
+          if (this.displayMode === 'table') {
+            this._isDisplayTable = true;
+            this._isDisplayGrid = false;
+          } else if (this.displayMode === 'grid') {
+            this._isDisplayTable = false;
+            this._isDisplayGrid = true;
+          }
+        },
+
+        _displayModeStorageName: function(name) {
+          return 'nx-dm-' + name;
         },
 
         _navigate: function(e) {

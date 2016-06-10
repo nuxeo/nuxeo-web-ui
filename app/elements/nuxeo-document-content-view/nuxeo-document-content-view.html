@@ -140,6 +140,10 @@ Contributors:
     <paper-toast id="toast"></paper-toast>
 
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
+
+    <iron-localstorage name="[[_displayModeStorageName(document)]]"
+      value="{{displayMode}}">
+    </iron-localstorage>
   </template>
   <script>
     (function() {
@@ -175,9 +179,17 @@ Contributors:
           currentDocument: {
             type: Object
           },
+          displayMode: {
+            type: String,
+            value: 'table'
+          },
           _isDisplayTable: {
             type: Boolean,
             value: true
+          },
+          _isDisplayGrid: {
+            type: Boolean,
+            value: false
           },
           selectedItems: {
             type: Object
@@ -194,7 +206,8 @@ Contributors:
         },
 
         observers: [
-          '_cvParamsChanged(params)'
+          '_cvParamsChanged(params)',
+          '_observeDisplayMode(displayMode)'
         ],
 
         _selectionChanged: function() {
@@ -216,13 +229,27 @@ Contributors:
         },
 
         displayTable: function() {
-          this._isDisplayTable = true;
+          this.displayMode = 'table';
           this.$.datatable.notifyResize();
         },
 
         displayGrid: function() {
-          this._isDisplayTable = false;
+          this.displayMode = 'grid';
           this.$.datagrid.notifyResize();
+        },
+
+        _observeDisplayMode: function() {
+          if (this.displayMode === 'table') {
+            this._isDisplayTable = true;
+            this._isDisplayGrid = false;
+          } else if (this.displayMode === 'grid') {
+            this._isDisplayTable = false;
+            this._isDisplayGrid = true;
+          }
+        },
+
+        _displayModeStorageName: function(document) {
+          return 'nx-dm-' + document.uid;
         },
 
         importBatch: function(data) {
