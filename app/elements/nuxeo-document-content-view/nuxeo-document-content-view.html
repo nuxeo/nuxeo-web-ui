@@ -32,6 +32,11 @@ Contributors:
         @apply(--layout-fit);
       }
 
+      .toolbar {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+      }
+
       nuxeo-data-table {
         background-color: #fff;
       }
@@ -42,7 +47,7 @@ Contributors:
 
       paper-fab {
         position: absolute;
-        top: 32px;
+        top: 64px;
         right: 32px;
         color: #ffffff;
         --paper-fab-background: #5ADA5A;
@@ -82,6 +87,8 @@ Contributors:
        params="[[params]]">
     </nuxeo-page-provider>
 
+    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar"></nuxeo-selection-toolbar>
+
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider">
@@ -97,8 +104,8 @@ Contributors:
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
           settings-enabled
-          selection-enabled
-          multi-selection>
+          selected-items="{{selectedItems}}"
+          selection-enabled>
           <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
@@ -194,9 +201,6 @@ Contributors:
           _isDisplayGrid: {
             type: Boolean,
             value: false
-          },
-          selectedItems: {
-            type: Object
           }
         },
 
@@ -213,11 +217,6 @@ Contributors:
           '_cvParamsChanged(params)',
           '_observeDisplayMode(displayMode)'
         ],
-
-        _selectionChanged: function() {
-          console.log('_selectionChanged');
-          this._toast(this.selectedItems.length + ' Document(s) selected');
-        },
 
         _computedClass: function(isSelected) {
           var classes = 'grid-box';
@@ -300,7 +299,7 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var as = this.$.datagrid.as;
+          var as = 'item';
           var detail = {
             doc: e.model[as],
             index: e.model.index + 1

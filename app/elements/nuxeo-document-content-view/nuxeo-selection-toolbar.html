@@ -1,0 +1,183 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume RENARD <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-selection-toolbar`
+@group Nuxeo UI
+@element nuxeo-selection-toolbar
+-->
+<dom-module id="nuxeo-selection-toolbar">
+  <template>
+
+    <style is="custom-style">
+      :host {
+        display: block;
+      }
+      #content {
+        height:56px;
+        padding:0px 6px 0px 24px;
+        position:relative;
+      }
+      .toolbar {
+        background: var(--nuxeo-selection-toolbar-color);
+        padding:0px 12px 0px 24px;
+        z-index: 2;
+        color: var(--nuxeo-link-hover-color);
+      }
+      .selection {
+        font-weight: 300;
+      }
+      .count {
+        font-weight: 600;
+      }
+      a.selectionLink {
+        max-width: 20em;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+        text-decoration: underline;
+
+      }
+
+      a.selectionLink:hover {
+        cursor: pointer;
+      }
+
+      .list {
+        @apply(--layout-vertical);
+        max-height: 60vh;
+        overflow: auto;
+      }
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--nuxeo-sidebar-item-theme);
+      }
+      .title.ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <paper-dialog id="selectedItemsPopup"
+      no-auto-focus>
+      <h1>Selected items</h1>
+      <div class="paper-content layout horizontal">
+        <div class="layout vertical">
+          <div class="row layout horizontal">
+            <div class="list">
+              <template is="dom-repeat" items="[[selectedItems]]">
+                <div class="item">
+                  <span class="flex">
+                    <iron-icon class="queue-thumbnail" src="[[_thumbnail(item)]]"></iron-icon>
+                    <span class="title ellipsis">[[item.title]]</span>
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="buttons sep">
+       <paper-button dialog-dismiss>Close</paper-button>
+      </div>
+    </paper-dialog>
+
+    <div class="horizontal center layout" id="content">
+      <div id="selectionToolbar" class="horizontal center layout fit toolbar" hidden$="[[!_isDisplayToolbar]]">
+          <div class="selection">
+            <span class="count">
+              [[selectedItems.length]] item(s) selected
+            </span>
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
+              <span>View selection</span>
+            </a>
+          </div>
+          <div class="horizontal center flex layout end-justified actions">
+            <paper-icon-button icon="editor:mode-edit" on-tap="dummyAction"></paper-icon-button>
+            <paper-icon-button icon="delete" on-tap="dummyAction"></paper-icon-button>
+            <a class="selectionLink" on-tap="clearSelection">
+              <span>Clear</span>
+            </a>
+          </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+
+        is: 'nuxeo-selection-toolbar',
+
+        properties: {
+          selectedItems: {
+            type: Object,
+            value: [],
+            notify: true
+          },
+          _isDisplayToolbar: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        observers: [
+          '_observeSelectedItems(selectedItems.*)'
+        ],
+
+        _observeSelectedItems: function() {
+          // TODO, improve because called too many times in case of Select/Unselect all
+          this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
+        },
+
+        toogleSelectedItemsPopup: function() {
+          this.$$('#selectedItemsPopup').toggle();
+        },
+
+        clearSelection: function() {
+          this.selectedItems = [];
+        },
+
+        _thumbnail: function(doc) {
+          if (doc && doc.uid) {
+            if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
+              return doc.contextParameters.thumbnail.url;
+            } else {
+              var baseUrl = this.$.nxcon.url;
+              return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+            }
+          }
+        },
+
+        dummyAction: function() {
+          console.log('dummyAction');
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
