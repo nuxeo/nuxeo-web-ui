@@ -54,48 +54,6 @@ Contributors:
         margin-right: .3em;
       }
 
-      .actions paper-icon-button {
-        color: var(--nuxeo-action-color);
-        width: 35px;
-        height: 35px;
-      }
-
-      .actions paper-icon-button:hover {
-        color: var(--nuxeo-link-hover-color);
-        fill: var(--nuxeo-link-hover-color);
-      }
-
-      .actions paper-icon-button[active] {
-        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
-      }
-
-      #previewDialog {
-        height: 100%;
-        width: 100%;
-      }
-
-      #previewDialog > nuxeo-document-preview {
-        height: 100%;
-      }
-
-      #previewDialog > * {
-        margin: 0;
-        padding: 0;
-      }
-
-      .actions {
-        color: var(--nuxeo-action-color);
-      }
-
-      .export-container {
-        min-width: 240px;
-        border: 1px solid #ddd;
-      }
-
-      .share-container {
-        min-width: 640px;
-      }
-
       section, iron-pages, .content {
         @apply(--layout-horizontal);
         @apply(--layout-flex);
@@ -129,38 +87,9 @@ Contributors:
             </paper-menu>
           </paper-dropdown-menu>
 
-          <div class="horizontal flex layout end-justified actions">
-            <template is="dom-if" if="[[_canViewAsCollectionMember(document)]]">
-              <!--Add to Collection-->
-              <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="toggleCollectionDialog"></paper-icon-button>
-              <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
-              <!--Add/Remove from Favorites-->
-              <nuxeo-favorites-toggle-button id="favBut" doc="[[document]]"></nuxeo-favorites-toggle-button>
-            </template>
-            <!--Share-->
-            <paper-icon-button noink icon="social:share" id="shareBut" on-tap="toggleShareDialog"></paper-icon-button>
-            <paper-tooltip for="shareBut">Share</paper-tooltip>
-            <template is="dom-if" if="[[_canView(document)]]">
-              <!--Notify me-->
-              <paper-icon-button noink icon="social:notifications" id="notifyBut"></paper-icon-button>
-              <paper-tooltip for="notifyBut">Notify me</paper-tooltip>
-              <!--Add to Clipboard-->
-              <paper-icon-button noink
-                id="clipboardBut"
-                icon="image:add-to-photos"
-                active="[[inClipboard]]"
-                on-tap="toggleClipboard"></paper-icon-button>
-              <paper-tooltip for="clipboardBut">Add to Clipboard</paper-tooltip>
-              <!--Lock-->
-              <nuxeo-lock-toggle-button id="lockBut" doc="[[document]]"></nuxeo-lock-toggle-button>
-              <!--Preview-->
-              <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
-              <paper-tooltip for="previewBut">Preview</paper-tooltip>
-            </template>
-            <!--Export-->
-            <paper-icon-button noink icon="icons:archive" id="exportBut" on-tap="toggleExportDialog"></paper-icon-button>
-            <paper-tooltip for="exportBut">Export</paper-tooltip>
-          </div>
+          <nuxeo-document-actions class="horizontal flex layout end-justified"
+            context="[[actionContext]]"></nuxeo-document-actions>
+
         </paper-toolbar>
       </paper-header>
 
@@ -168,39 +97,6 @@ Contributors:
         <paper-toast id="toast"></paper-toast>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
-            <template is="dom-if" if="[[document]]">
-              <paper-dialog id="exportDialog" with-backdrop>
-                <div class="vertical layout">
-                  <h1>Export</h1>
-                  <div class="export-container">
-                    <nuxeo-document-export document="[[document]]"></nuxeo-document-export>
-                  </div>
-                </div>
-              </paper-dialog>
-
-              <paper-dialog id="shareDialog" with-backdrop>
-                <div class="vertical layout">
-                  <h1>Share the Document</h1>
-                  <div class="share-container">
-                    <paper-input id="docPermalink"
-                                 label="Copy the link and share the document {{document.properties.dc:title}}"
-                                 value="[[_buildPermalink(document)]]"
-                                 autofocus
-                                 readonly></paper-input>
-                  </div>
-                </div>
-              </paper-dialog>
-            </template>
-
-            <paper-dialog id="collectionDialog" modal on-iron-overlay-closed="_resetCollectionPopup"
-              on-iron-overlay-opened="_focusCollectionPopup" no-auto-focus>
-              <h1>Add to Collection</h1>
-              <nuxeo-add-to-collection-popup
-                document="[[document]]"
-                id="addToCollection">
-              </nuxeo-add-to-collection-popup>
-            </paper-dialog>
-
             <template is="dom-if" if="[[_canViewContent(document)]]">
               <nuxeo-document-content-view provider="advanced_document_content"
                 params="[[cvParams]]"
@@ -210,9 +106,6 @@ Contributors:
 
             <template is="dom-if" if="[[_canView(document)]]">
               <nuxeo-document-page document="{{document}}"></nuxeo-document-page>
-              <paper-dialog id="previewDialog" with-backdrop>
-                <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-              </paper-dialog>
             </template>
           </section>
 
@@ -247,9 +140,6 @@ Contributors:
           document: {
             type: Object
           },
-          inClipboard: {
-            type: Boolean
-          },
           selectedTab: {
             type: String,
             value: 'view',
@@ -258,6 +148,12 @@ Contributors:
           cvParams: {
             type: Object,
             notify: true
+          },
+          actionContext: {
+            type: Object,
+            value: function() {
+              return {};
+            }
           }
         },
 
@@ -268,23 +164,10 @@ Contributors:
         },
 
         observers: [
-          '_inClipboard(document)',
+          '_updateActionContext(document)',
           '_updateCvParams(document)'
         ],
 
-        set clipboard(clipboard) {
-          this._clipboard = clipboard;
-          this._clipboard.addEventListener('documents-changed', this._inClipboard.bind(this));
-          this._inClipboard();
-        },
-
-        get clipboard() {
-          return this._clipboard;
-        },
-
-        _inClipboard: function() {
-          this.inClipboard = this.clipboard && this.document && this.clipboard.contains(this.document);
-        },
         /*
         set currentContentView(cv) {
           this.$.contentViewNav.contentView = cv;
@@ -298,33 +181,16 @@ Contributors:
           this.fire('documentUpdated');
         },
 
-        togglePreviewDialog: function() {
-          this.$$('#previewDialog').toggle();
-        },
-
-        toggleExportDialog: function() {
-          this.$$('#exportDialog').toggle();
-        },
-
-        toggleShareDialog: function() {
-          this.$$('#shareDialog').toggle();
-          this.$$('#docPermalink').inputElement.select();
-        },
-
-        toggleCollectionDialog: function() {
-          this.$$('#collectionDialog').toggle();
-        },
-
-        toggleClipboard: function() {
-          if (this.clipboard.contains(this.document)) {
-            this.clipboard.remove(this.document);
-          } else {
-            this.clipboard.add(this.document);
-          }
-        },
-
         download: function() {
           location.href = this.document.properties['file:content'].data;
+        },
+
+        set clipboard(clipboard) {
+          this.set('actionContext.clipboard', clipboard);
+        },
+
+        get clipboard() {
+          return this.actionContext.clipboard;
         },
 
         get _enrichers() {
@@ -345,8 +211,8 @@ Contributors:
           return this.document ? 'file:content' in this.document.properties : false;
         },
 
-        _canViewAsCollectionMember: function(document) {
-          return document ? document.facets.indexOf('NotCollectionMember') === -1 : false;
+        _updateActionContext: function() {
+          this.set('actionContext.document', this.document);
         },
 
         _canDownload: function() {
@@ -373,10 +239,6 @@ Contributors:
           }
         },
 
-        _buildPermalink: function(document) {
-          return location.origin + location.pathname + '#!/doc/' + document.uid;
-        },
-
         _toast: function(msg) {
           this.$.toast.text = msg;
           this.$.toast.open();
@@ -391,25 +253,7 @@ Contributors:
         _documentRemovedFromCollection: function() {
           this._toast('Document removed from Collection.');
           this._documentUpdated();
-        },
-
-        _resetCollectionPopup: function() {
-          this.$$('#addToCollection')._reset();
-        },
-
-        _focusCollectionPopup: function() {
-          this.$$('#addToCollection').focus();
-        },
-
-        ready: function() {
-          window.addEventListener('addedToCollection', function() {
-            this._documentAddedToCollection();
-          }.bind(this));
-          window.addEventListener('removedFromCollection', function() {
-            this._documentRemovedFromCollection();
-          }.bind(this));
         }
-
       });
     })();
   </script>

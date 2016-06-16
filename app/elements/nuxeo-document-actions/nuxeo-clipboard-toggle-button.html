@@ -1,0 +1,119 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<!--
+`nuxeo-clipboard-toggle-button`
+@group Nuxeo UI
+@element nuxeo-clipboard-toggle-button
+-->
+<dom-module id="nuxeo-clipboard-toggle-button">
+
+
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+      ::content iron-icon {
+        fill: var(--icon-toggle-color, rgba(0,0,0,0));
+        stroke: var(--icon-toggle-outline-color, currentcolor);
+      }
+
+      ::content iron-icon:hover {
+        stroke: var(--nuxeo-link-hover-color);
+      }
+
+      :host([in-clipboard]) ::content iron-icon {
+        stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
+        fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+      }
+    </style>
+
+    <paper-icon-button noink
+      id="clipboardBut"
+      icon="image:add-to-photos"
+      active="[[inClipboard]]"
+      on-tap="toggle"></paper-icon-button>
+    <paper-tooltip for="clipboardBut">Add to Clipboard</paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-clipboard-toggle-button',
+        properties: {
+          document: {
+            type: Object,
+            observer: '_update'
+          },
+          inClipboard: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          },
+          icon: {
+            type: String,
+            value: 'icons:grade'
+          },
+          tooltip: {
+            type: String,
+            computed: '_computeTooltip(inClipboard)'
+          }
+        },
+
+        _isAvailable: function(document) {
+          return document && document.facets.indexOf('NotCollectionMember') === -1;
+        },
+
+        _computeTooltip: function(inClipboard) {
+          return inClipboard ? 'Remove from clipboard' : 'Add to clipboard';
+        },
+
+        _update: function() {
+          this.inClipboard = this._clipboard && this.document && this._clipboard.contains(this.document);
+        },
+
+        set clipboard(clipboard) {
+          if (!clipboard) {
+            return;
+          }
+          this._clipboard = clipboard;
+          this._clipboard.addEventListener('documents-changed', this._update.bind(this));
+          this._update();
+        },
+
+        get clipboard() {
+          return this._clipboard;
+        },
+
+        toggle: function() {
+          if (this._clipboard.contains(this.document)) {
+            this._clipboard.remove(this.document);
+          } else {
+            this._clipboard.add(this.document);
+          }
+        },
+      });
+    })();
+  </script>
+
+</dom-module>
