@@ -367,6 +367,8 @@ Contributors:
         },
 
         _refresh: function() {
+          this.$.datatable.loading = true;
+          this.$.datagrid.loading = true;
           var pn = this.$.cvProvider.page;
           this.$.cvProvider.page = 1;
           if (pn === 1) {
