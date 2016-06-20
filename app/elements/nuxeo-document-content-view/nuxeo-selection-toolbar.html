@@ -114,8 +114,7 @@ Contributors:
             </a>
           </div>
           <div class="horizontal center flex layout end-justified actions">
-            <paper-icon-button icon="editor:mode-edit" on-tap="dummyAction"></paper-icon-button>
-            <paper-icon-button icon="delete" on-tap="dummyAction"></paper-icon-button>
+            <nuxeo-delete-documents-button documents="{{selectedItems}}"></nuxeo-delete-documents-button>
             <a class="selectionLink" on-tap="clearSelection">
               <span>Clear</span>
             </a>
@@ -170,10 +169,6 @@ Contributors:
               return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
             }
           }
-        },
-
-        dummyAction: function() {
-          console.log('dummyAction');
         }
 
       });

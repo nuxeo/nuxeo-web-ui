@@ -26,6 +26,7 @@
     "AlloyEditor": true,
     "CKEDITOR": true,
     "jQuery": true,
-    "Promise": true
+    "Promise": true,
+    "confirm": true
   }
 }

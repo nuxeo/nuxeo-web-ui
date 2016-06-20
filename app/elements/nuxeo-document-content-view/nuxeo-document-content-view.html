@@ -37,6 +37,10 @@ Contributors:
         @apply(--layout-fit);
       }
 
+      :host[display-mode=table] .toolbar {
+        margin-left: 69px;
+      }
+
       nuxeo-data-table {
         background-color: #fff;
       }
@@ -70,7 +74,7 @@ Contributors:
       </paper-fab>
       <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
     </template>
-    <template is="dom-if" if="[[!_isDisplayTable]]">
+    <template is="dom-if" if="[[_isDisplayGrid]]">
       <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
       </paper-fab>
       <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
@@ -87,7 +91,7 @@ Contributors:
        params="[[params]]">
     </nuxeo-page-provider>
 
-    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar"></nuxeo-selection-toolbar>
+    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh"></nuxeo-selection-toolbar>
 
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
@@ -100,7 +104,7 @@ Contributors:
           </template>
         </nuxeo-data-grid>
       </div>
-      <div id="table" hidden$="[[!_isDisplayTable]]">
+      <div id="table" hidden$="[[_isDisplayGrid]]">
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
           settings-enabled
@@ -153,7 +157,8 @@ Contributors:
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
 
     <iron-localstorage name="[[_displayModeStorageName(document)]]"
-      value="{{displayMode}}">
+      value="{{displayMode}}"
+      on-iron-localstorage-load-empty="_initLocalStorage">
     </iron-localstorage>
   </template>
   <script>
@@ -192,7 +197,9 @@ Contributors:
           },
           displayMode: {
             type: String,
-            value: 'table'
+            value: 'table',
+            notify: true,
+            reflectToAttribute: true
           },
           _isDisplayTable: {
             type: Boolean,
@@ -214,7 +221,7 @@ Contributors:
         },
 
         observers: [
-          '_cvParamsChanged(params)',
+          '_refresh(params)',
           '_observeDisplayMode(displayMode)'
         ],
 
@@ -352,13 +359,25 @@ Contributors:
         },
 
         _displayVersion: function(doc) {
-          if (doc.properties && doc.properties['uid:major_version'] !== undefined) {
-            return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+          if (doc.properties) {
+            if (doc.properties['uid:major_version'] !== null && doc.properties['uid:major_version'] !== undefined) {
+              return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+            }
           }
         },
 
-        _cvParamsChanged: function() {
+        _refresh: function() {
+          var pn = this.$.cvProvider.page;
           this.$.cvProvider.page = 1;
+          if (pn === 1) {
+            // normally the page provider is on auto mode
+            // so the fetch should be triggered when changing page
+            this.$.cvProvider.fetch();
+          }
+        },
+
+        _initLocalStorage: function() {
+          this.displayMode = 'table';
         }
 
       });

@@ -1,0 +1,90 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<!--
+`nuxeo-delete-documents-actions`
+@group Nuxeo UI
+@element nuxeo-delete-documents-actions
+-->
+<dom-module id="nuxeo-delete-documents-button">
+
+
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <nuxeo-operation id="deleteOp" op="Document.Delete"></nuxeo-operation>
+
+    <paper-icon-button icon="delete" id="deleteAllButtons">
+    </paper-icon-button>
+    <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
+      [[i18n('delete_selected_documents', 'Delete selected documents')]]
+    </paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-delete-documents-button',
+        properties: {
+          documents: {
+            type: Array,
+            notify: true,
+            value: []
+          }
+        },
+
+        listeners: {
+          'tap': 'deleteDocuments',
+        },
+
+        deleteDocuments: function() {
+          if (confirm('Permanently delete documents?')) {
+            if (this.documents && this.documents.length) {
+              var uids = this.documents.map(function(doc) {
+                return doc.uid;
+              }).join(',');
+              this.$.deleteOp.input = 'docs:' + uids;
+              this.$.deleteOp.execute().then(function() {
+                this.documents = [];
+                this.fire('refresh');
+              }.bind(this));
+            }
+          }
+        },
+
+        _uids: function() {
+          return this.documents.map(function(doc) {
+            return doc.uid;
+          }).join(',');
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
