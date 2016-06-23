@@ -165,7 +165,7 @@ Contributors:
         <paper-icon-button icon="icons:more-horiz" title="more"></paper-icon-button>
       </div>
       <div class="select">
-        <paper-icon-button icon="icons:check" title="select"></paper-icon-button>
+        <paper-icon-button icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
       </div>
     </div>
 
@@ -218,6 +218,10 @@ Contributors:
 
         handleClick: function() {
           this.fire('clicked');
+        },
+
+        _onCheckBoxTap: function() {
+          this.fire('selected');
         }
       });
     })();

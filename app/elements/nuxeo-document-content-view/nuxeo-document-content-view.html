@@ -91,11 +91,14 @@ Contributors:
        params="[[params]]">
     </nuxeo-page-provider>
 
-    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh"></nuxeo-selection-toolbar>
+    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh">
+    </nuxeo-selection-toolbar>
 
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider">
+        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
+          selected-items="{{selectedItems}}"
+          selection-enabled>>
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
               class$="[[_computedClass(selected)]]"
@@ -256,6 +259,7 @@ Contributors:
             this._isDisplayTable = false;
             this._isDisplayGrid = true;
           }
+          this.selectedItems = [];
         },
 
         _displayModeStorageName: function(document) {
