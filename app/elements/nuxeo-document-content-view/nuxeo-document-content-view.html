@@ -91,14 +91,13 @@ Contributors:
        params="[[params]]">
     </nuxeo-page-provider>
 
-    <nuxeo-selection-toolbar selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh">
-    </nuxeo-selection-toolbar>
-
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
-          selected-items="{{selectedItems}}"
+          selected-items="{{gridSelectedItems}}"
           selection-enabled>
+          <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar">
+          </nuxeo-selection-toolbar>
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
               tabindex$="{{tabIndex}}"
@@ -112,8 +111,10 @@ Contributors:
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
           settings-enabled
-          selected-items="{{selectedItems}}"
+          selected-items="{{tableSelectedItems}}"
           selection-enabled>
+          <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar">
+          </nuxeo-selection-toolbar>
           <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
@@ -260,7 +261,6 @@ Contributors:
             this._isDisplayTable = false;
             this._isDisplayGrid = true;
           }
-          this.selectedItems = [];
         },
 
         _displayModeStorageName: function(document) {

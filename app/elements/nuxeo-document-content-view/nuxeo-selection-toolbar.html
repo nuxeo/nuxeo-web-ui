@@ -160,7 +160,7 @@ Contributors:
         },
 
         clearSelection: function() {
-          this.selectedItems = [];
+          this.fire('clear-selected-items');
         },
 
         _thumbnail: function(doc) {
