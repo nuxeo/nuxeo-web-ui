@@ -15,6 +15,7 @@ limitations under the License.
 
 Contributors:
     Andre Justo <ajusto@nuxeo.com>
+    Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -140,8 +141,8 @@ Contributors:
     <nuxeo-search id="saved-search"></nuxeo-search>
 
     <div class="header ellipsis search-header">
-      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params='{"pageProviderName": "default_search"}'></nuxeo-search>
-      <paper-dropdown-menu no-label-float horizontal-align="left">
+      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params='{"pageProvider": "default_search"}'></nuxeo-search>
+      <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
         <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
           <paper-item>Search Filters</paper-item>
           <template is="dom-repeat" items="[[searches]]" as="search">
@@ -150,13 +151,11 @@ Contributors:
         </paper-menu>
       </paper-dropdown-menu>
       <template is="dom-if" if="[[_isQueue]]">
-        <h1>[[i18n('ui.searchForm.searchQueue', 'Search Queue')]]</h1>
         <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
         </paper-icon-button>
         <paper-tooltip for="toogleFilter">[[i18n('ui.searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isQueue]]">
-        <h1>[[i18n('ui.searchForm.filter', 'Search Filters')]]</h1>
         <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
         </paper-icon-button>
         <paper-tooltip for="toogleQueue">[[i18n('ui.searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
@@ -168,10 +167,14 @@ Contributors:
       <div id="filters" class="filters" hidden$="{{_isQueue}}">
         <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
         <div class="layout vertical row">
-          <paper-button noink class="primary clear" raised on-click="_clear">Clear</paper-button>
+          <paper-button noink class="primary clear" raised on-click="_clear">
+            [[i18n('ui.searchForm.clear', 'Clear')]]
+          </paper-button>
         </div>
         <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
-          <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">Reset</paper-button>
+          <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
+            [[i18n('ui.searchForm.Reset', 'Reset')]]
+          </paper-button>
         </div>
       </div>
 
@@ -218,17 +221,17 @@ Contributors:
 
     <paper-dialog id="saveDialog" with-backdrop>
       <div class="vertical layout">
-        <h1>Save Search</h1>
+        <h1>[[i18n('ui.searchForm.savePopup.heading','Save Search')]]</h1>
         <div>
           <paper-input id="savedSearchTitle"
-                       label="Enter a name for your saved search"
+                       label="[[i18n('ui.searchForm.savePopup.label', 'Enter a name for your saved search')]]"
                        autofocus
                        no-label-float>
           </paper-input>
         </div>
         <div class="buttons">
-         <paper-button dialog-dismiss>Cancel</paper-button>
-         <paper-button noink class="primary" on-tap="_saveSearch">Save</paper-button>
+         <paper-button dialog-dismiss>[[i18n('ui.searchForm.popup.cancel', 'Cancel')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('ui.searchForm.popup.save','Save')]]</paper-button>
         </div>
       </div>
     </paper-dialog>
@@ -289,6 +292,33 @@ Contributors:
             type: Boolean,
             value: false,
             notify: true
+          },
+          isSavedSearch: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+          paramMutator: {
+            type: Function,
+            value: function() {
+              return function(params) {
+                var result = {};
+                if (params) {
+                  // filter null values
+                  for (var param in params) {
+                    var value = params[param];
+                    if (value && param !== 'dc:title') {
+                      result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
+                    }
+                  }
+                  // allow search to be visible on JSF UI
+                  if (!('cvd:contentViewName' in result)) {
+                    result['cvd:contentViewName'] = 'default_search';
+                  }
+                }
+                return result;
+              };
+            }
           }
         },
 
@@ -403,9 +433,11 @@ Contributors:
 
         _selectedSearchIdxChanged: function() {
           if (this._isSavedSearch()) {
+            this.isSavedSearch = true;
             this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
-            this.params = this.selectedSearch.params;
+            this.params = this._mutateParams(this.selectedSearch.params);
           } else {
+            this.isSavedSearch = false;
             this.selectedSearch = {};
             this._clear();
           }
@@ -413,7 +445,7 @@ Contributors:
         },
 
         _selectedSearchChanged: function() {
-          this.params = this.selectedSearch.params;
+          this.params = this._mutateParams(this.selectedSearch.params);
         },
 
         _isSavedSearch: function() {
@@ -425,18 +457,20 @@ Contributors:
           if (!this._isSavedSearch()) {
             this.dirty = false;
           }
+          this.selectedSearchIdx = 0;
         },
 
         _reset: function() {
           var _el = this.$['saved-search'];
           _el.searchId = this.selectedSearch.id;
           _el.get().then(function(response) {
-            this.params = response.params;
+            this.params = this._mutateParams(response.params);
             this.dirty = false;
           }.bind(this));
         },
 
         saveAs: function() {
+          this.$.actionsDropdown.close();
           this.$.saveDialog.open();
           this._saveAs = true;
         },
@@ -456,9 +490,8 @@ Contributors:
             _el.searchId = '';
             _el.data = {
               'entity-type': 'savedSearch',
-              'langOrProviderName': this.provider,
+              'pageProviderName': this.provider,
               'params': this.params,
-              'searchType': 'pageProvider',
               'title': this.$$('#savedSearchTitle').value
             };
             _el.post().then(function(response) {
@@ -472,11 +505,16 @@ Contributors:
             // update an existing search
             _el.searchId = this.selectedSearch.id;
             _el.data = this.selectedSearch;
+            _el.data.params = this.params;
             _el.put().then(function() {
               this.dirty = false;
             }.bind(this));
           }
           this._saveAs = false;
+        },
+
+        _mutateParams: function(params) {
+          return this.paramMutator ? this.paramMutator(params) : params;
         }
       });
     })();

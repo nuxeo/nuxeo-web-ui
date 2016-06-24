@@ -59,18 +59,12 @@ Contributors:
         width: 100%;
       }
 
-      .clear {
-        background-color: #fafafa;
-        border-color: #fafafa;
-        width: 100%;
-      }
-
     </style>
 
     <div class="layout vertical row">
       <label>[[i18n('ui.facetedSearch.fullText', 'Full Text')]]</label>
       <paper-input id="searchInput" autofocus="true"
-                   value="{{params.ecm_fulltext}}" tabindex="0"
+                   value="{{searchTerm}}" tabindex="0"
                    type="search"
                    placeholder="[[i18n('ui.facetedSearch.fullText.placeholder', 'Search something ...')]]"
                    no-label-float>
@@ -153,11 +147,6 @@ Contributors:
         value="{{params.common_size_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
-    <div class="layout vertical row">
-     <paper-button noink class="primary clear" raised on-click="_clear">
-       [[i18n('ui.facetedSearch.clear', 'Clear')]]
-     </paper-button>
-    </div>
   </template>
   <script>
     (function() {
@@ -186,11 +175,6 @@ Contributors:
 
         behaviors: [Nuxeo.I18nBehavior],
 
-        _clear: function() {
-          this.params = {};
-          this.searchTerm = null;
-        },
-
         ready: function() {
           window.addEventListener('navigation', function(e) {
             if (e.detail.page === 'search') {
@@ -203,10 +187,12 @@ Contributors:
           if (this.searchTerm) {
             this.set('params.ecm_fulltext', this.searchTerm + '*');
           } else {
-            this.set('params.ecm_fulltext', '');
-            // dirty but needed, the above line for
-            // ecm_fulltext removal being observed
-            delete this.params.ecm_fulltext;
+            if (this.params.ecm_fulltext) {
+              this.set('params.ecm_fulltext', '');
+              // dirty but needed, the above line for
+              // ecm_fulltext removal being observed
+              delete this.params.ecm_fulltext;
+            }
           }
         }
       });

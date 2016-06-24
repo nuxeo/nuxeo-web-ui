@@ -258,7 +258,8 @@ Contributors:
               </section>
 
               <section class="card search" name="search">
-                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults" dirty="{{dirty}}"></nuxeo-search-form>
+                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                                   is-saved-search="{{searchLoaded}}"></nuxeo-search-form>
               </section>
 
               <section class="card tasks" name="tasks">
@@ -364,15 +365,19 @@ Contributors:
               clipboard="[[clipboard]]"></nuxeo-browser>
 
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
-              <div class="actions">
-                <paper-button on-click="_saveSearch" disabled$="[[!dirty]]">
-                   <iron-icon icon="check"></iron-icon>Save
+              <div class="actions horizontal layout center">
+                <paper-button on-click="_saveSearch" hidden$="[[_showSaveAs(searchLoaded,dirty)]]"> <!-- searchLoaded|!dirty -->
+                   <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
                 </paper-button>
-                <paper-menu-button horizontal-align="right" vertical-offset="40">
+                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchLoaded,dirty)]]"> <!-- searchLoaded&!dirty -->
+                   <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
+                </paper-button>
+                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[_showSaveAs(searchLoaded,dirty)]]">
                   <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
                   <paper-menu class="dropdown-content layout vertical">
-                    <paper-item class="layout horizontal center" on-tap="_saveSearchAs">
-                      <iron-icon icon="icons:add"></iron-icon>Save New Search
+                    <paper-item class="layout horizontal center" on-tap="_saveSearchAs"
+                                hidden$="[[_showSaveAs(searchLoaded,dirty)]]">
+                      <iron-icon icon="icons:add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
                     </paper-item>
                   </paper-menu>
                 </paper-menu-button>
@@ -554,6 +559,10 @@ Contributors:
 
         refresh: function() {
           this.$.doc.get();
+        },
+
+        _showSaveAs: function() {
+          return !this.searchLoaded || (this.searchLoaded && !this.dirty);
         },
 
         _navigate: function() {
