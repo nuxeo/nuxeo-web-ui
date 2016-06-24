@@ -98,9 +98,10 @@ Contributors:
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
           selected-items="{{selectedItems}}"
-          selection-enabled>>
+          selection-enabled>
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
+              tabindex$="{{tabIndex}}"
               class$="[[_computedClass(selected)]]"
               doc="[[item]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
