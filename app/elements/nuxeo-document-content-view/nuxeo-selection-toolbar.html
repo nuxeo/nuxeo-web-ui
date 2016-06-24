@@ -114,7 +114,10 @@ Contributors:
             </a>
           </div>
           <div class="horizontal center flex layout end-justified actions">
-            <nuxeo-delete-documents-button documents="{{selectedItems}}"></nuxeo-delete-documents-button>
+            <nuxeo-clipboard-documents-button documents="{{selectedItems}}">
+            </nuxeo-clipboard-documents-button>
+            <nuxeo-delete-documents-button documents="{{selectedItems}}">
+            </nuxeo-delete-documents-button>
             <a class="selectionLink" on-tap="clearSelection">
               <span>Clear</span>
             </a>

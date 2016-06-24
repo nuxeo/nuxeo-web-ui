@@ -442,7 +442,8 @@ Contributors:
           'browseCollection': '_navigateToCollection',
           'workflowStarted': '_fetchTasks',
           'workflowTaskProcessed': '_fetchTasks',
-          'taskChanged': '_onTaskChanged'
+          'taskChanged': '_onTaskChanged',
+          'addToClipboard': '_onAddToClipboard'
         },
 
         ready: function() {
@@ -589,7 +590,18 @@ Contributors:
         _onTaskChanged: function(e) {
           this.page = 'tasks';
           this.currentTask = e.detail.task;
+        },
+
+        _onAddToClipboard: function(e) {
+          if (e.detail.documents) {
+            e.detail.documents.forEach(function(doc) {
+              if (!this.clipboard.contains(doc)) {
+                this.clipboard.add(doc);
+              }
+            }.bind(this));
+          }
         }
+
       });
     })();
   </script>

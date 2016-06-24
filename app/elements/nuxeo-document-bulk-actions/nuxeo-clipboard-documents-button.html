@@ -1,0 +1,71 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the GNU Lesser General Public License
+(LGPL) version 2.1 which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/lgpl.html
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<!--
+`nuxeo-clipboard-documents-button`
+@group Nuxeo UI
+@element nuxeo-clipboard-documents-button
+-->
+<dom-module id="nuxeo-clipboard-documents-button">
+
+
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <paper-icon-button noink
+      id="clipboardButton"
+      icon="image:add-to-photos">
+    </paper-icon-button>
+    <paper-tooltip for="clipboardButton">[[i18n('add_to_clip_board', 'Add to clipboard')]]</paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-clipboard-documents-button',
+        properties: {
+          documents: {
+            type: Array,
+            notify: true,
+            value: []
+          }
+        },
+
+        listeners: {
+          'tap': 'addToClipBoard',
+        },
+
+        addToClipBoard: function() {
+          this.fire('addToClipboard', {documents: this.documents});
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
