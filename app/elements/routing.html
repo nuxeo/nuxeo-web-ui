@@ -106,6 +106,10 @@ Contributors:
       app.currentTask = null;
     });
 
+    page('/drive', function() {
+      app.page = 'drive';
+    });
+
     // add #! before urls
     page({
       hashbang: true
@@ -140,6 +144,11 @@ Contributors:
         group: function(name) {
           return page.base() + '/group/' + name;
         },
+
+        drive: function() {
+          return page.base() + '/drive';
+        }
+
       },
       baseUrl: page.base()
     });

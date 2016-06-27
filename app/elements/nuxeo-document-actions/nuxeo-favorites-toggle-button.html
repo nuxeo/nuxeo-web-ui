@@ -113,7 +113,7 @@ Contributors:
         },
 
         _isFavorite: function(doc) {
-          return doc && doc.contextParameters.favorites.isFavorite;
+          return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
         },
 
         _observeDoc: function() {
@@ -122,7 +122,7 @@ Contributors:
 
         ready: function() {
           window.addEventListener('removedFromFavorites', function(e) {
-            if (e.detail.docUid && e.detail.docUid === this.document.uid) {
+            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
               this.favorite = false;
             }
           }.bind(this));

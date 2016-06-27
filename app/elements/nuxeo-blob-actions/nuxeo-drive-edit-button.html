@@ -42,6 +42,12 @@ Contributors:
       <paper-tooltip for="driveBtn">Open with Drive</paper-tooltip>
     </template>
 
+    <paper-dialog id="dialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>Download Nuxeo Drive Client</h1>
+        <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -63,6 +69,10 @@ Contributors:
       },
 
       _go: function() {
+        if (!this.tokens || !this.tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
         location.href = this.driveEditURL;
       },
 

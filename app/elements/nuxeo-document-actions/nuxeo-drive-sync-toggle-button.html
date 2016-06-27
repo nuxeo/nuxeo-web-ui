@@ -103,7 +103,7 @@ Contributors:
         },
 
         _update: function() {
-          if (!this.document) {
+          if (!this.document || !roots) {
             return;
           }
           this.synchronized = (roots.indexOf(this.document.uid) !== -1);
