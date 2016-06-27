@@ -1,0 +1,97 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-drive-edit-button`
+@group Nuxeo UI
+@element nuxeo-drive-edit-button
+-->
+<dom-module id="nuxeo-drive-edit-button">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+      paper-icon-button {
+        height: 32px;
+        width: 32px;
+        @apply(--nuxeo-drive-edit-button-layout);
+      }
+    </style>
+
+    <nuxeo-resource auto path="/token" params='{"application": "Nuxeo Drive"}' on-response="_handleTokens"></nuxeo-resource>
+
+    <template is="dom-if" if="[[_isAvailable(blob)]]">
+      <paper-icon-button icon="editor:mode-edit" id="driveBtn" on-tap="_go"></paper-icon-button>
+      <paper-tooltip for="driveBtn">Open with Drive</paper-tooltip>
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-drive-edit-button',
+      properties: {
+        document: Object,
+        blob: Object,
+        tokens: Array
+      },
+
+      _isAvailable: function(blob) {
+        if (!blob) {
+          return false;
+        }
+        var isExcluded = false; //['Collection'].indexOf(this.document.type) !== -1;
+        var isMainBlob = true;
+        return !isExcluded && isMainBlob;
+      },
+
+      _go: function() {
+        location.href = this.driveEditURL;
+      },
+
+      get driveEditURL() {
+        if (!this.blob) {
+          return '';
+        }
+
+        var parts = this.blob.data.split('/nxfile/');
+        var baseUrl = parts[0];
+        var downloadUrl = 'nxfile/' + parts[1];
+
+        return [
+          'nxdrive://edit',
+          baseUrl.replace('://', '/'), // XXX replaceFirst
+          //'user', this.$.nx.client.user.id, // XXX
+          'repo', this.document.repository,
+          'nxdocid', this.document.uid,
+          'filename', this.blob.name,
+          'downloadUrl', downloadUrl].join('/');
+      },
+
+      _handleTokens: function(e) {
+        this.tokens = e.detail.response.entries.map(function(token) {
+          return token.id;
+        });
+      }
+
+    });
+  </script>
+
+</dom-module>
