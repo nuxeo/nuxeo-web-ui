@@ -162,7 +162,7 @@ Contributors:
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
 
     <iron-localstorage name="[[_displayModeStorageName(document)]]"
-      value="{{displayMode}}"
+      value="{{_settings}}"
       on-iron-localstorage-load-empty="_initLocalStorage">
     </iron-localstorage>
 
@@ -214,6 +214,11 @@ Contributors:
           _isDisplayGrid: {
             type: Boolean,
             value: false
+          },
+          _settings: {
+            type: Object,
+            value: {},
+            notify: true,
           }
         },
 
@@ -223,12 +228,15 @@ Contributors:
           'smartImport': '_handleSmartImport',
           'dropzone.dragover': '_dragoverSmartImport',
           'dropzone.dragleave': '_dragleaveSmartImport',
-          'dropzone.drop': '_dropSmartImport'
+          'dropzone.drop': '_dropSmartImport',
+          'tableSettingsChanged': '_updateSettings',
+          'displayModeChanged': '_updateSettings'
         },
 
         observers: [
           '_refresh(params)',
-          '_observeDisplayMode(displayMode)'
+          '_observeDisplayMode(displayMode)',
+          '_observeSettings(_settings)'
         ],
 
         _computedClass: function(isSelected) {
@@ -247,11 +255,13 @@ Contributors:
         displayTable: function() {
           this.displayMode = 'table';
           this.$.datatable.notifyResize();
+          this.fire('displayModeChanged');
         },
 
         displayGrid: function() {
           this.displayMode = 'grid';
           this.$.datagrid.notifyResize();
+          this.fire('displayModeChanged');
         },
 
         _observeDisplayMode: function() {
@@ -265,7 +275,7 @@ Contributors:
         },
 
         _displayModeStorageName: function(document) {
-          return 'nx-dm-' + document.uid;
+          return 'nx-browse-settings-' + this.$.nxcon.user.id + '-' + document.title;
         },
 
         importBatch: function(data) {
@@ -385,7 +395,22 @@ Contributors:
         },
 
         _initLocalStorage: function() {
-          this.displayMode = 'table';
+          this._settings = {};
+          this._settings.displayMode = 'table';
+          this._settings.tableSettings = this.$.datatable.settings;
+        },
+
+        _observeSettings: function() {
+          this.displayMode = this._settings.displayMode;
+          this.$.datatable.settings = this._settings.tableSettings;
+        },
+
+        _updateSettings: function() {
+          if (this._settings) {
+            // TODO improve when https://github.com/Polymer/polymer/issues/1550 fixed
+            this.set('_settings.displayMode', this.displayMode);
+            this.set('_settings.tableSettings', this.$.datatable.settings);
+          }
         }
 
       });
