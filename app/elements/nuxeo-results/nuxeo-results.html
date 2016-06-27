@@ -31,6 +31,15 @@ Contributors:
         @apply(--layout-fit);
       }
 
+      .toolbar {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+      }
+
+      :host[display-mode=table] .toolbar {
+        margin-left: 69px;
+      }
+
       nuxeo-data-table {
         background-color: #fff;
       }
@@ -41,7 +50,7 @@ Contributors:
 
       paper-fab {
         position: absolute;
-        top: 32px;
+        top: 64px;
         right: 32px;
         color: #ffffff;
         --paper-fab-background: #5ADA5A;
@@ -64,7 +73,7 @@ Contributors:
       </paper-fab>
       <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
     </template>
-    <template is="dom-if" if="[[!_isDisplayTable]]">
+    <template is="dom-if" if="[[_isDisplayGrid]]">
       <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
       </paper-fab>
       <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
@@ -74,19 +83,28 @@ Contributors:
 
     <div id="container">
       <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]">
+        <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]"
+          selected-items="{{gridSelectedItems}}"
+          selection-enabled>
+          <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar">
+          </nuxeo-selection-toolbar>
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
+              tabindex$="{{tabIndex}}"
               class$="[[_computedClass(selected)]]"
               doc="[[item]]" on-clicked="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
       </div>
-      <div id="table" hidden$="[[!_isDisplayTable]]">
+      <div id="table" hidden$="[[_isDisplayGrid]]">
         <nuxeo-data-table id="datatable"
           nx-provider="[[nxProvider]]"
-          selection-enabled multi-selection>
+          settings-enabled
+          selected-items="{{tableSelectedItems}}"
+          selection-enabled>
+          <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar">
+          </nuxeo-selection-toolbar>
          <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
@@ -114,8 +132,9 @@ Contributors:
       </div>
     </div>
 
-    <iron-localstorage name="[[_displayModeStorageName(name)]]"
-      value="{{displayMode}}">
+    <iron-localstorage name="[[_displayModeStorageName(document)]]"
+      value="{{displayMode}}"
+      on-iron-localstorage-load-empty="_initLocalStorage">
     </iron-localstorage>
 
   </template>
@@ -128,7 +147,9 @@ Contributors:
         properties: {
           displayMode: {
             type: String,
-            value: 'table'
+            value: 'table',
+            notify: true,
+            reflectToAttribute: true
           },
           _isDisplayTable: {
             type: Boolean,
@@ -148,6 +169,14 @@ Contributors:
         observers: [
           '_observeDisplayMode(displayMode)'
         ],
+
+        _computedClass: function(isSelected) {
+          var classes = 'grid-box';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
 
         displayTable: function() {
           this.displayMode = 'table';
@@ -205,8 +234,10 @@ Contributors:
         },
 
         _displayVersion: function(doc) {
-          if (doc.properties && doc.properties['uid:major_version'] !== undefined) {
-            return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+          if (doc.properties) {
+            if (doc.properties['uid:major_version'] !== null && doc.properties['uid:major_version'] !== undefined) {
+              return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+            }
           }
         },
 
@@ -214,13 +245,9 @@ Contributors:
           return typeof this.aggregation !== undefined;
         },
 
-        _computedClass: function(isSelected) {
-          var classes = 'grid-box';
-          if (isSelected) {
-            classes += ' selected';
-          }
-          return classes;
-        },
+        _initLocalStorage: function() {
+          this.displayMode = 'table';
+        }
 
       });
     })();
