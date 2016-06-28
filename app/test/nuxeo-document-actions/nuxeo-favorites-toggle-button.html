@@ -41,7 +41,7 @@ Contributors:
 
   <test-fixture id="toggleFavorite">
     <template is="dom-template">
-       <nuxeo-favorites-toggle-button doc="[[doc]]"></nuxeo-favorites-toggle-button>
+       <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
     </template>
   </test-fixture>
 
@@ -56,7 +56,8 @@ Contributors:
             "favorites": {
               "isFavorite": true
             }
-          }
+          },
+          "facets": []
         };
         server = sinon.fakeServer.create();
         server.autoRespond = true;
@@ -86,7 +87,7 @@ Contributors:
 
         test('toggle should remove document from favorites', function() {
           // Remove document from favorites by toggling
-          MockInteractions.tap(Polymer.dom(element.root).querySelector('#favBut'));
+          MockInteractions.tap(element);
           return waitChanged(element, 'favorite').then(function() {
             expect(element.favorite).to.be.false;
           });
@@ -116,7 +117,7 @@ Contributors:
 
         test('toggle should add the document to favorites', function() {
           // Add the documents to favorites by toggling
-          MockInteractions.tap(Polymer.dom(element.root).querySelector('#favBut'));
+          MockInteractions.tap(element);
           return waitChanged(element, 'favorite').then(function() {
             expect(element.favorite).to.be.true;
           });
