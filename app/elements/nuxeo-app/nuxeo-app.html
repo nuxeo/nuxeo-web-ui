@@ -278,7 +278,7 @@ Contributors:
                   <h1>Personal Space</h1>
                 </div>
                 <div class="content">
-                  <nuxeo-document-tree id="userWorkspace" root-path="[[userWorkspacePath]]" current-document="[[currentDocument]]">
+                  <nuxeo-document-tree id="userWorkspace" root-path="[[_userWorkspacePath]]" current-document="[[currentDocument]]">
                   </nuxeo-document-tree>
                 </div>
               </section>
@@ -468,7 +468,7 @@ Contributors:
             type: Object
           },
 
-          userWorkspacePath: {
+          _userWorkspacePath: {
             type: String
           }
         },
@@ -513,7 +513,7 @@ Contributors:
             Polymer.dom(this.root).appendChild(experimental);
           }
           this.$.nxcon.connect().then(function(res) {
-            this.userWorkspacePath =  '/default-domain/UserWorkspaces/' + res.id;
+            this._userWorkspacePath =  '/default-domain/UserWorkspaces/' + res.id;
           }.bind(this));
         },
 
