@@ -186,6 +186,8 @@ Contributors:
       }
     </style>
 
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
     <nuxeo-document id="doc" auto doc-path="[[docPath]]"
                     response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
@@ -276,7 +278,8 @@ Contributors:
                   <h1>Personal Space</h1>
                 </div>
                 <div class="content">
-                  <nuxeo-document-tree root-path="/default-domain/UserWorkspaces/Administrator/" current-document="[[currentDocument]]"></nuxeo-document-tree>
+                  <nuxeo-document-tree id="userWorkspace" root-path="[[userWorkspacePath]]" current-document="[[currentDocument]]">
+                  </nuxeo-document-tree>
                 </div>
               </section>
 
@@ -463,6 +466,10 @@ Contributors:
 
           currentTask: {
             type: Object
+          },
+
+          userWorkspacePath: {
+            type: String
           }
         },
 
@@ -505,6 +512,9 @@ Contributors:
             experimental.className = 'experimental';
             Polymer.dom(this.root).appendChild(experimental);
           }
+          this.$.nxcon.connect().then(function(res) {
+            this.userWorkspacePath =  '/default-domain/UserWorkspaces/' + res.id;
+          }.bind(this));
         },
 
         refresh: function() {

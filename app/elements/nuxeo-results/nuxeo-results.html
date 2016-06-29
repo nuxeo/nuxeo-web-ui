@@ -132,9 +132,8 @@ Contributors:
       </div>
     </div>
 
-    <iron-localstorage name="[[_displayModeStorageName(document)]]"
-      value="{{displayMode}}"
-      on-iron-localstorage-load-empty="_initLocalStorage">
+    <iron-localstorage id="prefStorage" name="[[_localStorageName]]"
+      value="{{_settings}}" auto-save-disabled>
     </iron-localstorage>
 
   </template>
@@ -159,16 +158,46 @@ Contributors:
             type: Boolean,
             value: false
           },
+          displayMode: {
+            type: String,
+            value: 'table',
+            notify: true,
+            reflectToAttribute: true
+          },
+          _isDisplayTable: {
+            type: Boolean,
+            value: true
+          },
+          _isDisplayGrid: {
+            type: Boolean,
+            value: false
+          },
+          _settings: {
+            type: Object,
+            value: {},
+            notify: true,
+          },
           name: {
             type: String
           },
+          _localStorageName :{
+            type: String
+          }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [
+          Nuxeo.RoutingBehavior
+        ],
 
         observers: [
-          '_observeDisplayMode(displayMode)'
+          '_observeDisplayMode(displayMode)',
+          'restoreSettings(_settings)'
         ],
+
+        listeners: {
+          'tableSettingsChanged': 'saveSettings',
+          'displayModeChanged': 'saveSettings'
+        },
 
         _computedClass: function(isSelected) {
           var classes = 'grid-box';
@@ -181,11 +210,13 @@ Contributors:
         displayTable: function() {
           this.displayMode = 'table';
           this.$.datatable.notifyResize();
+          this.fire('displayModeChanged');
         },
 
         displayGrid: function() {
           this.displayMode = 'grid';
           this.$.datagrid.notifyResize();
+          this.fire('displayModeChanged');
         },
 
         _observeDisplayMode: function() {
@@ -198,8 +229,25 @@ Contributors:
           }
         },
 
-        _displayModeStorageName: function(name) {
-          return 'nx-dm-' + name;
+        restoreSettings: function() {
+          if (this._settings) {
+            if (this._settings.displayMode && this._settings.displayMode.length > 0) {
+              this.displayMode = this._settings.displayMode;
+              if (this._settings.tableSettings) {
+                this.$.datatable.settings = this._settings.tableSettings;
+              }
+            }
+          }
+        },
+
+        saveSettings: function() {
+          if (this._settings === null) {
+            this._settings = {};
+          }
+          // TODO improve when https://github.com/Polymer/polymer/issues/1550 fixed
+          this.set('_settings.displayMode', this.displayMode);
+          this.set('_settings.tableSettings', this.$.datatable.settings);
+          this.$.prefStorage.save();
         },
 
         _navigate: function(e) {
@@ -245,8 +293,10 @@ Contributors:
           return typeof this.aggregation !== undefined;
         },
 
-        _initLocalStorage: function() {
-          this.displayMode = 'table';
+        ready: function() {
+          this.$.nxcon.connect().then(function(res) {
+            this._localStorageName =  res.id + '-nxrs-' + this.name;
+          }.bind(this));
         }
 
       });

@@ -161,9 +161,8 @@ Contributors:
 
     <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
 
-    <iron-localstorage name="[[_displayModeStorageName(document)]]"
-      value="{{_settings}}"
-      on-iron-localstorage-load-empty="_initLocalStorage">
+    <iron-localstorage id="prefStorage" name="[[_displayModeStorageName(document)]]"
+      value="{{_settings}}" auto-save-disabled>
     </iron-localstorage>
 
   </template>
@@ -229,14 +228,14 @@ Contributors:
           'dropzone.dragover': '_dragoverSmartImport',
           'dropzone.dragleave': '_dragleaveSmartImport',
           'dropzone.drop': '_dropSmartImport',
-          'tableSettingsChanged': '_updateSettings',
-          'displayModeChanged': '_updateSettings'
+          'tableSettingsChanged': 'saveSettings',
+          'displayModeChanged': 'saveSettings'
         },
 
         observers: [
           '_refresh(params)',
           '_observeDisplayMode(displayMode)',
-          '_observeSettings(_settings)'
+          'restoreSettings(_settings)'
         ],
 
         _computedClass: function(isSelected) {
@@ -275,7 +274,7 @@ Contributors:
         },
 
         _displayModeStorageName: function(document) {
-          return 'nx-browse-settings-' + this.$.nxcon.user.id + '-' + document.title;
+          return this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid;
         },
 
         importBatch: function(data) {
@@ -394,23 +393,25 @@ Contributors:
           }
         },
 
-        _initLocalStorage: function() {
-          this._settings = {};
-          this._settings.displayMode = 'table';
-          this._settings.tableSettings = this.$.datatable.settings;
-        },
-
-        _observeSettings: function() {
-          this.displayMode = this._settings.displayMode;
-          this.$.datatable.settings = this._settings.tableSettings;
-        },
-
-        _updateSettings: function() {
+        restoreSettings: function() {
           if (this._settings) {
-            // TODO improve when https://github.com/Polymer/polymer/issues/1550 fixed
-            this.set('_settings.displayMode', this.displayMode);
-            this.set('_settings.tableSettings', this.$.datatable.settings);
+            if (this._settings.displayMode && this._settings.displayMode.length > 0) {
+              this.displayMode = this._settings.displayMode;
+              if (this._settings.tableSettings) {
+                this.$.datatable.settings = this._settings.tableSettings;
+              }
+            }
           }
+        },
+
+        saveSettings: function() {
+          if (this._settings === null) {
+            this._settings = {};
+          }
+          // TODO improve when https://github.com/Polymer/polymer/issues/1550 fixed
+          this.set('_settings.displayMode', this.displayMode);
+          this.set('_settings.tableSettings', this.$.datatable.settings);
+          this.$.prefStorage.save();
         }
 
       });
