@@ -96,7 +96,7 @@ Contributors:
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
           selected-items="{{gridSelectedItems}}"
           selection-enabled>
-          <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar">
+          <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
@@ -113,7 +113,7 @@ Contributors:
           settings-enabled
           selected-items="{{tableSelectedItems}}"
           selection-enabled>
-          <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar">
+          <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
           <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
