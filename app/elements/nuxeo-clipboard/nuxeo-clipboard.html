@@ -131,9 +131,12 @@ Contributors:
       },
 
       _uids: function() {
-        return this.documents.map(function(doc) {
-          return doc.uid;
-        }).join(',');
+        if (this.documents && this.documents !== null) {
+          return this.documents.map(function(doc) {
+            return doc.uid;
+          }).join(',');
+        }
+        return '';
       },
 
       _opParams: function() {

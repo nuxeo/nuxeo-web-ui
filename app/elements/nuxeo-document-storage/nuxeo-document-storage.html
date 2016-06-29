@@ -30,7 +30,11 @@ Contributors:
         display: none;
       }
     </style>
-    <iron-localstorage name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize"></iron-localstorage>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <iron-localstorage name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
+    </iron-localstorage>
   </template>
   <script>
     Polymer({
@@ -41,7 +45,7 @@ Contributors:
         documents: {
           type: Array,
           notify: true
-        }
+        },
       },
 
       initialize: function() {
@@ -71,7 +75,14 @@ Contributors:
         return this.documents.findIndex(function(e) {
           return e.uid === doc.uid;
         });
+      },
+
+      ready: function() {
+        this.$.nxcon.connect().then(function(res) {
+          this.name =  res.id + '-' + this.name;
+        }.bind(this));
       }
+
     });
   </script>
 </dom-module>
