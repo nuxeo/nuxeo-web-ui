@@ -219,7 +219,7 @@ Contributors:
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
           <paper-icon-button icon="icons:content-paste" name="clipboard"></paper-icon-button>
           <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
-          <paper-icon-button src$="[[baseUrl]]images/avatar.png" name="profile" class="profile-icon"></paper-icon-button>
+          <paper-icon-button icon="icons:account-circle" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
 
         <iron-collapse id="sidebar" horizontal opened>
@@ -310,7 +310,7 @@ Contributors:
 
               <section class="card profile" name="profile">
                 <div class="header ellipsis">
-                  <h1>Lise Kemen</h1>
+                  <h1>[[_displayUser(currentUser)]]</h1>
                 </div>
                 <div class="content">
                   <div class="item">
@@ -326,7 +326,7 @@ Contributors:
                     <a href="">Cloud Services</a>
                   </div>
                   <div class="item layout vertical">
-                    <a href="">Sign Out</a>
+                    <a href="[[_connectionUrl()]]/logout">Sign Out</a>
                   </div>
                 </div>
               </section>
@@ -468,9 +468,16 @@ Contributors:
             type: Object
           },
 
+          currentUser: {
+            type: Object,
+            observer: '_observeCurrentUser'
+
+          },
+
           _userWorkspacePath: {
             type: String
           }
+
         },
 
         behaviors: [Nuxeo.RoutingBehavior],
@@ -513,7 +520,7 @@ Contributors:
             Polymer.dom(this.root).appendChild(experimental);
           }
           this.$.nxcon.connect().then(function(res) {
-            this._userWorkspacePath =  '/default-domain/UserWorkspaces/' + res.id;
+            this.currentUser =  res;
           }.bind(this));
         },
 
@@ -657,6 +664,31 @@ Contributors:
                 this.clipboard.add(doc);
               }
             }.bind(this));
+          }
+        },
+
+        _observeCurrentUser: function() {
+          if (this.currentUser) {
+            this._userWorkspacePath =  '/default-domain/UserWorkspaces/' + this.currentUser.id;
+          }
+        },
+
+        _displayUser: function(user) {
+          if (user) {
+            var result = '';
+            if (user.properties['firstName']) {
+              result += user.properties['firstName'];
+            }
+            if (user.properties['lastName']) {
+              if (result.length > 0) {
+                result += ' ';
+              }
+              result += user.properties['lastName'];
+            }
+            if (result.length === 0) {
+              result = user.id;
+            }
+            return result;
           }
         }
 
