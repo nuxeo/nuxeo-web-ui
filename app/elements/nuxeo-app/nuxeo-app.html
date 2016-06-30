@@ -218,7 +218,9 @@ Contributors:
           <paper-icon-button icon="icons:book" name="collections"></paper-icon-button>
           <paper-icon-button icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
           <paper-icon-button icon="icons:content-paste" name="clipboard"></paper-icon-button>
-          <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
+          <template is="dom-if" if="[[currentUser.isAdministrator]]">
+            <paper-icon-button icon="icons:build" name="administration"></paper-icon-button>
+          </template>
           <paper-icon-button icon="icons:account-circle" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
 
@@ -292,21 +294,23 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card administration" name="administration">
-                <div class="header ellipsis">
-                  <h1>Administration</h1>
-                </div>
-                <div class="content">
-                  <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                    <div class="item" name="repository">
-                      <a href$="[[urlFor('administration', 'repository')]]">Repository Monitoring</a>
-                    </div>
-                    <div class="item" name="user-group-management">
-                      <a href$="[[urlFor('administration', 'user-group-management')]]">Users & Groups</a>
-                    </div>
-                  </iron-selector>
-                </div>
-              </section>
+              <template is="dom-if" if="[[currentUser.isAdministrator]]">
+                <section class="card administration" name="administration">
+                  <div class="header ellipsis">
+                    <h1>Administration</h1>
+                  </div>
+                  <div class="content">
+                    <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
+                      <div class="item" name="repository">
+                        <a href$="[[urlFor('administration', 'repository')]]">Repository Monitoring</a>
+                      </div>
+                      <div class="item" name="user-group-management">
+                        <a href$="[[urlFor('administration', 'user-group-management')]]">Users & Groups</a>
+                      </div>
+                    </iron-selector>
+                  </div>
+                </section>
+              </template>
 
               <section class="card profile" name="profile">
                 <div class="header ellipsis">
