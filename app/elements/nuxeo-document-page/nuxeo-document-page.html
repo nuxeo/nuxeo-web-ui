@@ -208,7 +208,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow" response="{{workflows}}"></nuxeo-resource>
+    <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
     <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
 
     <template is="dom-if" if="[[hasTaskToProcess]]">
@@ -435,7 +435,9 @@ Contributors:
           };
           workflows.post().then(function() {
             this.fire('workflowStarted');
-            workflows.get();
+            workflows.get().then(function(res) {
+              this.workflows = res.entries;
+            }.bind(this));
             this._fetchTasks();
           }.bind(this));
         },
@@ -449,7 +451,9 @@ Contributors:
         },
 
         _taskCompleted: function() {
-          this.$.workflows.get();
+          workflows.get().then(function(res) {
+            this.workflows = res.entries;
+          }.bind(this));
           this._fetchTasks();
           this.isProcessingTask = false;
         },
@@ -468,7 +472,17 @@ Contributors:
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
+        },
+
+        _loadWorkflows: function() {
+          console.log('_loadWorkflows');
+          this.workflows = this.$.workflows.response.entries;
+        },
+
+        _loadtoto: function() {
+          console.log('otot');
         }
+
       });
     })();
   </script>
