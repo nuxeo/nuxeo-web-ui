@@ -30,14 +30,6 @@ Contributors:
 <dom-module id="nuxeo-admin">
   <template>
     <style is="custom-style" include="shared-styles">
-      .title {
-        color: var(--nuxeo-title-color);
-        font-size: 1.4rem;
-        margin: 0 0 .4em;
-        padding-bottom: 8px;
-        border-bottom: var(--nuxeo-border);
-      }
-
       paper-card {
         @apply(--paper-card);
       }
@@ -48,28 +40,50 @@ Contributors:
         width: 100%;
         height: 100%;
       }
+
+      paper-dropdown-menu {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-input: {
+          font-size: 18px;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-link-hover-color);
+        };
+        padding: .3em 0 .5em .5em;
+        margin-left: 1.5em;
+        border-left: var(--nuxeo-border);
+      }
     </style>
 
-    <paper-header-panel class="flex" >
-      <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n(selectedLabel)]]</span>
-      </div>
-      <div class="content">
-        <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
-          <section name="analytics">
-              <paper-card class="card">
-                <div class="card-content vertical layout">
-                  <span class="title">[[i18n('document_distribution', 'Document Distribution')]]</span>
-                  <nuxeo-document-distribution-chart index="_all"
-                    path="/" mode="count" max-depth="10"
-                    chart-hue="blue" chart-lumonisity="light"
-                    include-version include-hidden
-                    include-deleted>
-                  </nuxeo-document-distribution-chart>
-                </div>
-              </paper-card>
-          </section>
-          <section name="user-group-management">
+    <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+      <section name="analytics">
+        <paper-header-panel class="flex">
+          <div class="paper-header layout horizontal">
+            <span>[[i18n('label.admin.analytics', 'Analytics')]]</span>
+            <paper-dropdown-menu noink no-animations no-label-float>
+              <paper-menu class="dropdown-content" selected="{{selectedAnalyticsTab}}" attr-for-selected="name">
+                <paper-item name="repository">[[i18n('admin.analytics.repository', 'Repository Content')]]</paper-item>
+                <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution', 'Document Distribution')]]</paper-item>
+                <paper-item name="search">[[i18n('admin.analytics.search', 'Search')]]</paper-item>
+                <paper-item name="workflow">[[i18n('admin.analytics.workflow', 'Workflow')]]</paper-icon-item>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+          <div class="content">
+            <paper-card class="card">
+              <nuxeo-analytics selected-tab="[[selectedAnalyticsTab]]"></nuxeo-analytics>
+            </paper-card>
+          </div>
+        </paper-header-panel>
+      </section>
+      <section name="user-group-management">
+        <paper-header-panel class="flex">
+          <div class="paper-header layout horizontal">
+            <span class="flex">[[i18n('label.app.usersAndGroups', 'Users & Groups')]]</span>
+          </div>
+          <div class="content">
             <paper-card class="card">
               <div class="card-content vertical layout">
                 <nuxeo-user-group-management id="management" page="{{userManagementPage}}"></nuxeo-user-group-management>
@@ -78,11 +92,10 @@ Contributors:
                 </template>
               </div>
             </paper-card>
-          </section>
-        </iron-pages>
-      </div>
-    </paper-header-panel>
-
+          </div>
+        </paper-header-panel>
+      </section>
+    </iron-pages>
   </template>
   <script>
     (function() {
@@ -94,13 +107,6 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
-          labels: {
-            type: Object,
-            value: {
-              'analytics': 'label.admin.analytics',
-              'user-group-management': 'label.admin.users'
-            }
-          },
           selectedTab: {
             type: String,
             value: 'analytics'
@@ -110,14 +116,10 @@ Contributors:
             value: {},
             observer: '_entityChanged'
           },
-          selectedLabel: {
+          selectedAnalyticsTab: {
             type: String,
-            computed: '_computeLabel(selectedTab)'
+            value: 'repository'
           }
-        },
-
-        _computeLabel: function(tab) {
-          return this.labels[tab];
         },
 
         _entityChanged: function() {
@@ -138,7 +140,6 @@ Contributors:
         _displayLatest: function(userManagementPage) {
           return userManagementPage === 'search';
         }
-
       });
     })();
   </script>

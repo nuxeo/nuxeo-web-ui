@@ -109,3 +109,40 @@ nuxeo-document-permissions .required::after {
   content: '*';
   color: red;
 }
+
+/* --
+Analytics charts
+XXX: to review
+--*/
+chart-bar,
+chart-line,
+chart-pie {
+  height: 100%;
+  margin: 25px auto 0 auto;
+  width: 100%;
+  display: block;
+  font-size: 0.8em;
+}
+
+chart-bar /deep/ .chart-legend ul,
+chart-pie /deep/ .chart-legend ul,
+chart-line /deep/ .chart-legend ul {
+  list-style: none;
+  padding: 0;
+}
+
+chart-bar /deep/ .chart-legend li,
+chart-pie /deep/ .chart-legend li,
+chart-line /deep/ .chart-legend li {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+chart-bar /deep/ .chart-legend li span.pie-legend-icon,
+chart-pie /deep/ .chart-legend li span.pie-legend-icon,
+chart-line /deep/ .chart-legend li span.pie-legend-icon {
+  display: inline-block;
+  height: 12px;
+  margin-right: 5px;
+  width: 12px;
+}

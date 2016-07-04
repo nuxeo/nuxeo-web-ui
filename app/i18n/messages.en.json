@@ -295,5 +295,8 @@
   "label.security.permission.write": "Edit",
   "label.security.permission.writeLifeCycle": "Edit life cycle",
   "label.security.permission.writeProperties": "Edit properties",
-  "label.security.permission.writeSecurity": "Edit security"
+  "label.security.permission.writeSecurity": "Edit security",
+  "admin.analytics.repository": "Repository Content",
+  "admin.analytics.search": "Search",
+  "admin.analytics.workflow": "Workflow"
 }
