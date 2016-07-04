@@ -451,6 +451,7 @@ Contributors:
         },
 
         _taskCompleted: function() {
+          var workflows = this.$.workflows;
           workflows.get().then(function(res) {
             this.workflows = res.entries;
           }.bind(this));
