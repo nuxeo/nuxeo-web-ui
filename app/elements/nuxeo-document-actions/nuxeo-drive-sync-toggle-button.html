@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-drive-sync-toggle-button`
@@ -82,6 +83,7 @@ Contributors:
             this.synchronized = enable;
           }.bind(this));
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         _isAvailable: function() {
           if (!this.document) {
@@ -95,7 +97,8 @@ Contributors:
         },
 
         _tooltip: function(synchronized) {
-          return synchronized ? 'Unsynchronize' : 'Synchronize';
+          return synchronized ? this.i18n('ui.driveSyncToggleButton.unsync','Unsynchronize')
+                              : this.i18n('ui.driveSyncToggleButton.sync','Synchronize');
         },
 
         _icon: function(synchronized) {

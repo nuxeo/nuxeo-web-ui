@@ -15,6 +15,8 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-versioning-edit`
 @group Nuxeo UI
@@ -57,21 +59,21 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Version</label>
+        <label>[[i18n('label.version', 'Version')]]</label>
       </div>
-      <nuxeo-help for="version" label="[[i18n('label.versioning.currentVersion.tooltip')]]"></nuxeo-help>
+      <nuxeo-help for="version" label="[[i18n('label.versioning.currentVersion.tooltip','Current version of the document.')]]"></nuxeo-help>
       <span id="version" class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
     </div>
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Update Versions</label>
+        <label>[[i18n('label.versioning.selectVersioningOption', 'Update Versions')]]</label>
       </div>
-      <nuxeo-help for="versionType" label="[[i18n('label.versioning.changeVersion.tooltip')]]"></nuxeo-help>
+      <nuxeo-help for="versionType" label="[[i18n('label.versioning.changeVersion.tooltip','If a new version is created\, the new archived version will hold the values presented in this form.')]]"></nuxeo-help>
       <paper-radio-group id="versionType" selected="{{versioningType}}" class="layout vertical">
-        <paper-radio-button name="none">Skip version increment</paper-radio-button>
-        <paper-radio-button name="minor">Increment minor version</paper-radio-button>
-        <paper-radio-button name="major">Increment major version</paper-radio-button>
+        <paper-radio-button name="none">[[i18n('label.versioning.option.no_inc', 'Skip version increment')]]</paper-radio-button>
+        <paper-radio-button name="minor">[[i18n('label.versioning.option.inc_minor', 'Increment minor version')]]</paper-radio-button>
+        <paper-radio-button name="major">[[i18n('label.versioning.option.inc_major', 'Increment major version')]]</paper-radio-button>
       </paper-radio-group>
     </div>
 

@@ -16,6 +16,8 @@ Contributors:
     Nelson Silva <nsilva@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-video-view`
 @group Nuxeo UI
@@ -98,29 +100,29 @@ Contributors:
     <div class="card-section sep">
       <div class="properties">
         <div class="item">
-          <label>Format</label>
+          <label>[[i18n('label.widget.video.format', 'Format')]]</label>
           [[document.properties.vid:info.format]]
         </div>
         <div class="item">
-          <label>Duration</label>
+          <label>[[i18n('label.widget.video.duration', 'Duration')]]</label>
           [[document.properties.vid:info.duration]]
         </div>
         <div class="item">
-          <label>Width</label>
+          <label>[[i18n('label.widget.video.width', 'Width')]]</label>
           [[document.properties.vid:info.width]]
         </div>
         <div class="item">
-          <label>Height</label>
+          <label>[[i18n('label.widget.video.height', 'Height')]]</label>
           [[document.properties.vid:info.height]]
         </div>
         <div class="item">
-          <label>Frame Rate</label>
+          <label>[[i18n('label.widget.video.frameRate', 'Frame Rate')]]</label>
           [[document.properties.vid:info.frameRate]]
         </div>
       </div>
     </div>
     <div class="card-section sep">
-      <p class="title">Conversions</p>
+      <p class="title">[[i18n('heading.videoConversions', 'Conversions')]]</p>
       <div>
         <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
           <div class="item">
@@ -151,6 +153,7 @@ Contributors:
             notify: true
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
         _formatSize: function(size) {
           if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';

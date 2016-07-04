@@ -17,6 +17,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-query-widget`
@@ -72,7 +73,7 @@ Contributors:
 
     <template is="dom-if" if="[[isEmpty]]">
       <div class="horizontal layout center">
-        <span class="empty">There are no documents to show.</span>
+        <span class="empty">[[i18n('ui.queryWidget.noDocuments', 'There are no documents to show.')]]</span>
       </div>
     </template>
     <template is="dom-if" if="[[!isEmpty]]">
@@ -132,6 +133,9 @@ Contributors:
             notify: true
           }
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
+
         observers: ['_observePageNumbers(currentPage, numberOfPages, pageSize, pageNumber)'],
 
         _formatDate: function(date) {

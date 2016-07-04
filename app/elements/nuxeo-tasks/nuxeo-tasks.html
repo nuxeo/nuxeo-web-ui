@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-tasks`
@@ -163,7 +164,7 @@ Contributors:
           <a href="[[_href(currentTaskDocument)]]">[[currentTaskDocument.properties.dc:title]]</a>
         </template>
         <template is="dom-if" if="[[!_hasCurrent(current)]]">
-          <span class="flex">Tasks</span>
+          <span class="flex">[[i18n('ui.tasks.label', 'Tasks')]]</span>
         </template>
       </div>
       <div class="content">
@@ -180,9 +181,9 @@ Contributors:
                 <div class="graph-container">
                   <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
                 </div>
-                <paper-button noink dialog-dismiss>Close</paper-button>
+                <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
               </paper-dialog>
-              <paper-button noink on-tap="_toggleGraphDialog">View Graph</paper-button>
+              <paper-button noink on-tap="_toggleGraphDialog">[[i18n('ui.tasks.viewGraph', 'View Graph')]]</paper-button>
               <paper-icon-button icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
@@ -233,11 +234,11 @@ Contributors:
                 <span class="date flex">
                   <iron-icon icon="icons:today"></iron-icon> [[_date(task.dueDate)]]
                 </span>
-                <paper-button class="task-process" on-tap="_process">Process</paper-button>
+                <paper-button class="task-process" on-tap="_process">[[i18n('ui.tasks.process','Process')]]</paper-button>
               </div>
             </template>
             <template is="dom-if" if="[[_empty(tasks)]]">
-              <div class="task-box">There are no tasks to show.</div>
+              <div class="task-box">[[i18n('ui.tasks.noTasks','There are no tasks to show.')]]</div>
             </template>
           </div>
         </div>
@@ -269,7 +270,7 @@ Contributors:
           _currentIdx: Number,
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         _tasksChanged: function() {
           if (this.current) {

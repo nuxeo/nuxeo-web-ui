@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-pageable-widget`
@@ -46,10 +47,10 @@ Contributors:
 
     <div class="doctable vertical layout container">
       <div class="doctable-header horizontal layout center">
-        <span class="flex">Name</span>
-        <span class="flex">Modified</span>
-        <span class="flex">Last Contributor</span>
-        <span class="flex">Version</span>
+        <span class="flex">[[i18n('ui.pageableWidget.name', 'Name')]]</span>
+        <span class="flex">[[i18n('ui.pageableWidget.modified', 'Modified')]]</span>
+        <span class="flex">[[i18n('ui.pageableWidget.lastContributor', 'Last Contributor')]]</span>
+        <span class="flex">[[i18n('ui.pageableWidget.version', 'Version')]]</span>
       </div>
       <template is="dom-repeat" items="[[page]]">
         <div class="doctable-row horizontal layout">
@@ -76,7 +77,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         _formatDate: function(date) {
           return moment(date).format('MMM D, YYYY');

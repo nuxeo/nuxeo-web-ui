@@ -15,6 +15,8 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-faceted-search`
 @group Nuxeo UI
@@ -64,25 +66,26 @@ Contributors:
     </style>
 
     <div class="layout vertical row">
-      <label>Full Text</label>
+      <label>[[i18n('ui.facetedSearch.fullText', 'Full Text')]]</label>
       <paper-input id="searchInput" autofocus="true"
         value="{{searchTerm}}" tabindex="0"
-        type="search" placeholder="Search something ...">
+        type="search"
+        placeholder="[[i18n('ui.facetedSearch.fullText.placeholder', 'Search something ...')]]">
       </paper-input>
     </div>
 
     <div class="row layout vertical">
-      <label>Tags</label>
+      <label>[[i18n('ui.facetedSearch.tags', 'Tags')]]</label>
       <nuxeo-select2 operation="Tag.Suggestion"
                      min-chars="1"
                      multiple="true"
-                     placeholder="Search for tags..."
+                     placeholder="[[i18n('ui.facetedSearch.tags.placeholder', 'Search for tags...')]]"
                      value="{{params.ecm_tags}}">
       </nuxeo-select2>
     </div>
 
     <div class="layout vertical row">
-      <label>Creation date</label>
+      <label>[[i18n('ui.facetedSearch.creationDate', 'Creation date')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_created_agg]]"
         value="{{params.dc_created_agg}}">
@@ -90,7 +93,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>Modified date</label>
+      <label>[[i18n('ui.facetedSearch.modifiedDate', 'Modified date')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}">
@@ -98,8 +101,8 @@ Contributors:
     </div>
 
     <div class="row layout vertical">
-      <label>Authors</label>
-      <nuxeo-dropdown-aggregation placeholder="Search for authors..."
+      <label>[[i18n('ui.facetedSearch.authors', 'Authors')]]</label>
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('ui.facetedSearch.authors.placeholder', 'Search for authors...')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true">
@@ -107,17 +110,17 @@ Contributors:
     </div>
 
     <div class="row layout vertical">
-      <label>Collections</label>
+      <label>[[i18n('ui.facetedSearch.collections', 'Collections')]]</label>
       <nuxeo-select2 operation="User.GetCollections"
                      min-chars="0"
-                     placeholder="Select a value"
+                     placeholder="[[i18n('ui.facetedSearch.collections.placeholder', 'Select a value')]]"
                      value="{{params.ecm_collections}}"
                      multiple="true">
       </nuxeo-select2>
     </div>
 
     <div class="layout vertical row">
-      <label>Nature</label>
+      <label>[[i18n('ui.facetedSearch.nature', 'Nature')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_nature_agg]]"
         value="{{params.dc_nature_agg}}">
@@ -125,7 +128,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>Subjects</label>
+      <label>[[i18n('ui.facetedSearch.subject','Subjects')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
         value="{{params.dc_subjects_agg}}">
@@ -133,7 +136,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>Coverage</label>
+      <label>[[i18n('ui.facetedSearch.coverage', 'Coverage')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
         value="{{params.dc_coverage_agg}}">
@@ -141,14 +144,16 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>Size</label>
+      <label>[[i18n('ui.facetedSearch.size', 'Size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
     <div class="layout vertical row">
-     <paper-button noink class="primary clear" raised on-click="_clear">Clear</paper-button>
+     <paper-button noink class="primary clear" raised on-click="_clear">
+       [[i18n('ui.facetedSearch.clear', 'Clear')]]
+     </paper-button>
     </div>
   </template>
   <script>
@@ -176,6 +181,8 @@ Contributors:
           },
 
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         _clear: function() {
           this.params = {};

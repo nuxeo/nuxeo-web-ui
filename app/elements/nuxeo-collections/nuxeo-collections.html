@@ -17,6 +17,8 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
  `nuxeo-collections`
@@ -170,10 +172,10 @@ Contributors:
         <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
-        <paper-tooltip for="backToCollections">[[i18n('display_filter', 'Back to all collections')]]</paper-tooltip>
+        <paper-tooltip for="backToCollections">[[i18n('command.collections.backToCollections', 'Back to all collections')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        <h1>[[i18n('collections', 'Collections')]]</h1>
+        <h1>[[i18n('heading.collections', 'Collections')]]</h1>
       </template>
     </div>
 
@@ -208,11 +210,11 @@ Contributors:
                       </div>
                       <div class="collection-detail">
                         <div class="date horizontal layout center">
-                          <span class="collection-property">[[i18n('last_updated', 'Last updated on ')]] </span>
+                          <span class="collection-property">[[i18n('label.collections.lastUpdated', 'Last updated on ')]] </span>
                           <span>[[_formatDate(collection.properties.dc:modified)]]</span>
                         </div>
                         <div class="layout center">
-                          <span class="collection-property">[[i18n('owned_by', 'Owned by')]] </span>
+                          <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]] </span>
                           <a class="tag user" href$="[[urlFor('user', collection.properties.dc:creator)]]">[[collection.properties.dc:creator]]</a>
                         </div>
                       </div>
@@ -224,13 +226,13 @@ Contributors:
                 <div class="list-item loading">
                   <div class="primary">
                     <paper-spinner class="nxicon" active="true"></paper-spinner>
-                    [[i18n('loading_more', 'Loading more data')]]
+                    [[i18n('label.collections.loading', 'Loading more data')]]
                   </div>
                 </div>
               </template>
             </iron-scroll-threshold>
             <div hidden$="[[hasCollection]]">
-              <span class="empty">[[i18n('no_collections', 'No collections.')]]</span>
+              <span class="empty">[[i18n('label.collections.empty', 'No collections.')]]</span>
             </div>
           </div>
 
@@ -278,13 +280,13 @@ Contributors:
                 <div class="list-item loading">
                   <div class="primary">
                     <paper-spinner class="nxicon" active="true"></paper-spinner>
-                    [[i18n('loading_more', 'Loading more data')]]
+                    [[i18n('label.collections.loading', 'Loading more data')]]
                   </div>
                 </div>
               </template>
             </iron-scroll-threshold>
             <div hidden$="[[hasMember]]">
-              <span class="empty">[[i18n('empty_collection', 'Empty collection')]]</span>
+              <span class="empty">[[i18n('label.collections.emptyCollection', 'Empty collection')]]</span>
             </div>
           </div>
 
@@ -367,7 +369,7 @@ Contributors:
         },
 
         behaviors: [
-          Polymer.IronA11yKeysBehavior, Nuxeo.RoutingBehavior
+          Polymer.IronA11yKeysBehavior, Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior
         ],
 
         keyBindings: {

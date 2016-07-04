@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--Parallel document review - Choose Participants-->
 <!--
 `nuxeo-document-task-task2556`
@@ -60,7 +62,7 @@ Contributors:
 
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
-        <span class="action-property-header">Participants</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.participants', 'Participants')]]</span>
         <div class="flex">
           <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
                                  multiple="true"
@@ -69,11 +71,11 @@ Contributors:
         </div>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Comment</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.comment', 'Comment')]]</span>
         <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">End date</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.endDate', 'End date')]]</span>
         <paper-input type="date" id="end_date" value="{{selectedDate}}" no-label-float required></paper-input>
       </div>
     </paper-card>
@@ -85,7 +87,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task-task2556',
-        behaviors: [Nuxeo.DocumentTaskBehavior],
+        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
 
         _getUsernames: function() {
           if (this.response) {

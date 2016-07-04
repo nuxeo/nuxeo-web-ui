@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-clipboard-toggle-button`
@@ -51,7 +52,7 @@ Contributors:
       icon="image:add-to-photos"
       active="[[inClipboard]]"
       on-tap="toggle"></paper-icon-button>
-    <paper-tooltip for="clipboardBut">Add to Clipboard</paper-tooltip>
+    <paper-tooltip for="clipboardBut">[[tootltip]]</paper-tooltip>
 
   </template>
 
@@ -79,13 +80,15 @@ Contributors:
             computed: '_computeTooltip(inClipboard)'
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         _isAvailable: function(document) {
           return document && document.facets.indexOf('NotCollectionMember') === -1;
         },
 
         _computeTooltip: function(inClipboard) {
-          return inClipboard ? 'Remove from clipboard' : 'Add to clipboard';
+          return inClipboard ? this.i18n('ui.clipboardToggleButton.tootltip.remove','Remove from clipboard')
+                              : this.i18n('ui.clipboardToggleButton.tootltip.add','Add to clipboard');
         },
 
         _update: function() {

@@ -16,6 +16,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-favorites`
@@ -74,7 +75,7 @@ Contributors:
     <div>
 
     <template is="dom-if" if="[[!_hasFavorites(favorites)]]">
-      <span class="empty">No favorites.</span>
+      <span class="empty">[[i18n('label.collections.favorites.empty', 'No favorites.')]]</span>
     </template>
   </template>
   <script>
@@ -92,7 +93,7 @@ Contributors:
         }
       },
 
-      behaviors: [Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
       _contextDocObserver: function(newDoc, oldDoc) {
         if (newDoc) {

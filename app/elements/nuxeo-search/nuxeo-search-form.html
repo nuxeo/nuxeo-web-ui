@@ -15,6 +15,7 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
  `nuxeo-search-form`
@@ -112,16 +113,16 @@ Contributors:
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isQueue]]">
-        <h1>[[i18n('search_queue', 'Search Queue')]]</h1>
+        <h1>[[i18n('ui.searchForm.searchQueue', 'Search Queue')]]</h1>
         <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
         </paper-icon-button>
-        <paper-tooltip for="toogleFilter">[[i18n('display_filter', 'Switch to filter view')]]</paper-tooltip>
+        <paper-tooltip for="toogleFilter">[[i18n('ui.searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isQueue]]">
-        <h1>[[i18n('search_filters', 'Search Filters')]]</h1>
+        <h1>[[i18n('ui.searchForm.filter', 'Search Filters')]]</h1>
         <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
         </paper-icon-button>
-        <paper-tooltip for="toogleQueue">[[i18n('display_queue', 'Switch to queue view')]]</paper-tooltip>
+        <paper-tooltip for="toogleQueue">[[i18n('ui.searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
       </template>
     </div>
 
@@ -166,14 +167,14 @@ Contributors:
             <div class="item loading">
               <div class="primary">
                 <paper-spinner class="nxicon" active="true"></paper-spinner>
-                [[i18n('loading_more', 'Loading more data')]]
+                [[i18n('ui.searchForm.loading', 'Loading more data')]]
               </div>
               <div class="secondary dim">[[item.type]]</div>
             </div>
           </template>
         </iron-scroll-threshold>
         <div hidden$="[[hasResults]]" class="noResult">
-          <span class="empty">[[i18n('no_results_found', 'No results found')]]</span>
+          <span class="empty">[[i18n('ui.searchForm.noResults', 'No results found')]]</span>
         </div>
       </div>
 
@@ -186,6 +187,8 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-search-form',
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
 

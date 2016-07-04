@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-notifications-toggle-button`
@@ -59,13 +60,15 @@ Contributors:
             reflectToAttribute: true
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         toggle: function() {
           this.checked = !this.checked;
         },
 
         _label: function(checked) {
-          return checked ? 'Stop notifications' : 'Notify Me';
+          return checked ? this.i18n('ui.notificationsToggleButton.doNotNotify','Stop notifications')
+                          : this.i18n('ui.notificationsToggleButton.notify','Notify Me');
         },
 
         _icon: function(checked) {

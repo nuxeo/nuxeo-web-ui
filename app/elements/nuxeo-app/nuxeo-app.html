@@ -20,6 +20,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-app`
@@ -229,7 +230,7 @@ Contributors:
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
               <section class="card browse" name="browser">
                 <div class="header ellipsis">
-                  <h1>Browse</h1>
+                  <h1>[[i18n('heading.app.browse', 'Browse')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-document-tree root-path="/default-domain" current-document="[[currentDocument]]"></nuxeo-document-tree>
@@ -238,7 +239,7 @@ Contributors:
 
               <section class="card recents" name="recents">
                 <div class="header ellipsis">
-                  <h1>Recently Viewed</h1>
+                  <h1>[[i18n('heading.app.recentlyViewed', 'Recently Viewed')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-recent-documents max-size="5" id="recent"></nuxeo-recent-documents>
@@ -252,19 +253,19 @@ Contributors:
 
               <section class="card tasks" name="tasks">
                 <div class="header ellipsis">
-                  <h1>Tasks</h1>
+                  <h1>[[i18n('heading.app.tasks', 'Tasks')]]</h1>
                 </div>
                 <div class="content layout vertical">
                   <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
-                    <a href$="[[urlFor('tasks')]]">» view Tasks Dashboard</a>
+                    <a href$="[[urlFor('tasks')]]">[[i18n('command.app.viewTaskDashboard', '» view Tasks Dashboard')]]</a>
                   </div>
                 </div>
               </section>
 
               <section class="card favorites" name="favorites">
                 <div class="header ellipsis">
-                  <h1>Favorites</h1>
+                  <h1>[[i18n('heading.app.favorites', 'Favorites')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
@@ -277,7 +278,7 @@ Contributors:
 
               <section class="card personal-space" name="personalWorkspace">
                 <div class="header ellipsis">
-                  <h1>Personal Space</h1>
+                  <h1>[[i18n('heading.app.personalSpace', 'Personal Space')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-document-tree id="userWorkspace" root-path="[[_userWorkspacePath]]" current-document="[[currentDocument]]">
@@ -287,7 +288,7 @@ Contributors:
 
               <section class="card clipboard" name="clipboard">
                 <div class="header ellipsis">
-                  <h1>Clipboard</h1>
+                  <h1>[[i18n('heading.app.clipboard', 'Clipboard')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
@@ -297,7 +298,7 @@ Contributors:
               <template is="dom-if" if="[[currentUser.isAdministrator]]">
                 <section class="card administration" name="administration">
                   <div class="header ellipsis">
-                    <h1>Administration</h1>
+                    <h1>[[i18n('heading.app.administration', 'Administration')]]</h1>
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
@@ -305,7 +306,7 @@ Contributors:
                         <a href$="[[urlFor('administration', 'analytics')]]">Analytics</a>
                       </div>
                       <div class="item" name="user-group-management">
-                        <a href$="[[urlFor('administration', 'user-group-management')]]">Users & Groups</a>
+                        <a href$="[[urlFor('administration', 'user-group-management')]]">[[i18n('label.app.usersAndGroups', 'Users & Groups')]]</a>
                       </div>
                     </iron-selector>
                   </div>
@@ -318,19 +319,19 @@ Contributors:
                 </div>
                 <div class="content">
                   <div class="item">
-                    <a href="">Profile</a>
+                    <a href="">[[i18n('ui.app.user.profile','Profile')]]</a>
                   </div>
                   <div class="item">
-                    <a href="">Notifications</a>
+                    <a href="">[[i18n('ui.app.user.notifications','Notifications')]]</a>
                   </div>
                   <div class="item">
-                    <a href$="[[urlFor('drive')]]">Drive</a>
+                    <a href$="[[urlFor('drive')]]">[[i18n('ui.app.user.drive','Drive')]]</a>
                   </div>
                   <div class="item">
-                    <a href="">Cloud Services</a>
+                    <a href="">[[i18n('ui.app.user.cloudServices','Cloud Services')]]</a>
                   </div>
                   <div class="item layout vertical">
-                    <a href="[[_connectionUrl()]]/logout">Sign Out</a>
+                    <a href="[[_connectionUrl()]]/logout">[[i18n('ui.app.user.signOut','Sign Out')]]</a>
                   </div>
                 </div>
               </section>
@@ -368,24 +369,24 @@ Contributors:
             <!-- Nuxeo Drive page -->
             <paper-header-panel class="flex" name="drive">
               <div class="paper-header layout horizontal">
-                <span class="flex">Nuxeo Drive</span>
+                <span class="flex">[[i18n('ui.app.drive.heading','Nuxeo Drive')]]</span>
               </div>
               <div class="content">
                 <paper-card class="card">
                   <div class="card-content">
-                    <span class="title">Packages</span>
+                    <span class="title">[[i18n('ui.app.drive.packages','Packages')]]</span>
                     <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
                   </div>
                 </paper-card>
                 <paper-card class="card">
                   <div class="card-content">
-                    <span class="title">Synchronization Roots</span>
+                    <span class="title">[[i18n('ui.app.drive.roots','Synchronization Roots')]]</span>
                     <nuxeo-drive-sync-roots-management></nuxeo-drive-sync-roots-management>
                   </div>
                 </paper-card>
                 <paper-card class="card">
                   <div class="card-content">
-                    <span class="title">Tokens</span>
+                    <span class="title">[[i18n('ui.app.drive.tokens','Tokens')]]</span>
                     <nuxeo-authentication-tokens-management application="Nuxeo Drive"></nuxeo-authentication-tokens-management>
                   </div>
                 </paper-card>
@@ -484,7 +485,7 @@ Contributors:
 
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         get docId() {
           return this.linkDocId;

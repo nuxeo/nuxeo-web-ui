@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 An element for managing authentication tokens.
@@ -57,19 +58,19 @@ Example:
 
     <template is="dom-if" if=[[_empty(tokens)]]>
       <div class="table-row">
-        <div>[[i18n('label.authenticationTokens.empty', "You currently don't have any token.")]]</div>
+        <div>[[i18n('ui.drive.authenticationTokensManagement.empty', "You currently don't have any token.")]]</div>
       </div>
     </template>
 
     <template is="dom-if" if=[[!_empty(tokens)]]>
       <div class="table">
         <div class="row headers">
-          <div class="flex-2">[[i18n('label.authenticationToken.token', 'Token')]]</div>
-          <div class="flex-1">[[i18n('label.authenticationToken.application', 'Application')]]</div>
-          <div class="flex">[[i18n('label.authenticationToken.deviceId', 'Device Identifier')]]</div>
-          <div class="flex">[[i18n('label.authenticationToken.deviceDescription', 'Device Description')]]</div>
-          <div class="flex">[[i18n('label.authenticationToken.permission', 'Permission')]]</div>
-          <div class="flex">[[i18n('label.authenticationToken.creationDate', 'Creation Date')]]</div>
+          <div class="flex-2">[[i18n('ui.drive.authenticationTokensManagement.token', 'Token')]]</div>
+          <div class="flex-1">[[i18n('ui.drive.authenticationTokensManagement.application', 'Application')]]</div>
+          <div class="flex">[[i18n('ui.drive.authenticationTokensManagement.deviceId', 'Device Identifier')]]</div>
+          <div class="flex">[[i18n('ui.drive.authenticationTokensManagement.deviceDescription', 'Device Description')]]</div>
+          <div class="flex">[[i18n('ui.drive.authenticationTokensManagement.permission', 'Permission')]]</div>
+          <div class="flex">[[i18n('ui.drive.authenticationTokensManagement.creationDate', 'Creation Date')]]</div>
           <div class="actions"></div>
         </div>
         <template is="dom-repeat" items="[[tokens]]" as="token">
@@ -82,7 +83,7 @@ Example:
             <div class="flex">[[_formatDate(token.creationDate)]]</div>
             <div class="actions">
               <paper-icon-button icon="icons:clear"
-                                 title="[[i18n('label.authenticationToken.revoke', 'Revoke)]]"
+                                 title="[[i18n('ui.drive.authenticationTokensManagement.revoke', 'Revoke)]]"
                                  on-tap="_revoke">
               </paper-icon-button>
             </div>
@@ -91,7 +92,7 @@ Example:
       </div>
     </template>
 
-    <paper-toast id="toast">[[i18n('label.authenticationToken.revoked', 'Token revoked')]]</paper-toast>
+    <paper-toast id="toast">[[i18n('ui.drive.authenticationTokensManagement.revoked', 'Token revoked')]]</paper-toast>
   </template>
   <script>
     (function() {
@@ -104,6 +105,7 @@ Example:
             value: []
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         _params: function(application) {
           return {'application': application};

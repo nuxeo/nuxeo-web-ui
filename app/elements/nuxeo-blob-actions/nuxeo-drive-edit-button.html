@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-drive-edit-button`
@@ -39,12 +40,12 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(blob)]]">
       <paper-icon-button icon="editor:mode-edit" id="driveBtn" on-tap="_go"></paper-icon-button>
-      <paper-tooltip for="driveBtn">Open with Drive</paper-tooltip>
+      <paper-tooltip for="driveBtn">[[i18n('ui.driveEditButton.tooltip','Open with Drive')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
-        <h1>Download Nuxeo Drive Client</h1>
+        <h1>[[i18n('ui.driveEditButton.dialog.heading','Download Nuxeo Drive Client')]]</h1>
         <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
       </div>
     </paper-dialog>
@@ -58,6 +59,7 @@ Contributors:
         blob: Object,
         tokens: Array
       },
+      behaviors: [Nuxeo.I18nBehavior],
 
       _isAvailable: function(blob) {
         if (!blob) {

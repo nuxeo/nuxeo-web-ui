@@ -17,13 +17,14 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-lock-toggle-button`
 @group Nuxeo UI
 @element nuxeo-lock-toggle-button
 -->
 <dom-module id="nuxeo-lock-toggle-button">
-
 
   <template>
 
@@ -80,6 +81,8 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.I18nBehavior],
+
         listeners: {
           'tap': 'toggle',
         },
@@ -97,7 +100,7 @@ Contributors:
         },
 
         _computeTooltip: function(locked) {
-          return locked ? 'Unlock' : 'Lock';
+          return locked ? this.i18n('command.unlock', 'Unlock') : this.i18n('command.lock', 'Lock');
         },
 
         _computeIcon: function(locked) {

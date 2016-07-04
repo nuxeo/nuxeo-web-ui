@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--Parallel document review - Give your Opinion-->
 <!--
 `nuxeo-document-task-task328d`
@@ -57,11 +59,11 @@ Contributors:
 
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
-        <span class="action-property-header">Initiator Comment</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.initiatorComment', 'Initiator Comment')]]</span>
         <span>[[task.variables.initiatorComment]]</span>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Comment</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.comment', 'Comment')]]</span>
         <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
     </paper-card>
@@ -73,7 +75,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task-task328d',
-        behaviors: [Nuxeo.DocumentTaskBehavior],
+        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
 
         genTaskData: function() {
           return {

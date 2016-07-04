@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-export-button`
@@ -41,12 +42,12 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button noink icon="icons:archive" id="button" on-tap="_toggleDialog"></paper-icon-button>
-      <paper-tooltip for="button">Export</paper-tooltip>
+      <paper-tooltip for="button">[[i18n('ui.exportButton.tooltip','Export')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
-        <h1>Export</h1>
+        <h1>[[i18n('ui.exportButton.heading','Export')]]</h1>
         <div class="export-container">
           <nuxeo-document-export document="[[document]]"></nuxeo-document-export>
         </div>
@@ -61,6 +62,7 @@ Contributors:
       properties: {
         document: Object
       },
+      behaviors: [Nuxeo.I18nBehavior],
 
       _toggleDialog: function() {
         this.$.dialog.toggle();

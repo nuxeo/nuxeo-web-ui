@@ -16,6 +16,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-document-content-view`
@@ -72,12 +73,16 @@ Contributors:
     <template is="dom-if" if="[[_isDisplayTable]]">
       <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
       </paper-fab>
-      <paper-tooltip for="toogleGrid">[[i18n('display_grid', 'Switch to grid view')]]</paper-tooltip>
+      <paper-tooltip for="toogleGrid">
+        [[i18n('label.documents.display.grid', 'Switch to grid view')]]
+      </paper-tooltip>
     </template>
     <template is="dom-if" if="[[_isDisplayGrid]]">
       <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
       </paper-fab>
-      <paper-tooltip for="toogleTable">[[i18n('display_table', 'Switch to table view')]]</paper-tooltip>
+      <paper-tooltip for="toogleTable">
+        [[i18n('label.documents.display.table', 'Switch to table view')]]
+      </paper-tooltip>
     </template>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -115,17 +120,17 @@ Contributors:
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
-          <nuxeo-data-table-column name="[[i18n('title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+          <nuxeo-data-table-column name="[[i18n('ui.documentContentView.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('modfied', 'Modified')]]"
+          <nuxeo-data-table-column name="[[i18n('ui.documentContentView.modified', 'Modified')]]"
             sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
             <template is="header">
                 <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('modified', 'Modified')]]"
+                    placeholder="[[i18n('ui.documentContentView.modified', 'Modified')]]"
                     data="[[aggregations.dc_modified_agg]]"
                     value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
@@ -134,17 +139,19 @@ Contributors:
               [[_formatDate(item.properties.dc:modified)]]
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column  name="[[i18n('last_contributor', 'Last Contributor')]]"
+          <nuxeo-data-table-column  name="[[i18n('ui.documentContentView.lastContributor', 'Last Contributor')]]"
             filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
             <template is="header">
                 <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('last_contributor', 'Last Contibutor')]]"
+                    placeholder="[[i18n('ui.documentContentView.lastContributor', 'Last Contributor')]]"
                     data="[[aggregations.dc_last_contributor_agg]]"
                     value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
             </template>
             <template>
-              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
+              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">
+                [[item.properties.dc:lastContributor]]
+              </a>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="Version">
@@ -172,7 +179,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-content-view',
-        behaviors: [Nuxeo.UploaderBehavior],
+
+        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior],
+
         properties: {
           params: {
             type: Object,
@@ -303,9 +312,11 @@ Contributors:
           var docs = response.entries;
           if (docs.length === 1) {
             var doc = docs[0];
-            this._toast('Imported ' + doc.type.toLowerCase() + ' ' + doc.title + '.');
+            this._toast(this.i18n('label.documents.importedDocument', 'Imported {0}.',
+                        doc.type.toLowerCase() + ' ' + doc.title));
           } else {
-            this._toast('Imported ' + docs.length + ' documents.');
+            this._toast(this.i18n('label.documents.importedDocuments', 'Imported {0} documents.',
+                        docs.length));
           }
           // refresh
           this._handleDocumentCreated();
@@ -341,7 +352,7 @@ Contributors:
               this.toggleClass('hoverSmartImport', true, this._dropZone);
               this.isSmartImport = true;
             }.bind(this), 3000);
-            this._toast('Hold to Smart Import');
+            this._toast(this.i18n('label.documents.smartImport', 'Hold to Smart Import'));
           }
         },
 

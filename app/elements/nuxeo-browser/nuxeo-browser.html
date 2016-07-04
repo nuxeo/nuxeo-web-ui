@@ -20,6 +20,8 @@ Contributors:
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-browser`
 @group Nuxeo UI
@@ -70,20 +72,20 @@ Contributors:
           <paper-dropdown-menu noink no-animations no-label-float>
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
               <paper-icon-item name="view">
-                <iron-icon icon="icons:visibility" item-icon></iron-icon> View
-              </paper-icon-item>
+                <iron-icon icon="icons:visibility" item-icon></iron-icon>
+                [[i18n('command.browser.view', 'View')]]</paper-icon-item>
               <paper-icon-item name="edit">
-                <iron-icon icon="editor:mode-edit" item-icon></iron-icon> Edit
-              </paper-icon-item>
+                <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
+                [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
               <paper-icon-item name="activity">
-                <iron-icon icon="icons:restore" item-icon></iron-icon> Activity
-              </paper-icon-item>
+                <iron-icon icon="icons:restore" item-icon></iron-icon>
+                [[i18n('command.browser.activity', 'Activity')]]</paper-icon-item>
               <paper-icon-item name="permissions">
-                <iron-icon icon="communication:vpn-key" item-icon></iron-icon> Permissions
-              </paper-icon-item>
+                <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
+                [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
               <paper-icon-item name="settings">
-                <iron-icon icon="icons:settings" item-icon></iron-icon> Settings
-              </paper-icon-item>
+                <iron-icon icon="icons:settings" item-icon></iron-icon>
+                [[i18n('command.browser.settings', 'Settings')]]</paper-icon-item>
             </paper-menu>
           </paper-dropdown-menu>
 
@@ -156,6 +158,8 @@ Contributors:
             }
           }
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         listeners: {
           'permissions.acecreated': '_documentUpdated',

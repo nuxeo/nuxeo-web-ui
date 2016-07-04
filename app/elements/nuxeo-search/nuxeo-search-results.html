@@ -16,6 +16,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-search-results`
@@ -31,7 +32,7 @@ Contributors:
 
     <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n('search_result', 'Search Results')]]</span>
+        <span class="flex">[[i18n('ui.searchResults.results', 'Search Results')]]</span>
       </div>
       <nuxeo-results id="results" name="search"></nuxeo-results>
     </paper-header-panel>
@@ -43,6 +44,8 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-search-results',
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         set nxProvider(nxProvider) {
           this.$.results.nxProvider = nxProvider;

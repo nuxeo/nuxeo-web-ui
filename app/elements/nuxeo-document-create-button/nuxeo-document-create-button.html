@@ -15,6 +15,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-document-create-button`
@@ -66,7 +67,7 @@ Contributors:
                     response="{{createResponse}}"></nuxeo-document>
 
     <paper-fab id="createBtn" icon="add" on-tap="_toggleDialog"></paper-fab>
-    <paper-tooltip for="createBtn" position="left">Create a New Document</paper-tooltip>
+    <paper-tooltip for="createBtn" position="left">[[i18n('title.create.document', 'Create a New Document')]]</paper-tooltip>
 
     <paper-dialog id="createDocDialog"
                   class="container vertical layout"
@@ -74,7 +75,7 @@ Contributors:
                   no-auto-focus>
       <div class="vertical layout">
         <div class="horizontal layout">
-          <h1>New document</h1>
+          <h1>[[i18n('label.documents.new', 'New document')]]</h1>
           <paper-dropdown-menu class="picker" label="Document type">
             <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
               <template is="dom-repeat" items="[[documentTypes]]" as="type">
@@ -84,7 +85,7 @@ Contributors:
           </paper-dropdown-menu>
         </div>
         <div class="horizontal layout center">
-          <span class="in">In:</span>
+          <span class="in">[[i18n('label.documents.in', 'In:')]]</span>
           <nuxeo-path-suggestion class="flex"
                                  id="pathSuggester"
                                  value="{{targetPath}}"
@@ -98,11 +99,11 @@ Contributors:
         <div id="document-edit">
           <!--dynamically loaded via _updateLayout-->
         </div>
-        <button id="submitButton" style="display:none;">Submit</button>
+        <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
       </form>
       <div class="buttons sep horizontal end-justified layout">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button noink class="primary" on-tap="_submit">Create</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_submit">[[i18n('command.create', 'Create')]]</paper-button>
       </div>
     </paper-dialog>
   </template>

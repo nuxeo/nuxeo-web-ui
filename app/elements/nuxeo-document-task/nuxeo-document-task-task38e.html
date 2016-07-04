@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--Serial document review - Choose Participants-->
 <!--
 `nuxeo-document-task-task38e`
@@ -59,7 +61,7 @@ Contributors:
 
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
-        <span class="action-property-header">Participants</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.participants', 'Participants')]]</span>
         <div class="flex">
           <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
                                  multiple="true"
@@ -68,7 +70,7 @@ Contributors:
         </div>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Review Type</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.review.type', 'Review Type')]]</span>
         <paper-dropdown-menu label="Simple review or Validation?" no-label-float>
           <paper-menu class="dropdown-content" selected="{{selectedValidationOrReview}}" attr-for-selected="key">
             <template is="dom-repeat" items="[[validationOrReview]]">
@@ -78,7 +80,7 @@ Contributors:
         </paper-dropdown-menu>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Comment</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
         <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
     </paper-card>

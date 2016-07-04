@@ -16,6 +16,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-clipboard`
@@ -56,7 +57,7 @@ Contributors:
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="empty">Your clipboard is empty.</span>
+      <span class="empty">[[i18n('label.nxclipboard.empty', 'Your clipboard is empty.')]]</span>
     </template>
 
     <template is="dom-repeat" items="[[documents]]" as="document">
@@ -72,9 +73,9 @@ Contributors:
     <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
       <div class="toolbar">
           <paper-icon-button id="paste" icon="content-copy" on-tap="execute" data-op="Document.Copy"></paper-icon-button>
-          <paper-tooltip for="paste">Copy</paper-tooltip>
+          <paper-tooltip for="paste">[[i18n('command.nxclipboard.copy', 'Copy')]]</paper-tooltip>
           <paper-icon-button id="move" icon="content-cut" on-tap="execute" data-op="Document.Move"></paper-icon-button>
-          <paper-tooltip for="move">Move</paper-tooltip>
+          <paper-tooltip for="move">[[i18n('command.nxclipboard.move', 'Move')]]</paper-tooltip>
       </div>
     </template>
 
@@ -94,7 +95,7 @@ Contributors:
         }
       },
 
-      behaviors: [Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
       add: function(doc) {
         return this.$.storage.add(doc);

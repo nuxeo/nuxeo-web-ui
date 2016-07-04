@@ -17,6 +17,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-document-task`
@@ -84,21 +85,21 @@ Contributors:
 
     <div class="action-container layout vertical task-body">
       <paper-tabs selected="{{_selectedTab}}" attr-for-selected="name">
-        <paper-tab name="resolution">Task Resolution</paper-tab>
-        <paper-tab name="comments">Comments</paper-tab>
+        <paper-tab name="resolution">[[i18n('label.route.task.resolution', 'Task Resolution')]]</paper-tab>
+        <paper-tab name="comments">[[i18n('label.route.task.comments','Comments')]]</paper-tab>
       </paper-tabs>
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
           <paper-card class="layout vertical">
             <div class="layout horizontal center action-property">
-              <span class="flex-3">Due Date</span>
+              <span class="flex-3">[[i18n('label.route.task.dueDate', 'Due Date')]]</span>
               <span class="flex-9">
                 <iron-icon icon="icons:today"></iron-icon> [[_formatDate(task.dueDate)]]
               </span>
             </div>
             <div class="layout horizontal center action-property">
-              <span class="flex-3">Assigned to</span>
+              <span class="flex-3">[[i18n('label.route.task.assigned', 'Assigned to')]]</span>
               <span class="flex-9">
                 <template is="dom-repeat" items="[[task.actors]]" as="actor">
                   <a class="tag user" href="[[_actorHref(actor.id)]]">
@@ -128,7 +129,7 @@ Contributors:
           </div>
         </div>
         <div name="comments">
-          <p>There are no comments to show.</p>
+          <p>[[i18n('label.route.task.no.comments', 'There are no comments to show.')]]</p>
         </div>
       </iron-pages>
     </div>
@@ -140,8 +141,6 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task',
-
-        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
 
@@ -158,7 +157,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         /**
          * Returns the name for the current layout element

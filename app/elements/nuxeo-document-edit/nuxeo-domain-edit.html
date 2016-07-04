@@ -17,6 +17,7 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
@@ -63,7 +64,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Title</label>
+        <label>[[i18n('label.title', 'Title')]]</label>
         <span class="required">*</span>
       </div>
       <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
@@ -71,7 +72,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Description</label>
+        <label>[[i18n('label.description', 'Description')]]</label>
       </div>
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
@@ -92,7 +93,9 @@ Contributors:
             type: Object
           }
 
-        }
+        },
+
+        behaviors: [Nuxeo.I18nBehavior]
       });
     })();
   </script>

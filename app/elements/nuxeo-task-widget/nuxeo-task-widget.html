@@ -19,6 +19,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-task-widget`
@@ -77,7 +78,7 @@ Contributors:
 
     <template is="dom-if" if="[[_isEmpty(tasks)]]">
       <div class="horizontal layout center">
-        <span class="empty">There are no tasks to show.</span>
+        <span class="empty">[[i18n('ui.taskWidget.noTasks', 'There are no tasks to show.')]]</span>
       </div>
     </template>
     <template is="dom-if" if="[[!_isEmpty(tasks)]]">
@@ -96,18 +97,18 @@ Contributors:
             </div>
             <div class="task-detail">
               <div class="taskDoc horizontal layout center">
-                <span class="task-property">On  </span>
+                <span class="task-property">[[i18n('ui.taskWidget.on', 'On  ')]]</span>
                 <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
                   <nuxeo-document auto doc-id="[[doc.id]]" response="{{doc}}"></nuxeo-document>
                   <a href$="[[urlFor('browse', doc.path)]]" class="docTitle">[[doc.properties.dc:title]]</a>
                 </template>
               </div>
               <div class="horizontal layout center">
-                <span class="due-date task-property">Due date
+                <span class="due-date task-property">[[i18n('ui.taskWidget.dueDate', 'Due date' )]]
                 <span class="date">[[_formatDate(task.dueDate)]]</span></span>
               </div>
               <div class="layout center">
-                <span class="task-property">Initiated by </span>
+                <span class="task-property">[[i18n('ui.taskWidget.initiatedBy', 'Initiated by ')]]</span>
                 <a class="tag user initiator" href$="[[urlFor('user', workflow.initiator)]]">[[workflow.initiator]]</a>
               </div>
             </div>
@@ -122,8 +123,6 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task-widget',
-
-        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
           username: String,
@@ -140,7 +139,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         ready: function() {
           this._fetchTasks();

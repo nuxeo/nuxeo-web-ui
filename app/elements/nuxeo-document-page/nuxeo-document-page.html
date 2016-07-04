@@ -17,6 +17,7 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-document-page`
@@ -215,8 +216,12 @@ Contributors:
         <div class="card-content">
           <template is="dom-repeat" items="[[tasks]]" as="task">
             <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-            You have a task to process <strong>before [[_formatDate(task.dueDate)]]</strong>
-            <paper-button noink class="process-task" on-tap="_processTask">Process</paper-button>
+            <!-- TODO: review labels with embedded markup tags -->
+            [[i18n('label.document.routing.to.process', 'You have a task to process before ')]]
+            [[_formatDate(task.dueDate)]]
+            <paper-button noink class="process-task" on-tap="_processTask">
+              [[i18n('label.document.routing.process.task', 'Process')]]
+            </paper-button>
           </template>
         </div>
       </paper-card>
@@ -250,13 +255,13 @@ Contributors:
                     <div class="graph-container">
                       <nuxeo-workflow-graph workflow="[[workflow]]"></nuxeo-workflow-graph>
                     </div>
-                    <paper-button noink dialog-dismiss>Close</paper-button>
+                    <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
                   </paper-dialog>
-                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">View Graph</paper-button>
+                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">[[i18n('label.document.routing.route.view.graph', 'View Graph')]]</paper-button>
                 </div>
                 <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
                   <div class="buttons">
-                    <paper-button noink on-tap="_cancelProcessTask">Process later</paper-button>
+                    <paper-button noink on-tap="_cancelProcessTask">[[i18n('label.document.routing.process.task.later', 'Process later')]]</paper-button>
                   </div>
                 </nuxeo-document-task>
               </paper-card>
@@ -269,11 +274,11 @@ Contributors:
             <div class="horizontal layout wrap">
               <div class="description ctn">[[document.properties.dc:description]]</div>
               <div class="details ctn">
-                <div><span class="col">Added on</span> [[_formatDate(document.properties.dc:created)]]</div>
-                <div><span class="col">By</span><a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">
+                <div><span class="col">[[i18n('label.document.routing.added.on', 'Added on')]]</span> [[_formatDate(document.properties.dc:created)]]</div>
+                <div><span class="col">[[i18n('label.document.routing.added.by', 'By')]]</span><a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">
                   <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
                   [[document.properties.dc:creator]]</a></div>
-                <div><span class="col">Contributors</span>
+                <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
                   <nuxeo-document-users users="[[document.properties.dc:contributors]]">
                   </nuxeo-document-users>
                 </div>
@@ -282,17 +287,18 @@ Contributors:
               <div class="ctn">
                 <template is="dom-if" if="[[hasWorkflowRunning]]">
                   <span class="tag process-tag">
-                    Process running
+                    [[i18n('label.document.routing.process.running', 'Process running')]]
                   </span>
                 </template>
                 <span class="state tag">[[document.state]]</span>
-                <span class="version tag">Version [[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+                <span class="version tag">[[i18n('label.version.number', 'Version {0}.{1}',
+                  document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
               </div>
             </div>
           </paper-card>
           <template is="dom-if" if="[[!hasWorkflowRunning]]">
             <paper-card class="sidecard">
-              <p class="title">Process</p>
+              <p class="title">[[i18n('label.document.routing.process.title', 'Process')]]</p>
               <div class="vertical layout card-content">
                 <div>
                   <paper-dropdown-menu label="Start a process">
@@ -304,21 +310,21 @@ Contributors:
                   </paper-dropdown-menu>
                 </div>
                 <div>
-                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">Start</paper-button>
+                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">[[i18n('label.document.routing.process.start', 'Start')]]</paper-button>
                 </div>
               </div>
             </paper-card>
           </template>
           <template is="dom-if" if="[[_hasCollections(document)]]">
             <paper-card class="sidecard">
-              <p class="title">Collections</p>
+              <p class="title">[[i18n('label.document.routing.collections', 'Collections')]]</p>
               <div class="horizontal layout wrap card-content">
                 <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
               </div>
             </paper-card>
           </template>
           <paper-card class="sidecard">
-            <p class="title">Activity</p>
+            <p class="title">[[i18n('label.document.routing.activity', 'Activity')]]</p>
             <div class="vertical layout card-content audit">
               <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
             </div>
@@ -378,7 +384,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         listeners: {
           'workflowTaskProcessed': '_taskCompleted'

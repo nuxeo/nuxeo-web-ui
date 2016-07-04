@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-recent-documents`
@@ -50,7 +51,7 @@ Contributors:
     <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="empty">No recent documents.</span>
+      <span class="empty">[[i18n('ui.recentDocuments.noRecentDocuments', 'No recent documents.')]]</span>
     </template>
 
     <template is="dom-repeat" items="[[documents]]" as="document">
@@ -78,7 +79,7 @@ Contributors:
         }
       },
 
-      behaviors: [Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
       add: function(doc) {
         this.$.storage.add(doc);

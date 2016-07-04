@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--Serial document review - Validate the Document-->
 <!--
 `nuxeo-document-task-task6d8`
@@ -58,16 +60,16 @@ Contributors:
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
         <span class="action-property-header">
-          Participants
+          [[i18n('wf.serialDocumentReview.participants', 'Participants')]]
         </span>
         <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Initiator Comment</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.initiatorComment', 'Initiator Comment')]]</span>
         <span>[[task.variables.initiatorComment]]</span>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">Comment</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
         <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
     </paper-card>
@@ -79,7 +81,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task-task6d8',
-        behaviors: [Nuxeo.DocumentTaskBehavior],
+        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
 
         genTaskData: function() {
           return {

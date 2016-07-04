@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-note-view`
 @group Nuxeo UI
@@ -100,7 +102,7 @@ Contributors:
     <div class="card-section attachments">
       <p class="title">
         <iron-icon icon="editor:attach-file"></iron-icon>
-        Attachments
+        [[i18n('label.summary.download.attachments', 'Attachments')]]
       </p>
       <div>
         <template is="dom-repeat" items="[[document.properties.files:files]]">
@@ -111,7 +113,7 @@ Contributors:
         </template>
       </div>
       <div class="droparea">
-        + Complete the document with additional files
+        [[i18n('label.summary.drop.attachments', '+ Complete the document with additional files')]]
       </div>
     </div>
   </template>
@@ -128,6 +130,8 @@ Contributors:
             notify: true
           }
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         _formatSize: function(size) {
           if (size > 1048576) {

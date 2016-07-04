@@ -15,6 +15,7 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
@@ -80,7 +81,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Title</label>
+        <label>[[i18n('label.title', 'Title')]]</label>
         <span class="required">*</span>
       </div>
       <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
@@ -88,7 +89,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>Description</label>
+        <label>[[i18n('label.description', 'Description')]]</label>
       </div>
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
@@ -97,14 +98,14 @@ Contributors:
     <template is="dom-if" if="[[new]]">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>Content</label>
+          <label>[[i18n('content', 'Content')]]</label>
         </div>
         <div class="vertical layout">
           <paper-radio-group class="layout vertical" selected="none">
             <!-- none choice -->
-            <paper-radio-button name="none" on-tap="_noneSelected">None</paper-radio-button>
+            <paper-radio-button name="none" on-tap="_noneSelected">[[i18n('label.inputFile.noneChoice','None')]]</paper-radio-button>
             <!-- upload choice -->
-            <paper-radio-button name="upload"  on-tap="_uploadSelected">Upload</paper-radio-button>
+            <paper-radio-button name="upload"  on-tap="_uploadSelected">[[i18n('label.inputFile.uploadChoice','Upload')]]</paper-radio-button>
           </paper-radio-group>
           <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
         </div>
@@ -132,6 +133,8 @@ Contributors:
             value: false
           }
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         _icon: function() {
           var url = this.$.nxcon.url;

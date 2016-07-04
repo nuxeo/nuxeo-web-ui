@@ -15,6 +15,7 @@ Contributors:
   Guillaume RENARD <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-selection-toolbar`
@@ -81,7 +82,7 @@ Contributors:
 
     <paper-dialog id="selectedItemsPopup"
       no-auto-focus>
-      <h1>Selected items</h1>
+      <h1>[[i18n('label.documents.selected.items', 'Selected items')]]</h1>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
           <div class="row layout horizontal">
@@ -99,7 +100,7 @@ Contributors:
         </div>
       </div>
       <div class="buttons sep">
-       <paper-button dialog-dismiss>Close</paper-button>
+       <paper-button dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
       </div>
     </paper-dialog>
 
@@ -107,10 +108,10 @@ Contributors:
       <div id="selectionToolbar" class="horizontal center layout fit toolbar" hidden$="[[!_isDisplayToolbar]]">
           <div class="selection">
             <span class="count">
-              [[selectedItems.length]] item(s) selected
+              [[i18n('label.documents.selected.items.number', '{0} item(s) selected', selectedItems.length)]]
             </span>
             <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
-              <span>View selection</span>
+              <span>[[i18n('label.documents.view.selection', 'View selection')]]</span>
             </a>
           </div>
           <div class="horizontal center flex layout end-justified actions">
@@ -119,7 +120,7 @@ Contributors:
             <nuxeo-delete-documents-button documents="{{selectedItems}}">
             </nuxeo-delete-documents-button>
             <a class="selectionLink" on-tap="clearSelection">
-              <span>Clear</span>
+              <span>[[i18n('command.clear.selection', 'Clear')]]</span>
             </a>
           </div>
       </div>
@@ -145,6 +146,8 @@ Contributors:
             value: false
           }
         },
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         observers: [
           '_observeSelectedItems(selectedItems.*)'

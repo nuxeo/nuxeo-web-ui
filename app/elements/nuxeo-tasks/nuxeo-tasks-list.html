@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-tasks-list`
@@ -89,7 +90,7 @@ Contributors:
     </style>
 
     <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
-      <span class="empty">There are no tasks to show.</span>
+      <span class="empty">[[i18n('ui.tasksList.noTasks','There are no tasks to show.')]]</span>
     </div>
     <div hidden$="[[_hidden(tasks)]]">
       <iron-list id="list" items="[[tasks]]" as="task" selection-enabled selected-item="{{_selection}}">
@@ -104,11 +105,11 @@ Contributors:
               </div>
               <div class="task-detail">
                 <div class="taskDoc horizontal layout center">
-                  <span class="task-property">On  </span>
+                  <span class="task-property">[[i18n('ui.tasksList.on', 'On  ')]]</span>
                   <a href$="[[urlFor('browse', task.targetDocumentIds.0.title)]]" class="docTitle ellipsis">[[task.targetDocumentIds.0.title]]</a>
                 </div>
                 <div class="horizontal layout center">
-                  <span class="due-date task-property">Due date
+                  <span class="due-date task-property">[[i18n('ui.tasksList.dueDate','Due date ')]]
                   <span class="date">[[_formatDate(task.dueDate)]]</span></span>
                 </div>
               </div>
@@ -139,7 +140,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         ready: function() {
           // tmp fix

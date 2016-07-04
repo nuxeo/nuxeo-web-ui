@@ -15,6 +15,8 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-delete-documents-actions`
 @group Nuxeo UI
@@ -40,7 +42,7 @@ Contributors:
     <paper-icon-button icon="delete" id="deleteAllButtons">
     </paper-icon-button>
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
-      [[i18n('delete_selected_documents', 'Delete selected documents')]]
+      [[i18n('label.documents.deleteDocuments', 'Delete selected documents')]]
     </paper-tooltip>
 
   </template>
@@ -58,12 +60,15 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.I18nBehavior],
+
         listeners: {
           'tap': 'deleteDocuments',
         },
 
         deleteDocuments: function() {
-          if (confirm('Permanently delete documents?')) {
+          if (confirm(this.i18n('label.documents.confirmDeleteDocumentsForever',
+                                'Permanently delete selected document(s)?'))) {
             if (this.documents && this.documents.length) {
               var uids = this.documents.map(function(doc) {
                 return doc.uid;

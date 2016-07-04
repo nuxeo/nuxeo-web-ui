@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 An element listing Nuxeo Drive synchronization roots.
@@ -55,14 +56,14 @@ Example:
     <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params='{"enable": false}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">
-      You currently don't have any synchronization root.
+      [[i18n('ui.drive.syncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]
     </template>
 
     <template is="dom-if" if="[[!_empty(roots)]]">
       <div class="table">
         <div class="row headers">
-          <div class="flex-2">[[i18n('label.drive.root.name', 'Name')]]</div>
-          <div class="flex-8">[[i18n('label.drive.root.path', 'Path')]]</div>
+          <div class="flex-2">[[i18n('ui.drive.syncRootsManagement.root.name', 'Name')]]</div>
+          <div class="flex-8">[[i18n('ui.drive.syncRootsManagement.root.path', 'Path')]]</div>
           <div class="flex"></div>
         </div>
         <template is="dom-repeat" items="[[roots]]" as="doc">
@@ -80,7 +81,8 @@ Example:
       </div>
     </template>
 
-    <paper-toast id="toast">[[i18n('label.drive.roots.disable', 'Synchronization root disabled')]]</paper-toast>
+    <paper-toast id="toast">[[i18n('ui.drive.syncRootsManagement.roots.disabled',
+                                   'Synchronization root disabled')]]</paper-toast>
 
   </template>
   <script>
@@ -93,6 +95,7 @@ Example:
             value: []
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         _handleRoots: function(e) {
           this.roots = e.detail.response.entries;

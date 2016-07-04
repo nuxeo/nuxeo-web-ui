@@ -14,6 +14,7 @@ Lesser General Public License for more details.
 Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-clipboard-documents-button`
@@ -39,7 +40,7 @@ Contributors:
       id="clipboardButton"
       icon="image:add-to-photos">
     </paper-icon-button>
-    <paper-tooltip for="clipboardButton">[[i18n('add_to_clip_board', 'Add to clipboard')]]</paper-tooltip>
+    <paper-tooltip for="clipboardButton">[[i18n('ui.clipboardDocumentsButton.addToClipboard', 'Add to Clipboard')]]</paper-tooltip>
 
   </template>
 
@@ -55,6 +56,7 @@ Contributors:
             value: []
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         listeners: {
           'tap': 'addToClipBoard',

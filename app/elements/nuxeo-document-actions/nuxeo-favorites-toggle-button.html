@@ -17,6 +17,8 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-favorites-toggle-button`
 @group Nuxeo UI
@@ -86,6 +88,8 @@ Contributors:
           }
         },
 
+        behaviors: [Nuxeo.I18nBehavior],
+
         listeners: {
           'tap': 'toggle',
         },
@@ -109,7 +113,8 @@ Contributors:
         },
 
         _computeTooltip: function(isFavorite) {
-          return isFavorite ? 'Remove From Favorites' : 'Add to Favorites';
+          return isFavorite ? this.i18n('ui.favoritesToggleButton.removeFromFavorites', 'Remove From Favorites')
+                            : this.i18n('ui.favoritesToggleButton.addToFavorites', 'Add to Favorites');
         },
 
         _isFavorite: function(doc) {

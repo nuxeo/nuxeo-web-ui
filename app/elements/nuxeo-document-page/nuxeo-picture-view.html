@@ -15,6 +15,8 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <!--
 `nuxeo-picture-view`
 @group Nuxeo UI
@@ -98,29 +100,29 @@ Contributors:
     <div class="card-section sep">
       <div class="properties">
         <div class="item">
-          <label>Dimensions</label>
+          <label>[[i18n('label.widget.picture.dimensions', 'Dimensions')]]</label>
           [[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]
         </div>
         <div class="item">
-          <label>Format</label>
+          <label>[[i18n('label.widget.picture.format', 'Format')]]</label>
           [[document.properties.picture:info.format]]
         </div>
         <div class="item">
-          <label>Color Profile</label>
+          <label>[[i18n('label.widget.picture.colorSpace', 'Color Profile')]]</label>
           [[document.properties.picture:info.colorSpace]]
         </div>
         <div class="item">
-          <label>Bit Depth</label>
+          <label>[[i18n('label.widget.picture.depth', 'Bit Depth')]]</label>
           [[document.properties.picture:info.depth]]
         </div>
         <div class="item">
-          <label>Weight</label>
+          <label>[[i18n('label.widget.picture.weight', 'Weight')]]</label>
           [[_formatSize(document.properties.common:size)]]
         </div>
       </div>
     </div>
     <div class="card-section sep">
-      <p class="title">Additional Formats</p>
+      <p class="title">[[i18n('label.header.picture.additional.formats', 'Additional Formats')]]</p>
       <div>
         <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
           <div class="item">
@@ -153,6 +155,7 @@ Contributors:
             computed: '_getAdditionalFormats(document)'
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
         _formatSize: function(size) {
           if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';

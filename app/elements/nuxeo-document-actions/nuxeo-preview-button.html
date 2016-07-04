@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-preview-button`
@@ -50,7 +51,7 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="toggleDialog"></paper-icon-button>
-      <paper-tooltip for="previewBut">Preview</paper-tooltip>
+      <paper-tooltip for="previewBut">[[i18n('ui.previewButton.tooltip','Preview')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
@@ -65,6 +66,7 @@ Contributors:
       properties: {
         document: Object
       },
+      behaviors: [Nuxeo.I18nBehavior],
 
       _toggleDialog: function() {
         this.$.dialog.toggle();

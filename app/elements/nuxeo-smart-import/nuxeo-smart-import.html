@@ -17,6 +17,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-smart-import`
@@ -57,13 +58,13 @@ Contributors:
                   class="vertical layout">
       <div class="horizontal layout">
         <div id="uploadedFileList" class="vertical layout">
-          <h3>Uploaded Files</h3>
+          <h3>[[i18n('ui.smartImport.uploadedFiles', 'Uploaded Files')]]</h3>
           <template is="dom-repeat" items="[[batch]]">
             <span>[[item.name]] ([[_formatSize(item.size)]])</span>
           </template>
         </div>
         <div id="operationContainer" class="vertical layout">
-          <h3>Select Import Operation</h3>
+          <h3>[[i18n('ui.smartImport.selectOp', 'Select Import Operation')]]</h3>
           <form id="operationForm"
                 is="iron-form"
                 action="/"
@@ -81,13 +82,13 @@ Contributors:
                 <nuxeo-dublincore-edit document="{{newDocument}}" new></nuxeo-dublincore-edit>
               </template>
             </div>
-            <button id="submitImportButton" style="display:none;">Submit</button>
+            <button id="submitImportButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
           </form>
         </div>
       </div>
       <div class="buttons sep horizontal end-justified layout">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button noink class="primary" on-tap="_submit">Create</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_submit">[[i18n('command.create', 'Create')]]</paper-button>
       </div>
     </paper-dialog>
 
@@ -114,13 +115,13 @@ Contributors:
             value: [
               {
                 key: 'smartImport',
-                label: 'Smart import',
+                label: 'ui.smartImport.withoutMetadata',
                 operation: 'FileManager.Import',
                 message: 'Let Nuxeo select the appropriate document type for each file.'
               },
               {
                 key: 'smartImportWithMetadata',
-                label: 'Smart import with properties',
+                label: 'ui.smartImport.withMetadata',
                 operation: 'FileManager.ImportWithMetaData',
                 message: 'Let Nuxeo select the appropriate document type for each file and initialize properties.'
               }

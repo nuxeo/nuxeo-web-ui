@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 An element listing Nuxeo Drive desktop client packages for download.
@@ -73,8 +74,8 @@ Example:
 
     <div class="table">
       <div class="row headers">
-        <div class="flex-2">[[i18n('label.drive.packages.platform', 'Platform')]]</div>
-        <div class="flex-10">[[i18n('label.drive.packages.install', 'Package to Install')]]</div>
+        <div class="flex-2">[[i18n('ui.drive.desktopPackages.platform', 'Platform')]]</div>
+        <div class="flex-10">[[i18n('ui.drive.desktopPackages.install', 'Package to Install')]]</div>
       </div>
       <template is="dom-repeat" items="[[packages]]" as="pkg">
         <div class="row">
@@ -118,7 +119,8 @@ Example:
       });
 
       PACKAGES.push({
-        name: 'Read the documentation about the Linux client',
+        name: window.nuxeo.I18n.translate('ui.drive.desktopPackages.ubuntu.name',
+                                          'Read the documentation about the Linux client'),
         platform: 'ubuntu',
         url: 'https://github.com/nuxeo/nuxeo-drive#ubuntudebian-and-other-linux-variants-client'
       });
@@ -130,7 +132,8 @@ Example:
             type: Array,
             value: PACKAGES
           }
-        }
+        },
+        behaviors: [Nuxeo.I18nBehavior],
       });
     })();
   </script>

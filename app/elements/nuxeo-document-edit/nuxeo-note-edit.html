@@ -15,6 +15,7 @@ Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
@@ -82,7 +83,7 @@ Contributors:
 
    <div class="row layout horizontal">
      <div class="label-container">
-       <label>Title</label>
+       <label>[[i18n('label.title', 'Title')]]</label>
        <span class="required">*</span>
      </div>
      <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex" required>
@@ -90,14 +91,14 @@ Contributors:
 
    <div class="row layout horizontal">
      <div class="label-container">
-       <label>Description</label>
+       <label>[[i18n('label.description', 'Description')]]</label>
      </div>
      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
    </div>
 
    <div class="row layout horizontal">
      <div class="label-container">
-       <label>Note</label>
+       <label>[[i18n('note','Note')]]</label>
      </div>
      <div class="layout vertical flex">
        <template is="dom-if" if="[[_isHTML(document)]]">
@@ -107,12 +108,12 @@ Contributors:
          <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
        </template>
        <div class="layout horizontal">
-         <span class="format">Format</span>
+         <span class="format">[[i18n('label.richtext.format','Format')]]</span>
          <select value="{{document.properties.note:mime_type::change}}">
-           <option value="text/html">HTML</option>
-           <option value="text/plain">Text</option>
-           <option value="text/xml">XML</option>
-           <option value="text/x-web-markdown">Markdown</option>
+           <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
+           <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
+           <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
+           <option value="text/x-web-markdown">[[i18n('mimetype.markdown','Markdown')]]</option>
          </select>
        </div>
      </div>
@@ -139,6 +140,8 @@ Contributors:
           value: false
         }
       },
+
+      behaviors: [Nuxeo.I18nBehavior],
 
       _isHTML: function() {
         return this.document && this.document.properties['note:mime_type'] === 'text/html';

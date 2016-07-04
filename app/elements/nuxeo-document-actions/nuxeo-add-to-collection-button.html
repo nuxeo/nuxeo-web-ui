@@ -17,6 +17,7 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
   Nelson Silva <nsilva@nuxeo.com>
 -->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-add-to-collection-button`
@@ -76,23 +77,23 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
-      <paper-tooltip for="addColBut">Add to Collection</paper-tooltip>
+      <paper-tooltip for="addColBut">[[i18n('ui.addToCollectionButton.tooltip','Add to Collection')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" modal on-iron-overlay-closed="_resetPopup"
       on-iron-overlay-opened="_focusPopup" no-auto-focus>
-      <h1>Add to Collection</h1>
+      <h1>[[i18n('ui.addToCollectionButton.dialog.heading','Add to Collection')]]</h1>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
           <div class="row layout horizontal">
             <div class="label-container">
-              <label>Collections</label>
+              <label>[[i18n('ui.addToCollectionButton.dialog.collections','Collections')]]</label>
               <span class="required">*</span>
             </div>
             <nuxeo-select2 id="nxSelect"
                operation="Collection.Suggestion"
                min-chars="0"
-               placeholder="Select a Collection..."
+               placeholder="[[i18n('ui.addToCollectionButton.dialog.select','Select a Collection...')]]"
                value="{{collection}}"
                tagging="true"
                query-results-filter="[[resultsFilter]]"
@@ -103,7 +104,7 @@ Contributors:
           </div>
           <div class="row layout horizontal" hidden$="[[!_isNew(collection)]]">
             <div class="label-container">
-              <label>Description</label>
+              <label>[[i18n('ui.addToCollectionButton.dialog.description','Description')]]</label>
             </div>
             <textarea value="{{description::input}}"></textarea>
           </div>
@@ -117,9 +118,9 @@ Contributors:
         </nuxeo-operation>
       </div>
       <div class="buttons sep">
-       <paper-button dialog-dismiss>Cancel</paper-button>
+       <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
        <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
-         Add to Collection
+         [[i18n('ui.addToCollectionButton.dialog.add','Add to Collection')]]
        </paper-button>
       </div>
     </paper-dialog>
@@ -158,6 +159,7 @@ Contributors:
           }
         }
       },
+      behaviors: [Nuxeo.I18nBehavior],
 
       _toggleDialog: function() {
         this.$.dialog.toggle();
