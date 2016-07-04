@@ -242,7 +242,7 @@ Contributors:
       </div>
       <div class="sideinfo vertical layout flex">
         <template is="dom-if" if="[[isProcessingTask]]" restamp>
-          <template is="dom-repeat" items="[[workflows.entries]]" as="workflow">
+          <template is="dom-repeat" items="[[workflows]]" as="workflow">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <paper-card class="document-task">
                 <div class="layout horizontal center task-header">
@@ -253,7 +253,7 @@ Contributors:
                   </div>
                   <paper-dialog id="graphDialog" with-backdrop>
                     <div class="graph-container">
-                      <nuxeo-workflow-graph workflow="[[workflow]]"></nuxeo-workflow-graph>
+                      <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
                     </div>
                     <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
                   </paper-dialog>
