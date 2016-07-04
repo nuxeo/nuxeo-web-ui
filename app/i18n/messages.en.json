@@ -54,6 +54,6 @@
   "label.document.type.workspace": "Workspace",
   "label.home.dashboard": "Dashboard",
 
-  "label.admin.repo": "Repository",
+  "label.admin.analytics": "Analytics",
   "label.admin.users": "Users & Groups"
 }

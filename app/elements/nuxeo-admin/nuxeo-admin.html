@@ -55,7 +55,7 @@ Contributors:
       </div>
       <div class="content">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
-          <section name="repository">
+          <section name="analytics">
               <paper-card class="card">
                 <div class="card-content vertical layout">
                   <span class="title">Default Domain</span>
@@ -94,13 +94,13 @@ Contributors:
           labels: {
             type: Object,
             value: {
-              repository: 'label.admin.repo',
+              'analytics': 'label.admin.analytics',
               'user-group-management': 'label.admin.users'
             }
           },
           selectedTab: {
             type: String,
-            value: 'repository'
+            value: 'analytics'
           },
           entity: {
             type: Object,
