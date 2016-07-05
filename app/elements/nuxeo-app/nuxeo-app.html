@@ -213,6 +213,12 @@ Contributors:
                     headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'>
     </nuxeo-resource>
 
+    <nuxeo-document id="searchDoc" auto
+                    doc-id="[[selectedSearch.id]]"
+                    enrichers="permissions"
+                    response="{{searchDoc}}">
+    </nuxeo-document>
+
     <paper-toast id="toast"></paper-toast>
 
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
@@ -261,7 +267,7 @@ Contributors:
 
               <section class="card search" name="search">
                 <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults" dirty="{{dirty}}"
-                                   is-saved-search="{{searchLoaded}}"></nuxeo-search-form>
+                                   is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}"></nuxeo-search-form>
               </section>
 
               <section class="card tasks" name="tasks">
@@ -368,17 +374,20 @@ Contributors:
 
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
               <div class="actions horizontal layout center">
-                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchLoaded,dirty)]]">
+                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc,searchLoaded,dirty)]]">
                    <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
                 </paper-button>
-                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchLoaded,dirty)]]">
+                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchDoc,searchLoaded,dirty)]]">
                    <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
                 </paper-button>
-                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!searchLoaded]]">
+                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc,searchLoaded,dirty)]]">
                   <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
                   <paper-menu class="dropdown-content layout vertical">
-                    <paper-item class="layout horizontal center" on-tap="_renameSearch" hidden$="[[!searchLoaded]]">
+                    <paper-item class="layout horizontal center" on-tap="_renameSearch">
                       <iron-icon icon="icons:create"></iron-icon>[[i18n('ui.app.renameSearch', 'Rename')]]
+                    </paper-item>
+                    <paper-item class="layout horizontal center" on-tap="_shareSearch">
+                      <iron-icon icon="social:share"></iron-icon>[[i18n('ui.app.shareSearch', 'Share')]]
                     </paper-item>
                   </paper-menu>
                 </paper-menu-button>
@@ -479,6 +488,8 @@ Contributors:
 
           tasks: Array,
 
+          searchDoc: Object,
+
           taskCount: Number,
 
           drawerWidth: {
@@ -565,11 +576,20 @@ Contributors:
         },
 
         _showSaveAs: function() {
-          return this.searchLoaded || (!this.searchLoaded && this.dirty);
+          return (this.searchLoaded || (!this.searchLoaded && this.dirty)) && this._hasPermissions();
         },
 
         _showSave: function() {
-          return this.searchLoaded && this.dirty;
+          return this.searchLoaded && this.dirty && this._hasPermissions();
+        },
+
+        _showOtherSearchActions: function() {
+          return this.searchLoaded && this._hasPermissions();
+        },
+
+        _hasPermissions: function() {
+          return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
+                  this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
         },
 
         _navigate: function() {
@@ -711,6 +731,10 @@ Contributors:
 
         _renameSearch: function() {
           this.$$('nuxeo-search-form').rename();
+        },
+
+        _shareSearch: function() {
+          this.$$('nuxeo-search-form').share();
         },
 
         _onAddToClipboard: function(e) {
