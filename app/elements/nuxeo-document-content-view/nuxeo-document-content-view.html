@@ -38,27 +38,37 @@ Contributors:
         @apply(--layout-fit);
       }
 
-      :host[display-mode=table] .toolbar {
-        margin-left: 69px;
-      }
-
-      nuxeo-data-table {
+      nuxeo-data-table ::content #items {
         background-color: #fff;
       }
 
       nuxeo-data-table, nuxeo-data-grid {
-        min-height: calc(100vh - 61px);
+        min-height: calc(100vh - 100px);
+      }
+
+      nuxeo-data-table ::content #container.nuxeo-data-table {
+        padding: 4.5em 3em 3em;
+        box-sizing: border-box;
+      }
+
+      nuxeo-data-grid ::content #scrollThreshold.nuxeo-data-grid {
+        padding: 3.7em 2em 3em;
       }
 
       paper-fab {
         position: absolute;
-        top: 64px;
-        right: 32px;
-        color: #ffffff;
-        --paper-fab-background: #5ADA5A;
-        --paper-fab-keyboard-focus-background: #008000;
-        @apply(--nuxeo-document-create-button);
-        z-index: 1000;
+        top: 1em;
+        right: 2.3em;
+        color: var(--nuxeo-action-color);
+        --paper-fab-background: #fff;
+        --paper-fab-keyboard-focus-background: #efefef;
+        border: var(--nuxeo-border);
+        z-index: 10;
+        box-shadow: none;
+        position: absolute;
+        border-radius: .2em;
+        width: 2em;
+        height: 2em;
       }
 
       nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select {
@@ -71,14 +81,14 @@ Contributors:
     </style>
 
     <template is="dom-if" if="[[_isDisplayTable]]">
-      <paper-fab class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid">
+      <paper-fab mini noink class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid" elevation="0">
       </paper-fab>
       <paper-tooltip for="toogleGrid">
         [[i18n('label.documents.display.grid', 'Switch to grid view')]]
       </paper-tooltip>
     </template>
     <template is="dom-if" if="[[_isDisplayGrid]]">
-      <paper-fab class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable">
+      <paper-fab mini noink class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable" elevation="0">
       </paper-fab>
       <paper-tooltip for="toogleTable">
         [[i18n('label.documents.display.table', 'Switch to table view')]]
