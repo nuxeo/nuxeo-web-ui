@@ -34,28 +34,25 @@ Contributors:
         height: 56px;
         position:relative;
       }
+
       .toolbar {
         background: var(--nuxeo-selection-toolbar-color);
         padding: 0 3em;
         z-index: 100;
+        font-weight: 300;
+        font-size: .9rem;
         color: var(--nuxeo-link-hover-color);
         box-shadow: 0 0 3px rgba(0,0,0,0.4);
       }
-      .selection {
-        font-weight: 300;
-      }
+
       .count {
         font-weight: 600;
       }
       a.selectionLink {
-        max-width: 20em;
         display: inline-block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         vertical-align: bottom;
         text-decoration: underline;
-
+        margin-left: 1em;
       }
 
       a.selectionLink:hover {
