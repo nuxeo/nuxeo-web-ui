@@ -366,12 +366,20 @@ Contributors:
 
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
               <div class="actions horizontal layout center">
-                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchLoaded,dirty)]]">
-                   <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
-                </paper-button>
                 <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchLoaded,dirty)]]">
                    <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
                 </paper-button>
+                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchLoaded,dirty)]]">
+                   <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
+                </paper-button>
+                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!searchLoaded]]">
+                  <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
+                  <paper-menu class="dropdown-content layout vertical">
+                    <paper-item class="layout horizontal center" on-tap="_renameSearch" hidden$="[[!searchLoaded]]">
+                      <iron-icon icon="icons:create"></iron-icon>[[i18n('ui.app.renameSearch', 'Rename')]]
+                    </paper-item>
+                  </paper-menu>
+                </paper-menu-button>
               </div>
             </nuxeo-search-results>
 
@@ -695,6 +703,10 @@ Contributors:
 
         _saveSearchAs: function() {
           this.$$('nuxeo-search-form').saveAs();
+        },
+
+        _renameSearch: function() {
+          this.$$('nuxeo-search-form').rename();
         },
 
         _onAddToClipboard: function(e) {

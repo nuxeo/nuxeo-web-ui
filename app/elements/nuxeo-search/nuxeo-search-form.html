@@ -235,6 +235,23 @@ Contributors:
         </div>
       </div>
     </paper-dialog>
+
+    <paper-dialog id="renameDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('ui.searchForm.renamePopup.heading', 'Rename Saved Search')]]</h1>
+        <div>
+          <paper-input id="savedSearchRenameTitle"
+                       label="[[i18n('ui.searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
+                       autofocus
+                       no-label-float>
+          </paper-input>
+        </div>
+        <div class="buttons">
+         <paper-button dialog-dismiss>[[i18n('ui.searchForm.popup.cancel', 'Cancel')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('ui.searchForm.popup.save','Save')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
   </template>
   <script>
     (function() {
@@ -489,6 +506,13 @@ Contributors:
           }
         },
 
+        rename: function() {
+          this._renaming = true;
+          this.$.actionsDropdown.close();
+          this.$.renameDialog.open();
+          this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
+        },
+
         _saveSearch: function() {
           var _el = this.$['saved-search'];
           // save a new search
@@ -511,8 +535,23 @@ Contributors:
             // update an existing search
             _el.searchId = this.selectedSearch.id;
             _el.data = this.selectedSearch;
-            _el.data.params = this.params;
+            if (this._renaming) {
+              _el.data.title = this.$.savedSearchRenameTitle.value;
+              _el.data.params = this._mutateParams(_el.data.params);
+            } else {
+              _el.data.params = this.params;
+            }
             _el.put().then(function() {
+              if (this._renaming) {
+                this.$.renameDialog.close();
+
+                this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
+                // hack required to update the paper-input inside the paper-dropdown-menu
+                var idx = this.selectedSearchIdx;
+                this.selectedSearchIdx = 0;
+                this.selectedSearchIdx = idx;
+                this._renaming = false;
+              }
               this.dirty = false;
             }.bind(this));
           }

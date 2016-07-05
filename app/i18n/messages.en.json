@@ -238,6 +238,8 @@
   "ui.searchForm.savePopup.label": "Enter a name for your saved search",
   "ui.searchForm.popup.save": "Save",
   "ui.searchForm.popup.cancel": "Cancel",
+  "ui.searchForm.renamePopup.heading": "Rename Saved Search",
+  "ui.searchForm.renamePopup.label": "Enter a new name for your saved search",
   "SerialDocumentReview": "Serial document review",
   "ParallelDocumentReview": "Parallel document review",
   "wf.parallelDocumentReview.ParallelDocumentReview": "Parallel document review",
