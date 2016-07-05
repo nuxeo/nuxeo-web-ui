@@ -1,0 +1,263 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-chart-data-behavior.html">
+
+<!--
+`nuxeo-workflow-analytics`
+@group Nuxeo UI
+@element nuxeo-workflow-analytics
+-->
+<dom-module id="nuxeo-workflow-analytics">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .dates {
+        height: 40px;
+        padding: 1em;
+      }
+
+      .dates input {
+        background-color: #fff;
+        border: 1px solid #c6c6c6;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
+        border-radius: 3px;
+        margin-left: .5em;
+        width: 125px;
+      }
+
+      paper-dropdown-menu {
+        margin-right: 2em;
+        width: 225px;
+      }
+
+      paper-card {
+        background-color: transparent;
+        float: left;
+        height: 450px;
+        margin-bottom: 20px;
+        text-align: center;
+        padding: 10px;
+        width: 33.3%;
+      }
+
+      nuxeo-data-table {
+        height: 450px;
+      }
+
+      iron-icon {
+        color: #0f9d58;
+        --iron-icon-width: 144px;
+        --iron-icon-height: 144px;
+        margin-top: 50px;
+      }
+
+      @media (max-width: 1440px) {
+        paper-card {
+          width: 50%;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        paper-card {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 767px) {
+        paper-card {
+          width: 100%;
+        }
+      }
+    </style>
+
+    <div class="dates horizontal flex end-justified layout">
+      <paper-dropdown-menu no-label-float>
+        <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
+          <paper-item key="ParallelDocumentReview">Parallel Document Review</paper-item>
+          <paper-item key="SerialDocumentReview">Serial Document Review</paper-item>
+        </paper-menu>
+      </paper-dropdown-menu>
+      <input type="date" value="{{startDate::change}}">
+      <input type="date" value="{{endDate::change}}">
+    </div>
+
+    <!-- Average wf duration -->
+    <nuxeo-workflow-data workflow="[[workflow]]"
+                         event="afterWorkflowFinish"
+                         metrics="avg(timeSinceWfStarted)"
+                         start-date="[[startDate]]" end-date="[[endDate]]"
+                         data="{{avgWorkflowLength}}">
+    </nuxeo-workflow-data>
+
+    <paper-card heading="Average Workflow Duration" elevation="0">
+      <div class="card-content">
+        <iron-icon icon="image:timer"></iron-icon>
+        <h1>[[_asDuration(avgWorkflowLength)]]</h1>
+      </div>
+    </paper-card>
+
+    <!-- Wf initiators -->
+    <nuxeo-workflow-data workflow="[[workflow]]"
+                         event="afterWorkflowStarted"
+                         grouped-by="workflowInitiator"
+                         start-date="[[startDate]]" end-date="[[endDate]]"
+                         data="{{initiators}}">
+    </nuxeo-workflow-data>
+
+    <paper-card heading="Workflow Initiators" elevation="0">
+      <div class="card-content">
+        <chart-pie values=[[_values(initiators)]]
+                   series=[[_series(initiators)]]
+                   options='{"responsive": true}'>
+        </chart-pie>
+      </div>
+    </paper-card>
+
+    <!-- Actions per user -->
+    <nuxeo-workflow-data workflow="[[workflow]]"
+                         event="afterWorkflowTaskEnded"
+                         grouped-by="taskActor, action"
+                         start-date="[[startDate]]" end-date="[[endDate]]"
+                         data="{{numberOfActionsPerUser}}">
+    </nuxeo-workflow-data>
+
+    <paper-card heading="Actions Per User" elevation="0">
+      <div class="card-content">
+        <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
+                   series=[[_series(numberOfActionsPerUser)]]
+                   values=[[_values(numberOfActionsPerUser)]]
+                   options='{"responsive": true}'>
+        </chart-bar>
+      </div>
+    </paper-card>
+
+    <!-- Average task duration per user -->
+    <nuxeo-workflow-data workflow="[[workflow]]"
+                         event="afterWorkflowTaskEnded"
+                         grouped-by="taskActor"
+                         metrics="avg(timeSinceTaskStarted)"
+                         start-date="[[startDate]]" end-date="[[endDate]]"
+                         data="{{avgTaskDurationPerUser}}">
+    </nuxeo-workflow-data>
+
+    <paper-card heading="Average Task Duration Per User" elevation="0">
+      <div class="card-content">
+        <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
+          <nuxeo-data-table-column name="User">
+            <template>[[item.key]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="Average duration">
+            <template>[[item.value]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
+      </div>
+    </paper-card>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-workflow-analytics',
+        behaviors: [Nuxeo.ChartDataBehavior],
+        properties: {
+          workflow: {
+            type: String,
+            value: 'ParallelDocumentReview'
+          },
+          index: {
+            type: String,
+            value: 'nuxeo'
+          },
+          startDate: String,
+          endDate: String,
+          colors: {
+            type: Array,
+            value: ['#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
+                    '#3B3EAC', '#0099C6', '#DD4477', '#66AA00', '#B82E2E']
+          }
+        },
+
+        ready: function() {
+          this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+          this.endDate = moment().format('YYYY-MM-DD');
+        },
+
+        // override _labels and _values from nuxeo-chart-data-behavior.html
+        _labels: function(data) {
+          if (!data) { return []; }
+          if (data.value) {
+            return data.value.map(function(obj) {
+              return obj.key;
+            });
+          } else {
+            return this._labels(data[0]);
+          }
+        },
+
+        _values: function(data) {
+          var values = [];
+          data.forEach(function(entry) {
+            if (Array.isArray(entry.value)) {
+              values.push(entry.value.map(function(e) { return e.value; }));
+            } else {
+              values.push(entry.value);
+            }
+          });
+          return values;
+        },
+
+        _asDuration: function(duration) {
+          var seconds = Math.floor(duration / 1000),
+              minutes = Math.floor(seconds / 60),
+              hours = Math.floor(minutes / 60),
+              days = Math.floor(hours / 24),
+              result = '';
+          hours = hours - (days * 24);
+          minutes = minutes - (days * 24 * 60) - (hours * 60);
+          seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+          if (days > 0) {
+            result += days + ' Days ';
+          }
+          if (hours > 0) {
+            result += hours + 'h ';
+          }
+          if (minutes > 0) {
+            result += minutes + 'm ';
+          }
+          if (seconds > 0) {
+            result += seconds + 's ';
+          }
+          return result;
+        },
+
+        _table: function(data) {
+          return data.map(function(e) {
+            return {key: e.key, value: this._asDuration(e.value)};
+          }.bind(this));
+        },
+      });
+    })();
+  </script>
+</dom-module>
