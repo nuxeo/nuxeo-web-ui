@@ -276,9 +276,17 @@ Contributors:
           if (this.displayMode === 'table') {
             this._isDisplayTable = true;
             this._isDisplayGrid = false;
+            this.$.datatable.clearSelection();
+            if (this.$.datagrid.selectedItems) {
+              this.$.datatable.selectItems(this.$.datagrid.selectedItems);
+            }
           } else if (this.displayMode === 'grid') {
             this._isDisplayTable = false;
             this._isDisplayGrid = true;
+            this.$.datagrid.clearSelection();
+            if (this.$.datatable.selectedItems) {
+              this.$.datagrid.selectItems(this.$.datatable.selectedItems);
+            }
           }
         },
 
