@@ -59,16 +59,18 @@ Lesser General Public License for more details.
   <!-- endbuild -->
 
   <script>
+    window.Polymer = {
+      lazyRegister: true,
+      useNativeCSSProperties: true
+    };
+
     function getQueryParam(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.href);
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
     }
 
     if (getQueryParam('dom') == 'shadow') {
-      window.Polymer = {
-          dom: 'shadow',
-          lazyRegister: true
-      };
+      window.Polymer.dom = 'shadow';
     }
   </script>
 
