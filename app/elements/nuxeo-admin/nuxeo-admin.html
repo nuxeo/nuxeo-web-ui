@@ -40,44 +40,12 @@ Contributors:
         width: 100%;
         height: 100%;
       }
-
-      paper-dropdown-menu {
-        --paper-input-container-underline: {
-          display: none;
-        };
-        --paper-input-container-input: {
-          font-size: 18px;
-          font-weight: 400;
-          text-align: left;
-          color: var(--nuxeo-link-hover-color);
-        };
-        padding: .3em 0 .5em .5em;
-        margin-left: 1.5em;
-        border-left: var(--nuxeo-border);
-      }
     </style>
 
     <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
-      <section name="analytics">
-        <paper-header-panel class="flex">
-          <div class="paper-header layout horizontal">
-            <span>[[i18n('label.admin.analytics', 'Analytics')]]</span>
-            <paper-dropdown-menu noink no-animations no-label-float>
-              <paper-menu class="dropdown-content" selected="{{selectedAnalyticsTab}}" attr-for-selected="name">
-                <paper-item name="repository">[[i18n('admin.analytics.repository', 'Repository Content')]]</paper-item>
-                <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution', 'Document Distribution')]]</paper-item>
-                <paper-item name="search">[[i18n('admin.analytics.search', 'Search')]]</paper-item>
-                <paper-item name="workflow">[[i18n('admin.analytics.workflow', 'Workflow')]]</paper-icon-item>
-              </paper-menu>
-            </paper-dropdown-menu>
-          </div>
-          <div class="content">
-            <paper-card class="card">
-              <nuxeo-analytics selected-tab="[[selectedAnalyticsTab]]"></nuxeo-analytics>
-            </paper-card>
-          </div>
-        </paper-header-panel>
-      </section>
+
+      <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
+
       <section name="user-group-management">
         <paper-header-panel class="flex">
           <div class="paper-header layout horizontal">

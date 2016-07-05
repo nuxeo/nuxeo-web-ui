@@ -25,7 +25,7 @@ Contributors:
 -->
 <dom-module id="nuxeo-analytics">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -35,28 +35,58 @@ Contributors:
         font-size: 1.4rem;
         padding: 0.5em;
       }
+
+      paper-dropdown-menu {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-input: {
+          font-size: 18px;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-link-hover-color);
+        };
+        padding: .3em 0 .5em .5em;
+        margin-left: 1.5em;
+        border-left: var(--nuxeo-border);
+      }
     </style>
 
-    <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
-      <section name="document-distribution">
-        <span class="title">Default Domain</span>
-        <nuxeo-document-distribution-chart index="_all"
-          path="/" mode="count" max-depth="10"
-          chart-hue="blue" chart-lumonisity="light"
-          include-version include-hidden
-          include-deleted>
-        </nuxeo-document-distribution-chart>
-      </section>
-      <section name="repository">
-        <nuxeo-repository-analytics></nuxeo-repository-analytics>
-      </section>
-      <section name="search">
-        <nuxeo-search-analytics></nuxeo-search-analytics>
-      </section>
-      <section name="workflow">
-        <nuxeo-workflow-analytics></nuxeo-workflow-analytics>
-      </section>
-    </iron-pages>
+    <paper-header-panel class="flex">
+      <div class="paper-header layout horizontal">
+        <span>[[i18n('label.admin.analytics', 'Analytics')]]</span>
+        <paper-dropdown-menu noink no-animations no-label-float>
+          <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
+            <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution', 'Document Distribution')]]</paper-item>
+            <paper-item name="repository">[[i18n('admin.analytics.repository', 'Repository Content')]]</paper-item>
+            <paper-item name="search">[[i18n('admin.analytics.search', 'Search')]]</paper-item>
+            <paper-item name="workflow">[[i18n('admin.analytics.workflow', 'Workflow')]]</paper-item>
+          </paper-menu>
+        </paper-dropdown-menu>
+      </div>
+      <div class="content">
+        <paper-card class="card">
+          <template is="dom-if" if="[[_equals(selectedTab, 'document-distribution')]]">
+            <span class="title">Default Domain</span>
+            <nuxeo-document-distribution-chart index="_all"
+                                               path="/" mode="count" max-depth="10"
+                                               chart-hue="blue" chart-lumonisity="light"
+                                               include-version include-hidden
+                                               include-deleted>
+            </nuxeo-document-distribution-chart>
+          </template>
+          <template is="dom-if" if="[[_equals(selectedTab, 'repository')]]">
+            <nuxeo-repository-analytics></nuxeo-repository-analytics>
+          </template>
+          <template is="dom-if" if="[[_equals(selectedTab, 'search')]]">
+            <nuxeo-search-analytics></nuxeo-search-analytics>
+          </template>
+          <template is="dom-if" if="[[_equals(selectedTab, 'workflow')]]">
+            <nuxeo-workflow-analytics></nuxeo-workflow-analytics>
+          </template>
+        </paper-card>
+      </div>
+    </paper-header-panel>
 
   </template>
   <script>
@@ -65,8 +95,13 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-analytics',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           selectedTab: String
+        },
+
+        _equals: function(a, b) {
+          return a === b;
         }
       });
     })();
