@@ -213,6 +213,8 @@ Contributors:
                     headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'>
     </nuxeo-resource>
 
+    <paper-toast id="toast"></paper-toast>
+
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
         <a href$="[[urlFor('home')]]">
@@ -537,7 +539,9 @@ Contributors:
           'workflowStarted': '_fetchTasks',
           'workflowTaskProcessed': '_fetchTasks',
           'taskChanged': '_onTaskChanged',
-          'addToClipboard': '_onAddToClipboard'
+          'addToClipboard': '_onAddToClipboard',
+          'addedToCollection': '_documentAddedToCollection',
+          'removedFromCollection': '_documentRemovedFromCollection'
         },
 
         ready: function() {
@@ -746,6 +750,20 @@ Contributors:
 
         _connectionUrl: function() {
           return this.$.nxcon.url;
+        },
+
+        _documentAddedToCollection: function(e) {
+          if (e.detail.docIds) {
+            this.$.toast.text = this.i18n('documents_added_to_collection', 'Documents added to collection.');
+          } else {
+            this.$.toast.text = this.i18n('document_added_to_collection', 'Document added to collection.');
+          }
+          this.$.toast.open();
+        },
+
+        _documentRemovedFromCollection: function() {
+          this.$.toast.text = this.i18n('document_removed_from_collection', 'Document removed from collection.');
+          this.$.toast.open();
         }
 
       });

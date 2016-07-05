@@ -165,8 +165,6 @@ Contributors:
                      id="removeFromCollectionOp">
     </nuxeo-operation>
 
-    <paper-toast id="toast"></paper-toast>
-
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
         <h1>[[selectedCollection.title]]</h1>
@@ -546,8 +544,6 @@ Contributors:
             if (this.$.membersList.length > memberIndex) {
               this.$.membersList.selectItem(memberIndex);
             }
-            this.$.toast.text = 'Document removed from Collection.';
-            this.$.toast.open();
             this.fire('removedFromCollection',
               {
                 innerRemove: true,

@@ -80,8 +80,7 @@ Contributors:
       <paper-tooltip for="addColBut">[[i18n('ui.addToCollectionButton.tooltip','Add to Collection')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" modal on-iron-overlay-closed="_resetPopup"
-      on-iron-overlay-opened="_focusPopup" no-auto-focus>
+    <paper-dialog id="dialog" modal on-iron-overlay-closed="_resetPopup" no-auto-focus>
       <h1>[[i18n('ui.addToCollectionButton.dialog.heading','Add to Collection')]]</h1>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
@@ -225,11 +224,8 @@ Contributors:
       _resetPopup: function() {
         this.collection = '';
         this.description = '';
-      },
-
-      _focusPopup: function() {
-        jQuery(this.$.nxSelect.$.select2).select2('open');
       }
+
     });
   </script>
 

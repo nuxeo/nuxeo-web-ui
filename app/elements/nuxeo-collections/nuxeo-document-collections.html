@@ -45,8 +45,6 @@ Contributors:
                      id="op">
     </nuxeo-operation>
 
-    <paper-toast id="toast"></paper-toast>
-
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <span class="tag">
         [[item.title]]
@@ -68,8 +66,6 @@ Contributors:
           'collection': evt.currentTarget.dataset.uid
         };
         op.execute().then(function() {
-          this.$.toast.text = 'Document removed from Collection.';
-          this.$.toast.open();
           this.fire('removedFromCollection', {docId: this.document.uid, collectionId: evt.target.dataset.uid});
         }.bind(this));
       }

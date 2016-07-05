@@ -164,7 +164,9 @@ Contributors:
         listeners: {
           'permissions.acecreated': '_documentUpdated',
           'permissions.aceupdated': '_documentUpdated',
-          'permissions.acedeleted': '_documentUpdated'
+          'permissions.acedeleted': '_documentUpdated',
+          'addedToCollection': '_documentUpdated',
+          'removedFromCollection': '_documentUpdated'
         },
 
         observers: [
@@ -246,18 +248,8 @@ Contributors:
         _toast: function(msg) {
           this.$.toast.text = msg;
           this.$.toast.open();
-        },
-
-        _documentAddedToCollection: function() {
-          this.toggleCollectionDialog();
-          this._toast('Document added to Collection.');
-          this._documentUpdated();
-        },
-
-        _documentRemovedFromCollection: function() {
-          this._toast('Document removed from Collection.');
-          this._documentUpdated();
         }
+
       });
     })();
   </script>
