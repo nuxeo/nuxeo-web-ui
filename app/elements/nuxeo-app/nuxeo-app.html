@@ -366,21 +366,12 @@ Contributors:
 
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
               <div class="actions horizontal layout center">
-                <paper-button on-click="_saveSearch" hidden$="[[_showSaveAs(searchLoaded,dirty)]]"> <!-- searchLoaded|!dirty -->
+                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchLoaded,dirty)]]">
                    <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
                 </paper-button>
-                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchLoaded,dirty)]]"> <!-- searchLoaded&!dirty -->
+                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchLoaded,dirty)]]">
                    <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
                 </paper-button>
-                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[_showSaveAs(searchLoaded,dirty)]]">
-                  <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
-                  <paper-menu class="dropdown-content layout vertical">
-                    <paper-item class="layout horizontal center" on-tap="_saveSearchAs"
-                                hidden$="[[_showSaveAs(searchLoaded,dirty)]]">
-                      <iron-icon icon="icons:add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
-                    </paper-item>
-                  </paper-menu>
-                </paper-menu-button>
               </div>
             </nuxeo-search-results>
 
@@ -562,7 +553,11 @@ Contributors:
         },
 
         _showSaveAs: function() {
-          return !this.searchLoaded || (this.searchLoaded && !this.dirty);
+          return this.searchLoaded || (!this.searchLoaded && this.dirty);
+        },
+
+        _showSave: function() {
+          return this.searchLoaded && this.dirty;
         },
 
         _navigate: function() {
