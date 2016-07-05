@@ -165,7 +165,7 @@ Contributors:
     <div class="content">
 
       <div id="filters" class="filters" hidden$="{{_isQueue}}">
-        <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}"></nuxeo-faceted-search>
+        <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}" search-term="{{searchTerm}}"></nuxeo-faceted-search>
         <div class="layout vertical row">
           <paper-button noink class="primary clear" raised on-click="_clear">
             [[i18n('ui.searchForm.clear', 'Clear')]]
@@ -446,6 +446,9 @@ Contributors:
 
         _selectedSearchChanged: function() {
           this.params = this._mutateParams(this.selectedSearch.params);
+          if (this.params && this.params.ecm_fulltext) {
+            this.searchTerm = this.params.ecm_fulltext.replace('*', '');
+          }
         },
 
         _isSavedSearch: function() {
@@ -453,6 +456,7 @@ Contributors:
         },
 
         _clear: function() {
+          this.searchTerm = '';
           this.params = {};
           if (!this._isSavedSearch()) {
             this.dirty = false;
@@ -465,12 +469,14 @@ Contributors:
           _el.searchId = this.selectedSearch.id;
           _el.get().then(function(response) {
             this.params = this._mutateParams(response.params);
+            this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
             this.dirty = false;
           }.bind(this));
         },
 
         saveAs: function() {
           this.$.actionsDropdown.close();
+          this.$.savedSearchTitle.value = '';
           this.$.saveDialog.open();
           this._saveAs = true;
         },
