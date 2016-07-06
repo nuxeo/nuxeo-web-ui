@@ -310,7 +310,7 @@
   "admin.analytics.repository": "Repository Content",
   "admin.analytics.search": "Search",
   "admin.analytics.workflow": "Workflow",
-  "ui.browse.noDocument": "There is no document do display in this folder.",
+  "ui.browse.noDocument": "There is no document to display in this folder.",
   "ui.browse.noDocumentWhenFiltered": "There is no document with these criteria.",
   "ui.collections.noDocument": "There is no document in this collection. You can add a document either from the document itself or from bulk actions on documents selection.",
   "ui.collections.noDocumentWhenFiltered": "There is no document in this collection with these criteria."
