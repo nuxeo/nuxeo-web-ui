@@ -136,6 +136,7 @@ Contributors:
               {key: 'file', label: 'label.document.type.file'},
               {key: 'note', label: 'label.document.type.note'},
               {key: 'picture', label: 'label.document.type.picture'},
+              {key: 'video', label: 'label.document.type.video'},
               {key: 'folder', label: 'label.document.type.folder'},
               {key: 'workspace', label: 'label.document.type.workspace'}
             ]
@@ -173,6 +174,17 @@ Contributors:
                   'entity-type': 'document',
                   name: '',
                   type: 'Picture',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              video: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Video',
                   properties: {
                     'dc:title': '',
                     'dc:description': ''
