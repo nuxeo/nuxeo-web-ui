@@ -84,10 +84,8 @@ Contributors:
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
     <div class="action-container layout vertical task-body">
-      <paper-tabs selected="{{_selectedTab}}" attr-for-selected="name">
-        <paper-tab name="resolution">[[i18n('label.route.task.resolution', 'Task Resolution')]]</paper-tab>
-        <paper-tab name="comments">[[i18n('label.route.task.comments','Comments')]]</paper-tab>
-      </paper-tabs>
+
+      <div class="layout vertical center">[[i18n('label.route.task.resolution', 'Task Resolution')]]</div>
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
