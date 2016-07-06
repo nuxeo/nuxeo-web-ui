@@ -26,7 +26,7 @@ Contributors:
     var app = document.querySelector('nuxeo-app');
 
     // strip final /
-    page.base(app.baseUrl.replace(/\/$/, '') + '/#!');
+    page.base(app.baseUrl.replace(/\/$/, ''));
 
     // Middleware
     function scrollToTop(ctx, next) {
@@ -111,42 +111,44 @@ Contributors:
     });
 
     // add #! before urls
-    page({
-      hashbang: true
-    });
+    var useHashbang = true;
+    page({hashbang: true, click: false});
+    page.url = function(path) {
+      return page.base() + (useHashbang ? '#!' : '') + path;
+    };
 
     Polymer.Base._addFeature({
       router: {
         browse: function(path) {
-          return page.base() + '/browse' + path;
+          return page.url('/browse' + path);
         },
 
         document: function(id) {
-          return page.base() + '/doc/' + id;
+          return page.url('/doc/' + id);
         },
 
         home: function() {
-          return page.base() + '/home';
+          return page.url('/home');
         },
 
         tasks: function() {
-          return page.base() + '/tasks';
+          return page.url('/tasks');
         },
 
         administration: function(tab) {
-          return page.base() + '/admin/' + tab;
+          return page.url('/admin/' + tab);
         },
 
         user: function(name) {
-          return page.base() + '/user/' + name;
+          return page.url('/user/' + name);
         },
 
         group: function(name) {
-          return page.base() + '/group/' + name;
+          return page.url('/group/' + name);
         },
 
         drive: function() {
-          return page.base() + '/drive';
+          return page.url('/drive');
         }
 
       },

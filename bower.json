@@ -11,7 +11,7 @@
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",
     "nuxeo-elements": "nuxeo/nuxeo-elements#master",
     "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#master",
-    "page": "visionmedia/page.js#~1.6.4",
+    "page": "nuxeo/page.js#webui",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
     "polymer": "Polymer/polymer#^1.1.0",
