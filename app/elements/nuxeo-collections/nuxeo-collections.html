@@ -157,6 +157,17 @@ Contributors:
       color: var(--nuxeo-warn-text);
     }
 
+    .owner {
+      background-color: var(--nuxeo-tag-background);
+      color: var(--nuxeo-tag-text);
+      text-transform: capitalize;
+      border-radius: 2.5em;
+      padding: .2rem .4rem;
+      margin: 0 .3em .1em 0;
+      font-size: .8em;
+      line-height: initial;
+    }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -212,8 +223,8 @@ Contributors:
                           <span>[[_formatDate(collection.properties.dc:modified)]]</span>
                         </div>
                         <div class="layout center">
-                          <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]] </span>
-                          <a class="tag user" href$="[[urlFor('user', collection.properties.dc:creator)]]">[[collection.properties.dc:creator]]</a>
+                          <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]]</span>
+                          <span class="owner">[[collection.properties.dc:creator]]</span>
                         </div>
                       </div>
                     </div>
