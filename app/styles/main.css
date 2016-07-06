@@ -74,14 +74,6 @@ input {
   line-height: 1.4em;
   padding: 0.5em;
 }
-.emptyResult {
-  color: #c6c6c6;
-  display: block;
-  font-style: italic;
-  font-weight: normal;
-  padding: 1em 0.7em 2em;
-  text-align: center;
-}
 .tips {
   border: 1px solid #e6e9ef;
   border-radius: 3px;

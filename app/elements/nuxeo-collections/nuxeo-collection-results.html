@@ -32,7 +32,10 @@ Contributors:
       <div class="paper-header layout horizontal">
         <span class="flex">[[headerLabel]]</span>
       </div>
-      <nuxeo-results id="results" name="collections"></nuxeo-results>
+      <nuxeo-results id="results" name="collections"
+        empty-label="[[i18n('ui.collections.noDocument', 'No result')]]"
+        empty-label-when-filtered="[[i18n('ui.collections.noDocumentWhenFiltered', 'No result')]]">
+      </nuxeo-results>
     </paper-header-panel>
 
   </template>
@@ -42,6 +45,8 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-collection-results',
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         set nxProvider(nxProvider) {
           this.$.results.nxProvider = nxProvider;

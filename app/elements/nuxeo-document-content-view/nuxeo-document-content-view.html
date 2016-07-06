@@ -116,6 +116,8 @@ Contributors:
     <div id="dropzone" class="content-view">
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
+          empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
+          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'No result')]]"
           selected-items="{{gridSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
@@ -133,6 +135,8 @@ Contributors:
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
           settings-enabled
+          empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
+          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'No result')]]"
           selected-items="{{tableSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">

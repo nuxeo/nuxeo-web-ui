@@ -104,6 +104,8 @@ Contributors:
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]"
           selected-items="{{gridSelectedItems}}"
+          empty-label="[[emptyLabel]]"
+          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
@@ -120,6 +122,8 @@ Contributors:
         <nuxeo-data-table id="datatable"
           nx-provider="[[nxProvider]]"
           settings-enabled
+          empty-label="[[emptyLabel]]"
+          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
           selected-items="{{tableSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
