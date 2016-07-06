@@ -137,17 +137,17 @@ Contributors:
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
-          <nuxeo-data-table-column name="[[i18n('ui.documentContentView.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.documentContentView.modified', 'Modified')]]"
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modified')]]"
             sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
             <template is="header">
                 <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('ui.documentContentView.modified', 'Modified')]]"
+                    placeholder="[[i18n('ui.datatable.header.modified', 'Modified')]]"
                     data="[[aggregations.dc_modified_agg]]"
                     value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
@@ -156,11 +156,11 @@ Contributors:
               [[_formatDate(item.properties.dc:modified)]]
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column  name="[[i18n('ui.documentContentView.lastContributor', 'Last Contributor')]]"
+          <nuxeo-data-table-column  name="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
             filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
             <template is="header">
                 <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('ui.documentContentView.lastContributor', 'Last Contributor')]]"
+                    placeholder="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
                     data="[[aggregations.dc_last_contributor_agg]]"
                     value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
@@ -171,11 +171,47 @@ Contributors:
               </a>
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Version">
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
+            <template>[[item.state]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
             <template>[[_displayVersion(item)]]</template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="State">
-            <template>[[item.state]]</template>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
+            sort-by="dc:created" flex="50" hidden>
+            <template>
+              [[_formatDate(item.properties.dc:created)]]
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Author')]]"
+            sort-by="dc:creator" hidden>
+            <template>
+              <a class="tag user" href="/user/[[item.properties.dc:creator]]">
+                [[item.properties.dc:creator]]
+              </a>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
+            <template>
+                <span class="tag vocabulary">[[item.properties.dc:nature]]</span>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
+            <template>
+                <span class="tag vocabulary">[[item.properties.dc:coverage]]</span>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+            <template>
+                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                  <span class="tag vocabulary">[[subject]]</span>
+                </template>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>
+            <template>
+                [[item.properties.dc:rights]]
+            </template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </div>

@@ -124,29 +124,67 @@ Contributors:
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
           </nuxeo-selection-toolbar>
-         <nuxeo-data-table-column name="[[i18n('ui.results.title', 'Title')]]" flex="100">
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header..title', 'Title')]]" flex="100">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
-         </nuxeo-data-table-column>
-         <nuxeo-data-table-column name="[[i18n('ui.results.modified', 'Modified')]]" flex="50">
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modified')]]" flex="50">
             <template>
               [[_formatDate(item.properties.dc:modified)]]
             </template>
-         </nuxeo-data-table-column>
-         <nuxeo-data-table-column name="[[i18n('ui.results.lastContributor', 'Last Contibutor')]]"
-          flex="50">
-          <template>
-            <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">[[item.properties.dc:lastContributor]]</a>
-          </template>
-         </nuxeo-data-table-column>
-         <nuxeo-data-table-column name="Version">
-            <template>[[_displayVersion(item)]]</template>
-         </nuxeo-data-table-column>
-         <nuxeo-data-table-column name="State">
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.lastContributor', 'Last Contibutor')]]"
+            flex="50">
+            <template>
+              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">
+                [[item.properties.dc:lastContributor]]
+              </a>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
             <template>[[item.state]]</template>
-         </nuxeo-data-table-column>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
+            <template>[[_displayVersion(item)]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
+            flex="50" hidden>
+            <template>
+              [[_formatDate(item.properties.dc:created)]]
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Author')]]"
+            hidden>
+            <template>
+              <a class="tag user" href="/user/[[item.properties.dc:creator]]">
+                [[item.properties.dc:creator]]
+              </a>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
+            <template>
+                <span class="tag vocabulary">[[item.properties.dc:nature]]</span>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
+            <template>
+                <span class="tag vocabulary">[[item.properties.dc:coverage]]</span>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+            <template>
+                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                  <span class="tag vocabulary">[[subject]]</span>
+                </template>
+            </template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>
+            <template>
+                [[item.properties.dc:rights]]
+            </template>
+          </nuxeo-data-table-column>
         </nuxeo-data-table>
       </div>
     </div>
