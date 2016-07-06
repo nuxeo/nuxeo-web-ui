@@ -71,16 +71,6 @@ Contributors:
       </paper-input>
     </div>
 
-    <div class="row layout vertical">
-      <label>[[i18n('ui.facetedSearch.tags', 'Tags')]]</label>
-      <nuxeo-select2 operation="Tag.Suggestion"
-                     min-chars="1"
-                     multiple="true"
-                     placeholder="[[i18n('ui.facetedSearch.tags.placeholder', 'Search for tags...')]]"
-                     value="{{params.ecm_tags}}">
-      </nuxeo-select2>
-    </div>
-
     <div class="layout vertical row">
       <label>[[i18n('ui.facetedSearch.creationDate', 'Creation date')]]</label>
       <nuxeo-checkbox-aggregation
