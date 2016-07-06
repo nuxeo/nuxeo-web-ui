@@ -107,12 +107,12 @@ Contributors:
             </template>
 
             <template is="dom-if" if="[[_canView(document)]]">
-              <nuxeo-document-page document="{{document}}"></nuxeo-document-page>
+              <nuxeo-document-page document="[[document]]"></nuxeo-document-page>
             </template>
           </section>
 
           <section name="edit">
-            <nuxeo-document-edit document="{{document}}"></nuxeo-document-edit>
+            <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
           </section>
 
           <section name="activity">

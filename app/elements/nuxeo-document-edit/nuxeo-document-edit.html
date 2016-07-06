@@ -68,8 +68,7 @@ Contributors:
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]"
                     data="{{document}}" response="{{document}}"
-                    headers="[[headers]]"
-                    enrichers="permissions, breadcrumb, preview, favorites, renditions">
+                    headers="[[headers]]">
     </nuxeo-document>
     <paper-card class="end-space">
       <form id="form" is="iron-form" action="/">
@@ -188,12 +187,15 @@ Contributors:
         },
 
         _save: function() {
-          var doc = this.$.doc;
-          doc.put();
-          page('/browse' + this.document.path + '@view');
+          this.$.doc.put().then(this._back.bind(this));
         },
 
         _cancel: function() {
+          this._back();
+        },
+
+        _back: function() {
+          this.fire('documentUpdated');
           page('/browse' + this.document.path + '@view');
         }
       });
