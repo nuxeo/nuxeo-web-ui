@@ -47,8 +47,15 @@ Contributors:
       }
 
       nuxeo-data-table ::content #container.nuxeo-data-table {
-        padding: 4.5em 3em 3em;
+        padding: 4.5em 3em 0;
         box-sizing: border-box;
+      }
+
+      nuxeo-data-table ::content #container iron-list#list::after {
+        background-color: var(--nuxeo-page-background);
+        content:'';
+        display: block;
+        height: 4em;
       }
 
       nuxeo-data-grid ::content #scrollThreshold.nuxeo-data-grid {
