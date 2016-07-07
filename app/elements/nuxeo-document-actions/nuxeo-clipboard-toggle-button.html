@@ -33,23 +33,21 @@ Contributors:
         display: inline-block;
       }
       ::content iron-icon {
-        fill: var(--icon-toggle-color, rgba(0,0,0,0));
-        stroke: var(--icon-toggle-outline-color, currentcolor);
+        color: var(--nuxeo-action-color);
       }
 
       ::content iron-icon:hover {
-        stroke: var(--nuxeo-link-hover-color);
+        color: var(--nuxeo-link-hover-color);
       }
 
       :host([in-clipboard]) ::content iron-icon {
-        stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
-        fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
     </style>
 
     <paper-icon-button noink
       id="clipboardBut"
-      icon="image:add-to-photos"
+      icon="icons:content-paste"
       active="[[inClipboard]]"
       on-tap="toggle"></paper-icon-button>
     <paper-tooltip for="clipboardBut">[[tootltip]]</paper-tooltip>
