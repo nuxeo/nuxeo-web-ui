@@ -40,17 +40,6 @@ Contributors:
       height: calc(100vh - 61px);
     }
 
-    .manualLoading {
-      color: var(--nuxeo-link-color);
-      text-align: center;
-    }
-
-    .manualLoading:hover {
-      cursor: pointer;
-      color: var(--nuxeo-link-hover-color);
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    }
-
     .filters {
       padding: 1em;
       height: calc(100vh - 61px);
@@ -125,6 +114,17 @@ Contributors:
     #renameDialog {
       width: 400px;
     }
+
+    :host[loading] .loadable {
+      opacity: 0.25;
+    }
+
+    :host[loading] paper-spinner-lite {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      --paper-spinner-color: var(--default-primary-color);
+    }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -165,7 +165,7 @@ Contributors:
 
     <div class="content">
 
-      <div id="filters" class="filters" hidden$="{{_isQueue}}">
+      <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
         <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}" search-term="{{searchTerm}}"></nuxeo-faceted-search>
         <div class="layout vertical row">
           <paper-button noink class="primary clear" raised on-click="_clear">
@@ -183,7 +183,11 @@ Contributors:
         <iron-scroll-threshold id="scrollTheshold"
           lower-threshold="800" hidden$="[[!hasResults]]"
           on-lower-threshold="_loadMoreData">
-          <iron-list id="itemsList" items="[[docItems]]" selected-item="{{selectedDocument}}" selection-enabled scroll-target="scrollTheshold">
+          <iron-list id="itemsList" items="[[docItems]]"
+            class="loadable"
+            selected-item="{{selectedDocument}}"
+            selection-enabled
+            scroll-target="scrollTheshold">
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box vertical layout">
@@ -204,21 +208,14 @@ Contributors:
               </div>
             </template>
           </iron-list>
-          <template is="dom-if" if="[[showMore]]">
-            <div class="item loading">
-              <div class="primary">
-                <paper-spinner class="nxicon" active="true"></paper-spinner>
-                [[i18n('ui.searchForm.loading', 'Loading more data')]]
-              </div>
-              <div class="secondary dim">[[item.type]]</div>
-            </div>
-          </template>
         </iron-scroll-threshold>
         <div hidden$="[[hasResults]]" class="noResult">
-          <span class="empty">[[i18n('ui.searchForm.noResults', 'No results found')]]</span>
+          <span class="empty">[[i18n('ui.searchForm.noResult', 'No result found')]]</span>
         </div>
       </div>
     </div>
+
+    <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
 
     <paper-dialog id="saveDialog" with-backdrop>
       <div class="vertical layout">
@@ -303,10 +300,6 @@ Contributors:
             type: Array,
             value: []
           },
-          showMore: {
-            type: Object,
-            value: false
-          },
           selectedDocument: {
             type: Object,
             observer: '_selectedDocChanged',
@@ -347,6 +340,12 @@ Contributors:
                 return result;
               };
             }
+          },
+          loading: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            value: false
           }
         },
 
@@ -366,8 +365,8 @@ Contributors:
           }.bind(this));
           this.$.itemsList.fire('iron-resize');
           this.hasResults = !(this.docItems && this.docItems.length === 0);
-          this.showMore = this.$.provider.isNextPageAvailable;
           this.$.scrollTheshold.clearTriggers();
+          this.loading = false;
         },
 
         _resetResults: function() {
@@ -377,8 +376,8 @@ Contributors:
           this.selectedDocument = null;
           this._isQueue = false;
           this.$.itemsList.fire('iron-resize');
-          this.showMore = false;
           this.$.scrollTheshold.clearTriggers();
+          this.loading = true;
         },
 
         displayQueue: function(doc, index) {
@@ -398,6 +397,7 @@ Contributors:
           if (this.$.provider) {
             if (this.$.provider.isNextPageAvailable) {
               this.$.provider.page = this.$.provider.page + 1;
+              this.loading = true;
             }
           }
         },

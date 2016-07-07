@@ -56,16 +56,6 @@ Contributors:
       background-color: var(--google-grey-300);
       border-bottom: 1px solid #ccc;
     }
-    .manualLoading {
-      color: var(--nuxeo-link-color);
-      text-align: center;
-    }
-
-    .manualLoading:hover {
-      cursor: pointer;
-      color: var(--nuxeo-link-hover-color);
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    }
 
     .collections {
       height: calc(100vh - 61px);
@@ -168,6 +158,17 @@ Contributors:
       line-height: initial;
     }
 
+    :host[loading] .loadable {
+      opacity: 0.25;
+    }
+
+    :host[loading] paper-spinner-lite {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      --paper-spinner-color: var(--default-primary-color);
+    }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -206,7 +207,7 @@ Contributors:
               on-lower-threshold="_loadMoreCollections">
               <iron-list id="collectionsList" items="[[collections]]"
                 selected-item="{{selectedCollection}}"
-                selection-enabled
+                selection-enabled class="loadable"
                 scroll-target="collectionsScrollThreshold" as="collection">
                 <template>
                   <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
@@ -231,17 +232,9 @@ Contributors:
                   </div>
                 </template>
               </iron-list>
-              <template is="dom-if" if="[[showMoreCollections]]">
-                <div class="list-item loading">
-                  <div class="primary">
-                    <paper-spinner class="nxicon" active="true"></paper-spinner>
-                    [[i18n('label.collections.loading', 'Loading more data')]]
-                  </div>
-                </div>
-              </template>
             </iron-scroll-threshold>
             <div hidden$="[[hasCollection]]">
-              <span class="empty">[[i18n('label.collections.empty', 'No collections.')]]</span>
+              <span class="empty">[[i18n('label.collections.empty', 'No collection')]]</span>
             </div>
           </div>
 
@@ -261,7 +254,12 @@ Contributors:
               class="scrollThreshold"
               lower-threshold="800" hidden$="[[!hasMember]]"
               on-lower-threshold="_loadMoreMembers">
-              <iron-list id="membersList" items="[[members]]" selected-item="{{selectedMember}}" selection-enabled scroll-target="membersScrollThreshold" as="member">
+              <iron-list id="membersList" items="[[members]]"
+                class="loadable"
+                selected-item="{{selectedMember}}"
+                selection-enabled
+                scroll-target="membersScrollThreshold"
+                as="member">
                 <template>
                   <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                     <div class="list-item-box vertical layout">
@@ -285,14 +283,6 @@ Contributors:
                   </div>
                 </template>
               </iron-list>
-              <template is="dom-if" if="[[showMoreMembers]]">
-                <div class="list-item loading">
-                  <div class="primary">
-                    <paper-spinner class="nxicon" active="true"></paper-spinner>
-                    [[i18n('label.collections.loading', 'Loading more data')]]
-                  </div>
-                </div>
-              </template>
             </iron-scroll-threshold>
             <div hidden$="[[hasMember]]">
               <span class="empty">[[i18n('label.collections.emptyCollection', 'Empty collection')]]</span>
@@ -301,7 +291,7 @@ Contributors:
 
         </neon-animatable>
       </neon-animated-pages>
-
+      <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
 
   </template>
   <script>
@@ -335,14 +325,6 @@ Contributors:
             type: Object,
             value: []
           },
-          showMoreCollections: {
-            type: Object,
-            value: false
-          },
-          showMoreMembers: {
-            type: Object,
-            value: false
-          },
           selectedCollection: {
             type: Object,
             observer: '_selectedCollectionChanged',
@@ -374,6 +356,12 @@ Contributors:
           _exitAnimation: {
             type: String,
             value: 'slide-left-animation'
+          },
+          loading: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            value: false
           }
         },
 
@@ -466,8 +454,8 @@ Contributors:
           }.bind(this));
           this.$.collectionsList.fire('iron-resize');
           this.hasCollection = !(this.collections && this.collections.length === 0);
-          this.showMoreCollections = this.$.collectionsProvider.isNextPageAvailable;
           this.$.collectionsScrollThreshold.clearTriggers();
+          this.loading = false;
         },
 
         _resetCollectionResults: function() {
@@ -477,8 +465,8 @@ Contributors:
           this.selectedCollection = null;
           this.displayCollections();
           this.$.collectionsList.fire('iron-resize');
-          this.showMoreCollections = false;
           this.$.collectionsScrollThreshold.clearTriggers();
+          this.loading = true;
         },
 
         _updateMemberResults: function() {
@@ -488,8 +476,8 @@ Contributors:
           }.bind(this));
           this.$.membersList.fire('iron-resize');
           this.hasMember = !(this.members && this.members.length === 0);
-          this.showMoreMembers = this.$.memberProvider.isNextPageAvailable;
           this.$.membersScrollThreshold.clearTriggers();
+          this.loading = false;
         },
 
         _resetMemberResults: function() {
@@ -499,9 +487,9 @@ Contributors:
           this.selectedMember = null;
           this.displayCollections();
           this.$.membersList.fire('iron-resize');
-          this.showMoreMembers = false;
           this.$.membersScrollThreshold.clearTriggers();
           this.fire('resetCollectionResults');
+          this.loading = true;
         },
 
         displayMembers: function(member, index) {
@@ -522,14 +510,17 @@ Contributors:
         _loadMoreCollections: function() {
           if (this.$.collectionsProvider) {
             if (this.$.collectionsProvider.isNextPageAvailable) {
+              this.loading = true;
               this.$.collectionsProvider.page = this.$.collectionsProvider.page + 1;
             }
           }
         },
 
         _loadMoreMembers: function() {
+          console.log('_loadMoreMembers');
           if (this.$.memberProvider) {
             if (this.$.memberProvider.isNextPageAvailable) {
+              this.loading = true;
               this.$.memberProvider.page = this.$.memberProvider.page + 1;
               this.$.memberProvider.fetch();
             }
