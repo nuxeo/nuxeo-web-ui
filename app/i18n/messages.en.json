@@ -61,6 +61,7 @@
   "label.widget.video.width": "Width",
   "label.documents.in": "In:",
   "ui.exportButton.tooltip": "Export",
+  "ui.downloadButton.tooltip": "Download",
   "command.cancel": "Cancel",
   "label.widget.video.frameRate": "Frame Rate",
   "label.document.routing.activity": "Activity",
