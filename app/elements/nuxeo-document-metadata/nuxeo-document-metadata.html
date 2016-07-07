@@ -1,0 +1,255 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+
+<!--
+`nuxeo-document-metadata`
+@group Nuxeo UI
+@element nuxeo-document-metadata
+-->
+
+<dom-module id="nuxeo-document-metadata">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+        color: var(--nuxeo-tag-text);
+        font-size: .9em;
+        width: 100%;
+      }
+
+      .row {
+        margin-bottom: 1em;
+        width: 100%;
+      }
+
+      input {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      label {
+        font-weight: normal;
+      }
+
+      .label-container {
+        position: relative;
+        width: 30%;
+        display: inline-block;
+      }
+
+      .user {
+        vertical-align: top;
+      }
+
+      paper-icon-button {
+        float: right;
+      }
+
+      #edit {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+      }
+
+    </style>
+
+    <template is="dom-if" if="[[_equals(mode, 'view')]]">
+      <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit"></paper-icon-button>
+    </template>
+
+    <iron-pages selected="[[mode]]" attr-for-selected="mode">
+      <section mode="view">
+        <div class="row layout horizontal" hidden$="[[!document.properties.dc:description]]">
+          <div class="label-container">
+            <label>[[i18n('label.description', 'Description')]]</label>
+          </div>
+          [[document.properties.dc:description]]
+        </div>
+
+        <div class="row layout horizontal" hidden$="[[!document.properties.dc:nature]]">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
+          </div>
+          [[document.properties.dc:nature]]
+        </div>
+
+        <div class="row layout horizontal" hidden$="[[!document.properties.dc:subjects.length]]">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
+          </div>
+          [[document.properties.dc:subjects]]
+        </div>
+
+        <div class="row layout horizontal" hidden$="[[!document.properties.dc:coverage]]">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
+          </div>
+          [[document.properties.dc:coverage]]
+        </div>
+
+        <div class="row layout horizontal" hidden$="[[!document.properties.dc:expired]]">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
+          </div>
+          [[document.properties.dc:expired]]
+        </div>
+      </section>
+
+      <section mode="edit">
+        <div class="row layout horizontal">
+          <div class="label-container">
+            <label>[[i18n('label.description', 'Description')]]</label>
+          </div>
+          <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+        </div>
+
+        <div class="row layout horizontal">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
+          </div>
+          <nuxeo-directory-suggestion class="flex"
+                                      directory-name="nature"
+                                      value="{{document.properties.dc:nature}}"
+                                      placeholder="Select a value"
+                                      min-chars="0">
+          </nuxeo-directory-suggestion>
+        </div>
+
+        <div class="row layout horizontal">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
+          </div>
+          <nuxeo-directory-suggestion id="subjects"
+                                      class="flex"
+                                      directory-name="l10nsubjects"
+                                      value="{{document.properties.dc:subjects}}"
+                                      multiple="true"
+                                      dbl10n="true"
+                                      placeholder="[[i18n('ui.dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
+                                      min-chars="0">
+          </nuxeo-directory-suggestion>
+        </div>
+
+        <div class="row layout horizontal">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
+          </div>
+          <nuxeo-help for="coverage" label="[[i18n('label.dublincore.coverage.info', 'This property is used by virtual navigation.')]]"></nuxeo-help>
+          <nuxeo-directory-suggestion id="coverage"
+                                      class="flex"
+                                      directory-name="l10ncoverage"
+                                      value="{{document.properties.dc:coverage}}"
+                                      dbl10n="true"
+                                      placeholder="Select a value"
+                                      min-chars="0">
+          </nuxeo-directory-suggestion>
+        </div>
+
+        <div class="row layout horizontal">
+          <div class="label-container">
+            <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
+          </div>
+          <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
+        </div>
+
+      </section>
+    </iron-pages>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.document.routing.added.on', 'Added on')]]</label>
+      </div>
+      [[_formatDate(document.properties.dc:created)]]
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.document.routing.added.by', 'By')]]</label>
+      </div>
+      <a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">[[document.properties.dc:creator]]</a>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
+      </div>
+      <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
+    </div>
+
+    <template is="dom-if" if="[[_equals(mode, 'edit')]]">
+      <paper-icon-button icon="icons:clear" on-tap="_refresh"></paper-icon-button>
+      <paper-icon-button icon="icons:done" on-tap="save"></paper-icon-button>
+    </template>
+
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-metadata',
+
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+        properties: {
+          document: {
+            type: Object,
+            observer: 'view'
+          },
+          mode: {
+            type: String,
+            value: 'view'
+          }
+        },
+
+        edit: function() {
+          this.mode = 'edit';
+        },
+
+        view: function() {
+          this.mode = 'view';
+        },
+
+        save: function() {
+          this.$.doc.put().then(this._refresh.bind(this));
+        },
+
+        _refresh: function() {
+          this.fire('documentUpdated');
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _equals: function(a, b) {
+          return a === b;
+        }
+      });
+    })();
+  </script>
+</dom-module>

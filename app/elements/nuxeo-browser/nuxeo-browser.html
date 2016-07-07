@@ -74,9 +74,6 @@ Contributors:
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
                 [[i18n('command.browser.view', 'View')]]</paper-icon-item>
-              <paper-icon-item name="edit">
-                <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
-                [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
               <paper-icon-item name="activity">
                 <iron-icon icon="icons:restore" item-icon></iron-icon>
                 [[i18n('command.browser.activity', 'Activity')]]</paper-icon-item>
@@ -109,10 +106,6 @@ Contributors:
             <template is="dom-if" if="[[_canView(document)]]">
               <nuxeo-document-page document="[[document]]"></nuxeo-document-page>
             </template>
-          </section>
-
-          <section name="edit">
-            <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
           </section>
 
           <section name="activity">
