@@ -176,7 +176,7 @@ Contributors:
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
-            <template>[[item.state]]</template>
+            <template><span class="capitalize">[[item.state]]</span></template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
             <template>[[_displayVersion(item)]]</template>
