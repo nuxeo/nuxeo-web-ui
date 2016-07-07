@@ -698,6 +698,9 @@ Contributors:
         _observeSelectedTab: function() {
           if (this.selectedTab === 'search') {
             this.page = this.selectedTab;
+          } else if (this.selectedTab === 'personalWorkspace') {
+            var tree = this.$.userWorkspace.$.tree;
+            tree.open.apply(tree, [this.$.userWorkspace.rootDocument.uid]);
           }
         },
 
