@@ -567,7 +567,7 @@ Contributors:
         },
 
         _showSaveAs: function() {
-          return (this.searchLoaded || (!this.searchLoaded && this.dirty)) && this._hasPermissions();
+          return this.searchLoaded || (!this.searchLoaded && this.dirty);
         },
 
         _showSave: function() {
