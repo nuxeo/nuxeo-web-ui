@@ -32,9 +32,9 @@ Contributors:
         display: block;
       }
 
-      .dates {
-        height: 40px;
-        padding: 1em;
+      paper-card.dates {
+        width: 100%;
+        margin-bottom: 1.5em;
       }
 
       .dates input {
@@ -46,14 +46,16 @@ Contributors:
         width: 125px;
       }
 
-      paper-card {
-        background-color: transparent;
-        float: left;
-        height: 450px;
-        margin-bottom: 20px;
+      .flex-layout {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -1em;
+      }
+
+      .flex-layout paper-card {
+        flex: 1 0 calc(33% - 2em);
+        margin: 0 1em 1.5em;
         text-align: center;
-        padding: 10px;
-        width: 33.3%;
       }
 
       iron-icon {
@@ -63,130 +65,125 @@ Contributors:
         margin-top: 50px;
       }
 
-      @media (max-width: 1440px) {
-        paper-card {
-          width: 50%;
-        }
-      }
-
       @media (max-width: 1024px) {
-        paper-card {
-          width: 100%;
+        .flex-layout paper-card {
+          flex: 1 0 calc(100% - 2em);
         }
       }
 
-      @media (max-width: 767px) {
-        paper-card {
-          width: 100%;
-        }
-      }
     </style>
 
-    <div class="dates horizontal flex end-justified layout">
-      <input type="date" value="{{startDate::change}}">
-      <input type="date" value="{{endDate::change}}">
+    <paper-card elevation="0" class="dates">
+      <div class="card-content horizontal flex end-justified layout">
+        <input type="date" value="{{startDate::change}}">
+        <input type="date" value="{{endDate::change}}">
+      </div>
+    </paper-card>
+
+    <div class="flex-layout">
+      <!-- Number of documents -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             metrics="cardinality(ecm:uuid)" data="{{totalCount}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Documents" elevation="0">
+        <div class="card-content">
+          <iron-icon icon="icons:description"></iron-icon>
+          <h1>[[totalCount]]</h1>
+        </div>
+      </paper-card>
+
+      <!-- Document count per type -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="ecm:primaryType"
+                             group-limit="10"
+                             data="{{typeCount}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Document Types" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(typeCount)]]"
+                     series="[[_series(typeCount)]]"
+                     colors="[[colors]]"
+                     options='{"responsive": true, "animation": false}'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Top 10 creators -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="dc:creator"
+                             group-limit="10"
+                             data="{{topCreators}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Top 10 creators" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(topCreators)]]"
+                     series="[[_series(topCreators)]]"
+                     colors="[[colors]]"
+                     options='{"responsive": true, "animation": false}'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Documents created per week -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             with-date-intervals="week"
+                             date-field="dc:created"
+                             data="{{docsCreatedPerWeek}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Document Created Per Week" elevation="0">
+        <div class="card-content">
+          <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
+                      values="[[_values(docsCreatedPerWeek)]]"
+                      options='{"responsive": true, "animation": false, "datasetFill": false}'>
+          </chart-line>
+        </div>
+      </paper-card>
+
+      <!-- Documents modified per week -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             with-date-intervals="week"
+                             date-field="dc:modified"
+                             data="{{docsModifiedPerWeek}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Documents Modified Per Week" elevation="0">
+        <div class="card-content">
+          <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
+                      values="[[_values(docsModifiedPerWeek)]]"
+                      options='{"responsive": true, "animation": false, "datasetFill": false}'>
+          </chart-line>
+        </div>
+      </paper-card>
+
+      <!-- Files by mime-type -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="file:content.mime-type"
+                             data="{{filesByMimeType}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="Files by Mime Type" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(filesByMimeType)]]"
+                     series="[[_types(filesByMimeType)]]"
+                     colors="[[colors]]"
+                     options='{"responsive": true, "animation": false}'>
+          </chart-pie>
+          <div></div>
+        </div>
+      </paper-card>
+
+      <!-- End of paper-cards -->
     </div>
-
-    <!-- Number of documents -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           metrics="cardinality(ecm:uuid)" data="{{totalCount}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Documents" elevation="0">
-      <div class="card-content">
-        <iron-icon icon="icons:description"></iron-icon>
-        <h1>[[totalCount]]</h1>
-      </div>
-    </paper-card>
-
-    <!-- Document count per type -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           grouped-by="ecm:primaryType"
-                           group-limit="10"
-                           data="{{typeCount}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Document Types" elevation="0">
-      <div class="card-content">
-        <chart-pie values="[[_values(typeCount)]]"
-                   series="[[_series(typeCount)]]"
-                   colors="[[colors]]"
-                   options='{"responsive": true, "animation": false}'>
-        </chart-pie>
-      </div>
-    </paper-card>
-
-    <!-- Top 10 creators -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           grouped-by="dc:creator"
-                           group-limit="10"
-                           data="{{topCreators}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Top 10 creators" elevation="0">
-      <div class="card-content">
-        <chart-pie values="[[_values(topCreators)]]"
-                   series="[[_series(topCreators)]]"
-                   colors="[[colors]]"
-                   options='{"responsive": true, "animation": false}'>
-        </chart-pie>
-      </div>
-    </paper-card>
-
-    <!-- Documents created per week -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           with-date-intervals="week"
-                           date-field="dc:created"
-                           data="{{docsCreatedPerWeek}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Document Created Per Week" elevation="0">
-      <div class="card-content">
-        <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
-                    values="[[_values(docsCreatedPerWeek)]]"
-                    options='{"responsive": true, "animation": false, "datasetFill": false}'>
-        </chart-line>
-      </div>
-    </paper-card>
-
-    <!-- Documents modified per week -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           with-date-intervals="week"
-                           date-field="dc:modified"
-                           data="{{docsModifiedPerWeek}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Documents Modified Per Week" elevation="0">
-      <div class="card-content">
-        <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
-                    values="[[_values(docsModifiedPerWeek)]]"
-                    options='{"responsive": true, "animation": false, "datasetFill": false}'>
-        </chart-line>
-      </div>
-    </paper-card>
-
-    <!-- Files by mime-type -->
-    <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
-                           grouped-by="file:content.mime-type"
-                           data="{{filesByMimeType}}"
-                           index="[[index]]">
-    </nuxeo-repository-data>
-
-    <paper-card heading="Files by Mime Type" elevation="0">
-      <div class="card-content">
-        <chart-pie values="[[_values(filesByMimeType)]]"
-                   series="[[_types(filesByMimeType)]]"
-                   colors="[[colors]]"
-                   options='{"responsive": true, "animation": false}'>
-        </chart-pie>
-        <div></div>
-      </div>
-    </paper-card>
 
   </template>
   <script>

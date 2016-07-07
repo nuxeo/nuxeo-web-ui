@@ -31,9 +31,9 @@ Contributors:
         display: block;
       }
 
-      .dates {
-        height: 40px;
-        padding: 1em;
+      paper-card.dates {
+        width: 100%;
+        margin-bottom: 1.5em;
       }
 
       .dates input {
@@ -45,169 +45,166 @@ Contributors:
         width: 125px;
       }
 
+      .flex-layout {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -1em;
+      }
+
+      .flex-layout paper-card {
+        flex: 1 0 calc(33% - 2em);
+        margin: 0 1em 1.5em;
+        text-align: center;
+      }
+
       nuxeo-data-table {
         height: 450px;
       }
 
-      paper-card {
-        background-color: transparent;
-        float: left;
-        height: 450px;
-        margin-bottom: 20px;
-        text-align: center;
-        padding: 10px;
-        width: 33.3%;
-      }
-
-      @media (max-width: 1440px) {
-        paper-card {
-          width: 50%;
-        }
-      }
-
       @media (max-width: 1024px) {
-        paper-card {
-          width: 100%;
+        .flex-layout paper-card {
+          flex: 1 0 calc(100% - 2em);
         }
       }
 
-      @media (max-width: 767px) {
-        paper-card {
-          width: 100%;
-        }
-      }
     </style>
 
-    <div class="dates horizontal flex end-justified layout">
-      <input type="date" value="{{startDate::change}}">
-      <input type="date" value="{{endDate::change}}">
+    <paper-card elevation="0" class="dates">
+      <div class="card-content horizontal flex end-justified layout">
+        <input type="date" value="{{startDate::change}}">
+        <input type="date" value="{{endDate::change}}">
+      </div>
+    </paper-card>
+
+    <div class="flex-layout">
+      <!-- Number of calls per PageProvider -->
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                         grouped-by="pageProviderName"
+                         data="{{callsPerProvider}}"
+                         index="[[index]]">
+      </nuxeo-search-data>
+
+      <paper-card heading="Calls per PageProvider" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(callsPerProvider)]]"
+                     series="[[_series(callsPerProvider)]]"
+                     colors="[[colors]]"
+                     options='{"responsive": true, "animation": false}'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Number of calls per hour -->
+     <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                        with-date-intervals="hour"
+                        without-extended-bounds
+                        date-format="HH"
+                        data="{{callsPerHour}}"
+                        index="[[index]]">
+     </nuxeo-search-data>
+
+     <paper-card heading="Calls per hour" elevation="0">
+       <div class="card-content">
+         <chart-bar labels="[[_range(0,23)]]"
+                    values="[[_aggregatePerHourOfDay(callsPerHour)]]"
+                    options='{"responsive": true, "animation": false}'>
+         </chart-bar>
+       </div>
+     </paper-card>
+
+     <!-- Result ranges -->
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                         with-ranges='{"resultsCount":[
+                       {"key": "no result", "to": 1 },
+                       {"key": "less than 50", "from" : 1, "to": 50},
+                       {"key": "between 51 and 200", "from" : 51, "to": 200 },
+                       {"key": "between 200 and 1000", "from" : 201, "to": 1000},
+                       {"key": "more than 1000", "from" : 1001 }]}'
+                         data="{{callPerNumberOfResults}}"
+                         index="[[index]]">
+      </nuxeo-search-data>
+
+      <paper-card heading="Number of results" elevation="0">
+        <div class="card-content">
+          <nuxeo-data-table items="[[callPerNumberOfResults]]">
+            <nuxeo-data-table-column name="Range">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="Number of calls">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
+      </paper-card>
+
+      <!-- Most used expressions for full text search  -->
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                         grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext"
+                         group-limit="5"
+                         data="{{callsPerFT}}"
+                         index="[[index]]">
+      </nuxeo-search-data>
+
+      <paper-card heading="Most Popular Searches" elevation="0">
+        <div class="card-content">
+          <nuxeo-data-table items="[[callsPerFT]]">
+            <nuxeo-data-table-column name="Search term">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="Number of calls">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
+      </paper-card>
+
+      <!-- Searches by number of pages displayed -->
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                         with-ranges='{"pageIndex":[
+                           {"key": "First page", "from" : 0, "to": 1 },
+                           {"key": "Page 2", "from" : 1, "to": 2},
+                           {"key": "Pages 3 to 5", "from" : 2, "to": 5 },
+                           {"key": "Pages 6 to 10", "from" : 6, "to": 10},
+                           {"key": "After 10 pages", "from" : 10 }]}'
+                         data="{{callPerNumberOfPages}}"
+                         index="[[index]]">
+      </nuxeo-search-data>
+
+      <paper-card heading="Number of pages displayed" elevation="0">
+        <div class="card-content">
+          <nuxeo-data-table items="[[callPerNumberOfPages]]">
+            <nuxeo-data-table-column name="Range">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="Number of calls">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
+      </paper-card>
+
+      <!-- Searches by filters used -->
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                         grouped-by="searchFields"
+                         group-limit="5"
+                         data="{{callByFilters}}">
+      </nuxeo-search-data>
+
+      <paper-card heading="Filters used" elevation="0">
+        <div class="card-content">
+          <nuxeo-data-table items="[[callByFilters]]">
+            <nuxeo-data-table-column name="Filters used">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="Number of calls">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
+      </paper-card>
+
+      <!-- End of paper-cards -->
     </div>
-
-    <!-- Number of calls per PageProvider -->
-    <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                       grouped-by="pageProviderName"
-                       data="{{callsPerProvider}}"
-                       index="[[index]]">
-    </nuxeo-search-data>
-
-    <paper-card heading="Calls per PageProvider" elevation="0">
-      <div class="card-content">
-        <chart-pie values="[[_values(callsPerProvider)]]"
-                   series="[[_series(callsPerProvider)]]"
-                   colors="[[colors]]"
-                   options='{"responsive": true, "animation": false}'>
-        </chart-pie>
-      </div>
-    </paper-card>
-
-    <!-- Number of calls per hour -->
-   <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                      with-date-intervals="hour"
-                      without-extended-bounds
-                      date-format="HH"
-                      data="{{callsPerHour}}"
-                      index="[[index]]">
-   </nuxeo-search-data>
-
-   <paper-card heading="Calls per hour" elevation="0">
-     <div class="card-content">
-       <chart-bar labels="[[_range(0,23)]]"
-                  values="[[_aggregatePerHourOfDay(callsPerHour)]]"
-                  options='{"responsive": true, "animation": false}'>
-       </chart-bar>
-     </div>
-   </paper-card>
-
-   <!-- Result ranges -->
-    <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                       with-ranges='{"resultsCount":[
-                     {"key": "no result", "to": 1 },
-                     {"key": "less than 50", "from" : 1, "to": 50},
-                     {"key": "between 51 and 200", "from" : 51, "to": 200 },
-                     {"key": "between 200 and 1000", "from" : 201, "to": 1000},
-                     {"key": "more than 1000", "from" : 1001 }]}'
-                       data="{{callPerNumberOfResults}}"
-                       index="[[index]]">
-    </nuxeo-search-data>
-
-    <paper-card heading="Number of results" elevation="0">
-      <div class="card-content">
-        <nuxeo-data-table items="[[callPerNumberOfResults]]">
-          <nuxeo-data-table-column name="Range">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Number of calls">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </div>
-    </paper-card>
-
-    <!-- Most used expressions for full text search  -->
-    <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                       grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext"
-                       group-limit="5"
-                       data="{{callsPerFT}}"
-                       index="[[index]]">
-    </nuxeo-search-data>
-
-    <paper-card heading="Most Popular Searches" elevation="0">
-      <div class="card-content">
-        <nuxeo-data-table items="[[callsPerFT]]">
-          <nuxeo-data-table-column name="Search term">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Number of calls">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </div>
-    </paper-card>
-
-    <!-- Searches by number of pages displayed -->
-    <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                       with-ranges='{"pageIndex":[
-                         {"key": "First page", "from" : 0, "to": 1 },
-                         {"key": "Page 2", "from" : 1, "to": 2},
-                         {"key": "Pages 3 to 5", "from" : 2, "to": 5 },
-                         {"key": "Pages 6 to 10", "from" : 6, "to": 10},
-                         {"key": "After 10 pages", "from" : 10 }]}'
-                       data="{{callPerNumberOfPages}}"
-                       index="[[index]]">
-    </nuxeo-search-data>
-
-    <paper-card heading="Number of pages displayed" elevation="0">
-      <div class="card-content">
-        <nuxeo-data-table items="[[callPerNumberOfPages]]">
-          <nuxeo-data-table-column name="Range">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Number of calls">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </div>
-    </paper-card>
-
-    <!-- Searches by filters used -->
-    <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
-                       grouped-by="searchFields"
-                       group-limit="5"
-                       data="{{callByFilters}}">
-    </nuxeo-search-data>
-
-    <paper-card heading="Filters used" elevation="0">
-      <div class="card-content">
-        <nuxeo-data-table items="[[callByFilters]]">
-          <nuxeo-data-table-column name="Filters used">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Number of calls">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </div>
-    </paper-card>
   </template>
 
   </template>
@@ -265,7 +262,7 @@ Contributors:
             agg[i].forEach(function(v) { sum += v; });
             return sum;
           })];
-        }        
+        }
       });
     })();
   </script>

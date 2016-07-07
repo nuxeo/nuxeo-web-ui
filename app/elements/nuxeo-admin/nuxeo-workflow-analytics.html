@@ -31,9 +31,9 @@ Contributors:
         display: block;
       }
 
-      .dates {
-        height: 40px;
-        padding: 1em;
+      paper-card.dates {
+        width: 100%;
+        margin-bottom: 1.5em;
       }
 
       .dates input {
@@ -50,18 +50,20 @@ Contributors:
         width: 225px;
       }
 
-      paper-card {
-        background-color: transparent;
-        float: left;
-        height: 450px;
-        margin-bottom: 20px;
-        text-align: center;
-        padding: 10px;
-        width: 33.3%;
-      }
-
       nuxeo-data-table {
         height: 450px;
+      }
+
+      .flex-layout {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -1em;
+      }
+
+      .flex-layout paper-card {
+        flex: 1 0 calc(33% - 2em);
+        margin: 0 1em 1.5em;
+        text-align: center;
       }
 
       iron-icon {
@@ -71,107 +73,103 @@ Contributors:
         margin-top: 50px;
       }
 
-      @media (max-width: 1440px) {
-        paper-card {
-          width: 50%;
-        }
-      }
-
       @media (max-width: 1024px) {
-        paper-card {
-          width: 100%;
+        .flex-layout paper-card {
+          flex: 1 0 calc(100% - 2em);
         }
       }
 
-      @media (max-width: 767px) {
-        paper-card {
-          width: 100%;
-        }
-      }
+
     </style>
 
-    <div class="dates horizontal flex end-justified layout">
-      <paper-dropdown-menu no-label-float>
-        <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
-          <paper-item key="ParallelDocumentReview">Parallel Document Review</paper-item>
-          <paper-item key="SerialDocumentReview">Serial Document Review</paper-item>
-        </paper-menu>
-      </paper-dropdown-menu>
-      <input type="date" value="{{startDate::change}}">
-      <input type="date" value="{{endDate::change}}">
+    <paper-card elevation="0" class="dates">
+      <div class="card-content horizontal flex end-justified layout">
+        <paper-dropdown-menu no-label-float>
+          <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
+            <paper-item key="ParallelDocumentReview">Parallel Document Review</paper-item>
+            <paper-item key="SerialDocumentReview">Serial Document Review</paper-item>
+          </paper-menu>
+        </paper-dropdown-menu>
+        <input type="date" value="{{startDate::change}}">
+        <input type="date" value="{{endDate::change}}">
+      </div>
+    </paper-card>
+
+    <div class="flex-layout">
+      <!-- Average wf duration -->
+      <nuxeo-workflow-data workflow="[[workflow]]"
+                           event="afterWorkflowFinish"
+                           metrics="avg(timeSinceWfStarted)"
+                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           data="{{avgWorkflowLength}}">
+      </nuxeo-workflow-data>
+
+      <paper-card heading="Average Workflow Duration" elevation="0">
+        <div class="card-content">
+          <iron-icon icon="image:timer"></iron-icon>
+          <h1>[[_asDuration(avgWorkflowLength)]]</h1>
+        </div>
+      </paper-card>
+
+      <!-- Wf initiators -->
+      <nuxeo-workflow-data workflow="[[workflow]]"
+                           event="afterWorkflowStarted"
+                           grouped-by="workflowInitiator"
+                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           data="{{initiators}}">
+      </nuxeo-workflow-data>
+
+      <paper-card heading="Workflow Initiators" elevation="0">
+        <div class="card-content">
+          <chart-pie values=[[_values(initiators)]]
+                     series=[[_series(initiators)]]
+                     options='{"responsive": true}'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Actions per user -->
+      <nuxeo-workflow-data workflow="[[workflow]]"
+                           event="afterWorkflowTaskEnded"
+                           grouped-by="taskActor, action"
+                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           data="{{numberOfActionsPerUser}}">
+      </nuxeo-workflow-data>
+
+      <paper-card heading="Actions Per User" elevation="0">
+        <div class="card-content">
+          <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
+                     series=[[_series(numberOfActionsPerUser)]]
+                     values=[[_values(numberOfActionsPerUser)]]
+                     options='{"responsive": true}'>
+          </chart-bar>
+        </div>
+      </paper-card>
+
+      <!-- Average task duration per user -->
+      <nuxeo-workflow-data workflow="[[workflow]]"
+                           event="afterWorkflowTaskEnded"
+                           grouped-by="taskActor"
+                           metrics="avg(timeSinceTaskStarted)"
+                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           data="{{avgTaskDurationPerUser}}">
+      </nuxeo-workflow-data>
+
+      <paper-card heading="Average Task Duration Per User" elevation="0">
+        <div class="card-content">
+          <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
+            <nuxeo-data-table-column name="User">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="Average duration">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
+      </paper-card>
+
+      <!-- End of paper-cards -->
     </div>
-
-    <!-- Average wf duration -->
-    <nuxeo-workflow-data workflow="[[workflow]]"
-                         event="afterWorkflowFinish"
-                         metrics="avg(timeSinceWfStarted)"
-                         start-date="[[startDate]]" end-date="[[endDate]]"
-                         data="{{avgWorkflowLength}}">
-    </nuxeo-workflow-data>
-
-    <paper-card heading="Average Workflow Duration" elevation="0">
-      <div class="card-content">
-        <iron-icon icon="image:timer"></iron-icon>
-        <h1>[[_asDuration(avgWorkflowLength)]]</h1>
-      </div>
-    </paper-card>
-
-    <!-- Wf initiators -->
-    <nuxeo-workflow-data workflow="[[workflow]]"
-                         event="afterWorkflowStarted"
-                         grouped-by="workflowInitiator"
-                         start-date="[[startDate]]" end-date="[[endDate]]"
-                         data="{{initiators}}">
-    </nuxeo-workflow-data>
-
-    <paper-card heading="Workflow Initiators" elevation="0">
-      <div class="card-content">
-        <chart-pie values=[[_values(initiators)]]
-                   series=[[_series(initiators)]]
-                   options='{"responsive": true}'>
-        </chart-pie>
-      </div>
-    </paper-card>
-
-    <!-- Actions per user -->
-    <nuxeo-workflow-data workflow="[[workflow]]"
-                         event="afterWorkflowTaskEnded"
-                         grouped-by="taskActor, action"
-                         start-date="[[startDate]]" end-date="[[endDate]]"
-                         data="{{numberOfActionsPerUser}}">
-    </nuxeo-workflow-data>
-
-    <paper-card heading="Actions Per User" elevation="0">
-      <div class="card-content">
-        <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
-                   series=[[_series(numberOfActionsPerUser)]]
-                   values=[[_values(numberOfActionsPerUser)]]
-                   options='{"responsive": true}'>
-        </chart-bar>
-      </div>
-    </paper-card>
-
-    <!-- Average task duration per user -->
-    <nuxeo-workflow-data workflow="[[workflow]]"
-                         event="afterWorkflowTaskEnded"
-                         grouped-by="taskActor"
-                         metrics="avg(timeSinceTaskStarted)"
-                         start-date="[[startDate]]" end-date="[[endDate]]"
-                         data="{{avgTaskDurationPerUser}}">
-    </nuxeo-workflow-data>
-
-    <paper-card heading="Average Task Duration Per User" elevation="0">
-      <div class="card-content">
-        <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
-          <nuxeo-data-table-column name="User">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="Average duration">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </div>
-    </paper-card>
 
   </template>
   <script>

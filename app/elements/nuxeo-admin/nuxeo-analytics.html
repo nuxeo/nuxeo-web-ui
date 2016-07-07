@@ -65,26 +65,28 @@ Contributors:
         </paper-dropdown-menu>
       </div>
       <div class="content">
-        <paper-card class="card">
-          <template is="dom-if" if="[[_equals(selectedTab, 'document-distribution')]]">
-            <span class="title">Default Domain</span>
-            <nuxeo-document-distribution-chart index="_all"
-                                               path="/" mode="count" max-depth="10"
-                                               chart-hue="blue" chart-lumonisity="light"
-                                               include-version include-hidden
-                                               include-deleted>
-            </nuxeo-document-distribution-chart>
-          </template>
-          <template is="dom-if" if="[[_equals(selectedTab, 'repository')]]">
-            <nuxeo-repository-analytics></nuxeo-repository-analytics>
-          </template>
-          <template is="dom-if" if="[[_equals(selectedTab, 'search')]]">
-            <nuxeo-search-analytics></nuxeo-search-analytics>
-          </template>
-          <template is="dom-if" if="[[_equals(selectedTab, 'workflow')]]">
-            <nuxeo-workflow-analytics></nuxeo-workflow-analytics>
-          </template>
-        </paper-card>
+        <template is="dom-if" if="[[_equals(selectedTab, 'document-distribution')]]">
+          <paper-card elevation="0" class="block">
+            <div class="card-content">
+              <span class="title">Default Domain</span>
+              <nuxeo-document-distribution-chart index="_all"
+                                                 path="/" mode="count" max-depth="10"
+                                                 chart-hue="blue" chart-lumonisity="light"
+                                                 include-version include-hidden
+                                                 include-deleted>
+              </nuxeo-document-distribution-chart>
+            </div>
+          </paper-card>
+        </template>
+        <template is="dom-if" if="[[_equals(selectedTab, 'repository')]]">
+          <nuxeo-repository-analytics></nuxeo-repository-analytics>
+        </template>
+        <template is="dom-if" if="[[_equals(selectedTab, 'search')]]">
+          <nuxeo-search-analytics></nuxeo-search-analytics>
+        </template>
+        <template is="dom-if" if="[[_equals(selectedTab, 'workflow')]]">
+          <nuxeo-workflow-analytics></nuxeo-workflow-analytics>
+        </template>
       </div>
     </paper-header-panel>
 
