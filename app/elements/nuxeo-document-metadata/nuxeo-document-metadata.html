@@ -27,44 +27,6 @@ Contributors:
     <style is="custom-style" include="shared-styles">
       :host {
         display: block;
-        color: var(--nuxeo-tag-text);
-        font-size: .9em;
-        width: 100%;
-      }
-
-      .row {
-        margin-bottom: 1em;
-        width: 100%;
-      }
-
-      input {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
-      label {
-        font-weight: normal;
-      }
-
-      .label-container {
-        position: relative;
-        width: 30%;
-        display: inline-block;
-      }
-
-      .user {
-        vertical-align: top;
-      }
-
-      paper-icon-button {
-        float: right;
       }
 
       #edit {
@@ -75,135 +37,20 @@ Contributors:
 
     </style>
 
-    <template is="dom-if" if="[[_equals(mode, 'view')]]">
-      <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit"></paper-icon-button>
-    </template>
-
     <iron-pages selected="[[mode]]" attr-for-selected="mode">
       <section mode="view">
-        <div class="row layout horizontal" hidden$="[[!document.properties.dc:description]]">
-          <div class="label-container">
-            <label>[[i18n('label.description', 'Description')]]</label>
-          </div>
-          [[document.properties.dc:description]]
-        </div>
-
-        <div class="row layout horizontal" hidden$="[[!document.properties.dc:nature]]">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
-          </div>
-          [[document.properties.dc:nature]]
-        </div>
-
-        <div class="row layout horizontal" hidden$="[[!document.properties.dc:subjects.length]]">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
-          </div>
-          [[document.properties.dc:subjects]]
-        </div>
-
-        <div class="row layout horizontal" hidden$="[[!document.properties.dc:coverage]]">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
-          </div>
-          [[document.properties.dc:coverage]]
-        </div>
-
-        <div class="row layout horizontal" hidden$="[[!document.properties.dc:expired]]">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
-          </div>
-          [[document.properties.dc:expired]]
+        <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit"></paper-icon-button>
+        <div id="metadata-view">
+          <!-- Dynamic layout element will be inserted here -->
+          <!-- <nuxeo-{{this.document.type}}-metadata document="{{document}}"> -->
         </div>
       </section>
 
       <section mode="edit">
-        <div class="row layout horizontal">
-          <div class="label-container">
-            <label>[[i18n('label.description', 'Description')]]</label>
-          </div>
-          <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
-        </div>
-
-        <div class="row layout horizontal">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
-          </div>
-          <nuxeo-directory-suggestion class="flex"
-                                      directory-name="nature"
-                                      value="{{document.properties.dc:nature}}"
-                                      placeholder="Select a value"
-                                      min-chars="0">
-          </nuxeo-directory-suggestion>
-        </div>
-
-        <div class="row layout horizontal">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
-          </div>
-          <nuxeo-directory-suggestion id="subjects"
-                                      class="flex"
-                                      directory-name="l10nsubjects"
-                                      value="{{document.properties.dc:subjects}}"
-                                      multiple="true"
-                                      dbl10n="true"
-                                      placeholder="[[i18n('ui.dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
-                                      min-chars="0">
-          </nuxeo-directory-suggestion>
-        </div>
-
-        <div class="row layout horizontal">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
-          </div>
-          <nuxeo-help for="coverage" label="[[i18n('label.dublincore.coverage.info', 'This property is used by virtual navigation.')]]"></nuxeo-help>
-          <nuxeo-directory-suggestion id="coverage"
-                                      class="flex"
-                                      directory-name="l10ncoverage"
-                                      value="{{document.properties.dc:coverage}}"
-                                      dbl10n="true"
-                                      placeholder="Select a value"
-                                      min-chars="0">
-          </nuxeo-directory-suggestion>
-        </div>
-
-        <div class="row layout horizontal">
-          <div class="label-container">
-            <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
-          </div>
-          <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
-        </div>
-
+        <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
       </section>
     </iron-pages>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.document.routing.added.on', 'Added on')]]</label>
-      </div>
-      [[_formatDate(document.properties.dc:created)]]
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.document.routing.added.by', 'By')]]</label>
-      </div>
-      <a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">[[document.properties.dc:creator]]</a>
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
-      </div>
-      <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
-    </div>
-
-    <template is="dom-if" if="[[_equals(mode, 'edit')]]">
-      <paper-icon-button icon="icons:clear" on-tap="_refresh"></paper-icon-button>
-      <paper-icon-button icon="icons:done" on-tap="save"></paper-icon-button>
-    </template>
-
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}"></nuxeo-document>
   </template>
 
   <script>
@@ -213,12 +60,10 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-metadata',
 
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
         properties: {
           document: {
             type: Object,
-            observer: 'view'
+            observer: '_documentChanged'
           },
           mode: {
             type: String,
@@ -234,20 +79,60 @@ Contributors:
           this.mode = 'view';
         },
 
-        save: function() {
-          this.$.doc.put().then(this._refresh.bind(this));
+        _documentChanged: function() {
+          if (this.document) {
+            this.mode = 'view';
+            this._updateLayout();
+          }
         },
 
-        _refresh: function() {
-          this.fire('documentUpdated');
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(document) {
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'metadata'].join('-');
         },
 
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
         },
 
-        _equals: function(a, b) {
-          return a === b;
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.document),
+            el = document.createElement(layout),
+            parent = this.$['metadata-view'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current document
+         */
+        _updateLayout: function() {
+          var layout = this._layoutFor(this.document);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                console.error('Failed to find metadata layout for ' + this.document.type);
+              });
+          } else {
+            this._createLayout();
+          }
         }
       });
     })();

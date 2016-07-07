@@ -34,14 +34,6 @@ Contributors:
         margin: auto;
       }
 
-      .card-content {
-        padding: 2em;
-      }
-
-      .card-actions {
-        padding: 1em 2em;
-      }
-
       .label-container {
         position: relative;
         width: 200px;
@@ -64,34 +56,34 @@ Contributors:
         box-sizing: inherit;
       }
 
+      paper-icon-button {
+        float: right;
+      }
+
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]"
                     data="{{document}}" response="{{document}}"
                     headers="[[headers]]">
     </nuxeo-document>
-    <paper-card class="end-space">
-      <form id="form" is="iron-form" action="/">
-        <div class="card-content">
-          <div id="document-edit">
-            <!-- Dynamic layout element will be inserted here -->
-            <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
-          </div>
-          <div class="row layout horizontal">
-            <div class="label-container">
-              <label>[[i18n('label.editComment', 'Change comment')]]</label>
-            </div>
-            <nuxeo-help for="comment" label="[[i18n('label.editComment.tooltip', 'This comment will be visible in the logs displayed in the \"History\" tab.')]]"></nuxeo-help>
-            <textarea id="comment" class="flex"></textarea>
-          </div>
-          <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
+
+    <form id="form" is="iron-form" action="/">
+      <div id="document-edit">
+        <!-- Dynamic layout element will be inserted here -->
+        <!-- <nuxeo-{{this.document.type}}-edit document="{{document}}"> -->
+      </div>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>[[i18n('label.editComment', 'Change comment')]]</label>
         </div>
-        <div class="card-actions">
-          <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-          <paper-button noink class="primary" on-click="_save">[[i18n('command.submit', 'Submit')]]</paper-button>
-        </div>
-      </form>
-    </paper-card>
+        <textarea id="comment" class="flex"></textarea>
+      </div>
+      <nuxeo-versioning-edit document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit>
+      <div class="card-actions">
+        <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button noink class="primary" on-click="_save">[[i18n('command.save', 'Save')]]</paper-button>
+      </div>
+    </form>
 
   </template>
   <script>
@@ -187,16 +179,15 @@ Contributors:
         },
 
         _save: function() {
-          this.$.doc.put().then(this._back.bind(this));
+          this.$.doc.put().then(this._refresh.bind(this));
         },
 
         _cancel: function() {
-          this._back();
+          this._refresh();
         },
 
-        _back: function() {
+        _refresh: function() {
           this.fire('documentUpdated');
-          page('/browse' + this.document.path + '@view');
         }
       });
     })();

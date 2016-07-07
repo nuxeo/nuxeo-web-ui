@@ -39,7 +39,6 @@ Contributors:
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
         box-sizing: border-box;
         display: inline-block;
-        font-size: 1em;
         margin-bottom: 0.5em;
         padding: 0.5em;
       }
@@ -72,7 +71,6 @@ Contributors:
       <div class="label-container">
         <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
       </div>
-      <nuxeo-help for="subjects" label="[[i18n('label.dublincore.subjects.info', 'This property is used by virtual navigation.')]]"></nuxeo-help>
       <nuxeo-directory-suggestion id="subjects"
                                   class="flex"
                                   directory-name="l10nsubjects"
@@ -86,23 +84,8 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.dublincore.rights', 'Rights')]]</label>
-      </div>
-      <input is="iron-input" value="{{document.properties.dc:rights::change}}" class="flex">
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.source', 'Source')]]</label>
-      </div>
-      <input is="iron-input" value="{{document.properties.dc:source::change}}" class="flex">
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
         <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
       </div>
-      <nuxeo-help for="coverage" label="[[i18n('label.dublincore.coverage.info', 'This property is used by virtual navigation.')]]"></nuxeo-help>
       <nuxeo-directory-suggestion id="coverage"
                                   class="flex"
                                   directory-name="l10ncoverage"
@@ -113,76 +96,12 @@ Contributors:
       </nuxeo-directory-suggestion>
     </div>
 
-    <template is="dom-if" if="[[!new]]">
-
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.dublincore.created', 'Created at')]]</label>
-        </div>
-        <span class="flex">[[format(document.properties.dc:created)]]</span>
-      </div>
-
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.dublincore.modified', 'Last Modified at')]]</label>
-        </div>
-        <span class="flex">[[format(document.properties.dc:modified)]]</span>
-      </div>
-
-    </template>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.format', 'Format')]]</label>
-      </div>
-      <input is="iron-input" value="{{document.properties.dc:format::change}}" class="flex">
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.language', 'Language')]]</label>
-      </div>
-      <input is="iron-input" value="{{document.properties.dc:language::change}}" class="flex">
-    </div>
-
     <div class="row layout horizontal">
       <div class="label-container">
         <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
       </div>
       <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
     </div>
-
-    <template is="dom-if" if="[[!new]]">
-
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.dublincore.creator', 'Author')]]</label>
-        </div>
-        <nuxeo-help for="author" label="[[i18n('label.dublincore.author.info','The author is filled automatically when creating the document.')]]"></nuxeo-help>
-        <span id="author" class="flex">{{document.properties.dc:creator::change}}</span>
-      </div>
-
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
-        </div>
-        <nuxeo-help for="contributors" label="[[i18n('label.dublincore.contributors.info','Contributors are filled automatically when creating or editing the document.')]]"></nuxeo-help>
-        <div id="contributors" class="layout vertical">
-          <template is="dom-repeat" items={{document.properties.dc:contributors}}>
-            <span>{{item}}</span>
-          </template>
-        </div>
-      </div>
-
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.dublincore.lastContributor', 'Last Contributor')]]</label>
-        </div>
-        <nuxeo-help for="lastContributor" label="[[i18n('label.dublincore.lastContributor.info', 'Last contributor is filled automatically when creating or editing the document.')]]"></nuxeo-help>
-        <span id="lastContributor" class="flex">{{document.properties.dc:lastContributor::change}}</span>
-      </div>
-
-    </template>
 
   </template>
 
@@ -198,11 +117,6 @@ Contributors:
         properties: {
           document: {
             type: Object
-          },
-
-          new: {
-            type: Boolean,
-            value: false
           }
         },
 

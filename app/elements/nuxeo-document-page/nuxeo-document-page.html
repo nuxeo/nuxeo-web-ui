@@ -102,6 +102,23 @@ Contributors:
         box-sizing: border-box;
       }
 
+      .sidecard .details {
+        color: var(--nuxeo-tag-text);
+        font-size: .9em;
+        padding-bottom: 1em;
+        border-bottom: var(--nuxeo-border);
+      }
+
+      .details .col {
+        width: 30%;
+        display: inline-block;
+        line-height: 1.9em;
+      }
+
+      .details .user {
+        vertical-align: top;
+      }
+
       .sidecard .icon {
         --iron-icon-height: .9rem;
         --iron-icon-width: .9rem;
@@ -243,12 +260,20 @@ Contributors:
         </template>
 
         <template is="dom-if" if="[[!isProcessingTask]]">
-          <paper-card class="sidecard">
-            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
-          </paper-card>
 
           <paper-card class="sidecard">
             <div class="horizontal layout wrap">
+              <div class="details ctn">
+                <div><span class="col">[[i18n('label.document.routing.added.on', 'Added on')]]</span> [[_formatDate(document.properties.dc:created)]]</div>
+                <div><span class="col">[[i18n('label.document.routing.added.by', 'By')]]</span><a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">
+                  <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
+                  [[document.properties.dc:creator]]</a></div>
+                <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
+                  <nuxeo-document-users users="[[document.properties.dc:contributors]]">
+                  </nuxeo-document-users>
+                </div>
+              </div>
+
               <div class="ctn">
                 <template is="dom-if" if="[[hasWorkflowRunning]]">
                   <span class="tag process-tag">
@@ -261,6 +286,11 @@ Contributors:
               </div>
             </div>
           </paper-card>
+
+          <paper-card class="sidecard">
+            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          </paper-card>
+
           <template is="dom-if" if="[[!hasWorkflowRunning]]">
             <paper-card class="sidecard">
               <p class="title">[[i18n('label.document.routing.process.title', 'Process')]]</p>

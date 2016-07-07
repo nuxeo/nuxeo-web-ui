@@ -96,25 +96,14 @@ Contributors:
 
    <div class="row layout horizontal">
      <div class="label-container">
-       <label>[[i18n('note','Note')]]</label>
+       <label>[[i18n('label.richtext.format','Format')]]</label>
      </div>
-     <div class="layout vertical flex">
-       <template is="dom-if" if="[[_isHTML(document)]]">
-         <nuxeo-html-editor value="{{document.properties.note:note}}" class="flex" id="edit-editor"></nuxeo-html-editor>
-       </template>
-       <template is="dom-if" if="[[!_isHTML(document)]]">
-         <textarea rows="20" value="{{document.properties.note:note::change}}" class="flex"></textarea>
-       </template>
-       <div class="layout horizontal">
-         <span class="format">[[i18n('label.richtext.format','Format')]]</span>
-         <select value="{{document.properties.note:mime_type::change}}">
-           <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
-           <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
-           <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
-           <option value="text/x-web-markdown">[[i18n('mimetype.markdown','Markdown')]]</option>
-         </select>
-       </div>
-     </div>
+     <select value="{{document.properties.note:mime_type::change}}" class="flex">
+       <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
+       <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
+       <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
+       <option value="text/x-web-markdown">[[i18n('mimetype.markdown','Markdown')]]</option>
+     </select>
    </div>
 
    <template is="dom-if" if="[[!new]]">
