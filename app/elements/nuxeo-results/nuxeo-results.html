@@ -240,6 +240,7 @@ Contributors:
         ],
 
         observers: [
+          '_observeName(name)',
           '_observeDisplayMode(displayMode)',
           'restoreSettings(_settings)'
         ],
@@ -367,7 +368,14 @@ Contributors:
           this.$.nxcon.connect().then(function(res) {
             this._localStorageName =  res.id + '-nxrs-' + this.name;
           }.bind(this));
+        },
+
+        _observeName: function() {
+          if (this.$.nxcon.user) {
+            this._localStorageName =  this.$.nxcon.user.id + '-nxrs-' + this.name;
+          }
         }
+
 
       });
     })();

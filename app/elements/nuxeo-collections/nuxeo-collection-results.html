@@ -30,9 +30,9 @@ Contributors:
 
     <paper-header-panel class="flex" >
       <div class="paper-header layout horizontal">
-        <span class="flex">[[headerLabel]]</span>
+        <span class="flex">[[collection.title]]</span>
       </div>
-      <nuxeo-results id="results" name="collections"
+      <nuxeo-results id="results" name$="[[_computeName(collection)]]"
         empty-label="[[i18n('ui.collections.noDocument', 'No result')]]"
         empty-label-when-filtered="[[i18n('ui.collections.noDocumentWhenFiltered', 'No result')]]">
       </nuxeo-results>
@@ -54,6 +54,14 @@ Contributors:
 
         get nxProvider() {
           return this.$.results.nxProvider;
+        },
+
+        _computeName: function(collection) {
+          if (collection) {
+            return 'collection-' + collection.uid;
+          } else {
+            return 'collection';
+          }
         }
 
       });

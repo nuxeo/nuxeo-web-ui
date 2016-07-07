@@ -632,7 +632,7 @@ Contributors:
         _navigateToCollection: function(e) {
           this.selectedTab = 'collections';
           this.page = 'collection';
-          this.$.collectionResults.headerLabel = e.detail.collection.title;
+          this.$.collectionResults.collection = e.detail.collection;
         },
 
         get currentContentView() {
