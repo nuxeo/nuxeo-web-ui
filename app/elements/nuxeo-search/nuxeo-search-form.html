@@ -359,6 +359,9 @@ Contributors:
         },
 
         _updateSearchResults: function() {
+          if (this.$.provider.page === 1) {
+            this.docItems = [];
+          }
           var docs = this.$.provider.currentPage;
           docs.forEach(function(doc) {
             this.push('docItems', doc);

@@ -448,6 +448,9 @@ Contributors:
         },
 
         _updateCollectionResults: function() {
+          if (this.$.collectionsProvider.page === 1) {
+            this.collections = [];
+          }
           var collections = this.$.collectionsProvider.currentPage;
           collections.forEach(function(collection) {
             this.push('collections', collection);
@@ -470,6 +473,9 @@ Contributors:
         },
 
         _updateMemberResults: function() {
+          if (this.$.memberProvider.page === 1) {
+            this.members = [];
+          }
           var memberResults = this.$.memberProvider.currentPage;
           memberResults.forEach(function(member) {
             this.push('members', member);
@@ -517,7 +523,6 @@ Contributors:
         },
 
         _loadMoreMembers: function() {
-          console.log('_loadMoreMembers');
           if (this.$.memberProvider) {
             if (this.$.memberProvider.isNextPageAvailable) {
               this.loading = true;
