@@ -25,7 +25,8 @@ Contributors:
 
     var app = document.querySelector('nuxeo-app');
 
-    page.base(app.baseUrl);
+    // strip final /
+    page.base(app.baseUrl.replace(/\/$/, ''));
 
     // Middleware
     function scrollToTop(ctx, next) {
@@ -113,7 +114,7 @@ Contributors:
     var useHashbang = true;
     page({hashbang: true, click: false});
     page.url = function(path) {
-      return page.base() + (useHashbang ? '#!' : '') + path;
+      return page.base() + '/' + (useHashbang ? '#!' : '') + path;
     };
 
     Polymer.Base._addFeature({
