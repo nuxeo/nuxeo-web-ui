@@ -472,11 +472,6 @@ Contributors:
             observer: '_navigate'
           },
 
-          username: {
-            type: String,
-            value: 'Administrator'
-          },
-
           selectedTab: {
             type: String,
             observer: '_observeSelectedTab'
@@ -523,7 +518,6 @@ Contributors:
           currentUser: {
             type: Object,
             observer: '_observeCurrentUser'
-
           },
 
           _userWorkspacePath: {
@@ -564,7 +558,6 @@ Contributors:
 
         ready: function() {
           this.clipboard = this.$.clipboard;
-          this._fetchTasks();
           this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
           this.$.assetsResults.nxProvider = this.$.assetsForm.nxProvider;
           // XXX: review this
@@ -711,10 +704,10 @@ Contributors:
           // hack to fetch tasks with user prefix and without prefix
           // some tasks are prefixed, to be reviewed later
           this._tmpTasks = [];
-          this.$.tasks.params = {'userId': this.username};
+          this.$.tasks.params = {'userId': this.currentUser.id};
           this.$.tasks.get().then(function(response) {
             this._tmpTasks = response.entries;
-            this.$.tasks.params = {'userId': 'user:' + this.username};
+            this.$.tasks.params = {'userId': 'user:' + this.currentUser.id};
             this.$.tasks.get().then(function(response) {
               this.tasks = this._tmpTasks.concat(response.entries);
               this.taskCount = this.tasks.length;
@@ -740,6 +733,7 @@ Contributors:
         _observeCurrentUser: function() {
           if (this.currentUser) {
             this._userWorkspacePath =  '/default-domain/UserWorkspaces/' + this.currentUser.id;
+            this._fetchTasks();
           }
         },
 
