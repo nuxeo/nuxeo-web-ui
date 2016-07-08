@@ -29,6 +29,11 @@ Contributors:
 <dom-module id="nuxeo-task-widget">
   <template>
     <style is="custom-style" include="shared-styles">
+      .container {
+        max-height: 28vh;
+        overflow-y: auto;
+      }
+
       .task-list {
         @apply(--nuxeo-task-widget-layout);
       }
@@ -36,6 +41,7 @@ Contributors:
       .task-box {
         padding: var(--nuxeo-task-widget-box-padding);
         line-height: 155%;
+        min-height: 70px;
       }
 
       .task-box + .task-box {
@@ -74,37 +80,39 @@ Contributors:
       }
     </style>
 
-    <template is="dom-if" if="[[_isEmpty(tasks)]]">
-      <div class="horizontal layout center">
-        <span class="empty">[[i18n('ui.taskWidget.noTasks', 'There are no tasks to show.')]]</span>
-      </div>
-    </template>
-    <template is="dom-if" if="[[!_isEmpty(tasks)]]">
-      <div class="task-list vertical layout container">
-        <template is="dom-repeat" items="[[tasks]]" as="task">
-          <div class="task-box vertical layout">
-            <div class="task-info horizontal layout center">
-              <div class="vertical layout center">
-                <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
+    <div class="container">
+      <template is="dom-if" if="[[_isEmpty(tasks)]]">
+        <div class="horizontal layout center">
+          <span class="empty">[[i18n('ui.taskWidget.noTasks', 'There are no tasks to show.')]]</span>
+        </div>
+      </template>
+      <template is="dom-if" if="[[!_isEmpty(tasks)]]">
+        <div class="task-list vertical layout container">
+          <template is="dom-repeat" items="[[tasks]]" as="task">
+            <div class="task-box vertical layout">
+              <div class="task-info horizontal layout center">
+                <div class="vertical layout center">
+                  <iron-icon class="task-name-icon" icon="[[_getIcon(task.workflowModelName)]]"></iron-icon>
+                </div>
+                <span class="task-name">[[i18n(task.name)]]</span>
               </div>
-              <span class="task-name">[[i18n(task.name)]]</span>
+              <div class="task-detail">
+                <div class="taskDoc horizontal layout center">
+                  <span class="task-property">[[i18n('ui.taskWidget.on', 'On  ')]]</span>
+                  <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
+                    <a href$="[[urlFor('browse', doc.path)]]" class="docTitle">[[doc.title]]</a>
+                  </template>
+                </div>
+                <div class="horizontal layout center">
+                  <span class="due-date task-property">[[i18n('ui.taskWidget.dueDate', 'Due date' )]]
+                  <span class="date">[[_formatDate(task.dueDate)]]</span></span>
+                </div>
+              </div>
             </div>
-            <div class="task-detail">
-              <div class="taskDoc horizontal layout center">
-                <span class="task-property">[[i18n('ui.taskWidget.on', 'On  ')]]</span>
-                <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
-                  <a href$="[[urlFor('browse', doc.path)]]" class="docTitle">[[doc.title]]</a>
-                </template>
-              </div>
-              <div class="horizontal layout center">
-                <span class="due-date task-property">[[i18n('ui.taskWidget.dueDate', 'Due date' )]]
-                <span class="date">[[_formatDate(task.dueDate)]]</span></span>
-              </div>
-            </div>
-          </div>
-        </template>
-      </div>
-    </template>
+          </template>
+        </div>
+      </template>
+    </div>
   </template>
   <script>
     (function() {
