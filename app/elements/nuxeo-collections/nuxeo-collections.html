@@ -182,7 +182,7 @@ Contributors:
         <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
-        <paper-tooltip for="backToCollections">[[i18n('command.collections.backToCollections', 'Back to all collections')]]</paper-tooltip>
+        <paper-tooltip for="backToCollections">[[i18n('command.collections.backToCollections', 'Back to collections list')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
         <h1>[[i18n('heading.collections', 'Collections')]]</h1>
@@ -220,7 +220,7 @@ Contributors:
                       </div>
                       <div class="collection-detail">
                         <div class="date horizontal layout center">
-                          <span class="collection-property">[[i18n('label.collections.lastUpdated', 'Last updated on ')]] </span>
+                          <span class="collection-property">[[i18n('label.collections.lastUpdated', 'Last Modified')]] </span>
                           <span>[[_formatDate(collection.properties.dc:modified)]]</span>
                         </div>
                         <div class="layout center">
@@ -234,7 +234,7 @@ Contributors:
               </iron-list>
             </iron-scroll-threshold>
             <div hidden$="[[hasCollection]]">
-              <span class="empty">[[i18n('label.collections.empty', 'No collection')]]</span>
+              <span class="empty">[[i18n('label.collections.empty', 'There is no collection to display.')]]</span>
             </div>
           </div>
 

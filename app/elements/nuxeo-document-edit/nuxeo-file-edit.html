@@ -92,8 +92,7 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-
-    <template is="dom-if" if="[[new]]">
+    <template is="dom-if" if="[[!new]]">
       <div class="row layout horizontal">
         <div class="label-container">
           <label>[[i18n('content', 'Content')]]</label>
@@ -108,9 +107,6 @@ Contributors:
           <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
         </div>
       </div>
-    </template>
-
-    <template is="dom-if" if="[[!new]]">
       <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
     </template>
   </template>

@@ -78,7 +78,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('ui.facetedSearch.modifiedDate', 'Modified date')]]</label>
+      <label>[[i18n('ui.facetedSearch.modifiedDate', 'Modification date')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}">
@@ -87,7 +87,7 @@ Contributors:
 
     <div class="row layout vertical">
       <label>[[i18n('ui.facetedSearch.authors', 'Authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('ui.facetedSearch.authors.placeholder', 'Search for authors...')]]"
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('ui.facetedSearch.authors.placeholder', 'Search for contributors...')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true">

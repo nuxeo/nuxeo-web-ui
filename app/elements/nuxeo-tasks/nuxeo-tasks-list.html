@@ -90,7 +90,7 @@ Contributors:
     </style>
 
     <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
-      <span class="empty">[[i18n('ui.tasksList.noTasks','There are no tasks to show.')]]</span>
+      <span class="empty">[[i18n('ui.tasksList.noTasks', "You don't currently have any tasks.")]]</span>
     </div>
     <div hidden$="[[_hidden(tasks)]]">
       <iron-list id="list" items="[[tasks]]" as="task" selection-enabled selected-item="{{_selection}}">

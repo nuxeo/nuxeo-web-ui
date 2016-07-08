@@ -184,13 +184,13 @@ Contributors:
         );
       });
 
-      test('it should display "There are no tasks to show."', function() {
+      test('it should display "You don\'t currently have any tasks."', function() {
         var tasks = fixture('tasks');
         return waitChanged(tasks, 'tasks').then(flush).then(function() {
           expect(tasks.count).to.be.equal(0);
           var placeholder = Polymer.dom(tasks.root).querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
-          expect(placeholder.textContent).to.be.equal('There are no tasks to show.');
+          expect(placeholder.textContent).to.be.equal("You don't currently have any tasks.");
         });
       });
     });

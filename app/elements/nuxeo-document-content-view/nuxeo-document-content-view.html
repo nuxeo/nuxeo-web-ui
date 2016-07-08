@@ -117,7 +117,7 @@ Contributors:
       <div id="grid" hidden$="[[_isDisplayTable]]">
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
           empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
-          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'No result')]]"
+          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
           selected-items="{{gridSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
@@ -135,8 +135,8 @@ Contributors:
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
           settings-enabled
-          empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
-          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'No result')]]"
+          empty-label="[[i18n('ui.browse.noDocument', 'There are no items to display in this folder.')]]"
+          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
           selected-items="{{tableSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
@@ -147,11 +147,11 @@ Contributors:
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modified')]]"
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
             sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
             <template is="header">
                 <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('ui.datatable.header.modified', 'Modified')]]"
+                    placeholder="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
                     data="[[aggregations.dc_modified_agg]]"
                     value="{{column.filterValue}}" multiple>
                 </nuxeo-dropdown-aggregation>
@@ -176,7 +176,7 @@ Contributors:
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
-            <template><span class="capitalize">[[item.state]]</span></template>
+            <template>[[item.state]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
             <template>[[_displayVersion(item)]]</template>
@@ -187,7 +187,7 @@ Contributors:
               [[_formatDate(item.properties.dc:created)]]
             </template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Author')]]"
+          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
             sort-by="dc:creator" hidden>
             <template>
               <a class="tag user" href="/user/[[item.properties.dc:creator]]">
