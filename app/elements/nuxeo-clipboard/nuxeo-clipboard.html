@@ -117,7 +117,7 @@ Contributors:
         this.$.op.op = evt.currentTarget.dataset.op;
         this.$.op.execute().then(function() {
           this.documents = [];
-          this.fire('documentUpdated');
+          this.fire('document-updated');
         }.bind(this));
       },
 

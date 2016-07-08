@@ -567,7 +567,7 @@ Contributors:
             this._toggleDialog();
             page('/browse' + this.targetPath);
             if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
-              this.fire('documentUpdated');
+              this.fire('document-updated');
             }
             this._notify(response);
           }.bind(this));
@@ -593,7 +593,7 @@ Contributors:
             this._toast(this.i18n('label.documents.importedDocuments', 'Imported {0} documents.',
                         docs.length));
           }
-          this.fire('documentCreated');
+          this.fire('document-created');
         },
 
         _toast: function(msg) {

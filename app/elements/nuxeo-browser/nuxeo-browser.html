@@ -64,6 +64,14 @@ Contributors:
         @apply(--layout-horizontal);
         @apply(--layout-flex);
       }
+
+      paper-card {
+        display: block;
+        margin: auto;
+        padding: 2em;
+        @apply(--layout-flex);
+      }
+
     </style>
 
     <!-- Main content -->
@@ -78,6 +86,11 @@ Contributors:
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
                 [[i18n('command.browser.view', 'View')]]</paper-icon-item>
+              <template is="dom-if" if="[[_canViewContent(document)]]">
+                <paper-icon-item name="edit">
+                  <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
+                  [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
+              </template>
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
@@ -105,6 +118,14 @@ Contributors:
               <nuxeo-document-page document="[[document]]"></nuxeo-document-page>
             </template>
           </section>
+
+          <template is="dom-if" if="[[_canViewContent(document)]]">
+            <section name="edit">
+              <paper-card class="end-space">
+                <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
+              </paper-card>
+            </section>
+          </template>
 
           <section name="permissions">
             <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
@@ -157,17 +178,8 @@ Contributors:
           '_updateCvParams(document)'
         ],
 
-        /*
-        set currentContentView(cv) {
-          this.$.contentViewNav.contentView = cv;
-        },
-
-        get currentContentView() {
-          return this.$.contentViewNav.contentView;
-        },*/
-
         _documentUpdated: function() {
-          this.fire('documentUpdated');
+          this.fire('document-updated');
         },
 
         download: function() {
@@ -220,6 +232,10 @@ Contributors:
           if (this.document) {
             page('/browse' + this.document.path + '@' + this.selectedTab);
           }
+        },
+
+        _navigateToView: function() {
+          page('/browse' + this.document.path + '@view');
         },
 
         _updateCvParams: function() {
