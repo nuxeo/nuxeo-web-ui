@@ -78,15 +78,9 @@ Contributors:
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
                 [[i18n('command.browser.view', 'View')]]</paper-icon-item>
-              <paper-icon-item name="activity">
-                <iron-icon icon="icons:restore" item-icon></iron-icon>
-                [[i18n('command.browser.activity', 'Activity')]]</paper-icon-item>
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
-              <paper-icon-item name="settings">
-                <iron-icon icon="icons:settings" item-icon></iron-icon>
-                [[i18n('command.browser.settings', 'Settings')]]</paper-icon-item>
             </paper-menu>
           </paper-dropdown-menu>
 
@@ -112,16 +106,8 @@ Contributors:
             </template>
           </section>
 
-          <section name="activity">
-            Activity
-          </section>
-
           <section name="permissions">
             <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
-          </section>
-
-          <section name="settings">
-            Settings
           </section>
         </iron-pages>
       </div>
