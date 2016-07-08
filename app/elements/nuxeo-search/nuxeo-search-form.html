@@ -142,7 +142,7 @@ Contributors:
     <nuxeo-search id="saved-search"></nuxeo-search>
 
     <div class="header ellipsis search-header">
-      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params='{"pageProvider": "default_search"}'></nuxeo-search>
+      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
       <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
         <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
           <paper-item>[[i18n('ui.searchForm.searchFilters', 'Search Filters')]]</paper-item>
@@ -166,7 +166,10 @@ Contributors:
     <div class="content">
 
       <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
-        <nuxeo-faceted-search aggregations="[[aggregations]]" params="{{params}}" search-term="{{searchTerm}}"></nuxeo-faceted-search>
+        <div id="search-form-container">
+          <!-- Dynamic search form element will be inserted here -->
+          <!-- <nuxeo-{{searchName}}-search aggregations="[[aggregations]]" params="{{params}}"> -->
+        </div>
         <div class="layout vertical row">
           <paper-button noink class="primary clear" raised on-click="_clear">
             [[i18n('ui.searchForm.clear', 'Clear')]]
@@ -346,6 +349,11 @@ Contributors:
             notify: true,
             reflectToAttribute: true,
             value: false
+          },
+          searchName: String,
+          aggregations: {
+            type: Object,
+            observer: '_aggregationsChanged'
           }
         },
 
@@ -456,10 +464,16 @@ Contributors:
           this.$.itemsList.addOwnKeyBinding('k', 'selectQueuePrevious');
           this.$.itemsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
           this.$.itemsList.addOwnKeyBinding('j', 'selectQueueNext');
+
+          // dinamically insert search form
+          this._updateLayout();
         },
 
         _paramsChanged: function() {
           this.dirty = true;
+          if (this._form) {
+            this._form.params = this.params;
+          }
         },
 
         _selectedSearchIdxChanged: function() {
@@ -479,6 +493,7 @@ Contributors:
           this.params = this._mutateParams(this.selectedSearch.params);
           if (this.params && this.params.ecm_fulltext) {
             this.searchTerm = this.params.ecm_fulltext.replace('*', '');
+            this._form.searchTerm = this.searchTerm;
           }
         },
 
@@ -488,6 +503,9 @@ Contributors:
 
         _clear: function() {
           this.searchTerm = '';
+          if (this._form) {
+            this._form.searchTerm = '';
+          }
           this.params = {};
           if (!this._isSavedSearch()) {
             this.dirty = false;
@@ -501,6 +519,7 @@ Contributors:
           _el.get().then(function(response) {
             this.params = this._mutateParams(response.params);
             this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+            this._form.searchTerm = this.searchTerm;
             this.dirty = false;
           }.bind(this));
         },
@@ -579,6 +598,49 @@ Contributors:
 
         _mutateParams: function(params) {
           return this.paramMutator ? this.paramMutator(params) : params;
+        },
+
+        _computeSavedSearchesParams: function() {
+          return {pageProvider: this.provider};
+        },
+
+        _aggregationsChanged: function() {
+          if (this._form) {
+            this._form.aggregations = this.aggregations;
+          }
+        },
+
+        /**
+         * Retrieves and creates the search form for the current search type
+         */
+        _updateLayout: function() {
+          var layout = ['nuxeo', this.searchName, 'search'].join('-');
+          var url = this.resolveUrl(layout + '.html');
+          this.importHref(url, this._createLayout.bind(this),
+            // error handling
+            function() {
+              console.error('Failed to find search layout for ' + this.searchName);
+            });
+        },
+
+        /**
+         * Creates the layout for the current search type
+         */
+        _createLayout: function() {
+          var layout = ['nuxeo', this.searchName, 'search'].join('-'),
+              el = document.createElement(layout),
+              parent = this.$['search-form-container'];
+          parent.appendChild(el);
+          el.id = 'search-form';
+          this._form = el;
+          // setup data binding
+          el.addEventListener('params-changed', function(e) {
+            // e.detail.path is params.prop_name eg: params.ecm_fulltext
+            if (e.detail.path) {
+              var param = e.detail.path.split('.')[1];
+              this.set('params.' + param, e.detail.value);
+            }
+          }.bind(this));
         }
       });
     })();

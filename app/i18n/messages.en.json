@@ -314,4 +314,13 @@
   "ui.browse.noDocumentWhenFiltered": "There are no documents with these search criteria.",
   "ui.collections.noDocument": "There are no documents in this collection. You can add documents from the document view or in bulk from a list view.",
   "ui.collections.noDocumentWhenFiltered": "There are no documents in this collection with these criteria."
+  "label.ui.aggregate.to_500_px": "Less than 500px",
+  "label.ui.aggregate.from_500_to_1500_px": "Between 500px and 1500px",
+  "label.ui.aggregate.from_1500_to_2000_px": "Between 1500px and 2000px",
+  "label.ui.aggregate.from_2000_px": "More than 2000px",
+  "label.ui.aggregate.to_30_s": "Less than 30s",
+  "label.ui.aggregate.from_30_to_180_s": "Between 30s and 180s",
+  "label.ui.aggregate.from_180_to_600_s": "Between 180s and 600s",
+  "label.ui.aggregate.from_600_to_1800_s": "Between 600s and 1800s",
+  "label.ui.aggregate.from_1800_s": "More than 1800s"
 }

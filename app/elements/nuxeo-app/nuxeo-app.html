@@ -163,17 +163,6 @@ Contributors:
         height: 59px;
       }
 
-      nuxeo-search-results .actions paper-button {
-        font-size: .8em;
-        font-weight: normal;
-        margin: 0;
-        text-transform: none;
-      }
-
-      nuxeo-search-results .actions paper-button[disabled] {
-        background: none;
-      }
-
       paper-card {
         margin: 0 22px 22px 0;
         min-width: 560px;
@@ -213,10 +202,16 @@ Contributors:
                     headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'>
     </nuxeo-resource>
 
-    <nuxeo-document id="searchDoc" auto
+    <nuxeo-document auto
                     doc-id="[[selectedSearch.id]]"
                     enrichers="permissions"
                     response="{{searchDoc}}">
+    </nuxeo-document>
+
+    <nuxeo-document auto
+                    doc-id="[[selectedAssetsSearch.id]]"
+                    enrichers="permissions"
+                    response="{{assetsSearchDoc}}">
     </nuxeo-document>
 
     <paper-toast id="toast"></paper-toast>
@@ -230,6 +225,7 @@ Contributors:
           <paper-icon-button id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
           <paper-icon-button id="menuSearch" icon="icons:search" name="search"></paper-icon-button>
+          <paper-icon-button id="menuAssets" icon="icons:perm-media" name="assets"></paper-icon-button>
           <div id="menuTasks" class="icon-badge" name="tasks">
             <paper-icon-button icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
             <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
@@ -264,8 +260,15 @@ Contributors:
               </section>
 
               <section class="card search" name="search">
-                <nuxeo-search-form id="searchForm" on-display-filters="_resetSearchResults" dirty="{{dirty}}"
-                                   is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}"></nuxeo-search-form>
+                <nuxeo-search-form id="searchForm" search-name="faceted" on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                                   is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
+                </nuxeo-search-form>
+              </section>
+
+              <section class="card" name="assets">
+                <nuxeo-search-form id="assetsForm" search-name="assets" provider="assets_search" on-display-filters="_resetAssetsResults"
+                                   dirty="{{assetsDirty}}" is-saved-search="{{assetsSearchLoaded}}" selected-search="{{selectedAssetsSearch}}">
+                </nuxeo-search-form>
               </section>
 
               <section class="card tasks" name="tasks">
@@ -361,26 +364,14 @@ Contributors:
               selected-tab="{{docAction}}"
               clipboard="[[clipboard]]"></nuxeo-browser>
 
+            <!-- Default Search -->
             <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
-              <div class="actions horizontal layout center">
-                <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc,searchLoaded,dirty)]]">
-                   <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
-                </paper-button>
-                <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchDoc,searchLoaded,dirty)]]">
-                   <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
-                </paper-button>
-                <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc,searchLoaded,dirty)]]">
-                  <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
-                  <paper-menu class="dropdown-content layout vertical">
-                    <paper-item class="layout horizontal center" on-tap="_renameSearch">
-                      <iron-icon icon="icons:create"></iron-icon>[[i18n('ui.app.renameSearch', 'Rename')]]
-                    </paper-item>
-                    <paper-item class="layout horizontal center" on-tap="_shareSearch">
-                      <iron-icon icon="social:share"></iron-icon>[[i18n('ui.app.shareSearch', 'Share')]]
-                    </paper-item>
-                  </paper-menu>
-                </paper-menu-button>
-              </div>
+              <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
+            </nuxeo-search-results>
+
+            <!-- Assets Search -->
+            <nuxeo-search-results id="assetsResults" name="assets" on-navigate="_navigateFromAssetsSearch">
+              <nuxeo-saved-search-actions class="actions" search-doc="[[assetsSearchDoc]]" search-loaded="[[assetsSearchLoaded]]" dirty="[[assetsDirty]]"></nuxeo-saved-search-actions>
             </nuxeo-search-results>
 
             <nuxeo-collection-results id="collectionResults"
@@ -428,6 +419,7 @@ Contributors:
     <paper-tooltip for="menuHome" position="right" offset="0">[[i18n('heading.app.browse', 'Browse')]]</paper-tooltip>
     <paper-tooltip for="menuRecents" position="right" offset="0">[[i18n('heading.app.recentlyViewed', 'Recently Viewed')]]</paper-tooltip>
     <paper-tooltip for="menuSearch" position="right" offset="0">[[i18n('heading.app.search', 'Search Filters')]]</paper-tooltip>
+    <paper-tooltip for="menuAssets" position="right" offset="0">[[i18n('heading.app.assets', 'Assets Search')]]</paper-tooltip>
     <paper-tooltip for="menuTasks" position="right" offset="0">[[i18n('heading.app.tasks', 'Tasks')]]</paper-tooltip>
     <paper-tooltip for="menuFavorites" position="right" offset="0">[[i18n('heading.app.favorites', 'Favorites')]]</paper-tooltip>
     <paper-tooltip for="menuCollections" position="right" offset="0">[[i18n('heading.app.collections', 'Collections')]]</paper-tooltip>
@@ -487,8 +479,6 @@ Contributors:
           entity: Object,
 
           tasks: Array,
-
-          searchDoc: Object,
 
           taskCount: Number,
 
@@ -559,6 +549,11 @@ Contributors:
           this.clipboard = this.$.clipboard;
           this._fetchTasks();
           this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
+          this.$.assetsResults.nxProvider = this.$.assetsForm.nxProvider;
+          // XXX: review this
+          this.$.searchResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.searchForm;
+          this.$.assetsResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.assetsForm;
+          // XXX: end of review this
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
           if (this.shadowRoot) {
             var experimental = document.createElement('div');
@@ -573,23 +568,6 @@ Contributors:
 
         refresh: function() {
           this.$.doc.get();
-        },
-
-        _showSaveAs: function() {
-          return this.searchLoaded || (!this.searchLoaded && this.dirty);
-        },
-
-        _showSave: function() {
-          return this.searchLoaded && this.dirty && this._hasPermissions();
-        },
-
-        _showOtherSearchActions: function() {
-          return this.searchLoaded && this._hasPermissions();
-        },
-
-        _hasPermissions: function() {
-          return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
-                  this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
         },
 
         _navigate: function() {
@@ -628,14 +606,22 @@ Contributors:
           this.$.searchForm.displayQueue(e.detail.doc, e.detail.index);
         },
 
+        _navigateFromAssetsSearch: function(e) {
+          page.show('/browse' + e.detail.doc.path);
+          this.$.assetsForm.displayQueue(e.detail.doc, e.detail.index);
+        },
+
         _navigateFromCollection: function(e) {
           page.show('/browse' + e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
         },
 
         _resetSearchResults: function() {
-          this.selectedTab = 'search';
-          this.page = 'search';
+          this.selectedTab = this.page = 'search';
+        },
+
+        _resetAssetsResults: function() {
+          this.selectedTab = this.page = 'assets';
         },
 
         _navigateToCollection: function(e) {
@@ -696,7 +682,7 @@ Contributors:
         },
 
         _observeSelectedTab: function() {
-          if (this.selectedTab === 'search') {
+          if (this.selectedTab === 'search' || this.selectedTab === 'assets') {
             this.page = this.selectedTab;
           } else if (this.selectedTab === 'personalWorkspace') {
             var tree = this.$.userWorkspace.$.tree;
@@ -722,22 +708,6 @@ Contributors:
         _onTaskChanged: function(e) {
           this.page = 'tasks';
           this.currentTask = e.detail.task;
-        },
-
-        _saveSearch: function() {
-          this.$$('nuxeo-search-form').save();
-        },
-
-        _saveSearchAs: function() {
-          this.$$('nuxeo-search-form').saveAs();
-        },
-
-        _renameSearch: function() {
-          this.$$('nuxeo-search-form').rename();
-        },
-
-        _shareSearch: function() {
-          this.$$('nuxeo-search-form').share();
         },
 
         _onAddToClipboard: function(e) {
