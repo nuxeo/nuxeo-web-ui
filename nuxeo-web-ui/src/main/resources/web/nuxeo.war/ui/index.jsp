@@ -52,6 +52,20 @@ limitations under the License.
   <link rel="stylesheet" href="vendor/select2.css">
 
   <script src="webcomponentsjs/webcomponents-lite.min.js"></script>
+
+  <script>
+    window.Polymer = {
+      lazyRegister: true
+    };
+
+    // append theme file
+    var theme = localStorage.getItem('theme') || 'default';
+    var link = document.createElement('link')
+    link.setAttribute('rel', 'import')
+    link.setAttribute('href', 'styles/' + theme + '-theme.html');
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+
   <script src="vendor/jquery.js"></script>
   <script src="vendor/select2.js"></script>
   <script src="vendor/moment-with-locales.js"></script>
