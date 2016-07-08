@@ -93,8 +93,10 @@ Contributors:
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('ui.home.tasks', 'Tasks')]]</span>
-              <nuxeo-task-widget username="Administrator"></nuxeo-task-widget>
+              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>
+                [[i18n('ui.home.tasks', 'Tasks')]]
+              </span>
+              <nuxeo-task-widget tasks="[[tasks]]"></nuxeo-task-widget>
             </div>
           </paper-card>
           <paper-card class="card">
