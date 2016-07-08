@@ -503,19 +503,18 @@ Contributors:
         _updateLayout: function() {
           this.document = this.documentTemplates[this.selectedDocType]();
 
-          if (this.document) {
-            var layout = this._layoutFor(this.document);
-            if (!this._isRegistered(layout)) {
-              var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
-              this.importHref(url, this._createLayout.bind(this),
-                  // error handling
-                  function() {
-                    console.error('Failed to find edit layout for ' + this.document.type);
-                  });
-            } else {
-              this._createLayout();
-            }
+          var layout = this.document ? this._layoutFor() : 'nuxeo-dublincore-edit';
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find edit layout for ' + this.document.type);
+                });
+          } else if (this.document) {
+            this._createLayout();
           }
+          this.notifyResize();
         },
 
         _clear: function() {
