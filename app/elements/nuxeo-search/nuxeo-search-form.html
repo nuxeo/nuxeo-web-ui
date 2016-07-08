@@ -633,6 +633,7 @@ Contributors:
           parent.appendChild(el);
           el.id = 'search-form';
           this._form = el;
+          this._form.aggregations = this.aggregations;
           // setup data binding
           el.addEventListener('params-changed', function(e) {
             // e.detail.path is params.prop_name eg: params.ecm_fulltext
