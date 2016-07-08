@@ -25,7 +25,7 @@ Contributors:
 -->
 <dom-module id="nuxeo-themes">
   <template>
-    <style>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -77,7 +77,7 @@ Contributors:
     </style>
 
     <div class="flex-layout">
-      <paper-card>
+      <paper-card elevation="0">
         <iron-image src="[[baseUrl]]images/themes/default-theme.png" sizing="cover" class="thumbnailContainer"></iron-image>
         <div class="card-content layout horizontal center">
           <span class="name flex">Default Theme</span>
@@ -90,7 +90,7 @@ Contributors:
         </div>
       </paper-card>
 
-      <paper-card>
+      <paper-card elevation="0">
         <iron-image src="[[baseUrl]]images/themes/dark-theme.png" sizing="cover" class="thumbnailContainer"></iron-image>
         <div class="card-content layout horizontal center">
           <span class="name flex">Dark Theme</span>
@@ -103,7 +103,7 @@ Contributors:
         </div>
       </paper-card>
 
-      <paper-card>
+      <paper-card elevation="0">
         <iron-image src="[[baseUrl]]images/themes/dark-theme.png" sizing="cover" class="thumbnailContainer"></iron-image>
         <div class="card-content layout horizontal center">
           <span class="name flex">Placeholder Theme</span>
