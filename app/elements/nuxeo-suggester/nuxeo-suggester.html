@@ -180,7 +180,7 @@ Contributors:
             <template is="dom-repeat" items="{{items}}">
               <a class="result" href$="[[urlFor(item.type, item.id)]]" on-click="_itemClicked">
                 <iron-icon src="[[_getIcon(item)]]"></iron-icon>
-                <span>[[item.label]]</span>
+                <span class="ellipsis">[[item.label]]</span>
               </a>
             </template>
           </iron-selector>
