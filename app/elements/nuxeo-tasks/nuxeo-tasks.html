@@ -57,6 +57,14 @@ Contributors:
         background: #fff;
       }
 
+      .task-item {
+        cursor: pointer;
+      }
+
+      .task-item:hover {
+        background-color: var(--nuxeo-light-background);
+      }
+
       .task-box {
         line-height: 130%;
         padding: 1em;
@@ -71,9 +79,13 @@ Contributors:
         font-weight: bold;
       }
 
-      .task-directive,
-      .task-document {
+      .task-directive {
         color: #9a9a9a;
+        font-size: .8em;
+      }
+
+      .task-document {
+        color: var(--primary-text-color);
         font-size: .8em;
       }
 
@@ -81,16 +93,6 @@ Contributors:
         height: 16px;
         width: 16px;
         margin: -.3em 0 0 -.3em;
-      }
-
-      .task-process {
-        border: 1px solid #00adff;
-        color: #00adff;
-
-        --paper-button: {
-          height: 30px;
-          padding: .3em .5em;
-        };
       }
 
       iron-icon.task-name-icon {
@@ -106,6 +108,17 @@ Contributors:
       iron-icon.tag-icon {
         height: 12px;
         width: 12px;
+      }
+
+      .participant {
+        background-color: var(--nuxeo-tag-background);
+        color: var(--nuxeo-tag-text);
+        text-transform: capitalize;
+        border-radius: 2.5em;
+        padding: .2rem .4rem;
+        margin: 0 .3em .1em 0;
+        font-size: .8em;
+        line-height: initial;
       }
 
       .date {
@@ -207,7 +220,7 @@ Contributors:
         <template is="dom-if" if="[[!_hasCurrent(current)]]">
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
-              <div class="task-box layout horizontal">
+              <div class="task-item task-box layout horizontal" on-tap="_process">
                 <div class="layout vertical flex-4">
                   <div class="layout horizontal">
                     <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
@@ -218,23 +231,22 @@ Contributors:
                       <span class="task-directive">[[i18n(task.directive)]]</span>
                       <span class="task-document">
                         <iron-icon icon="icons:description"></iron-icon>
-                        <a href="[[_href(task.targetDocumentIds.0)]]">[[task.targetDocumentIds.0.title]]</a>
+                        <span class="docTitle">[[task.targetDocumentIds.0.title]]</span>
                       </span>
                     </div>
                   </div>
                 </div>
                 <div class="flex-2">
                   <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                    <a class="tag user initiator" href="[[_participantHref(actor.id)]]">
+                    <span class="participant">
                       <iron-icon icon="[[_participantIcon(actor.id)]]" class="tag-icon"></iron-icon>
                       [[_participantName(actor.id)]]
-                    </a>
+                    </span>
                   </template>
                 </div>
                 <span class="date flex">
                   <iron-icon icon="icons:today"></iron-icon> [[_date(task.dueDate)]]
                 </span>
-                <paper-button class="task-process" on-tap="_process">[[i18n('ui.tasks.process','Process')]]</paper-button>
               </div>
             </template>
             <template is="dom-if" if="[[_empty(tasks)]]">

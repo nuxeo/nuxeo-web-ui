@@ -157,7 +157,6 @@
   "label.editComment.tooltip": "This comment will be visible in the logs displayed in the \"History\" tab.",
   "label.documents.nextDocument": "Next Document",
   "label.documents.display.grid": "Switch to grid view",
-  "ui.tasks.process": "Process",
   "ui.drive.syncRootsManagement.roots.empty": "You currently don't have any synchronization root.",
   "label.documents.view.selection": "Display selection",
   "ui.tasksList.dueDate": "Due date ",
