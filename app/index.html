@@ -72,6 +72,13 @@ Lesser General Public License for more details.
     if (getQueryParam('dom') == 'shadow') {
       window.Polymer.dom = 'shadow';
     }
+
+    // append theme file
+    var theme = localStorage.getItem('theme') || 'default';
+    var link = document.createElement('link')
+    link.setAttribute('rel', 'import')
+    link.setAttribute('href', '../styles/' + theme + '-theme.html');
+    document.getElementsByTagName('head')[0].appendChild(link);
   </script>
 
   <!-- build:js vendor/jquery.js -->

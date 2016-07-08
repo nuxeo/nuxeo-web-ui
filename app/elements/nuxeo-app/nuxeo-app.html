@@ -341,6 +341,9 @@ Contributors:
                   <div class="item">
                     <a href$="[[urlFor('drive')]]">[[i18n('ui.app.user.drive','Drive')]]</a>
                   </div>
+                  <div class="item">
+                    <a href$="[[urlFor('themes')]]">[[i18n('ui.app.user.themes','Themes')]]</a>
+                  </div>
                   <div class="item layout vertical">
                     <a href="[[_connectionUrl()]]/logout">[[i18n('ui.app.user.signOut','Sign Out')]]</a>
                   </div>
@@ -406,6 +409,20 @@ Contributors:
                   <div class="card-content">
                     <div class="title">[[i18n('ui.app.drive.tokens','Tokens')]]</div>
                     <nuxeo-authentication-tokens-management application="Nuxeo Drive"></nuxeo-authentication-tokens-management>
+                  </div>
+                </paper-card>
+              </div>
+            </paper-header-panel>
+
+            <!-- Themes -->
+            <paper-header-panel class="flex" name="themes">
+              <div class="paper-header layout horizontal">
+                <span class="flex">[[i18n('ui.app.themes.heading','Themes')]]</span>
+              </div>
+              <div class="content">
+                <paper-card class="card" elevation="0">
+                  <div class="card-content">
+                    <nuxeo-themes></nuxeo-themes>
                   </div>
                 </paper-card>
               </div>

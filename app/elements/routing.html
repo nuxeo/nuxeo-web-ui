@@ -114,6 +114,10 @@ Contributors:
       app.page = 'drive';
     });
 
+    page('/themes', function() {
+      app.page = 'themes';
+    });
+
     // add #! before urls
     var useHashbang = true;
     page({hashbang: true, click: false});
@@ -153,6 +157,10 @@ Contributors:
 
         drive: function() {
           return page.url('/drive');
+        },
+
+        themes: function() {
+          return page.url('/themes');
         }
 
       },
