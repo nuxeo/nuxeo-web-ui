@@ -291,7 +291,7 @@ Contributors:
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </paper-card>
 
-          <template is="dom-if" if="[[!hasWorkflowRunning]]">
+          <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
             <paper-card class="sidecard">
               <p class="title">[[i18n('label.document.routing.process.title', 'Process')]]</p>
               <div class="vertical layout card-content">
@@ -385,26 +385,24 @@ Contributors:
           'workflowTaskProcessed': '_taskCompleted'
         },
 
-        ready: function() {
-          this.selectedProcess = this.processes[0].workflowModelName;
-        },
-
         _documentChanged: function() {
           this.workflows = this.document.contextParameters.runningWorkflows;
           this.tasks = this.document.contextParameters.pendingTasks;
           this.processes = this.document.contextParameters.runnableWorkflows;
+          this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
           this.isProcessingTask = false;
         },
 
+        _canStartProcess: function() {
+          return !this.hasWorkflowRunning && this.processes && this.processes.length > 0;
+        },
+
         _workflowsChanged: function() {
-          this.hasWorkflowRunning = this.workflows &&
-              this.workflows.length > 0;
+          this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
         },
 
         _tasksChanged: function() {
-          this.hasTaskToProcess = this.tasks &&
-              this.tasks &&
-              this.tasks.length > 0;
+          this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
         },
 
         _fetchTasks: function() {
@@ -473,10 +471,6 @@ Contributors:
         _loadWorkflows: function() {
           console.log('_loadWorkflows');
           this.workflows = this.$.workflows.response.entries;
-        },
-
-        _loadtoto: function() {
-          console.log('otot');
         }
 
       });
