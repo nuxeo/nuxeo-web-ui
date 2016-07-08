@@ -6,4 +6,6 @@ Bundle-Name: Nuxeo Web UI
 Bundle-ManifestVersion: 1
 Bundle-SymbolicName: org.nuxeo.web.ui;singleton:=true
 Nuxeo-Component: OSGI-INF/auth-config.xml,
-  OSGI-INF/actions-contrib.xml
+  OSGI-INF/actions-contrib.xml,
+  OSGI-INF/pageprovider-contrib.xml,
+  OSGI-INF/core-types-contrib.xml
