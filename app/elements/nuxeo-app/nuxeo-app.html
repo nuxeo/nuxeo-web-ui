@@ -556,7 +556,7 @@ Contributors:
           'manageGroup': '_handleUGMmanageGroup',
           'browseCollection': '_navigateToCollection',
           'workflowStarted': '_fetchTasks',
-          'workflowTaskProcessed': '_fetchTasks',
+          'workflowTaskProcessed': '_onTaskProcessed',
           'taskChanged': '_onTaskChanged',
           'addToClipboard': '_onAddToClipboard',
           'addedToCollection': '_documentAddedToCollection',
@@ -720,6 +720,12 @@ Contributors:
               this.taskCount = this.tasks.length;
             }.bind(this));
           }.bind(this));
+        },
+
+        _onTaskProcessed: function() {
+          // let's refresh the current document since it might have been changed (ex: state and version)
+          this.refresh();
+          this._fetchTasks();
         },
 
         _onTaskChanged: function(e) {
