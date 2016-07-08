@@ -164,7 +164,7 @@ Contributors:
     <div class="horizontal layout center flex">
       <div id="suggester" hidden$="[[!toggled]]">
         <div class="fade" on-tap="toggle"></div>
-        <div id="searchBar">
+        <div id="searchBar" on-tap="_focusSearch">
           <paper-input id="searchInput"
                        value="{{searchTerm}}"
                        type="search"
@@ -218,7 +218,8 @@ Contributors:
           'up': '_upPressed',
           'down': '_downPressed',
           'esc': 'closeResults',
-          'enter': '_enterPressed'
+          'enter': '_enterPressed',
+          'tab': '_focusSearch'
         },
 
         toggle: function() {
@@ -268,6 +269,10 @@ Contributors:
 
         _itemClicked: function() {
           this.toggle();
+        },
+
+        _focusSearch: function() {
+          this.$.searchInput.focus();
         }
       });
     })();
