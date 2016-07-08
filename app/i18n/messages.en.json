@@ -322,5 +322,8 @@
   "label.ui.aggregate.from_30_to_180_s": "Between 30s and 180s",
   "label.ui.aggregate.from_180_to_600_s": "Between 180s and 600s",
   "label.ui.aggregate.from_600_to_1800_s": "Between 600s and 1800s",
-  "label.ui.aggregate.from_1800_s": "More than 1800s"
+  "label.ui.aggregate.from_1800_s": "More than 1800s",
+  "ui.recentTable.name": "Name",
+  "ui.recentTable.type": "Type",
+  "ui.recentTable.lastViewed": "Last viewed"
 }

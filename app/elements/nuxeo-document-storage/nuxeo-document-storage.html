@@ -59,7 +59,9 @@ Contributors:
         return this.push('documents', {
           uid: doc.uid,
           title: doc.title,
-          type: doc.type
+          type: doc.type,
+          path: doc.type,
+          lastViewed: new Date()
         });
       },
 

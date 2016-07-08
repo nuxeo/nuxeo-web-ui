@@ -99,8 +99,8 @@ Contributors:
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('ui.home.latestDocumentsCreated','Latest Documents Created')]]</span>
-              <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:creator = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('heading.app.recentlyViewed','Recently Viewed')]]</span>
+              <nuxeo-recent-documents-table recent-documents="[[recentDocuments]]"></nuxeo-recent-documents-table>
             </div>
           </paper-card>
           <paper-card class="card">

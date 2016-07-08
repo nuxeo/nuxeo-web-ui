@@ -1,0 +1,92 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+icensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-recents-widget`
+@group Nuxeo UI
+@element nuxeo-recents-widge
+-->
+<dom-module id="nuxeo-recent-documents-table">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      .doctable {
+        box-sizing: border-box;
+        margin: 7.5px 0px 15px 0px;
+      }
+
+      .doctable-header {
+        font-weight: bold;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #d0d0d0;
+      }
+
+      .doctable-header,
+      .doctable-row {
+        margin: 8px 0px;
+      }
+    </style>
+
+    <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}">
+    </nuxeo-document-storage>
+
+    <div class="doctable vertical layout container">
+      <div class="doctable-header horizontal layout center">
+        <span class="flex">[[i18n('ui.recentTable.name', 'Name')]]</span>
+        <span class="flex">[[i18n('ui.recentTable.type', 'Type')]]</span>
+        <span class="flex">[[i18n('ui.recentTable.lastViewed', 'Last viewed')]]</span>
+      </div>
+      <template is="dom-repeat" items="[[recentDocuments]]">
+        <div class="doctable-row horizontal layout">
+          <a id="title" href$="[[urlFor('document', item.uid)]]" class="flex ellipsis">[[item.title]]</a>
+          <span id="type" class="flex">
+            [[item.type]]
+          </span>
+          <span id="viewed" class="flex">[[_formatDate(item.lastViewed)]]</span>
+        </div>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-recent-documents-table',
+        properties: {
+          recentDocuments: {
+            type: Array,
+            value: []
+          }
+        },
+
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+        _formatDate: function(date) {
+          return moment(date).format('MMM D, YYYY');
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
