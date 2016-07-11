@@ -40,7 +40,7 @@ Contributors:
 
     <iron-pages selected="[[mode]]" attr-for-selected="mode">
       <section mode="view">
-        <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit"></paper-icon-button>
+        <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
         <div id="metadata-view">
           <!-- Dynamic layout element will be inserted here -->
           <!-- <nuxeo-{{this.document.type}}-metadata document="{{document}}"> -->
@@ -134,6 +134,22 @@ Contributors:
           } else {
             this._createLayout();
           }
+        },
+
+        _hasFacet: function(document, facet) {
+          return document.facets.indexOf(facet) !== -1;
+        },
+
+        _hasPermission: function(document, permission) {
+          return document.contextParameters && document.contextParameters.permissions.indexOf(permission) !== -1;
+        },
+
+        _isMutable: function(document) {
+          return !this._hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+        },
+
+        _canEdit: function(document) {
+          return document.type !== 'Root' && this._hasPermission(document, 'Write') && this._isMutable(document);
         }
       });
     })();
