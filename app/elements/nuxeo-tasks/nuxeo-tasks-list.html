@@ -95,7 +95,7 @@ Contributors:
     <div hidden$="[[_hidden(tasks)]]">
       <iron-list id="list" items="[[tasks]]" as="task" selection-enabled selected-item="{{_selection}}">
         <template>
-          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
             <div class="task-box vertical layout">
               <div class="task-info horizontal layout center">
                 <div class="vertical layout center">
@@ -204,7 +204,11 @@ Contributors:
             classes += ' selected';
           }
           return classes;
-        }
+        },
+
+        _tap: function() {
+          this.fire('tasksListSelectionChanged');
+        },
       });
     })();
   </script>

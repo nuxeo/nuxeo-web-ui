@@ -563,6 +563,7 @@ Contributors:
           'workflowStarted': '_refreshAndFetchTasks',
           'workflowTaskProcessed': '_refreshAndFetchTasks',
           'taskChanged': '_onTaskChanged',
+          'tasksListSelectionChanged': '_onTasksListSelectionChanged',
           'addToClipboard': '_onAddToClipboard',
           'addedToCollection': '_documentAddedToCollection',
           'removedFromCollection': '_documentRemovedFromCollection'
@@ -738,8 +739,11 @@ Contributors:
         },
 
         _onTaskChanged: function(e) {
-          this.page = 'tasks';
           this.currentTask = e.detail.task;
+        },
+
+        _onTasksListSelectionChanged: function() {
+          this.page = 'tasks';
         },
 
         _onAddToClipboard: function(e) {
