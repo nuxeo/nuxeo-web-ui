@@ -385,10 +385,6 @@ Contributors:
 
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-        listeners: {
-          'workflowTaskProcessed': '_taskCompleted'
-        },
-
         _documentChanged: function() {
           this.workflows = this.document.contextParameters.runningWorkflows;
           this.tasks = this.document.contextParameters.pendingTasks;
@@ -409,20 +405,6 @@ Contributors:
           this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
         },
 
-        _fetchTasks: function() {
-          // another hack to fetch tasks with user prefix and without prefix
-          // some tasks are prefixed, to be reviewed later
-          this._tmpTasks = [];
-          this.$.tasks.params = {'userId': 'Administrator'};
-          this.$.tasks.get().then(function(response) {
-            this._tmpTasks = response.entries;
-            this.$.tasks.params = {'userId': 'user:Administrator'};
-            this.$.tasks.get().then(function(response) {
-              this.tasks = this._tmpTasks.concat(response.entries);
-            }.bind(this));
-          }.bind(this));
-        },
-
         _startWorkflow: function() {
           var workflows = this.$.workflows;
           this.$.workflows.data = {
@@ -432,10 +414,6 @@ Contributors:
           };
           workflows.post().then(function() {
             this.fire('workflowStarted');
-            workflows.get().then(function(res) {
-              this.workflows = res.entries;
-            }.bind(this));
-            this._fetchTasks();
           }.bind(this));
         },
 
@@ -444,15 +422,6 @@ Contributors:
         },
 
         _cancelProcessTask: function() {
-          this.isProcessingTask = false;
-        },
-
-        _taskCompleted: function() {
-          var workflows = this.$.workflows;
-          workflows.get().then(function(res) {
-            this.workflows = res.entries;
-          }.bind(this));
-          this._fetchTasks();
           this.isProcessingTask = false;
         },
 
@@ -470,11 +439,6 @@ Contributors:
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
-        },
-
-        _loadWorkflows: function() {
-          console.log('_loadWorkflows');
-          this.workflows = this.$.workflows.response.entries;
         }
 
       });
