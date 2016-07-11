@@ -169,7 +169,7 @@ Contributors:
         },
 
         _computeVideoSources: function() {
-          if (this.document) {
+          if (this.document && this.document.properties['vid:transcodedVideos']) {
             return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
               return {
                 data: conversion.content.data,
