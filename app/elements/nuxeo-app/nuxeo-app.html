@@ -279,7 +279,7 @@ Contributors:
                 <div class="content layout vertical">
                   <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
-                    <a href$="[[urlFor('tasks')]]">[[i18n('command.app.viewTaskDashboard', '» view Tasks Dashboard')]]</a>
+                    <a href$="[[urlFor('tasks')]]">[[i18n('command.app.viewTaskDashboard', '» View Tasks Dashboard')]]</a>
                   </div>
                 </div>
               </section>
@@ -454,6 +454,8 @@ Contributors:
       [[i18n('heading.app.account', 'User Settings')]]</paper-tooltip>
 
     <nuxeo-document-create-button parent="[[currentParent]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-popup id="importPopup"
+                                 parent="[[currentParent]]"></nuxeo-document-create-popup>
 
     <iron-a11y-keys
       id="keys"
@@ -551,6 +553,8 @@ Contributors:
 
         listeners: {
           'document-updated': 'refresh',
+          'create-document': 'showDocumentCreationWizard',
+          'document-created': '_handleDocumentCreated',
           'nuxeo-content-view-navigate': '_navigateFromCV',
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
@@ -586,6 +590,10 @@ Contributors:
 
         refresh: function() {
           this.$.doc.get();
+        },
+
+        showDocumentCreationWizard: function(e) {
+          this.$.importPopup.toggleDialog(e.detail ? e.detail.files : null);
         },
 
         _navigate: function() {
@@ -785,6 +793,18 @@ Contributors:
 
         _documentRemovedFromCollection: function() {
           this.$.toast.text = this.i18n('document_removed_from_collection', 'Document removed from collection.');
+          this.$.toast.open();
+        },
+
+        _handleDocumentCreated: function(e) {
+          if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
+            var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
+            this.$.toast.text = this.i18n('label.documents.createdDocument', 'Created {0}.',
+                        doc.type.toLowerCase() + ' ' + doc.title);
+          } else {
+            this.$.toast.text = this.i18n('label.documents.createdDocuments', 'Created {0} documents.',
+                        e.detail.response.entries.length);
+          }
           this.$.toast.open();
         }
 

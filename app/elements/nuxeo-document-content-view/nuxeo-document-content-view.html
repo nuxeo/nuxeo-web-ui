@@ -221,9 +221,7 @@ Contributors:
       </div>
     </div>
 
-    <paper-toast id="toast"></paper-toast>
-
-    <nuxeo-smart-import id="smartImport" document="[[document]]"></nuxeo-smart-import>
+    <paper-toast id="toast" duration="0"></paper-toast>
 
     <iron-localstorage id="prefStorage" name="[[_displayModeStorageName(document)]]"
       value="{{_settings}}" auto-save-disabled>
@@ -237,7 +235,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-content-view',
 
-        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
           params: {
@@ -251,13 +249,6 @@ Contributors:
           pageSize: {
             type: Number,
             value: 40
-          },
-          isSmartImport: {
-            type: Boolean,
-            value: false
-          },
-          dropZoneTimeout: {
-            type: Object
           },
           currentIndex: {
             type: Number,
@@ -288,9 +279,7 @@ Contributors:
         },
 
         listeners: {
-          'batchFinished': 'importBatch',
           'document-created': '_handleDocumentCreated',
-          'smartImport': '_handleSmartImport',
           'dropzone.dragover': '_dragoverSmartImport',
           'dropzone.dragleave': '_dragleaveSmartImport',
           'dropzone.drop': '_dropSmartImport',
@@ -310,11 +299,6 @@ Contributors:
             classes += ' selected';
           }
           return classes;
-        },
-
-        ready: function() {
-          this.connection = this.$.nx;
-          this.setupDropZone(this.$.dropzone);
         },
 
         displayTable: function() {
@@ -351,49 +335,8 @@ Contributors:
           return this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid;
         },
 
-        importBatch: function(data) {
-          if (this.isSmartImport) {
-            this.$.smartImport.uploader = this.uploader;
-            this.$.smartImport.batchId = data.detail.batchId;
-            this.$.smartImport.toggleDialog().then(function() {
-              this.isSmartImport = false;
-            }.bind(this));
-          } else {
-            this.batchExecute('FileManager.Import', {
-              context: {
-                currentDocument: this.document.path
-              }
-            }).then(function(response) {
-              this._notifyAndUpdate(response);
-            }.bind(this));
-          }
-        },
-
-        _handleSmartImport: function(data) {
-          this._notifyAndUpdate(data.detail);
-        },
-
-        _notifyAndUpdate: function(response) {
-          var docs = response.entries;
-          if (docs.length === 1) {
-            var doc = docs[0];
-            this._toast(this.i18n('label.documents.importedDocument', 'Imported {0}.',
-                        doc.type.toLowerCase() + ' ' + doc.title));
-          } else {
-            this._toast(this.i18n('label.documents.importedDocuments', 'Imported {0} documents.',
-                        docs.length));
-          }
-          // refresh
-          this._handleDocumentCreated();
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
-        },
-
         _handleDocumentCreated: function() {
-          this.$.provider.fetch();
+          this.fire('document-updated');
         },
 
         _navigate: function(e) {
@@ -411,27 +354,20 @@ Contributors:
           this.fire('nuxeo-content-view-navigate');
         },
 
-        _dragoverSmartImport: function() {
-          if (!this.dropZoneTimeout) {
-            this.dropZoneTimeout = setTimeout(function() {
-              this.toggleClass('hoverSmartImport', true, this._dropZone);
-              this.isSmartImport = true;
-            }.bind(this), 3000);
-            this._toast(this.i18n('label.documents.smartImport', 'Hold to Smart Import'));
-          }
+        _dragoverSmartImport: function(e) {
+          e.preventDefault();
+          this.$.toast.text = this.i18n('label.documents.smartImport', 'Drop to Smart Import');
+          this.$.toast.open();
         },
 
         _dragleaveSmartImport: function() {
-          clearTimeout(this.dropZoneTimeout);
-          this.dropZoneTimeout = null;
-          this.toggleClass('hoverSmartImport', false, this._dropZone);
-          this.isSmartImport = false;
+          this.$.toast.close();
         },
 
-        _dropSmartImport: function() {
-          clearTimeout(this.dropZoneTimeout);
-          this.dropZoneTimeout = null;
-          this.toggleClass('hoverSmartImport', false, this._dropZone);
+        _dropSmartImport: function(e) {
+          e.preventDefault();
+          this.$.toast.close();
+          this.fire('create-document', {files: e.dataTransfer.files});
         },
 
         _formatDate: function(date) {

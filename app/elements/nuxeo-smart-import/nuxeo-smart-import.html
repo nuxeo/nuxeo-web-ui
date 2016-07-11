@@ -70,7 +70,7 @@ Contributors:
                 action="/"
                 on-submit="_smartImport">
             <div class="vertical layout">
-              <paper-dropdown-menu label="Select Import Operation">
+              <paper-dropdown-menu no-label-float label="[[i18n('ui.smartImport.selectOp', 'Select Import Operation')]]">
                 <paper-menu class="dropdown-content" selected="{{selectedImportOpKey}}" attr-for-selected="key">
                   <template is="dom-repeat" items="[[smartImportOps]]">
                     <paper-item key="[[item.key]]">[[i18n(item.label)]]</paper-item>
@@ -101,7 +101,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-smart-import',
 
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.UploaderBehavior],
 
         properties: {
           document: {

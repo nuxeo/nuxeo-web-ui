@@ -1,0 +1,631 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-document-create-popup`
+@group Nuxeo UI
+@element nuxeo-document-create-popup
+-->
+<dom-module id="nuxeo-document-create-popup">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      nuxeo-path-suggestion {
+        --nuxeo-path-suggestion-results: {
+           z-index: 200;
+         };
+         --paper-input-container-underline: {
+           display: none;
+         };
+         --paper-input-container-underline-focus: {
+           display: none;
+         };
+      }
+
+      .batch-upload-file {
+        width: calc(50% - 34px);
+        height: 45px;
+        margin: 4px 8px;
+        padding: 4px 8px;
+        background-color: white;
+        border: var(--nuxeo-border);
+        border-radius: 2px;
+      }
+
+      #createDocDialog {
+        width: 75vw;
+      }
+
+      #heading {
+        margin: 0;
+        padding: 0;
+      }
+
+      .heading {
+        padding: 16px 32px;
+        margin-right: 32px;
+      }
+
+      .sidepart {
+        border-right: var(--nuxeo-border);
+      }
+
+      #typeDropdown {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-underline-focus: {
+          display: none;
+        };
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .suggestion-wrapper {
+        border: var(--nuxeo-border);
+        border-radius: 8px;
+        border-width: 2px;
+        padding: 0px 8px;
+      }
+
+      .suggestion-wrapper iron-icon {
+        color: var(--nuxeo-secondary-color);
+        margin-right: 8px;
+      }
+
+      .container {
+        width: 640px;
+      }
+
+      .picker {
+        margin-left: 32px;
+      }
+
+      .path {
+        border-top: var(--nuxeo-border);
+        margin-top: 0px;
+        margin-bottom: 8px;
+        padding: 16px 32px 16px 32px;
+      }
+
+      .path span {
+        padding-bottom: 8px;
+      }
+
+      #dropzone {
+        margin: 16px 32px;
+        padding: 8px 8px;
+        border: 2px dashed #d1d1d1;
+        border-radius: 4px;
+        background-color: #F7F6F6;
+        min-height: 100px;
+      }
+
+      #form {
+        margin-top: 0px;
+        padding: 24px 40px;
+        overflow-y: auto;
+        max-height: 50vh;
+      }
+
+      .batch-upload-file paper-icon-button {
+        margin-left: 15%;
+      }
+
+      .name {
+        font-size: 1.2em;
+        text-overflow: ellipsis;
+        display: block;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .size {
+        font-size: 0.8em;
+        color: gray;
+      }
+
+      .completed,
+      .uploading {
+        margin-top: 4px;
+      }
+
+      .complete {
+        color: green;
+      }
+
+      .uploading {
+        color: red;
+      }
+
+      .drop-label {
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+
+    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-resource id="uploader"></nuxeo-resource>
+    <nuxeo-document id="docRequest"
+                    doc-path="[[targetPath]]"
+                    data="[[document]]"
+                    response="{{createResponse}}"></nuxeo-document>
+
+    <paper-dialog id="createDocDialog"
+                  class="container vertical layout"
+                  modal
+                  no-auto-focus>
+      <div id="heading">
+        <div hidden$="[[addMetadata]]">
+          <div class="horizontal layout center">
+            <div class="heading sidepart">
+              <label>[[i18n('ui.documentCreateButton.type.label', 'Type')]]</label>
+            </div>
+            <div class="flex">
+              <paper-dropdown-menu id="typeDropdown" no-label-float horizontal-align="left">
+                <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
+                  <template is="dom-repeat" items="[[documentTypes]]" as="type">
+                    <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+            </div>
+          </div>
+        </div>
+        <div hidden$="[[!addMetadata]]" class="horizontal layout center">
+          <div class= "heading horizontal layout">
+            <h2>[[i18n('ui.documentCreateButton.addMetadata', 'Add Metadata')]]</h2>
+          </div>
+        </div>
+      </div>
+      <div class="path vertical layout" hidden$="[[addMetadata]]">
+        <span>[[i18n('label.documents.in', 'In')]]</span>
+        <div class="suggestion-wrapper horizontal layout center">
+          <div>
+            <iron-icon icon="icons:folder"></iron-icon>
+          </div>
+          <div class="flex">
+            <nuxeo-path-suggestion id="pathSuggester"
+                                   value="{{targetPath}}"
+                                   no-label-float></nuxeo-path-suggestion>
+          </div>
+        </div>
+      </div>
+      <div id="dropzone" class="horizontal layout" hidden$="[[!_showDropzone(selectedDocType,addMetadata)]]">
+        <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
+        <template is="dom-if" if="[[!hasFiles]]">
+          <div class="drop-label horizontal layout center center-justified flex" on-tap="_showUploadDialog">
+            [[i18n('ui.documentCreateButton.clickOrDrop', 'Click to select files or drag them to upload')]]
+          </div>
+        </template>
+        <template is="dom-if" if="[[hasFiles]]">
+          <div class="horizontal layout flex wrap">
+            <template is="dom-repeat" items="[[files]]" as="file">
+              <!-- batch upload file -->
+              <div class="batch-upload-file horizontal layout">
+                <div class="vertical layout flex">
+                  <div class="horizontal layout center">
+                    <div class="name flex">
+                      [[file.name]]
+                    </div>
+                    <div class="size">
+                      [[_formatSize(file.size)]]
+                    </div>
+                  </div>
+                  <template is="dom-if" if="[[file.complete]]">
+                    <div class="complete">
+                      Complete
+                    </div>
+                  </template>
+                  <template is="dom-if" if="[[!file.complete]]">
+                    <div class="uploading">
+                      Uploading
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <form is="iron-form"
+            action="/"
+            id="form"
+            on-submit="_regularCreate" class="sep form vertical layout"
+            hidden$="[[!_showForm(selectedDocType,addMetadata)]]">
+        <div id="document-edit" hidden$="[[addMetadata]]">
+          <!--dynamically loaded via _updateLayout-->
+        </div>
+        <div id="add-metadata" hidden$="[[!addMetadata]]">
+          <nuxeo-dublincore-edit document="{{newDocument}}"></nuxeo-dublincore-edit>
+        </div>
+        <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
+      </form>
+
+      <div class="buttons sep horizontal end-justified layout">
+        <paper-button dialog-dismiss on-tap="_clear">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button on-tap="_back" hidden$="[[!addMetadata]]">[[i18n('command.back', 'Back')]]</paper-button>
+        <paper-button noink
+                      class="primary"
+                      on-tap="_toggleAddMetadata"
+                      hidden$="[[!_canAddMetadata(selectedDocType,hasFilesUploaded,addMetadata)]]">
+                      [[i18n('command.addMetadata', 'Add Metadata')]]
+                    </paper-button>
+        <paper-button noink
+                      class="primary"
+                      on-tap="_create"
+                      hidden$="[[!_canCreate(selectedDocType,hasFilesUploaded,addMetadata)]]"
+                      >[[i18n('command.create', 'Create')]]</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-toast id="toast"></paper-toast>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-create-popup',
+
+        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Polymer.IronResizableBehavior],
+
+        properties: {
+          parent: {
+            type: Object
+          },
+
+          targetPath: {
+            type: String
+          },
+
+          document: {
+            type: Object
+          },
+
+          newDocument: {
+            type: Object,
+            value: {
+              properties: {}
+            }
+          },
+
+          documentTypes: {
+            type: Array,
+            value: [
+              {key: 'smartImport', label: 'label.document.type.smartImport'},
+              {key: 'file', label: 'label.document.type.file'},
+              {key: 'note', label: 'label.document.type.note'},
+              {key: 'picture', label: 'label.document.type.picture'},
+              {key: 'video', label: 'label.document.type.video'},
+              {key: 'folder', label: 'label.document.type.folder'},
+              {key: 'workspace', label: 'label.document.type.workspace'}
+            ]
+          },
+
+          documentTemplates: {
+            type: Object,
+            value: {
+              smartImport: function() {
+                return null;
+              },
+              file: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'File',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              note: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Note',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': '',
+                    'note:note': '',
+                    'note:mime_type': 'text/html'
+                  }
+                };
+              },
+              picture: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Picture',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              video: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Video',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              folder: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Folder',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              },
+              workspace: function() {
+                return {
+                  'entity-type': 'document',
+                  name: '',
+                  type: 'Workspace',
+                  properties: {
+                    'dc:title': '',
+                    'dc:description': ''
+                  }
+                };
+              }
+            }
+          },
+
+          selectedDocType: {
+            type: String,
+            value: 'smartImport',
+            observer: '_updateLayout'
+          },
+
+          hasFilesUploaded: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
+          hasFiles: {
+            type: Boolean,
+            value: false,
+            notify: true
+          }
+        },
+        listeners: {
+          'batchFinished': 'batchReady'
+        },
+        observers: [
+          '_observeFiles(files.*)'
+        ],
+
+        ready: function() {
+          this.connection = this.$.nx;
+          this.setupDropZone(this.$.dropzone);
+          this._clear();
+        },
+
+        toggleDialog: function(files) {
+          if (!this.$.createDocDialog.opened) {
+            this._updateLayout();
+            this.targetPath = this.parent ? this.parent.path + '/' : '/default-domain/';
+          }
+          this.$.createDocDialog.toggle();
+          if (files) {
+            this.selectedDocType = 'smartImport';
+            this.uploadFiles(files);
+          }
+        },
+
+        _observeFiles: function() {
+          this.hasFiles = this.files && this.files.length > 0;
+          this.hasFilesUploaded = this.files && this.files.every(function(file) {
+            return file.complete;
+          });
+        },
+
+        _showForm: function() {
+          return (this.selectedDocType === 'smartImport' && this.addMetadata) ||
+                 (this.selectedDocType !== 'smartImport' && !this.addMetadata);
+        },
+
+        _showDropzone: function() {
+          return this.selectedDocType === 'smartImport' && !this.addMetadata;
+        },
+
+        _isBulkCreate: function() {
+          return this.selectedDocType === 'smartImport';
+        },
+
+        _canCreate: function() {
+          return !this._isBulkCreate() || this.hasFilesUploaded;
+        },
+
+        _canAddMetadata: function() {
+          return this._isBulkCreate() && this.hasFilesUploaded && !this.addMetadata;
+        },
+
+        _showUploadDialog: function() {
+          this.$.uploadFiles.click();
+        },
+
+        _filesChanged: function(e) {
+          this.uploadFiles(e.target.files);
+        },
+
+        _toggleAddMetadata: function() {
+          this.addMetadata = !this.addMetadata;
+          if (this.addMetadata) {
+            this.notifyResize();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          return ['nuxeo', type, 'edit'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document type
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(),
+              el = document.createElement(layout),
+              parent = this.$['document-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current document type
+         */
+        _updateLayout: function() {
+          this.document = this.documentTemplates[this.selectedDocType]();
+
+          var layout = this.document ? this._layoutFor() : 'nuxeo-dublincore-edit';
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find edit layout for ' + this.document.type);
+                });
+          } else if (this.document) {
+            this._createLayout();
+          }
+          this.notifyResize();
+        },
+
+        _clear: function() {
+          this.files = [];
+          this.hasFilesUploaded = false;
+          this.properties = [];
+          this.addMetadata = false;
+          this.set('newDocument.properties', {});
+        },
+
+        _back: function() {
+          this.addMetadata = false;
+        },
+
+        _create: function() {
+          if (this._isBulkCreate()) {
+            this._bulkCreate();
+          } else {
+            document.getElementById('submitButton').click();
+          }
+        },
+
+        _regularCreate: function() {
+          var docRequest = this.$.docRequest;
+          var name = this.document.properties['dc:title'].replace(/[^a-z0-9]/gi, '_');
+          this.document.name = name;
+          docRequest.post().then(function(response) {
+            this._clear();
+            page('/browse' + response.path);
+            this._notify(response);
+          }.bind(this));
+          this.toggleDialog();
+        },
+
+        _bulkCreate: function() {
+          var params = {
+            context: {
+              currentDocument: this.targetPath,
+            }
+          };
+          if (this.addMetadata) {
+            params.properties = this.newDocument.properties;
+          }
+
+          this.batchExecute(this.addMetadata ? 'FileManager.ImportWithMetaData' : 'FileManager.Import', params)
+              .then(function(response) {
+            this._clear();
+            this.toggleDialog();
+            this._notify(response);
+            if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
+              this.fire('document-updated');
+            } else {
+              page('/browse' + this.targetPath);
+            }
+          }.bind(this));
+        },
+
+        batchReady: function(data) {
+          data.stopPropagation();
+          this.hasFilesUploaded = true;
+          this.properties = [];
+          for (var i = 0; i < this.files.length; i++) {
+            this.properties.push({});
+            this.files[i].index = i;
+          }
+        },
+
+        _notify: function(response) {
+          this.fire('document-created', {response: response});
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
+        },
+
+        _formatSize: function(size) {
+          if (!size) {
+            return '';
+          } else if (size > 1048576) {
+            return parseFloat(size / 1048576).toFixed(2) + ' MB';
+          } else if (size > 1024) {
+            return parseFloat(size / 1024).toFixed(2) + ' KB';
+          } else {
+            return size.toString() + ' B';
+          }
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
