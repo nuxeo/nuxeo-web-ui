@@ -437,12 +437,12 @@ Contributors:
           if (!this.$.createDocDialog.opened) {
             this._updateLayout();
             this.targetPath = this.parent ? this.parent.path + '/' : '/default-domain/';
+            this.selectedDocType = 'smartImport';
+            if (files) {
+              this.uploadFiles(files);
+            }
           }
           this.$.createDocDialog.toggle();
-          if (files) {
-            this.selectedDocType = 'smartImport';
-            this.uploadFiles(files);
-          }
         },
 
         _observeFiles: function() {
@@ -586,7 +586,9 @@ Contributors:
             this._clear();
             this.toggleDialog();
             this._notify(response);
-            if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
+            if (response.entries && response.entries.length === 1) {
+              page('/browse' + response.entries[0].path);
+            } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
               this.fire('document-updated');
             } else {
               page('/browse' + this.targetPath);
