@@ -122,21 +122,7 @@ Contributors:
       </template>
     </div>
     <div class="card-section attachments">
-      <p class="title">
-        <iron-icon icon="editor:attach-file"></iron-icon>
-        [[i18n('label.summary.download.attachments', 'Attachments')]]
-      </p>
-      <div>
-        <template is="dom-repeat" items="[[document.properties.files:files]]">
-          <div class="item">
-            <a href="[[item.file.data]]">[[item.filename]]</a>
-            <span>[[_formatSize(item.file.length)]]</span>
-          </div>
-        </template>
-      </div>
-      <div class="droparea">
-        [[i18n('label.summary.drop.attachments', '+ Complete the document with additional files')]]
-      </div>
+      <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
     </div>
 
     <paper-toast id="toast"></paper-toast>
