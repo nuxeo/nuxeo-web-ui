@@ -52,8 +52,8 @@
 
       .paper-header {
         height: 59px;
-        color: var(--nuxeo-title-color);
-        border-bottom: var(--nuxeo-border);
+        color: var(--nuxeo-header-title-color);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         font-size: 1.2em;
         font-weight: 600;
         padding: 0 4.2em 0 1.7em;
@@ -68,6 +68,14 @@
         width: 100%;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+      }
+
+      .paper-header ::content paper-icon-button:hover,
+      .paper-header ::content iron-icon:hover,
+      .paper-header ::content paper-icon-button:focus,
+      .paper-header ::content iron-icon:focus {
+        color: var(--nuxeo-header-actions-hover);
+        fill: var(--nuxeo-header-actions-hover);
       }
 
       /* --
@@ -89,8 +97,8 @@
       }
 
       #sidebar paper-toolbar {
-        background-color: var(--nuxeo-secondary-color);
-        color: white;
+        background-color: var(--nuxeo-sidebar-background);
+        color: var(--nuxeo-sidebar-actions);
         width: 250px;
       }
 
@@ -151,9 +159,8 @@
       -- */
       paper-card {
         --paper-card: {
-          box-shadow: none !important;
+          box-shadow: 0 0 1px rgba(0,0,0,0.34);
           background-color: #fff;
-          border: var(--nuxeo-border);
         };
       }
 
