@@ -24,10 +24,7 @@ Contributors:
 @element nuxeo-clipboard-toggle-button
 -->
 <dom-module id="nuxeo-clipboard-toggle-button">
-
-
   <template>
-
     <style is="custom-style" include="shared-styles">
       :host {
         display: inline-block;
@@ -50,10 +47,8 @@ Contributors:
       icon="icons:content-paste"
       active="[[inClipboard]]"
       on-tap="toggle"></paper-icon-button>
-    <paper-tooltip for="clipboardBut">[[tootltip]]</paper-tooltip>
-
+    <paper-tooltip for="clipboardBut">[[tooltip]]</paper-tooltip>
   </template>
-
   <script>
     (function() {
       'use strict';
