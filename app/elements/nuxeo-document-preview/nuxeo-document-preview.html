@@ -71,11 +71,7 @@ Contributors:
     </template>
 
     <template mime-pattern="video.*">
-      <nuxeo-video-viewer controls>
-        <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
-          <source src="[[conversion.content.data]]" type="[[conversion.content.mime-type]]" />
-        </template>
-      </nuxeo-video-viewer>
+      <nuxeo-video-viewer controls sources="[[videoSources]]"></nuxeo-video-viewer>
     </template>
 
     <template mime-pattern="text/(?:.*-)?markdown">
@@ -107,6 +103,10 @@ Contributors:
           xpath: {
             type: String,
             value: 'file:content'
+          },
+          videoSources: {
+            type: Array,
+            computed: '_computeVideoSources(document)'
           }
         },
 
@@ -149,6 +149,7 @@ Contributors:
               this.templatize(previewer);
               var instance = this.stamp({
                 document: this.document,
+                videoSources: this.videoSources,
                 blob: this.blob
               });
               this.$.preview.appendChild(instance.root);
@@ -165,8 +166,18 @@ Contributors:
             obj = obj[path[i]];
           }
           return obj;
-        }
+        },
 
+        _computeVideoSources: function() {
+          if (this.document) {
+            return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
+              return {
+                data: conversion.content.data,
+                type: conversion.content['mime-type']
+              };
+            });
+          }
+        }
       });
     })();
   </script>
