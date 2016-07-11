@@ -34,6 +34,7 @@ Contributors:
         padding: 0;
         filter: 0.1s ease-out, filter 0.1s ease-out;
         -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
+        border-bottom: 3px solid transparent;
       }
 
       .bubbleBox:hover,
@@ -42,7 +43,8 @@ Contributors:
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
         z-index: 500;
-        box-shadow: 0 3px 0 rgba(33, 53, 125, 0.9), 0 0 10px rgba(0, 0, 0, 0.25);
+        border-bottom: 3px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       }
 
       .bubbleBox .title {
