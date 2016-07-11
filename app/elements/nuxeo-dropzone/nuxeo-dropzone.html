@@ -64,9 +64,21 @@ Contributors:
         @apply(--nuxeo-dropzone-hover-layout);
       }
 
+      #dzContainer.hover-highlight {
+        border: 2px dashed #555;
+        border-radius: 8px;
+        @apply(--nuxeo-dropzone-hover-layout);
+      }
+
       #dzLabel {
         pointer-events: none;
         color: #aaa;
+        text-align: center;
+      }
+
+      #dzLabel.highlight {
+        pointer-events: none;
+        color: #555;
         text-align: center;
       }
 
@@ -112,10 +124,10 @@ Contributors:
     <div id="dropzone">
       <div id="dzContainer">
         <span id="dzLabel">
-          <template is="dom-if" if="[[!empty]]">
+          <template is="dom-if" if="[[dropping]]">
             [[message]]
           </template>
-          <template is="dom-if" if="[[empty]]">
+          <template is="dom-if" if="[[!dropping]]">
             [[messageEmpty]]
           </template>
         </span>
@@ -136,6 +148,10 @@ Contributors:
             notify: true
           },
           empty: {
+            type: Boolean,
+            value: false
+          },
+          dropping: {
             type: Boolean,
             value: false
           },
@@ -233,25 +249,37 @@ Contributors:
 
         _dragover: function(e) {
           e.preventDefault();
+          this.dropping = true;
           if (!this.empty) {
             this.toggleClass('hover', true, this.$.dzContainer);
             this.toggleClass('hover', true, this.$.content);
+          } else {
+            this.toggleClass('hover-highlight', true, this.$.dzContainer);
+            this.toggleClass('highlight', true, this.$.dzLabel);
           }
         },
 
         _dragleave: function() {
+          this.dropping = false;
           if (!this.empty) {
             this.toggleClass('hover', false, this.$.dzContainer);
             this.toggleClass('visible', false, this.$.dropzone);
             this.toggleClass('hover', false, this.$.content);
+          } else {
+            this.toggleClass('hover-highlight', false, this.$.dzContainer);
+            this.toggleClass('highlight', false, this.$.dzLabel);
           }
         },
 
         _drop: function(e) {
+          this.dropping = false;
           if (!this.empty) {
             this.toggleClass('hover', false, this.$.dzContainer);
             this.toggleClass('visible', false, this.$.dropzone);
             this.toggleClass('hover', false, this.$.content);
+          } else {
+            this.toggleClass('hover-highlight', false, this.$.dzContainer);
+            this.toggleClass('highlight', false, this.$.dzLabel);
           }
           e.preventDefault();
           this.uploadFiles(e.dataTransfer.files);
