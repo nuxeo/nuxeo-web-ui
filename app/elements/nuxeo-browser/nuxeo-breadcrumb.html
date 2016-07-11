@@ -32,7 +32,7 @@ Contributors:
 
       .breadcrumb, .shortBreadcrumb {
         margin: 0 1.5em 0 0;
-        color: var(--nuxeo-text-light);
+        color: var(--nuxeo-header-text-color);
         font-weight: 300;
         white-space: nowrap;
       }
@@ -41,11 +41,15 @@ Contributors:
         text-decoration: none;
       }
 
+      .breadcrumb a {
+        color: var(--nuxeo-header-text-color);
+      }
+
       a.breadcrumb-item-current {
         font-weight: 600;
         max-width: 12em;
         display: inline-block;
-        color: var(--nuxeo-link-color);
+        color: var(--nuxeo-header-title-color);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

@@ -141,15 +141,16 @@ Contributors:
       }
 
       .side-nav paper-icon-button {
-        color: #00adff;
+        color: var(--nuxeo-sidebar-actions);
         height: 50px;
         padding: 14px;
         width: 60px;
       }
 
-      .side-nav paper-icon-button.iron-selected {
-        color: #fff;
-
+      .side-nav paper-icon-button.iron-selected,
+      .side-nav paper-icon-button:hover {
+        color: var(--nuxeo-sidebar-actions-hover);
+        fill: var(--nuxeo-sidebar-actions-hover);
       }
 
       .side-nav paper-icon-button.iron-selected,
@@ -172,7 +173,7 @@ Contributors:
       }
 
       paper-card .title {
-        color: var(--nuxeo-title-color);
+        color: var(--nuxeo-header-title-color);
         font-size: 1.4rem;
         margin: 0 0 .4em;
         padding-bottom: 8px;

@@ -76,7 +76,9 @@ Contributors:
         width: 65px;
         height: 59px;
         padding: 16px;
-        border-left: var(--nuxeo-border);
+        box-shadow: 1px 0 0 rgba(0,0,0,0.1) inset;
+        background-color: rgba(255,255,255,0.03);
+        color: var(--nuxeo-header-actions);
       }
 
       #searchButton:hover {
@@ -85,8 +87,8 @@ Contributors:
       }
 
       #searchButton.toggled {
-        color: white;
-        background-color: var(--nuxeo-primary-color);
+        color: var(--nuxeo-button-primary-text);
+        background-color: var(--nuxeo-button-primary);
         z-index: 1001;
       }
 
@@ -105,7 +107,6 @@ Contributors:
         height: 59px;
         background-color: white;
         z-index: 1002;
-        border-bottom: var(--nuxeo-border);
       @apply(--layout-horizontal);
       @apply(--layout-center);
       @apply(--layout-center-justified);

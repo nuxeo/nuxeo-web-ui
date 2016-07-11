@@ -37,11 +37,16 @@ Contributors:
   <template>
     <style>
       :host {
-        color: var(--nuxeo-action-color);
+        color: var(--nuxeo-header-actions);
       }
 
       ::content paper-icon-button {
         width: 2.25rem;
+        color: var(--nuxeo-header-actions);
+      }
+
+      ::content paper-icon-button:hover {
+        color: var(--nuxeo-header-actions-hover);
       }
     </style>
 
