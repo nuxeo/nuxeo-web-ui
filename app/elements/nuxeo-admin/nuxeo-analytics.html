@@ -48,7 +48,19 @@ Contributors:
         };
         padding: .3em 0 .5em .5em;
         margin-left: 1.5em;
-        border-left: var(--nuxeo-border);
+        box-shadow: 1px 0 0 rgba(0,0,0,0.2) inset;
+      }
+
+      ::content .unfocused-line.paper-input-container {
+        background-color: transparent;
+      }
+
+      ::content paper-input-container .input-content.paper-input-container {
+        flex-direction: row-reverse;
+      }
+
+      ::content paper-input-container .input-content iron-icon {
+        margin-right: .3em;
       }
     </style>
 

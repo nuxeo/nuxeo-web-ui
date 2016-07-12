@@ -61,7 +61,7 @@ Contributors:
 
       .heading {
         padding: 16px 32px;
-        margin-right: 32px;
+        margin-right: 1em;
       }
 
       .sidepart {
@@ -81,11 +81,28 @@ Contributors:
         height: 100%;
       }
 
+      paper-dropdown-menu {
+        --paper-input-container-input: {
+          font-size: 18px;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-link-color);
+        };
+      }
+
+      ::content paper-input-container .input-content.paper-input-container {
+        flex-direction: row-reverse;
+      }
+
+      ::content paper-input-container .input-content iron-icon {
+        margin-right: .3em;
+      }
+
       .suggestion-wrapper {
         border: var(--nuxeo-border);
         border-radius: 8px;
         border-width: 2px;
-        padding: 0px 8px;
+        padding: 0 8px;
       }
 
       .suggestion-wrapper iron-icon {
@@ -103,7 +120,7 @@ Contributors:
 
       .path {
         border-top: var(--nuxeo-border);
-        margin-top: 0px;
+        margin-top: 0;
         margin-bottom: 8px;
         padding: 16px 32px 16px 32px;
       }
@@ -122,7 +139,7 @@ Contributors:
       }
 
       #form {
-        margin-top: 0px;
+        margin-top: 0;
         padding: 24px 40px;
         overflow-y: auto;
         max-height: 50vh;
