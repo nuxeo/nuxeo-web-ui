@@ -97,9 +97,9 @@ Contributors:
     <div class="notecontent">
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <nuxeo-html-editor value="{{_value}}"></nuxeo-html-editor>
+          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
           <div class="buttons layout horizontal end-justified">
-            <paper-button on-click="_editorSave" class="save">
+            <paper-button on-click="_editorSave" class="save" hidden$="[[!_canEdit(document)]]">
               <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
             </paper-button>
           </div>

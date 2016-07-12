@@ -78,12 +78,19 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
           placeholder: {
             type: String,
             value: 'Type here...'
-          }
+          },
+
+          readOnly: Boolean
         },
 
-        ready: function() {
+        attached: function() {
+          this.async(this._init.bind(this), 100);
+        },
+
+        _init: function() {
           // init editor
           var editor = AlloyEditor.editable(this.$.editor, {
+            readOnly: this.readOnly,
             toolbars: {
               add: {
                 buttons: ['image', 'camera', 'hline', 'table'],
