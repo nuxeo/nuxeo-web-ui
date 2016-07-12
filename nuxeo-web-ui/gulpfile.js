@@ -158,7 +158,13 @@ gulp.task('strip', function() {
     '!' + dist('bower_components/nuxeo-ui-elements'),
     '!' + dist('bower_components/nuxeo-ui-elements/viewers'),
     '!' + dist('bower_components/nuxeo-ui-elements/viewers/pdfjs'),
-    '!' + dist('bower_components/nuxeo-ui-elements/viewers/pdfjs/**')
+    '!' + dist('bower_components/nuxeo-ui-elements/viewers/pdfjs/**'),
+    // keep Alloy editor assets
+    '!' + dist('bower_components/alloyeditor'),
+    '!' + dist('bower_components/alloyeditor/dist'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor/assets'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor/assets/**'),
   ]);
 });
 
