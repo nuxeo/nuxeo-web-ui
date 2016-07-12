@@ -34,11 +34,14 @@
   </condition>
 
   <target name="init" description="Download all node and web dependencies">
+    <delete dir="node_modules" failonerror="true" />
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
+    <bower-fetch artifact="polymerelements:iron-elements:1.0.10" />
+    <bower-fetch artifact="polymerelements:paper-elements:1.0.7" />
     <exec executable="${cmd.bower}" failonerror="true">
-      <arg value="update" />
+      <arg value="install" />
     </exec>
   </target>
 
@@ -47,5 +50,19 @@
       <arg value="default" />
     </exec>
   </target>
+
+  <macrodef name="bower-fetch">
+    <attribute name="classifier" default="WEBUI-0.7.0"/>
+    <attribute name="artifact"/>
+    <attribute name="dir" default="target/classes/web/nuxeo.war/ui/bower_components"/>
+    <sequential>
+      <echo message="Fetching @{artifact}" />
+      <exec executable="${cmd.mvn}" failonerror="true">
+        <arg value="dependency:unpack" />
+        <arg value="-Dartifact=@{artifact}:zip:@{classifier}" />
+        <arg value="-DoutputDirectory=@{dir}" />
+      </exec>
+    </sequential>
+  </macrodef>
 
 </project>
