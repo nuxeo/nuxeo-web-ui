@@ -169,6 +169,7 @@ Contributors:
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
+                    headers='{"nx_es_sync": "true"}'
                     response="{{createResponse}}"></nuxeo-document>
 
     <paper-dialog id="createDocDialog"
@@ -581,8 +582,8 @@ Contributors:
             params.properties = this.newDocument.properties;
           }
 
-          this.batchExecute(this.addMetadata ? 'FileManager.ImportWithMetaData' : 'FileManager.Import', params)
-              .then(function(response) {
+          this.batchExecute(this.addMetadata ? 'FileManager.ImportWithMetaData' : 'FileManager.Import',
+                            params, {'nx_es_sync': 'true'}).then(function(response) {
             this._clear();
             this.toggleDialog();
             this._notify(response);
