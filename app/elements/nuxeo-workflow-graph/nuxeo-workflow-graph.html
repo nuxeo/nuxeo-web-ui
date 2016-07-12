@@ -128,7 +128,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource auto
+    <nuxeo-resource id="grahResource"
                     path="/workflow/[[workflowId]]/graph"
                     response="{{graph}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
@@ -193,6 +193,7 @@ Contributors:
         },
 
         observers: [
+          '_fetchGraph(workflowId)',
           '_updateGraph(graph)'
         ],
 
@@ -256,6 +257,12 @@ Contributors:
             return 'workflow_subworkflow_task';
           } else {
             return 'workflow_simple_task';
+          }
+        },
+
+        _fetchGraph: function() {
+          if (this.workflowId && this.workflowId.length > 0) {
+            this.$.grahResource.execute();
           }
         },
 
