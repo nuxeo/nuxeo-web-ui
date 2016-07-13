@@ -2,24 +2,20 @@
   "name": "nuxeo-web-ui",
   "private": true,
   "dependencies": {
-    "alloyeditor": "~0.7.5",
+    "alloyeditor": "0.7.5",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
     "jsPlumb": "2.0.4",
-    "marked-element": "PolymerElements/marked-element#~1.1.1",
-    "moment": "~2.10.6",
-    "nuxeo-elements": "nuxeo/nuxeo-elements#master",
-    "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#master",
-    "page": "nuxeo/page.js#webui",
+    "marked-element": "PolymerElements/marked-element#1.1.1",
+    "moment": "2.10.6",
+    "nuxeo-elements": "0.4.0",
+    "nuxeo-ui-elements": "0.2.0",
+    "page": "nuxeo/page.js#1.6.5",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "polymer": "Polymer/polymer#^1.1.0",
-    "nuxeo-dataviz-elements": "master",
-    "chart-elements": "nuxeo/chart-elements#nuxeo-chart-elements"
+    "nuxeo-dataviz-elements": "0.4.0",
+    "chart-elements": "nuxeo/chart-elements#2.0.3"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
-  },
-  "resolutions": {
-    "nuxeo-elements": "master",
-    "nuxeo": "^0.25.0"
   }
 }
