@@ -323,5 +323,14 @@
   "label.ui.aggregate.from_1800_s": "More than 1800s",
   "ui.recentTable.name": "Name",
   "ui.recentTable.type": "Type",
-  "ui.recentTable.lastViewed": "Last viewed"
+  "ui.recentTable.lastViewed": "Last viewed",
+  "ui.theme.apply:": "Apply",
+  "ui.theme.applying:": "Applying Theme...",
+  "ui.theme.current": "Current",
+  "ui.theme.nuxeo": "Nuxeo Theme",
+  "ui.theme.light": "Light Theme",
+  "ui.theme.dark": "Dark Theme",
+  "ui.theme.garden": "Garden Theme",
+  "ui.theme.kawai": "Kawai Theme",
+  "ui.theme.ocean": "Ocean Theme"
 }
