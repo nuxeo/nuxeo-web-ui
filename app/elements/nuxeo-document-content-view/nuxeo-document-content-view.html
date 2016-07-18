@@ -122,6 +122,7 @@ Contributors:
         <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
           empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
           empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
+          filters="{{filters}}"
           selected-items="{{gridSelectedItems}}"
           selection-enabled>
           <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
@@ -138,7 +139,7 @@ Contributors:
       <div id="table" hidden$="[[_isDisplayGrid]]">
         <nuxeo-data-table id="datatable"
           nx-provider="cvProvider"
-          settings-enabled
+          settings-enabled filters="{{filters}}"
           empty-label="[[i18n('ui.browse.noDocument', 'There are no items to display in this folder.')]]"
           empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
           selected-items="{{tableSelectedItems}}"
