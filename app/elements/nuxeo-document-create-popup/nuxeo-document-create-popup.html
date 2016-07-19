@@ -28,6 +28,10 @@ Contributors:
 
   <template>
     <style is="custom-style" include="shared-styles">
+      paper-dialog {
+        height: 80vh;
+      }
+
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
            z-index: 200;
@@ -54,7 +58,7 @@ Contributors:
         width: 75vw;
       }
 
-      #heading {
+      #heading, #content {
         margin: 0;
         padding: 0;
       }
@@ -62,31 +66,46 @@ Contributors:
       .heading {
         padding: 16px 32px;
         margin-right: 1em;
+        font-weight: bold;
       }
 
-      .sidepart {
+      .subheading {
+        padding: 16px 16px 16px 32px;
+        margin-right: 16px;
+        font-weight: bold;
+      }
+
+      .sidepart-right {
         border-right: var(--nuxeo-border);
       }
 
-      #typeDropdown {
+      .sidepart-left {
+        border-left: var(--nuxeo-border);
+      }
+
+      .typeDropdown {
+        width: 100%;
+      }
+
+      .typeDropdownSmall {
+        width: 150px;
+      }
+
+      paper-dropdown-menu {
+        --paper-input-container-input: {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          font-size: 18px;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-link-color);
+        };
         --paper-input-container-underline: {
           display: none;
         };
         --paper-input-container-underline-focus: {
           display: none;
-        };
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-      }
-
-      paper-dropdown-menu {
-        --paper-input-container-input: {
-          font-size: 18px;
-          font-weight: 400;
-          text-align: left;
-          color: var(--nuxeo-link-color);
         };
       }
 
@@ -114,10 +133,6 @@ Contributors:
         width: 640px;
       }
 
-      .picker {
-        margin-left: 32px;
-      }
-
       .path {
         border-top: var(--nuxeo-border);
         margin-top: 0;
@@ -142,11 +157,10 @@ Contributors:
         margin-top: 0;
         padding: 24px 40px;
         overflow-y: auto;
-        max-height: 50vh;
       }
 
       .batch-upload-file paper-icon-button {
-        margin-left: 15%;
+        margin-left: 1em;
       }
 
       .name {
@@ -162,7 +176,7 @@ Contributors:
         color: gray;
       }
 
-      .completed,
+      .complete,
       .uploading {
         margin-top: 4px;
       }
@@ -179,14 +193,25 @@ Contributors:
         font-weight: bold;
         cursor: pointer;
       }
+
+      .doc-title {
+        color: var(--nuxeo-secondary-color);
+        font-size: 1.4em;
+      }
+
+      .remaining-docs {
+        margin-left: 16px;
+        color: var(--nuxeo-text-light);
+        font-size: 0.9em;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-resource id="uploader"></nuxeo-resource>
+    <nuxeo-resource id="blobRemover"></nuxeo-resource>
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
-                    headers='{"nx_es_sync": "true"}'
+                    headers='{"nx_es_sync": "true", "nx_batch_no_drop": "true"}'
                     response="{{createResponse}}"></nuxeo-document>
 
     <paper-dialog id="createDocDialog"
@@ -194,13 +219,13 @@ Contributors:
                   modal
                   no-auto-focus>
       <div id="heading">
-        <div hidden$="[[addMetadata]]">
+        <div hidden$="[[customizing]]">
           <div class="horizontal layout center">
-            <div class="heading sidepart">
-              <label>[[i18n('ui.documentCreateButton.type.label', 'Type')]]</label>
+            <div class="heading sidepart-right">
+              <label>[[i18n('ui.documentCreatePopup.type.label', 'Type')]]</label>
             </div>
             <div class="flex">
-              <paper-dropdown-menu id="typeDropdown" no-label-float horizontal-align="left">
+              <paper-dropdown-menu class="typeDropdown" no-label-float horizontal-align="left">
                 <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
                   <template is="dom-repeat" items="[[documentTypes]]" as="type">
                     <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
@@ -210,13 +235,27 @@ Contributors:
             </div>
           </div>
         </div>
-        <div hidden$="[[!addMetadata]]" class="horizontal layout center">
-          <div class= "heading horizontal layout">
-            <h2>[[i18n('ui.documentCreateButton.addMetadata', 'Add Metadata')]]</h2>
+        <div hidden$="[[!customizing]]" class="horizontal layout center">
+          <div class= "heading sidepart-right">
+            <label>[[i18n('ui.documentCreatePopup.addMetadata.heading', 'Add Metadata')]]</label>
           </div>
+          <div class="horizontal layout flex">
+            <label class="doc-title">[[_getCurrentDocTitle(document,customizing)]]</label>
+            <label class="remaining-docs">[[_getRemainingDocs(document,customizing)]]</label>
+          </div>
+          <div class= "subheading sidepart-left">
+            <label>[[i18n('ui.documentCreatePopup.addMetadata.importAs', 'Import As')]]</label>
+          </div>
+          <paper-dropdown-menu class="typeDropdownSmall" no-label-float horizontal-align="left">
+            <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
+              <template is="dom-repeat" items="[[documentTypes]]" as="type">
+                <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
         </div>
       </div>
-      <div class="path vertical layout" hidden$="[[addMetadata]]">
+      <div class="path vertical layout">
         <span>[[i18n('label.documents.in', 'In')]]</span>
         <div class="suggestion-wrapper horizontal layout center">
           <div>
@@ -229,71 +268,87 @@ Contributors:
           </div>
         </div>
       </div>
-      <div id="dropzone" class="horizontal layout" hidden$="[[!_showDropzone(selectedDocType,addMetadata)]]">
-        <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
-        <template is="dom-if" if="[[!hasFiles]]">
-          <div class="drop-label horizontal layout center center-justified flex" on-tap="_showUploadDialog">
-            [[i18n('ui.documentCreateButton.clickOrDrop', 'Click to select files or drag them to upload')]]
-          </div>
-        </template>
-        <template is="dom-if" if="[[hasFiles]]">
-          <div class="horizontal layout flex wrap">
-            <template is="dom-repeat" items="[[files]]" as="file">
-              <!-- batch upload file -->
-              <div class="batch-upload-file horizontal layout">
-                <div class="vertical layout flex">
-                  <div class="horizontal layout center">
-                    <div class="name flex">
-                      [[file.name]]
+      <div id="content" class="horizontal layout flex">
+        <div id="dropzone" class="horizontal layout flex" hidden$="[[!_showDropzone(selectedDocType,customizing)]]">
+          <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
+          <template is="dom-if" if="[[!hasFiles]]">
+            <div class="drop-label horizontal layout center center-justified flex" on-tap="_showUploadDialog">
+              [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]
+            </div>
+          </template>
+          <template is="dom-if" if="[[hasFiles]]">
+            <div class="vertical layout flex">
+              <div class="horizontal layout wrap">
+                <template is="dom-repeat" items="[[files]]" as="file">
+                  <!-- batch upload file -->
+                  <div class="batch-upload-file horizontal layout">
+                    <div class="vertical layout flex">
+                      <div class="horizontal layout center">
+                        <div class="name flex">
+                          [[file.name]]
+                        </div>
+                        <div class="size">
+                          [[_formatSize(file.size)]]
+                        </div>
+                      </div>
+                      <template is="dom-if" if="[[file.complete]]">
+                        <div class="complete">
+                          Complete
+                        </div>
+                      </template>
+                      <template is="dom-if" if="[[!file.complete]]">
+                        <div class="uploading">
+                          Uploading
+                        </div>
+                      </template>
                     </div>
-                    <div class="size">
-                      [[_formatSize(file.size)]]
+                    <div class="horizontal layout center">
+                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
+                      <paper-tooltip>Remove</paper-tooltip>
                     </div>
                   </div>
-                  <template is="dom-if" if="[[file.complete]]">
-                    <div class="complete">
-                      Complete
-                    </div>
-                  </template>
-                  <template is="dom-if" if="[[!file.complete]]">
-                    <div class="uploading">
-                      Uploading
-                    </div>
-                  </template>
-                </div>
+                </template>
               </div>
-            </template>
+            </div>
+          </template>
+        </div>
+        <form is="iron-form"
+              action="/"
+              id="form"
+              on-submit="_regularCreate" class="sep form vertical layout flex"
+              hidden$="[[!_showForm(selectedDocType,customizing)]]">
+          <div id="document-edit">
+            <!--dynamically loaded via _updateLayout-->
           </div>
-        </template>
+          <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
+        </form>
       </div>
-      <form is="iron-form"
-            action="/"
-            id="form"
-            on-submit="_regularCreate" class="sep form vertical layout"
-            hidden$="[[!_showForm(selectedDocType,addMetadata)]]">
-        <div id="document-edit" hidden$="[[addMetadata]]">
-          <!--dynamically loaded via _updateLayout-->
-        </div>
-        <div id="add-metadata" hidden$="[[!addMetadata]]">
-          <nuxeo-dublincore-edit document="{{newDocument}}"></nuxeo-dublincore-edit>
-        </div>
-        <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
-      </form>
-
       <div class="buttons sep horizontal end-justified layout">
         <paper-button dialog-dismiss on-tap="_clear">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-        <paper-button on-tap="_back" hidden$="[[!addMetadata]]">[[i18n('command.back', 'Back')]]</paper-button>
+        <paper-button on-tap="_back" hidden$="[[!customizing]]">[[i18n('command.back', 'Back')]]</paper-button>
         <paper-button noink
                       class="primary"
-                      on-tap="_toggleAddMetadata"
-                      hidden$="[[!_canAddMetadata(selectedDocType,hasFilesUploaded,addMetadata)]]">
-                      [[i18n('command.addMetadata', 'Add Metadata')]]
+                      on-tap="_toggleCustomize"
+                      hidden$="[[!_canCustomize(selectedDocType,hasFilesUploaded,customizing)]]">
+                      [[i18n('ui.documentCreatePopup.addMetadata', 'Add Metadata')]]
+                    </paper-button>
+        <paper-button noink
+                      class="primary"
+                      on-tap="_nextFile"
+                      hidden$="[[!_hasNextFile(customizing,docIdx)]]">
+                      [[i18n('ui.documentCreatePopup.applyNext', 'Apply & See Next')]]
                     </paper-button>
         <paper-button noink
                       class="primary"
                       on-tap="_create"
-                      hidden$="[[!_canCreate(selectedDocType,hasFilesUploaded,addMetadata)]]"
-                      >[[i18n('command.create', 'Create')]]</paper-button>
+                      hidden$="[[!_canCreate(selectedDocType,hasFilesUploaded,customizing)]]">
+                      <template is="dom-if" if=[[_showApplyAll(customizing,docIdx)]]>
+                        [[i18n('ui.documentCreatePopup.applyAll', 'Apply to All & Create')]]
+                      </template>
+                      <template is="dom-if" if=[[!_showApplyAll(customizing,docIdx)]]>
+                        [[i18n('command.create', 'Create')]]
+                      </template>
+                    </paper-button>
       </div>
     </paper-dialog>
 
@@ -308,7 +363,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-create-popup',
 
-        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Polymer.IronResizableBehavior],
+        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior],
 
         properties: {
           parent: {
@@ -330,10 +385,19 @@ Contributors:
             }
           },
 
+          docIdx: {
+            type: Number,
+            value: 0
+          },
+
+          docData: {
+            type: Array,
+            value: []
+          },
+
           documentTypes: {
             type: Array,
             value: [
-              {key: 'smartImport', label: 'label.document.type.smartImport'},
               {key: 'file', label: 'label.document.type.file'},
               {key: 'note', label: 'label.document.type.note'},
               {key: 'picture', label: 'label.document.type.picture'},
@@ -436,6 +500,12 @@ Contributors:
             type: Boolean,
             value: false,
             notify: true
+          },
+
+          customizing: {
+            type: Boolean,
+            value: false,
+            observer: '_customizingChanged'
           }
         },
         listeners: {
@@ -463,6 +533,15 @@ Contributors:
           this.$.createDocDialog.toggle();
         },
 
+        _getCurrentDocTitle: function() {
+          return this.files && this.files.length > 0 ? this.files[this.docIdx].name : '';
+        },
+
+        _getRemainingDocs: function() {
+          return (this.files && this.files.length > 1) ?
+                    '+ ' + (this.files.length - 1 - this.docIdx) + ' other documents' : '';
+        },
+
         _observeFiles: function() {
           this.hasFiles = this.files && this.files.length > 0;
           this.hasFilesUploaded = this.files && this.files.every(function(file) {
@@ -471,24 +550,27 @@ Contributors:
         },
 
         _showForm: function() {
-          return (this.selectedDocType === 'smartImport' && this.addMetadata) ||
-                 (this.selectedDocType !== 'smartImport' && !this.addMetadata);
+          return this.customizing || (this.selectedDocType !== 'smartImport' && !this.customizing);
         },
 
         _showDropzone: function() {
-          return this.selectedDocType === 'smartImport' && !this.addMetadata;
+          return this.selectedDocType === 'smartImport' && !this.customizing;
+        },
+
+        _showApplyAll: function() {
+          return this.customizing && this._hasNextFile();
         },
 
         _isBulkCreate: function() {
-          return this.selectedDocType === 'smartImport';
+          return this.selectedDocType === 'smartImport' || this.customizing;
         },
 
         _canCreate: function() {
           return !this._isBulkCreate() || this.hasFilesUploaded;
         },
 
-        _canAddMetadata: function() {
-          return this._isBulkCreate() && this.hasFilesUploaded && !this.addMetadata;
+        _canCustomize: function() {
+          return this._isBulkCreate() && this.hasFilesUploaded && !this.customizing;
         },
 
         _showUploadDialog: function() {
@@ -499,18 +581,59 @@ Contributors:
           this.uploadFiles(e.target.files);
         },
 
-        _toggleAddMetadata: function() {
-          this.addMetadata = !this.addMetadata;
-          if (this.addMetadata) {
-            this.notifyResize();
+        _toggleCustomize: function() {
+          this.customizing = !this.customizing;
+        },
+
+        _customizingChanged: function() {
+          if (this.customizing) {
+            this.shift('documentTypes');
+            this.docIdx = 0;
+            this._resetDocumentType();
+          } else {
+            this.unshift('documentTypes', {key: 'smartImport', label: 'label.document.type.smartImport'});
+            this._resetDocumentType();
           }
+        },
+
+        _storeFile: function() {
+          if (this.docData.length <= this.docIdx) {
+            var fileData = {
+              parent: this.targetPath,
+              document: JSON.parse(JSON.stringify(this.document))
+            };
+            this.docData.push(fileData);
+          }
+        },
+
+        _nextFile: function() {
+          if (this._hasNextFile()) {
+            this._storeFile();
+            this.docIdx++;
+            this._resetDocumentType();
+          }
+        },
+
+        _resetDocumentType: function() {
+          // XXX fix this
+          //this.selectedDocType = null;
+          this.selectedDocType = this.documentTypes[0].key;
+          if (this.document) {
+            this._updateLayout();
+            this.set('document.properties.dc:title', this.files[this.docIdx].name);
+          }
+        },
+
+        _hasNextFile: function() {
+          return this.customizing && this.files && this.files.length > 1 && this.docIdx < this.files.length - 1;
         },
 
         /**
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType === 'smartImport' ? 'dublincore'
+                                                      : this.selectedDocType).toLowerCase();
           return ['nuxeo', type, 'edit'].join('-');
         },
 
@@ -533,7 +656,11 @@ Contributors:
           } else {
             parent.appendChild(el);
           }
+
           // setup data binding
+          if (this.customizing) {
+            this.set('document.properties.dc:title', this.files[this.docIdx].name);
+          }
           el.document = this.document;
         },
 
@@ -551,22 +678,21 @@ Contributors:
                 function() {
                   console.error('Failed to find edit layout for ' + this.document.type);
                 });
-          } else if (this.document) {
+          } else {
             this._createLayout();
           }
-          this.notifyResize();
         },
 
         _clear: function() {
           this.files = [];
           this.hasFilesUploaded = false;
           this.properties = [];
-          this.addMetadata = false;
+          this.customizing = false;
           this.set('newDocument.properties', {});
         },
 
         _back: function() {
-          this.addMetadata = false;
+          this.customizing = false;
         },
 
         _create: function() {
@@ -579,7 +705,7 @@ Contributors:
 
         _regularCreate: function() {
           var docRequest = this.$.docRequest;
-          var name = this.document.properties['dc:title'].replace(/[^a-z0-9]/gi, '_');
+          var name = this._sanitizeName(this.document.properties['dc:title']);
           this.document.name = name;
           docRequest.post().then(function(response) {
             this._clear();
@@ -589,28 +715,80 @@ Contributors:
           this.toggleDialog();
         },
 
-        _bulkCreate: function() {
-          var params = {
-            context: {
-              currentDocument: this.targetPath,
-            }
-          };
-          if (this.addMetadata) {
-            params.properties = this.newDocument.properties;
-          }
+        _sanitizeName: function(name) {
+          return name.replace(/[^a-z0-9]/gi, '_');
+        },
 
-          this.batchExecute(this.addMetadata ? 'FileManager.ImportWithMetaData' : 'FileManager.Import',
-                            params, {'nx_es_sync': 'true'}).then(function(response) {
-            this._clear();
-            this.toggleDialog();
-            this._notify(response);
-            if (response.entries && response.entries.length === 1) {
-              page('/browse' + response.entries[0].path);
-            } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
-              this.fire('document-updated');
-            } else {
-              page('/browse' + this.targetPath);
+        _bulkCreate: function() {
+          this._storeFile();
+
+          if (this.customizing) {
+            this._processFiles().then(function(response) {
+              this._clear();
+              this.toggleDialog();
+              this._notify(response);
+              if (this.files && this.files.length === 1) {
+                page('/browse' + response.path);
+              } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
+                this.fire('document-updated');
+              } else {
+                page('/browse' + this.targetPath);
+              }
+            }.bind(this));
+          } else {
+            var params = {
+              context: {
+                currentDocument: this.targetPath,
+              }
+            };
+            this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true'}).then(function(response) {
+              this._clear();
+              this.toggleDialog();
+              this._notify(response);
+              if (response.entries && response.entries.length === 1) {
+                page('/browse' + response.entries[0].path);
+              } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
+                this.fire('document-updated');
+              } else {
+                page('/browse' + this.targetPath);
+              }
+            }.bind(this));
+          }
+        },
+
+        _processFiles: function() {
+          var count = 0;
+          var self = this;
+          function next() {
+            if (count < self.files.length) {
+              return self._processFile(count++).then(next);
             }
+          }
+          return next();
+        },
+
+        _processFile: function(count) {
+          var file = this.files[count];
+          var hasOwnData = count < this.docData.length;
+          var fileData = this.docData[ hasOwnData ? count : this.docData.length - 1];
+          // TODO handle collections, tags, etc.
+          this.document = fileData.document;
+          this.targetPath = fileData.parent;
+          if (!hasOwnData) {
+            this.document.properties['dc:title'] = file.name;
+          }
+          this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+          this.document.properties['file:content'] = {
+            'upload-batch': this.batchId,
+            'upload-fileId': file.index.toString()
+          };
+          return this.$.docRequest.post();
+        },
+
+        _removeBlob: function(e) {
+          this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.index;
+          this.$.blobRemover.remove().then(function() {
+            this.splice('files', e.model.index, 1);
           }.bind(this));
         },
 
