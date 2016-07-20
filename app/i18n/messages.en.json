@@ -327,10 +327,10 @@
   "ui.theme.apply:": "Apply",
   "ui.theme.applying:": "Applying Theme...",
   "ui.theme.current": "Current",
-  "ui.theme.nuxeo": "Nuxeo Theme",
-  "ui.theme.light": "Light Theme",
-  "ui.theme.dark": "Dark Theme",
-  "ui.theme.garden": "Garden Theme",
-  "ui.theme.kawai": "Kawai Theme",
-  "ui.theme.ocean": "Ocean Theme"
+  "ui.theme.nuxeo": "Nuxeo",
+  "ui.theme.light": "Light",
+  "ui.theme.dark": "Dark",
+  "ui.theme.garden": "Garden",
+  "ui.theme.kawaii": "Kawaii",
+  "ui.theme.ocean": "Ocean"
 }
