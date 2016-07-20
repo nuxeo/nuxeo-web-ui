@@ -8,7 +8,7 @@
     "marked-element": "PolymerElements/marked-element#1.1.1",
     "moment": "2.10.6",
     "nuxeo-elements": "0.4.0",
-    "nuxeo-ui-elements": "0.2.0",
+    "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#master",
     "page": "nuxeo/page.js#1.6.5",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "polymer": "Polymer/polymer#^1.1.0",
