@@ -78,17 +78,7 @@ Contributors:
       </div>
       <div class="content">
         <template is="dom-if" if="[[_equals(selectedTab, 'document-distribution')]]">
-          <paper-card elevation="0" class="block">
-            <div class="card-content">
-              <span class="title">Default Domain</span>
-              <nuxeo-document-distribution-chart index="_all"
-                                                 path="/" mode="count" max-depth="10"
-                                                 chart-hue="blue" chart-lumonisity="light"
-                                                 include-version include-hidden
-                                                 include-deleted>
-              </nuxeo-document-distribution-chart>
-            </div>
-          </paper-card>
+          <nuxeo-distribution-analytics></nuxeo-distribution-analytics>
         </template>
         <template is="dom-if" if="[[_equals(selectedTab, 'repository')]]">
           <nuxeo-repository-analytics></nuxeo-repository-analytics>
