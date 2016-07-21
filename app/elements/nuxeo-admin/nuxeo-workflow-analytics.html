@@ -25,8 +25,8 @@ Contributors:
 @element nuxeo-workflow-analytics
 -->
 <dom-module id="nuxeo-workflow-analytics">
-  <template is="custom-style" include="shared-styles">
-    <style>
+  <template>
+    <style is="custom-style" include="shared-styles">
       :host {
         display: block;
       }
@@ -122,8 +122,8 @@ Contributors:
       <paper-card heading="Workflow Initiators" elevation="0">
         <div class="card-content">
           <chart-pie values=[[_values(initiators)]]
-                     series=[[_series(initiators)]]
-                     options='{"responsive": true}'>
+                     labels=[[_series(initiators)]]
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-pie>
         </div>
       </paper-card>
@@ -141,7 +141,7 @@ Contributors:
           <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
                      series=[[_series(numberOfActionsPerUser)]]
                      values=[[_values(numberOfActionsPerUser)]]
-                     options='{"responsive": true}'>
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-bar>
         </div>
       </paper-card>
@@ -189,12 +189,7 @@ Contributors:
             value: 'nuxeo'
           },
           startDate: String,
-          endDate: String,
-          colors: {
-            type: Array,
-            value: ['#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
-                    '#3B3EAC', '#0099C6', '#DD4477', '#66AA00', '#B82E2E']
-          }
+          endDate: String
         },
 
         ready: function() {
@@ -254,7 +249,7 @@ Contributors:
           return data.map(function(e) {
             return {key: e.key, value: this._asDuration(e.value)};
           }.bind(this));
-        },
+        }
       });
     })();
   </script>

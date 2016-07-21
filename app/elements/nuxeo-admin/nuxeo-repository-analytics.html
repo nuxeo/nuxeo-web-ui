@@ -105,9 +105,8 @@ Contributors:
       <paper-card heading="Document Types" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(typeCount)]]"
-                     series="[[_series(typeCount)]]"
-                     colors="[[colors]]"
-                     options='{"responsive": true, "animation": false}'>
+                     labels="[[_labels(typeCount)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-pie>
         </div>
       </paper-card>
@@ -123,9 +122,8 @@ Contributors:
       <paper-card heading="Top 10 creators" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(topCreators)]]"
-                     series="[[_series(topCreators)]]"
-                     colors="[[colors]]"
-                     options='{"responsive": true, "animation": false}'>
+                     labels="[[_labels(topCreators)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-pie>
         </div>
       </paper-card>
@@ -142,7 +140,7 @@ Contributors:
         <div class="card-content">
           <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
                       values="[[_values(docsCreatedPerWeek)]]"
-                      options='{"responsive": true, "animation": false, "datasetFill": false}'>
+                      options='{ "legend": { "display": false }, "animation": false }'>
           </chart-line>
         </div>
       </paper-card>
@@ -159,7 +157,7 @@ Contributors:
         <div class="card-content">
           <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
                       values="[[_values(docsModifiedPerWeek)]]"
-                      options='{"responsive": true, "animation": false, "datasetFill": false}'>
+                      options='{ "legend": { "display": false }, "animation": false }'>
           </chart-line>
         </div>
       </paper-card>
@@ -174,9 +172,8 @@ Contributors:
       <paper-card heading="Files by Mime Type" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(filesByMimeType)]]"
-                     series="[[_types(filesByMimeType)]]"
-                     colors="[[colors]]"
-                     options='{"responsive": true, "animation": false}'>
+                     labels="[[_types(filesByMimeType)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-pie>
           <div></div>
         </div>
@@ -199,16 +196,7 @@ Contributors:
             value: '_all'
           },
           startDate: String,
-          endDate: String,
-          colors: {
-            type: Array,
-            value: [
-              '#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477', '#66aa00', '#b82e2e',
-              '#316395', '#994499', '#22aa99', '#aaaa11', '#6633cc', '#e67300', '#8b0707', '#651067', '#329262',
-              '#5574a6', '#3b3eac', '#b77322', '#16d620', '#b91383', '#f4359e', '#9c5935', '#a9c413', '#2a778d',
-              '#668d1c', '#bea413', '#0c5922', '#743411'
-            ]
-          }
+          endDate: String
         },
 
         ready: function() {

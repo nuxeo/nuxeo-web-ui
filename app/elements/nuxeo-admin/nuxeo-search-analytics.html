@@ -87,9 +87,8 @@ Contributors:
       <paper-card heading="Calls per PageProvider" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(callsPerProvider)]]"
-                     series="[[_series(callsPerProvider)]]"
-                     colors="[[colors]]"
-                     options='{"responsive": true, "animation": false}'>
+                     labels="[[_labels(callsPerProvider)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
           </chart-pie>
         </div>
       </paper-card>
@@ -107,7 +106,8 @@ Contributors:
        <div class="card-content">
          <chart-bar labels="[[_range(0,23)]]"
                     values="[[_aggregatePerHourOfDay(callsPerHour)]]"
-                    options='{"responsive": true, "animation": false}'>
+                    series="[[_range(0,23)]]"
+                    options='{ "legend": { "display": false }, "animation": false }'>
          </chart-bar>
        </div>
      </paper-card>
@@ -222,11 +222,6 @@ Contributors:
           },
           startDate: String,
           endDate: String,
-          colors: {
-            type: Array,
-            value: ['#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
-                    '#3B3EAC', '#0099C6', '#DD4477', '#66AA00', '#B82E2E']
-          },
           hoursBounds: {
             value: {min: 0, max: 23}
           }
