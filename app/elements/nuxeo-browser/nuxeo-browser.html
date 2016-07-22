@@ -93,6 +93,11 @@ Contributors:
                   <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
                   [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
               </template>
+              <template is="dom-if" if="[[_canViewVersions(document)]]">
+                <paper-icon-item name="versions">
+                  <iron-icon icon="icons:chrome-reader-mode" item-icon></iron-icon>
+                  [[i18n('command.browser.versions', 'Versions')]]</paper-icon-item>
+              </template>
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
@@ -126,6 +131,12 @@ Contributors:
               <paper-card class="end-space">
                 <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
               </paper-card>
+            </section>
+          </template>
+
+          <template is="dom-if" if="[[_canViewVersions(document)]]">
+            <section name="versions">
+              <nuxeo-document-versions id="versions" document="[[document]]"></nuxeo-document-versions>
             </section>
           </template>
 
@@ -206,6 +217,10 @@ Contributors:
           return this.document.facets.indexOf('Folderish') !== -1;
         },
 
+        get _isVersionable() {
+          return this.document.facets.indexOf('Versionable') !== -1;
+        },
+
         get _canReadChildren() {
           return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
         },
@@ -228,6 +243,10 @@ Contributors:
 
         _canViewContent: function() {
           return this.document && this._isFolderish; // && this._canReadChildren;
+        },
+
+        _canViewVersions: function() {
+          return this.document && this._isVersionable;
         },
 
         _navigate: function() {
