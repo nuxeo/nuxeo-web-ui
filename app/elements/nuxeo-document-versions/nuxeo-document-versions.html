@@ -61,22 +61,30 @@ Contributors:
 
     </style>
 
-    <nuxeo-operation op="Document.GetVersions" input="[[document.uid]]" response="{{versions}}" auto></nuxeo-operation>
-    <nuxeo-operation id="opRestore" op="Document.RestoreVersion" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]" response="{{versions}}">
+    </nuxeo-operation>
+
+    <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]">
+    </nuxeo-operation>
 
     <paper-card class="main">
-      <div class="row">
-        <div class="col-1">[[i18n('ui.versions.version', 'Version')]]</div>
-        <div class="col-2">[[i18n('ui.versions.action', 'Action')]]</div>
-      </div>
-      <template is="dom-repeat" items="[[versions.entries]]" as="item">
+      <template is="dom-if" if="[[_hasVersions(versions)]]">
         <div class="row">
-          <div class="col-1">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</div>
-          <div class="col-2">
-            <paper-button raised class="primary" on-tap="_restore">[[i18n('ui.versions.action.restore', 'Restore')]]
-            </paper-button>
-          </div>
+          <div class="col-1">[[i18n('ui.versions.version', 'Version')]]</div>
+          <div class="col-2">[[i18n('ui.versions.action', 'Action')]]</div>
         </div>
+        <template is="dom-repeat" items="[[versions.entries]]" as="item">
+          <div class="row">
+            <div class="col-1">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</div>
+            <div class="col-2">
+              <paper-button raised class="primary" on-tap="_restore">[[i18n('ui.versions.action.restore', 'Restore')]]
+              </paper-button>
+            </div>
+          </div>
+        </template>
+      </template>
+      <template is="dom-if" if="[[!_hasVersions(versions)]]">
+        <div class="empty"><p>[[i18n('ui.versions.empty', 'No versions')]]</p></div>
       </template>
     </paper-card>
 
@@ -84,7 +92,8 @@ Contributors:
       <div><p>[[i18n('ui.versions.confirm.message', 'Restore document version?')]]</p></div>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('ui.versions.confirm.no', 'No')]]</paper-button>
-        <paper-button dialog-confirm class="primary" on-tap="_confirm">[[i18n('ui.versions.confirm.yes', 'Yes')]]</paper-button>
+        <paper-button dialog-confirm class="primary" on-tap="_confirm">[[i18n('ui.versions.confirm.yes', 'Yes')]]
+        </paper-button>
       </div>
     </paper-dialog>
 
@@ -101,7 +110,8 @@ Contributors:
 
         properties: {
           document: {
-            type: Object
+            type: Object,
+            observer: '_documentChanged'
           },
           versions: {
             type: Object
@@ -109,6 +119,16 @@ Contributors:
           version: {
             type: Object
           }
+        },
+
+        _documentChanged: function(newDoc) {
+          if (newDoc) {
+            this.$.opGetVersions.execute();
+          }
+        },
+
+        _hasVersions: function(versions) {
+          return versions && versions.entries.length > 0;
         },
 
         _restore: function(e) {
@@ -122,8 +142,8 @@ Contributors:
 
         _confirm: function() {
           if (this.version) {
-            this.$.opRestore.input = this.version.uid;
-            this.$.opRestore.execute().then(function() {
+            this.$.opRestoreVersion.input = this.version.uid;
+            this.$.opRestoreVersion.execute().then(function() {
               this.fire('document-updated');
               page('/browse' + this.document.path + '@view');
             }.bind(this));

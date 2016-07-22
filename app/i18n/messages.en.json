@@ -324,6 +324,7 @@
   "label.ui.aggregate.from_1800_s": "More than 1800s",
   "ui.versions.version": "Version",
   "ui.versions.action": "Action",
+  "ui.versions.empty": "No versions",
   "ui.versions.action.restore": "Restore",
   "ui.versions.confirm.message": "Restore document version?",
   "ui.versions.confirm.no": "No",
