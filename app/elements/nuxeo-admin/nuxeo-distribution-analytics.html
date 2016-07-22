@@ -54,6 +54,18 @@ Contributors:
         width: 100%;
       }
 
+      nuxeo-path-suggestion {
+        --nuxeo-path-suggestion-results: {
+           z-index: 2;
+         };
+         --paper-input-container-underline: {
+           display: none;
+         };
+         --paper-input-container-underline-focus: {
+           display: none;
+         };
+      }
+
     </style>
 
     <div class="flex-layout">
@@ -65,15 +77,14 @@ Contributors:
                 <iron-icon icon="icons:folder"></iron-icon>
               </div>
               <div class="flex">
-                <nuxeo-path-suggestion id="pathSuggester"
+                <nuxeo-path-suggestion id="pathSuggester" label="Select a path"
                    value="{{path}}"
                    no-label-float></nuxeo-path-suggestion>
               </div>
             </div>
 
             <nuxeo-document-distribution-chart id="chart" index="_all"
-             path="/" mode="count" max-depth="[[depth]]"
-             chart-hue="blue" chart-lumonisity="light"
+             path="/default-domain/" mode="count"
              include-version include-hidden
              include-deleted>
             </nuxeo-document-distribution-chart>
@@ -105,8 +116,7 @@ Contributors:
             value: '_all'
           },
           path: {
-            type: String,
-            value: '/default-domain/'
+            type: String
           },
           depth: {
             type: Number,
@@ -119,10 +129,16 @@ Contributors:
         ],
 
         _observeDocPath: function() {
-          if (this.path && this.path.length && this.path.endsWith('/')) {
+          if (this.path && this.path.length && this.path.endsWith('/') &&
+            (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
+            this.$.chart.maxDepth = this.depth;
             this.$.chart.path = this.path;
             this.$.chart.execute();
           }
+        },
+
+        ready: function() {
+          this.path = '/default-domain/';
         }
 
       });
