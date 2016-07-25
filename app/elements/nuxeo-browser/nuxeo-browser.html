@@ -183,7 +183,8 @@ Contributors:
           'permissions.aceupdated': '_documentUpdated',
           'permissions.acedeleted': '_documentUpdated',
           'addedToCollection': '_documentUpdated',
-          'removedFromCollection': '_documentUpdated'
+          'removedFromCollection': '_documentUpdated',
+          'document-restored': '_documentRestored'
         },
 
         observers: [
@@ -193,6 +194,11 @@ Contributors:
 
         _documentUpdated: function() {
           this.fire('document-updated');
+        },
+
+        _documentRestored: function() {
+          this.fire('document-updated');
+          this._navigateToView();
         },
 
         download: function() {

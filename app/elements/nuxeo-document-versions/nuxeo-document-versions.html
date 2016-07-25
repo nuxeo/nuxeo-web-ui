@@ -144,8 +144,7 @@ Contributors:
           if (this.version) {
             this.$.opRestoreVersion.input = this.version.uid;
             this.$.opRestoreVersion.execute().then(function() {
-              this.fire('document-updated');
-              page('/browse' + this.document.path + '@view');
+              this.fire('document-restored');
             }.bind(this));
           }
         }
