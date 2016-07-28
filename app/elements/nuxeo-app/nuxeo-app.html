@@ -201,6 +201,7 @@ Contributors:
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
+                    response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
                     headers='{"X-NXfetch.document": "lock"}'>
     </nuxeo-document>
@@ -439,7 +440,9 @@ Contributors:
       [[i18n('heading.app.account', 'User Settings')]]</paper-tooltip>
 
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
+    <nuxeo-document-create-popup id="importPopup"
+                                 parent="[[currentParent]]"
+                                 batch-append></nuxeo-document-create-popup>
 
     <iron-a11y-keys
       id="keys"

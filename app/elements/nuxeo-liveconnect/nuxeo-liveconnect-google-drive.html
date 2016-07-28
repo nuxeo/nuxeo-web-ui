@@ -1,0 +1,116 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+icensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<script src="https://apis.google.com/js/client.js" type="text/javascript"></script>
+
+<!--
+`nuxeo-liveconnect-google-drive`
+@group Nuxeo UI
+@element nuxeo-liveconnect-google-drive
+-->
+<dom-module id="nuxeo-liveconnect-google-drive">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-liveconnect-google-drive',
+
+        properties: {
+          clientId: {
+            type: String
+          },
+          document: {
+            type: Object,
+            notify: true
+          }
+        },
+
+        _handleAuthResult: function() {
+          var token = gapi.auth.getToken();
+          if (token) {
+            jQuery.getJSON('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ' + token.access_token)
+                  .done(function(info) {
+                    this.email = info.email;
+                    this._showPicker(token.access_token);
+                  }.bind(this));
+          } else {
+            this._checkAuth(false);
+          }
+        },
+
+        _checkAuth: function(immediate) {
+          gapi.auth.authorize({
+            client_id: this.clientId,
+            scope: 'email https://www.googleapis.com/auth/drive.readonly',
+            immediate: typeof immediate === 'undefined' ? true : immediate,
+            hd: window.location.origin
+          }, this._handleAuthResult.bind(this));
+        },
+
+        _showPicker: function(accessToken) {
+          var view = new google.picker.DocsView();
+          view.setIncludeFolders(true);
+          view.setOwnedByMe(true);
+          new google.picker.PickerBuilder()
+          .setOAuthToken(accessToken)
+          .setAppId(this.clientId)
+          .addView(view)
+          .setCallback(this._pickerCallback.bind(this))
+          .build()
+          .setVisible(true);
+        },
+
+        _pickerCallback: function(data) {
+          var action = data[google.picker.Response.ACTION];
+          if (action === google.picker.Action.PICKED) {
+            this.document = data[google.picker.Response.DOCUMENTS][0];
+            var fileInfo = {
+              providerId: 'googledrive',
+              providerName: 'Google Drive',
+              user: this.email,
+              fileId: this.document.id,
+              name: this.document.name,
+              size: this.document.sizeBytes,
+              key: 'googledrive:' + this.email + ':' + this.document.id
+            };
+            this.fire('nx-blob-picked', {fileInfo: fileInfo});
+          }
+        },
+
+        openPicker: function() {
+          this.clientId = '724031659061-bh35ibpvuhsdphm9dostk1g0rlrjj7eq.apps.googleusercontent.com';
+          gapi.load('picker', {
+            'callback': this._checkAuth.bind(this)
+          });
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

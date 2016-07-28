@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
 
 <!--
 `nuxeo-document-create-popup`
@@ -44,7 +45,7 @@ Contributors:
          };
       }
 
-      .batch-upload-file {
+      .file-to-import {
         width: calc(50% - 34px);
         height: 45px;
         margin: 4px 8px;
@@ -159,7 +160,7 @@ Contributors:
         overflow-y: auto;
       }
 
-      .batch-upload-file paper-icon-button {
+      .file-to-import paper-icon-button {
         margin-left: 1em;
       }
 
@@ -189,9 +190,21 @@ Contributors:
         color: red;
       }
 
-      .drop-label {
+      .provider {
+        color: blue;
+      }
+
+      .dropzone-label {
         font-weight: bold;
         cursor: pointer;
+        margin: 16px 0 48px 0;
+      }
+
+      .dropzone-heading {
+        font-weight: bold;
+        margin: 4px 8px;
+        padding: 4px 8px;
+        width: 100%;
       }
 
       .doc-title {
@@ -204,10 +217,17 @@ Contributors:
         color: var(--nuxeo-text-light);
         font-size: 0.9em;
       }
+
+      iron-icon.liveconnectIco {
+        --iron-icon-height: 16px;
+        --iron-icon-width: 16px;
+        margin-right: 4px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="blobRemover"></nuxeo-resource>
+    <nuxeo-operation id="fileManagerImport" op="FileManager.Import"></nuxeo-operation>
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
@@ -240,7 +260,7 @@ Contributors:
             <label>[[i18n('ui.documentCreatePopup.addMetadata.heading', 'Add Metadata')]]</label>
           </div>
           <div class="horizontal layout flex">
-            <label class="doc-title">[[_getCurrentDocTitle(document,customizing)]]</label>
+            <label class="doc-title">[[_getCurrentFileTitle(document,customizing)]]</label>
             <label class="remaining-docs">[[_getRemainingDocs(document,customizing)]]</label>
           </div>
           <div class= "subheading sidepart-left">
@@ -269,19 +289,29 @@ Contributors:
         </div>
       </div>
       <div id="content" class="horizontal layout flex">
-        <div id="dropzone" class="horizontal layout flex" hidden$="[[!_showDropzone(selectedDocType,customizing)]]">
+        <div id="dropzone" class="vertical layout flex" hidden$="[[!_showDropzone(selectedDocType,customizing)]]">
           <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
           <template is="dom-if" if="[[!hasFiles]]">
-            <div class="drop-label horizontal layout center center-justified flex" on-tap="_showUploadDialog">
-              [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]
+            <div class="vertical layout center center-justified flex">
+              <div class="dropzone-label horizontal layout center center-justified">
+                <a href="javascript:undefined" on-tap="_showUploadDialog">
+                  [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
+              </div>
+              <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
+              <span>[[i18n('ui.documentCreatePopup.linkFilesFrom', 'Or link files from')]]</span>
+              <div class="dropzone-label horizontal layout center center-justified">
+                <iron-icon class="liveconnectIco" src="google_drive.png"></iron-icon>
+                <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
+              </div>
             </div>
           </template>
           <template is="dom-if" if="[[hasFiles]]">
             <div class="vertical layout flex">
               <div class="horizontal layout wrap">
-                <template is="dom-repeat" items="[[files]]" as="file">
-                  <!-- batch upload file -->
-                  <div class="batch-upload-file horizontal layout">
+                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Local Files</span>
+                <template is="dom-repeat" items="[[localFiles]]" as="file">
+                  <!-- local file -->
+                  <div class="file-to-import horizontal layout">
                     <div class="vertical layout flex">
                       <div class="horizontal layout center">
                         <div class="name flex">
@@ -291,6 +321,11 @@ Contributors:
                           [[_formatSize(file.size)]]
                         </div>
                       </div>
+                      <template is="dom-if" if="[[file.providerName]]">
+                        <div class="provider">
+                          [[file.providerName]]
+                        </div>
+                      </template>
                       <template is="dom-if" if="[[file.complete]]">
                         <div class="complete">
                           Complete
@@ -304,11 +339,39 @@ Contributors:
                     </div>
                     <div class="horizontal layout center">
                       <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>Remove</paper-tooltip>
+                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
+                    </div>
+                  </div>
+                </template>
+                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Remote Files</span>
+                <template is="dom-repeat" items="[[remoteFiles]]" as="file">
+                  <!-- remote file -->
+                  <div class="file-to-import horizontal layout">
+                    <div class="vertical layout flex">
+                      <div class="horizontal layout center">
+                        <div class="name flex">
+                          [[file.name]]
+                        </div>
+                        <div class="size">
+                          [[_formatSize(file.size)]]
+                        </div>
+                      </div>
+                      <div class="provider">
+                        [[file.providerName]]
+                      </div>
+                    </div>
+                    <div class="horizontal layout center">
+                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
+                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
                     </div>
                   </div>
                 </template>
               </div>
+            </div>
+            <div class="horizontal layout center end-justified" hidden$="!hasFiles">
+              <span><a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
+                 or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
+              </span>
             </div>
           </template>
         </div>
@@ -324,12 +387,12 @@ Contributors:
         </form>
       </div>
       <div class="buttons sep horizontal end-justified layout">
-        <paper-button dialog-dismiss on-tap="_clear">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
         <paper-button on-tap="_back" hidden$="[[!customizing]]">[[i18n('command.back', 'Back')]]</paper-button>
         <paper-button noink
                       class="primary"
                       on-tap="_toggleCustomize"
-                      hidden$="[[!_canCustomize(selectedDocType,hasFilesUploaded,customizing)]]">
+                      hidden$="[[!_canCustomize(selectedDocType,hasFiles,customizing)]]">
                       [[i18n('ui.documentCreatePopup.addMetadata', 'Add Metadata')]]
                     </paper-button>
         <paper-button noink
@@ -341,7 +404,7 @@ Contributors:
         <paper-button noink
                       class="primary"
                       on-tap="_create"
-                      hidden$="[[!_canCreate(selectedDocType,hasFilesUploaded,customizing)]]">
+                      hidden$="[[!_canCreate(selectedDocType,hasLocalFilesUploaded,hasRemoteFiles,customizing)]]">
                       <template is="dom-if" if=[[_showApplyAll(customizing,docIdx)]]>
                         [[i18n('ui.documentCreatePopup.applyAll', 'Apply to All & Create')]]
                       </template>
@@ -395,6 +458,16 @@ Contributors:
             value: []
           },
 
+          localFiles: {
+            type: Array,
+            value: []
+          },
+
+          remoteFiles: {
+            type: Array,
+            value: []
+          },
+
           documentTypes: {
             type: Array,
             value: [
@@ -402,8 +475,6 @@ Contributors:
               {key: 'note', label: 'label.document.type.note'},
               {key: 'picture', label: 'label.document.type.picture'},
               {key: 'video', label: 'label.document.type.video'},
-              {key: 'folder', label: 'label.document.type.folder'},
-              {key: 'workspace', label: 'label.document.type.workspace'}
             ]
           },
 
@@ -484,13 +555,27 @@ Contributors:
             }
           },
 
+          documentBlobProperties: {
+            type: Object,
+            value: {
+              default: 'file:content',
+              note: 'note:note'
+            }
+          },
+
           selectedDocType: {
             type: String,
             value: 'smartImport',
             observer: '_updateLayout'
           },
 
-          hasFilesUploaded: {
+          hasLocalFiles: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
+          hasRemoteFiles: {
             type: Boolean,
             value: false,
             notify: true
@@ -499,7 +584,7 @@ Contributors:
           hasFiles: {
             type: Boolean,
             value: false,
-            notify: true
+            computed: '_computeHasFiles(hasLocalFiles,hasRemoteFiles)'
           },
 
           customizing: {
@@ -509,10 +594,12 @@ Contributors:
           }
         },
         listeners: {
-          'batchFinished': 'batchReady'
+          'batchFinished': '_batchReady',
+          'nx-blob-picked': '_blobPicked'
         },
         observers: [
-          '_observeFiles(files.*)'
+          '_observeFiles(files.*)',
+          '_observeRemoteFiles(remoteFiles.splices)'
         ],
 
         ready: function() {
@@ -533,20 +620,35 @@ Contributors:
           this.$.createDocDialog.toggle();
         },
 
-        _getCurrentDocTitle: function() {
-          return this.files && this.files.length > 0 ? this.files[this.docIdx].name : '';
+        _observeFiles: function(changeRecord) {
+          if (changeRecord) {
+            if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
+              changeRecord.value.indexSplices.forEach(function(s) {
+                for (var i = 0; i < s.addedCount; i++) {
+                  var index = s.index + i;
+                  this.push('localFiles', this.files[index]);
+                }
+              }, this);
+              this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+            } else if (changeRecord.path.match(/files\.#\d+\.index/gi)) {
+              this.hasLocalFilesUploaded = this.hasLocalFiles && this.files && this.files.every(function(file) {
+                return !file || file.complete;
+              });
+              // hack: refresh complete on the dom repeat
+              var i = this.localFiles.findIndex(function(f) {
+                return f.index === this.get(changeRecord.path.replace('.index', '')).index;
+              }.bind(this));
+              this.set(['localFiles', i, 'complete'].join('.'), true);
+            }
+          }
         },
 
-        _getRemainingDocs: function() {
-          return (this.files && this.files.length > 1) ?
-                    '+ ' + (this.files.length - 1 - this.docIdx) + ' other documents' : '';
+        _observeRemoteFiles: function() {
+          this.hasRemoteFiles = this.remoteFiles && this.remoteFiles.length > 0;
         },
 
-        _observeFiles: function() {
-          this.hasFiles = this.files && this.files.length > 0;
-          this.hasFilesUploaded = this.files && this.files.every(function(file) {
-            return file.complete;
-          });
+        _showDropzoneFileHeadings: function() {
+          return this.hasLocalFiles && this.hasRemoteFiles;
         },
 
         _showForm: function() {
@@ -566,11 +668,11 @@ Contributors:
         },
 
         _canCreate: function() {
-          return !this._isBulkCreate() || this.hasFilesUploaded;
+          return !this._isBulkCreate() || (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles);
         },
 
         _canCustomize: function() {
-          return this._isBulkCreate() && this.hasFilesUploaded && !this.customizing;
+          return this._isBulkCreate() && (this.hasFiles) && !this.customizing;
         },
 
         _showUploadDialog: function() {
@@ -586,21 +688,60 @@ Contributors:
         },
 
         _customizingChanged: function() {
+          // XXX a dom-repeat filter here would do the job, but the paper-dropdown-menu won't update
           if (this.customizing) {
             this.shift('documentTypes');
             this.docIdx = 0;
+            this.pop('documentTypes');
+            this.pop('documentTypes');
             this._resetDocumentType();
           } else {
             this.unshift('documentTypes', {key: 'smartImport', label: 'label.document.type.smartImport'});
+            this.push('documentTypes', {key: 'folder', label: 'label.document.type.folder'});
+            this.push('documentTypes', {key: 'workspace', label: 'label.document.type.workspace'});
             this._resetDocumentType();
           }
+        },
+
+        _computeHasFiles: function() {
+          return this.hasLocalFiles || this.hasRemoteFiles;
+        },
+
+        _getAllFiles: function() {
+          if (this.localFiles && this.remoteFiles) {
+            return this.localFiles.concat(this.remoteFiles);
+          } else {
+            return this.localFiles ? this.localFiles : this.remoteFiles;
+          }
+        },
+
+        _getTotalFileCount: function() {
+          return (this.localFiles ? this.localFiles.length : 0) + (this.remoteFiles ? this.remoteFiles.length : 0);
+        },
+
+        _getCurrentFile: function() {
+          var arr = this._getAllFiles();
+          return arr[this.docIdx];
+        },
+
+        _getCurrentFileTitle: function() {
+          var currentFile = this._getCurrentFile();
+          return currentFile ? currentFile.name : '';
+        },
+
+        _getRemainingDocs: function() {
+          var count = this._getTotalFileCount();
+          return count > 1 ? this.i18n('ui.documentCreatePopup.addMetadata.otherDocuments',
+                                       '+ {0} other documents',
+                                       (count - 1 - this.docIdx)) : '';
         },
 
         _storeFile: function() {
           if (this.docData.length <= this.docIdx) {
             var fileData = {
               parent: this.targetPath,
-              document: JSON.parse(JSON.stringify(this.document))
+              document: JSON.parse(JSON.stringify(this.document)),
+              type: this.selectedDocType
             };
             this.docData.push(fileData);
           }
@@ -614,18 +755,17 @@ Contributors:
           }
         },
 
+        _hasNextFile: function() {
+          var length = this._getTotalFileCount();
+          return this.customizing && length > 1 && this.docIdx < length - 1;
+        },
+
         _resetDocumentType: function() {
-          // XXX fix this
-          //this.selectedDocType = null;
           this.selectedDocType = this.documentTypes[0].key;
           if (this.document) {
             this._updateLayout();
-            this.set('document.properties.dc:title', this.files[this.docIdx].name);
+            this.set('document.properties.dc:title', this._getCurrentFileTitle());
           }
-        },
-
-        _hasNextFile: function() {
-          return this.customizing && this.files && this.files.length > 1 && this.docIdx < this.files.length - 1;
         },
 
         /**
@@ -659,7 +799,7 @@ Contributors:
 
           // setup data binding
           if (this.customizing) {
-            this.set('document.properties.dc:title', this.files[this.docIdx].name);
+            this.set('document.properties.dc:title', this._getCurrentFileTitle());
           }
           el.document = this.document;
         },
@@ -682,12 +822,28 @@ Contributors:
             this._createLayout();
           }
         },
+        _sanitizeName: function(name) {
+          return name.replace(/[^a-z0-9]/gi, '_');
+        },
+
+        _cancel: function() {
+          if (this.batchId) {
+            this.cancelBatch();
+          }
+          this._clear();
+        },
 
         _clear: function() {
           this.files = [];
-          this.hasFilesUploaded = false;
+          this.localFiles = [];
+          this.remoteFiles = [];
+          this.hasLocalFilesUploaded = false;
+          this.hasLocalFiles = false;
+          this.hasRemoteFiles = false;
           this.properties = [];
           this.customizing = false;
+          this.docData = [];
+          this.docIdx = 0;
           this.set('newDocument.properties', {});
         },
 
@@ -715,91 +871,152 @@ Contributors:
           this.toggleDialog();
         },
 
-        _sanitizeName: function(name) {
-          return name.replace(/[^a-z0-9]/gi, '_');
-        },
-
         _bulkCreate: function() {
           this._storeFile();
 
           if (this.customizing) {
-            this._processFiles().then(function(response) {
-              this._clear();
-              this.toggleDialog();
-              this._notify(response);
-              if (this.files && this.files.length === 1) {
-                page('/browse' + response.path);
-              } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
-                this.fire('document-updated');
-              } else {
-                page('/browse' + this.targetPath);
-              }
-            }.bind(this));
+            this._processFilesWithMetadata()
+                .then(function(response) {
+                  this._handleSuccess(response);
+                  this.cancelBatch();
+                }.bind(this), this._handleError.bind(this));
           } else {
             var params = {
               context: {
                 currentDocument: this.targetPath,
               }
             };
-            this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true'}).then(function(response) {
-              this._clear();
-              this.toggleDialog();
-              this._notify(response);
-              if (response.entries && response.entries.length === 1) {
-                page('/browse' + response.entries[0].path);
-              } else if (this.targetPath.replace(/\/$/,'') === this.parent.path.replace(/\/$/,'')) {
-                this.fire('document-updated');
-              } else {
-                page('/browse' + this.targetPath);
-              }
-            }.bind(this));
+            var doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
+            var doRemote = this.remoteFiles && this.remoteFiles.length > 0;
+            if (doLocal && doRemote) {
+              this._smartImportLocalFiles(params)
+                  .then(function(response1) {
+                    this._smartImportRemoteFiles(params).then(function(response2) {
+                      var response = {'entity-type': 'Documents'};
+                      if (response1.entries && response2.entries) {
+                        response.entries = response1.entries.concat(response2.entries);
+                      } else if (response1.entries) {
+                        response.entries = response1.entries.concat(response2);
+                      } else if (response2.entries) {
+                        response.entries = [response1].entries.concat(response2);
+                      } else {
+                        response.entries = [response1, response2];
+                      }
+                      this._handleSuccess(response);
+                    }.bind(this), this._handleError.bind(this));
+                  }.bind(this), this._handleError.bind(this));
+            } else if (doLocal) {
+              this._smartImportLocalFiles(params)
+                  .then(this._handleSuccess.bind(this), this._handleError.bind(this));
+            } else {
+              this._smartImportRemoteFiles(params)
+                  .then(this._handleSuccess.bind(this), this._handleError.bind(this));
+            }
           }
         },
 
-        _processFiles: function() {
+        _handleSuccess: function(response) {
+          this._clear();
+          this.toggleDialog();
+          this._notify(response);
+          if (this.uploader) {
+            this.uploader = null;
+          }
+          if (this.localFiles && this.localFiles.length === 1) {
+            page('/browse' + response.path);
+          } else if (this.targetPath.replace(/\/$/, '') === this.parent.path.replace(/\/$/, '')) {
+            this.fire('document-updated');
+          } else {
+            page('/browse' + this.targetPath);
+          }
+        },
+
+        _handleError: function(error) {
+          this._toast('ERROR: ' + error.message);
+        },
+
+        _smartImportLocalFiles: function(params) {
+          return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true'});
+        },
+
+        _smartImportRemoteFiles: function(params) {
+          this.$.fileManagerImport.input = 'blobs:' + this.remoteFiles.map(function(file) {
+            return file.key;
+          }).join();
+          this.$.fileManagerImport.params = params;
+          this.$.fileManagerImport.headers = {'nx_es_sync': 'true'};
+          return this.$.fileManagerImport.execute();
+        },
+
+        _processFilesWithMetadata: function() {
           var count = 0;
+          var length = this._getTotalFileCount();
           var self = this;
           function next() {
-            if (count < self.files.length) {
-              return self._processFile(count++).then(next);
+            if (count < length) {
+              var hasOwnData = count < self.docData.length;
+              var fileData = self.docData[hasOwnData ? count : self.docData.length - 1];
+              var arr = self.files, index = count;
+              if (count >= self.files.length) {
+                arr = self.remoteFiles;
+                index = count - self.files.length;
+              }
+              count++;
+              return self._processFileWithMetadata(arr[index], fileData, hasOwnData)
+                         .then(next, self._handleError.bind(self));
             }
           }
           return next();
         },
 
-        _processFile: function(count) {
-          var file = this.files[count];
-          var hasOwnData = count < this.docData.length;
-          var fileData = this.docData[ hasOwnData ? count : this.docData.length - 1];
-          // TODO handle collections, tags, etc.
+        _processFileWithMetadata: function(file, fileData, hasOwnData) {
           this.document = fileData.document;
           this.targetPath = fileData.parent;
           if (!hasOwnData) {
             this.document.properties['dc:title'] = file.name;
           }
           this.document.name = this._sanitizeName(this.document.properties['dc:title']);
-          this.document.properties['file:content'] = {
+          var blobProperty = this.documentBlobProperties[fileData.type] ||
+                             this.documentBlobProperties['default'];
+          // XXX if fileData.type == Note, then the file's contents should be passed instead
+          this.document.properties[blobProperty] = file.providerId ? {
+            'providerId': file.providerId,
+            'user': file.user,
+            'fileId': file.fileId
+          } : {
             'upload-batch': this.batchId,
-            'upload-fileId': file.index.toString()
+            'upload-fileId': file.index
           };
           return this.$.docRequest.post();
         },
 
         _removeBlob: function(e) {
-          this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.index;
-          this.$.blobRemover.remove().then(function() {
-            this.splice('files', e.model.index, 1);
-          }.bind(this));
+          if (e.model.file.providerId) {
+            this.splice('remoteFiles', e.model.index, 1);
+          } else {
+            this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.file.index;
+            this.$.blobRemover.remove().then(function() {
+              this.splice('localFiles', e.model.index, 1);
+              this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+            }.bind(this), this._handleError.bind(this));
+          }
         },
 
-        batchReady: function(data) {
+        _batchReady: function(data) {
           data.stopPropagation();
-          this.hasFilesUploaded = true;
           this.properties = [];
-          for (var i = 0; i < this.files.length; i++) {
+          for (var i = 0; i < this.localFiles.length; i++) {
             this.properties.push({});
-            this.files[i].index = i;
           }
+        },
+
+        _uploadGoogleDrive: function() {
+          this.$$('#googleDriveUploader').openPicker();
+        },
+
+        _blobPicked: function(e) {
+          this.hasRemoteFiles = true;
+          this.push('remoteFiles', e.detail.fileInfo);
         },
 
         _notify: function(response) {
@@ -812,7 +1029,7 @@ Contributors:
         },
 
         _formatSize: function(size) {
-          if (!size) {
+          if (!Number.isInteger(size)) {
             return '';
           } else if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';

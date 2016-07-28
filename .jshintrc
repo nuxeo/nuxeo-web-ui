@@ -27,6 +27,8 @@
     "CKEDITOR": true,
     "jQuery": true,
     "Promise": true,
-    "confirm": true
+    "confirm": true,
+    "gapi": true,
+    "google": true
   }
 }
