@@ -105,16 +105,16 @@ Contributors:
         overflow: auto;
       }
 
-      .view-dialog .buttons {
+      .view-dialog .actions {
         @apply(--layout-horizontal);
-        @apply(--layout-center);
         @apply(--layout-justified);
         padding: 16px;
         border-top: 1px solid var(--divider-color);
       }
 
-      paper-button {
-        margin: 0;
+      .view-dialog .actions .version {
+        font-weight: 500;
+        padding-left: 8px;
       }
 
     </style>
@@ -152,8 +152,12 @@ Contributors:
                 <p class="tag">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</p>
               </div>
               <div class="col-action">
-                <paper-button raised class="primary" on-tap="_confirmFromList">[[i18n('ui.versions.restore', 'Restore')]]
-                </paper-button>
+                <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
+                                      dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
+                                      dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
+                                      on-confirm="_restoreFromList">
+                  [[i18n('ui.versions.restore', 'Restore')]]
+                </nuxeo-confirm-button>
               </div>
             </div>
           </template>
@@ -170,25 +174,20 @@ Contributors:
         <div class="content">
             <nuxeo-document-page document="[[versionDocument]]"></nuxeo-document-page>
         </div>
-        <div class="buttons">
+        <div class="actions">
           <paper-button dialog-dismiss>[[i18n('ui.versions.close', 'Close')]]</paper-button>
-          <div></div>
-          <paper-button dialog-confirm class="primary" on-tap="_confirmFromView">
+          <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
+                                dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
+                                dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
+                                on-confirm="_restoreFromView">
             [[i18n('ui.versions.restore', 'Restore')]]
-            [[i18n('ui.versions.version', 'Version')]]
-            [[versionDocument.properties.uid:major_version]].[[versionDocument.properties.uid:minor_version]]
-          </paper-button>
+            <span class="version">
+              [[i18n('ui.versions.version', 'Version')]]
+              [[versionDocument.properties.uid:major_version]].[[versionDocument.properties.uid:minor_version]]
+            </span>
+          </nuxeo-confirm-button>
         </div>
       </template>
-    </paper-dialog>
-
-    <paper-dialog id="confirmDialog" with-backdrop>
-      <div><p>[[i18n('ui.versions.confirm.message', 'Restore document version?')]]</p></div>
-      <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('ui.versions.confirm.no', 'No')]]</paper-button>
-        <paper-button dialog-confirm class="primary" on-tap="_restore">[[i18n('ui.versions.confirm.yes', 'Yes')]]
-        </paper-button>
-      </div>
     </paper-dialog>
 
   </template>
@@ -235,25 +234,23 @@ Contributors:
 
         _view: function(e) {
           this.versionId = e.model.item.uid;
-          this.$.viewDialog.toggle();
+          this.$.viewDialog.open();
         },
 
-        _confirmFromList: function(e) {
-          this.versionId = e.model.item.uid;
-          this.$.confirmDialog.toggle();
+        _restoreFromList: function(e) {
+          this._restore(e.model.item.uid);
         },
 
-        _confirmFromView: function() {
-          this.$.confirmDialog.toggle();
+        _restoreFromView: function() {
+          this.$.viewDialog.close();
+          this._restore(this.versionId);
         },
 
-        _restore: function() {
-          if (this.versionId) {
-            this.$.opRestoreVersion.input = this.versionId;
-            this.$.opRestoreVersion.execute().then(function() {
-              this.fire('document-restored');
-            }.bind(this));
-          }
+        _restore: function(id) {
+          this.$.opRestoreVersion.input = id;
+          this.$.opRestoreVersion.execute().then(function() {
+            this.fire('document-restored');
+          }.bind(this));
         }
 
       });

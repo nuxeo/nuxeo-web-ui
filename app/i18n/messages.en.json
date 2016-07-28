@@ -330,7 +330,7 @@
   "ui.versions.empty": "No versions",
   "ui.versions.restore": "Restore",
   "ui.versions.close": "Close",
-  "ui.versions.confirm.message": "Restore document version?",
+  "ui.versions.confirm.title": "Are you sure?",
   "ui.versions.confirm.no": "No",
   "ui.versions.confirm.yes": "Yes",
   "ui.recentTable.name": "Name",
