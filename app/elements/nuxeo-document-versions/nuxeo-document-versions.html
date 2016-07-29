@@ -248,6 +248,7 @@ Contributors:
 
         _restore: function(id) {
           this.$.opRestoreVersion.input = id;
+          this.$.opRestoreVersion.params = {checkout: true};
           this.$.opRestoreVersion.execute().then(function() {
             this.fire('document-restored');
           }.bind(this));
