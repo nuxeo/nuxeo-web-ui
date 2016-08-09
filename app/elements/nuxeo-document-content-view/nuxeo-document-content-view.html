@@ -175,7 +175,7 @@ Contributors:
                 </nuxeo-dropdown-aggregation>
             </template>
             <template>
-              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">
+              <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
                 [[item.properties.dc:lastContributor]]
               </a>
             </template>
@@ -195,7 +195,7 @@ Contributors:
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
             sort-by="dc:creator" hidden>
             <template>
-              <a class="tag user" href="/user/[[item.properties.dc:creator]]">
+              <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
                 [[item.properties.dc:creator]]
               </a>
             </template>
@@ -240,7 +240,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-content-view',
 
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         properties: {
           params: {

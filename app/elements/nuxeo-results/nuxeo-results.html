@@ -149,7 +149,7 @@ Contributors:
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.lastContributor', 'Last Contibutor')]]"
             sort-by="dc:lastContributor" flex="50">
             <template>
-              <a class="tag user" href="/user/[[item.properties.dc:lastContributor]]">
+              <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
                 [[item.properties.dc:lastContributor]]
               </a>
             </template>
@@ -169,7 +169,7 @@ Contributors:
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
             hidden>
             <template>
-              <a class="tag user" href="/user/[[item.properties.dc:creator]]">
+              <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
                 [[item.properties.dc:creator]]
               </a>
             </template>
