@@ -17,6 +17,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-liveconnect-behavior.html">
 <script src="https://apis.google.com/js/client.js" type="text/javascript"></script>
 
 <!--
@@ -41,14 +42,26 @@ Contributors:
       Polymer({
         is: 'nuxeo-liveconnect-google-drive',
 
+        behaviors: [Nuxeo.LiveConnectBehavior],
+
         properties: {
           clientId: {
             type: String
-          },
-          document: {
-            type: Object,
-            notify: true
           }
+        },
+
+        getClientId: function() {
+          return '724031659061-bh35ibpvuhsdphm9dostk1g0rlrjj7eq.apps.googleusercontent.com';
+        },
+
+        getProviderId: function() {
+          return 'googledrive';
+        },
+
+        openPicker: function() {
+          gapi.load('picker', {
+            'callback': this._checkAuth.bind(this)
+          });
         },
 
         _handleAuthResult: function() {
@@ -56,7 +69,7 @@ Contributors:
           if (token) {
             jQuery.getJSON('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ' + token.access_token)
                   .done(function(info) {
-                    this.email = info.email;
+                    this.userId = info.email;
                     this._showPicker(token.access_token);
                   }.bind(this));
           } else {
@@ -82,6 +95,7 @@ Contributors:
           .setAppId(this.clientId)
           .addView(view)
           .setCallback(this._pickerCallback.bind(this))
+          .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
           .build()
           .setVisible(true);
         },
@@ -89,25 +103,20 @@ Contributors:
         _pickerCallback: function(data) {
           var action = data[google.picker.Response.ACTION];
           if (action === google.picker.Action.PICKED) {
-            this.document = data[google.picker.Response.DOCUMENTS][0];
-            var fileInfo = {
-              providerId: 'googledrive',
-              providerName: 'Google Drive',
-              user: this.email,
-              fileId: this.document.id,
-              name: this.document.name,
-              size: this.document.sizeBytes,
-              key: 'googledrive:' + this.email + ':' + this.document.id
-            };
-            this.fire('nx-blob-picked', {fileInfo: fileInfo});
+            var files = [];
+            data[google.picker.Response.DOCUMENTS].forEach(function(file) {
+              files.push({
+                providerId: 'googledrive',
+                providerName: 'Google Drive',
+                user: this.userId,
+                fileId: file.id,
+                name: file.name,
+                size: file.sizeBytes,
+                key: this.generateBlobKey(file.id)
+              });
+            }.bind(this));
+            this.notifyBlobPick(files);
           }
-        },
-
-        openPicker: function() {
-          this.clientId = '724031659061-bh35ibpvuhsdphm9dostk1g0rlrjj7eq.apps.googleusercontent.com';
-          gapi.load('picker', {
-            'callback': this._checkAuth.bind(this)
-          });
         }
       });
     })();

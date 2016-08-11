@@ -1,0 +1,70 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<script>
+var Nuxeo = Nuxeo || {};
+Nuxeo.LiveConnectBehavior = {
+  properties: {
+    clientId: {
+      type: String
+    },
+    providerId: {
+      type: String
+    },
+    userId: {
+      type: String
+    }
+  },
+
+  ready: function() {
+    this.clientId = this.getClientId();
+    this.providerId = this.getProviderId();
+  },
+
+  generateBlobKey: function(fileId) {
+    if (!this.providerId) {
+      throw 'failed to generate key: providerId not defined';
+    }
+    if (!this.userId) {
+      throw 'failed to generate key: userId not defined';
+    }
+    if (!fileId) {
+      throw 'failed to generate key: fileId not defined';
+    }
+    return this.providerId + ':' + this.userId + ':' + fileId;
+  },
+
+  notifyBlobPick: function(blobs) {
+    this.fire('nx-blob-picked', {blobs: Array.isArray(blobs) ? blobs : [blobs]});
+  },
+
+  // extension point
+  getClientId: function() {
+    throw 'not implemented';
+  },
+
+  // extension point
+  getProviderId: function() {
+    throw 'not implemented';
+  },
+
+  // extension point
+  openPicker: function() {
+    throw 'not implemented';
+  }
+};
+</script>

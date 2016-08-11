@@ -231,7 +231,7 @@ Contributors:
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
-                    headers='{"nx_es_sync": "true", "nx_batch_no_drop": "true"}'
+                    headers='{"nx_es_sync": "true", "X-Batch-No-Drop": "true"}'
                     response="{{createResponse}}"></nuxeo-document>
 
     <paper-dialog id="createDocDialog"
@@ -257,14 +257,14 @@ Contributors:
         </div>
         <div hidden$="[[!customizing]]" class="horizontal layout center">
           <div class= "heading sidepart-right">
-            <label>[[i18n('ui.documentCreatePopup.addMetadata.heading', 'Add Metadata')]]</label>
+            <label>[[i18n('ui.documentCreatePopup.customize.heading', 'Customize')]]</label>
           </div>
           <div class="horizontal layout flex">
             <label class="doc-title">[[_getCurrentFileTitle(document,customizing)]]</label>
             <label class="remaining-docs">[[_getRemainingDocs(document,customizing)]]</label>
           </div>
           <div class= "subheading sidepart-left">
-            <label>[[i18n('ui.documentCreatePopup.addMetadata.importAs', 'Import As')]]</label>
+            <label>[[i18n('ui.documentCreatePopup.customize.importAs', 'Import As')]]</label>
           </div>
           <paper-dropdown-menu class="typeDropdownSmall" no-label-float horizontal-align="left">
             <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
@@ -393,22 +393,30 @@ Contributors:
                       class="primary"
                       on-tap="_toggleCustomize"
                       hidden$="[[!_canCustomize(selectedDocType,hasFiles,customizing)]]">
-                      [[i18n('ui.documentCreatePopup.addMetadata', 'Add Metadata')]]
+                      [[i18n('ui.documentCreatePopup.customize', 'Customize Import')]]
+                    </paper-button>
+        <paper-button noink
+                      class="primary"
+                      on-tap="_previousFile"
+                      disabled$=[[!_hasPreviousFile(customizing,docIdx)]]
+                      hidden$="[[!customizing]]">
+                      &#x276e;&nbsp;[[i18n('ui.documentCreatePopup.previousDocument', 'Previous Document')]]
                     </paper-button>
         <paper-button noink
                       class="primary"
                       on-tap="_nextFile"
-                      hidden$="[[!_hasNextFile(customizing,docIdx)]]">
-                      [[i18n('ui.documentCreatePopup.applyNext', 'Apply & See Next')]]
+                      disabled$="[[!_hasNextFile(customizing,docIdx)]]"
+                      hidden$="[[!customizing]]">
+                      [[i18n('ui.documentCreatePopup.nextDocument', 'Next Document')]]&nbsp;&#x276f;
                     </paper-button>
         <paper-button noink
                       class="primary"
                       on-tap="_create"
                       hidden$="[[!_canCreate(selectedDocType,hasLocalFilesUploaded,hasRemoteFiles,customizing)]]">
-                      <template is="dom-if" if=[[_showApplyAll(customizing,docIdx)]]>
-                        [[i18n('ui.documentCreatePopup.applyAll', 'Apply to All & Create')]]
+                      <template is="dom-if" if=[[customizing]]>
+                        [[i18n('ui.documentCreatePopup.applyRemaining', 'Apply to Remaining & Create')]]
                       </template>
-                      <template is="dom-if" if=[[!_showApplyAll(customizing,docIdx)]]>
+                      <template is="dom-if" if=[[!customizing]]>
                         [[i18n('command.create', 'Create')]]
                       </template>
                     </paper-button>
@@ -439,13 +447,6 @@ Contributors:
 
           document: {
             type: Object
-          },
-
-          newDocument: {
-            type: Object,
-            value: {
-              properties: {}
-            }
           },
 
           docIdx: {
@@ -659,10 +660,6 @@ Contributors:
           return this.selectedDocType === 'smartImport' && !this.customizing;
         },
 
-        _showApplyAll: function() {
-          return this.customizing && this._hasNextFile();
-        },
-
         _isBulkCreate: function() {
           return this.selectedDocType === 'smartImport' || this.customizing;
         },
@@ -731,7 +728,7 @@ Contributors:
 
         _getRemainingDocs: function() {
           var count = this._getTotalFileCount();
-          return count > 1 ? this.i18n('ui.documentCreatePopup.addMetadata.otherDocuments',
+          return count > 1 ? this.i18n('ui.documentCreatePopup.customize.otherDocuments',
                                        '+ {0} other documents',
                                        (count - 1 - this.docIdx)) : '';
         },
@@ -755,9 +752,22 @@ Contributors:
           }
         },
 
+        _previousFile: function() {
+          if (this._hasPreviousFile()) {
+            this._storeFile();
+            this.docIdx--;
+            this._resetDocumentType();
+          }
+        },
+
         _hasNextFile: function() {
           var length = this._getTotalFileCount();
           return this.customizing && length > 1 && this.docIdx < length - 1;
+        },
+
+        _hasPreviousFile: function() {
+          var length = this._getTotalFileCount();
+          return this.customizing && length > 1 && this.docIdx > 0;
         },
 
         _resetDocumentType: function() {
@@ -772,8 +782,7 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType === 'smartImport' ? 'dublincore'
-                                                      : this.selectedDocType).toLowerCase();
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
           return ['nuxeo', type, 'edit'].join('-');
         },
 
@@ -810,16 +819,18 @@ Contributors:
         _updateLayout: function() {
           this.document = this.documentTemplates[this.selectedDocType]();
 
-          var layout = this.document ? this._layoutFor() : 'nuxeo-dublincore-edit';
-          if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-                // error handling
-                function() {
-                  console.error('Failed to find edit layout for ' + this.document.type);
-                });
-          } else {
-            this._createLayout();
+          if (this.document) {
+            var layout = this._layoutFor();
+            if (!this._isRegistered(layout)) {
+              var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
+              this.importHref(url, this._createLayout.bind(this),
+                  // error handling
+                  function() {
+                    console.error('Failed to find edit layout for ' + this.document.type);
+                  });
+            } else {
+              this._createLayout();
+            }
           }
         },
         _sanitizeName: function(name) {
@@ -844,7 +855,6 @@ Contributors:
           this.customizing = false;
           this.docData = [];
           this.docIdx = 0;
-          this.set('newDocument.properties', {});
         },
 
         _back: function() {
@@ -875,11 +885,7 @@ Contributors:
           this._storeFile();
 
           if (this.customizing) {
-            this._processFilesWithMetadata()
-                .then(function(response) {
-                  this._handleSuccess(response);
-                  this.cancelBatch();
-                }.bind(this), this._handleError.bind(this));
+            this._processFilesWithMetadata();
           } else {
             var params = {
               context: {
@@ -892,17 +898,7 @@ Contributors:
               this._smartImportLocalFiles(params)
                   .then(function(response1) {
                     this._smartImportRemoteFiles(params).then(function(response2) {
-                      var response = {'entity-type': 'Documents'};
-                      if (response1.entries && response2.entries) {
-                        response.entries = response1.entries.concat(response2.entries);
-                      } else if (response1.entries) {
-                        response.entries = response1.entries.concat(response2);
-                      } else if (response2.entries) {
-                        response.entries = [response1].entries.concat(response2);
-                      } else {
-                        response.entries = [response1, response2];
-                      }
-                      this._handleSuccess(response);
+                      this._handleSuccess(this._mergeResponses(response1, response2));
                     }.bind(this), this._handleError.bind(this));
                   }.bind(this), this._handleError.bind(this));
             } else if (doLocal) {
@@ -916,14 +912,17 @@ Contributors:
         },
 
         _handleSuccess: function(response) {
-          this._clear();
-          this.toggleDialog();
-          this._notify(response);
-          if (this.uploader) {
+          if (this.customizing) {
+            this.cancelBatch();
+          } else {
+            this.batchId = null;
             this.uploader = null;
           }
-          if (this.localFiles && this.localFiles.length === 1) {
-            page('/browse' + response.path);
+          this._clear();
+          this._notify(response);
+          this.toggleDialog();
+          if (!response.entries || response.entries.length === 1) {
+            page('/browse' + (response.entries ? response.entries[0] : response).path);
           } else if (this.targetPath.replace(/\/$/, '') === this.parent.path.replace(/\/$/, '')) {
             this.fire('document-updated');
           } else {
@@ -933,6 +932,26 @@ Contributors:
 
         _handleError: function(error) {
           this._toast('ERROR: ' + error.message);
+        },
+
+        _mergeResponses: function(response1, response2) {
+          var response = {'entity-type': 'Documents'};
+          if (response1 && response1.entries && response2 && response2.entries) {
+            response.entries = response1.entries.concat(response2.entries);
+          } else if (response1 && response1.entries) {
+            response.entries = response2 ? response1.entries.concat(response2) : response1.entries;
+          } else if (response2 && response2.entries) {
+            response.entries = response1 ? [response1].entries.concat(response2) : response2.entries;
+          } else {
+            response.entries = [];
+            if (response1) {
+              response.entries.push(response1);
+            }
+            if (response2) {
+              response.entries.push(response2);
+            }
+          }
+          return response;
         },
 
         _smartImportLocalFiles: function(params) {
@@ -952,19 +971,22 @@ Contributors:
           var count = 0;
           var length = this._getTotalFileCount();
           var self = this;
-          function next() {
+          function next(response1) {
             if (count < length) {
               var hasOwnData = count < self.docData.length;
               var fileData = self.docData[hasOwnData ? count : self.docData.length - 1];
-              var arr = self.files, index = count;
-              if (count >= self.files.length) {
+              var arr = self.localFiles, index = count;
+              if (count >= self.localFiles.length) {
                 arr = self.remoteFiles;
-                index = count - self.files.length;
+                index = count - self.localFiles.length;
               }
               count++;
               return self._processFileWithMetadata(arr[index], fileData, hasOwnData)
-                         .then(next, self._handleError.bind(self));
+                         .then(function(response2) {
+                            return next(self._mergeResponses(response1, response2));
+                          }, self._handleError.bind(self));
             }
+            return Promise.resolve(self._handleSuccess(response1));
           }
           return next();
         },
@@ -1016,7 +1038,7 @@ Contributors:
 
         _blobPicked: function(e) {
           this.hasRemoteFiles = true;
-          this.push('remoteFiles', e.detail.fileInfo);
+          this.notifyPath('remoteFiles', this.remoteFiles.concat(e.detail.blobs));
         },
 
         _notify: function(response) {
