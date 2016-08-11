@@ -30,21 +30,32 @@ Contributors:
     <style is="custom-style">
       :host {
         display: block;
+        font-family: var(--nuxeo-app-font);
       }
 
       #content {
-        height: 56px;
-        position:relative;
+        height: 60px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 110;
       }
 
       .toolbar {
-        background: var(--nuxeo-selection-toolbar-color);
+        background: #404040;
         padding: 0 3em;
         z-index: 100;
         font-weight: 300;
         font-size: .9rem;
-        color: var(--nuxeo-link-hover-color);
+        color: #fff;
         box-shadow: 0 0 3px rgba(0,0,0,0.4);
+      }
+
+      @media (min-width: 1280px) {
+        .toolbar {
+          padding-left: 7em;
+        }
       }
 
       .count {
@@ -59,6 +70,7 @@ Contributors:
 
       a.selectionLink:hover {
         cursor: pointer;
+        color: var(--nuxeo-header-actions-hover);
       }
 
       .list {
