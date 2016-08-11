@@ -55,6 +55,11 @@ Contributors:
         box-sizing: border-box;
       }
 
+      nuxeo-data-table ::content data-table-checkbox[checked] #container {
+        border-color: #75b226;
+        background-color: #75b226;
+      }
+
       nuxeo-data-table ::content #container iron-list#list::after {
         background-color: transparent;
         content:'';
@@ -82,11 +87,23 @@ Contributors:
         height: 2em;
       }
 
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select {
-        border:1px solid #00adff;
-        background-color: #00adff;
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox:hover .select:hover {
+        border: 2px solid #99d749;
+        background-color: #99d749;
         cursor: pointer;
         display: block;
+      }
+
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select paper-icon-button {
+        color: #fff;
+      }
+
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox {
+        filter: brightness(102%);
+        -webkit-filter: brightness(102%);
+        border-bottom: 3px solid #75b226;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
       }
 
     </style>
@@ -131,7 +148,7 @@ Contributors:
             <nuxeo-document-grid-thumbnail class="grid-box"
               tabindex$="{{tabIndex}}"
               class$="[[_computedClass(selected)]]"
-              doc="[[item]]" on-clicked="_navigate">
+              doc="[[item]]" on-navigate="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
         </nuxeo-data-grid>
@@ -148,7 +165,7 @@ Contributors:
           </nuxeo-selection-toolbar>
           <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
               <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>

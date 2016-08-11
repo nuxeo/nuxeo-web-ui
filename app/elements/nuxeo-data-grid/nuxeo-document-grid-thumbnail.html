@@ -96,12 +96,6 @@ Contributors:
         height: 1.9em;
       }
 
-      .bubbleBox:hover .select:hover {
-        border:1px solid #00adff;
-        background-color: #00adff;
-        cursor: pointer;
-      }
-
       .select:hover paper-icon-button {
         color: #fff;
       }
@@ -137,16 +131,10 @@ Contributors:
         color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
 
-
-      ::host.selected ::content .bubbleBox .select paper-icon-button {
-        color: #fff;
-      }
-
-      ::host.selected ::content .bubbleBox .select {
-        border:1px solid #00adff;
-        background-color: #00adff;
+      .bubbleBox:hover .select:hover {
+        border: 2px solid var(--nuxeo-button-primary);
+        background-color: var(--nuxeo-button-primary);
         cursor: pointer;
-        display: block;
       }
 
     </style>
@@ -155,8 +143,9 @@ Contributors:
 
     <div class="bubbleBox">
 
-      <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer">
-      </iron-image>
+        <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
+        on-tap="handleClick">
+        </iron-image>
       <a class="title ellipsis" on-click="handleClick">
         <div class="dataContainer">
           <div class="title ellipsis">[[doc.title]]</div>
@@ -220,7 +209,7 @@ Contributors:
         },
 
         handleClick: function() {
-          this.fire('clicked');
+          this.fire('navigate');
         },
 
         _onCheckBoxTap: function() {
