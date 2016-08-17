@@ -143,15 +143,22 @@ Contributors:
         width: 60px;
       }
 
-      .side-nav paper-icon-button.iron-selected,
-      .side-nav paper-icon-button:hover {
-        color: var(--nuxeo-sidebar-actions-hover);
-        fill: var(--nuxeo-sidebar-actions-hover);
+      .side-nav .iron-selected,
+      .side-nav paper-icon-button:hover,
+      .side-nav paper-icon-button[focused] {
+        color: #fff;
+        fill: #fff;
+        background-color: rgba(0,0,0,.15);
       }
 
-      .side-nav paper-icon-button.iron-selected,
-      .side-nav paper-icon-button:hover {
-        background-color: rgba(255,255,255,.03);
+      .side-nav paper-icon-button:focus ::content iron-icon {
+        fill: #fff; }
+
+      paper-menu {
+        --paper-menu-focused-item-after: {
+          background-color: rgba(0,0,0,.15);
+          color: #fff;
+        };
       }
 
       .side-nav .profile-icon {
@@ -224,20 +231,20 @@ Contributors:
           <paper-icon-button src$="[[baseUrl]]images/touch/icon-128x128.png" class="logo"></paper-icon-button>
         </a>
         <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
-          <paper-icon-button id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
-          <paper-icon-button id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
-          <paper-icon-button id="menuSearch" icon="icons:search" name="search"></paper-icon-button>
-          <paper-icon-button id="menuAssets" icon="icons:perm-media" name="assets"></paper-icon-button>
+          <paper-icon-button noink id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
+          <paper-icon-button noink id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
+          <paper-icon-button noink id="menuSearch" icon="icons:search" name="search"></paper-icon-button>
+          <paper-icon-button noink id="menuAssets" icon="icons:perm-media" name="assets"></paper-icon-button>
           <div id="menuTasks" class="icon-badge" name="tasks">
-            <paper-icon-button icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
+            <paper-icon-button noink icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
             <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
           </div>
-          <paper-icon-button id="menuFavorites" icon="icons:star" name="favorites"></paper-icon-button>
-          <paper-icon-button id="menuCollections" icon="icons:book" name="collections"></paper-icon-button>
-          <paper-icon-button id="menuPersonal" icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
-          <paper-icon-button id="menuClipboard" icon="icons:content-paste" name="clipboard"></paper-icon-button>
-          <paper-icon-button id="menuAdministration" icon="icons:build" name="administration" hidden$="[[!currentUser.isAdministrator]]"></paper-icon-button>
-          <paper-icon-button id="menuAccount" icon="icons:account-circle" name="profile" class="profile-icon"></paper-icon-button>
+          <paper-icon-button noink id="menuFavorites" icon="icons:star" name="favorites"></paper-icon-button>
+          <paper-icon-button noink id="menuCollections" icon="icons:book" name="collections"></paper-icon-button>
+          <paper-icon-button noink id="menuPersonal" icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
+          <paper-icon-button noink id="menuClipboard" icon="icons:content-paste" name="clipboard"></paper-icon-button>
+          <paper-icon-button noink id="menuAdministration" icon="icons:build" name="administration" hidden$="[[!currentUser.isAdministrator]]"></paper-icon-button>
+          <paper-icon-button noink id="menuAccount" icon="icons:account-circle" name="profile" class="profile-icon"></paper-icon-button>
         </paper-menu>
 
         <iron-collapse id="sidebar" horizontal opened>
