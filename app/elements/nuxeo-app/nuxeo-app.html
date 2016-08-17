@@ -50,11 +50,6 @@ Contributors:
         overflow: scroll;
       }
 
-      ::content --paper-icon-button-hover {
-        filter: brightness(102%);
-        webkit-filter: brightness(102%);
-      }
-
       #sidebar > div {
         margin-left: 60px;
       }
@@ -179,6 +174,10 @@ Contributors:
         margin: 0 0 .4em;
         padding-bottom: 8px;
         border-bottom: var(--nuxeo-border);
+      }
+
+      nuxeo-document-create-button.admin {
+        display: none;
       }
 
       .experimental {
@@ -455,7 +454,7 @@ Contributors:
     <paper-tooltip for="menuAccount" position="right" offset="0" animation-delay="0">
       [[i18n('heading.app.account', 'User Settings')]]</paper-tooltip>
 
-    <nuxeo-document-create-button parent="[[currentParent]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup"
                                  parent="[[currentParent]]"></nuxeo-document-create-popup>
 
