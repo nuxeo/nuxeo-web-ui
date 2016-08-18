@@ -18,6 +18,7 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-add-to-collection-button`
@@ -129,6 +130,7 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-add-to-collection-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: Object,
 
@@ -158,14 +160,13 @@ Contributors:
           }
         }
       },
-      behaviors: [Nuxeo.I18nBehavior],
 
       _toggleDialog: function() {
         this.$.dialog.toggle();
       },
 
-      _isAvailable: function(document) {
-        return document ? document.facets.indexOf('NotCollectionMember') === -1 : false;
+      _isAvailable: function(doc) {
+        return this._isCollectionMember(doc) && !this._isVersion(doc);
       },
 
       add: function() {

@@ -17,6 +17,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-notifications-toggle-button`
@@ -39,8 +40,10 @@ Contributors:
       }
     </style>
 
-    <paper-icon-button icon="[[_icon(checked)]]" id="notifyBut" on-tap="toggle"></paper-icon-button>
-    <paper-tooltip for="notifyBut">[[_label(checked)]]</paper-tooltip>
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button icon="[[_icon(checked)]]" id="notifyBut" on-tap="toggle"></paper-icon-button>
+      <paper-tooltip for="notifyBut">[[_label(checked)]]</paper-tooltip>
+    </template>
 
   </template>
 
@@ -49,6 +52,7 @@ Contributors:
       'use strict';
       Polymer({
         is: 'nuxeo-notifications-toggle-button',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -60,10 +64,13 @@ Contributors:
             reflectToAttribute: true
           }
         },
-        behaviors: [Nuxeo.I18nBehavior],
 
         toggle: function() {
           this.checked = !this.checked;
+        },
+
+        _isAvailable: function(doc) {
+          return !this._isVersion(doc);
         },
 
         _label: function(checked) {

@@ -17,6 +17,7 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-create-version-button`
@@ -115,9 +116,7 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-create-version-button',
-
-      behaviors: [Nuxeo.I18nBehavior],
-
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: Object,
         headers: {
@@ -138,7 +137,7 @@ Contributors:
       },
 
       _isAvailable: function(doc) {
-        return doc && doc.facets.indexOf('Versionable') !== -1;
+        return this._isVersionable(doc) && !this._isVersion(doc);
       },
 
       _nextMinor: function(doc) {

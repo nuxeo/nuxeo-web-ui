@@ -17,6 +17,7 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-download-button`
@@ -35,7 +36,7 @@ Contributors:
       }
     </style>
 
-    <template is="dom-if" if="[[_hasDownload(document)]]">
+    <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button id="button" icon="icons:file-download" on-tap="_download"></paper-icon-button>
       <paper-tooltip for="button">[[i18n('ui.downloadButton.tooltip', 'Download')]]</paper-tooltip>
     </template>
@@ -45,15 +46,13 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-download-button',
-      behaviors: [Nuxeo.I18nBehavior],
-
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: Object
       },
 
-      _hasDownload: function() {
-        return (this.document && this.document.facets.indexOf('Folderish') === -1 &&
-                this.document.properties['file:content']);
+      _isAvailable: function(doc) {
+        return this._isFolderish(doc) && this._hasContent(doc) && this._isVersion(doc);
       },
 
       _download: function() {

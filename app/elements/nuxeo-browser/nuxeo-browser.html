@@ -23,6 +23,7 @@ Contributors:
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-browser`
@@ -79,11 +80,11 @@ Contributors:
     <!-- Main content -->
     <paper-header-panel class="main">
 
-      <paper-header class="paper-header">
+      <div class="paper-header">
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
 
-          <paper-dropdown-menu noink no-animations no-label-float>
+          <paper-dropdown-menu noink no-animations no-label-float hidden$="[[_isVersion(document)]]">
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
@@ -108,7 +109,7 @@ Contributors:
             context="[[actionContext]]"></nuxeo-document-actions>
 
         </paper-toolbar>
-      </paper-header>
+      </div>
 
       <div class="content" id="nxContent">
         <paper-toast id="toast"></paper-toast>
@@ -176,7 +177,7 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
 
         listeners: {
           'permissions.acecreated': '_documentUpdated',

@@ -18,6 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-lock-toggle-button`
@@ -50,9 +51,10 @@ Contributors:
       op="Document.Unlock"
       input="[[document.uid]]"></nuxeo-operation>
 
-    <paper-icon-button icon="[[icon]]" id="lockBut">
-    </paper-icon-button>
-    <paper-tooltip for="lockBut" id="lockButTooltip">[[tooltip]]</paper-tooltip>
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button icon="[[icon]]" id="lockBut"></paper-icon-button>
+      <paper-tooltip for="lockBut" id="lockButTooltip">[[tooltip]]</paper-tooltip>
+    </template>
 
   </template>
 
@@ -61,6 +63,7 @@ Contributors:
       'use strict';
       Polymer({
         is: 'nuxeo-lock-toggle-button',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -81,10 +84,8 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
-
         listeners: {
-          'tap': 'toggle',
+          'tap': 'toggle'
         },
 
         toggle: function() {
@@ -97,6 +98,10 @@ Contributors:
               this.locked = false;
             }.bind(this));
           }
+        },
+
+        _isAvailable: function(doc) {
+          return !this._isVersion(doc);
         },
 
         _computeTooltip: function(locked) {

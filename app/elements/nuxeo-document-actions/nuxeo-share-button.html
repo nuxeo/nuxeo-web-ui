@@ -17,6 +17,7 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-share-button`
@@ -62,10 +63,10 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-share-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: Object
       },
-      behaviors: [Nuxeo.I18nBehavior],
 
       _toggleDialog: function() {
         this.$.dialog.toggle();

@@ -17,6 +17,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-clipboard-toggle-button`
@@ -42,18 +43,19 @@ Contributors:
       }
     </style>
 
-    <paper-icon-button noink
-      id="clipboardBut"
-      icon="icons:content-paste"
-      active="[[inClipboard]]"
-      on-tap="toggle"></paper-icon-button>
-    <paper-tooltip for="clipboardBut">[[tooltip]]</paper-tooltip>
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button noink id="clipboardBut" icon="icons:content-paste" active="[[inClipboard]]" on-tap="toggle">
+      </paper-icon-button>
+      <paper-tooltip for="clipboardBut">[[tooltip]]</paper-tooltip>
+    </template>
+
   </template>
   <script>
     (function() {
       'use strict';
       Polymer({
         is: 'nuxeo-clipboard-toggle-button',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -73,10 +75,17 @@ Contributors:
             computed: '_computeTooltip(inClipboard)'
           }
         },
-        behaviors: [Nuxeo.I18nBehavior],
 
-        _isAvailable: function(document) {
-          return document && document.facets.indexOf('NotCollectionMember') === -1;
+        toggle: function() {
+          if (this._clipboard.contains(this.document)) {
+            this._clipboard.remove(this.document);
+          } else {
+            this._clipboard.add(this.document);
+          }
+        },
+
+        _isAvailable: function(doc) {
+          return this._isCollectionMember(doc) && !this._isVersion(doc);
         },
 
         _computeTooltip: function(inClipboard) {
@@ -99,15 +108,8 @@ Contributors:
 
         get clipboard() {
           return this._clipboard;
-        },
+        }
 
-        toggle: function() {
-          if (this._clipboard.contains(this.document)) {
-            this._clipboard.remove(this.document);
-          } else {
-            this._clipboard.add(this.document);
-          }
-        },
       });
     })();
   </script>

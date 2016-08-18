@@ -17,6 +17,7 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-drive-sync-toggle-button`
@@ -55,6 +56,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-drive-sync-toggle-button',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -83,10 +85,12 @@ Contributors:
             this.synchronized = enable;
           }.bind(this));
         },
-        behaviors: [Nuxeo.I18nBehavior],
 
         _isAvailable: function() {
           if (!this.document) {
+            return false;
+          }
+          if (this._isVersion(this.document)) {
             return false;
           }
           var excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
