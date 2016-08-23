@@ -21,6 +21,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-app`
@@ -198,15 +199,11 @@ Contributors:
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-document id="doc" auto doc-path="[[docPath]]"
-                    response="{{currentDocument}}"
+    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
                     headers='{"X-NXfetch.document": "lock"}'>
     </nuxeo-document>
-    <nuxeo-document id="idResolver"
-                    doc-id="[[linkDocId]]"
-                    response="{{resolvedDocument}}">
-    </nuxeo-document>
+
     <nuxeo-resource id="tasks" path="/task"
                     headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'>
     </nuxeo-resource>
@@ -462,8 +459,7 @@ Contributors:
       [[i18n('heading.app.account', 'User Settings')]]</paper-tooltip>
 
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup"
-                                 parent="[[currentParent]]"></nuxeo-document-create-popup>
+    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
 
     <iron-a11y-keys
       id="keys"
@@ -479,7 +475,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-app',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           baseUrl: {
             type: String,
@@ -497,14 +493,11 @@ Contributors:
 
           selectedAdminTab: String,
 
-          currentDocument: {
-            type: Object,
-            observer: '_documentChanged'
-          },
+          currentDocument: Object,
           currentParent: Object,
+          docId: String,
           docPath: String,
           docAction: String,
-          linkDocId: String,
 
           entity: Object,
 
@@ -542,21 +535,6 @@ Contributors:
             type: String
           }
 
-        },
-
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-        get docId() {
-          return this.linkDocId;
-        },
-
-        set docId(id) {
-          this.linkDocId = id;
-          this.$.idResolver.get().then(function() {
-            this.docPath = this.resolvedDocument.path;
-            this.linkDocId = '';
-            this._navigate();
-          }.bind(this));
         },
 
         listeners: {
@@ -597,8 +575,26 @@ Contributors:
           }.bind(this));
         },
 
+        updateDoc: function(id, path, action) {
+          this.docId = id;
+          this.docPath = path;
+          this.docAction = action;
+          this.$.doc.get().then(function(doc) {
+            if (this.docId && !this._isVersion(doc)) {
+              this.docId = '';
+              this.docPath = doc.path;
+              this._navigate();
+            } else {
+              this.$.recent.add(doc);
+              this.currentParent = this._isFolderish(doc) ? doc :
+                doc.contextParameters.breadcrumb.entries.slice(-2,-1)[0];
+              this.set('currentDocument', doc);
+            }
+          }.bind(this));
+        },
+
         refresh: function() {
-          this.$.doc.get();
+          this.updateDoc(this.docId, this.docPath, this.docAction);
         },
 
         showDocumentCreationWizard: function(e) {
@@ -608,6 +604,9 @@ Contributors:
         _navigate: function() {
           var url = '/' + this.page, state;
           if (this.page === 'browse') {
+            if (this.docId) {
+              return;
+            }
             if (this.docPath) {
               url += this.docPath;
             }
@@ -675,14 +674,6 @@ Contributors:
 
         scrollPageToTop: function() {
           //this.$.selectedPage.scrollToTop(true);
-        },
-
-        _documentChanged: function() {
-          if (this.currentDocument) {
-            this.$.recent.add(this.currentDocument);
-            this.currentParent = this.currentDocument.facets.indexOf('Folderish') > -1 ? this.currentDocument :
-              this.currentDocument.contextParameters.breadcrumb.entries.slice(-2,-1)[0];
-          }
         },
 
         _toggleDrawer: function(e) {

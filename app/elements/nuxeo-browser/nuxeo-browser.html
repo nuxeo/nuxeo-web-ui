@@ -22,6 +22,7 @@ Contributors:
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
@@ -75,6 +76,35 @@ Contributors:
         @apply(--layout-flex);
       }
 
+      .info-bar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: #333;
+        color: #fff;
+        padding: 8px;
+        margin: 32px 32px 0 32px;
+      }
+
+      .info-bar paper-card {
+        display: block;
+      }
+
+      .info-bar paper-button {
+        margin: 0;
+      }
+
+      .info-bar .icon {
+        margin: 0 8px;
+      }
+
+      .info-bar .message {
+        @apply(--layout-flex);
+      }
+
+      .info-bar .actions {
+        display: block;
+      }
+
     </style>
 
     <!-- Main content -->
@@ -84,7 +114,7 @@ Contributors:
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
 
-          <paper-dropdown-menu noink no-animations no-label-float hidden$="[[_isVersion(document)]]">
+          <paper-dropdown-menu noink no-animations no-label-float>
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
@@ -110,6 +140,20 @@ Contributors:
 
         </paper-toolbar>
       </div>
+
+      <template is="dom-if" if="[[_isVersion(document)]]">
+        <div class="card-content info-bar">
+          <iron-icon class="icon" icon="icons:info"></iron-icon>
+          <div class="message">
+            [[i18n('ui.versions.info', 'You\'re viewing the {0}.{1} version',
+            document.properties.uid:major_version, document.properties.uid:minor_version)]]
+          </div>
+          <div class="actions">
+            <paper-button on-tap="_navigateToVersions">[[i18n('ui.versions.view', 'View versions')]]</paper-button>
+            <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
+          </div>
+        </div>
+      </template>
 
       <div class="content" id="nxContent">
         <paper-toast id="toast"></paper-toast>
@@ -156,6 +200,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-browser',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object
@@ -163,7 +208,7 @@ Contributors:
           selectedTab: {
             type: String,
             value: 'view',
-            observer: '_navigate'
+            notify: true
           },
           cvParams: {
             type: Object,
@@ -176,8 +221,6 @@ Contributors:
             }
           }
         },
-
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
 
         listeners: {
           'permissions.acecreated': '_documentUpdated',
@@ -220,54 +263,40 @@ Contributors:
           }
         },
 
-        get _isFolderish() {
-          return this.document.facets.indexOf('Folderish') !== -1;
-        },
-
-        get _isVersionable() {
-          return this.document.facets.indexOf('Versionable') !== -1;
-        },
-
         get _canReadChildren() {
           return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
-        },
-
-        get _hasFileContent() {
-          return this.document ? 'file:content' in this.document.properties : false;
         },
 
         _updateActionContext: function() {
           this.set('actionContext.document', this.document);
         },
 
-        _canDownload: function() {
-          return this._canView() && this._hasFileContent;
+        _canDownload: function(document) {
+          return this._canView(document) && this._hasContent(document);
         },
 
-        _canView: function() {
-          return this.document && !this._isFolderish;
+        _canView: function(document) {
+          return document && !this._isFolderish(document);
         },
 
-        _canViewContent: function() {
-          return this.document && this._isFolderish; // && this._canReadChildren;
+        _canViewContent: function(document) {
+          return this._isFolderish(document); // && this._canReadChildren;
         },
 
-        _canViewVersions: function() {
-          return this.document && this._isVersionable;
-        },
-
-        _navigate: function() {
-          if (this.document) {
-            page('/browse' + this.document.path + '@' + this.selectedTab);
-          }
+        _canViewVersions: function(document) {
+          return this._isVersionable(document) && !this._isVersion(document);
         },
 
         _navigateToView: function() {
           page('/browse' + this.document.path + '@view');
         },
 
+        _navigateToVersions: function() {
+          page('/browse' + this.document.path + '@versions');
+        },
+
         _updateCvParams: function() {
-          if (this._canViewContent()) {
+          if (this._canViewContent(this.document)) {
             this.cvParams = {'ecm_parentId': this.document.uid};
           }
         },

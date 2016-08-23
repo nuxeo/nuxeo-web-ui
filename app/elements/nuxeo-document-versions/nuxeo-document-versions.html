@@ -17,6 +17,9 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-document-versions`
@@ -77,59 +80,14 @@ Contributors:
       }
 
       .main .link {
-        width: 100%;
-        display: block;
+        display: inline-block;
         cursor: pointer;
-      }
-
-      #viewDialog {
-        @apply(--layout-vertical);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 0;
-        margin: 64px;
-      }
-
-      .view-dialog .head {
-        color: var(--nuxeo-title-color);
-        font-size: 24px;
-        font-weight: 500;
-      }
-
-      .view-dialog .content {
-        @apply(--layout-flex);
-        background-color: var(--nuxeo-light-background);
-        overflow: auto;
-      }
-
-      .view-dialog .actions {
-        @apply(--layout-horizontal);
-        @apply(--layout-justified);
-        padding: 16px;
-        border-top: 1px solid var(--divider-color);
-      }
-
-      .view-dialog .actions .version {
-        font-weight: 500;
-        padding-left: 8px;
       }
 
     </style>
 
     <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]" response="{{versions}}">
     </nuxeo-operation>
-
-    <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]">
-    </nuxeo-operation>
-
-    <nuxeo-document auto doc-id="[[versionId]]"
-                    response="{{versionDocument}}"
-                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
-                    headers='{"X-NXfetch.document": "lock"}'>
-    </nuxeo-document>
 
     <paper-card class="main">
       <template is="dom-if" if="[[_hasVersions(versions)]]">
@@ -143,8 +101,8 @@ Contributors:
           </div>
           <template is="dom-repeat" items="[[versions.entries]]" as="item">
             <div class="row">
-              <div class="col-title" on-tap="_view">
-                <a class="link">[[item.properties.dc:title]]</a>
+              <div class="col-title">
+                <a class="link" href$="[[urlFor('document', item.uid)]]">[[item.properties.dc:title]]</a>
               </div>
               <div class="col-date">[[_date(item.properties.dc:modified)]]</div>
               <div class="col-author">[[item.properties.dc:lastContributor]]</div>
@@ -152,12 +110,7 @@ Contributors:
                 <p class="tag">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</p>
               </div>
               <div class="col-action">
-                <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
-                                      dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
-                                      dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
-                                      on-confirm="_restoreFromList">
-                  [[i18n('ui.versions.restore', 'Restore')]]
-                </nuxeo-confirm-button>
+                <nuxeo-restore-version-button document="[[item]]"></nuxeo-restore-version-button>
               </div>
             </div>
           </template>
@@ -168,28 +121,6 @@ Contributors:
       </template>
     </paper-card>
 
-    <paper-dialog id="viewDialog" class="view-dialog" with-backdrop>
-      <template is="dom-if" if="[[versionDocument]]">
-        <div class="head">[[versionDocument.properties.dc:title]]</div>
-        <div class="content">
-            <nuxeo-document-page document="[[versionDocument]]"></nuxeo-document-page>
-        </div>
-        <div class="actions">
-          <paper-button dialog-dismiss>[[i18n('ui.versions.close', 'Close')]]</paper-button>
-          <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
-                                dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
-                                dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
-                                on-confirm="_restoreFromView">
-            [[i18n('ui.versions.restore', 'Restore')]]
-            <span class="version">
-              [[i18n('ui.versions.version', 'Version')]]
-              [[versionDocument.properties.uid:major_version]].[[versionDocument.properties.uid:minor_version]]
-            </span>
-          </nuxeo-confirm-button>
-        </div>
-      </template>
-    </paper-dialog>
-
   </template>
 
   <script>
@@ -198,9 +129,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-versions',
-
-        behaviors: [Nuxeo.I18nBehavior],
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -208,19 +137,14 @@ Contributors:
           },
           versions: {
             type: Object
-          },
-          versionId: {
-            type: String,
-            value: ''
-          },
-          versionDocument: {
-            type: Object
           }
         },
 
-        _documentChanged: function(newDoc) {
-          if (newDoc) {
-            this.$.opGetVersions.execute();
+        _documentChanged: function(doc) {
+          if (doc) {
+            if (this._isVersionable(doc) && !this._isVersion(doc)) {
+              this.$.opGetVersions.execute();
+            }
           }
         },
 
@@ -230,28 +154,6 @@ Contributors:
 
         _date: function(date) {
           return moment(date).format('DD/MM/YYYY HH:mm');
-        },
-
-        _view: function(e) {
-          this.versionId = e.model.item.uid;
-          this.$.viewDialog.open();
-        },
-
-        _restoreFromList: function(e) {
-          this._restore(e.model.item.uid);
-        },
-
-        _restoreFromView: function() {
-          this.$.viewDialog.close();
-          this._restore(this.versionId);
-        },
-
-        _restore: function(id) {
-          this.$.opRestoreVersion.input = id;
-          this.$.opRestoreVersion.params = {checkout: true};
-          this.$.opRestoreVersion.execute().then(function() {
-            this.fire('document-restored');
-          }.bind(this));
         }
 
       });

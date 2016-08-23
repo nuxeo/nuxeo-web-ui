@@ -1,0 +1,86 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-restore-version-button`
+@group Nuxeo UI
+@element nuxeo-restore-version-button
+-->
+<dom-module id="nuxeo-restore-version-button">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+
+      nuxeo-confirm-button {
+        display: inline-block;
+        padding: 8px;
+      }
+
+      nuxeo-confirm-button .version {
+        font-weight: 500;
+        padding-left: 8px;
+      }
+
+    </style>
+
+    <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]">
+    </nuxeo-operation>
+
+    <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
+                          dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
+                          dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
+                          on-confirm="_restore">
+      [[i18n('ui.versions.restore', 'Restore')]]
+      <span class="version">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
+      </span>
+    </nuxeo-confirm-button>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-restore-version-button',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          document: Object
+        },
+
+        _restore: function() {
+          if (this.document) {
+            this.$.opRestoreVersion.input = this.document.uid;
+            this.$.opRestoreVersion.params = {checkout: true};
+            this.$.opRestoreVersion.execute().then(function() {
+              this.fire('document-restored');
+            }.bind(this));
+          }
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
