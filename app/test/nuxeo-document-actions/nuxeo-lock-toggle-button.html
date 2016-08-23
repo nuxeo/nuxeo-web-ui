@@ -82,7 +82,7 @@ Contributors:
 
         test('toggle should unlock the document', function() {
           // Unlock the document by toggling
-          MockInteractions.tap(Polymer.dom(element.root).querySelector('#lockBut'));
+          MockInteractions.tap(element);
           return waitChanged(element, 'locked').then(function() {
             expect(element.locked).to.be.false;
           });
@@ -112,7 +112,7 @@ Contributors:
 
         test('toggle should lock the document', function() {
           // Lock the document by toggling
-          MockInteractions.tap(Polymer.dom(element.root).querySelector('#lockBut'));
+          MockInteractions.tap(element);
           return waitChanged(element, 'locked').then(function() {
             expect(element.locked).to.be.true;
           });
