@@ -69,12 +69,13 @@ Contributors:
         <div class="item">
           <span class="flex">
             <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
-            <a class="favLink ellipsis" href$="[[urlFor('browse', item.path)]]" >[[item.title]]</a>
+            <a class="favLink ellipsis" href$="[[urlFor('document', item.uid)]]" >[[item.title]]</a>
           </span>
-          <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]" >
+          <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]">
+          </paper-icon-button>
         </div>
       </template>
-    <div>
+    </div>
 
     <template is="dom-if" if="[[!_hasFavorites(favorites)]]">
       <span class="empty">[[i18n('label.collections.favorites.empty', 'No favorites.')]]</span>
