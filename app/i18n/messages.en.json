@@ -103,6 +103,8 @@
   "command.clear.selection": "Clear",
   "label.collections.empty": "There is no collection to display",
   "label.app.usersAndGroups": "Users & Groups",
+  "label.app.vocabularyManagement": "Vocabulary",
+  "ui.vocabularyManagement.select": "Select a vocabulary",
   "ui.recentDocuments.noRecentDocuments": "There are no recent documents to display.",
   "label.document.routing.process.running": "Process running",
   "label.dublincore.created": "Created at",
