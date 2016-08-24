@@ -29,7 +29,7 @@ Nuxeo.FiltersBehavior = {
   },
 
   _isVersion: function(doc) {
-    // TODO: replace '!doc.isCheckedOut' with 'doc.isVersion' when available on REST API
+    // TODO: replace '!doc.isCheckedOut' with 'doc.isVersion' when https://jira.nuxeo.com/browse/NXP-20331 is fixed
     return (doc) ? !doc.isCheckedOut : false;
   },
 
