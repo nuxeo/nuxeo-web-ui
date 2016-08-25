@@ -3,19 +3,21 @@
 module.exports = function () {
 
   this.When('I click the Create Document button', () => {
-    this.ui.openCreateDocDialog();
+    this.ui.createButton.click();
     this.ui.createDialog.isVisible.should.be.true;
   });
 
-  this.Given(/^I select (.*) from the Document Type menu$/, (docType) => {
+  this.When(/^I select (.*) from the Document Type menu$/, (docType) => {
     this.ui.createDialog.docType = docType;
-    this.ui.createDialog.form(docType).isVisible().should.be.true;
+    this.ui.createDialog.form.isVisible().should.be.true;
   });
 
-  this.Then(/^I create a (.*)$/, (docType) => {
-    this.ui.title(docType);
+  this.When(/^I create a (.*)$/, (docType) => {
+    this.ui.createDialog.title = `Test ${docType}`;
     this.ui.createDialog.submit();
   });
 
-  this.Then(/^I go to the (.*)$/, (docType) => this.ui.preview(docType).isVisible().should.be.true);
+  this.Then(/^I see the (.*) page$/, (docType) => {
+    this.ui.browser.documentPage(docType).view.waitForVisible(5000);
+  });
 };

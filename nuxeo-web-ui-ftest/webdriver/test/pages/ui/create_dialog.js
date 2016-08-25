@@ -10,24 +10,26 @@ export default class CreateDialog {
     return this.dialog.isVisible();
   }
 
-  set docType(docType) {
-    const dropdown = this.dialog.element('paper-dropdown-menu[label="Document type"]');
-    dropdown.waitForVisible('paper-dropdown-menu[label="Document type"]');
-    dropdown.waitForVisible('#menuButton #trigger paper-input paper-input-container div div input');
-    dropdown.click('#menuButton #trigger paper-input paper-input-container div div input');
-    dropdown.waitForVisible('#menuButton #dropdown #contentWrapper div.dropdown-content paper-menu div.selectable-content');
-    driver.pause(1000);
-    dropdown.click(`//paper-menu-button/iron-dropdown/div/div/paper-menu/div/paper-item[text()="${docType}"]`);
-    const doctype = docType.toLowerCase();
-    this.dialog.waitForVisible(`#form nuxeo-${doctype}-edit`, 5000);
+  get docType() {
+    return this._docType;
   }
 
-  form(docType) {
-    const doctype = docType.toLowerCase();
-    return this.dialog.element(`#form nuxeo-${doctype}-edit`);
+  set docType(docType) {
+    this._docType = docType;
+    this.dialog.click(`///paper-button[normalize-space(text())="${this.docType}"]`);
+    this.form.waitForVisible(5000);
+  }
+
+  set title(title) {
+    // XXX this.form.setValue('input[name="title"]', title)
+    this.form.setValue(`input.nuxeo-${this.docType.toLowerCase()}-edit`, title);
+  }
+
+  get form() {
+    return new DocumentEdit(this.dialog.element(`nuxeo-${this.docType.toLowerCase()}-edit`));
   }
 
   submit() {
-    this.dialog.element('paper-button.primary').click();
+    this.dialog.click('///paper-button[text()="Create"]');
   }
 }

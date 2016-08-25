@@ -9,7 +9,7 @@ Feature: Home
   Scenario: My dashboard
     When I click the Nuxeo logo
     Then I can see my home
-    # And I have a "My Documents" card
-    # And I have a "My Last Edits" card
-    # And I have a "My Tasks" card
-    # And I have a "My Favorite Documents" card
+    And I have a "Recently Edited" card
+    And I have a "Recently Viewed" card
+    And I have a "Tasks" card
+    And I have a "Favorite Items" card
