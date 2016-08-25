@@ -88,12 +88,20 @@ Contributors:
         </paper-dropdown-menu>
       </div>
       <div class="content">
-        <nuxeo-data-table id="table" items="[[entries]]">
+        <nuxeo-data-table id="table" items="[[entries]]"
+          empty-label="[[i18n('ui.vocabularyManagement.noEntry', 'No entry')]]"
+          empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
           <template is="dom-repeat" items="[[colDef]]" as="col">
             <nuxeo-data-table-column name="[[col.name]]">
               <template>[[_value(item, column.name)]]</template>
             </nuxeo-data-table-column>
           </template>
+          <nuxeo-data-table-column>
+            <template>
+              <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+              <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+            </template>
+          </nuxeo-data-table-column>
         </nuxeo-data-table>
       </div>
     </paper-header-panel>
@@ -128,9 +136,12 @@ Contributors:
               this.colDef = [];
               if (resp.entries.length > 0) {
                 this.colDef = Object.keys(resp.entries[0].properties).map(function(key) {
-                  return {name: key};
-                });
+                  return {name: key, pos: this._computeColPos(key)};
+                }.bind(this));
               }
+              this.colDef.sort(function(a, b) {
+                return a.pos - b.pos;
+              });
               console.log(resp);
               this.entries = resp.entries;
               this.$.table.notifyResize();
@@ -143,7 +154,28 @@ Contributors:
         },
 
         _value: function(entry, prop) {
-          return entry.properties[prop];
+          if (entry && entry.properties && prop) {
+            return entry.properties[prop];
+          }
+        },
+
+        _computeColPos: function(key) {
+          if (key === 'parent') {
+            return 1;
+          } else if (key === 'id') {
+            return 2;
+          } else if (key === 'obsolete') {
+            return 98;
+          } else if (key === 'ordering') {
+            return 99;
+          } else {
+            return 50;
+          }
+        },
+
+        _deleteEntry: function(e) {
+          console.log('_deleteEntry');
+          console.log(e);
         }
 
       });
