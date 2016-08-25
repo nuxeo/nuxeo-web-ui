@@ -1,20 +1,21 @@
+@ignore
 Feature: Create Document
 
   I can create a Document
 
   Background:
     Given I login as "Administrator"
-    And I click the Create Document button
 
   Scenario Outline: Create <doctype>
-    Given I select <doctype> from the Document Type menu
-    Then I create a <doctype>
-    And I go to the <doctype>
+    When I click the Create Document button
+    And I select <doctype> from the Document Type menu
+    And I create a <doctype>
+    Then I see the <doctype> page
 
   Examples:
     |doctype  |
     |Note     |
     |File     |
-    |Picture  |
-    |Folder   |
-    |Workspace|
+    #|Picture  |
+    #|Folder   |
+    #|Workspace|

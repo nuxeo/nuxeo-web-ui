@@ -1,9 +1,7 @@
 'use strict';
 
-import LoginPage from '../../pages/login';
+import Login from '../../pages/login';
 import UI from '../../pages/ui';
-import NavButtons from '../../pages/ui/nav_buttons';
-
 var Nuxeo = require('nuxeo');
 
 const USERS = {
@@ -14,7 +12,7 @@ module.exports = function () {
   this.Given('I am "$username"', (username) => this.username = username);
 
   this.When('I login as "$username"', (username) => {
-    const login = LoginPage.get();
+    const login = Login.get();
     login.username = username;
     login.password = USERS[username];
     login.submit();
@@ -33,7 +31,8 @@ module.exports = function () {
   this.When('I logout', () => driver.url('/logout'));
 
   this.Then('I am logged in as "$username"', (username) => {
-    driver.isExisting(`//nuxeo-task-widget[@username="${username}"]`).should.be.true;
+    driver.isExisting(`//section[@name="profile"]//h1[contains(text(),"${username}")]`).should.be.true;
+    // XXX: this.ui.drawer.profile.getText('h1').should.be.equal(username);
   });
 
   this.Then('I am logged out', () => driver.isVisible('#username').should.be.true);

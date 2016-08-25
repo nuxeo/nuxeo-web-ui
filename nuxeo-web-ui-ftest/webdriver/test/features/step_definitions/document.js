@@ -24,11 +24,21 @@ module.exports = function() {
   });
 
   this.When('I browse to the document', () => {
-    driver.url('/ui/#!/browse/default-domain/' + doc.name);
+    driver.url('/#!/browse/default-domain/' + doc.name);
     driver.waitForExist('p.title', 5000);
+  });
+
+  this.Then(/^I can edit the (.*) metadata$/, (docType) => {
+    const page = this.ui.browser.documentPage(docType);
+    page.metadata.element('///section[@mode="view"]').isVisible().should.be.true;
+    page.metadata.click('#edit');
+
+    page.edit.isVisible().should.be.true;
+    page.edit.title = docType;
+    page.edit.submit();
   });
 
   this.After(function(scenario) {
     return Promise.all(teardownCbs.map((cb) => cb()));
   });
-}
+};

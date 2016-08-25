@@ -1,76 +1,63 @@
 'use strict';
 
+import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
-import NavButtons from './ui/nav_buttons';
-import EditDoc from './ui/edit_doc';
+import Drawer from './ui/drawer';
+import Home from './ui/home';
 
 export default class UI {
 
-  constructor() {
-    this.home = new NavButtons('nuxeo-home');
-    this.browser = new NavButtons('section.browse');
-    this.search = new NavButtons('section.search');
-    this.admin = new NavButtons('section.administration');
-    this.recents = new NavButtons('section.recents');
-    this.tasks = new NavButtons('section.tasks');
-    this.favorites = new NavButtons('section.favorites');
-    this.collections = new NavButtons('section.collections');
-    this.personal = new NavButtons('section.personal-space');
-    this.edit_doc = new EditDoc('nuxeo-document-edit paper-card #form');
-  }
-
-  goTo(button) {
-    driver.click(`nuxeo-menu-icon[name='${button}']`);
-  }
-
-  goToSearch(button) {
-    driver.click(`nuxeo-menu-icon[name='${button}Search']`);
+  constructor(selector) {
+    this.app = driver.element(selector);
+    this.drawer = new Drawer('#drawer');
+    this.pages = this.app.element('#mainContainer iron-pages');
+    this.suggester = this.app.element('#mainContainer nuxeo-suggester');
+    this.createButton = this.app.element('#createBtn');
   }
 
   goHome() {
-    driver.click('paper-icon-button.logo');
-  }
-
-  goToBrowser() {
-    driver.click(`nuxeo-menu-icon[icon="icons:folder-open"]`);
-  }
-
-  openCreateDocDialog() {
-    driver.click('#createBtn');
+    this.drawer.logo.click();
   }
 
   get createDialog() {
-    return new CreateDialog('#createDocDialog');
+    return this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
   }
 
   static get() {
     driver.url('/ui');
-    driver.waitForExist('nuxeo-app', 2000);
-    return new UI();
+    return new UI('nuxeo-app');
   }
 
-  title(docType) {
-    const doctype = docType.toLowerCase();
-    if (doctype === 'picture') {
-      driver.waitForVisible('input.nuxeo-file-edit', 2000);
-      driver.setValue(`input.nuxeo-file-edit`, `Test_${docType}`);
-    } else {
-    driver.waitForVisible(`input.nuxeo-${doctype}-edit`, 2000);
-    driver.setValue(`input.nuxeo-${doctype}-edit`, `Test_${docType}`);
-    }
+  get home() {
+    return new Home('nuxeo-home');
   }
 
-  preview(docType) {
-    driver.waitForVisible(`//nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]`, 2000);
-    return driver.element(`//nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]`);
-    ////nuxeo-breadcrumb/div/a/span[text()="Test_${docType}"]
-    // if (doctype === 'workspace' || doctype === 'folder') {
-    //   driver.waitForVisible('#dropzone', 1000);
-    //   return driver.element('#dropzone');
-    // } else {
-    // driver.waitForVisible('#document-view', 1000);
-    // return driver.element(`#document-view nuxeo-${doctype}-view`);
-    // }
+  get browser() {
+    return new Browser('nuxeo-browser');
+  }
+
+  get search() {
+    return this.pages.element('nuxeo-search-results');
+  }
+
+  get collection() {
+    return this.pages.element('nuxeo-collection-results');
+  }
+
+  get administration() {
+    return this.pages.element('nuxeo-admin');
+  }
+
+  get tasks() {
+    return this.pages.element('nuxeo-tasks');
+  }
+
+  get isConnectionActive() {
+    return driver.execute(() => document.querySelector('nuxeo-connection').active).value;
+  }
+
+  waitRequests() {
+    driver.waitUntil(() => !this.isConnectionActive, 5000, 'Waiting for inactive connection');
   }
 
   view(option) {

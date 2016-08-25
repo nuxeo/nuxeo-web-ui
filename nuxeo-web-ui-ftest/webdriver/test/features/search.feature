@@ -5,4 +5,5 @@ Feature: Search
 
   Scenario: Search
     When I click the "default" search button
-    Then I can see the Search window
+    Then I can see the Search panel
+    And I can see the Search results
