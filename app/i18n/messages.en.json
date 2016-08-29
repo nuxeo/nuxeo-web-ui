@@ -108,6 +108,7 @@
   "ui.vocabularyManagement.noEntry": "No entry",
   "ui.vocabularyManagement.noEntryWhenFiltered": "There are no vocabulary entries with these search criteria.",
   "ui.vocabularyManagement.deleteEntry": "Delete entry",
+  "ui.vocabularyManagement.editEntry": "Edit entry",
   "ui.recentDocuments.noRecentDocuments": "There are no recent documents to display.",
   "label.document.routing.process.running": "Process running",
   "label.dublincore.created": "Created at",

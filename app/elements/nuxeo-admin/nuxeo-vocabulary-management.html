@@ -74,7 +74,9 @@ Contributors:
 
     <nuxeo-resource id="directoryuis" path="/directoryui" auto response="{{vocabularyResonse}}"></nuxeo-resource>
 
-    <nuxeo-resource id="directory" path="/directory/[[selectedVocabulary]]"></nuxeo-resource>
+    <nuxeo-resource id="directory" ></nuxeo-resource>
+
+    <paper-toast id="toast"></paper-toast>
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
@@ -98,6 +100,8 @@ Contributors:
           </template>
           <nuxeo-data-table-column>
             <template>
+              <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+              <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
               <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
               <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
             </template>
@@ -132,7 +136,9 @@ Contributors:
 
         _observeSelectedVocabulary: function() {
           if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
+            this.$.directory.path = '/directory/' + this.selectedVocabulary;
             this.$.directory.get().then(function(resp) {
+              this.entries = [];
               this.colDef = [];
               if (resp.entries.length > 0) {
                 this.colDef = Object.keys(resp.entries[0].properties).map(function(key) {
@@ -142,10 +148,9 @@ Contributors:
               this.colDef.sort(function(a, b) {
                 return a.pos - b.pos;
               });
-              console.log(resp);
               this.entries = resp.entries;
-              this.$.table.notifyResize();
-            }.bind(this))
+              console.log(resp);
+            }.bind(this));
           }
         },
 
@@ -156,6 +161,8 @@ Contributors:
         _value: function(entry, prop) {
           if (entry && entry.properties && prop) {
             return entry.properties[prop];
+          } else {
+            console.info('_value');
           }
         },
 
@@ -175,6 +182,15 @@ Contributors:
 
         _deleteEntry: function(e) {
           console.log('_deleteEntry');
+          console.log(e);
+          this.$.directory.path = '/directory/' + e.model.item.directoryName + '/' e.model.item.properties.id;
+          this.$.directory.delete().then(function() {
+
+          });
+        },
+
+        _editEntry: function(e) {
+          console.log('_editEntry');
           console.log(e);
         }
 
