@@ -1,0 +1,58 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+
+<link rel="import" href="nuxeo-spreadsheet-button.html">
+<link rel="import" href="nuxeo-display-mode-button.html">
+
+<!--
+`nuxeo-document-actions`
+@group Nuxeo UI
+@element nuxeo-content-view-actions
+-->
+<dom-module id="nuxeo-content-view-actions">
+  <template>
+    <style>
+      .main {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-end-justified);
+      }
+
+      .action {
+        margin-left: 4px;
+      }
+    </style>
+
+    <div class="main">
+      <nuxeo-spreadsheet-button class="action" base-url="[[content.baseUrl]]" mode="[[context.displayMode]]"
+                                nx-provider="[[context.nxProvider]]">
+      </nuxeo-spreadsheet-button>
+      <nuxeo-display-mode-button class="action" mode="[[context.displayMode]]"></nuxeo-display-mode-button>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-content-view-actions',
+      properties: {
+        context: Object
+      }
+    });
+  </script>
+</dom-module>

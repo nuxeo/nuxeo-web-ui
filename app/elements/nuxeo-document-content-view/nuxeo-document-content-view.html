@@ -30,9 +30,10 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
 
-      .content-view  {
+      .main {
         @apply(--layout-vertical);
         @apply(--layout-fit);
+        padding: 32px;
       }
 
       .toolbar {
@@ -42,17 +43,19 @@ Contributors:
         top: 0;
       }
 
+      .content-view  {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+        margin-top: 8px;
+      }
+
+      nuxeo-data-grid {
+        display: block;
+        position: relative;
+      }
+
       nuxeo-data-table ::content #items {
         background-color: #fff;
-      }
-
-      nuxeo-data-table, nuxeo-data-grid {
-        min-height: calc(100vh - 59px);
-      }
-
-      nuxeo-data-table ::content #container.nuxeo-data-table {
-        padding: 4.5em 3em 0;
-        box-sizing: border-box;
       }
 
       nuxeo-data-table ::content data-table-checkbox[checked] #container {
@@ -67,24 +70,8 @@ Contributors:
         height: 4em;
       }
 
-      nuxeo-data-grid ::content #scrollThreshold.nuxeo-data-grid {
-        padding: 3.7em 2em 3em;
-      }
-
-      paper-fab {
-        position: absolute;
-        top: 1em;
-        right: 2.3em;
-        color: var(--nuxeo-action-color);
-        --paper-fab-background: #fff;
-        --paper-fab-keyboard-focus-background: #efefef;
-        border: var(--nuxeo-border);
-        z-index: 10;
-        box-shadow: none;
-        position: absolute;
-        border-radius: .2em;
-        width: 2em;
-        height: 2em;
+      nuxeo-data-table, nuxeo-data-grid {
+        min-height: calc(100vh - 59px);
       }
 
       nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,
@@ -108,138 +95,128 @@ Contributors:
 
     </style>
 
-    <template is="dom-if" if="[[_isDisplayTable]]">
-      <paper-fab mini noink class="switchGridTable" icon="icons:apps" id="toogleGrid" on-tap="displayGrid" elevation="0">
-      </paper-fab>
-      <paper-tooltip for="toogleGrid">
-        [[i18n('label.documents.display.grid', 'Switch to grid view')]]
-      </paper-tooltip>
-    </template>
-    <template is="dom-if" if="[[_isDisplayGrid]]">
-      <paper-fab mini noink class="switchGridTable" icon="icons:list" id="toogleTable" on-tap="displayTable" elevation="0">
-      </paper-fab>
-      <paper-tooltip for="toogleTable">
-        [[i18n('label.documents.display.table', 'Switch to table view')]]
-      </paper-tooltip>
-    </template>
-
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-page-provider id="cvProvider" auto
-       provider="[[provider]]"
-       page-size="[[pageSize]]"
-       aggregations="{{aggregations}}"
-       enrichers="thumbnail"
-       page="[[pageNumber]]"
-       params="[[params]]">
+    <nuxeo-page-provider id="nxProvider" auto
+                         provider="[[provider]]"
+                         page-size="[[pageSize]]"
+                         aggregations="{{aggregations}}"
+                         enrichers="thumbnail"
+                         page="[[pageNumber]]"
+                         params="[[params]]">
     </nuxeo-page-provider>
 
-    <div id="dropzone" class="content-view">
-      <div id="grid" hidden$="[[_isDisplayTable]]">
-        <nuxeo-data-grid id="datagrid" nx-provider="cvProvider"
-          empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
-          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
-          filters="{{filters}}"
-          selected-items="{{gridSelectedItems}}"
-          selection-enabled>
-          <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
-          </nuxeo-selection-toolbar>
-          <template>
-            <nuxeo-document-grid-thumbnail class="grid-box"
-              tabindex$="{{tabIndex}}"
-              class$="[[_computedClass(selected)]]"
-              doc="[[item]]" on-navigate="_navigate">
-            </nuxeo-document-grid-thumbnail>
-          </template>
-        </nuxeo-data-grid>
-      </div>
-      <div id="table" hidden$="[[_isDisplayGrid]]">
-        <nuxeo-data-table id="datatable"
-          nx-provider="cvProvider"
-          settings-enabled filters="{{filters}}"
-          empty-label="[[i18n('ui.browse.noDocument', 'There are no items to display in this folder.')]]"
-          empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
-          selected-items="{{tableSelectedItems}}"
-          selection-enabled>
-          <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
-          </nuxeo-selection-toolbar>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+    <div class="main">
+      <nuxeo-content-view-actions context="[[actionContext]]"></nuxeo-content-view-actions>
+
+      <div id="dropzone" class="content-view">
+        <div id="grid" hidden$="[[_isTable(displayMode)]]">
+          <nuxeo-data-grid id="datagrid" nx-provider="nxProvider"
+            empty-label="[[i18n('ui.browse.noDocument', 'No result')]]"
+            empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
+            filters="{{filters}}"
+            selected-items="{{gridSelectedItems}}"
+            selection-enabled>
+            <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
+            </nuxeo-selection-toolbar>
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
-              <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+              <nuxeo-document-grid-thumbnail class="grid-box"
+                tabindex$="{{tabIndex}}"
+                class$="[[_computedClass(selected)]]"
+                doc="[[item]]" on-navigate="_navigate">
+              </nuxeo-document-grid-thumbnail>
             </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
-            sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
-            <template is="header">
-                <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
-                    data="[[aggregations.dc_modified_agg]]"
-                    value="{{column.filterValue}}" multiple>
-                </nuxeo-dropdown-aggregation>
-            </template>
-            <template>
-              [[_formatDate(item.properties.dc:modified)]]
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column  name="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
-            filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
-            <template is="header">
-                <nuxeo-dropdown-aggregation
-                    placeholder="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
-                    data="[[aggregations.dc_last_contributor_agg]]"
-                    value="{{column.filterValue}}" multiple>
-                </nuxeo-dropdown-aggregation>
-            </template>
-            <template>
-              <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
-                [[item.properties.dc:lastContributor]]
-              </a>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
-            <template>[[item.state]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
-            <template>[[_displayVersion(item)]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
-            sort-by="dc:created" flex="50" hidden>
-            <template>
-              [[_formatDate(item.properties.dc:created)]]
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
-            sort-by="dc:creator" hidden>
-            <template>
-              <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
-                [[item.properties.dc:creator]]
-              </a>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
-            <template>
-                <span class="tag vocabulary">[[item.properties.dc:nature]]</span>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
-            <template>
-                <span class="tag vocabulary">[[item.properties.dc:coverage]]</span>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
-            <template>
-                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
-                  <span class="tag vocabulary">[[subject]]</span>
-                </template>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>
-            <template>
-                [[item.properties.dc:rights]]
-            </template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
+          </nuxeo-data-grid>
+        </div>
+
+        <div id="table" hidden$="[[_isGrid(displayMode)]]">
+          <nuxeo-data-table id="datatable"
+            nx-provider="nxProvider"
+            settings-enabled filters="{{filters}}"
+            empty-label="[[i18n('ui.browse.noDocument', 'There are no items to display in this folder.')]]"
+            empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
+            selected-items="{{tableSelectedItems}}"
+            selection-enabled>
+            <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
+            </nuxeo-selection-toolbar>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
+              <template>
+                <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
+                <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
+              sort-by="dc:modified" flex="50" filter-by="dc_modified_agg">
+              <template is="header">
+                  <nuxeo-dropdown-aggregation
+                      placeholder="[[i18n('ui.datatable.header.modified', 'Modification Date')]]"
+                      data="[[aggregations.dc_modified_agg]]"
+                      value="{{column.filterValue}}" multiple>
+                  </nuxeo-dropdown-aggregation>
+              </template>
+              <template>
+                [[_formatDate(item.properties.dc:modified)]]
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column  name="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
+              filter-by="dc_last_contributor_agg" flex="50" sort-by="dc:lastContributor">
+              <template is="header">
+                  <nuxeo-dropdown-aggregation
+                      placeholder="[[i18n('ui.datatable.header.lastContributor', 'Last Contributor')]]"
+                      data="[[aggregations.dc_last_contributor_agg]]"
+                      value="{{column.filterValue}}" multiple>
+                  </nuxeo-dropdown-aggregation>
+              </template>
+              <template>
+                <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
+                  [[item.properties.dc:lastContributor]]
+                </a>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
+              <template>[[item.state]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
+              <template>[[_displayVersion(item)]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
+              sort-by="dc:created" flex="50" hidden>
+              <template>
+                [[_formatDate(item.properties.dc:created)]]
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
+              sort-by="dc:creator" hidden>
+              <template>
+                <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
+                  [[item.properties.dc:creator]]
+                </a>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
+              <template>
+                  <span class="tag vocabulary">[[item.properties.dc:nature]]</span>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
+              <template>
+                  <span class="tag vocabulary">[[item.properties.dc:coverage]]</span>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+              <template>
+                  <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                    <span class="tag vocabulary">[[subject]]</span>
+                  </template>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>
+              <template>
+                  [[item.properties.dc:rights]]
+              </template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </div>
       </div>
     </div>
 
@@ -260,6 +237,7 @@ Contributors:
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         properties: {
+          nxProvider: HTMLElement,
           params: {
             type: Object,
             value: {},
@@ -285,18 +263,17 @@ Contributors:
             notify: true,
             reflectToAttribute: true
           },
-          _isDisplayTable: {
-            type: Boolean,
-            value: true
-          },
-          _isDisplayGrid: {
-            type: Boolean,
-            value: false
+          actionContext: {
+            type: Object,
+            value: function() {
+              return {};
+            },
+            notify: true
           },
           _settings: {
             type: Object,
             value: {},
-            notify: true,
+            notify: true
           }
         },
 
@@ -306,14 +283,19 @@ Contributors:
           'dropzone.dragleave': '_dragleaveSmartImport',
           'dropzone.drop': '_dropSmartImport',
           'tableSettingsChanged': 'saveSettings',
-          'displayModeChanged': 'saveSettings'
+          'display-mode-changed': '_changeDisplayMode'
         },
 
         observers: [
           '_refresh(params)',
-          '_observeDisplayMode(displayMode)',
+          '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*)',
+          '_displayModeChanged(displayMode)',
           'restoreSettings(_settings)'
         ],
+
+        ready: function() {
+          this.nxProvider = this.$.nxProvider;
+        },
 
         _computedClass: function(isSelected) {
           var classes = 'grid-box';
@@ -323,34 +305,43 @@ Contributors:
           return classes;
         },
 
-        displayTable: function() {
-          this.displayMode = 'table';
-          this.$.datatable.notifyResize();
-          this.fire('displayModeChanged');
+        _isTable: function(mode) {
+          return mode === 'table';
         },
 
-        displayGrid: function() {
-          this.displayMode = 'grid';
-          this.$.datagrid.notifyResize();
-          this.fire('displayModeChanged');
+        _isGrid: function(mode) {
+          return mode === 'grid';
         },
 
-        _observeDisplayMode: function() {
+        _changeDisplayMode: function(e) {
+          var mode = e.detail.mode;
+          if (mode && mode !== this.displayMode) {
+            this.displayMode = mode;
+          }
+        },
+
+        _displayModeChanged: function() {
           if (this.displayMode === 'table') {
-            this._isDisplayTable = true;
-            this._isDisplayGrid = false;
             this.$.datatable.clearSelection();
             if (this.$.datagrid.selectedItems) {
               this.$.datatable.selectItems(this.$.datagrid.selectedItems);
             }
+            this.$.datatable.notifyResize();
+
           } else if (this.displayMode === 'grid') {
-            this._isDisplayTable = false;
-            this._isDisplayGrid = true;
             this.$.datagrid.clearSelection();
             if (this.$.datatable.selectedItems) {
               this.$.datagrid.selectItems(this.$.datatable.selectedItems);
             }
+            this.$.datagrid.notifyResize();
           }
+          this.saveSettings();
+        },
+
+        _updateActionContext: function() {
+          this.set('actionContext.baseUrl', this.$.nxcon.url);
+          this.set('actionContext.displayMode', this.displayMode);
+          this.set('actionContext.nxProvider', this.nxProvider);
         },
 
         _displayModeStorageName: function(document) {
@@ -418,12 +409,12 @@ Contributors:
         _refresh: function() {
           this.$.datatable.loading = true;
           this.$.datagrid.loading = true;
-          var pn = this.$.cvProvider.page;
-          this.$.cvProvider.page = 1;
+          var pn = this.$.nxProvider.page;
+          this.$.nxProvider.page = 1;
           if (pn === 1) {
             // normally the page provider is on auto mode
             // so the fetch should be triggered when changing page
-            this.$.cvProvider.fetch();
+            this.$.nxProvider.fetch();
           }
         },
 

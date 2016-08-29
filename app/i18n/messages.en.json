@@ -344,6 +344,7 @@
   "ui.recentTable.name": "Name",
   "ui.recentTable.type": "Type",
   "ui.recentTable.lastViewed": "Last viewed",
+  "ui.spreadsheetButton.tooltip": "Spreadsheet Editor",
   "ui.theme.apply:": "Apply",
   "ui.theme.applying:": "Applying Theme...",
   "ui.theme.current": "Current",

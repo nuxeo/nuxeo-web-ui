@@ -1,0 +1,92 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-spreadsheet-button`
+@group Nuxeo UI
+@element nuxeo-display-mode-button
+-->
+<dom-module id="nuxeo-display-mode-button">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      paper-icon-button {
+        background: white;
+        color: var(--nuxeo-action-color);
+        border: var(--nuxeo-border);
+        border-radius: 4px;
+      }
+    </style>
+
+    <template is="dom-if" if="[[_isAvailable(mode)]]">
+      <template is="dom-if" if="[[_isTable(mode)]]">
+        <paper-icon-button icon="icons:apps" id="toogleGrid" on-tap="_toggle"></paper-icon-button>
+        <paper-tooltip for="toogleGrid">
+          [[i18n('label.documents.display.grid', 'Switch to grid view')]]
+        </paper-tooltip>
+      </template>
+      <template is="dom-if" if="[[_isGrid(mode)]]">
+        <paper-icon-button icon="icons:list" id="toogleTable" on-tap="_toggle"></paper-icon-button>
+        <paper-tooltip for="toogleTable">
+          [[i18n('label.documents.display.table', 'Switch to table view')]]
+        </paper-tooltip>
+      </template>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-display-mode-button',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          mode: String
+        },
+
+        _isAvailable: function() {
+          return this.mode;
+        },
+
+        _isGrid: function() {
+          return this.mode ? this.mode === 'grid' : 'table';
+        },
+
+        _isTable: function() {
+          return this.mode ? this.mode === 'table' : 'table';
+        },
+
+        _toggle: function() {
+          this.mode = this.mode === 'table' ? 'grid' : 'table';
+          this.fire('display-mode-changed', {mode: this.mode});
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
