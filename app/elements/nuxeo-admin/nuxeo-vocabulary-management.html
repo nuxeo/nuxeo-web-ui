@@ -70,13 +70,20 @@ Contributors:
       nuxeo-data-table ::content #items {
         background-color: #fff;
       }
+
+      #errorToast {
+        --paper-toast-background-color: red;
+        --paper-toast-color: white;
+      }
     </style>
 
-    <nuxeo-resource id="directoryuis" path="/directoryui" auto response="{{vocabularyResonse}}"></nuxeo-resource>
+    <nuxeo-resource id="directoryuis" path="/directory?uiDirectory=true" auto response="{{vocabularyResonse}}"></nuxeo-resource>
 
     <nuxeo-resource id="directory" ></nuxeo-resource>
 
     <paper-toast id="toast"></paper-toast>
+
+    <paper-toast id="errorToast"></paper-toast>
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
@@ -95,17 +102,19 @@ Contributors:
           empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
           <template is="dom-repeat" items="[[colDef]]" as="col">
             <nuxeo-data-table-column name="[[col.name]]">
-              <template>[[_value(item, column.name)]]</template>
+              <template>
+                <template is="dom-if" if="[[!_entryActions(column.name)]]">
+                  [[_value(item, column.name)]]
+                </template>
+                <template is="dom-if" if="[[_entryActions(column.name)]]">
+                  <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+                  <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
+                  <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+                  <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+                </template>
+              </template>
             </nuxeo-data-table-column>
           </template>
-          <nuxeo-data-table-column>
-            <template>
-              <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
-              <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
-              <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
-              <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
-            </template>
-          </nuxeo-data-table-column>
         </nuxeo-data-table>
       </div>
     </paper-header-panel>
@@ -134,22 +143,29 @@ Contributors:
           '_observeSelectedVocabulary(selectedVocabulary)'
         ],
 
+        _entryActions: function(o) {
+          return o  === 'actions';
+        },
+
         _observeSelectedVocabulary: function() {
           if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
             this.$.directory.path = '/directory/' + this.selectedVocabulary;
             this.$.directory.get().then(function(resp) {
               this.entries = [];
               this.colDef = [];
+              var tmp = [];
               if (resp.entries.length > 0) {
-                this.colDef = Object.keys(resp.entries[0].properties).map(function(key) {
+                tmp = Object.keys(resp.entries[0].properties).map(function(key) {
                   return {name: key, pos: this._computeColPos(key)};
                 }.bind(this));
               }
-              this.colDef.sort(function(a, b) {
+              tmp.push({name: 'actions', pos: 1000, actions: true});
+              tmp.sort(function(a, b) {
                 return a.pos - b.pos;
               });
+              this.colDef = tmp;
               this.entries = resp.entries;
-              console.log(resp);
+              console.log(this.colDef);
             }.bind(this));
           }
         },
@@ -163,6 +179,7 @@ Contributors:
             return entry.properties[prop];
           } else {
             console.info('_value');
+            return 'N/A';
           }
         },
 
@@ -181,12 +198,23 @@ Contributors:
         },
 
         _deleteEntry: function(e) {
-          console.log('_deleteEntry');
-          console.log(e);
-          this.$.directory.path = '/directory/' + e.model.item.directoryName + '/' e.model.item.properties.id;
-          this.$.directory.delete().then(function() {
-
-          });
+          if (confirm(this.i18n('ui.vocabularyManagement.confirmDelete',
+                                'Delete vocabulary entry?'))) {
+            var item = e.model.dataHost.parentNode.item;
+            this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
+            this.$.directory.remove().then(function(res) {
+              this._observeSelectedVocabulary();
+              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyDeleted', 'Entry successfully deleted.');
+              this.$.toast.open();
+            }.bind(this), function(err) {
+              if (err.status === 401) {
+                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.referencedEntry', 'This entry is referenced in another vocabulary.');
+              } else {
+                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.error', 'An error occured while deleting this entry') + ': ' + err.message;
+              }
+              this.$.errorToast.open();
+            }.bind(this));
+          }
         },
 
         _editEntry: function(e) {
