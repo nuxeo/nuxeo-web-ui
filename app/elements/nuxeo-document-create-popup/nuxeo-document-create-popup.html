@@ -19,6 +19,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-one-drive.html">
 
 <!--
 `nuxeo-document-create-popup`
@@ -298,10 +299,15 @@ Contributors:
                   [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
               </div>
               <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
+              <nuxeo-liveconnect-one-drive id="oneDriveUploader"></nuxeo-liveconnect-one-drive>
               <span>[[i18n('ui.documentCreatePopup.linkFilesFrom', 'Or link files from')]]</span>
               <div class="dropzone-label horizontal layout center center-justified">
                 <iron-icon class="liveconnectIco" src="google_drive.png"></iron-icon>
                 <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
+              </div>
+              <div class="dropzone-label horizontal layout center center-justified">
+                <iron-icon class="liveconnectIco" src="OneDrive.png"></iron-icon>
+                <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
               </div>
             </div>
           </template>
@@ -370,7 +376,8 @@ Contributors:
             </div>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <span><a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
-                 or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
+                 or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a> or
+                 <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
               </span>
             </div>
           </template>
@@ -1034,6 +1041,10 @@ Contributors:
 
         _uploadGoogleDrive: function() {
           this.$$('#googleDriveUploader').openPicker();
+        },
+
+        _uploadOneDrive: function() {
+          this.$$('#oneDriveUploader').openPicker();
         },
 
         _blobPicked: function(e) {

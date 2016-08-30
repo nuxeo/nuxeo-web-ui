@@ -29,6 +29,7 @@
     "Promise": true,
     "confirm": true,
     "gapi": true,
-    "google": true
+    "google": true,
+    "OneDriveFilePicker": true
   }
 }
