@@ -43,7 +43,7 @@ Contributors:
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
         border-radius: 3px;
         margin-left: .5em;
-        width: 125px;
+        width: 132px;
       }
 
       .flex-layout {
@@ -56,6 +56,14 @@ Contributors:
         flex: 1 0 calc(33% - 2em);
         margin: 0 1em 1.5em;
         text-align: center;
+      }
+
+      .message {
+        color: #c6c6c6;
+      }
+
+      nuxeo-data-table {
+        height: 550px;
       }
 
       iron-icon {
@@ -81,6 +89,35 @@ Contributors:
     </paper-card>
 
     <div class="flex-layout">
+
+      <!-- Top Downloads -->
+      <nuxeo-audit-data event-id="download"
+                        where='{"downloadReason": "download"}'
+                        grouped-by="docUUID"
+                        group-limit="10"
+                        start-date="[[startDate]]" end-date="[[endDate]]"
+                        data="{{downloads}}">
+      </nuxeo-audit-data>
+
+      <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" current-page="{{downloadedDocs}}">
+      </nuxeo-page-provider>
+
+      <paper-card heading="Top Downloads" elevation="0">
+        <div class="card-content downloads">
+          <template is="dom-if" if="[[!_isEmpty(downloads)]]">
+            <nuxeo-data-table items="[[downloadedDocs]]">
+              <nuxeo-data-table-column name="File">
+                <template>[[item.title]]</template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="Downloads">
+                <template>[[_numberOfDownloads(item)]]</template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </template>
+          <template is="dom-if" if="[[_isEmpty(downloads)]]"><div class="message">No results</div></template>
+        </div>
+      </paper-card>
+
       <!-- Number of documents -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
                              metrics="cardinality(ecm:uuid)" data="{{totalCount}}"
@@ -219,6 +256,26 @@ Contributors:
               return obj.key;
             }
           });
+        },
+
+        // builds page provider query to get info about downloaded docs
+        _downloadsQuery: function(entries) {
+          if (entries.length > 0) {
+            var values = entries.map(function(entry) {
+              return '\'' + entry.key + '\'';
+            }).join(',');
+            return 'SELECT * FROM Document WHERE ecm:uuid IN (' + values + ')';
+          }
+        },
+
+        _numberOfDownloads: function(doc) {
+          return this.downloads.find(function(entry) {
+            return entry.key === doc.uid;
+          }).value;
+        },
+
+        _isEmpty: function(array) {
+          return !array || array.length === 0;
         }
 
       });
