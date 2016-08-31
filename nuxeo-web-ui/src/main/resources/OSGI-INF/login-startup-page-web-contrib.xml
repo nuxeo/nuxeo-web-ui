@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.login.startup.page.web.contrib">
+
+  <extension target="org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService" point="loginScreen">
+    <loginScreenConfig>
+      <startupPages>
+        <startupPage id="web" priority="100">
+          <path>ui/</path>
+        </startupPage>
+      </startupPages>
+    </loginScreenConfig>
+  </extension>
+
+</component>
