@@ -85,6 +85,25 @@ Contributors:
 
     <paper-toast id="errorToast"></paper-toast>
 
+    <paper-dialog id="dialog" modal no-auto-focus>
+      <h1>[[i18n('ui.vocabularyManagement.editEntry','Edit vocabulary entry')]]</h1>
+      <div class="paper-content layout horizontal">
+        <form id="form" is="iron-form" action="/">
+          <div id="entry-edit">
+            <!-- Dynamic layout element will be inserted here -->
+          </div>
+          <div class="card-actions">
+            <div class="buttons sep">
+             <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+             <paper-button noink class="primary" on-tap="_save" >
+               [[i18n('command.save', 'Save')]]
+             </paper-button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </paper-dialog>
+
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
         <span>[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</span>
@@ -136,18 +155,95 @@ Contributors:
           colDef: {
             type: Object,
             notify: true
+          },
+          _selectedEntry: {
+            type: Object,
+            observer: '_entryChanged'
           }
         },
 
         observers: [
-          '_observeSelectedVocabulary(selectedVocabulary)'
+          '_refresh(selectedVocabulary)'
         ],
+
+        _entryChanged: function() {
+          if (this._selectedEntry) {
+            this._updateLayout();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var schema = this._getSchemaFor(this._selectedEntry);
+          var type = schema.charAt(0).toLowerCase() + schema.slice(1);
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'edit'].join('-');
+        },
+
+        _getSchemaFor: function(entry) {
+          var schema = '';
+          for (var i in this.vocabularyResonse.entries) {
+            if (this.vocabularyResonse.entries[i].name === entry.directoryName) {
+              schema = this.vocabularyResonse.entries[i].schema;
+              break;
+            }
+          }
+          if (!schema || schema.length === 0) {
+            return 'nuxeo-vocabulary-edit';
+          }
+          return schema;
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current vocabulary entry
+         */
+        _updateLayout: function() {
+          var layout = this._layoutFor(this._selectedEntry);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                console.error('Failed to find edit layout for ' + this._getSchemaFor(this._selectedEntry));
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        /*
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this._selectedEntry),
+              el = document.createElement(layout),
+              parent = this.$['entry-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.entry = this._selectedEntry;
+
+          // hack to force resize event and correctly display <nuxeo-helper> elements
+          //this.notifyResize();
+        },
 
         _entryActions: function(o) {
           return o  === 'actions';
         },
 
-        _observeSelectedVocabulary: function() {
+        _refresh: function() {
           if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
             this.$.directory.path = '/directory/' + this.selectedVocabulary;
             this.$.directory.get().then(function(resp) {
@@ -165,7 +261,6 @@ Contributors:
               });
               this.colDef = tmp;
               this.entries = resp.entries;
-              console.log(this.colDef);
             }.bind(this));
           }
         },
@@ -178,7 +273,7 @@ Contributors:
           if (entry && entry.properties && prop) {
             return entry.properties[prop];
           } else {
-            console.info('_value');
+            console.error('Could not resolve property ' + prop);
             return 'N/A';
           }
         },
@@ -202,15 +297,18 @@ Contributors:
                                 'Delete vocabulary entry?'))) {
             var item = e.model.dataHost.parentNode.item;
             this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
-            this.$.directory.remove().then(function(res) {
-              this._observeSelectedVocabulary();
-              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyDeleted', 'Entry successfully deleted.');
+            this.$.directory.remove().then(function() {
+              this._refresh();
+              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyDeleted',
+                'Entry successfully deleted.');
               this.$.toast.open();
             }.bind(this), function(err) {
               if (err.status === 401) {
-                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.referencedEntry', 'This entry is referenced in another vocabulary.');
+                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.referencedEntry',
+                  'This entry is referenced in another vocabulary.');
               } else {
-                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.error', 'An error occured while deleting this entry') + ': ' + err.message;
+                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.error',
+                  'An error occured while deleting this entry') + ': ' + err.message;
               }
               this.$.errorToast.open();
             }.bind(this));
@@ -218,8 +316,31 @@ Contributors:
         },
 
         _editEntry: function(e) {
-          console.log('_editEntry');
-          console.log(e);
+          this._selectedEntry = e.model.dataHost.parentNode.item;
+          this.$.dialog.toggle();
+        },
+
+        _cancel: function() {
+          //this._refresh();
+        },
+
+        _save: function() {
+          this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
+            '/' + this._selectedEntry.properties.id;
+          this.$.directory.data = this._selectedEntry;
+          this.$.directory.put().then(function() {
+            this.$.dialog.toggle();
+            this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyEdited',
+                'Entry successfully edited.');
+            this.$.toast.open();
+            this._refresh();
+          }.bind(this),
+          function(err) {
+            this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
+              this.i18n('ui.vocabularyManagement.cannotEdit',
+                'An error occured while editing.');
+            this.$.errorToast.open();
+          }.bind(this));
         }
 
       });
