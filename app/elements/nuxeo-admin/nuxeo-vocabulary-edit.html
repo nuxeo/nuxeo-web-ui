@@ -95,7 +95,8 @@ Contributors:
       <div class="label-container">
         <label>[[i18n('ui.vocabularyManagement.edit.obsolete', 'Obsolete')]]</label>
       </div>
-      <input is="iron-input" name="obsolete" value="{{entry.properties.obsolete::change}}" class="flex"></input>
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
+        on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
     </div>
 
     <div class="row layout horizontal">
@@ -121,10 +122,24 @@ Contributors:
           new: {
             type: Boolean,
             value: false
-          }
+          },
+
+
         },
 
-        behaviors: [Nuxeo.I18nBehavior]
+        behaviors: [Nuxeo.I18nBehavior],
+
+        _isObsolete: function(obsolete) {
+          return obsolete !== 0;
+        },
+
+        _obsoleteChanged: function() {
+          if (this.entry.properties.obsolete > 0) {
+            this.entry.properties.obsolete = 0;
+          } else {
+            this.entry.properties.obsolete = 1;
+          }
+        }
 
       });
     })();
