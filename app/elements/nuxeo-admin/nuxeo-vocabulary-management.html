@@ -191,9 +191,20 @@ Contributors:
             }
           }
           if (!schema || schema.length === 0) {
-            return 'nuxeo-vocabulary-edit';
+            return 'vocabulary';
           }
           return schema;
+        },
+
+        _getParentDirectoryFor: function(entry) {
+          var parent = '';
+          for (var i in this.vocabularyResonse.entries) {
+            if (this.vocabularyResonse.entries[i].name === entry.directoryName) {
+              parent = this.vocabularyResonse.entries[i].parent;
+              break;
+            }
+          }
+          return parent;
         },
 
         /**
@@ -234,6 +245,7 @@ Contributors:
           }
           // setup data binding
           el.entry = this._selectedEntry;
+          el.parentDirectory = this._getParentDirectoryFor(this._selectedEntry);
 
           // hack to force resize event and correctly display <nuxeo-helper> elements
           //this.notifyResize();

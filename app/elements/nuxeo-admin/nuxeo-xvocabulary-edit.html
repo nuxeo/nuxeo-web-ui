@@ -18,11 +18,11 @@ Contributors:
 -->
 
 <!--
-`nuxeo-vocabulary-edit`
+`nuxeo-xvocabulary-edit`
 @group Nuxeo UI
-@element nuxeo-vocabulary-edit
+@element nuxeo-xvocabulary-edit
 -->
-<dom-module id="nuxeo-vocabulary-edit">
+<dom-module id="nuxeo-xvocabulary-edit">
   <template>
     <style is="custom-style" include="shared-styles">
       :host {
@@ -76,6 +76,22 @@ Contributors:
       }
     </style>
 
+    <nuxeo-resource id="directory" path="/directory/[[parentDirectory]]" response="{{parentResponse}}"></nuxeo-resource>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.parent', 'Parent')]]</label>
+        <span class="required">*</span>
+      </div>
+      <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('ui.vocabularyManagement.selectParent', 'Select a parent')]]">
+        <paper-menu class="dropdown-content" selected="{{entry.properties.parent}}" attr-for-selected="name">
+          <template is="dom-repeat" items="[[parentResponse.entries]]">
+            <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+    </div>
+
     <div class="row layout horizontal">
       <div class="label-container">
         <label>[[i18n('ui.vocabularyManagement.edit.id', 'ID')]]</label>
@@ -112,7 +128,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-vocabulary-edit',
+        is: 'nuxeo-xvocabulary-edit',
 
         properties: {
           entry: {
@@ -122,6 +138,11 @@ Contributors:
           new: {
             type: Boolean,
             value: false
+          },
+
+          parentDirectory: {
+            type: String,
+            observer: '_observeParent'
           }
 
         },
@@ -137,6 +158,12 @@ Contributors:
             this.entry.properties.obsolete = 0;
           } else {
             this.entry.properties.obsolete = 1;
+          }
+        },
+
+        _observeParent: function() {
+          if (this.parentDirectory && this.parentDirectory.length > 0) {
+            this.$.directory.get();
           }
         }
 
