@@ -1,0 +1,266 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<!--
+`nuxeo-l10nxvocabulary-edit`
+@group Nuxeo UI
+@element nuxeo-l10nxvocabulary-edit
+-->
+<dom-module id="nuxeo-l10nxvocabulary-edit">
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+        --nuxeo-tree-theme: {
+          padding: 1em;
+        };
+        --nuxeo-tree-node-theme: {
+          min-height: 24px;
+        };
+        --nuxeo-tree-children-theme: {
+          padding-left: 1em;
+        };
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      input,
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      img {
+        height: 16px;
+        width: 16px;
+      }
+
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
+      }
+
+      .radio-container {
+        padding: 0;
+      }
+
+      .radio-container > * {
+        margin-right: 10px;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
+      }
+
+
+      .node-name {
+        display: inline;
+        position: absolute;
+      }
+
+      iron-icon {
+        color: var(--nuxeo-link-color);
+      }
+
+      [toggle] {
+        cursor: pointer;
+      }
+
+      nuxeo-tree {
+        width: 300px;
+        height: 300px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      nuxeo-tree ::content > nuxeo-tree-node ::content > #content {
+        display: none;
+      }
+
+      nuxeo-tree ::content iron-collapse {
+        padding-left: 2em;
+      }
+
+      .parent {
+        cursor: pointer;
+      }
+
+    </style>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.parent', 'Parent')]]</label>
+        <span class="required">*</span>
+      </div>
+      <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-selected-node="_selectParent">
+        <template>
+          <template is="dom-if" if="[[!isLeaf]]">
+            <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+          </template>
+          <span class="flex node-name ellipsis">
+            <span class$="[[_computeNodeClass(item)]]">[[item.properties.id]]</span>
+          </span>
+        </template>
+      </nuxeo-tree>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.id', 'ID')]]</label>
+        <span class="required">*</span>
+      </div>
+      <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.label', 'Label')]]</label>
+      </div>
+      <input is="iron-input" name="label" value="{{entry.properties.label::change}}" class="flex"></input>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.obsolete', 'Obsolete')]]</label>
+      </div>
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
+        on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('ui.vocabularyManagement.edit.ordering', 'Ordering')]]</label>
+      </div>
+      <input type="number" is="iron-input" name="ordering" value="{{entry.properties.ordering::change}}" class="flex"></input>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-l10nxvocabulary-edit',
+
+        properties: {
+          entry: {
+            type: Object
+          },
+
+          new: {
+            type: Boolean,
+            value: false
+          },
+
+          entries: {
+            type: Array
+          },
+
+          controller: Object,
+
+          _root: {
+            type: Object,
+            value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
+          }
+
+        },
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        observers: ['_inputChanged(entry, entries)'],
+
+        _isObsolete: function(obsolete) {
+          return obsolete !== 0;
+        },
+
+        _obsoleteChanged: function() {
+          if (this.entry.properties.obsolete > 0) {
+            this.entry.properties.obsolete = 0;
+          } else {
+            this.entry.properties.obsolete = 1;
+          }
+        },
+
+        _inputChanged: function() {
+          if (this.entry && this.entries) {
+            this.controller = {
+              getChildren: function(node) {
+                console.log('getChildren');
+                return new Promise(function(resolve) {
+                  var targetParentId = !node ? '' : node.properties.id;
+                  var children = this.entries.filter(
+                    function(e) {
+                      if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                        e.id = e.properties.id;
+                        return true;
+                      }
+                    }.bind(this)
+                  );
+                  resolve(children);
+                }.bind(this));
+              }.bind(this),
+
+              isLeaf: function(node) {
+                console.log('isLeaf');
+                var lookedUpId = node.properties.id;
+                var isNotLeaf = this.entries.some(
+                  function(e) {
+                    return e.properties.parent === lookedUpId;
+                  }
+                );
+                return !isNotLeaf && node.root !== true;
+              }.bind(this)
+            };
+            this.$.tree.open.apply(this.$.tree, ['root']);
+          }
+        },
+
+        _expandIcon: function(opened) {
+          return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+        },
+
+        _selectParent: function() {
+          console.log('_selectParent');
+        },
+
+        _computeNodeClass: function() {
+          console.log('_computeNodeClass');
+          return 'parent';
+        }
+
+      });
+    })();
+  </script>
+</dom-module>
