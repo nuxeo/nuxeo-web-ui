@@ -119,21 +119,38 @@ Contributors:
 
     </style>
 
+    <paper-dialog id="parentDialog" modal no-auto-focus>
+      <h1>[[i18n('ui.vocabularyManagement.selectParent', 'Select a parent')]]</h1>
+      <div class="paper-content layout horizontal">
+        <form id="form" is="iron-form">
+          <div>
+            <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
+              <template>
+                <template is="dom-if" if="[[!isLeaf]]">
+                  <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+                </template>
+                <span class="flex node-name ellipsis">
+                  <a class="parent">[[item.properties.id]]</a>
+                </span>
+              </template>
+            </nuxeo-tree>
+          </div>
+          <div class="card-actions">
+            <div class="buttons sep">
+             <paper-button dialog-dismiss>[[i18n('command.close','Close')]]</paper-button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </paper-dialog>
+
     <div class="row layout horizontal">
       <div class="label-container">
         <label>[[i18n('ui.vocabularyManagement.edit.parent', 'Parent')]]</label>
-        <span class="required">*</span>
       </div>
-      <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-selected-node="_selectParent">
-        <template>
-          <template is="dom-if" if="[[!isLeaf]]">
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
-          </template>
-          <span class="flex node-name ellipsis">
-            <span class$="[[_computeNodeClass(item)]]">[[item.properties.id]]</span>
-          </span>
-        </template>
-      </nuxeo-tree>
+      <paper-button on-tap="_toggleParent">
+        [[_parentLabel]]
+      </paper-button>
     </div>
 
     <div class="row layout horizontal">
@@ -146,9 +163,16 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('ui.vocabularyManagement.edit.label', 'Label')]]</label>
+        <label>label_en</label>
       </div>
-      <input is="iron-input" name="label" value="{{entry.properties.label::change}}" class="flex"></input>
+      <input is="iron-input" name="label" value="{{entry.properties.label_en::change}}" class="flex"></input>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>label_fr</label>
+      </div>
+      <input is="iron-input" name="label" value="{{entry.properties.label_fr::change}}" class="flex"></input>
     </div>
 
     <div class="row layout horizontal">
@@ -188,6 +212,10 @@ Contributors:
             type: Array
           },
 
+          _parentLabel: {
+            type: String,
+          },
+
           controller: Object,
 
           _root: {
@@ -214,36 +242,41 @@ Contributors:
         },
 
         _inputChanged: function() {
-          if (this.entry && this.entries) {
-            this.controller = {
-              getChildren: function(node) {
-                console.log('getChildren');
-                return new Promise(function(resolve) {
-                  var targetParentId = !node ? '' : node.properties.id;
-                  var children = this.entries.filter(
-                    function(e) {
-                      if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
-                        e.id = e.properties.id;
-                        return true;
-                      }
-                    }.bind(this)
-                  );
-                  resolve(children);
-                }.bind(this));
-              }.bind(this),
+          if (this.entry) {
+            if (this.entry.properties.parent.length > 0) {
+              this._parentLabel = this.entry.properties.parent;
+            } else {
+              this._parentLabel = this.i18n('ui.vocabularyManagement.edit.selectParent', 'Select a parent');
+            }
+            if (this.entries) {
+              this.controller = {
+                getChildren: function(node) {
+                  return new Promise(function(resolve) {
+                    var targetParentId = !node ? '' : node.properties.id;
+                    var children = this.entries.filter(
+                      function(e) {
+                        if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                          e.id = e.properties.id;
+                          return true;
+                        }
+                      }.bind(this)
+                    );
+                    resolve(children);
+                  }.bind(this));
+                }.bind(this),
 
-              isLeaf: function(node) {
-                console.log('isLeaf');
-                var lookedUpId = node.properties.id;
-                var isNotLeaf = this.entries.some(
-                  function(e) {
-                    return e.properties.parent === lookedUpId;
-                  }
-                );
-                return !isNotLeaf && node.root !== true;
-              }.bind(this)
-            };
-            this.$.tree.open.apply(this.$.tree, ['root']);
+                isLeaf: function(node) {
+                  var lookedUpId = node.properties.id;
+                  var isNotLeaf = this.entries.some(
+                    function(e) {
+                      return e.properties.parent === lookedUpId;
+                    }
+                  );
+                  return !isNotLeaf && node.root !== true;
+                }.bind(this)
+              };
+              this.$.tree.open.apply(this.$.tree, ['root']);
+            }
           }
         },
 
@@ -251,13 +284,14 @@ Contributors:
           return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
         },
 
-        _selectParent: function() {
-          console.log('_selectParent');
+        _selectParent: function(e) {
+          this.entry.properties.parent = e.detail.item.properties.id;
+          this._parentLabel = this.entry.properties.parent;
+          this._toggleParent();
         },
 
-        _computeNodeClass: function() {
-          console.log('_computeNodeClass');
-          return 'parent';
+        _toggleParent: function() {
+          this.$.parentDialog.toggle();
         }
 
       });

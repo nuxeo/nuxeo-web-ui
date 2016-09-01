@@ -77,7 +77,8 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="directoryuis" path="/directory?uiDirectory=true" auto response="{{vocabularyResonse}}"></nuxeo-resource>
+    <nuxeo-resource id="directoryuis" path="/directory?uiDirectory=true" auto response="{{vocabularyResonse}}">
+    </nuxeo-resource>
 
     <nuxeo-resource id="directory" ></nuxeo-resource>
 
@@ -116,25 +117,33 @@ Contributors:
         </paper-dropdown-menu>
       </div>
       <div class="content">
-        <nuxeo-data-table id="table" items="[[entries]]"
-          empty-label="[[i18n('ui.vocabularyManagement.noEntry', 'No entry')]]"
-          empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
-          <template is="dom-repeat" items="[[colDef]]" as="col">
-            <nuxeo-data-table-column name="[[col.name]]">
-              <template>
-                <template is="dom-if" if="[[!_entryActions(column.name)]]">
-                  [[_value(item, column.name)]]
+        <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
+          <nuxeo-data-table id="table" items="[[entries]]"
+            empty-label="[[i18n('ui.vocabularyManagement.noEntry', 'No entry')]]"
+            empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
+            <template is="dom-repeat" items="[[colDef]]" as="col">
+              <nuxeo-data-table-column name="[[col.name]]">
+                <template>
+                  <template is="dom-if" if="[[!_entryActions(column.name)]]">
+                    [[_value(item, column.name)]]
+                  </template>
+                  <template is="dom-if" if="[[_entryActions(column.name)]]">
+                    <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+                    <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
+                    <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+                    <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+                  </template>
                 </template>
-                <template is="dom-if" if="[[_entryActions(column.name)]]">
-                  <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
-                  <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
-                  <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
-                  <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
-                </template>
-              </template>
-            </nuxeo-data-table-column>
-          </template>
-        </nuxeo-data-table>
+              </nuxeo-data-table-column>
+            </template>
+          </nuxeo-data-table>
+        </template>
+        <template is="dom-if" if="[[!_isVocabularySelected(selectedVocabulary)]]">
+          <div class="noResult">
+            <span class="empty">[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]</span>
+        </div>
+        </template>
+
       </div>
     </paper-header-panel>
 
@@ -351,6 +360,10 @@ Contributors:
                 'An error occured while editing.');
             this.$.errorToast.open();
           }.bind(this));
+        },
+
+        _isVocabularySelected: function() {
+          return this.selectedVocabulary && this.selectedVocabulary.length > 0;
         }
 
       });
