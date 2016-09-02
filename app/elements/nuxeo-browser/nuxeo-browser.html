@@ -124,11 +124,6 @@ Contributors:
                   <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
                   [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
               </template>
-              <template is="dom-if" if="[[_canViewVersions(document)]]">
-                <paper-icon-item name="versions">
-                  <iron-icon icon="icons:history" item-icon></iron-icon>
-                  [[i18n('command.browser.versions', 'Versions')]]</paper-icon-item>
-              </template>
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
@@ -149,7 +144,6 @@ Contributors:
             document.properties.uid:major_version, document.properties.uid:minor_version)]]
           </div>
           <div class="actions">
-            <paper-button on-tap="_navigateToVersions">[[i18n('ui.versions.view', 'View versions')]]</paper-button>
             <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
           </div>
         </div>
@@ -176,12 +170,6 @@ Contributors:
               <paper-card class="end-space">
                 <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
               </paper-card>
-            </section>
-          </template>
-
-          <template is="dom-if" if="[[_canViewVersions(document)]]">
-            <section name="versions">
-              <nuxeo-document-versions id="versions" document="[[document]]"></nuxeo-document-versions>
             </section>
           </template>
 
@@ -283,16 +271,8 @@ Contributors:
           return this._isFolderish(document); // && this._canReadChildren;
         },
 
-        _canViewVersions: function(document) {
-          return this._isVersionable(document) && !this._isVersion(document);
-        },
-
         _navigateToView: function() {
           page('/browse' + this.document.path + '@view');
-        },
-
-        _navigateToVersions: function() {
-          page('/browse' + this.document.path + '@versions');
         },
 
         _updateCvParams: function() {

@@ -31,96 +31,108 @@ Contributors:
   <template>
     <style is="custom-style" include="shared-styles">
       :host {
-        display: block;
-        width: 100%;
-      }
-
-      .main {
-        @apply(--layout-vertical);
-      }
-
-      .main .head {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        padding: 8px;
-        font-weight: 700;
-      }
-
-      .main .row {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        padding: 8px;
-      }
-
-      .main .col-title {
-        @apply(--layout-flex-4);
-      }
-
-      .main .col-date {
-        @apply(--layout-center);
-        @apply(--layout-flex-2);
-      }
-
-      .main .col-author {
-        @apply(--layout-center);
-        @apply(--layout-flex-2);
-        text-align: center;
-      }
-
-      .main .col-version {
-        @apply(--layout-center);
-        @apply(--layout-flex-2);
-        text-align: center;
-      }
-
-      .main .col-action {
-        @apply(--layout-center);
-        @apply(--layout-flex-2);
-        text-align: center;
-      }
-
-      .main .link {
         display: inline-block;
+      }
+
+      .menu {
+        width: 200px;
+        max-height: 300px;
+        padding: 0;
+      }
+
+      .menu-trigger {
+        padding-right: 24px;
+      }
+
+      .version {
+        @apply(--layout-vertical);
+        @apply(--layout-start);
+        padding: 8px;
         cursor: pointer;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .version .row {
+        @apply(--layout-horizontal);
+        @apply(--layout-start);
+        margin: 0;
+        padding: 0;
+      }
+
+      .version .row ::content * {
+        display: inline-block;
+        text-align: left;
+      }
+
+      .version .title {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .version .modified {
+        font-size: 12px;
+        margin-top: 4px;
+        color: var(--nuxeo-text-light);
+      }
+
+      .version .latest {
+        margin: 8px 0;
+      }
+
+      paper-menu-button {
+        padding: 0;
+        cursor: pointer;
+      }
+
+      iron-icon {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        right: 4px;
+        top: 0;
+        padding: 0;
+        margin: 0;
       }
 
     </style>
 
-    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]" response="{{versions}}">
+    <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
     </nuxeo-operation>
 
-    <paper-card class="main">
-      <template is="dom-if" if="[[_hasVersions(versions)]]">
-        <div class="card-content">
-          <div class="head">
-            <div class="col-title">[[i18n('ui.versions.title', 'Title')]]</div>
-            <div class="col-date">[[i18n('ui.versions.date', 'Modification date')]]</div>
-            <div class="col-author">[[i18n('ui.versions.author', 'Last contributor')]]</div>
-            <div class="col-version">[[i18n('ui.versions.version', 'Version')]]</div>
-            <div class="col-action">[[i18n('ui.versions.action', 'Action')]]</div>
-          </div>
-          <template is="dom-repeat" items="[[versions.entries]]" as="item">
-            <div class="row">
-              <div class="col-title">
-                <a class="link" href$="[[urlFor('document', item.uid)]]">[[item.properties.dc:title]]</a>
-              </div>
-              <div class="col-date">[[_date(item.properties.dc:modified)]]</div>
-              <div class="col-author">[[item.properties.dc:lastContributor]]</div>
-              <div class="col-version">
-                <p class="tag">[[item.properties.uid:major_version]].[[item.properties.uid:minor_version]]</p>
-              </div>
-              <div class="col-action">
-                <nuxeo-restore-version-button document="[[item]]"></nuxeo-restore-version-button>
+    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.path]]" response="{{versions}}">
+    </nuxeo-operation>
+
+    <template is="dom-if" if="[[_hasVersions(versions)]]">
+      <paper-menu-button noink no-animations>
+        <div class="tag dropdown-trigger menu-trigger">
+          [[_labelTitle(document)]][[_labelCheckedOut(document)]]<iron-icon icon="icons:arrow-drop-down"></iron-icon>
+        </div>
+        <paper-menu class="dropdown-content menu" noink>
+          <template is="dom-if" if="[[_isVersion(document)]]">
+            <div id="version-latest" class="version" on-tap="_showLatest">
+              <div class="row title latest">
+                [[_labelTitle(latest)]][[_labelCheckedOut(latest)]] ([[i18n('ui.versions.latest', 'Latest')]])
               </div>
             </div>
           </template>
-        </div>
-      </template>
-      <template is="dom-if" if="[[!_hasVersions(versions)]]">
-        <div class="empty"><p>[[i18n('ui.versions.empty', 'No versions')]]</p></div>
-      </template>
-    </paper-card>
+          <template is="dom-repeat" items="[[versions.entries]]" as="item" sort="_sort">
+            <div id="version-id-[[index]]" class="version" on-tap="_showVersion">
+              <div class="row title">[[_labelTitle(item)]]</div>
+              <div class="row modified">[[_labelModified(item)]]</div>
+            </div>
+          </template>
+        </paper-menu>
+      </paper-menu-button>
 
+      <template is="dom-if" if="[[_isVersion(document)]]">
+        <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
+      </template>
+      <template is="dom-repeat" items="[[versions.entries]]" as="item" sort="_sort">
+        <paper-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</paper-tooltip>
+      </template>
+
+    </template>
   </template>
 
   <script>
@@ -131,29 +143,56 @@ Contributors:
         is: 'nuxeo-document-versions',
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          },
-          versions: {
-            type: Object
-          }
+          document: Object,
+          latest: Object,
+          versions: Object
         },
+        observers: [
+          '_update(document, document.*)'
+        ],
 
-        _documentChanged: function(doc) {
-          if (doc) {
-            if (this._isVersionable(doc) && !this._isVersion(doc)) {
-              this.$.opGetVersions.execute();
+        _update: function() {
+          if (this.document) {
+            if (this._isVersion(this.document)) {
+              this.$.opGetLatest.execute();
             }
+            this.$.opGetVersions.execute();
           }
         },
 
-        _hasVersions: function(versions) {
-          return versions && versions.entries.length > 0;
+        _hasVersions: function() {
+          return this.versions && this.versions.entries && this.versions.entries.length > 0;
         },
 
-        _date: function(date) {
-          return moment(date).format('DD/MM/YYYY HH:mm');
+        _showLatest: function() {
+          page('/browse' + this.document.path + '@view');
+        },
+
+        _showVersion: function(e) {
+          page('/doc/' + e.model.item.uid);
+        },
+
+        _labelTitle: function(doc) {
+          if (doc) {
+            return this.i18n('ui.versions.version', '{0}.{1}',
+              doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
+          }
+          return '';
+        },
+
+        _labelCheckedOut: function(doc) {
+          return (doc && doc.isCheckedOut) ? '+' : '';
+        },
+
+        _labelModified: function(doc) {
+          return this.i18n('ui.versions.modified', 'Modified {0} by {1}',
+            moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
+        },
+
+        _sort: function(item1, item2) {
+          var v1 = parseFloat(item1.properties['uid:major_version'] + '.' + item1.properties['uid:minor_version']);
+          var v2 = parseFloat(item2.properties['uid:major_version'] + '.' + item2.properties['uid:minor_version']);
+          return (v1 < v2) ? 1 : -1;
         }
 
       });

@@ -207,6 +207,10 @@ Contributors:
       nuxeo-workflow-graph {
         position: relative;
       }
+
+      nuxeo-document-versions {
+        margin-left: 8px;
+      }
     </style>
 
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
@@ -287,8 +291,7 @@ Contributors:
                   </span>
                 </template>
                 <span class="state tag">[[document.state]]</span>
-                <span class="version tag">[[i18n('label.version.number', 'Version {0}.{1}',
-                  document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
+                <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
               </div>
             </div>
           </paper-card>
