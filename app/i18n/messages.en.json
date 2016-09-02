@@ -1,4 +1,6 @@
 {
+  "ui.app.no": "No",
+  "ui.app.yes": "Yes",
   "ui.pageableWidget.modified": "Modified",
   "ui.results.displayGrid": "Switch to grid view",
   "label.widget.picture.weight": "Weight",
