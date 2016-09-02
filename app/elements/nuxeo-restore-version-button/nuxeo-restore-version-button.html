@@ -34,7 +34,6 @@ Contributors:
 
       nuxeo-confirm-button {
         display: inline-block;
-        padding: 8px;
       }
 
       nuxeo-confirm-button .version {
@@ -44,17 +43,22 @@ Contributors:
 
     </style>
 
+    <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
+    </nuxeo-operation>
+
     <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]">
     </nuxeo-operation>
 
-    <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
-                          dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
-                          dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
-                          on-confirm="_restore">
-      [[i18n('ui.versions.restore', 'Restore')]]
-      <span class="version">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
-      </span>
-    </nuxeo-confirm-button>
+    <template is="dom-if" if="[[_isAvailable(latest)]]">
+      <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
+                            dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
+                            dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
+                            on-confirm="_restore">
+        [[i18n('ui.versions.restore', 'Restore')]]
+        <span class="version">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
+        </span>
+      </nuxeo-confirm-button>
+    </template>
 
   </template>
 
@@ -66,7 +70,30 @@ Contributors:
         is: 'nuxeo-restore-version-button',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: Object
+          document: Object,
+          latest: Object
+        },
+        observers: [
+          '_update(document)'
+        ],
+
+        _update: function() {
+          if (this.document.isVersion) {
+            this.$.opGetLatest.execute();
+          } else {
+            this.latest = null;
+          }
+        },
+
+        _isAvailable: function() {
+          if (this.document && this.latest) {
+            var v1 = this.document.properties['uid:major_version'] + '.' +
+              this.document.properties['uid:minor_version'];
+            var v2 = this.latest.properties['uid:major_version'] + '.' +
+              this.latest.properties['uid:minor_version'];
+            return v1 === v2 ? this.latest.isCheckedOut : true;
+          }
+          return false;
         },
 
         _restore: function() {
