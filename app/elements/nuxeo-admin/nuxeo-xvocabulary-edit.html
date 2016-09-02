@@ -150,7 +150,7 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         _isObsolete: function(obsolete) {
-          return obsolete !== 0;
+          return obsolete !== null && obsolete !== 0;
         },
 
         _obsoleteChanged: function() {

@@ -230,7 +230,7 @@ Contributors:
         observers: ['_inputChanged(entry, entries)'],
 
         _isObsolete: function(obsolete) {
-          return obsolete !== 0;
+          return obsolete !== null && obsolete !== 0;
         },
 
         _obsoleteChanged: function() {
@@ -243,7 +243,7 @@ Contributors:
 
         _inputChanged: function() {
           if (this.entry) {
-            if (this.entry.properties.parent.length > 0) {
+            if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
               this._parentLabel = this.entry.properties.parent;
             } else {
               this._parentLabel = this.i18n('ui.vocabularyManagement.edit.selectParent', 'Select a parent');

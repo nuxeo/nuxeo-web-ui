@@ -48,7 +48,6 @@ Contributors:
         };
         padding: .3em 0 .5em .5em;
         margin-left: 1.5em;
-        box-shadow: 1px 0 0 rgba(0,0,0,0.2) inset;
       }
 
       ::content .unfocused-line.paper-input-container {
@@ -64,7 +63,7 @@ Contributors:
       }
 
       nuxeo-data-table {
-        min-height: calc(100vh - 150px);
+        min-height: calc(100vh - 280px);
       }
 
       nuxeo-data-table ::content #items {
@@ -75,6 +74,14 @@ Contributors:
         --paper-toast-background-color: red;
         --paper-toast-color: white;
       }
+
+      .top.actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-end-justified);
+        margin: 1em 0 1em 0;
+      }
+
     </style>
 
     <nuxeo-resource id="directoryList" path="/directory" auto response="{{vocabularyResonse}}">
@@ -108,16 +115,26 @@ Contributors:
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
         <span>[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</span>
-        <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]">
-          <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
-            <template is="dom-repeat" items="[[vocabularyResonse.entries]]">
-              <paper-item name="[[item.name]]">[[item.name]]</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
       </div>
       <div class="content">
+        <paper-card elevation="0" class="block">
+          <div class="card-content">
+            <span>[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</span>
+            <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]">
+              <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
+                <template is="dom-repeat" items="[[vocabularyResonse.entries]]">
+                  <paper-item name="[[item.name]]">[[item.name]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+        </paper-card>
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
+          <div class="top actions">
+            <paper-button on-tap="_createEntry">
+              <span>+ [[i18n('ui.vocabularyManagement.addEntry', 'Add entry')]]</span>
+            </paper-button>
+          </div>
           <nuxeo-data-table id="table" items="[[entries]]"
             empty-label="[[i18n('ui.vocabularyManagement.noEntry', 'No entry')]]"
             empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
@@ -137,11 +154,6 @@ Contributors:
               </nuxeo-data-table-column>
             </template>
           </nuxeo-data-table>
-        </template>
-        <template is="dom-if" if="[[!_isVocabularySelected(selectedVocabulary)]]">
-          <div class="noResult">
-            <span class="empty">[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]</span>
-        </div>
         </template>
 
       </div>
@@ -336,6 +348,7 @@ Contributors:
 
         _editEntry: function(e) {
           this._selectedEntry = e.model.dataHost.parentNode.item;
+          this._new = false;
           this.$.dialog.toggle();
         },
 
@@ -344,26 +357,56 @@ Contributors:
         },
 
         _save: function() {
-          this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
-            '/' + this._selectedEntry.properties.id;
+
           this.$.directory.data = this._selectedEntry;
-          this.$.directory.put().then(function() {
-            this.$.dialog.toggle();
-            this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyEdited',
-                'Entry successfully edited.');
-            this.$.toast.open();
-            this._refresh();
-          }.bind(this),
-          function(err) {
-            this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
-              this.i18n('ui.vocabularyManagement.cannotEdit',
-                'An error occured while editing.');
-            this.$.errorToast.open();
-          }.bind(this));
+          if (this._new) {
+            this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
+            this.$.directory.post().then(function() {
+              this.$.dialog.toggle();
+              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyCreated',
+                  'Entry successfully created.');
+              this.$.toast.open();
+              this._refresh();
+            }.bind(this),
+            function(err) {
+              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
+                this.i18n('ui.vocabularyManagement.cannotCreate',
+                  'An error occured while creating.');
+              this.$.errorToast.open();
+            }.bind(this));
+          } else {
+            this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
+              '/' + this._selectedEntry.properties.id;
+            this.$.directory.put().then(function() {
+              this.$.dialog.toggle();
+              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyEdited',
+                  'Entry successfully edited.');
+              this.$.toast.open();
+              this._refresh();
+            }.bind(this),
+            function(err) {
+              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
+                this.i18n('ui.vocabularyManagement.cannotEdit',
+                  'An error occured while editing.');
+              this.$.errorToast.open();
+            }.bind(this));
+          }
         },
 
         _isVocabularySelected: function() {
           return this.selectedVocabulary && this.selectedVocabulary.length > 0;
+        },
+
+        _createEntry: function() {
+          var emptyEntry = JSON.parse(JSON.stringify(this.entries[0]));
+          for (var property in this.entries[0].properties) {
+            if (this.entries[0].properties.hasOwnProperty(property)) {
+              emptyEntry.properties[property] = null;
+            }
+          }
+          this._selectedEntry = emptyEntry;
+          this._new = true;
+          this.$.dialog.toggle();
         }
 
       });
