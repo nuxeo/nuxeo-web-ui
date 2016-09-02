@@ -114,12 +114,12 @@ Contributors:
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
-        <span>[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</span>
+        <span>[[i18n('label.app.vocabularyManagement', 'Vocabularies')]]</span>
       </div>
       <div class="content">
         <paper-card elevation="0" class="block">
           <div class="card-content">
-            <span>[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</span>
+            <span>[[i18n('ui.vocabularyManagement.vocabulary', 'Vocabulary')]]</span>
             <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]">
               <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
                 <template is="dom-repeat" items="[[vocabularyResonse.entries]]">
