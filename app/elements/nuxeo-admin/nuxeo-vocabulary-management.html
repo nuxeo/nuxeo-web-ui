@@ -302,6 +302,10 @@ Contributors:
 
         _value: function(entry, prop) {
           if (entry && entry.properties && prop) {
+            if (prop === 'obsolete') {
+              return entry.properties[prop] > 0 ?
+                this.i18n('ui.app.yes', 'Yes') : this.i18n('ui.app.no', 'No');
+            }
             return entry.properties[prop];
           } else {
             console.error('Could not resolve property ' + prop);
