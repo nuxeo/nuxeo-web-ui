@@ -58,9 +58,22 @@ Contributors:
         background-color: #fff;
       }
 
-      nuxeo-data-table ::content data-table-checkbox[checked] #container {
-        border-color: #75b226;
-        background-color: #75b226;
+      nuxeo-data-table ::content nuxeo-data-table-row:not([header]):hover {
+        background-color: var(--nuxeo-container-hover);
+      }
+
+      nuxeo-data-table ::content nuxeo-data-table-checkbox {
+        flex-basis: 30px;
+        border-right: none;
+      }
+
+      nuxeo-data-table ::content #container.nuxeo-data-table-checkbox {
+        border: 1px solid var(--nuxeo-text-light);
+      }
+
+      nuxeo-data-table ::content *[checked] #container.nuxeo-data-table-checkbox {
+        border-color: #75b226 !important;
+        background-color: #75b226 !important;
       }
 
       nuxeo-data-table ::content #container iron-list#list::after {
@@ -71,7 +84,7 @@ Contributors:
       }
 
       nuxeo-data-table, nuxeo-data-grid {
-        min-height: calc(100vh - 59px);
+        min-height: calc(100vh - 11em);
       }
 
       nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,

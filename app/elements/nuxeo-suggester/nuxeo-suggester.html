@@ -76,8 +76,7 @@ Contributors:
         width: 65px;
         height: 59px;
         padding: 16px;
-        box-shadow: 1px 0 0 rgba(0,0,0,0.1) inset;
-        background-color: rgba(255,255,255,0.03);
+        background-color: rgba(0,0,0,0.05);
         color: var(--nuxeo-header-actions);
       }
 
@@ -106,39 +105,46 @@ Contributors:
       #searchBar {
         height: 59px;
         background-color: white;
-        z-index: 1002;
       @apply(--layout-horizontal);
       @apply(--layout-center);
       @apply(--layout-center-justified);
       @apply(--layout-self-stretch);
       }
 
+      #suggester ::content .unfocused-line.paper-input-container,
+      #suggester ::content .focused-line.paper-input-container {
+        background-color: transparent;
+      }
+
       #results {
-        width: var(--nuxeo-suggester-width, 60%);
-        margin-top: 2px;
-        margin-bottom: 32px;
-        background-color: white;
-        z-index: 1001;
-        box-shadow: 0 0 24px 3px #aaa;
-        border: var(--nuxeo-border);
+        width: var(--nuxeo-suggester-width, 65%);
+        margin: .5em 0 3em;
+        height: calc(100% - 130px);
+        padding: 0 2em;
+        box-sizing: border-box;
+        overflow-y: scroll;
       @apply(--layout-vertical);
       }
 
       .result {
-        text-decoration: none;
         display: block;
-        padding: 12px 16px;
-        font-size: 22px;
+        padding: 1em;
+        background-color: #fff;
+        transform: translateZ(0);
+        transition-duration: .1s;
+        transition-property: transform;
       @apply(--layout-horizontal);
       @apply(--layout-center);
       }
 
-      .result:hover {
-        background-color: #efefef;
-      }
-
       .result + .result {
         border-top: var(--nuxeo-border);
+       }
+
+      .result:hover,
+      .iron-selected {
+        background-color: var(--nuxeo-container-hover);
+        transform: scale(1.01);
       }
 
       .result > iron-icon {
@@ -152,12 +158,10 @@ Contributors:
         height: 100%;
         position: fixed;
         opacity: .8;
-        background: white;
+        z-index: -1;
+        background: var(--nuxeo-text-default);
       }
 
-      .iron-selected {
-        background-color: #e8e8e8;
-      }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
