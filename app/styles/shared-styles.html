@@ -5,10 +5,17 @@
       /* --
       Global styles
       -- */
+      :root {
+        --paper-font-common-base: {
+          var(--nuxeo-app-font);
+        };
+      }
+
       body {
         background: var(--nuxeo-page-background);
         font-family: var(--nuxeo-app-font);
-        color: #333;
+        font-size: 15px;
+        color: var(--nuxeo-text-default);
         margin: 0;
       }
 
@@ -24,7 +31,7 @@
       }
 
       .sep {
-        border-top: 1px solid #e8e8e8;
+        border-top: var(--nuxeo-border);
       }
 
       /* --
@@ -45,21 +52,54 @@
       }
 
       paper-header-panel .content {
-        padding: 16px 32px;
+        padding: 2.5em 3em;
       }
 
       paper-header-panel#mainContainer {
         background-color: var(--nuxeo-page-background);
       }
 
+      paper-item,
+      paper-icon-item {
+        font-size: .9em;
+        min-height: 2.5em;
+      }
+
+      paper-item iron-icon,
+      paper-icon-item iron-icon {
+        width: 1em;
+        height: 1em;
+        margin-right: .5em;
+      }
+
+      ::content paper-icon-item #contentIcon {
+        width: 1.5em;
+      }
+
+      paper-item:hover,
+      paper-icon-item:hover {
+        color: var(--nuxeo-link-hover-color);
+        cursor: pointer;
+        background-color: #fafafa;
+      }
+
+      paper-icon-item {
+        --paper-item-focused-before: {
+          background: transparent;
+        };
+        --paper-item-focused: {
+          background: transparent;
+        };
+      }
+
       .paper-header {
         height: 59px;
+        color: var(--nuxeo-text-default);
         background: var(--nuxeo-header-background);
-        color: var(--nuxeo-header-title-color);
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-        font-size: 1.2em;
+        font-size: 1.05em;
         font-weight: 600;
-        padding: 0 4.2em 0 1.7em;
+        padding: 0 5.1em 0 1.7em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
@@ -121,6 +161,20 @@
         pointer-events: none;
       }
 
+      ::content iron-icon.paper-dropdown-menu {
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      ::content #contentWrapper.iron-dropdown > * {
+        border: var(--nuxeo-border);
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.15);
+      }
+      ::content .selectable-content.paper-menu > *:focus,
+      ::content .selectable-content.paper-menu  > *:focus:after,
+      ::content .selectable-content.paper-menu  > *:focus:before {
+        background-color: rgba(0,0,0,0.07);
+      }
+
       /* Side nav */
       .side-nav {
         background-color: var(--nuxeo-secondary-color);
@@ -165,6 +219,11 @@
         };
       }
 
+      ::content paper-card[elevation="0"],
+      ::content paper-card[elevation="1"] {
+        box-shadow: none;
+      }
+
       paper-card.block {
         display: block;
       }
@@ -176,7 +235,7 @@
 
       .card-section {
         padding: 16px 0;
-        position: relative;;
+        position: relative;
       }
 
       /* --
@@ -194,6 +253,10 @@
         text-transform: capitalize;
       }
 
+      ::content .focused-line.paper-input-container {
+        background-color: var(--nuxeo-primary-color);
+      }
+
       /* --
       Labels, Messages & Tooltips
       -- */
@@ -203,7 +266,7 @@
         background-color: var(--nuxeo-tag-background);
         color: var(--nuxeo-tag-text);
         padding: .2rem .4rem;
-        margin: 0;
+        margin: 0 .3em .1em 0;
         font-size: .8em;
         border-radius: 2px;
         line-height: initial;

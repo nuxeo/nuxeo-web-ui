@@ -29,75 +29,99 @@ Contributors:
 
     <style is="custom-style" include="shared-styles">
       :host {
-        min-width: 8em;
+        min-width: 30%;
+        min-height: 3em;
+        flex: 1;
       }
 
-      .breadcrumb, .shortBreadcrumb {
-        margin: 0 1.5em 0 0;
-        color: var(--nuxeo-header-text-color);
+      .breadcrumb {
+        margin: .55em 1.5em 0 0;
+        color: var(--nuxeo-text-light);
         font-weight: 300;
-        white-space: nowrap;
+        font-size: .95rem;
+      }
+
+      .ancestors {
+        margin-top: -.4em;
+        display: block;
+        line-height: 1em;
       }
 
       .breadcrumb-item {
         text-decoration: none;
       }
 
-      .breadcrumb a {
-        color: var(--nuxeo-header-text-color);
+      .current {
+        font-weight: 600;
+        display: initial;
+        white-space: nowrap;
+        color: var(--nuxeo-text-default);
       }
 
-      a.breadcrumb-item-current {
-        font-weight: 600;
-        max-width: 12em;
+      .current span {
         display: inline-block;
-        color: var(--nuxeo-header-title-color);
+      }
+
+      .current iron-icon,
+      .current iron-icon ::content img {
+        width: .7rem !important;
+        height: .7rem !important;
+        margin-top: -.35em;
+        margin-right: .1em;
+      }
+
+      a.nuxeo-breadcrumb,
+      .breadcrumb-divider {
+        color: var(--nuxeo-text-light);
+        font-size: .6rem;
+        font-weight: 300;
+      }
+
+      a.nuxeo-breadcrumb:hover {
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      .current span, .ancestors {
+        max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        vertical-align: bottom;
       }
 
-      .breadcrumb-divider {
-        font-size: 20px;
-      }
-
-      a.breadcrumb-item-parent {
-        opacity: .8;
-      }
-
-      a.breadcrumb-item-parent:hover {
-        opacity: 1;
-      }
-
-      a.breadcrumb-item-parent:before{
-        content: '«';
-        padding-right: .4em;
-      }
-
-      .breadcrumb-divider:last-of-type,
-      .breadcrumb-item-ancestor {
+      .ancestors span.breadcrumb-item:last-of-type .breadcrumb-divider {
         display: none;
       }
 
+      a.breadcrumb-item-ancestor:nth-last-child(-n+1),
+      a.breadcrumb-item-ancestor:nth-last-child(-n+2)
+      a.breadcrumb-item-ancestor:nth-last-child(-n+3) {
+        display: inline-block;
+      }
+
       @media (max-width: 1280px) {
-        .breadcrumb-divider,
-        a.breadcrumb-item-parent span {
-          display: none;
-        }
-        a.breadcrumb-item-parent:before{
-          padding: .5em .5em .5em 0;
-        }
       }
 
     </style>
 
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
     <div class="breadcrumb">
-      <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-        <a href$="[[urlFor('browse', item.path)]]" class$="breadcrumb-item [[_computeCssClass(index, document)]]"><span>[[item.title]]</span></a>
-        <span class$="breadcrumb-divider [[_computeCssClass(index, document)]]">/</span>
-      </template>
+      <div class="current" class="breadcrumb-item breadcrumb-item-current">
+        <iron-icon src="[[_icon(document)]]"></iron-icon>
+        <span>[[document.title]]</span>
+      </div>
+      <div class="ancestors">
+        <template is="dom-repeat" items="[[_breadcrumb(document)]]">
+          <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
+            <a href$="[[urlFor('browse', item.path)]]">
+              <span class="breadcrumb-item-title">[[item.title]]</span>
+            </a>
+            <span class="breadcrumb-divider">/</span>
+          </span>
+        </template>
+      </div>
     </div>
+
 
   </template>
 
@@ -119,7 +143,7 @@ Contributors:
 
         _breadcrumb: function() {
           if (this._enrichers) {
-            return this._enrichers.breadcrumb.entries;
+            return this._enrichers.breadcrumb.entries.slice(0, this._enrichers.breadcrumb.entries.length - 1);
           }
         },
 
@@ -129,9 +153,18 @@ Contributors:
               return 'breadcrumb-item-current';
             } else if (index === this._enrichers.breadcrumb.entries.length - 2) {
               return 'breadcrumb-item-parent';
+            } else if (index === this._enrichers.breadcrumb.entries.length - 3) {
+              return 'breadcrumb-item-grand-parent';
             } else {
               return 'breadcrumb-item-ancestor';
             }
+          }
+        },
+
+        _icon: function(document)  {
+          if (document) {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + document.properties['common:icon'];
           }
         },
 

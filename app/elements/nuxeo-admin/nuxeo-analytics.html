@@ -30,43 +30,42 @@ Contributors:
         display: block;
       }
 
-      .title {
-        display: block;
-        font-size: 1.4rem;
-        padding: 0.5em;
-      }
-
-      paper-dropdown-menu {
-        --paper-input-container-underline: {
-          display: none;
-        };
+      .paper-header paper-dropdown-menu {
         --paper-input-container-input: {
-          font-size: 18px;
+          font-size: 1.05em;
           font-weight: 400;
+          font-family: var(--nuxeo-app-font);
           text-align: left;
-          color: var(--nuxeo-header-text-color);
+          color: var(--nuxeo-text-default);
         };
-        padding: .3em 0 .5em .5em;
-        margin-left: 1.5em;
-        box-shadow: 1px 0 0 rgba(0,0,0,0.2) inset;
+        background-color: rgba(0,0,0,0.05);
       }
 
-      ::content .unfocused-line.paper-input-container {
-        background-color: transparent;
+      .paper-header ::content paper-button,
+      .paper-header ::content paper-icon-button {
+        background-color: rgba(0,0,0,0.05);
       }
 
-      ::content paper-input-container .input-content.paper-input-container {
-        flex-direction: row-reverse;
+      .paper-header ::content paper-menu-button {
+        padding: 0;
+        margin-left: 1em;
+      }
+
+      ::content .unfocused-line.paper-input-container,
+      ::content .focused-line.paper-input-container {
+        background-color: transparent !important;
       }
 
       ::content paper-input-container .input-content iron-icon {
         margin-right: .3em;
+        color: var(--nuxeo-link-hover-color);
       }
+
     </style>
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
-        <span>[[i18n('label.admin.analytics', 'Analytics')]]</span>
+        <span class="flex">[[i18n('label.admin.analytics', 'Analytics')]]</span>
         <paper-dropdown-menu noink no-animations no-label-float>
           <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution', 'Document Distribution')]]</paper-item>
