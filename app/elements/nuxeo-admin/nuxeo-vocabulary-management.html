@@ -268,6 +268,7 @@ Contributors:
           el.entry = this._selectedEntry;
           el.parentDirectory = this._getParentDirectoryFor(this._selectedEntry);
           el.entries = this.entries;
+          el.new = this._new;
         },
 
         _entryActions: function(o) {
@@ -351,8 +352,8 @@ Contributors:
         },
 
         _editEntry: function(e) {
-          this._selectedEntry = e.model.dataHost.parentNode.item;
           this._new = false;
+          this._selectedEntry = e.model.dataHost.parentNode.item;
           this.$.dialog.toggle();
         },
 
@@ -408,8 +409,8 @@ Contributors:
               emptyEntry.properties[property] = null;
             }
           }
-          this._selectedEntry = emptyEntry;
           this._new = true;
+          this._selectedEntry = emptyEntry;
           this.$.dialog.toggle();
         }
 

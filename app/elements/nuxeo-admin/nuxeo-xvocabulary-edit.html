@@ -97,7 +97,7 @@ Contributors:
         <label>[[i18n('ui.vocabularyManagement.edit.id', 'ID')]]</label>
         <span class="required">*</span>
       </div>
-      <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required>
+      <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required readonly$="[[!new]]">
     </div>
 
     <div class="row layout horizontal">
