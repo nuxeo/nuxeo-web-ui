@@ -75,10 +75,11 @@ Contributors:
       top: 0;
       right: 0;
       width: 60px;
-      height: 60px;
+      height: 59px;
       padding: 16px;
       z-index: 101;
       border: var(--nuxeo-border);
+      border-top: none;
       background-color: var(--nuxeo-light-background);
     }
 
@@ -94,13 +95,13 @@ Contributors:
       @apply(--layout-flex);
       @apply(--layout-vertical);
       height: calc(100vh - 61px);
-      width: 290px;
+      width: 293px;
     }
 
     .header {
       height: 59px;
       background-color: var(--nuxeo-light-background);
-      border-bottom: var(--nuxeo-border);
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
       @apply(--layout-horizontal);
       @apply(--layout-center);
     }

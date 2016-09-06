@@ -34,12 +34,12 @@ Contributors:
       .logo {
         background: rgba(255,255,255,0.9);
         border-right: var(--nuxeo-border);
-        height: 59px;
-        padding: 18px;
+        height: 58px;
+        padding: 17px 16px;
         position: fixed;
         top: 0;
         left: 0;
-        width: 60px;
+        width: 56px;
         z-index: 102;
       }
 
@@ -52,7 +52,7 @@ Contributors:
       }
 
       #sidebar > div {
-        margin-left: 60px;
+        margin-left: 56px;
       }
 
       #sidebar section {
@@ -64,14 +64,14 @@ Contributors:
         @apply(--layout-flex);
         @apply(--layout-vertical);
         overflow: auto;
-        width: 290px;
         height: calc(100vh - 59px);
+        width: 293px;
       }
 
       #sidebar .card .header {
         height: 59px;
         background-color: var(--nuxeo-light-background);
-        border-bottom: var(--nuxeo-border);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
@@ -139,9 +139,9 @@ Contributors:
 
       .side-nav paper-icon-button {
         color: var(--nuxeo-sidebar-actions);
-        height: 50px;
-        padding: 14px;
-        width: 60px;
+        height: 48px;
+        padding: 14px 13px;
+        width: 56px;
       }
 
       .side-nav .iron-selected,
@@ -167,6 +167,8 @@ Contributors:
         position: fixed;
         left: 0;
         height: 59px;
+        background-color: var(--nuxeo-sidebar-background);
+        box-shadow: -2px -2px 1px rgba(0,0,0,0.1);
       }
 
       paper-card {
@@ -510,7 +512,7 @@ Contributors:
 
           drawerWidth: {
             type: String,
-            value: '60px'
+            value: '56px'
           },
 
           drawerOpened: {
@@ -681,7 +683,7 @@ Contributors:
 
         _toggleDrawer: function(e) {
           if (this._selected === e.detail.selected && this.drawerOpened) {
-            this.drawerWidth = '60px';
+            this.drawerWidth = '56px';
             this.drawerOpened = false;
           } else {
             this.drawerWidth = '350px';
