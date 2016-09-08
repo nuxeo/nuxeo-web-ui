@@ -44,19 +44,20 @@ Contributors:
     .list-item {
       cursor: pointer;
       padding: 1em;
-      border-bottom: 1px solid #DDD;
+      border-bottom: var(--nuxeo-border);
+      background-color: #fff;
     }
     .list-item:focus,
     .list-item.selected:focus {
       outline: 0;
-      background-color: #ddd;
+      background-color: var(--nuxeo-container-hover);
     }
     .list-item.selected {
       color: var(--paper-blue-600);
     }
     .list-item.selected {
-      background-color: var(--google-grey-300);
-      border-bottom: 1px solid #ccc;
+      background-color: var(--nuxeo-container-hover);
+      border-bottom: var(--nuxeo-border);
     }
 
     .collections {
