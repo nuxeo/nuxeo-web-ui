@@ -52,7 +52,13 @@
       }
 
       paper-header-panel .content {
-        padding: 2.5em 3em;
+        padding: 2.5em 2em;
+      }
+
+      @media (max-width: 1024px) {
+        paper-header-panel .content {
+          padding: 2em .5em;
+        }
       }
 
       paper-header-panel#mainContainer {
@@ -99,7 +105,7 @@
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         font-size: 1.05em;
         font-weight: 600;
-        padding: 0 5.1em 0 1.7em;
+        padding: 0 4.3em 0 1.7em;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }

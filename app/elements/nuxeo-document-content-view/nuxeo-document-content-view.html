@@ -33,7 +33,13 @@ Contributors:
       .main {
         @apply(--layout-vertical);
         @apply(--layout-fit);
-        padding: 32px;
+        padding: 1.5em 2em 0;
+      }
+
+      @media (max-width: 1024px) {
+        .main {
+          padding: 1.5em .5em;
+        }
       }
 
       .toolbar {
@@ -83,8 +89,12 @@ Contributors:
         height: 4em;
       }
 
-      nuxeo-data-table, nuxeo-data-grid {
-        min-height: calc(100vh - 10em);
+      nuxeo-data-table {
+        min-height: calc(100vh - 9.3em);
+      }
+
+      nuxeo-data-grid {
+        min-height: calc(100vh - 8em);
       }
 
       nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,
