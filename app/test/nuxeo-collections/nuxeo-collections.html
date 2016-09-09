@@ -65,7 +65,7 @@ Contributors:
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&searchTerm=%25&sortBy=dc%3Amodified&sortOrder=desc&user=%24currentUser',
+            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -89,7 +89,7 @@ Contributors:
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&searchTerm=%25&sortBy=dc%3Amodified&sortOrder=desc&user=%24currentUser',
+            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
