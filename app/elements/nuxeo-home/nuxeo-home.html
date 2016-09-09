@@ -31,6 +31,13 @@ Contributors:
         height: 100vh;
       }
 
+      .flex-layout {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
       .title {
         color: var(--nuxeo-title-color);
         font-size: 1.2rem;
@@ -45,16 +52,16 @@ Contributors:
         margin-right: .4rem;
       }
 
-      paper-card {
-        @apply(--paper-card);
+      paper-card.card {
+        min-width: 25em;
+        width: 49%;
+        margin: 0 0 2em;
       }
 
-      paper-card.card {
-        margin: 0 22px 22px 0;
-        min-width: 560px;
-        width: calc(49.8% - 22px);
-        height: auto;
-        border: var(--nuxeo-border);
+      @media (max-width: 1024px) {
+        paper-card.card {
+          width: 100%;
+        }
       }
 
       nuxeo-task-widget {
@@ -73,7 +80,7 @@ Contributors:
         <span class="flex">[[i18n(selectedLabel)]]</span>
       </div>
       <div class="content">
-        <section name="dashboard">
+        <section name="dashboard" class="flex-layout">
           <paper-card class="card">
             <div class="card-content vertical layout">
               <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('ui.home.latestDocumentsEdited', 'Recently Edited')]]</span>
