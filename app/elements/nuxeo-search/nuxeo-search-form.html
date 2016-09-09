@@ -33,11 +33,13 @@ Contributors:
       @apply(--layout-flex);
       display: block;
     }
-    #scrollTheshold {
-      /* scrollTheshold has to have
-         an explicit height else infinite
-         scrolling breaks */
+    nuxeo-data-list {
       height: calc(100vh - 61px);
+    }
+
+    nuxeo-data-list {
+      display: block;
+      position: relative;
     }
 
     .filters {
@@ -144,8 +146,7 @@ Contributors:
        current-page="{{currentPage}}"
        is-next-page-available="{{isNextPageAvailable}}"
        current-page-size="{{currentPageSize}}"
-       params="[[params]]"
-       on-update="_updateSearchResults">
+       params="[[params]]">
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
@@ -189,45 +190,33 @@ Contributors:
             [[i18n('ui.searchForm.Reset', 'Reset')]]
           </paper-button>
         </div>
+        <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
       </div>
 
       <div id="queue" hidden$="{{!_isQueue}}">
-        <iron-scroll-threshold id="scrollTheshold"
-          lower-threshold="800" hidden$="[[!hasResults]]"
-          on-lower-threshold="_loadMoreData">
-          <iron-list id="itemsList" items="[[docItems]]"
-            class="loadable"
-            selected-item="{{selectedDocument}}"
-            selection-enabled
-            scroll-target="scrollTheshold">
-            <template>
-              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                <div class="list-item-box vertical layout">
-                  <div class="list-item-info horizontal layout center">
-                    <div class="vertical layout center">
-                      <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                    </div>
-                    <span class="list-item-title ellipsis">[[item.title]]</span>
+        <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}">
+          <template>
+            <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+              <div class="list-item-box vertical layout">
+                <div class="list-item-info horizontal layout center">
+                  <div class="vertical layout center">
+                    <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                   </div>
-                  <div class="list-item-detail">
-                    <div class="layout center">
-                      <span class="list-item-property ellipsis">
-                        [[item.type]]
-                      </span>
-                    </div>
+                  <span class="list-item-title ellipsis">[[item.title]]</span>
+                </div>
+                <div class="list-item-detail">
+                  <div class="layout center">
+                    <span class="list-item-property ellipsis">
+                      [[item.type]]
+                    </span>
                   </div>
                 </div>
               </div>
-            </template>
-          </iron-list>
-        </iron-scroll-threshold>
-        <div hidden$="[[hasResults]]" class="noResult">
-          <span class="empty">[[i18n('ui.searchForm.noResult', 'No result found')]]</span>
-        </div>
+            </div>
+          </template>
+        </nuxeo-data-list>
       </div>
     </div>
-
-    <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
 
     <paper-dialog id="saveDialog" with-backdrop>
       <div class="vertical layout">
@@ -357,7 +346,8 @@ Contributors:
             type: Boolean,
             notify: true,
             reflectToAttribute: true,
-            value: false
+            value: false,
+            observer: '_observeLoading'
           },
           searchName: String,
           aggregations: {
@@ -367,59 +357,34 @@ Contributors:
         },
 
         observers: [
-          '_resetResults(provider, params.*)',
-          '_paramsChanged(params.*)'
+         '_resetResults(provider, params.*)',
+         '_paramsChanged(params.*)'
         ],
 
         get nxProvider() {
           return this.$.provider;
         },
 
-        _updateSearchResults: function() {
-          if (this.$.provider.page === 1) {
-            this.docItems = [];
-          }
-          var docs = this.$.provider.currentPage;
-          docs.forEach(function(doc) {
-            this.push('docItems', doc);
-          }.bind(this));
-          this.$.itemsList.fire('iron-resize');
-          this.hasResults = !(this.docItems && this.docItems.length === 0);
-          this.$.scrollTheshold.clearTriggers();
-          this.loading = false;
-        },
-
-        _resetResults: function() {
-          this.$.provider.page = 1;
-          this.$.provider.pageSize = 40;
-          this.docItems = [];
-          this.selectedDocument = null;
-          this._isQueue = false;
-          this.$.itemsList.fire('iron-resize');
-          this.$.scrollTheshold.clearTriggers();
-          this.loading = true;
-        },
-
         displayQueue: function(doc, index) {
           this._isQueue = true;
           if (doc && doc.uid) {
-            this.$.itemsList.selectItem(doc);
-            this.$.itemsList.scrollToIndex(Math.max(0, index - 5));
+            this.$.list.$.list.selectItem(doc);
+            this.$.list.$.list.scrollToIndex(Math.max(0, index - 5));
+            this.$.list.notifyResize();
           }
+        },
+
+        _resetResults: function() {
+          this.$.list._resetResults();
+        },
+
+        _observeLoading: function() {
+          console.log('_observeLoading');
         },
 
         displayFilters: function() {
           this._isQueue = false;
           this.fire('display-filters');
-        },
-
-        _loadMoreData: function() {
-          if (this.$.provider) {
-            if (this.$.provider.isNextPageAvailable) {
-              this.$.provider.page = this.$.provider.page + 1;
-              this.loading = true;
-            }
-          }
         },
 
         _computedClass: function(isSelected) {
@@ -448,20 +413,20 @@ Contributors:
         ready: function() {
           // tmp fix
           // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.itemsList._didMoveDown = function() {
+          this.$.list.$.list._didMoveDown = function() {
             this._focusPhysicalItem(this._focusedIndex + 1);
           };
           // end tmp fix
 
-          this.$.itemsList.selectQueuePrevious = function() {
+          this.$.list.$.list.selectQueuePrevious = function() {
             this._didMoveUp();
             this.toggleSelectionForFocusedItem();
           };
-          this.$.itemsList.selectQueueNext = function() {
+          this.$.list.$.list.selectQueueNext = function() {
             this._didMoveDown();
             this.toggleSelectionForFocusedItem();
           };
-          this.$.itemsList.toggleSelectionForFocusedItem = function() {
+          this.$.list.$.list.toggleSelectionForFocusedItem = function() {
             this.debounce('toggleSelectionForFocusedItem', function() {
               var model = this._focusedItem._templateInstance;
               if (model) {
@@ -469,10 +434,10 @@ Contributors:
               }
             }.bind(this), 300);
           };
-          this.$.itemsList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
-          this.$.itemsList.addOwnKeyBinding('k', 'selectQueuePrevious');
-          this.$.itemsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
-          this.$.itemsList.addOwnKeyBinding('j', 'selectQueueNext');
+          this.$.list.$.list.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+          this.$.list.$.list.addOwnKeyBinding('k', 'selectQueuePrevious');
+          this.$.list.$.list.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+          this.$.list.$.list.addOwnKeyBinding('j', 'selectQueueNext');
 
           // dinamically insert search form
           this._updateLayout();
