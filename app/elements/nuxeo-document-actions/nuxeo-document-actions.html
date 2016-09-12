@@ -25,53 +25,22 @@ Contributors:
 <link rel="import" href="nuxeo-lock-toggle-button.html">
 <link rel="import" href="nuxeo-preview-button.html">
 <link rel="import" href="nuxeo-export-button.html">
-<link rel="import" href="nuxeo-drive-sync-toggle-button.html">
 <link rel="import" href="nuxeo-download-button.html">
 <link rel="import" href="nuxeo-create-version-button.html">
 <link rel="import" href="nuxeo-download-button.html">
 
-<!--
-`nuxeo-document-actions`
-@group Nuxeo UI
-@element nuxeo-document-actions
--->
-<dom-module id="nuxeo-document-actions">
+
+<nuxeo-slot-content name="defaultDocumentActions" slot="DOCUMENT_ACTIONS">
   <template>
-    <style>
-      :host {
-        color: var(--nuxeo-header-actions);
-        margin: 0 0 0 1em;
-      }
-
-      ::content paper-icon-button {
-        width: 2.25rem;
-        color: var(--nuxeo-header-actions);
-      }
-
-      ::content paper-icon-button:hover {
-        color: var(--nuxeo-header-actions-hover);
-      }
-    </style>
-
-    <nuxeo-add-to-collection-button document="[[context.document]]"></nuxeo-add-to-collection-button>
-    <nuxeo-favorites-toggle-button document="[[context.document]]"></nuxeo-favorites-toggle-button>
-    <nuxeo-share-button document="[[context.document]]"></nuxeo-share-button>
-    <nuxeo-notifications-toggle-button document="[[context.document]]"></nuxeo-notifications-toggle-button>
-    <nuxeo-clipboard-toggle-button document="[[context.document]]" clipboard="[[context.clipboard]]"></nuxeo-clipboard-toggle-button>
-    <nuxeo-lock-toggle-button document="[[context.document]]"></nuxeo-lock-toggle-button>
-    <nuxeo-preview-button document="[[context.document]]"></nuxeo-preview-button>
-    <nuxeo-export-button document="[[context.document]]"></nuxeo-export-button>
-    <nuxeo-drive-sync-toggle-button document="[[context.document]]"></nuxeo-drive-sync-toggle-button>
-    <nuxeo-create-version-button document="[[context.document]]"></nuxeo-create-version-button>
-    <nuxeo-download-button document="[[context.document]]"></nuxeo-download-button>
-
+    <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
+    <nuxeo-favorites-toggle-button document="[[document]]"></nuxeo-favorites-toggle-button>
+    <nuxeo-share-button document="[[document]]"></nuxeo-share-button>
+    <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
+    <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
+    <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+    <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
+    <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
+    <nuxeo-create-version-button document="[[document]]"></nuxeo-create-version-button>
+    <nuxeo-download-button document="[[document]]"></nuxeo-download-button>
   </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-document-actions',
-      properties: {
-        context: Object
-      }
-    });
-  </script>
-</dom-module>
+</nuxeo-slot-content>

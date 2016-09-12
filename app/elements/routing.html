@@ -92,29 +92,13 @@ Contributors:
       page.redirect('/admin/user-group-management/group/' + data.params.id);
     });
 
-    page('/search', function() {
-      app.page = 'search';
-    });
-
-    page('/assets', function() {
-      app.page = 'assets';
-    });
-
-    page('/collection', function() {
-      app.page = 'collection';
-    });
-
     page('/tasks', function() {
       app.page = 'tasks';
       app.currentTask = null;
     });
 
-    page('/drive', function() {
-      app.page = 'drive';
-    });
-
-    page('/themes', function() {
-      app.page = 'themes';
+    page('/:page', function(ctx) {
+      app.page = ctx.params.page;
     });
 
     // add #! before urls
@@ -154,8 +138,8 @@ Contributors:
           return page.url('/group/' + name);
         },
 
-        drive: function() {
-          return page.url('/drive');
+        page: function(name) {
+          return page.url('/' + name);
         },
 
         themes: function() {

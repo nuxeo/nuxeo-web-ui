@@ -85,8 +85,9 @@ Contributors:
           </p>
         </template>
         <div class="horizontal flex end-justified layout">
-          <nuxeo-blob-actions document="[[document]]"
-            blob="[[document.properties.file:content]]"></nuxeo-blob-actions>
+
+          <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
           <nuxeo-delete-blob-button hidden="[[!document.properties.file:content]]"
                                     document="{{document}}"></nuxeo-delete-blob-button>
           <nuxeo-upload-blob-button document="{{document}}"
@@ -109,9 +110,19 @@ Contributors:
         properties: {
           document: {
             type: Object,
-            notify: true
+            notify: true,
+            observer: '_updateActionContext'
+          },
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(document)'
           }
         },
+
+        _actionContext: function() {
+          return {document: this.document};
+        },
+
         _formatSize: function(size) {
           if (!size) {
             return '';

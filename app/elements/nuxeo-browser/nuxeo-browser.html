@@ -105,6 +105,21 @@ Contributors:
         display: block;
       }
 
+      .document-actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+        color: var(--nuxeo-header-actions);
+        margin: 0 0 0 1em;
+      }
+
+      .document-actions::content paper-icon-button {
+        width: 2.25rem;
+        color: var(--nuxeo-header-actions);
+      }
+
+      .document-actions::content paper-icon-button:hover {
+        color: var(--nuxeo-header-actions-hover);
+      }
     </style>
 
     <!-- Main content -->
@@ -127,11 +142,15 @@ Contributors:
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
+
+              <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS"></nuxeo-slot>
+
             </paper-menu>
           </paper-dropdown-menu>
 
-          <nuxeo-document-actions class="horizontal layout end-justified"
-            context="[[actionContext]]"></nuxeo-document-actions>
+          <div class="document-actions">
+            <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </div>
 
         </paper-toolbar>
       </div>
@@ -176,6 +195,9 @@ Contributors:
           <section name="permissions">
             <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
           </section>
+
+          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES"></nuxeo-slot>
+
         </iron-pages>
       </div>
     </paper-header-panel>
@@ -202,11 +224,12 @@ Contributors:
             type: Object,
             notify: true
           },
+          clipboard: {
+            type: Object
+          },
           actionContext: {
             type: Object,
-            value: function() {
-              return {};
-            }
+            computed: '_actionContext(document)'
           }
         },
 
@@ -220,7 +243,6 @@ Contributors:
         },
 
         observers: [
-          '_updateActionContext(document)',
           '_updateCvParams(document)'
         ],
 
@@ -237,14 +259,6 @@ Contributors:
           location.href = this.document.properties['file:content'].data;
         },
 
-        set clipboard(clipboard) {
-          this.set('actionContext.clipboard', clipboard);
-        },
-
-        get clipboard() {
-          return this.actionContext.clipboard;
-        },
-
         get _enrichers() {
           if (this.document) {
             return this.document.contextParameters;
@@ -255,8 +269,8 @@ Contributors:
           return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
         },
 
-        _updateActionContext: function() {
-          this.set('actionContext.document', this.document);
+        _actionContext: function() {
+          return {document: this.document, clipboard: this.clipboard};
         },
 
         _canDownload: function(document) {

@@ -84,12 +84,12 @@ Contributors:
         font-weight: 500;
       }
 
-      #sidebar .item {
+      #sidebar::content .item {
         border-bottom: var(--nuxeo-border);
         display: block;
       }
 
-      #sidebar .item a {
+      #sidebar::content .item a {
         margin-bottom: 0;
         padding: 1em;
         display: block;
@@ -171,14 +171,13 @@ Contributors:
         box-shadow: -2px -2px 1px rgba(0,0,0,0.1);
       }
 
-      paper-card {
+      ::content paper-card {
         margin: 0 22px 22px 0;
         min-width: 22em;
         width: 100%;
-        height: 100%;
       }
 
-      paper-card .title {
+      ::content paper-card .title {
         color: var(--nuxeo-header-title-color);
         font-size: 1.2rem;
         margin: 0 0 .4em;
@@ -348,10 +347,10 @@ Contributors:
                 <div class="header ellipsis">
                   <h1>[[_displayUser(currentUser)]]</h1>
                 </div>
-                <div class="content">
-                  <div class="item">
-                    <a href$="[[urlFor('drive')]]">[[i18n('ui.app.user.drive','Drive')]]</a>
-                  </div>
+                <div class="content userMenu">
+
+                  <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
+
                   <div class="item">
                     <a href$="[[urlFor('themes')]]">[[i18n('ui.app.user.themes','Themes')]]</a>
                   </div>
@@ -398,33 +397,6 @@ Contributors:
               <nuxeo-tasks id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
             </div>
 
-            <!-- Nuxeo Drive page -->
-            <paper-header-panel class="flex" name="drive">
-              <div class="paper-header layout horizontal">
-                <span class="flex">[[i18n('ui.app.drive.heading','Nuxeo Drive')]]</span>
-              </div>
-              <div class="content">
-                <paper-card class="card" elevation="0">
-                  <div class="card-content">
-                    <div class="title">[[i18n('ui.app.drive.packages','Packages')]]</div>
-                    <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
-                  </div>
-                </paper-card>
-                <paper-card class="card" elevation="0">
-                  <div class="card-content">
-                    <div class="title">[[i18n('ui.app.drive.roots','Synchronization Roots')]]</div>
-                    <nuxeo-drive-sync-roots-management></nuxeo-drive-sync-roots-management>
-                  </div>
-                </paper-card>
-                <paper-card class="card" elevation="0">
-                  <div class="card-content">
-                    <div class="title">[[i18n('ui.app.drive.tokens','Tokens')]]</div>
-                    <nuxeo-authentication-tokens-management application="Nuxeo Drive"></nuxeo-authentication-tokens-management>
-                  </div>
-                </paper-card>
-              </div>
-            </paper-header-panel>
-
             <!-- Themes -->
             <paper-header-panel class="flex" name="themes">
               <div class="paper-header layout horizontal">
@@ -434,6 +406,9 @@ Contributors:
                 <nuxeo-themes></nuxeo-themes>
               </div>
             </paper-header-panel>
+
+            <nuxeo-slot slot="PAGES"></nuxeo-slot>
+
           </iron-pages>
         </div>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
