@@ -79,7 +79,7 @@ Contributors:
           var element = fixture('collections'), collections;
           return waitChanged(element, 'collections').then(flush).then(function() {
             expect(element.collections.length).to.be.equal(1);
-            collections = Polymer.dom(element.root).querySelector('nuxeo-data-list').querySelectorAll('.collection-box');
+            collections = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.collection-box');
             expect(collections.length).to.be.equal(1);
             expect(collections[0].querySelector('.collection-name').textContent).to.be.equal('My Collection');
           });
@@ -104,8 +104,9 @@ Contributors:
           element.collections = [];
           element.$.collectionsProvider.fetch();
           return flush().then(function() {
+            debugger
             expect(element.collections.length).to.be.equal(0);
-            var placeholder = Polymer.dom(element.root).querySelector('nuxeo-data-list').querySelector('.emptyResult');
+            var placeholder = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelector('.emptyResult');
             expect(isHidden(placeholder)).to.be.false;
           });
         });
