@@ -35,29 +35,13 @@ Contributors:
       @apply(--layout-flex);
       display: block;
     }
-    .scrollThreshold {
-      /* scrollThreshold has to have
-         an explicit height else infinite
-         scrolling breaks */
+    nuxeo-data-list {
       height: calc(100vh - 61px);
     }
-    .list-item {
-      cursor: pointer;
-      padding: 1em;
-      border-bottom: var(--nuxeo-border);
-      background-color: #fff;
-    }
-    .list-item:focus,
-    .list-item.selected:focus {
-      outline: 0;
-      background-color: var(--nuxeo-container-hover);
-    }
-    .list-item.selected {
-      color: var(--paper-blue-600);
-    }
-    .list-item.selected {
-      background-color: var(--nuxeo-container-hover);
-      border-bottom: var(--nuxeo-border);
+
+    nuxeo-data-list {
+      display: block;
+      position: relative;
     }
 
     .collections {
@@ -205,41 +189,35 @@ Contributors:
                sort='{"dc:modified":"desc"}'
                on-update="_updateCollectionResults">
             </nuxeo-page-provider>
-            <iron-scroll-threshold id="collectionsScrollThreshold"
-              lower-threshold="800" hidden$="[[!hasCollection]]"
-              class="scrollThreshold"
-              on-lower-threshold="_loadMoreCollections">
-              <iron-list id="collectionsList" items="[[collections]]"
-                selected-item="{{selectedCollection}}"
-                selection-enabled class="loadable"
-                scroll-target="collectionsScrollThreshold" as="collection">
-                <template>
-                  <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                    <div class="collection-box vertical layout">
-                      <div class="collection-info horizontal layout center">
-                        <div class="vertical layout center">
-                          <iron-icon class="collection-name-icon" icon="icons:book"></iron-icon>
-                        </div>
-                        <span class="collection-name">[[collection.title]]</span>
+
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
+              selected-item="{{selectedCollection}}"
+              selection-enabled as="collection"
+              empty-label="[[i18n('label.collections.empty', 'There is no collection to display.')]]"
+              empty-label-when-filtered="[[i18n('label.collections.empty', 'There is no collection to display.')]]">
+              <template>
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                  <div class="collection-box vertical layout">
+                    <div class="collection-info horizontal layout center">
+                      <div class="vertical layout center">
+                        <iron-icon class="collection-name-icon" icon="icons:book"></iron-icon>
                       </div>
-                      <div class="collection-detail">
-                        <div class="date horizontal layout center">
-                          <span class="collection-property">[[i18n('label.collections.lastUpdated', 'Last Modified')]] </span>
-                          <span>[[_formatDate(collection.properties.dc:modified)]]</span>
-                        </div>
-                        <div class="layout center">
-                          <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]]</span>
-                          <span class="owner">[[collection.properties.dc:creator]]</span>
-                        </div>
+                      <span class="collection-name">[[collection.title]]</span>
+                    </div>
+                    <div class="collection-detail">
+                      <div class="date horizontal layout center">
+                        <span class="collection-property">[[i18n('label.collections.lastUpdated', 'Last Modified')]] </span>
+                        <span>[[_formatDate(collection.properties.dc:modified)]]</span>
+                      </div>
+                      <div class="layout center">
+                        <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]]</span>
+                        <span class="owner">[[collection.properties.dc:creator]]</span>
                       </div>
                     </div>
                   </div>
-                </template>
-              </iron-list>
-            </iron-scroll-threshold>
-            <div hidden$="[[hasCollection]]">
-              <span class="empty">[[i18n('label.collections.empty', 'There is no collection to display.')]]</span>
-            </div>
+                </div>
+              </template>
+            </nuxeo-data-list>
           </div>
 
         </neon-animatable>
@@ -254,43 +232,35 @@ Contributors:
                current-page-size="{{currentPageSize}}"
                on-update="_updateMemberResults">
             </nuxeo-page-provider>
-            <iron-scroll-threshold id="membersScrollThreshold"
-              class="scrollThreshold"
-              lower-threshold="800" hidden$="[[!hasMember]]"
-              on-lower-threshold="_loadMoreMembers">
-              <iron-list id="membersList" items="[[members]]"
-                class="loadable"
-                selected-item="{{selectedMember}}"
-                selection-enabled
-                scroll-target="membersScrollThreshold"
-                as="member">
-                <template>
-                  <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                    <div class="list-item-box vertical layout">
-                      <div class="list-item-info horizontal layout center">
-                        <div class="vertical layout center">
-                          <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
-                        </div>
-                        <span class="list-item-title ellipsis">[[member.title]]</span>
+
+            <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
+              selected-item="{{selectedMember}}"
+              selection-enabled as="member"
+              empty-label="[[i18n('label.collections.emptyCollection', 'Empty collection')]]"
+              empty-label-when-filtered="[[i18n('label.collections.emptyCollection', 'Empty collection')]]">
+              <template>
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                  <div class="list-item-box vertical layout">
+                    <div class="list-item-info horizontal layout center">
+                      <div class="vertical layout center">
+                        <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
                       </div>
-                      <div class="list-item-detail">
-                        <div class="layout center">
-                          <span class="list-item-property ellipsis">
-                            [[member.type]]
-                            <iron-icon  id="removeFromCollection" class="remove"
-                              icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
-                            </iron-icon>
-                          </span>
-                        </div>
+                      <span class="list-item-title ellipsis">[[member.title]]</span>
+                    </div>
+                    <div class="list-item-detail">
+                      <div class="layout center">
+                        <span class="list-item-property ellipsis">
+                          [[member.type]]
+                          <iron-icon  id="removeFromCollection" class="remove"
+                            icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
+                          </iron-icon>
+                        </span>
                       </div>
                     </div>
                   </div>
-                </template>
-              </iron-list>
-            </iron-scroll-threshold>
-            <div hidden$="[[hasMember]]">
-              <span class="empty">[[i18n('label.collections.emptyCollection', 'Empty collection')]]</span>
-            </div>
+                </div>
+              </template>
+            </nuxeo-data-list>
           </div>
 
         </neon-animatable>
@@ -392,7 +362,6 @@ Contributors:
           if (!this._isDisplayMembers) {
             if (this.selectedCollection) {
               this.displayMembers();
-              this.$.membersScrollThreshold.clearTriggers();
               this.$.membersList.fire('iron-resize');
               if (this.hasMember) {
                 this.$.membersList.selectItem(0);
@@ -405,7 +374,6 @@ Contributors:
         _navigateOnLeft: function() {
           if (this._isDisplayMembers) {
             this.displayCollections();
-            this.$.collectionsScrollThreshold.clearTriggers();
             this.$.collectionsList.fire('iron-resize');
           }
           this._tmpJustLeft = true;
@@ -414,12 +382,12 @@ Contributors:
         _navigateOnDown: function() {
           if (this._isDisplayMembers) {
             if (this._tmpJustRight) {
-              this.$.membersList.selectQueueNext();
+              this.$.membersList.selectNext();
               this._tmpJustRight = false;
             }
           } else {
             if (this._tmpJustLeft) {
-              this.$.collectionsList.selectQueueNext();
+              this.$.collectionsList.selectNext();
               this._tmpJustLeft = false;
             }
           }
@@ -428,12 +396,12 @@ Contributors:
         _navigateOnUp: function() {
           if (this._isDisplayMembers) {
             if (this._tmpJustRight) {
-              this.$.membersList.selectQueuePrevious();
+              this.$.membersList.selectPrevious();
               this._tmpJustRight = false;
             }
           } else {
             if (this._tmpJustLeft) {
-              this.$.collectionsList.selectQueuePrevious();
+              this.$.collectionsList.selectPrevious();
               this._tmpJustLeft = false;
             }
           }
@@ -461,7 +429,6 @@ Contributors:
           }.bind(this));
           this.$.collectionsList.fire('iron-resize');
           this.hasCollection = !(this.collections && this.collections.length === 0);
-          this.$.collectionsScrollThreshold.clearTriggers();
           this.loading = false;
         },
 
@@ -472,7 +439,6 @@ Contributors:
           this.selectedCollection = null;
           this.displayCollections();
           this.$.collectionsList.fire('iron-resize');
-          this.$.collectionsScrollThreshold.clearTriggers();
           this.loading = true;
         },
 
@@ -486,7 +452,6 @@ Contributors:
           }.bind(this));
           this.$.membersList.fire('iron-resize');
           this.hasMember = !(this.members && this.members.length === 0);
-          this.$.membersScrollThreshold.clearTriggers();
           this.loading = false;
         },
 
@@ -497,7 +462,6 @@ Contributors:
           this.selectedMember = null;
           this.displayCollections();
           this.$.membersList.fire('iron-resize');
-          this.$.membersScrollThreshold.clearTriggers();
           this.fire('resetCollectionResults');
           this.loading = true;
         },
@@ -631,57 +595,6 @@ Contributors:
             }
           }.bind(this));
 
-          // tmp fix
-          // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.collectionsList._didMoveDown = function() {
-            this._focusPhysicalItem(this._focusedIndex + 1);
-          };
-          this.$.membersList._didMoveDown = function() {
-            this._focusPhysicalItem(this._focusedIndex + 1);
-          };
-          // end tmp fix
-
-          this.$.collectionsList.selectQueuePrevious = function() {
-            this._didMoveUp();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.collectionsList.selectQueueNext = function() {
-            this._didMoveDown();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.collectionsList.toggleSelectionForFocusedItem = function() {
-            this.debounce('toggleSelectionForFocusedItem', function() {
-              var model = this._focusedItem._templateInstance;
-              if (model) {
-                this.toggleSelectionForItem(model[this.as]);
-              }
-            }.bind(this), 300);
-          };
-          this.$.collectionsList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
-          this.$.collectionsList.addOwnKeyBinding('k', 'selectQueuePrevious');
-          this.$.collectionsList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
-          this.$.collectionsList.addOwnKeyBinding('j', 'selectQueueNext');
-
-          this.$.membersList.selectQueuePrevious = function() {
-            this._didMoveUp();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.membersList.selectQueueNext = function() {
-            this._didMoveDown();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.membersList.toggleSelectionForFocusedItem = function() {
-            this.debounce('toggleSelectionForFocusedItem', function() {
-              var model = this._focusedItem._templateInstance;
-              if (model) {
-                this.toggleSelectionForItem(model[this.as]);
-              }
-            }.bind(this), 300);
-          };
-          this.$.membersList.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
-          this.$.membersList.addOwnKeyBinding('k', 'selectQueuePrevious');
-          this.$.membersList.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
-          this.$.membersList.addOwnKeyBinding('j', 'selectQueueNext');
         },
 
         _formatDate: function(date) {
