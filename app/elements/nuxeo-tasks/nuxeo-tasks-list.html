@@ -87,13 +87,23 @@ Contributors:
       .item.selected {
         background-color: var(--google-grey-300);
       }
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        height: calc(100vh - 150px);
+      }
     </style>
 
     <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
       <span class="empty">[[i18n('ui.tasksList.noTasks', "You don't currently have any tasks.")]]</span>
     </div>
     <div hidden$="[[_hidden(tasks)]]">
-      <iron-list id="list" items="[[tasks]]" as="task" selection-enabled selected-item="{{_selection}}">
+
+
+      <nuxeo-data-list items="[[tasks]]" id="list" as="task"
+        selected-item="{{_selection}}"
+        selection-enabled>
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
             <div class="task-box vertical layout">
@@ -116,7 +126,7 @@ Contributors:
             </div>
           </div>
         </template>
-      </iron-list>
+      </nuxeo-data-list>
     </div>
   </template>
   <script>
@@ -141,36 +151,6 @@ Contributors:
         },
 
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-        ready: function() {
-          // tmp fix
-          // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.list._didMoveDown = function() {
-            this._focusPhysicalItem(this._focusedIndex + 1);
-          };
-          // end tmp fix
-
-          this.$.list.selectQueuePrevious = function() {
-            this._didMoveUp();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.list.selectQueueNext = function() {
-            this._didMoveDown();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.list.toggleSelectionForFocusedItem = function() {
-            this.debounce('toggleSelectionForFocusedItem', function() {
-              var model = this._focusedItem._templateInstance;
-              if (model) {
-                this.toggleSelectionForItem(model[this.as]);
-              }
-            }.bind(this), 300);
-          };
-          this.$.list.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
-          this.$.list.addOwnKeyBinding('k', 'selectQueuePrevious');
-          this.$.list.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
-          this.$.list.addOwnKeyBinding('j', 'selectQueueNext');
-        },
 
         _selectionChanged: function() {
           if (this._selection) {
