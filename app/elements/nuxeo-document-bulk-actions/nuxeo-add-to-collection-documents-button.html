@@ -165,7 +165,7 @@ Contributors:
       behaviors: [Nuxeo.I18nBehavior],
 
       _isAvailable: function() {
-        if (this.documents, this.documents.length > 0) {
+        if (this.documents && this.documents.length > 0) {
           return this.documents.every(function(doc) {
             return doc.facets.indexOf('NotCollectionMember') === -1;
           });

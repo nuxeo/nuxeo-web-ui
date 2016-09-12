@@ -194,7 +194,9 @@ Contributors:
       </div>
 
       <div id="queue" hidden$="{{!_isQueue}}">
-        <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}">
+        <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
+          selected-item="{{selectedDocument}}"
+          selection-enabled>
           <template>
             <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
               <div class="list-item-box vertical layout">
@@ -346,8 +348,7 @@ Contributors:
             type: Boolean,
             notify: true,
             reflectToAttribute: true,
-            value: false,
-            observer: '_observeLoading'
+            value: false
           },
           searchName: String,
           aggregations: {
@@ -376,10 +377,6 @@ Contributors:
 
         _resetResults: function() {
           this.$.list._resetResults();
-        },
-
-        _observeLoading: function() {
-          console.log('_observeLoading');
         },
 
         displayFilters: function() {
@@ -411,34 +408,6 @@ Contributors:
         },
 
         ready: function() {
-          // tmp fix
-          // see https://github.com/PolymerElements/iron-list/issues/236
-          this.$.list.$.list._didMoveDown = function() {
-            this._focusPhysicalItem(this._focusedIndex + 1);
-          };
-          // end tmp fix
-
-          this.$.list.$.list.selectQueuePrevious = function() {
-            this._didMoveUp();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.list.$.list.selectQueueNext = function() {
-            this._didMoveDown();
-            this.toggleSelectionForFocusedItem();
-          };
-          this.$.list.$.list.toggleSelectionForFocusedItem = function() {
-            this.debounce('toggleSelectionForFocusedItem', function() {
-              var model = this._focusedItem._templateInstance;
-              if (model) {
-                this.toggleSelectionForItem(model[this.as]);
-              }
-            }.bind(this), 300);
-          };
-          this.$.list.$.list.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
-          this.$.list.$.list.addOwnKeyBinding('k', 'selectQueuePrevious');
-          this.$.list.$.list.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
-          this.$.list.$.list.addOwnKeyBinding('j', 'selectQueueNext');
-
           // dinamically insert search form
           this._updateLayout();
         },
@@ -617,6 +586,7 @@ Contributors:
             }
           }.bind(this));
         }
+
       });
     })();
   </script>
