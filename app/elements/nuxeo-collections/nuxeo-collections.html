@@ -146,17 +146,6 @@ Contributors:
       line-height: initial;
     }
 
-    :host[loading] .loadable {
-      opacity: 0.25;
-    }
-
-    :host[loading] paper-spinner-lite {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      --paper-spinner-color: var(--default-primary-color);
-    }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -189,7 +178,7 @@ Contributors:
                sort='{"dc:modified":"desc"}'>
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList"
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
               selected-item="{{selectedCollection}}"
               selection-enabled as="collection"
               empty-label="[[i18n('label.collections.empty', 'There is no collection to display.')]]"
@@ -231,7 +220,7 @@ Contributors:
                current-page-size="{{currentPageSize}}">
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="memberProvider" id="membersList"
+            <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
               selected-item="{{selectedMember}}"
               selection-enabled as="member"
               empty-label="[[i18n('label.collections.emptyCollection', 'Empty collection')]]"
