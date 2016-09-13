@@ -186,11 +186,10 @@ Contributors:
                provider="user_collections"
                page-size="40"
                params='{"searchTerm":"%","user":"$currentUser"}'
-               sort='{"dc:modified":"desc"}'
-               on-update="_updateCollectionResults">
+               sort='{"dc:modified":"desc"}'>
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList"
               selected-item="{{selectedCollection}}"
               selection-enabled as="collection"
               empty-label="[[i18n('label.collections.empty', 'There is no collection to display.')]]"
@@ -229,11 +228,10 @@ Contributors:
                provider="default_content_collection"
                enrichers="thumbnail"
                is-next-page-available="{{isNextPageAvailable}}"
-               current-page-size="{{currentPageSize}}"
-               on-update="_updateMemberResults">
+               current-page-size="{{currentPageSize}}">
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
+            <nuxeo-data-list nx-provider="memberProvider" id="membersList"
               selected-item="{{selectedMember}}"
               selection-enabled as="member"
               empty-label="[[i18n('label.collections.emptyCollection', 'Empty collection')]]"
@@ -265,7 +263,6 @@ Contributors:
 
         </neon-animatable>
       </neon-animated-pages>
-      <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
 
   </template>
   <script>
@@ -419,51 +416,8 @@ Contributors:
           }
         },
 
-        _updateCollectionResults: function() {
-          if (this.$.collectionsProvider.page === 1) {
-            this.collections = [];
-          }
-          var collections = this.$.collectionsProvider.currentPage;
-          collections.forEach(function(collection) {
-            this.push('collections', collection);
-          }.bind(this));
-          this.$.collectionsList.fire('iron-resize');
-          this.hasCollection = !(this.collections && this.collections.length === 0);
-          this.loading = false;
-        },
-
-        _resetCollectionResults: function() {
-          this.$.collectionsProvider.page = 1;
-          this.$.collectionsProvider.pageSize = 40;
-          this.collections = [];
-          this.selectedCollection = null;
-          this.displayCollections();
-          this.$.collectionsList.fire('iron-resize');
-          this.loading = true;
-        },
-
-        _updateMemberResults: function() {
-          if (this.$.memberProvider.page === 1) {
-            this.members = [];
-          }
-          var memberResults = this.$.memberProvider.currentPage;
-          memberResults.forEach(function(member) {
-            this.push('members', member);
-          }.bind(this));
-          this.$.membersList.fire('iron-resize');
-          this.hasMember = !(this.members && this.members.length === 0);
-          this.loading = false;
-        },
-
         _resetMemberResults: function() {
-          this.$.memberProvider.page = 1;
-          this.$.memberProvider.pageSize = 40;
-          this.members = [];
-          this.selectedMember = null;
-          this.displayCollections();
-          this.$.membersList.fire('iron-resize');
-          this.fire('resetCollectionResults');
-          this.loading = true;
+          this.$.membersList._resetResults();
         },
 
         displayMembers: function(member, index) {
@@ -479,25 +433,6 @@ Contributors:
           this.fire('browseCollection', {
             collection: this.selectedCollection,
           });
-        },
-
-        _loadMoreCollections: function() {
-          if (this.$.collectionsProvider) {
-            if (this.$.collectionsProvider.isNextPageAvailable) {
-              this.loading = true;
-              this.$.collectionsProvider.page = this.$.collectionsProvider.page + 1;
-            }
-          }
-        },
-
-        _loadMoreMembers: function() {
-          if (this.$.memberProvider) {
-            if (this.$.memberProvider.isNextPageAvailable) {
-              this.loading = true;
-              this.$.memberProvider.page = this.$.memberProvider.page + 1;
-              this.$.memberProvider.fetch();
-            }
-          }
         },
 
         _removeFromCollection: function(evt) {
