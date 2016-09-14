@@ -51,6 +51,23 @@ Contributors:
         overflow: scroll;
       }
 
+
+      #sidebar {
+        background-color: #fff;
+        overflow-y: auto;
+      }
+
+      #sidebar paper-toolbar {
+        background-color: var(--nuxeo-sidebar-background);
+        color: var(--nuxeo-sidebar-actions);
+        width: 250px;
+      }
+
+      #sidebar ::content .item:hover,
+      #sidebar ::content .list-item:hover {
+        background-color: var(--nuxeo-container-hover);
+      }
+
       #sidebar > div {
         margin-left: 56px;
       }
@@ -132,9 +149,13 @@ Contributors:
       }
 
       .side-nav {
+        position: fixed;
+        width: 56px;
+        height: calc(100% - 120px);
+        z-index: 100;
         padding: 60px 0;
         overflow: auto;
-        background-color: var(--nuxeo-sidebar-background);
+        background-color: var(--nuxeo-secondary-color);
       }
 
       .side-nav paper-icon-button {
@@ -187,6 +208,13 @@ Contributors:
 
       nuxeo-document-create-button.admin {
         display: none;
+      }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
       }
 
       .experimental {

@@ -20,20 +20,12 @@
       }
 
       /* --
-      Page Layout elements
-      -- */
-
-      .sep {
-        border-top: var(--nuxeo-border);
-      }
-
-      /* --
       Header page and Header subview
       -- */
       paper-header-panel {
         --paper-header-panel-body: {
            background-color: var(--nuxeo-page-background);
-         }
+         };
         --paper-header-panel-shadow: {
           box-shadow: none;
         };
@@ -118,19 +110,6 @@
         fill: var(--nuxeo-header-actions-hover);
       }
 
-      /* --
-      Sidebar & Right panel
-      -- */
-      #sidebar {
-        background-color: #fff;
-        overflow-y: auto;
-      }
-
-      #sidebar ::content .item:hover,
-      #sidebar ::content .list-item:hover {
-        background-color: var(--nuxeo-container-hover);
-      }
-
       nuxeo-app {
         --nuxeo-sidebar-item-theme: {
             border-bottom: var(--nuxeo-border);
@@ -139,12 +118,6 @@
             margin: 0;
             white-space: nowrap;
         }
-      }
-
-      #sidebar paper-toolbar {
-        background-color: var(--nuxeo-sidebar-background);
-        color: var(--nuxeo-sidebar-actions);
-        width: 250px;
       }
 
       /* --
@@ -177,16 +150,6 @@
       ::content .selectable-content.paper-menu  > *:focus:after,
       ::content .selectable-content.paper-menu  > *:focus:before {
         background-color: rgba(0,0,0,0.07);
-      }
-
-      /* Side nav */
-      .side-nav {
-        background-color: var(--nuxeo-secondary-color);
-        height: calc(100% - 120px);
-        position: fixed;
-        width: 56px;
-        padding-top: 0;
-        z-index: 100;
       }
 
       /* --
@@ -243,21 +206,6 @@
         position: relative;
       }
 
-      /* --
-      Text helpers
-      -- */
-      .ellipsis {
-        width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: block;
-      }
-
-      .capitalize {
-        text-transform: capitalize;
-      }
-
       ::content .focused-line.paper-input-container {
         background-color: var(--nuxeo-primary-color);
       }
@@ -285,15 +233,6 @@
 
       .tag.user:hover {
         color: var(--nuxeo-link-hover-color);
-      }
-
-      .empty {
-        color: var(--nuxeo-text-light);
-        display: block;
-        padding: 1rem 0;
-        text-align: center;
-        max-width: 28rem;
-        margin: 0 auto;
       }
 
       paper-tooltip {

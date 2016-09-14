@@ -44,6 +44,7 @@ Contributors:
       .node-name {
         display: inline;
         position: absolute;
+        text-overflow: ellipsis;
       }
 
       iron-icon {
@@ -53,6 +54,7 @@ Contributors:
       [toggle] {
         cursor: pointer;
       }
+
     </style>
 
     <nuxeo-document auto doc-path="[[rootPath]]" doc-id="[[rootId]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>

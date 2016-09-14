@@ -88,6 +88,7 @@ Contributors:
       .node-name {
         display: inline;
         position: absolute;
+        text-overflow: ellipsis;
       }
 
       iron-icon {
@@ -117,6 +118,10 @@ Contributors:
         cursor: pointer;
       }
 
+      .sep {
+        border-top: var(--nuxeo-border);
+      }
+
     </style>
 
     <paper-dialog id="parentDialog" modal no-auto-focus>
@@ -129,7 +134,7 @@ Contributors:
                 <template is="dom-if" if="[[!isLeaf]]">
                   <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
                 </template>
-                <span class="flex node-name ellipsis" select>
+                <span class="flex node-name" select>
                   <a class="parent">[[item.properties.id]]</a>
                 </span>
               </template>

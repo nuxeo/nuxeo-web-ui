@@ -102,6 +102,10 @@ Contributors:
 
       .title {
         font-size: 1.05em;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
       }
 
       .bubbleBox .actions {
@@ -146,9 +150,9 @@ Contributors:
         <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
         on-tap="handleClick">
         </iron-image>
-      <a class="title ellipsis" on-click="handleClick">
+      <a class="title" on-click="handleClick">
         <div class="dataContainer">
-          <div class="title ellipsis">[[doc.title]]</div>
+          <div class="title">[[doc.title]]</div>
           <p class="tag">[[_docType(doc)]]</p>
         </div>
       </a>
