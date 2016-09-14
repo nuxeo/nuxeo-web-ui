@@ -18,8 +18,8 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-one-drive.html">
+<link rel="import" href="nuxeo-document-creation-form.html">
+<link rel="import" href="nuxeo-document-import-form.html">
 
 <!--
 `nuxeo-document-create-popup`
@@ -30,403 +30,44 @@ Contributors:
 
   <template>
     <style is="custom-style" include="shared-styles">
-      paper-dialog {
-        height: 80vh;
+      :host {
+        --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
+        display: block;
       }
 
-      nuxeo-path-suggestion {
-        --nuxeo-path-suggestion-results: {
-           z-index: 200;
-         };
-         --paper-input-container-underline: {
-           display: none;
-         };
-         --paper-input-container-underline-focus: {
-           display: none;
-         };
-      }
-
-      .file-to-import {
-        width: calc(50% - 34px);
-        height: 45px;
-        margin: 4px 8px;
-        padding: 4px 8px;
-        background-color: white;
-        border: var(--nuxeo-border);
-        border-radius: 2px;
-      }
-
-      #createDocDialog {
-        width: 75vw;
-      }
-
-      #heading, #content {
+      #holder {
         margin: 0;
         padding: 0;
+        height: 80vh;
+        width: 65vw;
       }
 
-      .heading {
-        padding: 16px 32px;
-        margin-right: 1em;
-        font-weight: bold;
-      }
-
-      .subheading {
-        padding: 16px 16px 16px 32px;
-        margin-right: 16px;
-        font-weight: bold;
-      }
-
-      .sidepart-right {
-        border-right: var(--nuxeo-border);
-      }
-
-      .sidepart-left {
-        border-left: var(--nuxeo-border);
-      }
-
-      .typeDropdown {
-        width: 100%;
-      }
-
-      .typeDropdownSmall {
-        width: 150px;
-      }
-
-      paper-dropdown-menu {
-        --paper-input-container-input: {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          font-size: 18px;
-          font-weight: 400;
-          text-align: left;
-          color: var(--nuxeo-link-color);
-        };
-        --paper-input-container-underline: {
-          display: none;
-        };
-        --paper-input-container-underline-focus: {
-          display: none;
-        };
-      }
-
-      ::content paper-input-container .input-content.paper-input-container {
-        flex-direction: row-reverse;
-      }
-
-      ::content paper-input-container .input-content iron-icon {
-        margin-right: .3em;
-      }
-
-      .suggestion-wrapper {
-        border: var(--nuxeo-border);
-        border-radius: 8px;
-        border-width: 2px;
-        padding: 0 8px;
-      }
-
-      .suggestion-wrapper iron-icon {
-        color: var(--nuxeo-secondary-color);
-        margin-right: 8px;
-      }
-
-      .container {
-        width: 640px;
-      }
-
-      .path {
-        border-top: var(--nuxeo-border);
-        margin-top: 0;
-        margin-bottom: 8px;
-        padding: 16px 32px 16px 32px;
-      }
-
-      .path span {
-        padding-bottom: 8px;
-      }
-
-      #dropzone {
-        margin: 16px 32px;
-        padding: 8px 8px;
-        border: 2px dashed #d1d1d1;
-        border-radius: 4px;
-        background-color: #F7F6F6;
-        min-height: 100px;
-      }
-
-      #form {
-        margin-top: 0;
-        padding: 24px 40px;
-        overflow-y: auto;
-      }
-
-      .file-to-import paper-icon-button {
-        margin-left: 1em;
-      }
-
-      .name {
-        font-size: 1.2em;
-        text-overflow: ellipsis;
-        display: block;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .size {
-        font-size: 0.8em;
-        color: gray;
-      }
-
-      .complete,
-      .uploading {
-        margin-top: 4px;
-      }
-
-      .complete {
-        color: green;
-      }
-
-      .uploading {
-        color: red;
-      }
-
-      .provider {
-        color: blue;
-      }
-
-      .dropzone-label {
-        font-weight: bold;
-        cursor: pointer;
-        margin: 16px 0 48px 0;
-      }
-
-      .dropzone-heading {
-        font-weight: bold;
-        margin: 4px 8px;
-        padding: 4px 8px;
-        width: 100%;
-      }
-
-      .doc-title {
-        color: var(--nuxeo-secondary-color);
-        font-size: 1.4em;
-      }
-
-      .remaining-docs {
-        margin-left: 16px;
-        color: var(--nuxeo-text-light);
-        font-size: 0.9em;
-      }
-
-      iron-icon.liveconnectIco {
-        --iron-icon-height: 16px;
-        --iron-icon-width: 16px;
-        margin-right: 4px;
+      .modeTab {
+        text-transform: uppercase;
       }
     </style>
-
-    <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-resource id="blobRemover"></nuxeo-resource>
-    <nuxeo-operation id="fileManagerImport" op="FileManager.Import"></nuxeo-operation>
-    <nuxeo-document id="docRequest"
-                    doc-path="[[targetPath]]"
-                    data="[[document]]"
-                    headers='{"nx_es_sync": "true", "X-Batch-No-Drop": "true"}'
-                    response="{{createResponse}}"></nuxeo-document>
 
     <paper-dialog id="createDocDialog"
                   class="container vertical layout"
                   modal
                   no-auto-focus>
-      <div id="heading">
-        <div hidden$="[[customizing]]">
-          <div class="horizontal layout center">
-            <div class="heading sidepart-right">
-              <label>[[i18n('ui.documentCreatePopup.type.label', 'Type')]]</label>
-            </div>
-            <div class="flex">
-              <paper-dropdown-menu class="typeDropdown" no-label-float horizontal-align="left">
-                <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-                  <template is="dom-repeat" items="[[documentTypes]]" as="type">
-                    <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
-                  </template>
-                </paper-menu>
-              </paper-dropdown-menu>
-            </div>
-          </div>
-        </div>
-        <div hidden$="[[!customizing]]" class="horizontal layout center">
-          <div class= "heading sidepart-right">
-            <label>[[i18n('ui.documentCreatePopup.customize.heading', 'Customize')]]</label>
-          </div>
-          <div class="horizontal layout flex">
-            <label class="doc-title">[[_getCurrentFileTitle(document,customizing)]]</label>
-            <label class="remaining-docs">[[_getRemainingDocs(document,customizing)]]</label>
-          </div>
-          <div class= "subheading sidepart-left">
-            <label>[[i18n('ui.documentCreatePopup.customize.importAs', 'Import As')]]</label>
-          </div>
-          <paper-dropdown-menu class="typeDropdownSmall" no-label-float horizontal-align="left">
-            <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-              <template is="dom-repeat" items="[[documentTypes]]" as="type">
-                <paper-item key="[[type.key]]">[[i18n(type.label)]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
-        </div>
-      </div>
-      <div class="path vertical layout">
-        <span>[[i18n('label.documents.in', 'In')]]</span>
-        <div class="suggestion-wrapper horizontal layout center">
-          <div>
-            <iron-icon icon="icons:folder"></iron-icon>
-          </div>
-          <div class="flex">
-            <nuxeo-path-suggestion id="pathSuggester"
-                                   value="{{targetPath}}"
-                                   no-label-float></nuxeo-path-suggestion>
-          </div>
-        </div>
-      </div>
-      <div id="content" class="horizontal layout flex">
-        <div id="dropzone" class="vertical layout flex" hidden$="[[!_showDropzone(selectedDocType,customizing)]]">
-          <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
-          <template is="dom-if" if="[[!hasFiles]]">
-            <div class="vertical layout center center-justified flex">
-              <div class="dropzone-label horizontal layout center center-justified">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
-              </div>
-              <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
-              <nuxeo-liveconnect-one-drive id="oneDriveUploader"></nuxeo-liveconnect-one-drive>
-              <span>[[i18n('ui.documentCreatePopup.linkFilesFrom', 'Or link files from')]]</span>
-              <div class="dropzone-label horizontal layout center center-justified">
-                <iron-icon class="liveconnectIco" src="google_drive.png"></iron-icon>
-                <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
-              </div>
-              <div class="dropzone-label horizontal layout center center-justified">
-                <iron-icon class="liveconnectIco" src="OneDrive.png"></iron-icon>
-                <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
-              </div>
-            </div>
-          </template>
-          <template is="dom-if" if="[[hasFiles]]">
-            <div class="vertical layout flex">
-              <div class="horizontal layout wrap">
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Local Files</span>
-                <template is="dom-repeat" items="[[localFiles]]" as="file">
-                  <!-- local file -->
-                  <div class="file-to-import horizontal layout">
-                    <div class="vertical layout flex">
-                      <div class="horizontal layout center">
-                        <div class="name flex">
-                          [[file.name]]
-                        </div>
-                        <div class="size">
-                          [[_formatSize(file.size)]]
-                        </div>
-                      </div>
-                      <template is="dom-if" if="[[file.providerName]]">
-                        <div class="provider">
-                          [[file.providerName]]
-                        </div>
-                      </template>
-                      <template is="dom-if" if="[[file.complete]]">
-                        <div class="complete">
-                          Complete
-                        </div>
-                      </template>
-                      <template is="dom-if" if="[[!file.complete]]">
-                        <div class="uploading">
-                          Uploading
-                        </div>
-                      </template>
-                    </div>
-                    <div class="horizontal layout center">
-                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
-                    </div>
-                  </div>
-                </template>
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Remote Files</span>
-                <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                  <!-- remote file -->
-                  <div class="file-to-import horizontal layout">
-                    <div class="vertical layout flex">
-                      <div class="horizontal layout center">
-                        <div class="name flex">
-                          [[file.name]]
-                        </div>
-                        <div class="size">
-                          [[_formatSize(file.size)]]
-                        </div>
-                      </div>
-                      <div class="provider">
-                        [[file.providerName]]
-                      </div>
-                    </div>
-                    <div class="horizontal layout center">
-                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
-            <div class="horizontal layout center end-justified" hidden$="!hasFiles">
-              <span><a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
-                 or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a> or
-                 <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
-              </span>
-            </div>
-          </template>
-        </div>
-        <form is="iron-form"
-              action="/"
-              id="form"
-              on-submit="_regularCreate" class="sep form vertical layout flex"
-              hidden$="[[!_showForm(selectedDocType,customizing)]]">
-          <div id="document-edit">
-            <!--dynamically loaded via _updateLayout-->
-          </div>
-          <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
-        </form>
-      </div>
-      <div class="buttons sep horizontal end-justified layout">
-        <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-        <paper-button on-tap="_back" hidden$="[[!customizing]]">[[i18n('command.back', 'Back')]]</paper-button>
-        <paper-button noink
-                      class="primary"
-                      on-tap="_toggleCustomize"
-                      hidden$="[[!_canCustomize(selectedDocType,hasFiles,customizing)]]">
-                      [[i18n('ui.documentCreatePopup.customize', 'Customize Import')]]
-                    </paper-button>
-        <paper-button noink
-                      class="primary"
-                      on-tap="_previousFile"
-                      disabled$=[[!_hasPreviousFile(customizing,docIdx)]]
-                      hidden$="[[!customizing]]">
-                      &#x276e;&nbsp;[[i18n('ui.documentCreatePopup.previousDocument', 'Previous Document')]]
-                    </paper-button>
-        <paper-button noink
-                      class="primary"
-                      on-tap="_nextFile"
-                      disabled$="[[!_hasNextFile(customizing,docIdx)]]"
-                      hidden$="[[!customizing]]">
-                      [[i18n('ui.documentCreatePopup.nextDocument', 'Next Document')]]&nbsp;&#x276f;
-                    </paper-button>
-        <paper-button noink
-                      class="primary"
-                      on-tap="_create"
-                      hidden$="[[!_canCreate(selectedDocType,hasLocalFilesUploaded,hasRemoteFiles,customizing)]]">
-                      <template is="dom-if" if=[[customizing]]>
-                        [[i18n('ui.documentCreatePopup.applyRemaining', 'Apply to Remaining & Create')]]
-                      </template>
-                      <template is="dom-if" if=[[!customizing]]>
-                        [[i18n('command.create', 'Create')]]
-                      </template>
-                    </paper-button>
+      <div id="holder" class="vertical layout flex">
+        <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
+          <paper-tab name="create" class="modeTab">
+            [[i18n('ui.documentCreatePopup.create','Create')]]
+          </paper-tab>
+          <paper-tab name="import" class="modeTab">
+            [[i18n('ui.documentCreatePopup.import','Import')]]
+          </paper-tab>
+        </paper-tabs>
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex">
+          <nuxeo-document-creation-form id="simpleCreation"
+                                          name="create"
+                                          parent="[[parent]]"></nuxeo-document-creation-form>
+          <nuxeo-document-import-form id="bulkCreation"
+                                        name="import"
+                                        parent="[[parent]]"></nuxeo-document-import-form>
+        </iron-pages>
       </div>
     </paper-dialog>
 
@@ -441,637 +82,61 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-create-popup',
 
-        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
           parent: {
-            type: Object
-          },
-
-          targetPath: {
-            type: String
-          },
-
-          document: {
-            type: Object
-          },
-
-          docIdx: {
-            type: Number,
-            value: 0
-          },
-
-          docData: {
-            type: Array,
-            value: []
-          },
-
-          localFiles: {
-            type: Array,
-            value: []
-          },
-
-          remoteFiles: {
-            type: Array,
-            value: []
-          },
-
-          documentTypes: {
-            type: Array,
-            value: [
-              {key: 'file', label: 'label.document.type.file'},
-              {key: 'note', label: 'label.document.type.note'},
-              {key: 'picture', label: 'label.document.type.picture'},
-              {key: 'video', label: 'label.document.type.video'},
-            ]
-          },
-
-          documentTemplates: {
             type: Object,
-            value: {
-              smartImport: function() {
-                return null;
-              },
-              file: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'File',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': ''
-                  }
-                };
-              },
-              note: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'Note',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': '',
-                    'note:note': '',
-                    'note:mime_type': 'text/html'
-                  }
-                };
-              },
-              picture: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'Picture',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': ''
-                  }
-                };
-              },
-              video: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'Video',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': ''
-                  }
-                };
-              },
-              folder: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'Folder',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': ''
-                  }
-                };
-              },
-              workspace: function() {
-                return {
-                  'entity-type': 'document',
-                  name: '',
-                  type: 'Workspace',
-                  properties: {
-                    'dc:title': '',
-                    'dc:description': ''
-                  }
-                };
-              }
-            }
+            nottify: true
           },
 
-          documentBlobProperties: {
-            type: Object,
-            value: {
-              default: 'file:content',
-              note: 'note:note'
-            }
+          _showTabs: {
+            type: Boolean,
+            value: true
           },
-
-          selectedDocType: {
+          selectedTab: {
             type: String,
-            value: 'smartImport',
-            observer: '_updateLayout'
-          },
-
-          hasLocalFiles: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-
-          hasRemoteFiles: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-
-          hasFiles: {
-            type: Boolean,
-            value: false,
-            computed: '_computeHasFiles(hasLocalFiles,hasRemoteFiles)'
-          },
-
-          customizing: {
-            type: Boolean,
-            value: false,
-            observer: '_customizingChanged'
+            value: 'create'
           }
         },
+
         listeners: {
-          'batchFinished': '_batchReady',
-          'nx-blob-picked': '_blobPicked'
-        },
-        observers: [
-          '_observeFiles(files.*)',
-          '_observeRemoteFiles(remoteFiles.splices)'
-        ],
-
-        ready: function() {
-          this.connection = this.$.nx;
-          this.setupDropZone(this.$.dropzone);
-          this._clear();
+          'nx-creation-wizard-hide-tabs': '_hideTabs',
+          'nx-creation-wizard-show-tabs': '_displayTabs',
+          'document-created': '_close'
         },
 
-        toggleDialog: function(files) {
-          if (!this.$.createDocDialog.opened) {
-            this._updateLayout();
-            this.targetPath = this.parent ? this.parent.path + '/' : '/default-domain/';
-            this.selectedDocType = 'smartImport';
-            if (files) {
-              this.uploadFiles(files);
-            }
+        _hideTabs: function() {
+          this._showTabs = false;
+        },
+
+        _displayTabs: function() {
+          this._showTabs = true;
+        },
+
+        _close: function() {
+          if (this.$.createDocDialog.opened) {
+            this.$.createDocDialog.toggle();
+            this._showTabs = true;
           }
+        },
+
+        toggleDialogCreate: function(type) {
+          this.selectedTab = 'create';
+          this.$.simpleCreation.selectedDocType = type;
+          this.toggleDialog();
+        },
+
+        toggleDialogImport: function(files) {
+          this.selectedTab = 'import';
+          this.$.bulkCreation.init(files);
+          this.toggleDialog();
+        },
+
+        toggleDialog: function() {
           this.$.createDocDialog.toggle();
-        },
-
-        _observeFiles: function(changeRecord) {
-          if (changeRecord) {
-            if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
-              changeRecord.value.indexSplices.forEach(function(s) {
-                for (var i = 0; i < s.addedCount; i++) {
-                  var index = s.index + i;
-                  this.push('localFiles', this.files[index]);
-                }
-              }, this);
-              this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
-            } else if (changeRecord.path.match(/files\.#\d+\.index/gi)) {
-              this.hasLocalFilesUploaded = this.hasLocalFiles && this.files && this.files.every(function(file) {
-                return !file || file.complete;
-              });
-              // hack: refresh complete on the dom repeat
-              var i = this.localFiles.findIndex(function(f) {
-                return f.index === this.get(changeRecord.path.replace('.index', '')).index;
-              }.bind(this));
-              this.set(['localFiles', i, 'complete'].join('.'), true);
-            }
-          }
-        },
-
-        _observeRemoteFiles: function() {
-          this.hasRemoteFiles = this.remoteFiles && this.remoteFiles.length > 0;
-        },
-
-        _showDropzoneFileHeadings: function() {
-          return this.hasLocalFiles && this.hasRemoteFiles;
-        },
-
-        _showForm: function() {
-          return this.customizing || (this.selectedDocType !== 'smartImport' && !this.customizing);
-        },
-
-        _showDropzone: function() {
-          return this.selectedDocType === 'smartImport' && !this.customizing;
-        },
-
-        _isBulkCreate: function() {
-          return this.selectedDocType === 'smartImport' || this.customizing;
-        },
-
-        _canCreate: function() {
-          return !this._isBulkCreate() || (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles);
-        },
-
-        _canCustomize: function() {
-          return this._isBulkCreate() && (this.hasFiles) && !this.customizing;
-        },
-
-        _showUploadDialog: function() {
-          this.$.uploadFiles.click();
-        },
-
-        _filesChanged: function(e) {
-          this.uploadFiles(e.target.files);
-        },
-
-        _toggleCustomize: function() {
-          this.customizing = !this.customizing;
-        },
-
-        _customizingChanged: function() {
-          // XXX a dom-repeat filter here would do the job, but the paper-dropdown-menu won't update
-          if (this.customizing) {
-            this.shift('documentTypes');
-            this.docIdx = 0;
-            this.pop('documentTypes');
-            this.pop('documentTypes');
-            this._resetDocumentType();
-          } else {
-            this.unshift('documentTypes', {key: 'smartImport', label: 'label.document.type.smartImport'});
-            this.push('documentTypes', {key: 'folder', label: 'label.document.type.folder'});
-            this.push('documentTypes', {key: 'workspace', label: 'label.document.type.workspace'});
-            this._resetDocumentType();
-          }
-        },
-
-        _computeHasFiles: function() {
-          return this.hasLocalFiles || this.hasRemoteFiles;
-        },
-
-        _getAllFiles: function() {
-          if (this.localFiles && this.remoteFiles) {
-            return this.localFiles.concat(this.remoteFiles);
-          } else {
-            return this.localFiles ? this.localFiles : this.remoteFiles;
-          }
-        },
-
-        _getTotalFileCount: function() {
-          return (this.localFiles ? this.localFiles.length : 0) + (this.remoteFiles ? this.remoteFiles.length : 0);
-        },
-
-        _getCurrentFile: function() {
-          var arr = this._getAllFiles();
-          return arr[this.docIdx];
-        },
-
-        _getCurrentFileTitle: function() {
-          var currentFile = this._getCurrentFile();
-          return currentFile ? currentFile.name : '';
-        },
-
-        _getRemainingDocs: function() {
-          var count = this._getTotalFileCount();
-          return count > 1 ? this.i18n('ui.documentCreatePopup.customize.otherDocuments',
-                                       '+ {0} other documents',
-                                       (count - 1 - this.docIdx)) : '';
-        },
-
-        _storeFile: function() {
-          if (this.docData.length <= this.docIdx) {
-            var fileData = {
-              parent: this.targetPath,
-              document: JSON.parse(JSON.stringify(this.document)),
-              type: this.selectedDocType
-            };
-            this.docData.push(fileData);
-          }
-        },
-
-        _nextFile: function() {
-          if (this._hasNextFile()) {
-            this._storeFile();
-            this.docIdx++;
-            this._resetDocumentType();
-          }
-        },
-
-        _previousFile: function() {
-          if (this._hasPreviousFile()) {
-            this._storeFile();
-            this.docIdx--;
-            this._resetDocumentType();
-          }
-        },
-
-        _hasNextFile: function() {
-          var length = this._getTotalFileCount();
-          return this.customizing && length > 1 && this.docIdx < length - 1;
-        },
-
-        _hasPreviousFile: function() {
-          var length = this._getTotalFileCount();
-          return this.customizing && length > 1 && this.docIdx > 0;
-        },
-
-        _resetDocumentType: function() {
-          this.selectedDocType = this.documentTypes[0].key;
-          if (this.document) {
-            this._updateLayout();
-            this.set('document.properties.dc:title', this._getCurrentFileTitle());
-          }
-        },
-
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
-          return ['nuxeo', type, 'edit'].join('-');
-        },
-
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document type
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(),
-              el = document.createElement(layout),
-              parent = this.$['document-edit'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-
-          // setup data binding
-          if (this.customizing) {
-            this.set('document.properties.dc:title', this._getCurrentFileTitle());
-          }
-          el.document = this.document;
-        },
-
-        /**
-         * Retrieves and creates the layout for the current document type
-         */
-        _updateLayout: function() {
-          this.document = this.documentTemplates[this.selectedDocType]();
-
-          if (this.document) {
-            var layout = this._layoutFor();
-            if (!this._isRegistered(layout)) {
-              var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
-              this.importHref(url, this._createLayout.bind(this),
-                  // error handling
-                  function() {
-                    console.error('Failed to find edit layout for ' + this.document.type);
-                  });
-            } else {
-              this._createLayout();
-            }
-          }
-        },
-        _sanitizeName: function(name) {
-          return name.replace(/[^a-z0-9]/gi, '_');
-        },
-
-        _cancel: function() {
-          if (this.batchId) {
-            this.cancelBatch();
-          }
-          this._clear();
-        },
-
-        _clear: function() {
-          this.files = [];
-          this.localFiles = [];
-          this.remoteFiles = [];
-          this.hasLocalFilesUploaded = false;
-          this.hasLocalFiles = false;
-          this.hasRemoteFiles = false;
-          this.properties = [];
-          this.customizing = false;
-          this.docData = [];
-          this.docIdx = 0;
-        },
-
-        _back: function() {
-          this.customizing = false;
-        },
-
-        _create: function() {
-          if (this._isBulkCreate()) {
-            this._bulkCreate();
-          } else {
-            document.getElementById('submitButton').click();
-          }
-        },
-
-        _regularCreate: function() {
-          var docRequest = this.$.docRequest;
-          var name = this._sanitizeName(this.document.properties['dc:title']);
-          this.document.name = name;
-          docRequest.post().then(function(response) {
-            this._clear();
-            page('/browse' + response.path);
-            this._notify(response);
-          }.bind(this));
-          this.toggleDialog();
-        },
-
-        _bulkCreate: function() {
-          this._storeFile();
-
-          if (this.customizing) {
-            this._processFilesWithMetadata();
-          } else {
-            var params = {
-              context: {
-                currentDocument: this.targetPath,
-              }
-            };
-            var doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
-            var doRemote = this.remoteFiles && this.remoteFiles.length > 0;
-            if (doLocal && doRemote) {
-              this._smartImportLocalFiles(params)
-                  .then(function(response1) {
-                    this._smartImportRemoteFiles(params).then(function(response2) {
-                      this._handleSuccess(this._mergeResponses(response1, response2));
-                    }.bind(this), this._handleError.bind(this));
-                  }.bind(this), this._handleError.bind(this));
-            } else if (doLocal) {
-              this._smartImportLocalFiles(params)
-                  .then(this._handleSuccess.bind(this), this._handleError.bind(this));
-            } else {
-              this._smartImportRemoteFiles(params)
-                  .then(this._handleSuccess.bind(this), this._handleError.bind(this));
-            }
-          }
-        },
-
-        _handleSuccess: function(response) {
-          if (this.customizing) {
-            this.cancelBatch();
-          } else {
-            this.batchId = null;
-            this.uploader = null;
-          }
-          this._clear();
-          this._notify(response);
-          this.toggleDialog();
-          if (!response.entries || response.entries.length === 1) {
-            page('/browse' + (response.entries ? response.entries[0] : response).path);
-          } else if (this.targetPath.replace(/\/$/, '') === this.parent.path.replace(/\/$/, '')) {
-            this.fire('document-updated');
-          } else {
-            page('/browse' + this.targetPath);
-          }
-        },
-
-        _handleError: function(error) {
-          this._toast('ERROR: ' + error.message);
-        },
-
-        _mergeResponses: function(response1, response2) {
-          var response = {'entity-type': 'Documents'};
-          if (response1 && response1.entries && response2 && response2.entries) {
-            response.entries = response1.entries.concat(response2.entries);
-          } else if (response1 && response1.entries) {
-            response.entries = response2 ? response1.entries.concat(response2) : response1.entries;
-          } else if (response2 && response2.entries) {
-            response.entries = response1 ? [response1].entries.concat(response2) : response2.entries;
-          } else {
-            response.entries = [];
-            if (response1) {
-              response.entries.push(response1);
-            }
-            if (response2) {
-              response.entries.push(response2);
-            }
-          }
-          return response;
-        },
-
-        _smartImportLocalFiles: function(params) {
-          return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true'});
-        },
-
-        _smartImportRemoteFiles: function(params) {
-          this.$.fileManagerImport.input = 'blobs:' + this.remoteFiles.map(function(file) {
-            return file.key;
-          }).join();
-          this.$.fileManagerImport.params = params;
-          this.$.fileManagerImport.headers = {'nx_es_sync': 'true'};
-          return this.$.fileManagerImport.execute();
-        },
-
-        _processFilesWithMetadata: function() {
-          var count = 0;
-          var length = this._getTotalFileCount();
-          var self = this;
-          function next(response1) {
-            if (count < length) {
-              var hasOwnData = count < self.docData.length;
-              var fileData = self.docData[hasOwnData ? count : self.docData.length - 1];
-              var arr = self.localFiles, index = count;
-              if (count >= self.localFiles.length) {
-                arr = self.remoteFiles;
-                index = count - self.localFiles.length;
-              }
-              count++;
-              return self._processFileWithMetadata(arr[index], fileData, hasOwnData)
-                         .then(function(response2) {
-                            return next(self._mergeResponses(response1, response2));
-                          }, self._handleError.bind(self));
-            }
-            return Promise.resolve(self._handleSuccess(response1));
-          }
-          return next();
-        },
-
-        _processFileWithMetadata: function(file, fileData, hasOwnData) {
-          this.document = fileData.document;
-          this.targetPath = fileData.parent;
-          if (!hasOwnData) {
-            this.document.properties['dc:title'] = file.name;
-          }
-          this.document.name = this._sanitizeName(this.document.properties['dc:title']);
-          var blobProperty = this.documentBlobProperties[fileData.type] ||
-                             this.documentBlobProperties['default'];
-          // XXX if fileData.type == Note, then the file's contents should be passed instead
-          this.document.properties[blobProperty] = file.providerId ? {
-            'providerId': file.providerId,
-            'user': file.user,
-            'fileId': file.fileId
-          } : {
-            'upload-batch': this.batchId,
-            'upload-fileId': file.index
-          };
-          return this.$.docRequest.post();
-        },
-
-        _removeBlob: function(e) {
-          if (e.model.file.providerId) {
-            this.splice('remoteFiles', e.model.index, 1);
-          } else {
-            this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.file.index;
-            this.$.blobRemover.remove().then(function() {
-              this.splice('localFiles', e.model.index, 1);
-              this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
-            }.bind(this), this._handleError.bind(this));
-          }
-        },
-
-        _batchReady: function(data) {
-          data.stopPropagation();
-          this.properties = [];
-          for (var i = 0; i < this.localFiles.length; i++) {
-            this.properties.push({});
-          }
-        },
-
-        _uploadGoogleDrive: function() {
-          this.$$('#googleDriveUploader').openPicker();
-        },
-
-        _uploadOneDrive: function() {
-          this.$$('#oneDriveUploader').openPicker();
-        },
-
-        _blobPicked: function(e) {
-          this.hasRemoteFiles = true;
-          this.notifyPath('remoteFiles', this.remoteFiles.concat(e.detail.blobs));
-        },
-
-        _notify: function(response) {
-          this.fire('document-created', {response: response});
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
-        },
-
-        _formatSize: function(size) {
-          if (!Number.isInteger(size)) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' B';
-          }
         }
+
       });
     })();
   </script>

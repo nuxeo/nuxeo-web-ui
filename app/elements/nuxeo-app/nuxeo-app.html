@@ -441,8 +441,7 @@ Contributors:
 
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup"
-                                 parent="[[currentParent]]"
-                                 batch-append></nuxeo-document-create-popup>
+                                 parent="[[currentParent]]"></nuxeo-document-create-popup>
 
     <iron-a11y-keys
       id="keys"
@@ -583,7 +582,13 @@ Contributors:
         },
 
         showDocumentCreationWizard: function(e) {
-          this.$.importPopup.toggleDialog(e.detail ? e.detail.files : null);
+          if (e.detail.files) {
+            this.$.importPopup.toggleDialogImport(e.detail.files);
+          } else if (e.detail.type) {
+            this.$.importPopup.toggleDialogCreate(e.detail.type);
+          } else {
+            this.$.importPopup.toggleDialog();
+          }
         },
 
         _navigate: function() {

@@ -1,0 +1,259 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-document-creation-behavior.html">
+
+<!--
+`nuxeo-document-creation-form`
+@group Nuxeo UI
+@element nuxeo-document-creation-form
+-->
+<dom-module id="nuxeo-document-creation-form">
+
+  <template>
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: block;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+
+      nuxeo-path-suggestion {
+        --nuxeo-path-suggestion-results: {
+           z-index: 200;
+         };
+         --paper-input-container-underline: {
+           display: none;
+         };
+         --paper-input-container-underline-focus: {
+           display: none;
+         };
+      }
+
+      #typeSelection {
+        margin: var(--nuxeo-document-creation-form-margin, 128px);
+        overflow-y: auto;
+      }
+      #typeSelection paper-button {
+        width: var(--nuxeo-document-creation-form-button-width, 128px);
+        height: var(--nuxeo-document-creation-form-button-height, 128px);
+        color: var(--nuxeo-secondary-color);
+      }
+      #typeSelection paper-button:hover {
+        color: var(--nuxeo-primary-color);
+      }
+      #typeSelection iron-icon {
+        width: var(--nuxeo-document-creation-form-icon-width, 64px);
+        height: var(--nuxeo-document-creation-form-icon-height, 64px);
+      }
+
+      #editor {
+        margin: var(--nuxeo-document-creation-form-form-margin, 0);
+        overflow-y: auto;
+      }
+
+      #document-edit {
+        margin: 8px 36px;
+      }
+
+      .heading {
+        text-transform: uppercase;
+        font-size: 16px;
+        color: var(--nuxeo-secondary-color);
+        padding: 16px 32px;
+      }
+      .heading iron-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 8px;
+      }
+
+      .path {
+        margin-top: 0;
+        padding: 32px 32px 16px 32px;
+      }
+      .path span {
+        width: 200px;
+      }
+
+      .suggestion-wrapper {
+        border: var(--nuxeo-border);
+        border-radius: 8px;
+        border-width: 2px;
+        padding: 0 8px;
+      }
+      .suggestion-wrapper iron-icon {
+        color: var(--nuxeo-secondary-color);
+        margin-right: 8px;
+      }
+
+      .docTypeButton {
+        margin: 4px;
+      }
+    </style>
+
+    <nuxeo-document id="docRequest"
+                    doc-path="[[targetPath]]"
+                    data="[[document]]"
+                    headers='{"nx_es_sync": "true"}'
+                    response="{{createResponse}}"></nuxeo-document>
+
+    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
+
+      <!--Stage: allow user to choose a doc type-->
+      <div name="choose" class="vertical layout flex">
+        <div class="flex">
+          <div id="typeSelection" class="horizontal layout wrap">
+            <template is="dom-repeat" items="[[docTypes]]" as="type">
+              <paper-button raised class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
+                <iron-icon icon="[[_getTypeIcon(type)]]"></iron-icon>
+                [[_getTypeName(type)]]
+              </paper-button>
+            </template>
+          </div>
+        </div>
+        <div class="buttons sep horizontal end-justified layout">
+          <div class="flex start-justified">
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+        </div>
+      </div>
+
+      <!--Stage: allow user to fill in the properties for the selected type and create a new document-->
+      <div name="edit" class="vertical layout flex">
+        <div class="horizontal layout heading center">
+          <iron-icon icon="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
+          <span>[[_newDocumentLabel(selectedDocType)]]</span>
+        </div>
+        <div id="editor" class="flex">
+          <div class="path sep horizontal layout center">
+            <span>[[i18n('label.documents.location', 'Location')]]</span>
+            <div class="suggestion-wrapper horizontal layout center flex">
+              <div>
+                <iron-icon icon="icons:folder"></iron-icon>
+              </div>
+              <div class="flex">
+                <nuxeo-path-suggestion id="pathSuggester"
+                                       value="{{targetPath}}"
+                                       no-label-float></nuxeo-path-suggestion>
+              </div>
+            </div>
+          </div>
+          <form is="iron-form"
+                action="/"
+                id="form"
+                on-submit="_create" class="form vertical layout flex">
+            <div id="document-edit">
+              <!--dynamically loaded via _updateLayout-->
+            </div>
+            <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
+          </form>
+        </div>
+        <div class="buttons sep horizontal end-justified layout">
+          <div class="flex start-justified">
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+          <paper-button on-tap="_back">[[i18n('command.back', 'Back')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_submit">[[i18n('command.create', 'Create')]]</paper-button>
+        </div>
+      </div>
+
+    </iron-pages>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-creation-form',
+
+        behaviors: [Nuxeo.DocumentCreationBehavior],
+
+        properties: {
+
+          stage: {
+            type: String,
+            value: 'choose'
+          }
+
+        },
+
+        listeners: {
+          'nx-document-layout-changed': '_layoutUpdated'
+        },
+
+        _getTypeName: function(type) {
+          return this.documentTemplates[type] ? this.documentTemplates[type]().type : '';
+        },
+
+        _getTypeIcon: function(type) {
+          return this.documentIcons[type];
+        },
+
+        _selectType: function(e) {
+          this.selectedDocType = e.model.type;
+          this.fire('nx-creation-wizard-hide-tabs');
+        },
+
+        _create: function() {
+          var docRequest = this.$.docRequest;
+          var name = this._sanitizeName(this.document.properties['dc:title']);
+          this.document.name = name;
+          docRequest.post().then(function(response) {
+            this._clear();
+            page('/browse' + response.path);
+            this._notify(response);
+          }.bind(this));
+        },
+
+        _submit: function() {
+          this.$.submitButton.click();
+        },
+
+        _back: function() {
+          this._clear();
+          this.fire('nx-creation-wizard-show-tabs');
+        },
+
+        _cancel: function() {
+          this._clear();
+          this.fire('nx-creation-wizard-show-tabs');
+        },
+
+        _newDocumentLabel: function() {
+          return this.i18n('ui.documentCreatePopup.newDoc.heading', 'New {0}', this._getTypeName(this.selectedDocType));
+        },
+
+        _clear: function() {
+          this.stage = 'choose';
+          this.selectedDocType = '';
+          this._resetTargetPath();
+        },
+
+        _layoutUpdated: function() {
+          this.stage = 'edit';
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
