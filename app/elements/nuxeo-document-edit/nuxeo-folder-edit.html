@@ -90,9 +90,7 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <template is="dom-if" if="[[!new]]">
-      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
-    </template>
+    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
   </template>
   <script>
     (function() {
@@ -104,11 +102,6 @@ Contributors:
         properties: {
           document: {
             type: Object
-          },
-
-          new: {
-            type: Boolean,
-            value: false
           }
         },
 

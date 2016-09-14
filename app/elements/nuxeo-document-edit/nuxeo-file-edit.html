@@ -94,7 +94,7 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <template is="dom-if" if="[[!new]]">
+    <template is="dom-if" if="[[uploadEnabled]]">
       <div class="row layout horizontal">
         <div class="label-container">
           <label>[[i18n('content', 'Content')]]</label>
@@ -109,8 +109,8 @@ Contributors:
           <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
         </div>
       </div>
-      <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
     </template>
+    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
   </template>
   <script>
     (function() {
@@ -124,7 +124,7 @@ Contributors:
             type: Object
           },
 
-          new: {
+          uploadEnabled: {
             type: Boolean,
             value: false
           }

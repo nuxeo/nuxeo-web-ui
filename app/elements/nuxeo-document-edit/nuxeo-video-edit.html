@@ -31,7 +31,7 @@ Contributors:
        }
      </style>
 
-     <nuxeo-file-edit document={{document}} new="[[new]]"></nuxeo-file-edit>
+     <nuxeo-file-edit document={{document}} uploadEnabled="[[uploadEnabled]]"></nuxeo-file-edit>
 
    </template>
    <script>
@@ -46,7 +46,7 @@ Contributors:
              type: Object
            },
 
-           new: {
+           uploadEnabled: {
              type: Boolean,
              value: false
            }

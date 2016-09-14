@@ -204,6 +204,12 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.I18nBehavior, {
     } else {
       parent.appendChild(el);
     }
+    if (Object.keys(this.document.properties).length === 0 ||
+        Object.keys(this.document.properties).every(function(prop) {
+      return !this.document.properties[prop];
+    }.bind(this))) {
+      el.uploadEnabled = true;
+    }
     el.document = this.document;
   },
 
