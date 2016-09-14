@@ -14,7 +14,8 @@
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "polymer": "Polymer/polymer#^1.1.0",
     "chart-elements": "nuxeo/chart-elements#3.1.0",
-    "Chart.js": "2.1.6"
+    "Chart.js": "2.1.6",
+    "onedrive-file-picker": "nuxeo/onedrive-file-picker#0.3.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
