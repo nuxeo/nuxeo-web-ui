@@ -31,11 +31,17 @@ Contributors:
 
       nuxeo-data-list {
         min-height: calc(100vh - 61px);
+
+      .list {
+        @apply(--layout-vertical);
       }
 
       nuxeo-data-list {
         display: block;
         position: relative;
+
+      .entry {
+        @apply(--nuxeo-sidebar-item-theme);
       }
 
       .favIcon {

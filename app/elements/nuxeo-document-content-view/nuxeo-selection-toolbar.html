@@ -74,11 +74,13 @@ Contributors:
         max-height: 60vh;
         overflow: auto;
       }
+
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
       }
+
       .title.ellipsis {
         display: inline-block;
         width: 80%;
@@ -87,6 +89,22 @@ Contributors:
 
       .sep {
         border-top: var(--nuxeo-border);
+      }
+
+      .queue-thumbnail {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
+
+      .queue-thumbnail ::content img {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
       }
 
     </style>
