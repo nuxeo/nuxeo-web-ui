@@ -28,14 +28,16 @@ Contributors:
 <dom-module id="nuxeo-favorites">
   <template>
     <style is="custom-style" include="shared-styles">
-      .list {
-        @apply(--layout-vertical);
+
+      nuxeo-data-list {
+        min-height: calc(100vh - 61px);
       }
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--nuxeo-sidebar-item-theme);
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
       }
+
       .favIcon {
         --iron-icon-height: 16px;
         --iron-icon-width: 16px;
@@ -53,6 +55,12 @@ Contributors:
         width: 80%;
         vertical-align: middle;
       }
+
+      .remove {
+        width: 16px;
+        height: 16px;
+        border-radius: 8px;
+      }
     </style>
 
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
@@ -62,24 +70,41 @@ Contributors:
 
     <nuxeo-operation id="getFavOp"
       op="Favorite.GetDocuments"
+      enrichers="thumbnail"
       input="[[doc.uid]]" response="{{favorites}}"></nuxeo-operation>
 
     <div class="list">
-      <template is="dom-repeat" items="[[favorites.entries]]">
-        <div class="item">
-          <span class="flex">
-            <iron-icon class="favIcon" src="[[_icon(item)]]"></iron-icon>
-            <a class="favLink ellipsis" href$="[[urlFor('document', item.uid)]]" >[[item.title]]</a>
-          </span>
-          <paper-icon-button class="favRemove" icon="icons:clear" id="favBut" on-tap="_removeFromFavorites" uid="[[item.uid]]">
-          </paper-icon-button>
-        </div>
-      </template>
-    </div>
 
-    <template is="dom-if" if="[[!_hasFavorites(favorites)]]">
-      <span class="empty">[[i18n('label.collections.favorites.empty', 'No favorites.')]]</span>
-    </template>
+      <nuxeo-data-list items="[[favorites.entries]]" id="favoritesList"
+        selected-item="{{selectedFavorite}}"
+        selection-enabled as="favorite"
+        empty-label="[[i18n('label.collections.favorites.empty', 'No favorites.')]]"
+        empty-label-when-filtered="[[i18n('label.collections.favorites.empty', 'No favorites.')]]">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="list-item-box vertical layout">
+              <div class="list-item-info horizontal layout center" >
+                <div class="vertical layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(favorite)]]">
+                </div>
+                <span class="list-item-title ellipsis">[[favorite.title]]</span>
+              </div>
+              <div class="list-item-detail">
+                <div class="layout center">
+                  <span class="list-item-property ellipsis">
+                    [[favorite.type]]
+                    <iron-icon  id="removeFromFavorites" class="remove"
+                      icon="icons:clear" data-uid$="[[favorite.uid]]" on-tap="_removeFromFavorites">
+                    </iron-icon>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </nuxeo-data-list>
+
+    </div>
   </template>
   <script>
     Polymer({
@@ -92,6 +117,11 @@ Contributors:
         },
         favorites: {
           type: Object,
+          notify: true
+        },
+        selectedFavorite: {
+          type: Object,
+          observer: '_selectedFavoriteChanged',
           notify: true
         }
       },
@@ -110,13 +140,6 @@ Contributors:
         }
       },
 
-      _hasFavorites: function(favorites) {
-        if (favorites) {
-          return favorites.entries.length > 0;
-        }
-        return false;
-      },
-
       ready: function() {
         window.addEventListener('addedToFavorites', function() {
           this.$.getFavOp.execute();
@@ -126,13 +149,32 @@ Contributors:
         }.bind(this));
       },
 
-      _icon: function(document) {
-        var url = this.$.nxcon.url;
-        return url + document.properties['common:icon'];
+      _thumbnail: function(doc) {
+        if (doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        } else {
+          var baseUrl = this.$.nxcon.url;
+          return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+        }
       },
 
-      _removeFromFavorites: function() {
-        var docUid = arguments[0].currentTarget.uid;
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedFavoriteChanged: function(favorite) {
+        if (favorite) {
+          page.show('/doc/' + favorite.uid);
+        }
+      },
+
+      _removeFromFavorites: function(e) {
+        e.stopImmediatePropagation();
+        var docUid = e.model.favorite.uid;
         this.$.removeFromFavOp.input = docUid;
         this.$.removeFromFavOp.execute().then(function() {
           this.fire('removedFromFavorites', {docUid: docUid});

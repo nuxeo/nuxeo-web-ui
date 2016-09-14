@@ -30,6 +30,7 @@ Contributors:
   <link rel="import" href="../common.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
   <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+  <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
   <link rel="import" href="../../elements/nuxeo-collections/nuxeo-favorites.html">
   <script src="nuxeo-favorites-responses.js"></script>
 </head>
@@ -81,7 +82,7 @@ Contributors:
             [
               200,
               {'Content-Type': 'application/json'},
-              '{"entity-type": "document", "uid": "2", "title":"My picture in Favorites"}',
+              '{"entity-type": "document", "uid": "2", "title":"My picture in Favorites", "contextParameters": { "thumbnail": { "url": "dummy" }}}',
             ]
           );
         });
@@ -89,15 +90,17 @@ Contributors:
         test('it should display favorites', function() {
           var element = fixture('favorites', {doc: doc});
           var items;
+          debugger
           return waitChanged(element, 'favorites').then(flush).then(function() {
             // Assert we have two documents in favorites
+            debugger
             expect(element.favorites.entries.length).to.be.equal(2);
-            items = Polymer.dom(element.root).querySelectorAll('.item');
+            items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
             // Assert all items are displayed
             expect(items.length).to.be.equal(2);
             // Assert items names
-            expect(items[0].querySelector('.favLink').textContent).to.be.equal('My picture in Favorites');
-            expect(items[1].querySelector('.favLink').textContent).to.be.equal('My video in Favorites');
+            expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My picture in Favorites');
+            expect(items[1].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
           });
         });
 
@@ -107,9 +110,9 @@ Contributors:
           return waitChanged(element, 'favorites').then(flush).then(function() {
             // Assert we have two documents in favorites
             expect(element.favorites.entries.length).to.be.equal(2);
-            items = Polymer.dom(element.root).querySelectorAll('.item');
+            items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
             // Remove first item
-            var removeButton = items[0].querySelector('.favRemove');
+            var removeButton = items[0].querySelector('.remove');
             // Remove first entry from mock response
             favoritesResponse.entries.shift();
             performFavoritesResponse();
@@ -117,8 +120,8 @@ Contributors:
             return waitChanged(element, 'favorites').then(flush).then(function() {
               // Assert we only have one document in favorites
               expect(element.favorites.entries.length).to.be.equal(1);
-              items = Polymer.dom(element.root).querySelectorAll('.item');
-              expect(items[0].querySelector('.favLink').textContent).to.be.equal('My video in Favorites');
+              items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
+              expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
             });
           });
         });
@@ -153,7 +156,7 @@ Contributors:
           var element = fixture('favorites', {doc: doc});
           return waitChanged(element, 'favorites').then(function() {
             expect(element.favorites.entries.length).to.be.equal(0);
-            var placeholder = Polymer.dom(element.root).querySelector('.empty');
+            var placeholder = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelector('.emptyResult');
             expect(isHidden(placeholder)).to.be.false;
             expect(placeholder.textContent).to.be.equal('No favorites.');
           });

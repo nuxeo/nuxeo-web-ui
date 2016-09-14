@@ -103,7 +103,6 @@ Contributors:
           element.collections = [];
           element.$.collectionsProvider.fetch();
           return flush().then(function() {
-            debugger
             expect(element.collections.length).to.be.equal(0);
             var placeholder = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelector('.emptyResult');
             expect(isHidden(placeholder)).to.be.false;

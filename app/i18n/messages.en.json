@@ -32,6 +32,8 @@
   "command.lock": "Lock",
   "ui.favoritesToggleButton.addToFavorites": "Add to Favorites",
   "ui.favoritesToggleButton.removeFromFavorites": "Remove From Favorites",
+  "ui.favortes.addedToFavorites": "Added to Favorites",
+  "ui.favortes.removedFromFavorites": "Removed from Favorites",
   "label.widget.picture.depth": "Bit Depth",
   "mimetype.html": "HTML",
   "ui.taskWidget.noTasks": "There are no tasks to show.",

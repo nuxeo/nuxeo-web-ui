@@ -30,7 +30,12 @@ var favoritesResponse = {
      "title":"My picture in Favorites",
      "properties": {
       "common:icon": "/icons/file.gif"
-     }
+    },
+    "contextParameters": {
+        "thumbnail": {
+            "url": "/icons/file.gif"
+        }
+    }
    }, {
     "entity-type":"document",
      "uid":"3",
@@ -38,6 +43,11 @@ var favoritesResponse = {
      "title":"My video in Favorites",
      "properties": {
       "common:icon": "/icons/file.gif"
-     }
+    },
+    "contextParameters": {
+        "thumbnail": {
+            "url": "/icons/file.gif"
+        }
+    }
    }]
 };

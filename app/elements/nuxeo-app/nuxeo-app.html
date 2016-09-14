@@ -532,7 +532,9 @@ Contributors:
           'tasksListSelectionChanged': '_onTasksListSelectionChanged',
           'addToClipboard': '_onAddToClipboard',
           'addedToCollection': '_documentAddedToCollection',
-          'removedFromCollection': '_documentRemovedFromCollection'
+          'removedFromCollection': '_documentRemovedFromCollection',
+          'addedToFavorites': '_documentAddedToFavorites',
+          'removedFromFavorites': '_documentRemovedFromFavorites'
         },
 
         ready: function() {
@@ -776,6 +778,16 @@ Contributors:
 
         _documentRemovedFromCollection: function() {
           this.$.toast.text = this.i18n('document_removed_from_collection', 'Document removed from collection.');
+          this.$.toast.open();
+        },
+
+        _documentAddedToFavorites: function() {
+          this.$.toast.text = this.i18n('ui.favortes.addedToFavorites', 'Document added to favorites.');
+          this.$.toast.open();
+        },
+
+        _documentRemovedFromFavorites: function() {
+          this.$.toast.text = this.i18n('ui.favortes.removedFromFavorites', 'Document removed from favorites.');
           this.$.toast.open();
         },
 
