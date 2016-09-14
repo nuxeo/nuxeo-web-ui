@@ -269,7 +269,7 @@ Contributors:
           </div>
         </div>
         <div id="dropzone" class="vertical layout flex">
-          <input hidden id="uploadFiles" type="file" on-change="_filesChanged">
+          <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple>
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
