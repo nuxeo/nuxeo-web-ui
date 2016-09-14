@@ -126,14 +126,19 @@ Contributors:
     <nuxeo-operation id="removeFromFavOp"
       op="Document.RemoveFromFavorites"></nuxeo-operation>
 
-    <nuxeo-operation id="getFavOp"
-      op="Favorite.GetDocuments"
-      enrichers="thumbnail"
-      input="[[doc.uid]]" response="{{favorites}}"></nuxeo-operation>
+    <nuxeo-operation id="fetchFavOp"
+      op="Favorite.Fetch"
+      response="{{favorites}}"></nuxeo-operation>
+
+    <nuxeo-page-provider id="favoritesProvider"
+       provider="default_content_collection"
+       page-size="50"
+       enrichers="thumbnail">
+    </nuxeo-page-provider>
 
     <div class="list">
 
-      <nuxeo-data-list items="[[favorites.entries]]" id="favoritesList"
+      <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList"
         selected-item="{{selectedFavorite}}"
         selection-enabled as="favorite"
         empty-label="[[i18n('label.collections.favorites.empty', 'No favorites.')]]"
@@ -168,11 +173,6 @@ Contributors:
     Polymer({
       is: 'nuxeo-favorites',
       properties: {
-        doc: {
-          type: Object,
-          notify: true,
-          observer: '_contextDocObserver'
-        },
         favorites: {
           type: Object,
           notify: true
@@ -186,24 +186,18 @@ Contributors:
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-      _contextDocObserver: function(newDoc, oldDoc) {
-        if (newDoc) {
-          if (oldDoc) {
-            if (newDoc.repository !== oldDoc.repository) {
-              this.$.getFavOp.execute();
-            }
-          } else {
-            this.$.getFavOp.execute();
-          }
-        }
-      },
-
       ready: function() {
+        this.$.fetchFavOp.execute().then(function(resp) {
+          this.$.favoritesProvider.params = [resp.uid];
+          this.$.favoritesProvider.fetch();
+        }.bind(this));
         window.addEventListener('addedToFavorites', function() {
-          this.$.getFavOp.execute();
+          this.$.favoritesProvider.page = 1;
+          this.$.favoritesProvider.fetch();
         }.bind(this));
         window.addEventListener('removedFromFavorites', function() {
-          this.$.getFavOp.execute();
+          this.$.favoritesProvider.page = 1;
+          this.$.favoritesProvider.fetch();
         }.bind(this));
       },
 
