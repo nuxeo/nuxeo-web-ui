@@ -1,49 +1,51 @@
-<!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 <style is="custom-style">
 
-  /*
-   Polymer includes a shim for CSS Custom Properties that we can use for application theming.
-   Below, you'll find the default palette for the Polymer Starter Kit layout. Feel free to play
-   with changing the colors used or generate your own palette of colours at MaterialPalette.com.
+  @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");
 
-   See https://www.polymer-project.org/1.0/docs/devguide/styling.html#xscope-styling-details
-   for further information on custom CSS properties.
-   */
+  html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    font-size: 15px; }
 
-  /* Application theme */
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    color: #243238;
+    background-color: #e9eff3;
+    font-family: 'Open Sans',sans-serif;
+    font-weight: 400; }
+
+  h1,h2,h3,
+  h4,h5,h6 {
+    font-weight: 400;
+    line-height: 1em; }
+
+  a, a:active,
+  a:visited, a:focus {
+    color: #213f7d;
+    text-decoration: none; }
+
+  a:hover {
+    color: #00adff;
+    text-decoration: underline; }
 
   :root {
     /* -- Nuxeo Branding colors -- */
     --nuxeo-app-font: 'Open Sans', Arial, sans-serif;
 
+    --nuxeo-header-background: #fff;
+    --nuxeo-sidebar-actions: #009de8;
+    --nuxeo-sidebar-actions-hover: #00adff;
+
+    /* Badges & tags */
+    --nuxeo-tag-background: #edf1f5;
+    --nuxeo-tag-text: #6d7684;
+    --nuxeo-badge-background: #f68500;
+
     /* primary & secondary are used on background or
     to highlight non specific elements as listed below */
     --nuxeo-primary-color: #00adff; /* sky blue */
-    --nuxeo-secondary-color: #213f7d; /* dark blue */
+    --dark-primary-color: #213f7d; /* dark blue */
 
     /* Titles & text */
     --nuxeo-title-color: #213f7d;
@@ -52,15 +54,13 @@ limitations under the License.
 
     /* Global layout */
     --nuxeo-page-background: none #e9eff3;
-    --nuxeo-header-background: #fff;
+
     --nuxeo-header-title-color: #213f7d;
     --nuxeo-header-text-color: #213f7d;
     --nuxeo-header-actions: #434343;
     --nuxeo-header-actions-hover: #00adff;
     --nuxeo-sidebar-background: #213f7d;
-    --nuxeo-sidebar-actions: #009de8;
-    --nuxeo-sidebar-actions-hover: #00adff;
-    --nuxeo-border: 1px solid #e5e5e5;
+
     --nuxeo-light-background: #fafcfd;
 
     /* Buttons & Links */
@@ -75,48 +75,81 @@ limitations under the License.
     --nuxeo-action-color-activated: #f68500;
     --nuxeo-container-hover: #f3f7f9;
 
-    /* Badges & tags */
-    --nuxeo-tag-background: #edf1f5;
-    --nuxeo-tag-text: #6d7684;
-    --nuxeo-badge-background: #f68500;
-
     /* Warn, Info, Error */
     --nuxeo-warn-text: #d5652c;
 
-    /* -- Default Polymer Variables --*/
-
-    --dark-primary-color: #213f7d;
     --default-primary-color: #00adff;
-    --light-primary-color: #C5CAE9;
-    --text-primary-color: #ffffff; /*text/icons*/
-    --accent-color: #FF4081;
+    --dark-primary-color: #213f7d;
+    --light-primary-color: #f3f7f9;
+    --text-primary-color: #ffffff;
+    --accent-color: #00adff;
     --primary-background-color: #f8fafc;
-    --primary-text-color: #434343;
-    --secondary-text-color: #727272;
+    --primary-text-color: #243238;
+    --secondary-text-color: #243238;
     --disabled-text-color: #bdbdbd;
-    --divider-color: #B6B6B6;
+    --divider-color: #e5e5e5;
 
-    /* -- Components variable override -- */
+    /* Tabs, Toolbars & Menus */
+    --paper-tabs-selection-bar-color: #00adff;
+    --paper-tab-ink: #00adff;
 
-    /* paper-drawer-panel */
-    --drawer-menu-color: #fff;
-    --drawer-border-color: 1px solid #ccc;
-    --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
+    --paper-toolbar-background: #ffffff;
+    --paper-toolbar-color: #243238;
 
-    /* paper-menu */
-    --paper-menu-background-color: #fff;
-    --menu-link-color: #434343;
+    --paper-menu-background-color: #ffffff;
+    --paper-menu-color: #243238;
+    --paper-menu-disabled-color: #e9eff3;
 
-    /* paper-spinner */
+    /* Forms & Buttons */
+    --paper-checkbox-checked-color: #00adff;
+    --paper-checkbox-checked-ink-color: #213f7d;
+    --paper-checkbox-unchecked-color: #243238;
+    --paper-checkbox-unchecked-ink-color: #6c6f7c;
+    --paper-checkbox-label-color: #243238;
+
+    --paper-radio-button-checked-color: #00adff;
+    --paper-radio-button-checked-ink-color: #ffffff;
+    --paper-radio-button-unchecked-color: #243238;
+    --paper-radio-button-unchecked-ink-color: #6c6f7c;
+    --paper-radio-button-label-color: #243238;
+
+    --paper-input-container-color: #6c6f7c;
+    --paper-input-container-focus-color: #00adff;
+    --paper-input-container-invalid-color: #ff003c;
+    --paper-input-container-input-color: #6c6f7c;
+
+    --paper-slider-knob-color: #00adff;
+    --paper-slider-active-color: #00adff;
+    --paper-slider-pin-color: #00adff;
+
+    --paper-toggle-button-checked-bar-color: #00adff;
+    --paper-toggle-button-checked-button-color: #00adff;
+    --paper-toggle-button-checked-ink-color: #00adff;
+    --paper-toggle-button-unchecked-bar-color: #243238;
+    --paper-toggle-button-unchecked-button-color: #243238;
+    --paper-toggle-button-unchecked-ink-color: #243238;
+
+    --paper-fab-background: #00adff;
+    --paper-fab-disabled-background: #e9eff3;
+    --paper-fab-disabled-text: #2f2b16;
+    --paper-icon-button-disabled-text: #e9eff3;
+
+    /* Loaders */
+    --paper-progress-active-color: #00adff;
+    --paper-progress-secondary-color: #00adff;
+
     --paper-spinner-layer-1-color: #00adff;
     --paper-spinner-layer-2-color: #0075b0;
     --paper-spinner-layer-3-color: #213f7d;
     --paper-spinner-layer-4-color: #0d9ad6;
 
-    --nuxeo-selection-toolbar-color: #e3f2fd;
+    /* -- Nuxeo Mixins -- */
+    --nuxeo-sidebar: {
+      background-color: #213f7d;
+    };
 
     --nuxeo-sidebar-item-theme: {
-      border-bottom: var(--nuxeo-border);
+      border-bottom: 1px solid var(--divider-color);
       padding: 1em;
       margin: 0;
       white-space: nowrap;
@@ -138,70 +171,179 @@ limitations under the License.
     --paper-tooltip: {
       font-size: 1rem;
       font-weight: bold;
-      background-color: var(--nuxeo-secondary-color);
+      background-color: var(--dark-primary-color);
     };
 
     --paper-card: {
-      box-shadow: 0 0 1px rgba(0,0,0,0.34);
+      box-shadow: none !important;
       background-color: #fff;
     };
-
-  }
-
-  body {
-    background: var(--nuxeo-page-background);
-    font-family: var(--nuxeo-app-font);
-    font-size: 15px;
-    color: var(--nuxeo-text-default);
-    margin: 0;
-  }
-
-  a {
-    color: var(--nuxeo-link-color);
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: var(--nuxeo-link-hover-color);
   }
 
   paper-material {
     border-radius: 2px;
     height: 100%;
-    padding: 16px 0 16px 0;
+    padding: 16px 0
     width: calc(98.66% - 16px);
     margin: 16px auto;
     background: white;
   }
 
-  paper-button:hover,
-  paper-button:focus {
-    color: var(--nuxeo-link-hover-color);
-  }
+  paper-toolbar a, paper-toolbar a:hover,
+  paper-toolbar a:active,paper-toolbar a:visited,
+  paper-toolbar a:focus {
+    color: #213f7d; }
 
-  paper-button.primary {
-    background-color: var(--nuxeo-button-primary);
-    color: #fff;
-  }
+  paper-button.primary,
+  paper-button.btn-primary,
+  paper-button[primary] {
+    color: #00adff; }
 
-  paper-button.primary:hover,
-  paper-button.primary:focus {
-    background-color: var(--nuxeo-button-primary-focus);
-    font-weight: inherit;
-    color: #fff !important;
-  }
+  paper-button.primary[raised],
+  paper-button.btn-primary[raised],
+  paper-button[primary][raised] {
+    background-color: #00adff;
+    color: #fff; }
 
-  paper-button.disabled {
-    color: white;
-  }
+  paper-button.secondary,
+  paper-button.btn-secondary,
+  paper-button[secondary] {
+    color: #213f7d; }
 
-  paper-menu a > *,
-  paper-menu paper-item > *,
-  paper-menu paper-icon-item > * {
-    pointer-events: none;
-  }
+  paper-button.secondary[raised],
+  paper-button.btn-secondary[raised],
+  paper-button[secondary][raised] {
+    background-color: #213f7d;
+    color: #fff; }
 
-  paper-menu iron-icon {
+  paper-button.success,
+  paper-button.btn-success,
+  paper-button[success] {
+    color: #88c100; }
+
+  paper-button.success[raised],
+  paper-button.btn-success[raised],
+  paper-button[success][raised] {
+    background-color: #88c100;
+    color: #fff; }
+
+  paper-button.info,
+  paper-button.btn-info,
+  paper-button[info] {
+    color: #00adff; }
+
+  paper-button.info[raised],
+  paper-button.btn-info[raised],
+  paper-button[info][raised] {
+    background-color: #00adff;
+    color: #fff; }
+
+  paper-button.warning,
+  paper-button.btn-warning,
+  paper-button[warning] {
+    color: #ff8a00; }
+
+  paper-button.warning[raised],
+  paper-button.btn-warning[raised],
+  paper-button[warning][raised] {
+    background-color: #ff8a00; color: #fff; }
+
+  paper-button.error,
+  paper-button.btn-error,
+  paper-button[error] {
+    color: #ff5722; }
+
+  paper-button.error[raised],
+  paper-button.btn-error[raised],
+  paper-button[error][raised] {
+    background-color: #ff5722;
+    color: #fff; }
+
+  paper-button.link,
+  paper-button.btn-link,
+  paper-button[link] {
+    text-decoration: underline; }
+
+  paper-button[raised] {
+    color: #243238; }
+
+  paper-button[disabled] {
+    color: #6c6f7c !important;
+    background: #e9eff3 !important; }
+
+  paper-icon-button.primary,
+  paper-icon-button.btn-primary,
+  paper-icon-button[primary] {
+    color: #00adff; }
+
+  paper-icon-button.primary:hover,
+  paper-icon-button.btn-primary:hover,
+  paper-icon-button[primary]:hover {
+    background-color: #d2e8f4;
+    background-color: rgba(0,173,255,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.secondary,
+  paper-icon-button.btn-secondary,
+  paper-icon-button[secondary] {
+    color: #213f7d; }
+
+  paper-icon-button.secondary:hover,
+  paper-icon-button.btn-secondary:hover,
+  paper-icon-button[secondary]:hover {
+    background-color: #d5dde7;
+    background-color: rgba(33,63,125,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.success,
+  paper-icon-button.btn-success,
+  paper-icon-button[success] {
+    color: #88c100; }
+
+  paper-icon-button.success:hover,
+  paper-icon-button.btn-success:hover,
+  paper-icon-button[success]:hover {
+    background-color: #dfeadb;
+    background-color: rgba(136,193,0,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.info,
+  paper-icon-button.btn-info,
+  paper-icon-button[info] {
+    color: #00adff; }
+
+  paper-icon-button.info:hover,
+  paper-icon-button.btn-info:hover,
+  paper-icon-button[info]:hover {
+    background-color: #d2e8f4;
+    background-color: rgba(0,173,255,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.warning,
+  paper-icon-button.btn-warning,
+  paper-icon-button[warning] {
+    color: #ff8a00; }
+
+  paper-icon-button.warning:hover,
+  paper-icon-button.btn-warning:hover,
+  paper-icon-button[warning]:hover {
+    background-color: #ebe5db;
+    background-color: rgba(255,138,0,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.error,
+  paper-icon-button.btn-error,
+  paper-icon-button[error] {
+    color: #ff5722; }
+
+  paper-icon-button.error:hover,
+  paper-icon-button.btn-error:hover,
+  paper-icon-button[error]:hover {
+    background-color: #ebe0de;
+    background-color: rgba(255,87,34,0.2);
+    border-radius: 50%; }
+
+  /*paper-menu iron-icon {
     margin-right: 33px;
     opacity: 0.54;
   }
@@ -227,85 +369,81 @@ limitations under the License.
     width: 1em;
     height: 1em;
     margin-right: .5em;
-  }
+  } */
 
-  /* Breakpoints */
+  paper-checkbox #checkmark.paper-checkbox {
+    border-color: #fff !important; }
 
-  /* Small */
-  @media (max-width: 600px) {
+  paper-dialog {
+    color: #243238;
+    background-color: #fff;
+    font-family: 'Open Sans',sans-serif;
+    font-weight: 400; }
 
-    paper-material {
-      --menu-container-display: none;
-      width: calc(97.33% - 32px);
-      padding-left: 16px;
-      padding-right: 16px;
-    }
+  paper-dialog h1,paper-dialog h2,paper-dialog h3,
+  paper-dialog h4,paper-dialog h5,paper-dialog h6 {
+    overflow: visible;
+    padding: 0 1em;
+    text-align: center; }
 
-    paper-toolbar.tall .app-name {
-      font-size: 24px;
-      font-weight: 400;
-    }
-  }
+  paper-fab {
+    background-color: #00adff;
+    color: #fff;
+    --text-primary-color: #ffffff;
+    --paper-fab-keyboard-focus-background: #005780; }
 
-  /* Tablet+ */
-  @media (min-width: 601px) {
+  paper-fab.primary,
+  paper-fab.btn-primary,
+  paper-fab[primary] {
+    background-color: #00adff;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #005780; }
 
-    paper-material {
-      width: calc(98% - 46px);
-      margin-bottom: 32px;
-      padding-left: 30px;
-      padding-right: 30px;
-    }
+  paper-fab.secondary,
+  paper-fab.btn-secondary,
+  paper-fab[secondary] {
+    background-color: #213f7d;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #4d78d0; }
 
-    #drawer.paper-drawer-panel > [drawer] {
-      border-right: 1px solid rgba(0, 0, 0, 0.14);
-    }
+  paper-fab.success,
+  paper-fab.btn-success,
+  paper-fab[success] {
+    background-color: #88c100;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #c7ff42; }
 
-    iron-pages {
-      padding: 48px 62px;
-    }
+  paper-fab.info,
+  paper-fab.btn-info,
+  paper-fab[info] {
+    background-color: #00adff;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #005780; }
 
-  }
+  paper-fab.warning,
+  paper-fab.btn-warning,
+  paper-fab[warning] {
+    background-color: #ff8a00;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #804500; }
 
-  /* Material Design Adaptive Breakpoints */
-  /*
-    Below you'll find CSS media queries based on the breakpoint guidance
-    published by the Material Design team. You can choose to use, customise
-    or remove these breakpoints based on your needs.
+  paper-fab.error,
+  paper-fab.btn-error,
+  paper-fab[error] {
+    background-color: #ff5722;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #a22700; }
 
-    http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints
-   */
+  paper-fab[disabled] {
+    color: #2f2b16 !important;
+    background: #eceff1 !important; }
 
-  /* mobile-small */
-  @media all and (min-width: 0) and (max-width: 360px) and (orientation: portrait) { }
-  /* mobile-large */
-  @media all and (min-width: 361px) and (orientation: portrait) { }
-  /* mobile-small-landscape */
-  @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
-  /* mobile-large-landscape */
-  @media all and (min-width: 481px) and (orientation: landscape) { }
-  /* tablet-small-landscape */
-  @media all and (min-width: 600px) and (max-width: 960px) and (orientation: landscape) { }
-  /* tablet-large-landscape */
-  @media all and (min-width: 961px) and (orientation: landscape) { }
-  /* tablet-small */
-  @media all and (min-width: 600px) and (orientation: portrait) { }
-  /* tablet-large */
-  @media all and (min-width: 601px) and (max-width: 840px) and (orientation : portrait) { }
-  /* desktop-x-small-landscape */
-  @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
-  /* desktop-x-small */
-  @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) { }
-  /* desktop-small-landscape */
-  @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) { }
-  /* desktop-small */
-  @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) { }
-  /* desktop-medium-landscape */
-  @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) { }
-  /* desktop-medium */
-  @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) { }
-  /* desktop-large */
-  @media all and (min-width: 1281px) and (max-width: 1600px) { }
-  /* desktop-xlarge */
-  @media all and (min-width: 1601px) and (max-width: 1920px) { }
+  section.hero paper-menu,
+  section[hero] paper-menu {
+    --paper-menu-background-color: #ffffff; }
+
+  paper-tabs {
+    background-color: #ffffff;
+    color: #243238; }
+
 </style>

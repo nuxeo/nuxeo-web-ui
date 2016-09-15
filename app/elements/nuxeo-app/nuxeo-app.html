@@ -92,7 +92,7 @@ Contributors:
 
       .logo {
         background: rgba(255,255,255,0.9);
-        border-right: var(--nuxeo-border);
+        border-right: 1px solid var(--divider-color);
         height: 58px;
         padding: 17px 16px;
         position: fixed;
@@ -111,19 +111,18 @@ Contributors:
       }
 
       #sidebar {
-        background-color: #fff;
         overflow-y: auto;
       }
 
-      #sidebar paper-toolbar {
-        background-color: var(--nuxeo-sidebar-background);
+      paper-menu {
+        @apply(--nuxeo-sidebar);
         color: var(--nuxeo-sidebar-actions);
         width: 250px;
       }
 
       #sidebar ::content .item:hover,
       #sidebar ::content .list-item:hover {
-        background-color: var(--nuxeo-container-hover);
+        background-color: var(--light-primary-color);
       }
 
       #sidebar > div {
@@ -131,7 +130,7 @@ Contributors:
       }
 
       #sidebar section {
-        border-right: var(--nuxeo-border);
+        border-right: 1px solid var(--divider-color);
       }
 
       #sidebar .content {
@@ -160,7 +159,7 @@ Contributors:
       }
 
       #sidebar::content .item {
-        border-bottom: var(--nuxeo-border);
+        border-bottom: 1px solid var(--divider-color);
         display: block;
       }
 
@@ -213,7 +212,7 @@ Contributors:
         z-index: 100;
         padding: 60px 0;
         overflow: auto;
-        background-color: var(--nuxeo-secondary-color);
+        background-color: var(--dark-primary-color);
       }
 
       .side-nav paper-icon-button {
@@ -262,7 +261,6 @@ Contributors:
         font-size: 1.2rem;
         margin: 0 0 .4em;
         padding-bottom: 8px;
-        border-bottom: var(--nuxeo-border);
       }
 
       nuxeo-document-create-button.admin {
