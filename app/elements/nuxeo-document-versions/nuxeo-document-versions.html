@@ -27,9 +27,8 @@ Contributors:
 @element nuxeo-document-versions
 -->
 <dom-module id="nuxeo-document-versions">
-
   <template>
-    <style is="custom-style" include="shared-styles">
+    <style>
       :host {
         display: inline-block;
       }
@@ -93,6 +92,10 @@ Contributors:
         top: 0;
         padding: 0;
         margin: 0;
+      }
+
+      .tag {
+        @apply(--nuxeo-tag);
       }
 
     </style>

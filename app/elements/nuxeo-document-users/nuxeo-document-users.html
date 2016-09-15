@@ -25,14 +25,17 @@ Contributors:
 @element nuxeo-document-users
 -->
 <dom-module id="nuxeo-document-users">
-
   <template>
-    <style is="custom-style" include="shared-styles">
+    <style>
       .icon {
         --iron-icon-height: .9rem;
         --iron-icon-width: .9rem;
         margin-right: .2rem;
         @apply(--nuxeo-document-users-icon-theme);
+      }
+
+      .tag {
+        @apply(--nuxeo-tag);
       }
     </style>
 

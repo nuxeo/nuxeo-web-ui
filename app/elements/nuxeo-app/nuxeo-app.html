@@ -30,7 +30,66 @@ Contributors:
 -->
 <dom-module id="nuxeo-app">
   <template>
-    <style is="custom-style" include="shared-styles">
+    <style>
+
+      /* --
+      Header page and Header subview
+      -- */
+      paper-header-panel {
+        --paper-header-panel-body: {
+          background-color: var(--nuxeo-page-background);
+        };
+        --paper-header-panel-shadow: {
+          box-shadow: none;
+        };
+        --paper-header-panel-waterfall-container: {
+          display: -webkit-flex;
+          display: flex;
+        };
+        height: 100vh;
+      }
+
+      paper-header-panel ::content .content {
+        padding: 2.5em 2em;
+      }
+
+      paper-header-panel ::content #mainContainer {
+        background-color: var(--nuxeo-page-background);
+      }
+
+      paper-header-panel ::content .paper-header {
+        height: 59px;
+        color: var(--nuxeo-header-title-color);
+        background: var(--nuxeo-header-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        font-size: 1.05em;
+        font-weight: 600;
+        padding: 0 4.3em 0 1.7em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      @media (max-width: 1024px) {
+        paper-header-panel ::content .content {
+          padding: 2em .5em;
+        }
+      }
+
+      paper-header-panel ::content paper-toolbar {
+        color: var(--nuxeo-title-color);
+        width: 100%;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      paper-header-panel .paper-header ::content paper-icon-button:hover,
+      paper-header-panel .paper-header ::content iron-icon:hover,
+      paper-header-panel .paper-header ::content paper-icon-button:focus,
+      paper-header-panel .paper-header ::content iron-icon:focus {
+        color: var(--nuxeo-header-actions-hover);
+        fill: var(--nuxeo-header-actions-hover);
+      }
+
       .logo {
         background: rgba(255,255,255,0.9);
         border-right: var(--nuxeo-border);
@@ -50,7 +109,6 @@ Contributors:
       iron-collapse {
         overflow: scroll;
       }
-
 
       #sidebar {
         background-color: #fff;
@@ -174,13 +232,7 @@ Contributors:
       }
 
       .side-nav paper-icon-button:focus ::content iron-icon {
-        fill: #fff; }
-
-      paper-menu {
-        --paper-menu-focused-item-after: {
-          background-color: rgba(0,0,0,.15);
-          color: #fff;
-        };
+        fill: #fff;
       }
 
       .side-nav .profile-icon {
@@ -190,6 +242,13 @@ Contributors:
         height: 59px;
         background-color: var(--nuxeo-sidebar-background);
         box-shadow: -2px -2px 1px rgba(0,0,0,0.1);
+      }
+
+      paper-menu {
+        --paper-menu-focused-item-after: {
+          background-color: rgba(0,0,0,.15);
+          color: #fff;
+        };
       }
 
       ::content paper-card {

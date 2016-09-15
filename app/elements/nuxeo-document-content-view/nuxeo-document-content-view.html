@@ -28,8 +28,7 @@ Contributors:
 <dom-module id="nuxeo-document-content-view">
   <template>
 
-    <style is="custom-style" include="shared-styles">
-
+    <style>
       .main {
         @apply(--layout-vertical);
         @apply(--layout-fit);
@@ -137,6 +136,10 @@ Contributors:
         border-radius: 20px;
         box-sizing: border-box;
         margin-right: 8px;
+      }
+
+      .tag {
+        @apply(--nuxeo-tag);
       }
 
     </style>

@@ -27,7 +27,7 @@ Contributors:
 <dom-module id="nuxeo-document-grid-thumbnail">
   <template>
 
-    <style is="custom-style" include="shared-styles">
+    <style>
       .bubbleBox {
         display: block;
         margin: 0 .4em .8em;
@@ -139,6 +139,10 @@ Contributors:
         border: 2px solid var(--nuxeo-button-primary);
         background-color: var(--nuxeo-button-primary);
         cursor: pointer;
+      }
+
+      .tag {
+        @apply(--nuxeo-tag);
       }
 
     </style>

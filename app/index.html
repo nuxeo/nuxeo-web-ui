@@ -61,20 +61,19 @@ limitations under the License.
       lazyRegister: true
     };
 
+    // switch to shadow dom
     function getQueryParam(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.href);
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
     }
-
     if (getQueryParam('dom') == 'shadow') {
       window.Polymer.dom = 'shadow';
     }
 
-    // append theme file
-    var theme = localStorage.getItem('theme') || 'default';
-    var link = document.createElement('link')
-    link.setAttribute('rel', 'import')
-    link.setAttribute('href', 'styles/' + theme + '-theme.html');
+    // apply theme
+    var link = document.createElement('link');
+    link.setAttribute('rel', 'import');
+    link.setAttribute('href', 'styles/' + (localStorage.getItem('theme') || 'default') + '-theme.html');
     document.getElementsByTagName('head')[0].appendChild(link);
   </script>
 
@@ -99,9 +98,6 @@ limitations under the License.
   <!-- endreplace-->
 
   <link rel="import" href="elements/nuxeo-drive/nuxeo-drive.html">
-
-  <!-- For shared styles, shared-styles.html import in elements.html -->
-  <style is="custom-style" include="shared-styles"></style>
 
 </head>
 

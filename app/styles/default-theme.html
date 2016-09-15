@@ -120,20 +120,49 @@ limitations under the License.
       padding: 1em;
       margin: 0;
       white-space: nowrap;
-    }
+    };
+
+    --nuxeo-tag: {
+      display: inline-block;
+      text-transform: uppercase;
+      background-color: var(--nuxeo-tag-background);
+      color: var(--nuxeo-tag-text);
+      padding: .2rem .4rem;
+      margin: 0 .3em .1em 0;
+      font-size: .8em;
+      border-radius: 2px;
+      line-height: initial;
+      text-decoration: none;
+    };
+
+    --paper-tooltip: {
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: var(--nuxeo-secondary-color);
+    };
+
+    --paper-card: {
+      box-shadow: 0 0 1px rgba(0,0,0,0.34);
+      background-color: #fff;
+    };
 
   }
 
-  /* General styles */
-
-  #drawerToolbar {
-    color: var(--secondary-text-color);
-    background-color: var(--drawer-menu-color);
-    border-bottom: var(--drawer-toolbar-border-color);
+  body {
+    background: var(--nuxeo-page-background);
+    font-family: var(--nuxeo-app-font);
+    font-size: 15px;
+    color: var(--nuxeo-text-default);
+    margin: 0;
   }
 
-  paper-scroll-header-panel {
-    height: 100%;
+  a {
+    color: var(--nuxeo-link-color);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--nuxeo-link-hover-color);
   }
 
   paper-material {
@@ -145,13 +174,36 @@ limitations under the License.
     background: white;
   }
 
+  paper-button:hover,
+  paper-button:focus {
+    color: var(--nuxeo-link-hover-color);
+  }
+
+  paper-button.primary {
+    background-color: var(--nuxeo-button-primary);
+    color: #fff;
+  }
+
+  paper-button.primary:hover,
+  paper-button.primary:focus {
+    background-color: var(--nuxeo-button-primary-focus);
+    font-weight: inherit;
+    color: #fff !important;
+  }
+
+  paper-button.disabled {
+    color: white;
+  }
+
+  paper-menu a > *,
+  paper-menu paper-item > *,
+  paper-menu paper-icon-item > * {
+    pointer-events: none;
+  }
+
   paper-menu iron-icon {
     margin-right: 33px;
     opacity: 0.54;
-  }
-
-  .paper-menu > .iron-selected {
-    color: var(--default-primary-color);
   }
 
   paper-menu a {
@@ -164,9 +216,17 @@ limitations under the License.
     padding: 0 16px;
   }
 
-  /* Height of the scroll area */
-  .content {
-    height: 900px;
+  paper-item,
+  paper-icon-item {
+    font-size: .9em;
+    min-height: 2.5em;
+  }
+
+  paper-item iron-icon,
+  paper-icon-item iron-icon {
+    width: 1em;
+    height: 1em;
+    margin-right: .5em;
   }
 
   /* Breakpoints */
@@ -185,11 +245,6 @@ limitations under the License.
       font-size: 24px;
       font-weight: 400;
     }
-
-    #drawer .paper-toolbar {
-      margin-left: 16px;
-    }
-
   }
 
   /* Tablet+ */

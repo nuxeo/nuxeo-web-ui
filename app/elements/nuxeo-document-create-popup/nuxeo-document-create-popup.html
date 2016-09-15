@@ -27,12 +27,24 @@ Contributors:
 @element nuxeo-document-create-popup
 -->
 <dom-module id="nuxeo-document-create-popup">
-
   <template>
-    <style is="custom-style" include="shared-styles">
+    <style>
+
       :host {
         --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
         display: block;
+      }
+
+      nuxeo-path-suggestion {
+        --nuxeo-path-suggestion-results: {
+          z-index: 200;
+        };
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-underline-focus: {
+          display: none;
+        };
       }
 
       #holder {

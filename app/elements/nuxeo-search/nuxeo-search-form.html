@@ -27,165 +27,166 @@ Contributors:
  -->
 <dom-module id="nuxeo-search-form">
   <template>
-    <style is="custom-style" include="shared-styles">
-    :host {
-      @apply(--layout-vertical);
-      @apply(--layout-flex);
-      display: block;
-    }
-    nuxeo-data-list {
-      height: calc(100vh - 61px);
-    }
+    <style>
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+        display: block;
+      }
 
-    nuxeo-data-list {
-      display: block;
-      position: relative;
-    }
+      nuxeo-data-list {
+        height: calc(100vh - 61px);
+      }
 
-    .filters {
-      padding: 1em 0;
-      height: calc(100vh - 61px);
-      overflow: auto;
-    }
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+      }
 
-    .switch {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 60px;
-      height: 59px;
-      padding: 16px;
-      z-index: 101;
-      border: var(--nuxeo-border);
-      border-top: none;
-      background-color: var(--nuxeo-light-background);
-    }
+      .filters {
+        padding: 1em 0;
+        height: calc(100vh - 61px);
+        overflow: auto;
+      }
 
-    .switch:hover {
-      background-color: var(--nuxeo-button-primary);
-      color: var(--nuxeo-button-primary-text);
-    }
+      .switch {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60px;
+        height: 59px;
+        padding: 16px;
+        z-index: 101;
+        border: var(--nuxeo-border);
+        border-top: none;
+        background-color: var(--nuxeo-light-background);
+      }
 
-    paper-dropdown-menu {
-      margin-left: 1em;
-    }
+      .switch:hover {
+        background-color: var(--nuxeo-button-primary);
+        color: var(--nuxeo-button-primary-text);
+      }
 
-    ::content .unfocused-line.paper-input-container {
-      background-color: transparent;
-    }
+      paper-dropdown-menu {
+        margin-left: 1em;
+      }
 
-    /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
-    .content {
-      font-size: .9rem;
-      @apply(--layout-flex);
-      @apply(--layout-vertical);
-      height: calc(100vh - 61px);
-      width: 293px;
-    }
+      ::content .unfocused-line.paper-input-container {
+        background-color: transparent;
+      }
 
-    .header {
-      height: 59px;
-      background-color: var(--nuxeo-light-background);
-      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
-    }
+      /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
+      .content {
+        font-size: .9rem;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        height: calc(100vh - 61px);
+        width: 293px;
+      }
 
-    .header h1 {
-      font-size: 1rem;
-      margin: .1em .2em 0 1.1em;
-      font-weight: 500;
-    }
+      .header {
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
 
-    .header h1,
-    .header ::content .input-content.paper-input-container input {
-      color: var(--nuxeo-tag-text);
-      text-transform: uppercase;
-    }
-    /* End TODO Lise :) */
+      .header h1 {
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
+      }
 
-    .row {
-      box-sizing: border-box;
-      margin-bottom: 1rem;
-      padding: 0 1rem;
-      width: 100%;
-    }
+      .header h1,
+      .header ::content .input-content.paper-input-container input {
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+      }
 
-    .clear {
-      background-color: #fafafa;
-      border-color: #fafafa;
-      width: 100%;
-    }
+      /* End TODO Lise :) */
 
-    .reset {
-      width: 100%;
-    }
+      .row {
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        padding: 0 1rem;
+        width: 100%;
+      }
 
-    .ellipsis {
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+      .clear {
+        background-color: #fafafa;
+        border-color: #fafafa;
+        width: 100%;
+      }
 
-    .queue-thumbnail {
-      height: 32px;
-      width: 32px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      margin-right: 8px;
-    }
+      .reset {
+        width: 100%;
+      }
 
-    .queue-thumbnail ::content img {
-      height: 32px;
-      width: 32px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      margin-right: 8px;
-    }
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
 
-    #saveDialog,
-    #renameDialog {
-      width: 400px;
-    }
+      .queue-thumbnail {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
 
-    :host[loading] .loadable {
-      opacity: 0.25;
-    }
+      .queue-thumbnail ::content img {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
 
-    :host[loading] paper-spinner-lite {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      --paper-spinner-color: var(--default-primary-color);
-    }
+      #saveDialog,
+      #renameDialog {
+        width: 400px;
+      }
 
-    .list-item {
-      cursor: pointer;
-      padding: 1em;
-      border-bottom: 1px solid #DDD;
-    }
+      :host[loading] .loadable {
+        opacity: 0.25;
+      }
 
-    .list-item:focus,
-    .list-item.selected:focus {
-      outline: 0;
-      background-color: #ddd;
-    }
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
 
-    .list-item.selected {
-      color: var(--paper-blue-600);
-      background-color: var(--google-grey-300);
-      border-bottom: 1px solid #ccc;
-    }
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid #DDD;
+      }
 
-    .list-item-detail {
-      margin-left: 40px;
-    }
+      .list-item:focus,
+      .list-item.selected:focus {
+        outline: 0;
+        background-color: #ddd;
+      }
 
-    .list-item-property {
-      color: var(--nuxeo-text-light);
-      margin-right: .2em;
-    }
+      .list-item.selected {
+        color: var(--paper-blue-600);
+        background-color: var(--google-grey-300);
+        border-bottom: 1px solid #ccc;
+      }
 
+      .list-item-detail {
+        margin-left: 40px;
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>

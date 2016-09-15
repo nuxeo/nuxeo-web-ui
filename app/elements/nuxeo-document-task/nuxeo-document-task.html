@@ -27,9 +27,8 @@ Contributors:
 @element nuxeo-document-task
 -->
 <dom-module id="nuxeo-document-task">
-
   <template>
-    <style is="custom-style" include="shared-styles">
+    <style>
       :host {
         display: block;
       }
@@ -81,6 +80,11 @@ Contributors:
         margin-bottom: 0.5em;
         padding: .5em 0;
       }
+
+      .tag {
+        @apply(--nuxeo-tag);
+      }
+
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
