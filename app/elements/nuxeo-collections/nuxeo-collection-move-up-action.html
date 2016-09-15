@@ -1,0 +1,82 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-collection-move-down-action`
+@group Nuxeo UI
+@element nuxeo-collection-move-down-action
+-->
+<dom-module id="nuxeo-collection-move-down-action">
+
+
+  <template>
+
+    <style is="custom-style" include="shared-styles">
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <nuxeo-operation op="Document.MoveCollectionMember"
+                     id="moveUpOp">
+    </nuxeo-operation>
+
+    <paper-icon-button noink
+      id="downButton"
+      icon="icons:arrow-downward">
+    </paper-icon-button>
+    <paper-tooltip for="downButton">[[i18n('ui.collections.moveDown', 'Move down')]]</paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-collection-move-down-action',
+        properties: {
+          documents: {
+            type: Array,
+            notify: true,
+            value: []
+          }
+        },
+        behaviors: [Nuxeo.I18nBehavior],
+
+        listeners: {
+          'tap': 'moveUp',
+        },
+
+        moveUp: function() {
+          console.log('moveUp');
+          if (this.documents && this.documents.length === 1) {
+            this.$.moveUpOp.input = this.documents[0].uid;
+          }
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

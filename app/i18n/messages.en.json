@@ -349,6 +349,8 @@
   "ui.browse.noDocumentWhenFiltered": "There are no documents with these search criteria.",
   "ui.collections.noDocument": "There are no documents in this collection. You can add documents from the document view or in bulk from a list view.",
   "ui.collections.noDocumentWhenFiltered": "There are no documents in this collection with these criteria.",
+  "ui.collections.moveUp": "Move up",
+  "ui.collections.moveDown": "Move down",
   "label.ui.aggregate.to_500_px": "Less than 500px",
   "label.ui.aggregate.from_500_to_1500_px": "Between 500px and 1500px",
   "label.ui.aggregate.from_1500_to_2000_px": "Between 1500px and 2000px",

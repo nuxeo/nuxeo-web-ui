@@ -146,12 +146,7 @@ Contributors:
             </a>
           </div>
           <div class="horizontal center flex layout end-justified actions">
-            <nuxeo-add-to-collection-documents-button documents="{{selectedItems}}">
-            </nuxeo-add-to-collection-documents-button>
-            <nuxeo-clipboard-documents-button documents="{{selectedItems}}">
-            </nuxeo-clipboard-documents-button>
-            <nuxeo-delete-documents-button documents="{{selectedItems}}">
-            </nuxeo-delete-documents-button>
+            <content select=".actions"></content>
             <a class="selectionLink" on-tap="clearSelection">
               <span>[[i18n('command.clear.selection', 'Clear')]]</span>
             </a>
@@ -183,11 +178,10 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         observers: [
-          '_observeSelectedItems(selectedItems.*)'
+          '_observeSelectedItems(selectedItems)'
         ],
 
         _observeSelectedItems: function() {
-          // TODO, improve because called too many times in case of Select/Unselect all
           this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
         },
 

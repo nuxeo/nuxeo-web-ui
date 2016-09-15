@@ -38,7 +38,12 @@ Contributors:
         <span class="flex">[[i18n('ui.searchResults.results', 'Search Results')]]</span>
         <content select=".actions"></content>
       </div>
-      <nuxeo-results id="results" name="[[name]]" display-mode="[[displayMode]]"></nuxeo-results>
+
+      <nuxeo-results id="results" name="[[name]]" display-mode="[[displayMode]]">
+        <div class="actions">
+          <nuxeo-slot slot="SEARCH_ACTIONS" />
+        </div>
+      </nuxeo-results>
     </paper-header-panel>
 
   </template>

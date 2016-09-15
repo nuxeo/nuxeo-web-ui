@@ -170,7 +170,8 @@ Contributors:
             filters="{{filters}}"
             selected-items="{{gridSelectedItems}}"
             selection-enabled>
-            <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh">
+            <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh" slot="[[slot]]">
+              <content select=".actions"></content>
             </nuxeo-selection-toolbar>
             <template>
               <nuxeo-document-grid-thumbnail class="grid-box"
@@ -190,7 +191,8 @@ Contributors:
             empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
             selected-items="{{tableSelectedItems}}"
             selection-enabled>
-            <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh">
+            <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh" slot="[[slot]]">
+              <content select=".actions"></content>
             </nuxeo-selection-toolbar>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
               <template>

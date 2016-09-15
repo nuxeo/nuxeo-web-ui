@@ -80,10 +80,14 @@ Contributors:
       }
     </style>
 
-    <template is="dom-if" if="[[_isAvailable(documents.length)]]">
+    <!-- this does not work anymore with slot, the changes on documents passed by the slot model are detected
+    <template is="dom-if" if="[[_isAvailable(documents.*)]]">
+    -->
       <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
       <paper-tooltip for="addColBut">[[i18n('ui.addToCollectionButton.tooltip','Add to Collection')]]</paper-tooltip>
+    <!--
     </template>
+    -->
 
     <paper-dialog id="dialog" on-iron-overlay-closed="_resetPopup" no-auto-focus>
       <h1>[[i18n('ui.addToCollectionButton.dialog.heading','Add to Collection')]]</h1>
@@ -137,7 +141,8 @@ Contributors:
         documents: {
           type: Array,
           notify: true,
-          value: []
+          value: [],
+          observer: '_pouet'
         },
 
         collection: {
@@ -168,7 +173,12 @@ Contributors:
       },
       behaviors: [Nuxeo.I18nBehavior],
 
+      _pouet: function() {
+          console.log('pouet');
+      },
+
       _isAvailable: function() {
+        console.log('_isAvailable');
         if (this.documents && this.documents.length > 0) {
           return this.documents.every(function(doc) {
             return doc.facets.indexOf('NotCollectionMember') === -1;

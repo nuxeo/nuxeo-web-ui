@@ -273,9 +273,7 @@ Contributors:
           <div id="queue" hidden$="{{!_isDisplayMembers}}">
             <nuxeo-page-provider id="memberProvider"
                provider="default_content_collection"
-               enrichers="thumbnail"
-               is-next-page-available="{{isNextPageAvailable}}"
-               current-page-size="{{currentPageSize}}">
+               enrichers="thumbnail">
             </nuxeo-page-provider>
 
             <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
