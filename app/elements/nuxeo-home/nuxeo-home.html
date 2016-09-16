@@ -31,6 +31,13 @@ Contributors:
         height: 100vh;
       }
 
+      ::content a, ::content a:active,
+      ::content a:visited, ::content a:focus {
+        @apply(--nuxeo-link); }
+
+      ::content a:hover {
+        @apply(--nuxeo-link-hover); }
+
       .flex-layout {
         display: flex;
         flex-direction: row;
