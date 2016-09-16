@@ -460,7 +460,6 @@ Contributors:
 
         _observeSelectedItems: function() {
           this.debounce('_observeSelectedItems', function() {
-            // ugly but a selectAll on datatable/iron-list will notify many times
             this.$.toolbar.selectedItems = [];
             if (this.displayMode === 'table') {
               this.$.toolbar.set('selectedItems', this.$.datatable.selectedItems);
@@ -468,6 +467,10 @@ Contributors:
               this.$.toolbar.set('selectedItems', this.$.datagrid.selectedItems);
             }
           }.bind(this), 50);
+        },
+
+        get items() {
+          return this.$.datatable.items;
         }
 
       });

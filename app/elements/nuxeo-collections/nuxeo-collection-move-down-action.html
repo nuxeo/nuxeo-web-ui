@@ -23,7 +23,7 @@ Contributors:
 @group Nuxeo UI
 @element nuxeo-collection-move-up-action
 -->
-<dom-module id="nuxeo-collection-move-up-action">
+<dom-module id="nuxeo-collection-move-down-action">
 
 
   <template>
@@ -40,9 +40,9 @@ Contributors:
 
     <paper-icon-button noink
       id="upButton"
-      icon="icons:arrow-upward">
+      icon="icons:arrow-downward">
     </paper-icon-button>
-    <paper-tooltip for="upButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
+    <paper-tooltip for="upButton">[[i18n('ui.collections.moveDown', 'Move down')]]</paper-tooltip>
 
   </template>
 
@@ -50,7 +50,7 @@ Contributors:
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-collection-move-up-action',
+        is: 'nuxeo-collection-move-down-action',
         properties: {
           documents: {
             type: Array,
@@ -61,11 +61,14 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         listeners: {
-          'tap': 'addToClipBoard',
+          'tap': 'moveDown',
         },
 
-        addToClipBoard: function() {
-          this.fire('addToClipboard', {documents: this.documents});
+        moveDown: function() {
+          console.log('moveDown');
+          if (this.documents && this.documents.length === 1) {
+            this.$.moveUpOp.input = this.documents[0].uid;
+          }
         }
 
       });

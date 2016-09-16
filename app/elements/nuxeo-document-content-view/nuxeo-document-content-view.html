@@ -160,6 +160,11 @@ Contributors:
     </nuxeo-page-provider>
 
     <div class="main">
+
+      <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh" on-clear-selected-items="_clearSelectedItems">
+        <content select=".actions"></content>
+      </nuxeo-selection-toolbar>
+
       <nuxeo-content-view-actions context="[[actionContext]]"></nuxeo-content-view-actions>
 
       <div id="dropzone" class="content-view">
@@ -170,9 +175,6 @@ Contributors:
             filters="{{filters}}"
             selected-items="{{gridSelectedItems}}"
             selection-enabled>
-            <nuxeo-selection-toolbar selected-items="[[gridSelectedItems]]" class="toolbar" on-refresh="_refresh" slot="[[slot]]">
-              <content select=".actions"></content>
-            </nuxeo-selection-toolbar>
             <template>
               <nuxeo-document-grid-thumbnail class="grid-box"
                 tabindex$="{{tabIndex}}"
@@ -191,9 +193,6 @@ Contributors:
             empty-label-when-filtered="[[i18n('ui.browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
             selected-items="{{tableSelectedItems}}"
             selection-enabled>
-            <nuxeo-selection-toolbar selected-items="[[tableSelectedItems]]" class="toolbar" on-refresh="_refresh" slot="[[slot]]">
-              <content select=".actions"></content>
-            </nuxeo-selection-toolbar>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
               <template>
                 <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
@@ -329,6 +328,10 @@ Contributors:
             type: Object,
             value: {},
             notify: true
+          },
+          selectedItems: {
+            type: Object,
+            notify: true
           }
         },
 
@@ -345,7 +348,8 @@ Contributors:
           '_refresh(params)',
           '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*)',
           '_displayModeChanged(displayMode)',
-          'restoreSettings(_settings)'
+          'restoreSettings(_settings)',
+          '_observeSelectedItems(tableSelectedItems.length, gridSelectedItems.length)'
         ],
 
         ready: function() {
@@ -492,6 +496,21 @@ Contributors:
           this.set('_settings.displayMode', this.displayMode);
           this.set('_settings.tableSettings', this.$.datatable.settings);
           this.$.prefStorage.save();
+        },
+
+        _observeSelectedItems: function() {
+          this.debounce('_observeSelectedItems', function() {
+            this.$.toolbar.selectedItems = [];
+            if (this.displayMode === 'table') {
+              this.$.toolbar.set('selectedItems', this.$.datatable.selectedItems);
+            } else if (this.displayMode === 'grid') {
+              this.$.toolbar.set('selectedItems', this.$.datagrid.selectedItems);
+            }
+          }.bind(this), 50);
+        },
+
+        get items() {
+          return this.$.datatable.items;
         }
 
       });

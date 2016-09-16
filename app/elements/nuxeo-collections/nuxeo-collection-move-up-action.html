@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-collection-move-down-action`
+`nuxeo-collection-move-up-action`
 @group Nuxeo UI
-@element nuxeo-collection-move-down-action
+@element nuxeo-collection-move-up-action
 -->
-<dom-module id="nuxeo-collection-move-down-action">
+<dom-module id="nuxeo-collection-move-up-action">
 
 
   <template>
@@ -43,10 +43,10 @@ Contributors:
     </nuxeo-operation>
 
     <paper-icon-button noink
-      id="downButton"
-      icon="icons:arrow-downward">
+      id="upButton"
+      icon="icons:arrow-upward">
     </paper-icon-button>
-    <paper-tooltip for="downButton">[[i18n('ui.collections.moveDown', 'Move down')]]</paper-tooltip>
+    <paper-tooltip for="downButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
 
   </template>
 
@@ -54,7 +54,7 @@ Contributors:
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-collection-move-down-action',
+        is: 'nuxeo-collection-move-up-action',
         properties: {
           documents: {
             type: Array,

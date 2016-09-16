@@ -174,10 +174,12 @@ Contributors:
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
           <section name="view">
             <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view provider="advanced_document_content"
-                params="[[cvParams]]"
+              <nuxeo-document-content-view id="browseContent" provider="advanced_document_content"
+                params="[[cvParams]]" selected-items="{{selectedItems}}"
                 document="[[document]]">
-                <nuxeo-slot class="actions" slot="BROWSE_ACTIONS"></nuxeo-slot>
+                <div class="actions">
+                  <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+                </div>
               </nuxeo-document-content-view>
             </template>
 
@@ -232,6 +234,10 @@ Contributors:
           actionContext: {
             type: Object,
             computed: '_actionContext(document)'
+          },
+          browseActionContext: {
+            type: Object,
+            computed: '_browseActionContext(document, selectedItems)'
           }
         },
 
@@ -273,6 +279,10 @@ Contributors:
 
         _actionContext: function() {
           return {document: this.document, clipboard: this.clipboard};
+        },
+
+        _browseActionContext: function() {
+          return {document: this.document, selectedItems: this.selectedItems};
         },
 
         _canDownload: function(document) {

@@ -39,9 +39,9 @@ Contributors:
         <content select=".actions"></content>
       </div>
 
-      <nuxeo-results id="results" name="[[name]]" display-mode="[[displayMode]]">
+      <nuxeo-results id="results" name="[[name]]" display-mode="[[displayMode]]" selected-items="{{selectedItems}}">
         <div class="actions">
-          <nuxeo-slot slot="SEARCH_ACTIONS" />
+          <nuxeo-slot slot="SEARCH_ACTIONS" model="[[actionContext]]"/>
         </div>
       </nuxeo-results>
     </paper-header-panel>
@@ -56,12 +56,23 @@ Contributors:
 
         behaviors: [Nuxeo.I18nBehavior],
 
+        properties: {
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(selectedItems)'
+          }
+        },
+
         set nxProvider(nxProvider) {
           this.$.results.nxProvider = nxProvider;
         },
 
         get nxProvider() {
           return this.$.results.nxProvider;
+        },
+
+        _actionContext: function() {
+          return {selectedItems: this.selectedItems, items: this.$.results.items};
         }
 
       });
