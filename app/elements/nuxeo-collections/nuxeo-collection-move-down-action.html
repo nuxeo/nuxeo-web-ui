@@ -78,10 +78,9 @@ Contributors:
           console.log('moveDown');
           if (this.members && this.members.length === 1 && this.allMembers) {
             var member2 = this.members[0].uid;
-            var i = 0, found = false;
+            var i = 0;
             for (; i < this.allMembers.length; i++) {
               if (this.allMembers[i].uid === member2) {
-                found =true;
                 if (i > 0) {
                   var member1 = this.allMembers[i - 1].uid;
                   this.$.moveDownOp.input = this.collection.uid;
