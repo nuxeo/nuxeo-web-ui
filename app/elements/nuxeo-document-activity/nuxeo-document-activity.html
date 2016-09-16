@@ -32,11 +32,19 @@ Contributors:
       .audit_user a {
         @apply(--nuxeo-document-activity-user-theme);
       }
+
+      .tag {
+        @apply(--nuxeo-tag);
+      }
+
+      .user {
+        @apply(--nuxeo-user);
+      }
     </style>
 
     <template is="dom-repeat" items="[[document.contextParameters.audit]]">
       <p>
-        <span class="audit_user"><a href$="[[urlFor('user', item.principalName)]]">[[_user(item)]]</a>&nbsp;</span>
+        <span class="audit_user"><a class="tag user" href$="[[urlFor('user', item.principalName)]]">[[_user(item)]]</a>&nbsp;</span>
         <span>[[_activity(item)]]</span>
       </p>
     </template>

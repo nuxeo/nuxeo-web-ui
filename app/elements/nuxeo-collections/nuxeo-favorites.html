@@ -29,8 +29,14 @@ Contributors:
   <template>
     <style>
 
-      nuxeo-data-list {
-        min-height: calc(100vh - 61px);
+      a, a:active,
+      a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
 
       .list {
         @apply(--layout-vertical);
@@ -39,6 +45,8 @@ Contributors:
       nuxeo-data-list {
         display: block;
         position: relative;
+        min-height: calc(100vh - 61px)
+      }
 
       .entry {
         @apply(--nuxeo-sidebar-item-theme);

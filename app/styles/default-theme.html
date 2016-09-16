@@ -22,11 +22,11 @@
 
   a, a:active,
   a:visited, a:focus {
-    color: #213f7d;
+    color: var(--nuxeo-link-color);
     text-decoration: none; }
 
   a:hover {
-    color: #00adff;
+    color: var(--nuxeo-link-hover-color);
     text-decoration: underline; }
 
   :root {
@@ -148,6 +148,16 @@
       background-color: #213f7d;
     };
 
+    --nuxeo-link: {
+      color: var(--nuxeo-link-color);
+      text-decoration: none;
+    }
+
+    --nuxeo-link-hover: {
+      color: var(--nuxeo-link-hover-color);
+      text-decoration: underline;
+    }
+
     --nuxeo-sidebar-item-theme: {
       border-bottom: 1px solid var(--divider-color);
       padding: 1em;
@@ -166,6 +176,12 @@
       border-radius: 2px;
       line-height: initial;
       text-decoration: none;
+    };
+
+    --nuxeo-user: {
+      border-radius: 2.5em;
+      text-transform: capitalize;
+      color: var(--nuxeo-link-color);
     };
 
     --paper-tooltip: {

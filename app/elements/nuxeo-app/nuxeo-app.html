@@ -31,6 +31,12 @@ Contributors:
 <dom-module id="nuxeo-app">
   <template>
     <style>
+      a, a:active,
+      a:visited, a:focus {
+        @apply(--nuxeo-link); }
+
+      a:hover {
+        @apply(--nuxeo-link-hover); }
 
       /* --
       Header page and Header subview
