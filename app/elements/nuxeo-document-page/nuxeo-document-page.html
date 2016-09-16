@@ -31,8 +31,14 @@ Contributors:
     <style>
       :host {
         @apply(--layout-flex);
-
       }
+
+      ::content a, ::content a:active,
+      ::content a:visited, ::content a:focus {
+        @apply(--nuxeo-link); }
+
+      ::content a:hover {
+        @apply(--nuxeo-link-hover); }
 
       ::content .attachments {
         margin: 0 -1em -1em;
