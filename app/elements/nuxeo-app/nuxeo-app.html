@@ -126,9 +126,9 @@ Contributors:
         width: 250px;
       }
 
-      #sidebar ::content .item:hover,
-      #sidebar ::content .list-item:hover {
-        background-color: var(--light-primary-color);
+      ::content .item:hover,
+      ::content .list-item:hover {
+        @apply(--nuxeo-block-hover);
       }
 
       #sidebar > div {
