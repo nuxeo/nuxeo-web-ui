@@ -42,11 +42,13 @@ Contributors:
                      id="moveUpOp">
     </nuxeo-operation>
 
-    <paper-icon-button noink
-      id="upButton"
-      icon="icons:arrow-upward">
-    </paper-icon-button>
-    <paper-tooltip for="downButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
+    <template is="dom-if" if="[[_isAvailable(members)]]">
+      <paper-icon-button noink
+        id="upButton"
+        icon="icons:arrow-upward">
+      </paper-icon-button>
+      <paper-tooltip for="downButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
+    </template>
 
   </template>
 
@@ -56,10 +58,14 @@ Contributors:
       Polymer({
         is: 'nuxeo-collection-move-up-action',
         properties: {
-          documents: {
-            type: Array,
-            notify: true,
-            value: []
+          members: {
+            type: Object
+          },
+          allMembers: {
+            type: Object
+          },
+          collection: {
+            type: Object
           }
         },
         behaviors: [Nuxeo.I18nBehavior],
@@ -70,8 +76,32 @@ Contributors:
 
         moveUp: function() {
           console.log('moveUp');
-          if (this.documents && this.documents.length === 1) {
-            this.$.moveUpOp.input = this.documents[0].uid;
+          if (this.members && this.members.length === 1 && this.allMembers) {
+            var member2 = this.members[0].uid;
+            var i = 0, found = false;
+            for (; i < this.allMembers.length; i++) {
+              if (this.allMembers[i].uid === member2) {
+                found =true;
+                if (i > 0) {
+                  var member1 = this.allMembers[i - 1].uid;
+                  this.$.moveUpOp.input = this.collection.uid;
+                  this.$.moveUpOp.params = {
+                    member1: member1,
+                    member2: member2
+                  };
+                  this.$.moveUpOp.execute().then(function() {
+                    this.fire('refresh');
+                  }.bind(this));
+                }
+                break;
+              }
+            }
+          }
+        },
+
+        _isAvailable: function() {
+          if (this.members && this.members.length === 1) {
+            return true;
           }
         }
 

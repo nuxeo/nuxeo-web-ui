@@ -19,9 +19,9 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-collection-move-up-action`
+`nuxeo-collection-move-down-action`
 @group Nuxeo UI
-@element nuxeo-collection-move-up-action
+@element nuxeo-collection-move-down-action
 -->
 <dom-module id="nuxeo-collection-move-down-action">
 
@@ -38,11 +38,17 @@ Contributors:
       }
     </style>
 
-    <paper-icon-button noink
-      id="upButton"
-      icon="icons:arrow-downward">
-    </paper-icon-button>
-    <paper-tooltip for="upButton">[[i18n('ui.collections.moveDown', 'Move down')]]</paper-tooltip>
+    <nuxeo-operation op="Document.MoveCollectionMember"
+                     id="moveDownOp">
+    </nuxeo-operation>
+
+    <template is="dom-if" if="[[_isAvailable(members)]]">
+      <paper-icon-button noink
+        id="downButton"
+        icon="icons:arrow-downward">
+      </paper-icon-button>
+      <paper-tooltip for="downButton">[[i18n('ui.collections.moveDown', 'Move down')]]</paper-tooltip>
+    </template>
 
   </template>
 
@@ -52,10 +58,14 @@ Contributors:
       Polymer({
         is: 'nuxeo-collection-move-down-action',
         properties: {
-          documents: {
-            type: Array,
-            notify: true,
-            value: []
+          members: {
+            type: Object
+          },
+          allMembers: {
+            type: Object
+          },
+          collection: {
+            type: Object
           }
         },
         behaviors: [Nuxeo.I18nBehavior],
@@ -66,8 +76,32 @@ Contributors:
 
         moveDown: function() {
           console.log('moveDown');
-          if (this.documents && this.documents.length === 1) {
-            this.$.moveUpOp.input = this.documents[0].uid;
+          if (this.members && this.members.length === 1 && this.allMembers) {
+            var member2 = this.members[0].uid;
+            var i = 0, found = false;
+            for (; i < this.allMembers.length; i++) {
+              if (this.allMembers[i].uid === member2) {
+                found =true;
+                if (i > 0) {
+                  var member1 = this.allMembers[i - 1].uid;
+                  this.$.moveDownOp.input = this.collection.uid;
+                  this.$.moveDownOp.params = {
+                    member1: member1,
+                    member2: member2
+                  };
+                  this.$.moveDownOp.execute().then(function() {
+                    this.fire('refresh');
+                  }.bind(this));
+                }
+                break;
+              }
+            }
+          }
+        },
+
+        _isAvailable: function() {
+          if (this.members && this.members.length === 1) {
+            return true;
           }
         }
 
