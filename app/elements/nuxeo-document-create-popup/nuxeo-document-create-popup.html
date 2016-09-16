@@ -139,12 +139,14 @@ Contributors:
 
         toggleDialogCreate: function(type) {
           this.selectedTab = 'create';
+          this._showTabs = false;
           this.$.simpleCreation.selectedDocType = type;
           this.toggleDialog();
         },
 
         toggleDialogImport: function(files) {
           this.selectedTab = 'import';
+          this._showTabs = false;
           this.$.bulkCreation.init(files);
           this.toggleDialog();
         },

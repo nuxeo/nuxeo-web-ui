@@ -17,7 +17,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="nuxeo-document-creation-behavior.html">
+<link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
 
 <!--
 `nuxeo-document-creation-form`
@@ -176,6 +176,8 @@ Contributors:
 
     </iron-pages>
 
+    <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
+
   </template>
 
   <script>
@@ -218,6 +220,7 @@ Contributors:
           var name = this._sanitizeName(this.document.properties['dc:title']);
           this.document.name = name;
           docRequest.post().then(function(response) {
+            this.$.creationStats.storeType(this.selectedDocType);
             this._clear();
             page('/browse' + response.path);
             this._notify(response);

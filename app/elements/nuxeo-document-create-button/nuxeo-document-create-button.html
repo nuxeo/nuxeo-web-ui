@@ -17,7 +17,7 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-document-creation/nuxeo-document-metadata-behavior.html">
 
 <!--
 `nuxeo-document-create-button`
@@ -28,20 +28,47 @@ Contributors:
   <template>
     <style>
       paper-fab {
-        position: absolute;
-        bottom: 32px;
-        right: 32px;
+        width: var(--nuxeo-document-create-button-width, 56px);
+        height: var(--nuxeo-document-create-button-height, 56px);
         color: #ffffff;
         --paper-fab-background: var(--nuxeo-primary-color);
         --paper-fab-keyboard-focus-background: var(--dark-primary-color);
         @apply(--nuxeo-document-create-button);
+        transition: color 0.25s ease-in-out;
+      }
+
+      #tray {
+        position: absolute;
+        bottom: 32px;
+        right: 32px;
+      }
+
+      #shortcuts {
+        opacity: 0;
+        transition: opacity 0.25s ease-in-out;
+      }
+
+      #shortcuts.open {
+        opacity: 1;
+      }
+
+      ::content nuxeo-document-create-shortcuts {
+        --nuxeo-document-create-shortcut-margin: 0 0 16px 0;
       }
     </style>
 
-    <paper-fab id="createBtn" icon="add" on-tap="_toggle"></paper-fab>
-    <paper-tooltip for="createBtn" position="left">[[i18n('title.create.document', 'Add Content')]]</paper-tooltip>
+    <div id="tray" on-mouseenter="_onMouseEnter" on-mouseleave="_onMouseLeave">
+      <div id="shortcuts" class$="[[_animateOpen(shortcutsVisible)]]">
+        <nuxeo-slot slot="DOCUMENT_CREATE_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+      </div>
 
-    <paper-toast id="toast"></paper-toast>
+      <paper-fab id="createBtn"
+                 icon="add"
+                 on-tap="_displayWizard"></paper-fab>
+       <paper-tooltip for="createBtn" position="left">[[i18n('title.create.document', 'Add Content')]]</paper-tooltip>
+    </div>
+
+    <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
   </template>
 
@@ -55,13 +82,49 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
-          parent: {
-            type: Object
+          shortcutsVisible: {
+            type: Boolean,
+            value: false
+          },
+          actionContext: {
+            type: Object,
+            value: function() {
+              return {};
+            },
+            computed: '_actionContext(shortcutsVisible)'
           }
         },
 
-        _toggle: function() {
+        listeners: {
+          'create-document': '_hideShortcuts'
+        },
+
+        _actionContext: function() {
+          return {hostVisible: this.shortcutsVisible};
+        },
+
+        _showShortcuts: function() {
+          this.shortcutsVisible = true;
+        },
+
+        _hideShortcuts: function() {
+          this.shortcutsVisible = false;
+        },
+
+        _onMouseEnter: function() {
+          this._showShortcuts();
+        },
+
+        _onMouseLeave: function() {
+          this._hideShortcuts();
+        },
+
+        _displayWizard: function() {
           this.fire('create-document');
+        },
+
+        _animateOpen: function() {
+          return this.shortcutsVisible ? 'open' : '';
         }
       });
     })();
