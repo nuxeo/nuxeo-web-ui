@@ -19,7 +19,13 @@ Contributors:
 
 <nuxeo-slot-content name="defaultCollectionActions" slot="COLLECTION_ACTIONS">
   <template>
-    <nuxeo-collection-move-up-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]"></nuxeo-collection-move-up-action>
-    <nuxeo-collection-move-down-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]"></nuxeo-collection-move-down-action>
+    <nuxeo-collection-move-top-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
+    </nuxeo-collection-move-top-action>
+    <nuxeo-collection-move-up-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
+    </nuxeo-collection-move-up-action>
+    <nuxeo-collection-move-down-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
+    </nuxeo-collection-move-down-action>
+    <nuxeo-collection-move-bottom-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
+    </nuxeo-collection-move-bottom-action>
   </template>
 </nuxeo-slot-content>

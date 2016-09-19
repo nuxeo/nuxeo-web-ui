@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-collection-move-up-action`
+`nuxeo-collection-move-bottom-action`
 @group Nuxeo UI
-@element nuxeo-collection-move-up-action
+@element nuxeo-collection-move-bottom-action
 -->
-<dom-module id="nuxeo-collection-move-up-action">
+<dom-module id="nuxeo-collection-move-bottom-action">
 
 
   <template>
@@ -39,15 +39,15 @@ Contributors:
     </style>
 
     <nuxeo-operation op="Document.MoveCollectionMember"
-                     id="moveUpOp">
+                     id="moveBottomOp">
     </nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
       <paper-icon-button noink
-        id="upButton"
-        icon="icons:arrow-upward">
+        id="bottomButton"
+        icon="editor:vertical-align-bottom">
       </paper-icon-button>
-      <paper-tooltip for="upButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
+      <paper-tooltip for="bottomButton">[[i18n('ui.collections.moveBottom', 'Move bottom')]]</paper-tooltip>
     </template>
 
   </template>
@@ -56,7 +56,7 @@ Contributors:
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-collection-move-up-action',
+        is: 'nuxeo-collection-move-bottom-action',
         properties: {
           members: {
             type: Object
@@ -77,25 +77,25 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         listeners: {
-          'tap': 'moveUp',
+          'tap': 'moveBottom',
         },
 
-        moveUp: function() {
+        moveBottom: function() {
           if (this.members && this.members.length === 1 && this.allMembers) {
             var member2 = this.members[0].uid;
             var i = 0;
             for (; i < this.allMembers.length; i++) {
               if (this.allMembers[i].uid === member2) {
-                if (i > 0) {
+                if (i < this.allMembers.length - 1) {
                   this._member2Idx = i;
-                  this._member1Idx = i - 1;
+                  this._member1Idx = this.allMembers.length - 1;
                   var member1 = this.allMembers[this._member1Idx].uid;
-                  this.$.moveUpOp.input = this.collection.uid;
-                  this.$.moveUpOp.params = {
+                  this.$.moveBottomOp.input = this.collection.uid;
+                  this.$.moveBottomOp.params = {
                     member1: member1,
                     member2: member2
                   };
-                  this.$.moveUpOp.execute().then(function() {
+                  this.$.moveBottomOp.execute().then(function() {
                     this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
                       this.allMembers[this._member2Idx])[0];
                     this.fire('refresh-display', {focusIndex: this._member1Idx});
@@ -112,7 +112,7 @@ Contributors:
             if (this.allMembers && this.allMembers.length <= 1) {
               return false;
             }
-            if (this.allMembers[0].uid === this.members[0].uid) {
+            if (this.allMembers[this.allMembers.length - 1].uid === this.members[0].uid) {
               return false;
             }
             return true;

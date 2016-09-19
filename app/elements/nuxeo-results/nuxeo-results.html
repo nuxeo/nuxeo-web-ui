@@ -455,7 +455,7 @@ Contributors:
           if (this.selectedItems && this.selectedItems.length > 0) {
             this.selectedItems = [];
             this.selectedItems = this.$.datatable.selectedItems;
-            if (e.detail.focusIndex) {
+            if (e.detail.focusIndex || e.detail.focusIndex === 0) {
               if (this.displayMode === 'table') {
                 this.$.datatable.focusOnIndexIfNotVisible(e.detail.focusIndex);
               } else if (this.displayMode === 'grid') {
@@ -490,6 +490,10 @@ Contributors:
 
         get items() {
           return this.$.datatable.$.list.items;
+        },
+
+        get size() {
+          return this.$.datatable.size;
         }
 
       });

@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-collection-move-up-action`
+`nuxeo-collection-move-top-action`
 @group Nuxeo UI
-@element nuxeo-collection-move-up-action
+@element nuxeo-collection-move-top-action
 -->
-<dom-module id="nuxeo-collection-move-up-action">
+<dom-module id="nuxeo-collection-move-top-action">
 
 
   <template>
@@ -39,15 +39,15 @@ Contributors:
     </style>
 
     <nuxeo-operation op="Document.MoveCollectionMember"
-                     id="moveUpOp">
+                     id="moveTopOp">
     </nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
       <paper-icon-button noink
-        id="upButton"
-        icon="icons:arrow-upward">
+        id="topButton"
+        icon="editor:vertical-align-top">
       </paper-icon-button>
-      <paper-tooltip for="upButton">[[i18n('ui.collections.moveUp', 'Move up')]]</paper-tooltip>
+      <paper-tooltip for="topButton">[[i18n('ui.collections.moveTop', 'Move top')]]</paper-tooltip>
     </template>
 
   </template>
@@ -56,7 +56,7 @@ Contributors:
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-collection-move-up-action',
+        is: 'nuxeo-collection-move-top-action',
         properties: {
           members: {
             type: Object
@@ -88,14 +88,14 @@ Contributors:
               if (this.allMembers[i].uid === member2) {
                 if (i > 0) {
                   this._member2Idx = i;
-                  this._member1Idx = i - 1;
+                  this._member1Idx = 0;
                   var member1 = this.allMembers[this._member1Idx].uid;
-                  this.$.moveUpOp.input = this.collection.uid;
-                  this.$.moveUpOp.params = {
+                  this.$.moveTopOp.input = this.collection.uid;
+                  this.$.moveTopOp.params = {
                     member1: member1,
                     member2: member2
                   };
-                  this.$.moveUpOp.execute().then(function() {
+                  this.$.moveTopOp.execute().then(function() {
                     this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
                       this.allMembers[this._member2Idx])[0];
                     this.fire('refresh-display', {focusIndex: this._member1Idx});
