@@ -127,19 +127,19 @@ Contributors:
       op="Document.RemoveFromFavorites"></nuxeo-operation>
 
     <nuxeo-operation id="fetchFavOp"
-      op="Favorite.Fetch"
-      response="{{favorites}}"></nuxeo-operation>
+      op="Favorite.Fetch"></nuxeo-operation>
 
     <nuxeo-page-provider id="favoritesProvider"
        provider="default_content_collection"
        page-size="50"
+       params="[[_computeParams(favorite)]]"
        enrichers="thumbnail">
     </nuxeo-page-provider>
 
     <div class="list">
 
       <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList"
-        selected-item="{{selectedFavorite}}"
+        selected-item="{{selectedFavorite}}" items="{{favorites}}"
         selection-enabled as="favorite"
         empty-label="[[i18n('label.collections.favorites.empty', 'No favorites.')]]"
         empty-label-when-filtered="[[i18n('label.collections.favorites.empty', 'No favorites.')]]">
@@ -188,7 +188,7 @@ Contributors:
 
       ready: function() {
         this.$.fetchFavOp.execute().then(function(resp) {
-          this.$.favoritesProvider.params = [resp.uid];
+          this.favorite = resp;
           this.$.favoritesProvider.fetch();
         }.bind(this));
         window.addEventListener('addedToFavorites', function() {
@@ -231,6 +231,10 @@ Contributors:
         this.$.removeFromFavOp.execute().then(function() {
           this.fire('removedFromFavorites', {docUid: docUid});
         }.bind(this));
+      },
+
+      _computeParams: function() {
+        return [this.favorite.uid];
       }
 
     });
