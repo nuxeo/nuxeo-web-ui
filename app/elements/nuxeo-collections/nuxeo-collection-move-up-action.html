@@ -42,7 +42,7 @@ Contributors:
                      id="moveUpOp">
     </nuxeo-operation>
 
-    <template is="dom-if" if="[[_isAvailable(members)]]">
+    <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
       <paper-icon-button noink
         id="upButton"
         icon="icons:arrow-upward">
@@ -66,6 +66,12 @@ Contributors:
           },
           collection: {
             type: Object
+          },
+          _member1Idx: {
+            type: Number
+          },
+          _member2Idx: {
+            type: Number
           }
         },
         behaviors: [Nuxeo.I18nBehavior],
@@ -75,21 +81,24 @@ Contributors:
         },
 
         moveUp: function() {
-          console.log('moveUp');
           if (this.members && this.members.length === 1 && this.allMembers) {
             var member2 = this.members[0].uid;
             var i = 0;
             for (; i < this.allMembers.length; i++) {
               if (this.allMembers[i].uid === member2) {
                 if (i > 0) {
-                  var member1 = this.allMembers[i - 1].uid;
+                  this._member2Idx = i;
+                  this._member1Idx = i - 1;
+                  var member1 = this.allMembers[this._member1Idx].uid;
                   this.$.moveUpOp.input = this.collection.uid;
                   this.$.moveUpOp.params = {
                     member1: member1,
                     member2: member2
                   };
                   this.$.moveUpOp.execute().then(function() {
-                    this.fire('refresh');
+                    this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
+                      this.allMembers[this._member2Idx])[0];
+                    this.fire('refresh-display', {focusIndex: this._member1Idx});
                   }.bind(this));
                 }
                 break;
@@ -100,8 +109,15 @@ Contributors:
 
         _isAvailable: function() {
           if (this.members && this.members.length === 1) {
+            if (this.allMembers && this.allMembers.length <= 1) {
+              return false;
+            }
+            if (this.allMembers[0].uid === this.members[0].uid) {
+              return false;
+            }
             return true;
           }
+          return false;
         }
 
       });

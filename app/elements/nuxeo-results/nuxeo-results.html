@@ -156,7 +156,10 @@ Contributors:
 
     <div class="main">
 
-      <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar" on-refresh="_refresh" on-clear-selected-items="_clearSelectedItems">
+      <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar"
+        on-refresh="_refresh"
+        on-refresh-display="_refreshDisplay"
+        on-clear-selected-items="_clearSelectedItems">
         <content select=".actions"></content>
       </nuxeo-selection-toolbar>
 
@@ -443,6 +446,22 @@ Contributors:
             // normally the page provider is on auto mode
             // so the fetch should be triggered when changing page
             this.nxProvider.fetch();
+          }
+        },
+
+        _refreshDisplay: function(e) {
+          this.$.datatable.notifyResize();
+          this.$.datagrid.notifyResize();
+          if (this.selectedItems && this.selectedItems.length > 0) {
+            this.selectedItems = [];
+            this.selectedItems = this.$.datatable.selectedItems;
+            if (e.detail.focusIndex) {
+              if (this.displayMode === 'table') {
+                this.$.datatable.focusOnIndexIfNotVisible(e.detail.focusIndex);
+              } else if (this.displayMode === 'grid') {
+                this.$.datagrid.focusOnIndexIfNotVisible(e.detail.focusIndex);
+              }
+            }
           }
         },
 
