@@ -363,6 +363,8 @@
   "label.ui.aggregate.from_600_to_1800_s": "Between 600s and 1800s",
   "label.ui.aggregate.from_1800_s": "More than 1800s",
   "ui.versions": "Versions",
+  "ui.versions.create": "Create Version",
+  "ui.versions.unversioned": "Unversioned Changes",
   "ui.versions.latest": "Latest",
   "ui.versions.modified": "Modified {0} by {1}",
   "ui.versions.version": "{0}.{1}",

@@ -19,7 +19,10 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
+<link rel="import" href="nuxeo-document-versions-list.html">
+<link rel="import" href="nuxeo-document-create-version.html">
 
 <!--
 `nuxeo-document-versions`
@@ -27,20 +30,33 @@ Contributors:
 @element nuxeo-document-versions
 -->
 <dom-module id="nuxeo-document-versions">
+
   <template>
     <style>
       :host {
         display: inline-block;
       }
 
-      .menu {
-        width: 200px;
-        max-height: 300px;
+      .toggle {
+        @apply(--nuxeo-tag);
         padding: 0;
+        cursor: pointer;
       }
 
-      .menu-trigger {
-        padding-right: 24px;
+      .toggle-text {
+        display: inline-block;
+        padding: 4px 0 4px 8px;
+      }
+
+      .toggle-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      #list-items {
+        overflow: auto;
+        width: 200px;
+        max-height: 400px;
       }
 
       .version {
@@ -66,7 +82,6 @@ Contributors:
       .version .title {
         font-size: 12px;
         font-weight: 500;
-        text-transform: uppercase;
       }
 
       .version .modified {
@@ -84,18 +99,8 @@ Contributors:
         cursor: pointer;
       }
 
-      iron-icon {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        right: 4px;
-        top: 0;
-        padding: 0;
-        margin: 0;
-      }
-
-      .tag {
-        @apply(--nuxeo-tag);
+      iron-scroll-threshold {
+        display: none;
       }
 
     </style>
@@ -103,39 +108,55 @@ Contributors:
     <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
     </nuxeo-operation>
 
-    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.path]]" response="{{versions}}">
-    </nuxeo-operation>
+    <nuxeo-page-provider id="provider" query="[[query]]" page-size="[[pageSize]]" page="{{page}}"
+                          sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'>
+    </nuxeo-page-provider>
 
-    <template is="dom-if" if="[[_hasVersions(versions)]]">
-      <paper-menu-button noink no-animations>
-        <div class="tag dropdown-trigger menu-trigger">
-          [[_labelTitle(document)]][[_labelCheckedOut(document)]]<iron-icon icon="icons:arrow-drop-down"></iron-icon>
-        </div>
-        <paper-menu class="dropdown-content menu" noink>
+    <!-- create version-->
+    <nuxeo-document-create-version id="create" document="[[document]]" hidden$="[[_hasVersions(document)]]">
+    </nuxeo-document-create-version>
+
+    <!-- versions list -->
+    <div hidden$="[[!_hasVersions(document)]]">
+
+      <div class="toggle" on-tap="_showList">
+        <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
+        <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
+      </div>
+
+      <nuxeo-document-versions-list id="list" document="[[document]]">
+        <div id="list-items">
           <template is="dom-if" if="[[_isVersion(document)]]">
             <div id="version-latest" class="version" on-tap="_showLatest">
-              <div class="row title latest">
-                [[_labelTitle(latest)]][[_labelCheckedOut(latest)]] ([[i18n('ui.versions.latest', 'Latest')]])
-              </div>
+              <div class="row title latest">[[_labelLatest(latest)]]</div>
             </div>
           </template>
-          <template is="dom-repeat" items="[[versions.entries]]" as="item" sort="_sort">
+          <template is="dom-repeat" items="[[versions]]" as="item">
             <div id="version-id-[[index]]" class="version" on-tap="_showVersion">
               <div class="row title">[[_labelTitle(item)]]</div>
               <div class="row modified">[[_labelModified(item)]]</div>
             </div>
           </template>
-        </paper-menu>
-      </paper-menu-button>
+        </div>
 
-      <template is="dom-if" if="[[_isVersion(document)]]">
-        <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
-      </template>
-      <template is="dom-repeat" items="[[versions.entries]]" as="item" sort="_sort">
-        <paper-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</paper-tooltip>
-      </template>
+        <!-- TODO: NXP-20453: include create version button on versions list
+        <div id="list-actions" on-tap="_createVersion">[[i18n('ui.versions.create', 'Create Version')]]</div>
+        -->
 
+      </nuxeo-document-versions-list>
+
+      <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500"
+                             on-lower-threshold="_loadMore"></iron-scroll-threshold>
+    </div>
+
+    <!-- tooltips -->
+    <template is="dom-if" if="[[_isVersion(document)]]">
+      <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
     </template>
+    <template is="dom-repeat" items="[[versions]]" as="item">
+      <paper-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</paper-tooltip>
+    </template>
+
   </template>
 
   <script>
@@ -148,31 +169,92 @@ Contributors:
         properties: {
           document: Object,
           latest: Object,
-          versions: Object
+          versions: {
+            type: Array,
+            value: [],
+            notify: true
+          },
+          query: String,
+          page: {
+            type: Number,
+            value: 0
+          },
+          pageSize: {
+            type: Number,
+            value: 100
+          }
         },
         observers: [
-          '_update(document, document.*)'
+          '_update(document)'
         ],
 
         _update: function() {
           if (this.document) {
             if (this._isVersion(this.document)) {
-              this.$.opGetLatest.execute();
+              this.$.opGetLatest.execute().then(function() {
+                this._query(this.latest.uid);
+              }.bind(this));
+            } else {
+              this._query(this.document.uid);
             }
-            this.$.opGetVersions.execute();
           }
         },
 
-        _hasVersions: function() {
-          return this.versions && this.versions.entries && this.versions.entries.length > 0;
+        _hasVersions: function(doc) {
+          return (doc && (doc.properties['uid:major_version'] > 0 || doc.properties['uid:minor_version'] > 0));
+        },
+
+        _query: function(id) {
+          this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '"';
+          this.page = 0;
+          this._loadMore();
+        },
+
+        _loadMore: function() {
+          this.$.scrollThreshold.clearTriggers();
+          if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
+            if (this.page === 0) {
+              this.set('versions', []);
+            }
+            this.page = this.page + 1;
+            this.$.provider.fetch().then(function(results) {
+              results.entries.forEach(function(doc) {
+                this.push('versions', doc);
+              }.bind(this));
+            }.bind(this));
+          }
+        },
+
+        _showList: function() {
+          this.$.list.open();
+        },
+
+        _hideList: function() {
+          this.$.list.close();
         },
 
         _showLatest: function() {
+          this._hideList();
           page('/browse' + this.document.path + '@view');
         },
 
         _showVersion: function(e) {
+          this._hideList();
           page('/doc/' + e.model.item.uid);
+        },
+
+        _labelLatest: function(doc) {
+          if (doc) {
+            var number = this.i18n('ui.versions.version', '{0}.{1}',
+                doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
+              ((doc.isCheckedOut) ? '+ ' : ' ');
+            var label = (doc.isCheckedOut) ?
+              this.i18n('ui.versions.unversioned', 'Unversioned Changes') :
+              this.i18n('ui.versions.latest', 'Latest');
+            return number + label;
+          }
+          this._hideList();
+          return '';
         },
 
         _labelTitle: function(doc) {
@@ -192,10 +274,8 @@ Contributors:
             moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
         },
 
-        _sort: function(item1, item2) {
-          var v1 = parseFloat(item1.properties['uid:major_version'] + '.' + item1.properties['uid:minor_version']);
-          var v2 = parseFloat(item2.properties['uid:major_version'] + '.' + item2.properties['uid:minor_version']);
-          return (v1 < v2) ? 1 : -1;
+        _date: function(date) {
+          return moment(date).format('DD/MM/YYYY HH:mm');
         }
 
       });
