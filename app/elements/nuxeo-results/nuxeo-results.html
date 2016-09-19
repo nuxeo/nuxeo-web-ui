@@ -454,11 +454,12 @@ Contributors:
           this.$.datagrid.notifyResize();
           if (this.selectedItems && this.selectedItems.length > 0) {
             this.selectedItems = [];
-            this.selectedItems = this.$.datatable.selectedItems;
             if (e.detail.focusIndex || e.detail.focusIndex === 0) {
               if (this.displayMode === 'table') {
+                this.selectedItems = this.$.datatable.selectedItems;
                 this.$.datatable.focusOnIndexIfNotVisible(e.detail.focusIndex);
               } else if (this.displayMode === 'grid') {
+                this.selectedItems = this.$.datagrid.selectedItems;
                 this.$.datagrid.focusOnIndexIfNotVisible(e.detail.focusIndex);
               }
             }
@@ -489,11 +490,19 @@ Contributors:
         },
 
         get items() {
-          return this.$.datatable.$.list.items;
+          if (this.displayMode === 'table') {
+            return this.$.datatable.$.list.items;
+          } else if (this.displayMode === 'grid') {
+            return this.$.datagrid.$.list.items;
+          }
         },
 
         get size() {
-          return this.$.datatable.size;
+          if (this.displayMode === 'table') {
+            return this.$.datatable.size;
+          } else if (this.displayMode === 'grid') {
+            return this.$.datagrid.size;
+          }
         }
 
       });
