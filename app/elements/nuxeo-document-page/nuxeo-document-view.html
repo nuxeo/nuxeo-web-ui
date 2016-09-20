@@ -87,7 +87,9 @@ Contributors:
         _updateLayout: function() {
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl(layout + '.html');
+            var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
+            var folder = ['nuxeo', docType].join('-') + '/';
+            var url = this.resolveUrl('layouts/' + folder + layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {

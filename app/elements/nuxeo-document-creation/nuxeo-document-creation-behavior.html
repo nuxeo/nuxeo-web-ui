@@ -112,7 +112,9 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.DocumentMetadataBehavior, {
       }
       var layout = this._layoutFor();
       if (!this._isRegistered(layout)) {
-        var url = this.resolveUrl('../nuxeo-document-edit/' + layout + '.html');
+        var docType = this.selectedDocType.charAt(0).toLowerCase() + this.selectedDocType.slice(1);
+        var folder = ['nuxeo', docType].join('-') + '/';
+        var url = this.resolveUrl('../nuxeo-document-page/layouts/' + folder + layout + '.html');
         this.importHref(url, this._createLayout.bind(this),
             // error handling
             function() {

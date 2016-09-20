@@ -74,13 +74,6 @@ Contributors:
         <!-- Dynamic layout element will be inserted here -->
         <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
       </div>
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('label.editComment', 'Change comment')]]</label>
-        </div>
-        <textarea id="comment" class="flex"></textarea>
-      </div>
-      <nuxeo-versioning-edit-layout document="[[document]]" versioning-type="{{versioningType}}"></nuxeo-versioning-edit-layout>
       <div class="card-actions">
         <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
         <paper-button noink class="primary" on-click="_save">[[i18n('command.save', 'Save')]]</paper-button>
@@ -169,7 +162,9 @@ Contributors:
         _updateLayout: function() {
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl(layout + '.html');
+            var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
+            var folder = ['nuxeo', docType].join('-') + '/';
+            var url = this.resolveUrl('layouts/' + folder + layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
