@@ -136,7 +136,7 @@ Contributors:
             </div>
           </template>
         </div>
-        <div class="list-actions">
+        <div class="list-actions" hidden$="[[_isCreateDisabled(document)]]">
           <nuxeo-document-create-version document="[[document]]" on-dialog-closed="_hideList">
           </nuxeo-document-create-version>
         </div>
@@ -198,6 +198,10 @@ Contributors:
 
         _hasVersions: function(doc) {
           return (doc && (doc.properties['uid:major_version'] > 0 || doc.properties['uid:minor_version'] > 0));
+        },
+
+        _isCreateDisabled: function(doc) {
+          return !doc || !doc.isCheckedOut;
         },
 
         _query: function(id) {
