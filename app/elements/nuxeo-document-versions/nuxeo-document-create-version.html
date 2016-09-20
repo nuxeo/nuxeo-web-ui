@@ -92,7 +92,9 @@ Contributors:
 
     <div class="tag" on-tap="_toggleDialog">[[i18n('ui.versions.create', 'Create Version')]]</div>
 
-    <paper-dialog id="dialog" class="dialog" with-backdrop>
+    <paper-dialog id="dialog" class="dialog" with-backdrop
+                  on-iron-overlay-opened="_dialogOpened"
+                  on-iron-overlay-closed="_dialogClosed">
       <div class="title">[[i18n('ui.createVersion.title', 'Create Version for {0} - Version {1}.{2}',
         document.properties.dc:title, document.properties.uid:major_version, document.properties.uid:minor_version)]]
       </div>
@@ -136,8 +138,12 @@ Contributors:
         response: Object
       },
 
-      openDialog: function() {
-        this.$.dialog.open();
+      _dialogOpened: function(e) {
+        e.target.parentNode.insertBefore(e.target.backdropElement, e.target);
+      },
+
+      _dialogClosed: function() {
+        this.fire('dialog-closed');
       },
 
       _computeHeaders: function(versionType) {

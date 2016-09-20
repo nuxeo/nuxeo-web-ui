@@ -59,12 +59,19 @@ Contributors:
         max-height: 400px;
       }
 
+      .list-actions {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        border-top: 1px solid var(--divider-color);
+        padding: 8px;
+      }
+
       .version {
         @apply(--layout-vertical);
         @apply(--layout-start);
         padding: 8px;
         cursor: pointer;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        border-top: 1px solid var(--divider-color);
       }
 
       .version .row {
@@ -94,11 +101,6 @@ Contributors:
         margin: 8px 0;
       }
 
-      paper-menu-button {
-        padding: 0;
-        cursor: pointer;
-      }
-
       iron-scroll-threshold {
         display: none;
       }
@@ -112,18 +114,14 @@ Contributors:
                           sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'>
     </nuxeo-page-provider>
 
-    <!-- create version-->
-    <nuxeo-document-create-version id="create" document="[[document]]" hidden$="[[_hasVersions(document)]]">
+    <nuxeo-document-create-version document="[[document]]" hidden$="[[_hasVersions(document)]]">
     </nuxeo-document-create-version>
 
-    <!-- versions list -->
     <div hidden$="[[!_hasVersions(document)]]">
-
       <div class="toggle" on-tap="_showList">
         <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
         <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
       </div>
-
       <nuxeo-document-versions-list id="list" document="[[document]]">
         <div id="list-items">
           <template is="dom-if" if="[[_isVersion(document)]]">
@@ -138,18 +136,16 @@ Contributors:
             </div>
           </template>
         </div>
-
-        <!-- TODO: NXP-20453: include create version button on versions list
-        <div id="list-actions" on-tap="_createVersion">[[i18n('ui.versions.create', 'Create Version')]]</div>
-        -->
-
+        <div class="list-actions">
+          <nuxeo-document-create-version document="[[document]]" on-dialog-closed="_hideList">
+          </nuxeo-document-create-version>
+        </div>
       </nuxeo-document-versions-list>
-
       <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500"
-                             on-lower-threshold="_loadMore"></iron-scroll-threshold>
+                             on-lower-threshold="_loadMore">
+      </iron-scroll-threshold>
     </div>
 
-    <!-- tooltips -->
     <template is="dom-if" if="[[_isVersion(document)]]">
       <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
     </template>
