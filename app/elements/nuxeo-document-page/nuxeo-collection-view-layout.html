@@ -14,25 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
-
-<!--
-`nuxeo-video-metadata`
-@group Nuxeo UI
-@element nuxeo-video-metadata
+  Guillaume Renard <grenard@nuxeo.com>
 -->
 
-<dom-module id="nuxeo-video-metadata">
+<!--
+`nuxeo-collection-view-layout`
+@group Nuxeo UI
+@element nuxeo-collection-view-layout
+-->
+<dom-module id="nuxeo-collection-view-layout">
   <template>
-    <nuxeo-dublincore-metadata document="[[document]]"></nuxeo-dublincore-metadata>
   </template>
   <script>
-    Polymer({
-      is: 'nuxeo-video-metadata',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        document: Object
-      }
-    });
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-collection-view-layout',
+
+        properties: {
+          document: {
+            type: Object,
+            notify: true
+          }
+        }
+
+      });
+    })();
   </script>
 </dom-module>

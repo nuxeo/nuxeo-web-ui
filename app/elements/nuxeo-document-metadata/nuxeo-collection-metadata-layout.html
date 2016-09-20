@@ -14,32 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-  Guillaume Renard <grenard@nuxeo.com>
--->
+  Nelson Silva <nsilva@nuxeo.com>
 
 <!--
-`nuxeo-collection-view`
+`nuxeo-collection-metadata-layout`
 @group Nuxeo UI
-@element nuxeo-collection-view
+@element nuxeo-collection-metadata-layout
 -->
-<dom-module id="nuxeo-collection-view">
+
+<dom-module id="nuxeo-collection-metadata-layout">
   <template>
+    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-collection-view',
-
-        properties: {
-          document: {
-            type: Object,
-            notify: true
-          }
-        }
-
-      });
-    })();
+    Polymer({
+      is: 'nuxeo-collection-metadata-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        document: Object
+      }
+    });
   </script>
 </dom-module>

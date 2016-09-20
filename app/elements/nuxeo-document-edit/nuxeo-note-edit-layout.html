@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-note-edit`
+`nuxeo-note-edit-layout`
 @group Nuxeo UI
-@element nuxeo-note-edit
+@element nuxeo-note-edit-layout
 -->
-<dom-module id="nuxeo-note-edit">
+<dom-module id="nuxeo-note-edit-layout">
  <template>
    <style>
      :host {
@@ -108,14 +108,14 @@ Contributors:
      </select>
    </div>
 
-   <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+   <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
  </template>
  <script>
   (function() {
     'use strict';
 
     Polymer({
-      is: 'nuxeo-note-edit',
+      is: 'nuxeo-note-edit-layout',
 
       properties: {
         document: {

@@ -1,11 +1,11 @@
 <!--
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+		http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-    Andre Justo <ajusto@nuxeo.com>
+	Gabriel Barata <gbarata@nuxeo.com>
 -->
+<link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-versioning-edit`
+`nuxeo-folder-edit-layout`
 @group Nuxeo UI
-@element nuxeo-versioning-edit
+@element nuxeo-folder-edit-layout
 -->
-<dom-module id="nuxeo-versioning-edit">
+<dom-module id="nuxeo-folder-edit-layout">
   <template>
     <style>
       :host {
@@ -33,6 +34,7 @@ Contributors:
         margin-bottom: 25px;
       }
 
+      input,
       textarea {
         background: none #fff;
         border: 1px solid #c6c6c6;
@@ -43,7 +45,20 @@ Contributors:
         font-size: 1em;
         margin-bottom: 0.5em;
         padding: 0.5em;
-        width: 300px;
+      }
+
+      img {
+        height: 16px;
+        width: 16px;
+      }
+
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
+      }
+
+      .radio-container > * {
+        margin-right: 10px;
       }
 
       .label-container {
@@ -51,51 +66,52 @@ Contributors:
         width: 200px;
       }
 
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
       }
     </style>
 
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.version', 'Version')]]</label>
+        <label>[[i18n('label.title', 'Title')]]</label>
+        <span class="required">*</span>
       </div>
-      <span id="version" class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
+      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
     </div>
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.versioning.selectVersioningOption', 'Update Versions')]]</label>
+        <label>[[i18n('label.description', 'Description')]]</label>
       </div>
-      <paper-radio-group id="versionType" selected="{{versioningType}}" class="layout vertical">
-        <paper-radio-button name="none">[[i18n('label.versioning.option.no_inc', 'Skip version increment')]]</paper-radio-button>
-        <paper-radio-button name="minor">[[i18n('label.versioning.option.inc_minor', 'Increment minor version')]]</paper-radio-button>
-        <paper-radio-button name="major">[[i18n('label.versioning.option.inc_major', 'Increment major version')]]</paper-radio-button>
-      </paper-radio-group>
+      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
+    <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-versioning-edit',
-
-        behaviors: [Nuxeo.I18nBehavior],
+        is: 'nuxeo-folder-edit-layout',
 
         properties: {
           document: {
             type: Object
-          },
-
-          versioningType: {
-            type: 'String',
-            value: 'none',
-            notify: true
           }
+        },
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        _icon: function() {
+          var url = this.$.nxcon.url;
+          return url + this.document.properties['common:icon'];
         }
+
       });
     })();
   </script>

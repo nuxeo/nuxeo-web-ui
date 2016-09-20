@@ -17,18 +17,18 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 
 <!--
-`nuxeo-collection-metadata`
+`nuxeo-picture-metadata-layout`
 @group Nuxeo UI
-@element nuxeo-collection-metadata
+@element nuxeo-picture-metadata-layout
 -->
 
-<dom-module id="nuxeo-collection-metadata">
+<dom-module id="nuxeo-picture-metadata-layout">
   <template>
-    <nuxeo-dublincore-metadata document="[[document]]"></nuxeo-dublincore-metadata>
+    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-collection-metadata',
+      is: 'nuxeo-picture-metadata-layout',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object

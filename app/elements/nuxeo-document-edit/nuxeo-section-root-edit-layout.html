@@ -17,14 +17,14 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 
-<link rel="import" href="nuxeo-section-edit.html">
+<link rel="import" href="nuxeo-section-edit-layout.html">
 
 <!--
-`nuxeo-section-root-edit`
+`nuxeo-section-root-edit-layout`
 @group Nuxeo UI
-@element nuxeo-section-root-edit
+@element nuxeo-section-root-edit-layout
 -->
-<dom-module id="nuxeo-section-root-edit">
+<dom-module id="nuxeo-section-root-edit-layout">
   <template>
     <style>
       :host {
@@ -32,7 +32,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-section-edit document="[[document]]"></nuxeo-section-edit>
+    <nuxeo-section-edit-layout document="[[document]]"></nuxeo-section-edit-layout>
 
   </template>
   <script>
@@ -40,7 +40,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-section-root-edit',
+        is: 'nuxeo-section-root-edit-layout',
 
         properties: {
 

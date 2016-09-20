@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-template-edit`
+`nuxeo-template-edit-layout`
 @group Nuxeo UI
-@element nuxeo-template-edit
+@element nuxeo-template-edit-layout
 -->
-<dom-module id="nuxeo-template-edit">
+<dom-module id="nuxeo-template-edit-layout">
   <template>
     <style>
       :host {
@@ -75,7 +75,7 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+    <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
 
   </template>
   <script>
@@ -83,7 +83,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-template-edit',
+        is: 'nuxeo-template-edit-layout',
 
         properties: {
 

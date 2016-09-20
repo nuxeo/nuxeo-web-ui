@@ -14,16 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-    Guillaume RENARD <grenard@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-collection-edit`
+`nuxeo-versioning-edit-layout`
 @group Nuxeo UI
-@element nuxeo-collection-edit
+@element nuxeo-versioning-edit-layout
 -->
-<dom-module id="nuxeo-collection-edit">
+<dom-module id="nuxeo-versioning-edit-layout">
   <template>
     <style>
       :host {
@@ -34,7 +33,6 @@ Contributors:
         margin-bottom: 25px;
       }
 
-      input,
       textarea {
         background: none #fff;
         border: 1px solid #c6c6c6;
@@ -45,24 +43,7 @@ Contributors:
         font-size: 1em;
         margin-bottom: 0.5em;
         padding: 0.5em;
-      }
-
-      img {
-        height: 16px;
-        width: 16px;
-      }
-
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
-      }
-
-      .radio-container {
-        padding: 0;
-      }
-
-      .radio-container > * {
-        margin-right: 10px;
+        width: 300px;
       }
 
       .label-container {
@@ -70,52 +51,51 @@ Contributors:
         width: 200px;
       }
 
-      .required {
-        color: red;
-        position: absolute;
-        right: 10px;
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
       }
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.title', 'Title')]]</label>
-        <span class="required">*</span>
+        <label>[[i18n('label.version', 'Version')]]</label>
       </div>
-      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
+      <span id="version" class="flex">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]</span>
     </div>
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.description', 'Description')]]</label>
+        <label>[[i18n('label.versioning.selectVersioningOption', 'Update Versions')]]</label>
       </div>
-      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+      <paper-radio-group id="versionType" selected="{{versioningType}}" class="layout vertical">
+        <paper-radio-button name="none">[[i18n('label.versioning.option.no_inc', 'Skip version increment')]]</paper-radio-button>
+        <paper-radio-button name="minor">[[i18n('label.versioning.option.inc_minor', 'Increment minor version')]]</paper-radio-button>
+        <paper-radio-button name="major">[[i18n('label.versioning.option.inc_major', 'Increment major version')]]</paper-radio-button>
+      </paper-radio-group>
     </div>
 
-    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-collection-edit',
+        is: 'nuxeo-versioning-edit-layout',
+
+        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
           document: {
             type: Object
+          },
+
+          versioningType: {
+            type: 'String',
+            value: 'none',
+            notify: true
           }
-        },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        _icon: function() {
-          var url = this.$.nxcon.url;
-          return url + this.document.properties['common:icon'];
         }
-
       });
     })();
   </script>

@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-file-edit`
+`nuxeo-file-edit-layout`
 @group Nuxeo UI
-@element nuxeo-file-edit
+@element nuxeo-file-edit-layout
 -->
-<dom-module id="nuxeo-file-edit">
+<dom-module id="nuxeo-file-edit-layout">
   <template>
     <style>
       :host {
@@ -110,14 +110,14 @@ Contributors:
         </div>
       </div>
     </template>
-    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+    <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-file-edit',
+        is: 'nuxeo-file-edit-layout',
 
         properties: {
           document: {

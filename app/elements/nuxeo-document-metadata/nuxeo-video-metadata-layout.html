@@ -17,18 +17,18 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 
 <!--
-`nuxeo-file-metadata`
+`nuxeo-video-metadata-layout`
 @group Nuxeo UI
-@element nuxeo-file-metadata
+@element nuxeo-video-metadata-layout
 -->
 
-<dom-module id="nuxeo-file-metadata">
+<dom-module id="nuxeo-video-metadata-layout">
   <template>
-    <nuxeo-dublincore-metadata document="[[document]]"></nuxeo-dublincore-metadata>
+    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-file-metadata',
+      is: 'nuxeo-video-metadata-layout',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object

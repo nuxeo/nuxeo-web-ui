@@ -42,7 +42,7 @@ Contributors:
         <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
         <div id="metadata-view">
           <!-- Dynamic layout element will be inserted here -->
-          <!-- <nuxeo-{{this.document.type}}-metadata document="{{document}}"> -->
+          <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
         </div>
       </section>
 
@@ -92,7 +92,7 @@ Contributors:
         _layoutFor: function(document) {
           // lower case first letter to avoid extra dash in camelToDashCase
           var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
-          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'metadata'].join('-');
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'metadata-layout'].join('-');
         },
 
         /**

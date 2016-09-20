@@ -1,11 +1,11 @@
 <!--
-(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-		http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-	Gabriel Barata <gbarata@nuxeo.com>
+    Guillaume RENARD <grenard@nuxeo.com>
 -->
 <link rel="import" href="nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-folder-edit`
+`nuxeo-collection-edit-layout`
 @group Nuxeo UI
-@element nuxeo-folder-edit
+@element nuxeo-collection-edit-layout
 -->
-<dom-module id="nuxeo-folder-edit">
+<dom-module id="nuxeo-collection-edit-layout">
   <template>
     <style>
       :host {
@@ -57,6 +57,10 @@ Contributors:
         padding: 0;
       }
 
+      .radio-container {
+        padding: 0;
+      }
+
       .radio-container > * {
         margin-right: 10px;
       }
@@ -73,7 +77,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <div class="row layout horizontal">
       <div class="label-container">
@@ -90,14 +94,14 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <nuxeo-dublincore-edit document="[[document]]"></nuxeo-dublincore-edit>
+    <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-folder-edit',
+        is: 'nuxeo-collection-edit-layout',
 
         properties: {
           document: {

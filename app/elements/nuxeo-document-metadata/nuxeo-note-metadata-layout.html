@@ -17,12 +17,12 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 
 <!--
-`nuxeo-note-metadata`
+`nuxeo-note-metadata-layout`
 @group Nuxeo UI
-@element nuxeo-note-metadata
+@element nuxeo-note-metadata-layout
 -->
 
-<dom-module id="nuxeo-note-metadata">
+<dom-module id="nuxeo-note-metadata-layout">
   <template>
     <style>
       :host {
@@ -48,7 +48,7 @@ Contributors:
       }
 
     </style>
-    <nuxeo-dublincore-metadata document="[[document]]"></nuxeo-dublincore-metadata>
+    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
     <div class="row layout horizontal">
       <div class="label-container">
         <label>[[i18n('label.richtext.format', 'Format')]]</label>
@@ -58,7 +58,7 @@ Contributors:
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-note-metadata',
+      is: 'nuxeo-note-metadata-layout',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object

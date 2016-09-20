@@ -17,18 +17,18 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 
 <!--
-`nuxeo-picture-metadata`
+`nuxeo-file-metadata-layout`
 @group Nuxeo UI
-@element nuxeo-picture-metadata
+@element nuxeo-file-metadata-layout
 -->
 
-<dom-module id="nuxeo-picture-metadata">
+<dom-module id="nuxeo-file-metadata-layout">
   <template>
-    <nuxeo-dublincore-metadata document="[[document]]"></nuxeo-dublincore-metadata>
+    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-picture-metadata',
+      is: 'nuxeo-file-metadata-layout',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object
