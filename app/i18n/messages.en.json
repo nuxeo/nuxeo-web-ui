@@ -373,7 +373,6 @@
   "ui.versions.confirm.no": "No",
   "ui.versions.confirm.yes": "Yes",
   "ui.versions.info": "You're viewing the {0}.{1} version",
-  "ui.createVersion.tooltip": "Create Version",
   "ui.createVersion.title": "Create Version for {0} - Version {1}.{2}",
   "ui.createVersion.minor": "Minor Version",
   "ui.createVersion.major": "Major Version",
