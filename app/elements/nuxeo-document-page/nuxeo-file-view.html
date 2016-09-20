@@ -69,7 +69,7 @@ Contributors:
                     message="Drop to replace main file"
                     message-empty="Click here or drop to replace main file"
                     empty="[[!document.properties.file:content.data]]">
-        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
     <div class="card-section">
       <div class="horizontal layout center">
@@ -123,7 +123,7 @@ Contributors:
         },
 
         _actionContext: function() {
-          return {document: this.document};
+          return {document: this.document, blob: this.document.properties['file:content']};
         },
 
         _formatSize: function(size) {
