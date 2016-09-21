@@ -48,10 +48,6 @@ Contributors:
         min-height: calc(100vh - 61px)
       }
 
-      .entry {
-        @apply(--nuxeo-sidebar-item-theme);
-      }
-
       .favIcon {
         --iron-icon-height: 16px;
         --iron-icon-width: 16px;
@@ -71,38 +67,29 @@ Contributors:
         text-overflow: ellipsis;
       }
 
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
+      .queue-thumbnail,
       .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
+        height: 1.5em;
+        width: 1.5em;
         border-radius: 20px;
         box-sizing: border-box;
         margin-right: 8px;
       }
 
       .list-item {
-        cursor: pointer;
-        padding: 1em;
-        border-bottom: 1px solid #DDD;
+        @apply(--nuxeo-sidebar-item-theme);
+        @apply(--nuxeo-sidebar-item-link);
       }
 
       .list-item:focus,
       .list-item.selected:focus {
         outline: 0;
-        background-color: #ddd;
+        @apply(--nuxeo-block-hover);
       }
 
       .list-item.selected {
-        color: var(--paper-blue-600);
-        background-color: var(--google-grey-300);
-        border-bottom: 1px solid #ccc;
+        color: var(--default-primary-color);
+        @apply(--nuxeo-block-hover);
       }
 
       .list-item-detail {

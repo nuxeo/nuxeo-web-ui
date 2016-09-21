@@ -116,12 +116,7 @@ Contributors:
         overflow: scroll;
       }
 
-      #sidebar {
-        overflow-y: auto;
-      }
-
       paper-menu {
-        @apply(--nuxeo-sidebar);
         color: var(--nuxeo-sidebar-actions);
         width: 250px;
       }
@@ -164,15 +159,12 @@ Contributors:
         font-weight: 500;
       }
 
-      #sidebar::content .item {
-        border-bottom: 1px solid var(--divider-color);
-        display: block;
+      #sidebar ::content .item {
+        @apply(--nuxeo-sidebar-item-theme);
       }
 
-      #sidebar::content .item a {
-        margin-bottom: 0;
-        padding: 1em;
-        display: block;
+      #sidebar ::content .item a {
+        @apply(--nuxeo-sidebar-item-link);
       }
 
       #sidebar .tasks .link {
@@ -218,7 +210,7 @@ Contributors:
         z-index: 100;
         padding: 60px 0;
         overflow: auto;
-        background-color: var(--dark-primary-color);
+        @apply(--nuxeo-sidebar);
       }
 
       .side-nav paper-icon-button {
