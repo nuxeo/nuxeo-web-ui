@@ -48,7 +48,6 @@ limitations under the License.
   <!-- Tile icon for Win8 (144x144) -->
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-  <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="vendor/select2.css">
 
   <script src="webcomponentsjs/webcomponents-lite.min.js"></script>
