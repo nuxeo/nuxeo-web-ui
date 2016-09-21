@@ -11,7 +11,7 @@
     margin: 0;
     min-height: 100%;
     color: #243238;
-    background-color: #e9eff3;
+    background: #e9eff3;
     font-family: 'Open Sans',sans-serif;
     font-weight: 400; }
 
@@ -31,20 +31,12 @@
   :root {
     /* -- Nuxeo Branding colors -- */
     --nuxeo-app-font: 'Open Sans', Arial, sans-serif;
-
-    --nuxeo-header-background: #fff;
-    --nuxeo-sidebar-actions: #009de8;
-    --nuxeo-sidebar-actions-hover: #00adff;
+    --nuxeo-primary-color: #00adff;
 
     /* Badges & tags */
     --nuxeo-tag-background: #edf1f5;
     --nuxeo-tag-text: #6d7684;
     --nuxeo-badge-background: #f68500;
-
-    /* primary & secondary are used on background or
-    to highlight non specific elements as listed below */
-    --nuxeo-primary-color: #00adff; /* sky blue */
-    --dark-primary-color: #213f7d; /* dark blue */
 
     /* Titles & text */
     --nuxeo-title-color: #213f7d;
@@ -53,13 +45,14 @@
 
     /* Global layout */
     --nuxeo-page-background: none #e9eff3;
-
+    --nuxeo-header-background: #fff;
     --nuxeo-header-title-color: #213f7d;
     --nuxeo-header-text-color: #213f7d;
-    --nuxeo-header-actions: #434343;
+    --nuxeo-header-actions: #243238;
     --nuxeo-header-actions-hover: #00adff;
     --nuxeo-sidebar-background: #213f7d;
-
+    --nuxeo-sidebar-actions: #009de8;
+    --nuxeo-sidebar-actions-hover: #00adff;
     --nuxeo-light-background: #fafcfd;
 
     /* Buttons & Links */
@@ -70,7 +63,7 @@
     --nuxeo-link-hover-color: #00adff;
 
     /* Actions in toolbar, e.g. document view */
-    --nuxeo-action-color: #434343;
+    --nuxeo-action-color: #243238;
     --nuxeo-action-color-activated: #f68500;
     --nuxeo-container-hover: #f3f7f9;
 
@@ -144,7 +137,7 @@
 
     /* -- Nuxeo Mixins -- */
     --nuxeo-sidebar: {
-      background-color: #213f7d;
+      background-color: var(--nuxeo-sidebar-background);
     };
 
     --nuxeo-link: {
@@ -162,9 +155,14 @@
 
     --nuxeo-sidebar-item-theme: {
       border-bottom: 1px solid var(--divider-color);
-      padding: 1em;
+      display: block;
       margin: 0;
       white-space: nowrap;
+    };
+
+    --nuxeo-sidebar-item-link: {
+      display: block;
+      padding: 1em;
     };
 
     --nuxeo-tag: {
@@ -188,7 +186,7 @@
     --paper-tooltip: {
       font-size: 1rem;
       font-weight: bold;
-      background-color: var(--dark-primary-color);
+      background-color: var(--nuxeo-sidebar-background);
     };
 
     --paper-card: {
@@ -359,34 +357,6 @@
     background-color: #ebe0de;
     background-color: rgba(255,87,34,0.2);
     border-radius: 50%; }
-
-  /*paper-menu iron-icon {
-    margin-right: 33px;
-    opacity: 0.54;
-  }
-
-  paper-menu a {
-    @apply(--layout-horizontal);
-    @apply(--layout-center);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 24px;
-    min-height: 48px;
-    padding: 0 16px;
-  }
-
-  paper-item,
-  paper-icon-item {
-    font-size: .9em;
-    min-height: 2.5em;
-  }
-
-  paper-item iron-icon,
-  paper-icon-item iron-icon {
-    width: 1em;
-    height: 1em;
-    margin-right: .5em;
-  } */
 
   paper-checkbox #checkmark.paper-checkbox {
     border-color: #fff !important; }
