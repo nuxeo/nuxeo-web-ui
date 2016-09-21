@@ -71,7 +71,7 @@ limitations under the License.
   <script src="vendor/moment-with-locales.js"></script>
   <script src="vendor/alloy-editor.js"></script>
 
-  <link rel="import" href="elements/elements.html">
+  <link rel="import" href="elements.html">
 
   <style is="custom-style" include="shared-styles"></style>
 </head>

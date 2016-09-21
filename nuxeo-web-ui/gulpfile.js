@@ -145,8 +145,18 @@ gulp.task('vulcanize', function() {
         inlineScripts: true
       }))
       //.pipe($.minifyInline())
-      .pipe(gulp.dest(dist('elements')))
+      .pipe(gulp.dest(dist()))
       .pipe($.size({title: 'vulcanize'}));
+});
+
+// Move dynamic layouts to root
+gulp.task('move-layouts', function() {
+  gulp.src([
+    dist('elements/document/**'),
+    dist('elements/nuxeo-search/**'),
+    dist('elements/nuxeo-admin/**'),
+    dist('elements/nuxeo-document-task/**')
+  ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 });
 
 // Strip unnecessary stuff
@@ -180,6 +190,7 @@ gulp.task('default', ['clean'], function(cb) {
       'elements',
       ['images', 'fonts', 'html'],
       'vulcanize',
+      'move-layouts',
       'strip',
       cb);
 });
