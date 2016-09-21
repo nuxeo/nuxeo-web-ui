@@ -2,6 +2,6 @@
   "name": "nuxeo-web-ui",
   "private": true,
   "dependencies": {
-    "nuxeo-web-ui": "nuxeo/nuxeo-web-ui#0.7.0"
+    "nuxeo-web-ui": "nuxeo/nuxeo-web-ui#master"
   }
 }
