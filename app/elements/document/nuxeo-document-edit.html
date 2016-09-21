@@ -163,8 +163,8 @@ Contributors:
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
             var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
-            var folder = ['nuxeo', docType].join('-') + '/';
-            var url = this.resolveUrl('layouts/' + folder + layout + '.html');
+            var folder = ['nuxeo', Polymer.CaseMap.camelToDashCase(docType)].join('-') + '/';
+            var url = this.resolveUrl(folder + layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {

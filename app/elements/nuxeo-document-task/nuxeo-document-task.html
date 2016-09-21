@@ -205,7 +205,7 @@ Contributors:
         _taskChanged: function() {
           var layout = this._layoutFor(this.task);
           if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl('../nuxeo-document-task/' + layout + '.html');
+            var url = this.resolveUrl(layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
                 // error handling
                 function() {
