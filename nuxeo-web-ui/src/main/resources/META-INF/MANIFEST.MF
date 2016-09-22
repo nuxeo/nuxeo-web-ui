@@ -10,3 +10,4 @@ Nuxeo-Component: OSGI-INF/auth-config.xml,
   OSGI-INF/pageprovider-contrib.xml,
   OSGI-INF/core-types-contrib.xml,
   OSGI-INF/login-startup-page-web-contrib.xml
+  OSGI-INF/webresources-contrib.xml

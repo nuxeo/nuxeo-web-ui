@@ -12,8 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+<%@ page import="java.util.List"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
+<%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
+<%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
+<%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
+
+<% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 
 <!doctype html>
 <html lang="">
@@ -59,8 +66,8 @@ limitations under the License.
 
     // append theme file
     var theme = localStorage.getItem('theme') || 'default';
-    var link = document.createElement('link')
-    link.setAttribute('rel', 'import')
+    var link = document.createElement('link');
+    link.setAttribute('rel', 'import');
     link.setAttribute('href', 'styles/' + theme + '-theme.html');
     document.getElementsByTagName('head')[0].appendChild(link);
   </script>
@@ -70,7 +77,9 @@ limitations under the License.
   <script src="vendor/moment-with-locales.js"></script>
   <script src="vendor/alloy-editor.js"></script>
 
-  <link rel="import" href="elements.html">
+  <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
+  <link rel="import" href="<%= request.getContextPath() %>/<%= resource.getURI() %>">
+  <% } %>
 
   <style is="custom-style" include="shared-styles"></style>
 </head>
