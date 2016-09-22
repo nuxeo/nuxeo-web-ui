@@ -77,8 +77,7 @@ Contributors:
         padding: 8px 16px;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
+      .create {
         cursor: pointer;
       }
 
@@ -90,7 +89,7 @@ Contributors:
     <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]"
                      response="{{version}}"></nuxeo-operation>
 
-    <div class="tag" on-tap="_toggleDialog">[[i18n('ui.versions.create', 'Create Version')]]</div>
+    <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('ui.versions.create', 'Create Version')]]</nuxeo-tag>
 
     <paper-dialog id="dialog" class="dialog" with-backdrop
                   on-iron-overlay-opened="_dialogOpened"

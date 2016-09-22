@@ -98,22 +98,6 @@ Contributors:
         margin-right: .5em;
       }
 
-      iron-icon.tag-icon {
-        height: 12px;
-        width: 12px;
-      }
-
-      .participant {
-        background-color: var(--nuxeo-tag-background);
-        color: var(--nuxeo-tag-text);
-        text-transform: capitalize;
-        border-radius: 2.5em;
-        padding: .2rem .4rem;
-        margin: 0 .3em .1em 0;
-        font-size: .8em;
-        line-height: initial;
-      }
-
       .date {
         color: var(--nuxeo-warn-text);
       }
@@ -231,10 +215,7 @@ Contributors:
                 </div>
                 <div class="flex-2">
                   <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                    <span class="participant">
-                      <iron-icon icon="[[_participantIcon(actor.id)]]" class="tag-icon"></iron-icon>
-                      [[_participantName(actor.id)]]
-                    </span>
+                    <nuxeo-tag icon="[[_participantIcon(actor.id)]]">[[_participantName(actor.id)]]</nuxeo-tag>
                   </template>
                 </div>
                 <span class="date flex">

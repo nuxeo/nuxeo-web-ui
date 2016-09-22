@@ -139,17 +139,6 @@ Contributors:
       margin-right: .2em;
     }
 
-    .owner {
-      background-color: var(--nuxeo-tag-background);
-      color: var(--nuxeo-tag-text);
-      text-transform: capitalize;
-      border-radius: 2.5em;
-      padding: .2rem .4rem;
-      margin: 0 .3em .1em 0;
-      font-size: .8em;
-      line-height: initial;
-    }
-
     .ellipsis {
       text-overflow: ellipsis;
       overflow: hidden;
@@ -252,7 +241,7 @@ Contributors:
                       </div>
                       <div class="layout center">
                         <span class="collection-property">[[i18n('label.collections.ownedBy', 'Owned by')]]</span>
-                        <span class="owner">[[collection.properties.dc:creator]]</span>
+                        <nuxeo-tag>[[collection.properties.dc:creator]]</nuxeo-tag>
                       </div>
                     </div>
                   </div>

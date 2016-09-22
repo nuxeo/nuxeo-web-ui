@@ -46,10 +46,6 @@ Contributors:
         cursor: pointer;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection"
@@ -58,10 +54,10 @@ Contributors:
     </nuxeo-operation>
 
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
-      <span class="tag">
+      <nuxeo-tag>
         [[item.title]]
         <iron-icon icon="icons:clear" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
-      </span>
+      </nuxeo-tag>
     </template>
 
   </template>

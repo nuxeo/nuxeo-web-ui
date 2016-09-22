@@ -26,30 +26,10 @@ Contributors:
 -->
 <dom-module id="nuxeo-document-users">
   <template>
-    <style>
-      .icon {
-        --iron-icon-height: .9rem;
-        --iron-icon-width: .9rem;
-        margin-right: .2rem;
-        @apply(--nuxeo-document-users-icon-theme);
-      }
-
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
-      .user {
-        @apply(--nuxeo-user);
-      }
-    </style>
-
     <template is="dom-repeat" items="[[users]]" as="contributor">
-      <a class="tag user" href$="[[urlFor('user', contributor)]]">
-        <div class="layout horizontal center">
-          <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
-          <span>[[contributor]]</span>
-        </div>
-      </a>
+      <nuxeo-tag href="" icon="icons:perm-identity">
+        <a href$="[[urlFor('user', contributor)]]">[[contributor]]</a>
+      </nuxeo-tag>
     </template>
   </template>
 

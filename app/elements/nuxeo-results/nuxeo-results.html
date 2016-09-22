@@ -147,14 +147,6 @@ Contributors:
         margin-right: 8px;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
-      .user {
-        @apply(--nuxeo-user);
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -211,8 +203,8 @@ Contributors:
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.lastContributor', 'Last Contibutor')]]"
               sort-by="dc:lastContributor" flex="50">
               <template>
-                <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
-                  [[item.properties.dc:lastContributor]]
+                <a href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
+                  <nuxeo-tag>[[item.properties.dc:lastContributor]]</nuxeo-tag>
                 </a>
               </template>
             </nuxeo-data-table-column>
@@ -220,7 +212,7 @@ Contributors:
               <template><span class="capitalize">[[item.state]]</span></template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
-              <template>[[_displayVersion(item)]]</template>
+              <template><span>[[_displayVersion(item)]]</span></template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
               flex="50" hidden>
@@ -231,26 +223,26 @@ Contributors:
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
               hidden>
               <template>
-                <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
-                  [[item.properties.dc:creator]]
+                <a href$="[[urlFor('user', item.properties.dc:creator)]]">
+                  <nuxeo-tag>[[item.properties.dc:creator]]</nuxeo-tag>
                 </a>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
               <template>
-                  <span class="tag vocabulary">[[item.properties.dc:nature]]</span>
+                <span>[[item.properties.dc:nature]]</span>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
               <template>
-                  <span class="tag vocabulary">[[item.properties.dc:coverage]]</span>
+                <span>[[item.properties.dc:coverage]]</span>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
               <template>
-                  <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
-                    <span class="tag vocabulary">[[subject]]</span>
-                  </template>
+                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                  <span>[[subject]]</span>
+                </template>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>

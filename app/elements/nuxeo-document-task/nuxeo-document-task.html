@@ -52,10 +52,6 @@ Contributors:
         --iron-icon-width: .9rem;
       }
 
-      iron-icon.tag-icon {
-        margin-right: .2em;
-      }
-
       .task-body {
         padding: 0;
         overflow-y: auto;
@@ -81,14 +77,6 @@ Contributors:
         padding: .5em 0;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
-      .user {
-        @apply(--nuxeo-user);
-      }
-
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
@@ -110,9 +98,8 @@ Contributors:
               <span class="flex-3">[[i18n('label.route.task.assigned', 'Assigned to')]]</span>
               <span class="flex-9">
                 <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                  <a class="tag user" href="[[_actorHref(actor.id)]]">
-                    <iron-icon icon="[[_actorIcon(actor.id)]]" class="tag-icon"></iron-icon>
-                    [[_actorName(actor.id)]]
+                  <a href="[[_actorHref(actor.id)]]">
+                    <nuxeo-tag icon="[[_actorIcon(actor.id)]]">[[_actorName(actor.id)]]</nuxeo-tag>
                   </a>
                 </template>
               </span>

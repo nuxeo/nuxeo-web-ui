@@ -115,7 +115,6 @@ Contributors:
       }
 
       .sidecard .details {
-        color: var(--nuxeo-tag-text);
         font-size: .9em;
         padding-bottom: 1em;
         border-bottom: 1px solid var(--divider-color);
@@ -127,7 +126,7 @@ Contributors:
         line-height: 1.9em;
       }
 
-      .details .user {
+      .details {
         vertical-align: top;
       }
 
@@ -213,14 +212,6 @@ Contributors:
       nuxeo-workflow-graph {
         position: relative;
       }
-
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
-      .user {
-        @apply(--nuxeo-user);
-      }
     </style>
 
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
@@ -284,23 +275,25 @@ Contributors:
           <paper-card class="sidecard">
             <div class="horizontal layout wrap">
               <div class="details ctn">
-                <div><span class="col">[[i18n('label.document.routing.added.on', 'Created on')]]</span> [[_formatDate(document.properties.dc:created)]]</div>
-                <div><span class="col">[[i18n('label.document.routing.added.by', 'By')]]</span><a class="tag user" href$="[[urlFor('user', document.properties.dc:creator)]]">
-                  <iron-icon class="icon" icon="icons:perm-identity"></iron-icon>
-                  [[document.properties.dc:creator]]</a></div>
+                <div>
+                  <span class="col">[[i18n('label.document.routing.added.on', 'Created on')]]</span>
+                  [[_formatDate(document.properties.dc:created)]]
+                </div>
+                <div>
+                  <span class="col">[[i18n('label.document.routing.added.by', 'By')]]</span>
+                  <nuxeo-tag icon="icons:perm-identity">
+                    <a href$="[[urlFor('user', document.properties.dc:creator)]]">[[document.properties.dc:creator]]</a>
+                  </nuxeo-tag>
+                </div>
                 <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
-                  <nuxeo-document-users users="[[document.properties.dc:contributors]]">
-                  </nuxeo-document-users>
+                  <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
                 </div>
               </div>
-
               <div class="ctn">
                 <template is="dom-if" if="[[hasWorkflowRunning]]">
-                  <span class="tag process-tag">
-                    [[i18n('label.document.routing.process.running', 'Process running')]]
-                  </span>
+                  <nuxeo-tag uppercase>[[i18n('label.document.routing.process.running', 'Process running')]]</nuxeo-tag>
                 </template>
-                <span class="state tag">[[document.state]]</span>
+                <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
                 <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
               </div>
             </div>

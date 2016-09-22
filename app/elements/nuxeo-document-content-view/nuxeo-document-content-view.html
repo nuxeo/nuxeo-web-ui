@@ -143,14 +143,6 @@ Contributors:
         margin-right: 8px;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
-      .user {
-        @apply(--nuxeo-user);
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -227,8 +219,8 @@ Contributors:
                   </nuxeo-dropdown-aggregation>
               </template>
               <template>
-                <a class="tag user" href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
-                  [[item.properties.dc:lastContributor]]
+                <a href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
+                  <nuxeo-tag>[[item.properties.dc:lastContributor]]</nuxeo-tag>
                 </a>
               </template>
             </nuxeo-data-table-column>

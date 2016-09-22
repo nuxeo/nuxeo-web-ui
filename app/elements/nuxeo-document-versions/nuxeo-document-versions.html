@@ -38,7 +38,6 @@ Contributors:
       }
 
       .toggle {
-        @apply(--nuxeo-tag);
         padding: 0;
         cursor: pointer;
       }
@@ -118,10 +117,10 @@ Contributors:
     </nuxeo-document-create-version>
 
     <div hidden$="[[!_hasVersions(document)]]">
-      <div class="toggle" on-tap="_showList">
+      <nuxeo-tag class="toggle" on-tap="_showList">
         <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
         <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
-      </div>
+      </nuxeo-tag>
       <nuxeo-document-versions-list id="list" document="[[document]]">
         <div id="list-items">
           <template is="dom-if" if="[[_isVersion(document)]]">

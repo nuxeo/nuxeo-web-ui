@@ -141,10 +141,6 @@ Contributors:
         cursor: pointer;
       }
 
-      .tag {
-        @apply(--nuxeo-tag);
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon"> </nuxeo-connection>
@@ -157,7 +153,7 @@ Contributors:
       <a class="title" on-click="handleClick">
         <div class="dataContainer">
           <div class="title">[[doc.title]]</div>
-          <p class="tag">[[_docType(doc)]]</p>
+          <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
         </div>
       </a>
       <div class="actions">
