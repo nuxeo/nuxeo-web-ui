@@ -1,5 +1,5 @@
 {
-  "name": "nuxeo-web-ui",
+  "name": "nuxeo-web-ui-addon",
   "private": true,
   "dependencies": {
     "nuxeo-web-ui": "nuxeo/nuxeo-web-ui#master"
