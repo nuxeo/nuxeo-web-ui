@@ -139,13 +139,6 @@ Contributors:
       margin-right: .2em;
     }
 
-    .ellipsis {
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      display: block;
-    }
-
     .queue-thumbnail {
       height: 32px;
       width: 32px;
@@ -196,7 +189,7 @@ Contributors:
                      id="removeFromCollectionOp">
     </nuxeo-operation>
 
-    <div class="header ellipsis search-header">
+      <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
         <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
