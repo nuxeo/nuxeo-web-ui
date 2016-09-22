@@ -22,6 +22,7 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
+<link rel="import" href="nuxeo-menu-item.html">
 
 <!--
 `nuxeo-app`
@@ -41,7 +42,7 @@ Contributors:
       /* --
       Header page and Header subview
       -- */
-      paper-header-panel {
+      paper-header-panel, iron-pages::content paper-header-panel {
         --paper-header-panel-body: {
           background-color: var(--nuxeo-page-background);
         };
@@ -121,7 +122,7 @@ Contributors:
         width: 250px;
       }
 
-      ::content .item:hover,
+      ::content nuxeo-menu-item:hover,
       ::content .list-item:hover {
         @apply(--nuxeo-block-hover);
       }
@@ -159,11 +160,11 @@ Contributors:
         font-weight: 500;
       }
 
-      #sidebar ::content .item {
+      #sidebar ::content nuxeo-menu-item {
         @apply(--nuxeo-sidebar-item-theme);
       }
 
-      #sidebar ::content .item a {
+      #sidebar ::content nuxeo-menu-item a {
         @apply(--nuxeo-sidebar-item-link);
       }
 
@@ -173,7 +174,7 @@ Contributors:
         text-align: center;
       }
 
-      #sidebar .profile .item:last-of-type {
+      #sidebar .profile nuxeo-menu-item:last-of-type {
         @apply(--layout-flex);
         @apply(--layout-vertical);
         border: none;
@@ -413,15 +414,9 @@ Contributors:
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                      <div class="item" name="analytics">
-                        <a href$="[[urlFor('administration', 'analytics')]]">Analytics</a>
-                      </div>
-                      <div class="item" name="user-group-management">
-                        <a href$="[[urlFor('administration', 'user-group-management')]]">[[i18n('label.app.usersAndGroups', 'Users & Groups')]]</a>
-                      </div>
-                      <div class="item" name="vocabulary-management">
-                        <a href$="[[urlFor('administration', 'vocabulary-management')]]">[[i18n('label.app.vocabularyManagement', 'Vocabulary')]]</a>
-                      </div>
+                      <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="user-group-management" label="label.app.usersAndGroups" route="administration:user-group-management"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="vocabulary-management" label="label.app.vocabularyManagement" route="administration:vocabulary-management"></nuxeo-menu-item>
                     </iron-selector>
                   </div>
                 </section>
@@ -435,15 +430,9 @@ Contributors:
 
                   <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
 
-                  <div class="item">
-                    <a href$="[[urlFor('page', 'drive')]]">[[i18n('ui.app.user.drive','Drive')]]</a>
-                  </div>
-                  <div class="item">
-                    <a href$="[[urlFor('themes')]]">[[i18n('ui.app.user.themes','Themes')]]</a>
-                  </div>
-                  <div class="item layout vertical">
-                    <a href="[[_connectionUrl()]]/logout">[[i18n('ui.app.user.signOut','Sign Out')]]</a>
-                  </div>
+                  <nuxeo-menu-item label="ui.app.user.drive" route="page:drive"></nuxeo-menu-item>
+                  <nuxeo-menu-item label="ui.app.user.themes" route="page:themes"></nuxeo-menu-item>
+                  <nuxeo-menu-item label="ui.app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
                 </div>
               </section>
             </iron-pages>
