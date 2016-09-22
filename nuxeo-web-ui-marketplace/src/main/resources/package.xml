@@ -16,7 +16,6 @@
   </platforms>
   <dependencies>
     <package>nuxeo-jsf-ui</package>
-    <package>nuxeo-drive</package>
     <package>nuxeo-dam</package>
   </dependencies>
   <license>Apache License, Version 2.0</license>
