@@ -82,7 +82,7 @@ Contributors:
           }
           var parts = this.route.split(':');
           var name = parts[0];
-          var args = (parts[1] && parts[1].split(',')) || [];
+          var args = (parts[1] && parts[1].split('/')) || [];
           return this.urlFor.apply(this, [name].concat(args));
         }
       });
