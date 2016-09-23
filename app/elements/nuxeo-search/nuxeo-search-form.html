@@ -226,7 +226,7 @@ Contributors:
       <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
         <div id="search-form-container">
           <!-- Dynamic search form element will be inserted here -->
-          <!-- <nuxeo-{{searchName}}-search aggregations="[[aggregations]]" params="{{params}}"> -->
+          <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
         </div>
         <div class="layout vertical row">
           <paper-button noink class="primary clear" raised on-click="_clear">
@@ -407,7 +407,8 @@ Contributors:
 
         observers: [
          '_resetResults(provider, params.*)',
-         '_paramsChanged(params.*)'
+         '_paramsChanged(params.*)',
+         '_updateLayout(searchName)'
         ],
 
         get nxProvider() {
@@ -453,11 +454,6 @@ Contributors:
             var baseUrl = this.$.nxcon.url;
             return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
           }
-        },
-
-        ready: function() {
-          // dinamically insert search form
-          this._updateLayout();
         },
 
         _paramsChanged: function() {
@@ -605,13 +601,15 @@ Contributors:
          * Retrieves and creates the search form for the current search type
          */
         _updateLayout: function() {
-          var layout = ['nuxeo', this.searchName, 'search'].join('-');
-          var url = this.resolveUrl(layout + '.html');
-          this.importHref(url, this._createLayout.bind(this),
-            // error handling
-            function() {
-              console.error('Failed to find search layout for ' + this.searchName);
-            });
+          if (this.searchName && this.searchName.length > 0) {
+            var layout = ['nuxeo', this.searchName, 'search'].join('-');
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                console.error('Failed to find search layout for ' + this.searchName);
+              });
+          }
         },
 
         /**
@@ -621,10 +619,12 @@ Contributors:
           var layout = ['nuxeo', this.searchName, 'search'].join('-'),
               el = document.createElement(layout),
               parent = this.$['search-form-container'];
+          parent.innerHTML = '';
           parent.appendChild(el);
           el.id = 'search-form';
           this._form = el;
           this._form.aggregations = this.aggregations;
+          this.provider = this._form.provider;
           // setup data binding
           el.addEventListener('params-changed', function(e) {
             // e.detail.path is params.prop_name eg: params.ecm_fulltext

@@ -18,11 +18,11 @@ Contributors:
 -->
 
 <!--
-`nuxeo-faceted-search`
+`nuxeo-default-search`
 @group Nuxeo UI
-@element nuxeo-faceted-search
+@element nuxeo-default-search
 -->
-<dom-module id="nuxeo-faceted-search">
+<dom-module id="nuxeo-default-search">
   <template>
     <style>
       :host {
@@ -141,7 +141,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-faceted-search',
+        is: 'nuxeo-default-search',
 
         properties: {
           params: {
@@ -159,7 +159,10 @@ Contributors:
             notify: true,
             observer: '_addFullTextSearch'
           },
-
+          provider: {
+            type: String,
+            value: 'default_search'
+          }
         },
 
         behaviors: [Nuxeo.I18nBehavior],
