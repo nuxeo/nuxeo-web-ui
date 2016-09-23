@@ -43,10 +43,10 @@ Contributors:
         background-color: rgba(0,0,0,.15);
       }
     </style>
-    <a href$="[[urlFor('page', route)]]">
+    <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" icon="[[icon]]" name="[[name]]"></paper-icon-button>
       <paper-tooltip for="button" position="right" offset="0" animation-delay="0">
-        [[i18n(tooltip)]]</paper-tooltip>
+        [[i18n(label)]]</paper-tooltip>
     </a>
   </template>
   <script>
@@ -58,13 +58,16 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
         properties: {
           /**
-           * The 18n tooltip key
+           * The 18n label key
            */
-          tooltip: {
+          label: {
             type: String
           },
 
-          name: {
+          /**
+           * A named route and arguments. Route syntax is <name>:<arg 1>/<arg 2>/.../<arg n>.
+           */
+          route: {
             type: String,
             value: ''
           },
@@ -76,6 +79,16 @@ Contributors:
             type: String,
             value: ''
           }
+        },
+
+        _href: function() {
+          if (this.link) {
+            return this.link;
+          }
+          var parts = this.route.split(':');
+          var name = parts[0];
+          var args = (parts[1] && parts[1].split('/')) || [];
+          return this.urlFor.apply(this, [name].concat(args));
         }
       });
     })();
