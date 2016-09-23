@@ -5,7 +5,7 @@
   <extension target="org.nuxeo.ecm.platform.WebResources" point="resources">
 
     <resource name="elements.html" type="import" shrinkable="false">
-      <uri>/ui/elements/elements.html</uri>
+      <uri>/ui/elements.html</uri>
     </resource>
 
   </extension>
