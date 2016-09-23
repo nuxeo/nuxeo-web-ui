@@ -170,7 +170,7 @@
   "label.summary.upload.attachment.tooltip": "Upload an attachment",
   "label.dublincore.creator": "Contributor",
   "command.collections.backToCollections": "Back to collections list",
-  "heading.app.search": "Search Filters",
+  "heading.app.search": "Search",
   "heading.app.tasks": "Tasks",
   "ui.drive.desktopPackages.platform": "Platform",
   "ui.drive.authenticationTokensManagement.deviceId": "Device Identifier",

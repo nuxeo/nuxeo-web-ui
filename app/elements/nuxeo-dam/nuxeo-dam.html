@@ -18,9 +18,6 @@ Contributors:
 -->
 <nuxeo-slot-content name="damSearchMenuButtons" slot="SEARCH_MENU_BUTTONS">
   <template>
-    <a href$="[[urlFor('page', 'search/assets')]]" name="assetsSearch">
-      <paper-icon-button noink id="menuAssets" icon="icons:perm-media">
-      </paper-icon-button>
-    </a>
+    <nuxeo-menu-icon id="assetsSearchButton" name="assetsSearch" route="search/assets" icon="icons:perm-media" tooltip="heading.app.assets"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
