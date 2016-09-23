@@ -190,7 +190,7 @@ Contributors:
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-page-provider id="provider" auto
+    <nuxeo-page-provider id="provider"
        provider="[[provider]]"
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
@@ -333,8 +333,7 @@ Contributors:
             observer: '_selectedSearchIdxChanged'
           },
           provider: {
-            type: String,
-            value: 'default_search'
+            type: String
           },
           params: {
             type: Object
@@ -627,6 +626,7 @@ Contributors:
           el.id = 'search-form';
           this._form = el;
           this._form.aggregations = this.aggregations;
+          this.$.provider.auto = true;
           this.provider = this._form.provider;
           this.$['saved-searches'].get();
           // setup data binding
