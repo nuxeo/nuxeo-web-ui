@@ -11,6 +11,8 @@
   <production-state>proto</production-state>
   <supported>false</supported>
   <platforms>
+    <platform>cap-@DISTRIB_VERSION@</platform>
+    <platform>cap-@DISTRIB_VERSION@-HF*</platform>
     <platform>server-@DISTRIB_VERSION@</platform>
     <platform>server-@DISTRIB_VERSION@-HF*</platform>
   </platforms>
