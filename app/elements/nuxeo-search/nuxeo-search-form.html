@@ -629,6 +629,11 @@ Contributors:
           this.$.provider.auto = true;
           this.provider = this._form.provider;
           this.$['saved-searches'].get();
+          if (this._form.onlyQueue === true) {
+            this.displayQueue();
+          } else {
+            this.displayFilters();
+          }
           // setup data binding
           el.addEventListener('params-changed', function(e) {
             // e.detail.path is params.prop_name eg: params.ecm_fulltext
