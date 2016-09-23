@@ -200,7 +200,7 @@ Contributors:
     <nuxeo-search id="saved-search"></nuxeo-search>
 
     <div class="header ellipsis search-header">
-      <nuxeo-search id="saved-searches" auto searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
+      <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
       <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
         <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
           <paper-item>[[i18n('ui.searchForm.searchFilters', 'Search Filters')]]</paper-item>
@@ -469,18 +469,18 @@ Contributors:
             this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
             this.params = this._mutateParams(this.selectedSearch.params);
           } else {
-            this.isSavedSearch = false;
-            this.selectedSearch = {};
             this._clear();
           }
           this.dirty = false;
         },
 
         _selectedSearchChanged: function() {
-          this.params = this._mutateParams(this.selectedSearch.params);
-          if (this.params && this.params.ecm_fulltext) {
-            this.searchTerm = this.params.ecm_fulltext.replace('*', '');
-            this._form.searchTerm = this.searchTerm;
+          if (this.selectedSearch) {
+            this.params = this._mutateParams(this.selectedSearch.params);
+            if (this.params && this.params.ecm_fulltext) {
+              this.searchTerm = this.params.ecm_fulltext.replace('*', '');
+              this._form.searchTerm = this.searchTerm;
+            }
           }
         },
 
@@ -490,6 +490,8 @@ Contributors:
 
         _clear: function() {
           this.searchTerm = '';
+          this.isSavedSearch = false;
+          this.selectedSearch = {};
           if (this._form) {
             this._form.searchTerm = '';
           }
@@ -620,11 +622,13 @@ Contributors:
               el = document.createElement(layout),
               parent = this.$['search-form-container'];
           parent.innerHTML = '';
+          this._clear();
           parent.appendChild(el);
           el.id = 'search-form';
           this._form = el;
           this._form.aggregations = this.aggregations;
           this.provider = this._form.provider;
+          this.$['saved-searches'].get();
           // setup data binding
           el.addEventListener('params-changed', function(e) {
             // e.detail.path is params.prop_name eg: params.ecm_fulltext

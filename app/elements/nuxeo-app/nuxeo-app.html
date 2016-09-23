@@ -316,15 +316,7 @@ Contributors:
         <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
           <paper-icon-button noink id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button noink id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
-          <!--<nuxeo-slot slot="SEARCH_MENU_BUTTONS" ></nuxeo-slot>-->
-          <a href$="[[urlFor('page', 'search/default')]]">
-            <paper-icon-button noink id="menuSearch" icon="icons:search">
-            </paper-icon-button>
-          </a>
-          <a href$="[[urlFor('page', 'search/assets')]]">
-            <paper-icon-button noink id="menuAssets" icon="icons:perm-media">
-            </paper-icon-button>
-          </a>
+          <nuxeo-slot slot="SEARCH_MENU_BUTTONS" ></nuxeo-slot>
           <div id="menuTasks" class="icon-badge" name="tasks">
             <paper-icon-button noink icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
             <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
@@ -465,11 +457,6 @@ Contributors:
               <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
             </nuxeo-search-results>
 
-            <!-- Assets Search -->
-            <nuxeo-search-results id="assetsResults" name="assets" on-navigate="_navigateFromAssetsSearch" display-mode="grid">
-              <nuxeo-saved-search-actions class="actions" search-doc="[[assetsSearchDoc]]" search-loaded="[[assetsSearchLoaded]]" dirty="[[assetsDirty]]"></nuxeo-saved-search-actions>
-            </nuxeo-search-results>
-
             <nuxeo-collection-results id="collectionResults"
               name="collection" on-navigate="_navigateFromCollection">
             </nuxeo-collection-results>
@@ -565,7 +552,9 @@ Contributors:
 
           entity: Object,
 
-          searchName: String,
+          searchName: {
+            type: String
+          },
 
           tasks: Array,
 
@@ -626,10 +615,8 @@ Contributors:
         ready: function() {
           this.clipboard = this.$.clipboard;
           this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
-          //this.$.assetsResults.nxProvider = this.$.assetsForm.nxProvider;
           // XXX: review this
           this.$.searchResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.searchForm;
-          this.$.assetsResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.assetsForm;
           // XXX: end of review this
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
           if (this.shadowRoot) {
@@ -676,7 +663,6 @@ Contributors:
         },
 
         _navigate: function() {
-          console.log('_navigate');
           var url = '/' + this.page, state;
           if (this.page === 'browse') {
             if (this.docId) {
@@ -698,6 +684,10 @@ Contributors:
                   this.entity && this.entity.id && this.entity.type) {
                 url += '/' + this.entity.type + '/' + this.entity.id;
               }
+            }
+          } else if (this.page === 'search') {
+            if (this.searchName) {
+              url += '/' + this.searchName;
             }
           }
           page.show(url, state);
@@ -779,9 +769,7 @@ Contributors:
         },
 
         _observeSelectedTab: function() {
-          if (this.selectedTab === 'search' || this.selectedTab === 'assets') {
-            this.page = this.selectedTab;
-          } else if (this.selectedTab === 'personalWorkspace') {
+          if (this.selectedTab === 'personalWorkspace') {
             var tree = this.$.userWorkspace.$.tree;
             tree.open.apply(tree, [this.$.userWorkspace.rootDocument.uid]);
           }

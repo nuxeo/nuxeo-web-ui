@@ -62,10 +62,9 @@ Contributors:
     });
 
     page('/search/:searchName', function(data) {
-      console.log('aaa');
       app.selectedTab = 'search';
-      app.page = 'search';
       app.searchName = data.params.searchName;
+      app.page = 'search';
     });
 
     page('/doc/:repo?/:id/', function(data) {

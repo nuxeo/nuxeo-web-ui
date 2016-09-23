@@ -19,23 +19,13 @@ Contributors:
 
 <nuxeo-slot-content name="defaultSearchMenuButtons" slot="SEARCH_MENU_BUTTONS">
   <template>
-    <paper-icon-button noink id="menuSearch" icon="icons:search" name="search" href="/search/default_search"></paper-icon-button>
-    <paper-icon-button noink id="menuAssets" icon="icons:perm-media" name="search" href="/search/assets_search"></paper-icon-button>
-  </template>
-</nuxeo-slot-content>
-
-<nuxeo-slot-content name="defaultSearchMenuContents" slot="SEARCH_MENU_CONTENTS">
-  <template>
-    <section class="card search" name="search">
-      <nuxeo-search-form id="searchForm" search-name="faceted" on-display-filters="_resetSearchResults" dirty="{{dirty}}"
-                         is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
-      </nuxeo-search-form>
-    </section>
-
-    <section class="card" name="assets">
-      <nuxeo-search-form id="assetsForm" search-name="assets" provider="assets_search" on-display-filters="_resetAssetsResults"
-                         dirty="{{assetsDirty}}" is-saved-search="{{assetsSearchLoaded}}" selected-search="{{selectedAssetsSearch}}">
-      </nuxeo-search-form>
-    </section>
+    <a href$="[[urlFor('page', 'search/default')]]" name="defaultSearch">
+      <paper-icon-button noink id="menuSearch" icon="icons:search">
+      </paper-icon-button>
+    </a>
+    <a href$="[[urlFor('page', 'search/assets')]]" name="assetsSearch">
+      <paper-icon-button noink id="menuAssets" icon="icons:perm-media">
+      </paper-icon-button>
+    </a>
   </template>
 </nuxeo-slot-content>
