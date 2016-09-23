@@ -16,13 +16,8 @@ limitations under the License.
 Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
-
-<nuxeo-slot-content name="defaultSearchMenuButtons" slot="SEARCH_MENU_BUTTONS">
+<nuxeo-slot-content name="damSearchMenuButtons" slot="SEARCH_MENU_BUTTONS">
   <template>
-    <a href$="[[urlFor('page', 'search/default')]]" name="defaultSearch">
-      <paper-icon-button noink id="menuSearch" icon="icons:search">
-      </paper-icon-button>
-    </a>
     <a href$="[[urlFor('page', 'search/assets')]]" name="assetsSearch">
       <paper-icon-button noink id="menuAssets" icon="icons:perm-media">
       </paper-icon-button>
