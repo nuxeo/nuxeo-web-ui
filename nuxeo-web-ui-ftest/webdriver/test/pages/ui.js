@@ -20,6 +20,10 @@ export default class UI {
     driver.click(`paper-icon-button[name='${button}']`);
   }
 
+  goToSearch(button) {
+    driver.click(`nuxeo-menu-icon[name='${button}Search']`);
+  }
+
   goHome() {
     driver.click('paper-icon-button.logo');
   }
