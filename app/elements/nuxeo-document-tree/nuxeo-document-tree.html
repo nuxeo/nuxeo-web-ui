@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../nuxeo-filters-behaviour/nuxeo-filters-behaviour.html">
 
 <!--
 `nuxeo-document-tree`
@@ -30,6 +31,7 @@ Contributors:
     <style>
       :host {
         display: block;
+        padding: 16px 8px;
         --nuxeo-tree-theme: {
           padding: 1em;
         };
@@ -41,17 +43,23 @@ Contributors:
         };
       }
 
-      a, a:active,
-      a:visited, a:focus {
-        @apply(--nuxeo-link); }
+      nuxeo-tree {
+        padding: 0 8px;
+      }
+
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
 
       a:hover {
-        @apply(--nuxeo-link-hover); }
+        @apply(--nuxeo-link-hover);
+      }
 
       .node-name {
-        display: inline;
+        display: inline-block;
         position: absolute;
         text-overflow: ellipsis;
+        line-height: 24px;
       }
 
       iron-icon {
@@ -62,10 +70,23 @@ Contributors:
         cursor: pointer;
       }
 
+      .parents {
+        display: block;
+        font-weight: bold;
+      }
+
     </style>
 
-    <nuxeo-document auto doc-path="[[rootPath]]" doc-id="[[rootId]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
+    <nuxeo-document auto doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
     <nuxeo-page-provider id="children" provider="tree_children" enrichers="children"></nuxeo-page-provider>
+
+    <div class="parents">
+      <template is="dom-repeat" items="[[parents]]" as="item">
+        <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal center">
+          <iron-icon icon="icons:chevron-left"></iron-icon>[[item.title]]
+        </a>
+      </template>
+    </div>
 
     <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
       <template>
@@ -73,7 +94,6 @@ Contributors:
           <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
         </template>
         <span class="flex node-name ellipsis">
-          <iron-icon icon="[[_icon(opened)]]"></iron-icon>
           <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
         </span>
       </template>
@@ -86,21 +106,26 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-tree',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FiltersBehavior],
         properties: {
-          rootPath: String,
-
-          rootId: String,
-
           controller: Object,
-
+          rootPath: {
+            type: String,
+            value: '/default-domain'
+          },
+          rootDocument: {
+            type: Object,
+            observer: '_rootDocumentChanged'
+          },
           currentDocument: {
             type: Object,
             observer: '_currentDocumentChanged'
+          },
+          parents: {
+            type: Array,
+            value: []
           }
         },
-
-        behaviors: [Nuxeo.RoutingBehavior],
 
         ready: function() {
           this.controller = {
@@ -123,10 +148,19 @@ Contributors:
 
         _currentDocumentChanged: function() {
           if (this.currentDocument) {
-            var ids = this.currentDocument.contextParameters.breadcrumb.entries.map(function(entry) {
-              return entry.uid;
-            });
-            this.$.tree.open.apply(this.$.tree, ids);
+            if (this.rootPath !== this.currentDocument.path) {
+              this.$.tree.style.display = 'none';
+              var doc = this.currentDocument;
+              var entries = doc.contextParameters.breadcrumb.entries;
+              this.parents = entries.slice(0, entries.length - (this._isFolderish(doc) ? 1 : 2));
+              this.rootPath = this._isFolderish(doc) ? doc.path : entries[entries.length - 2].path;
+            }
+          }
+        },
+
+        _rootDocumentChanged: function() {
+          if (this.rootDocument) {
+            this.$.tree.style.display = 'block';
           }
         },
 
