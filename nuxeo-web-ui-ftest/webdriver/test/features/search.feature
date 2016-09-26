@@ -5,5 +5,5 @@ Feature: Search
     And I go to the UI
 
   Scenario: Search
-    When I click the "defaultSearch" button
+    When I click the "default" search button
     Then I can see the Search window
