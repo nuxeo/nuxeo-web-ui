@@ -153,7 +153,7 @@ gulp.task('vulcanize', function() {
 gulp.task('move-layouts', function() {
   gulp.src([
     dist('elements/document/**'),
-    dist('elements/nuxeo-search/**'),
+    dist('elements/search/**'),
     dist('elements/nuxeo-admin/**'),
     dist('elements/nuxeo-document-task/**')
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
