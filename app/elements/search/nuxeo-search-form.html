@@ -201,23 +201,28 @@ Contributors:
 
     <div class="header ellipsis search-header">
       <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
-      <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
-        <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
-          <paper-item>[[i18n('ui.searchForm.searchFilters', 'Search Filters')]]</paper-item>
-          <template is="dom-repeat" items="[[searches]]" as="search">
-            <paper-item>[[search.title]]</paper-item>
-          </template>
-        </paper-menu>
-      </paper-dropdown-menu>
-      <template is="dom-if" if="[[_isQueue]]">
-        <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
-        </paper-icon-button>
-        <paper-tooltip for="toogleFilter">[[i18n('ui.searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+      <template is="dom-if" if="[[!_onlyQueue]]">
+        <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
+          <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
+            <paper-item>[[i18n('ui.searchForm.searchFilters', 'Search Filters')]]</paper-item>
+            <template is="dom-repeat" items="[[searches]]" as="search">
+              <paper-item>[[search.title]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+        <template is="dom-if" if="[[_isQueue]]">
+          <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
+          </paper-icon-button>
+          <paper-tooltip for="toogleFilter">[[i18n('ui.searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+        </template>
+        <template is="dom-if" if="[[!_isQueue]]">
+          <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+          </paper-icon-button>
+          <paper-tooltip for="toogleQueue">[[i18n('ui.searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+        </template>
       </template>
-      <template is="dom-if" if="[[!_isQueue]]">
-        <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
-        </paper-icon-button>
-        <paper-tooltip for="toogleQueue">[[i18n('ui.searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+      <template is="dom-if" if="[[_onlyQueue]]">
+        <h1>[[i18n(label, label)]]</h1>
       </template>
     </div>
 
@@ -369,6 +374,10 @@ Contributors:
             value: false,
             notify: true
           },
+          _onlyQueue: {
+            type: Boolean,
+            value: false
+          },
           paramMutator: {
             type: Function,
             value: function() {
@@ -405,7 +414,7 @@ Contributors:
         },
 
         observers: [
-         '_resetResults(provider, params.*)',
+         '_resetResults(provider, params.*, query)',
          '_paramsChanged(params.*)',
          '_updateLayout(searchName)'
         ],
@@ -499,6 +508,7 @@ Contributors:
             this.dirty = false;
           }
           this.selectedSearchIdx = 0;
+          this._resetResults();
         },
 
         _reset: function() {
@@ -627,12 +637,21 @@ Contributors:
           this._form = el;
           this._form.aggregations = this.aggregations;
           this.$.provider.auto = true;
-          this.provider = this._form.provider;
-          this.$['saved-searches'].get();
+          if (this._form.provider !== undefined) {
+            this.provider = this._form.provider;
+            this.$.provider.query = null;
+          } else {
+            this.provider = null;
+            this.$.provider.query = this._form.query;
+          }
           if (this._form.onlyQueue === true) {
+            this._onlyQueue = true;
+            this.label = this._form.label;
             this.displayQueue();
           } else {
+            this._onlyQueue = false;
             this.displayFilters();
+            this.$['saved-searches'].get();
           }
           // setup data binding
           el.addEventListener('params-changed', function(e) {
