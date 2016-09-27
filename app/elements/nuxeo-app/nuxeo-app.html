@@ -390,7 +390,7 @@ Contributors:
                   <h1>[[i18n('heading.app.personalSpace', 'Personal Space')]]</h1>
                 </div>
                 <div class="content">
-                  <nuxeo-document-tree id="userWorkspace" root-path="[[_userWorkspacePath]]" current-document="[[currentDocument]]">
+                  <nuxeo-document-tree current-document="[[currentDocument]]" user="[[currentUser]]">
                   </nuxeo-document-tree>
                 </div>
               </section>
@@ -531,11 +531,7 @@ Contributors:
             observer: '_navigate'
           },
 
-          selectedTab: {
-            type: String,
-            observer: '_observeSelectedTab'
-          },
-
+          selectedTab: String,
           selectedAdminTab: String,
 
           currentDocument: Object,
@@ -578,10 +574,6 @@ Contributors:
           currentUser: {
             type: Object,
             observer: '_observeCurrentUser'
-          },
-
-          _userWorkspacePath: {
-            type: String
           }
 
         },
@@ -763,13 +755,6 @@ Contributors:
           this._navigate();
         },
 
-        _observeSelectedTab: function() {
-          if (this.selectedTab === 'personalWorkspace') {
-            var tree = this.$.userWorkspace.$.tree;
-            tree.open.apply(tree, [this.$.userWorkspace.rootDocument.uid]);
-          }
-        },
-
         _fetchTasks: function() {
           // hack to fetch tasks with user prefix and without prefix
           // some tasks are prefixed, to be reviewed later
@@ -811,7 +796,6 @@ Contributors:
 
         _observeCurrentUser: function() {
           if (this.currentUser) {
-            this._userWorkspacePath =  '/default-domain/UserWorkspaces/' + this.currentUser.id;
             this._fetchTasks();
           }
         },

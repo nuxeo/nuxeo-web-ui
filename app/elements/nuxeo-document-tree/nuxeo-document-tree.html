@@ -124,6 +124,10 @@ Contributors:
           parents: {
             type: Array,
             value: []
+          },
+          user: {
+            type: Object,
+            observer: '_userChanged'
           }
         },
 
@@ -146,8 +150,14 @@ Contributors:
           };
         },
 
+        _userChanged: function() {
+          if (this.user) {
+            this.rootPath = '/default-domain/UserWorkspaces/' + this.user.id;
+          }
+        },
+
         _currentDocumentChanged: function() {
-          if (this.currentDocument) {
+          if (this.currentDocument && !this.user) {
             if (this.rootPath !== this.currentDocument.path) {
               this.$.tree.style.display = 'none';
               var doc = this.currentDocument;
