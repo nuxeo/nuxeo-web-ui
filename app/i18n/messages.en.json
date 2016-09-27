@@ -171,6 +171,7 @@
   "label.dublincore.creator": "Contributor",
   "command.collections.backToCollections": "Back to collections list",
   "heading.app.search": "Search",
+  "heading.app.validatedSearch": "Validated",
   "heading.app.tasks": "Tasks",
   "ui.drive.desktopPackages.platform": "Platform",
   "ui.drive.authenticationTokensManagement.deviceId": "Device Identifier",
@@ -391,5 +392,6 @@
   "ui.theme.dark": "Dark",
   "ui.theme.garden": "Garden",
   "ui.theme.kawaii": "Kawaii",
-  "ui.theme.ocean": "Ocean"
+  "ui.theme.ocean": "Ocean",
+  "ui.queue.validateDocuments": "Validated Documents"
 }

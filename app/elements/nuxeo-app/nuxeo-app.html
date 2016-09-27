@@ -318,6 +318,7 @@ Contributors:
           <paper-icon-button noink id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button noink id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="heading.app.search"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="validatedSearch" route="search:validated" icon="icons:done-all" label="heading.app.validateSearch"></nuxeo-menu-icon>
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
           <div id="menuTasks" class="icon-badge" name="tasks">
             <paper-icon-button noink icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
@@ -621,6 +622,7 @@ Contributors:
           this.$.nxcon.connect().then(function(res) {
             this.currentUser =  res;
           }.bind(this));
+
         },
 
         updateDoc: function(id, path, action) {
