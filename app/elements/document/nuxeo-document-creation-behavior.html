@@ -113,7 +113,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.DocumentMetadataBehavior, {
       var layout = this._layoutFor();
       if (!this._isRegistered(layout)) {
         var docType = this.selectedDocType.charAt(0).toLowerCase() + this.selectedDocType.slice(1);
-        var folder = ['nuxeo', Polymer.CaseMap.camelToDashCase(docType)].join('-') + '/';
+        var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
         var url = this.resolveUrl('../document/' + folder + layout + '.html');
         this.importHref(url, this._createLayout.bind(this),
             // error handling

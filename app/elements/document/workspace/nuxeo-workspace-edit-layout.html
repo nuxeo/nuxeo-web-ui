@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-    Andre Justo <ajusto@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../nuxeo-dublincore/nuxeo-dublincore-edit.html">
+<link rel="import" href="../dublincore/nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-file-edit-layout`
+`nuxeo-workspace-edit-layout`
 @group Nuxeo UI
-@element nuxeo-file-edit-layout
+@element nuxeo-workspace-edit-layout
 -->
-<dom-module id="nuxeo-file-edit-layout">
+<dom-module id="nuxeo-workspace-edit-layout">
   <template>
     <style>
       :host {
@@ -47,24 +47,6 @@ Contributors:
         padding: 0.5em;
       }
 
-      img {
-        height: 16px;
-        width: 16px;
-      }
-
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
-      }
-
-      .radio-container {
-        padding: 0;
-      }
-
-      .radio-container > * {
-        margin-right: 10px;
-      }
-
       .label-container {
         position: relative;
         width: 200px;
@@ -75,9 +57,8 @@ Contributors:
         position: absolute;
         right: 10px;
       }
-    </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    </style>
 
     <div class="row layout horizontal">
       <div class="label-container">
@@ -94,57 +75,25 @@ Contributors:
       <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
     </div>
 
-    <template is="dom-if" if="[[uploadEnabled]]">
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('content', 'Content')]]</label>
-        </div>
-        <div class="vertical layout">
-          <paper-radio-group class="layout vertical" selected="none">
-            <!-- none choice -->
-            <paper-radio-button name="none" on-tap="_noneSelected">[[i18n('label.inputFile.noneChoice','None')]]</paper-radio-button>
-            <!-- upload choice -->
-            <paper-radio-button name="upload"  on-tap="_uploadSelected">[[i18n('label.inputFile.uploadChoice','Upload')]]</paper-radio-button>
-          </paper-radio-group>
-          <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
-        </div>
-      </div>
-    </template>
     <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
+
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-file-edit-layout',
+        is: 'nuxeo-workspace-edit-layout',
 
         properties: {
+
           document: {
             type: Object
-          },
-
-          uploadEnabled: {
-            type: Boolean,
-            value: false
           }
+
         },
 
         behaviors: [Nuxeo.I18nBehavior],
-
-        _icon: function() {
-          var url = this.$.nxcon.url;
-          return url + this.document.properties['common:icon'];
-        },
-
-        _noneSelected: function() {
-          this.document.properties['file:content'] = null;
-        },
-
-        _uploadSelected: function() {
-          this.document.properties['file:content'] = this.$$('#nxFile').value;
-        }
-
       });
     })();
   </script>

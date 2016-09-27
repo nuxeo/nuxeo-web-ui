@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-    Guillaume RENARD <grenard@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../nuxeo-dublincore/nuxeo-dublincore-edit.html">
+<link rel="import" href="../dublincore/nuxeo-dublincore-edit.html">
 
 <!--
-`nuxeo-collection-edit-layout`
+`nuxeo-template-edit-layout`
 @group Nuxeo UI
-@element nuxeo-collection-edit-layout
+@element nuxeo-template-edit-layout
 -->
-<dom-module id="nuxeo-collection-edit-layout">
+<dom-module id="nuxeo-template-edit-layout">
   <template>
     <style>
       :host {
@@ -47,24 +47,6 @@ Contributors:
         padding: 0.5em;
       }
 
-      img {
-        height: 16px;
-        width: 16px;
-      }
-
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
-      }
-
-      .radio-container {
-        padding: 0;
-      }
-
-      .radio-container > * {
-        margin-right: 10px;
-      }
-
       .label-container {
         position: relative;
         width: 200px;
@@ -75,9 +57,8 @@ Contributors:
         position: absolute;
         right: 10px;
       }
-    </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    </style>
 
     <div class="row layout horizontal">
       <div class="label-container">
@@ -95,27 +76,24 @@ Contributors:
     </div>
 
     <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
+
   </template>
   <script>
     (function() {
       'use strict';
 
       Polymer({
-        is: 'nuxeo-collection-edit-layout',
+        is: 'nuxeo-template-edit-layout',
 
         properties: {
+
           document: {
             type: Object
           }
+
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
-
-        _icon: function() {
-          var url = this.$.nxcon.url;
-          return url + this.document.properties['common:icon'];
-        }
-
+        behaviors: [Nuxeo.I18nBehavior]
       });
     })();
   </script>
