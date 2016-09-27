@@ -248,6 +248,7 @@ Contributors:
 
       <div id="queue" hidden$="{{!_isQueue}}">
         <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
+          on-nuxeo-page-loaded="_membersLoaded"
           selected-item="{{selectedDocument}}"
           selection-enabled>
           <template>
@@ -661,6 +662,12 @@ Contributors:
               this.set('params.' + param, e.detail.value);
             }
           }.bind(this));
+        },
+
+        _membersLoaded: function() {
+          if (this._onlyQueue && this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
+            this.$.list.selectItem(this.$.list.$.list.items[0]);
+          }
         }
 
       });

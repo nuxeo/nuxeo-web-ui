@@ -67,6 +67,11 @@ Contributors:
       app.page = 'search';
     });
 
+    page('/queue/:searchName', function(data) {
+      app.selectedTab = 'search';
+      app.searchName = data.params.searchName;
+    });
+
     page('/doc/:repo?/:id/', function(data) {
       app.updateDoc(data.params.id, '', 'view');
       if (!data.state.contentView) {
@@ -130,6 +135,10 @@ Contributors:
 
         search: function(searchId) {
           return page.url('/search/' + searchId);
+        },
+
+        queue: function(searchId) {
+          return page.url('/queue/' + searchId);
         },
 
         tasks: function() {
