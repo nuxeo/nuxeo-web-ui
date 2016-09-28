@@ -286,6 +286,11 @@ Contributors:
         </neon-animatable>
       </neon-animated-pages>
 
+    <nuxeo-keys keys="right l" on-pressed="_navigateOnRight"></nuxeo-keys>
+    <nuxeo-keys keys="left h" on-pressed="_navigateOnLeft"></nuxeo-keys>
+    <nuxeo-keys keys="down j" on-pressed="_navigateOnDown"></nuxeo-keys>
+    <nuxeo-keys keys="up k" on-pressed="_navigateOnUp"></nuxeo-keys>
+
   </template>
   <script>
     (function() {
@@ -293,6 +298,8 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-collections',
+
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         properties: {
 
@@ -336,12 +343,6 @@ Contributors:
             type: Boolean,
             value: true
           },
-          keyEventTarget: {
-            type: Object,
-            value: function() {
-              return document.body;
-            }
-          },
           _entryAnimation: {
             type: String,
             value: 'slide-from-right-animation'
@@ -356,21 +357,6 @@ Contributors:
             reflectToAttribute: true,
             value: false
           }
-        },
-
-        behaviors: [
-          Polymer.IronA11yKeysBehavior, Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior
-        ],
-
-        keyBindings: {
-          'right': '_navigateOnRight',
-          'l': '_navigateOnRight',
-          'left': '_navigateOnLeft',
-          'h': '_navigateOnLeft',
-          'down': '_navigateOnDown',
-          'j': '_navigateOnDown',
-          'up': '_navigateOnUp',
-          'k': '_navigateOnUp'
         },
 
         get nxProvider() {

@@ -314,7 +314,7 @@ Contributors:
         <a href$="[[urlFor('home')]]">
           <paper-icon-button src$="[[baseUrl]]images/touch/icon-128x128.png" class="logo"></paper-icon-button>
         </a>
-        <paper-menu class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
+        <paper-menu id="menu" class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
           <paper-icon-button noink id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
           <paper-icon-button noink id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="heading.app.search"></nuxeo-menu-icon>
@@ -503,15 +503,13 @@ Contributors:
     <nuxeo-slot slot="MENU_BUTTONS_TOOLTIP"></nuxeo-slot>
 
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup"
-                                 parent="[[currentParent]]"></nuxeo-document-create-popup>
+    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
 
-    <iron-a11y-keys
-      id="keys"
-      keys="ctrl+space"
-      target="[[keyPressTarget]]"
-      on-keys-pressed="_handleKeyPresses">
-    </iron-a11y-keys>
+    <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
+    <nuxeo-keys keys="d" on-pressed="_showDashboard"></nuxeo-keys>
+    <nuxeo-keys keys="a" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
+    <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
+
   </template>
 
   <script>
@@ -560,7 +558,7 @@ Contributors:
             value: false
           },
 
-          keyPressTarget: {
+          keyEventTarget: {
             type: Object,
             value: function() {
               return document.body;
@@ -580,7 +578,7 @@ Contributors:
 
         listeners: {
           'document-updated': 'refresh',
-          'create-document': 'showDocumentCreationWizard',
+          'create-document': '_showDocumentCreationWizard',
           'document-created': '_handleDocumentCreated',
           'nuxeo-content-view-navigate': '_navigateFromCV',
           'goHome': '_handleUGMgoHome',
@@ -614,7 +612,6 @@ Contributors:
           this.$.nxcon.connect().then(function(res) {
             this.currentUser =  res;
           }.bind(this));
-
         },
 
         updateDoc: function(id, path, action) {
@@ -639,7 +636,19 @@ Contributors:
           this.updateDoc(this.docId, this.docPath, this.docAction);
         },
 
-        showDocumentCreationWizard: function(e) {
+        _focusMenu: function() {
+          this.$.menu.focus();
+        },
+
+        _showDashboard: function() {
+          this.page = 'home';
+        },
+
+        _showSuggester: function() {
+          this.$.suggester.toggle();
+        },
+
+        _showDocumentCreationWizard: function(e) {
           if (e.detail.files) {
             this.$.importPopup.toggleDialogImport(e.detail.files);
           } else if (e.detail.type) {
@@ -734,10 +743,6 @@ Contributors:
             this.drawerOpened = true;
           }
           this._selected = e.detail.selected;
-        },
-
-        _handleKeyPresses: function() {
-          this.$.suggester.toggle();
         },
 
         _handleUGMgoHome: function() {

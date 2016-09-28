@@ -205,9 +205,15 @@ Contributors:
           </iron-selector>
         </div>
       </div>
-      <paper-icon-button noink id="searchButton" icon="icons:search" name="browser"
-                         on-tap="toggle"></paper-icon-button>
+      <paper-icon-button noink id="searchButton" icon="icons:search" name="browser" on-tap="toggle"></paper-icon-button>
     </div>
+
+    <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="tab" on-pressed="_focusSearch"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="esc" on-pressed="closeResults"></nuxeo-keys>
+
   </template>
 
   <script>
@@ -217,7 +223,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-suggester',
 
-        behaviors: [Polymer.IronA11yKeysBehavior, Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         properties: {
           toggled: {
@@ -234,15 +240,13 @@ Contributors:
           searchDelay: {
             type: Number,
             value: 200
+          },
+          target: {
+            type: Object,
+            value: function() {
+              return this;
+            }
           }
-        },
-
-        keyBindings: {
-          'up': '_upPressed',
-          'down': '_downPressed',
-          'esc': 'closeResults',
-          'enter': '_enterPressed',
-          'tab': '_focusSearch'
         },
 
         toggle: function() {

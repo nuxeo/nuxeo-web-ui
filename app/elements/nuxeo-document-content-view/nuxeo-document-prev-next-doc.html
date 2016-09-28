@@ -86,6 +86,9 @@ Contributors:
       <paper-tooltip for="nextDoc" position="left">[[i18n('label.documents.nextDocument', 'Next Document')]]</paper-tooltip>
     </template>
 
+    <nuxeo-keys keys="left" on-pressed="previous"></nuxeo-keys>
+    <nuxeo-keys keys="right" on-pressed="next"></nuxeo-keys>
+
   </template>
 
   <script>
@@ -96,10 +99,7 @@ Contributors:
 
         is: 'nuxeo-document-prev-next-doc',
 
-        behaviors: [
-          Polymer.IronA11yKeysBehavior,
-          Nuxeo.I18nBehavior
-        ],
+        behaviors: [Nuxeo.I18nBehavior],
 
         properties: {
           params: {
@@ -121,12 +121,6 @@ Contributors:
             type: Boolean,
             computed: '_hasPrevious(index)'
           },
-          keyEventTarget: {
-            type: Object,
-            value: function() {
-              return document.body;
-            }
-          },
           isVisible: {
             type: Boolean,
             computed: '_isVisible(provider, hasPrevious, hasNext)'
@@ -136,11 +130,6 @@ Contributors:
         observers: [
             '_fetch(index)'
         ],
-
-        keyBindings: {
-          'left': 'previous',
-          'right': 'next'
-        },
 
         set contentView(cv) {
           this._contentView = cv;
