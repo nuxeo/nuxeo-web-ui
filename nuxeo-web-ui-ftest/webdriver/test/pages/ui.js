@@ -17,7 +17,7 @@ export default class UI {
   }
 
   goTo(button) {
-    driver.click(`paper-icon-button[name='${button}']`);
+    driver.click(`nuxeo-menu-icon[name='${button}']`);
   }
 
   goToSearch(button) {
