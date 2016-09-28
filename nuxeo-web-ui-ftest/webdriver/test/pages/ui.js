@@ -29,7 +29,7 @@ export default class UI {
   }
 
   goToBrowser() {
-    driver.click(`paper-icon-button[icon="icons:folder-open"]`);
+    driver.click(`nuxeo-menu-icon[icon="icons:folder-open"]`);
   }
 
   static get() {
