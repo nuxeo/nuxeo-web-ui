@@ -33,12 +33,43 @@ Contributors:
 <dom-module id="nuxeo-app">
   <template>
     <style>
-      a, a:active,
-      a:visited, a:focus {
-        @apply(--nuxeo-link); }
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
 
       a:hover {
-        @apply(--nuxeo-link-hover); }
+        @apply(--nuxeo-link-hover);
+      }
+
+      /* Navigation menu */
+      #menu {
+        @apply(--nuxeo-sidebar);
+        position: fixed;
+        width: 56px;
+        height: calc(100% - 120px);
+        z-index: 100;
+        padding: 60px 0;
+        overflow: auto;
+      }
+
+      #menu ::content paper-icon-button {
+        color: var(--nuxeo-sidebar-actions);
+        height: 48px;
+        padding: 14px 13px;
+        width: 56px;
+        --paper-menu-selected-item: {
+          background-color: rgba(0, 0, 0, 0.25);
+          color: #fff;
+          fill: #fff;
+        }
+      }
+
+      #menu .profile-icon {
+        position: fixed;
+        height: 59px;
+        bottom: 0;
+        left: 0;
+      }
 
       /* --
       Header page and Header subview
@@ -112,15 +143,14 @@ Contributors:
 
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
+        --paper-badge-margin-left: -24px;
+        --paper-badge-margin-bottom: -24px;
+        --paper-badge-width: 18px;
+        --paper-badge-height: 18px;
       }
 
       iron-collapse {
         overflow: auto;
-      }
-
-      paper-menu {
-        color: var(--nuxeo-sidebar-actions);
-        width: 250px;
       }
 
       ::content nuxeo-menu-item:hover,
@@ -182,16 +212,6 @@ Contributors:
         justify-content: flex-end;
       }
 
-      .icon-badge {
-        position: relative;
-      }
-
-      .header-badge {
-        left: 33px !important;
-        top: 6px !important;
-        position: absolute;
-      }
-
       [hidden] {
         display: none !important;
       }
@@ -203,51 +223,6 @@ Contributors:
 
       nuxeo-tasks-list {
         font-size: .9em;
-      }
-
-      .side-nav {
-        position: fixed;
-        width: 56px;
-        height: calc(100% - 120px);
-        z-index: 100;
-        padding: 60px 0;
-        overflow: auto;
-        @apply(--nuxeo-sidebar);
-      }
-
-      .side-nav paper-icon-button, .side-nav ::content paper-icon-button  {
-        color: var(--nuxeo-sidebar-actions);
-        height: 48px;
-        padding: 14px 13px;
-        width: 56px;
-      }
-
-      .side-nav .iron-selected,
-      .side-nav paper-icon-button:hover,
-      .side-nav paper-icon-button[focused] {
-        color: #fff;
-        fill: #fff;
-        background-color: rgba(0,0,0,.15);
-      }
-
-      .side-nav paper-icon-button:focus ::content iron-icon {
-        fill: #fff;
-      }
-
-      .side-nav .profile-icon {
-        bottom: 0;
-        position: fixed;
-        left: 0;
-        height: 59px;
-        background-color: var(--nuxeo-sidebar-background);
-        box-shadow: -2px -2px 1px rgba(0,0,0,0.1);
-      }
-
-      paper-menu {
-        --paper-menu-focused-item-after: {
-          background-color: rgba(0,0,0,.15);
-          color: #fff;
-        };
       }
 
       ::content paper-card {
@@ -314,22 +289,23 @@ Contributors:
         <a href$="[[urlFor('home')]]">
           <paper-icon-button src$="[[baseUrl]]images/touch/icon-128x128.png" class="logo"></paper-icon-button>
         </a>
-        <paper-menu id="menu" class="side-nav" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
-          <paper-icon-button noink id="menuHome" class="menu-icon" icon="icons:folder-open" name="browser"></paper-icon-button>
-          <paper-icon-button noink id="menuRecents" icon="icons:restore" name="recents"></paper-icon-button>
+
+        <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
+          <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="heading.app.browse"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="recents" icon="icons:restore" label="heading.app.recentlyViewed"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="heading.app.search"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="validatedSearch" route="queue:validated" icon="icons:done-all" label="heading.app.validateSearch"></nuxeo-menu-icon>
+
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
-          <div id="menuTasks" class="icon-badge" name="tasks">
-            <paper-icon-button noink icon="icons:check-box" name="tasks" id="tasksCounter"></paper-icon-button>
-            <paper-badge label="[[taskCount]]" class="header-badge" for="tasksCounter"></paper-badge>
-          </div>
-          <paper-icon-button noink id="menuFavorites" icon="icons:star" name="favorites"></paper-icon-button>
-          <paper-icon-button noink id="menuCollections" icon="icons:book" name="collections"></paper-icon-button>
-          <paper-icon-button noink id="menuPersonal" icon="icons:folder-shared" name="personalWorkspace"></paper-icon-button>
-          <paper-icon-button noink id="menuClipboard" icon="icons:content-paste" name="clipboard"></paper-icon-button>
-          <paper-icon-button noink id="menuAdministration" icon="icons:build" name="administration" hidden$="[[!currentUser.isAdministrator]]"></paper-icon-button>
-          <paper-icon-button noink id="menuAccount" icon="icons:account-circle" name="profile" class="profile-icon"></paper-icon-button>
+
+          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="heading.app.tasks"></nuxeo-menu-icon>
+          <paper-badge label="[[taskCount]]" for="menuTasks"></paper-badge>
+          <nuxeo-menu-icon name="favorites" icon="icons:star" label="heading.app.favorites"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="collections" icon="icons:book" label="heading.app.collections"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="heading.app.personalSpace"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="heading.app.clipboard"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="icons:build" label="heading.app.administration" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="heading.app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
         <iron-collapse id="sidebar" horizontal opened>
@@ -482,32 +458,12 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <paper-tooltip for="menuHome" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.browse', 'Browse')]]</paper-tooltip>
-    <paper-tooltip for="menuRecents" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.recentlyViewed', 'Recently Viewed')]]</paper-tooltip>
-    <paper-tooltip for="menuTasks" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.tasks', 'Tasks')]]</paper-tooltip>
-    <paper-tooltip for="menuFavorites" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.favorites', 'Favorites')]]</paper-tooltip>
-    <paper-tooltip for="menuCollections" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.collections', 'Collections')]]</paper-tooltip>
-    <paper-tooltip for="menuPersonal" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.personalSpace', 'Personal Space')]]</paper-tooltip>
-    <paper-tooltip for="menuClipboard" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.clipboard', 'Clipboard')]]</paper-tooltip>
-    <paper-tooltip for="menuAdministration" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.administration', 'Administration')]]</paper-tooltip>
-    <paper-tooltip for="menuAccount" position="right" offset="0" animation-delay="0">
-      [[i18n('heading.app.account', 'User Settings')]]</paper-tooltip>
-    <nuxeo-slot slot="MENU_BUTTONS_TOOLTIP"></nuxeo-slot>
-
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="_showDashboard"></nuxeo-keys>
-    <nuxeo-keys keys="a" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
+    <nuxeo-keys keys="c" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
     <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
 
   </template>
@@ -610,7 +566,7 @@ Contributors:
             Polymer.dom(this.root).appendChild(experimental);
           }
           this.$.nxcon.connect().then(function(res) {
-            this.currentUser =  res;
+            this.currentUser = res;
           }.bind(this));
         },
 

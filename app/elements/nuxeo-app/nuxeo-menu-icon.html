@@ -29,25 +29,23 @@ Contributors:
         display: block;
       }
 
-      paper-icon-button  {
-        color: var(--nuxeo-sidebar-actions);
-        height: 48px;
-        padding: 14px 13px;
-        width: 56px;
+      paper-icon-button:hover,
+      paper-icon-button[focused] {
+        background: rgba(0, 0, 0, 0.25);
       }
 
-      paper-icon-button:hover,
-      side-nav paper-icon-button[focused] {
-        color: #fff;
+      paper-icon-button:hover ::content iron-icon,
+      paper-icon-button[focused] ::content iron-icon {
         fill: #fff;
-        background-color: rgba(0,0,0,.15);
       }
-    </style>
+
+   </style>
+
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" icon="[[icon]]" name="[[name]]"></paper-icon-button>
-      <paper-tooltip for="button" position="right" offset="0" animation-delay="0">
-        [[i18n(label)]]</paper-tooltip>
+      <paper-tooltip id="tooltip" for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</paper-tooltip>
     </a>
+
   </template>
   <script>
     (function() {
@@ -81,7 +79,14 @@ Contributors:
           }
         },
 
+        ready: function() {
+          document.body.appendChild(this.$.tooltip);
+        },
+
         _href: function() {
+          if (!this.route) {
+            return;
+          }
           if (this.link) {
             return this.link;
           }
