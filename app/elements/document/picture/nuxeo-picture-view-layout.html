@@ -77,9 +77,9 @@ Contributors:
 
     <nuxeo-dropzone id="dropzone"
                     document="{{document}}"
-                    message="Drop to replace the picture"
-                    message-empty="Click here or drop to replace the picture"
-                    uploaded-message="Picture uploaded"
+                    message="[[i18n('pictureViewLayout.dropzone.message','Drop to replace the picture')]]"
+                    message-empty="[[i18n('pictureViewLayout.dropzone.empty.message','Click here or drop to replace the picture')]]"
+                    uploaded-message="[[i18n('pictureViewLayout.uploaded.message','Picture uploaded')]]"
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
@@ -91,11 +91,12 @@ Contributors:
           </p>
           <div class="horizontal flex end-justified layout">
             <nuxeo-document-view-delete-blob document="{{document}}"
-                                             tool-tip="Delete picture"
-                                             confirm-message="Do you really want to delente this picture?"
-                                             delete-message="Picture deleted"
+                                             tool-tip="[[i18n('pictureViewLayout.delete.tootltip','Delete picture')]]"
+                                             confirm-message="[[i18n('pictureViewLayout.delete.confirm.message','Do you really want to delente this picture?')]]"
+                                             delete-message="[[i18n('pictureViewLayout.deleted.message','Picture deleted')]]"
                                              hidden="[[!document.properties.file:content]]"></nuxeo-document-view-delete-blob>
-            <nuxeo-upload-blob-button tooltip="Upload picture" on-tap="_upload"></nuxeo-upload-blob-button>
+            <nuxeo-upload-blob-button tool-tip="[[i18n('pictureViewLayout.upload.tooltip','Upload picture')]]"
+                                      on-tap="_upload"></nuxeo-upload-blob-button>
           </div>
         </template>
         <template is="dom-if" if="[[!document.properties.file:content]]">
@@ -108,29 +109,29 @@ Contributors:
     <div class="card-section sep">
       <div class="properties">
         <div class="item">
-          <label>[[i18n('label.widget.picture.dimensions', 'Dimensions')]]</label>
+          <label>[[i18n('pictureViewLayout.dimensions', 'Dimensions')]]</label>
           [[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.picture.format', 'Format')]]</label>
+          <label>[[i18n('pictureViewLayout.format', 'Format')]]</label>
           [[document.properties.picture:info.format]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.picture.colorSpace', 'Color Profile')]]</label>
+          <label>[[i18n('pictureViewLayout.colorSpace', 'Color Profile')]]</label>
           [[document.properties.picture:info.colorSpace]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.picture.depth', 'Bit Depth')]]</label>
+          <label>[[i18n('pictureViewLayout.depth', 'Bit Depth')]]</label>
           [[document.properties.picture:info.depth]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.picture.weight', 'Weight')]]</label>
+          <label>[[i18n('pictureViewLayout.weight', 'Weight')]]</label>
           [[_formatSize(document.properties.common:size)]]
         </div>
       </div>
     </div>
     <div class="card-section sep">
-      <p class="title">[[i18n('label.header.picture.additional.formats', 'Additional Formats')]]</p>
+      <p class="title">[[i18n('pictureVeiwLayout.formats', 'Additional Formats')]]</p>
       <div>
         <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
           <div class="item">

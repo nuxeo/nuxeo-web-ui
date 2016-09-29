@@ -42,7 +42,7 @@ Contributors:
     <paper-icon-button icon="delete" id="deleteAllButtons">
     </paper-icon-button>
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
-      [[i18n('label.documents.deleteDocuments', 'Delete selected items')]]
+      [[i18n('deleteDocumentsButton.tooltip', 'Delete selected items')]]
     </paper-tooltip>
 
   </template>
@@ -67,7 +67,7 @@ Contributors:
         },
 
         deleteDocuments: function() {
-          if (confirm(this.i18n('label.documents.confirmDeleteDocumentsForever',
+          if (confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever',
                                 'Permanently delete selected document(s)?'))) {
             if (this.documents && this.documents.length) {
               var uids = this.documents.map(function(doc) {

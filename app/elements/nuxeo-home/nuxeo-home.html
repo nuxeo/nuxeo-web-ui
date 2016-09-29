@@ -90,27 +90,27 @@ Contributors:
         <section name="dashboard" class="flex-layout">
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('ui.home.latestDocumentsEdited', 'Recently Edited')]]</span>
+              <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited', 'Recently Edited')]]</span>
               <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
             </div>
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
               <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>
-                [[i18n('ui.home.tasks', 'Tasks')]]
+                [[i18n('home.tasks', 'Tasks')]]
               </span>
               <nuxeo-task-widget tasks="[[tasks]]"></nuxeo-task-widget>
             </div>
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('heading.app.recentlyViewed','Recently Viewed')]]</span>
+              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed','Recently Viewed')]]</span>
               <nuxeo-recent-documents-table recent-documents="[[recentDocuments]]"></nuxeo-recent-documents-table>
             </div>
           </paper-card>
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('ui.home.favorites','Favorite Items')]]</span>
+              <span class="title"><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites','Favorite Items')]]</span>
               <nuxeo-pageable-widget page="[[favorites.entries]]"></nuxeo-pageable-widget>
             </div>
           </paper-card>
@@ -133,7 +133,7 @@ Contributors:
           labels: {
             type: Object,
             value: {
-              dashboard: 'label.home.dashboard'
+              dashboard: 'home.dashboard'
             }
           },
           selectedTab: {

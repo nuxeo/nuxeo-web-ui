@@ -73,9 +73,9 @@ Contributors:
 
     <nuxeo-dropzone id="dropzone"
                     document="{{document}}"
-                    message="Drop to replace the video"
-                    message-empty="Click here or drop to replace the video"
-                    uploaded-message="Video uploaded"
+                    message="[[i18n('videoViewLayout.dropzone.message','Drop to replace the video')]]"
+                    message-empty="[[i18n('videoViewLayout.dropzone.empty.message','Click here or drop to replace the video')]]"
+                    uploaded-message="[[i18n('videoViewLayout.uploaded.message','Video uploaded')]]"
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
@@ -86,13 +86,14 @@ Contributors:
             <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
           </p>
           <div class="horizontal flex end-justified layout">
-            <nuxeo-document-view-delete-blob document="{{document}}"
-                                             tool-tip="Delete video"
-                                             confirm-message="Do you really want to delete this video?"
-                                             delete-message="Video deleted"
+            <nuxeo-delete-blob-button document="{{document}}"
+                                             tool-tip="[[i18n('videoViewLayout.delete.tootltip','Delete video')]]"
+                                             confirm-message="[[i18n('videoViewLayout.delete.confirm.message','Do you really want to delete this video?')]]"
+                                             delete-message="[[i18n('videoViewLayout.deleted.message','Video deleted')]]"
                                              hidden="[[!document.properties.file:content]]">
             </nuxeo-document-view-delete-blob>
-            <nuxeo-upload-blob-button tooltip="Upload video" on-tap="_upload"></nuxeo-upload-blob-button>
+            <nuxeo-upload-blob-button tool-tip="[[i18n('videoViewLayout.upload.tooltip','Upload video')]]"
+                                      on-tap="_upload"></nuxeo-upload-blob-button>
           </div>
         </template>
         <template is="dom-if" if="[[!document.properties.file:content]]">
@@ -105,29 +106,29 @@ Contributors:
     <div class="card-section sep">
       <div class="properties">
         <div class="item">
-          <label>[[i18n('label.widget.video.format', 'Format')]]</label>
+          <label>[[i18n('videoViewLayout.format', 'Format')]]</label>
           [[document.properties.vid:info.format]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.video.duration', 'Duration')]]</label>
+          <label>[[i18n('videoViewLayout.duration', 'Duration')]]</label>
           [[document.properties.vid:info.duration]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.video.width', 'Width')]]</label>
+          <label>[[i18n('videoViewLayout.width', 'Width')]]</label>
           [[document.properties.vid:info.width]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.video.height', 'Height')]]</label>
+          <label>[[i18n('videoViewLayout.height', 'Height')]]</label>
           [[document.properties.vid:info.height]]
         </div>
         <div class="item">
-          <label>[[i18n('label.widget.video.frameRate', 'Frame Rate')]]</label>
+          <label>[[i18n('videoViewLayout.frameRate', 'Frame Rate')]]</label>
           [[document.properties.vid:info.frameRate]]
         </div>
       </div>
     </div>
     <div class="card-section sep">
-      <p class="title">[[i18n('heading.videoConversions', 'Conversions')]]</p>
+      <p class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</p>
       <div>
         <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
           <div class="item">

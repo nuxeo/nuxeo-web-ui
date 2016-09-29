@@ -59,7 +59,7 @@ Contributors:
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="empty">[[i18n('label.nxclipboard.empty', 'Your clipboard is empty.')]]</span>
+      <span class="empty">[[i18n('clipboard.empty', 'Your clipboard is empty.')]]</span>
     </template>
 
     <template is="dom-repeat" items="[[documents]]" as="document">
@@ -75,9 +75,9 @@ Contributors:
     <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
       <div class="toolbar">
           <paper-icon-button id="paste" icon="content-copy" on-tap="execute" data-op="Document.Copy"></paper-icon-button>
-          <paper-tooltip for="paste">[[i18n('command.nxclipboard.copy', 'Copy')]]</paper-tooltip>
+          <paper-tooltip for="paste">[[i18n('clipboard.copy', 'Copy')]]</paper-tooltip>
           <paper-icon-button id="move" icon="content-cut" on-tap="execute" data-op="Document.Move"></paper-icon-button>
-          <paper-tooltip for="move">[[i18n('command.nxclipboard.move', 'Move')]]</paper-tooltip>
+          <paper-tooltip for="move">[[i18n('clipboard.move', 'Move')]]</paper-tooltip>
       </div>
     </template>
 

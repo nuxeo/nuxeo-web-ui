@@ -67,8 +67,8 @@ Contributors:
 
     <nuxeo-dropzone id="dropzone"
                     document="{{document}}"
-                    message="Drop to replace main file"
-                    message-empty="Click here or drop to replace main file"
+                    message="[[i18n('fileViewLayout.dropzone.message','Drop to replace main file')]]"
+                    message-empty="[[i18n('fileViewLayout.dropzone.empty.message','Click here or drop to replace main file')]]"
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
@@ -94,7 +94,8 @@ Contributors:
 
           <nuxeo-delete-blob-button hidden$="[[!document.properties.file:content]]"
                                     document="{{document}}"></nuxeo-delete-blob-button>
-          <nuxeo-upload-blob-button tooltip="Upload main file" on-tap="_upload"></nuxeo-upload-blob-button>
+          <nuxeo-upload-blob-button tool-tip="[[i18n('fileViewLayout.upload','Upload main file')]]"
+                                    on-tap="_upload"></nuxeo-upload-blob-button>
         </div>
       </div>
       <span>[[_formatSize(document.properties.common:size)]]</span>
@@ -121,6 +122,7 @@ Contributors:
             computed: '_actionContext(document)'
           }
         },
+        behaviors: [Nuxeo.I18nBehavior],
 
         _actionContext: function() {
           return {document: this.document, blob: this.document.properties['file:content']};

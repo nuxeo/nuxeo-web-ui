@@ -83,19 +83,19 @@ Contributors:
 
     <div class="action-container layout vertical task-body">
 
-      <div class="layout vertical center">[[i18n('label.route.task.resolution', 'Task Resolution')]]</div>
+      <div class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</div>
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
           <paper-card class="layout vertical">
             <div class="layout horizontal center action-property">
-              <span class="flex-3">[[i18n('label.route.task.dueDate', 'Due Date')]]</span>
+              <span class="flex-3">[[i18n('documentTask.dueDate', 'Due Date')]]</span>
               <span class="flex-9">
                 <iron-icon icon="icons:today"></iron-icon> [[_formatDate(task.dueDate)]]
               </span>
             </div>
             <div class="layout horizontal center action-property">
-              <span class="flex-3">[[i18n('label.route.task.assigned', 'Assigned to')]]</span>
+              <span class="flex-3">[[i18n('documentTask.assigned', 'Assigned to')]]</span>
               <span class="flex-9">
                 <template is="dom-repeat" items="[[task.actors]]" as="actor">
                   <a href="[[_actorHref(actor.id)]]">

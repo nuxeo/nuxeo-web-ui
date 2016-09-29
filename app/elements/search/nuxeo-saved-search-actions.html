@@ -46,19 +46,19 @@ Contributors:
 
     <div class="horizontal layout center">
       <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, searchLoaded,dirty)]]">
-         <iron-icon icon="add"></iron-icon>[[i18n('ui.app.saveNewSearch', 'Save As')]]
+         <iron-icon icon="add"></iron-icon>[[i18n('app.saveNewSearch', 'Save As')]]
       </paper-button>
       <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchDoc,searchLoaded,dirty)]]">
-         <iron-icon icon="check"></iron-icon>[[i18n('ui.app.savedSearch', 'Save')]]
+         <iron-icon icon="check"></iron-icon>[[i18n('app.savedSearch', 'Save')]]
       </paper-button>
       <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc,searchLoaded,dirty)]]">
         <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-menu class="dropdown-content layout vertical">
           <paper-item class="layout horizontal center" on-tap="_renameSearch">
-            <iron-icon icon="icons:create"></iron-icon>[[i18n('ui.app.renameSearch', 'Rename')]]
+            <iron-icon icon="icons:create"></iron-icon>[[i18n('app.renameSearch', 'Rename')]]
           </paper-item>
           <paper-item class="layout horizontal center" on-tap="_shareSearch">
-            <iron-icon icon="social:share"></iron-icon>[[i18n('ui.app.shareSearch', 'Share')]]
+            <iron-icon icon="social:share"></iron-icon>[[i18n('app.shareSearch', 'Share')]]
           </paper-item>
         </paper-menu>
       </paper-menu-button>

@@ -64,7 +64,7 @@ Contributors:
       <nuxeo-directory-suggestion class="flex"
                                   directory-name="nature"
                                   value="{{document.properties.dc:nature}}"
-                                  placeholder="Select a value"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
                                   min-chars="0">
       </nuxeo-directory-suggestion>
     </div>
@@ -79,7 +79,7 @@ Contributors:
                                   value="{{document.properties.dc:subjects}}"
                                   multiple="true"
                                   dbl10n="true"
-                                  placeholder="[[i18n('ui.dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
                                   min-chars="0">
       </nuxeo-directory-suggestion>
     </div>
@@ -93,14 +93,14 @@ Contributors:
                                   directory-name="l10ncoverage"
                                   value="{{document.properties.dc:coverage}}"
                                   dbl10n="true"
-                                  placeholder="Select a value"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
                                   min-chars="0">
       </nuxeo-directory-suggestion>
     </div>
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.dublincore.expire', 'Expire on')]]</label>
+        <label>[[i18n('label.dublincore.expire', 'Expires on')]]</label>
       </div>
       <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
     </div>

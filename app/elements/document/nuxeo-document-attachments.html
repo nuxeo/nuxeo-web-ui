@@ -76,17 +76,17 @@ Contributors:
     <div class="horizontal layout">
       <p class="title">
         <iron-icon icon="editor:attach-file"></iron-icon>
-        [[i18n('label.summary.download.attachments', 'Attachments')]]
+        [[i18n('documentAttachments.heading', 'Attachments')]]
       </p>
       <div class="horizontal flex end-justified layout center" hidden$="[[!_hasAttachments(document)]]">
-        <nuxeo-upload-blob-button tooltip="[[i18n('label.summary.upload.attachment.tooltip', 'Upload an attachment')]]" on-tap="_upload"></nuxeo-upload-blob-button>
+        <nuxeo-upload-blob-button tool-tip="[[i18n('documentAttachments.upload.tooltip', 'Upload an attachment')]]" on-tap="_upload"></nuxeo-upload-blob-button>
       </div>
     </div>
     <nuxeo-dropzone id="dropzone"
                     document="{{document}}"
-                    message="[[i18n('label.summary.drop.attachment.message', 'Drop to attach file')]]"
-                    message-empty="[[i18n('label.summary.drop.attachments', '+ Complete the document with additional files')]]"
-                    uploaded-message="[[i18n('label.summary.drop.attachment.uploaded', 'Attachment uploaded')]]"
+                    message="[[i18n('documentAttachments.dropzone.message', 'Drop to attach file')]]"
+                    message-empty="[[i18n('documentAttachments.dropzone.emptyMessage', '+ Complete the document with additional files')]]"
+                    uploaded-message="[[i18n('documentAttachments.upload.uploaded', 'Attachment uploaded')]]"
                     empty="[[!_hasAttachments(document, document.properties, document.properties.files:files)]]"
                     xpath="files:files"
                     blob-list>
@@ -100,14 +100,14 @@ Contributors:
             </div>
             <div class="horizontal flex end-justified layout">
               <nuxeo-delete-blob-button document="{{document}}"
-                                        tool-tip="[[i18n('label.summary.delete.attachment.tooltip', 'Delete attachment')]]"
-                                        confirm-message="[[i18n('label.summary.delete.attachment.confirm', 'Do you really want to delete this attachment?')]]"
-                                        delete-message="[[i18n('label.summary.attachment.deleted', 'Attachment deleted')]]"
+                                        tool-tip="[[i18n('documentAttachments.delete.tooltip', 'Delete attachment')]]"
+                                        confirm-message="[[i18n('documentAttachments.delete.confirm', 'Do you really want to delete this attachment?')]]"
+                                        delete-message="[[i18n('documentAttachments.attachment.deleted', 'Attachment deleted')]]"
                                         xpath="files:files/[[index]]"
                                         blob-list></nuxeo-delete-blob-button>
               <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
               <paper-tooltip for="previewBut">
-                [[i18n('label.summary.preview.attachment', 'Preview attachment')]]
+                [[i18n('documentAttachments.preview.tooltip', 'Preview attachment')]]
               </paper-tooltip>
             </div>
           </div>

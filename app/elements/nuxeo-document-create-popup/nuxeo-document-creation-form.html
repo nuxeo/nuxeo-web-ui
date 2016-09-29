@@ -143,7 +143,7 @@ Contributors:
         </div>
         <div id="editor" class="flex">
           <div class="path sep horizontal layout center">
-            <span>[[i18n('label.documents.location', 'Location')]]</span>
+            <span>[[i18n('documentCreationForm.location', 'Location')]]</span>
             <div class="suggestion-wrapper horizontal layout center flex">
               <div>
                 <iron-icon icon="icons:folder"></iron-icon>
@@ -242,7 +242,7 @@ Contributors:
         },
 
         _newDocumentLabel: function() {
-          return this.i18n('ui.documentCreatePopup.newDoc.heading', 'New {0}', this._getTypeName(this.selectedDocType));
+          return this.i18n('documentCreationForm.newDoc.heading', 'New {0}', this._getTypeName(this.selectedDocType));
         },
 
         _clear: function() {

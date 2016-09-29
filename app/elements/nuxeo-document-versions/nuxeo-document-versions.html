@@ -244,12 +244,12 @@ Contributors:
 
         _labelLatest: function(doc) {
           if (doc) {
-            var number = this.i18n('ui.versions.version', '{0}.{1}',
+            var number = this.i18n('versions.version', '{0}.{1}',
                 doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
               ((doc.isCheckedOut) ? '+ ' : ' ');
             var label = (doc.isCheckedOut) ?
-              this.i18n('ui.versions.unversioned', 'Unversioned Changes') :
-              this.i18n('ui.versions.latest', 'Latest');
+              this.i18n('versions.unversioned', 'Unversioned Changes') :
+              this.i18n('versions.latest', 'Latest');
             return number + label;
           }
           this._hideList();
@@ -258,7 +258,7 @@ Contributors:
 
         _labelTitle: function(doc) {
           if (doc) {
-            return this.i18n('ui.versions.version', '{0}.{1}',
+            return this.i18n('versions.version', '{0}.{1}',
               doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
           }
           return '';
@@ -269,7 +269,7 @@ Contributors:
         },
 
         _labelModified: function(doc) {
-          return this.i18n('ui.versions.modified', 'Modified {0} by {1}',
+          return this.i18n('versions.modified', 'Modified {0} by {1}',
             moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
         },
 

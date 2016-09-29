@@ -134,15 +134,15 @@ Contributors:
             <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
               <paper-icon-item name="view">
                 <iron-icon icon="icons:visibility" item-icon></iron-icon>
-                [[i18n('command.browser.view', 'View')]]</paper-icon-item>
+                [[i18n('command.view', 'View')]]</paper-icon-item>
               <template is="dom-if" if="[[_canViewContent(document)]]">
                 <paper-icon-item name="edit">
                   <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
-                  [[i18n('command.browser.edit', 'Edit')]]</paper-icon-item>
+                  [[i18n('command.edit', 'Edit')]]</paper-icon-item>
               </template>
               <paper-icon-item name="permissions">
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
-                [[i18n('command.browser.permissions', 'Permissions')]]</paper-icon-item>
+                [[i18n('browser.permissions', 'Permissions')]]</paper-icon-item>
 
               <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS"></nuxeo-slot>
 
@@ -160,7 +160,7 @@ Contributors:
         <div class="card-content info-bar">
           <iron-icon class="icon" icon="icons:info"></iron-icon>
           <div class="message">
-            [[i18n('ui.versions.info', 'You\'re viewing the {0}.{1} version',
+            [[i18n('versions.info', "You're viewing the {0}.{1} version",
             document.properties.uid:major_version, document.properties.uid:minor_version)]]
           </div>
           <div class="actions">

@@ -204,7 +204,7 @@ Contributors:
       <template is="dom-if" if="[[!_onlyQueue]]">
         <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
           <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
-            <paper-item>[[i18n('ui.searchForm.searchFilters', 'Search Filters')]]</paper-item>
+            <paper-item>[[i18n('searchForm.searchFilters', 'Search Filters')]]</paper-item>
             <template is="dom-repeat" items="[[searches]]" as="search">
               <paper-item>[[search.title]]</paper-item>
             </template>
@@ -213,12 +213,12 @@ Contributors:
         <template is="dom-if" if="[[_isQueue]]">
           <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
           </paper-icon-button>
-          <paper-tooltip for="toogleFilter">[[i18n('ui.searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+          <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
         </template>
         <template is="dom-if" if="[[!_isQueue]]">
           <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
           </paper-icon-button>
-          <paper-tooltip for="toogleQueue">[[i18n('ui.searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+          <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
         </template>
       </template>
       <template is="dom-if" if="[[_onlyQueue]]">
@@ -235,12 +235,12 @@ Contributors:
         </div>
         <div class="layout vertical row">
           <paper-button noink class="primary clear" raised on-click="_clear">
-            [[i18n('ui.searchForm.clear', 'Clear')]]
+            [[i18n('command.clear', 'Clear')]]
           </paper-button>
         </div>
         <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
           <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
-            [[i18n('ui.searchForm.Reset', 'Reset')]]
+            [[i18n('command.Reset', 'Reset')]]
           </paper-button>
         </div>
         <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
@@ -276,41 +276,41 @@ Contributors:
 
     <paper-dialog id="saveDialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('ui.searchForm.savePopup.heading','Save Search')]]</h1>
+        <h1>[[i18n('searchForm.savePopup.heading','Save Search')]]</h1>
         <div>
           <paper-input id="savedSearchTitle"
-                       label="[[i18n('ui.searchForm.savePopup.label', 'Enter a name for your saved search')]]"
+                       label="[[i18n('searchForm.savePopup.label', 'Enter a name for your saved search')]]"
                        autofocus
                        no-label-float>
           </paper-input>
         </div>
         <div class="buttons">
          <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('ui.searchForm.popup.save','Save')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
         </div>
       </div>
     </paper-dialog>
 
     <paper-dialog id="renameDialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('ui.searchForm.renamePopup.heading', 'Rename Saved Search')]]</h1>
+        <h1>[[i18n('searchForm.renamePopup.heading', 'Rename Saved Search')]]</h1>
         <div>
           <paper-input id="savedSearchRenameTitle"
-                       label="[[i18n('ui.searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
+                       label="[[i18n('searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
                        autofocus
                        no-label-float>
           </paper-input>
         </div>
         <div class="buttons">
          <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('ui.searchForm.popup.save','Save')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
         </div>
       </div>
     </paper-dialog>
 
     <paper-dialog id="shareDialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('ui.searchForm.shared.heading', 'Share Saved Search')]]</h1>
+        <h1>[[i18n('searchForm.shared.heading', 'Share Saved Search')]]</h1>
         <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
         <div class="buttons">
          <paper-button dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>

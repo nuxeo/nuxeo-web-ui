@@ -81,7 +81,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('label.title', 'Title')]]</label>
+        <label>[[i18n('title', 'Title')]]</label>
         <span class="required">*</span>
       </div>
       <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
@@ -97,14 +97,14 @@ Contributors:
     <template is="dom-if" if="[[uploadEnabled]]">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('content', 'Content')]]</label>
+          <label>[[i18n('fileEditLayout.content', 'Content')]]</label>
         </div>
         <div class="vertical layout">
           <paper-radio-group class="layout vertical" selected="none">
             <!-- none choice -->
-            <paper-radio-button name="none" on-tap="_noneSelected">[[i18n('label.inputFile.noneChoice','None')]]</paper-radio-button>
+            <paper-radio-button name="none" on-tap="_noneSelected">[[i18n('fileEditLayout.radio.none','None')]]</paper-radio-button>
             <!-- upload choice -->
-            <paper-radio-button name="upload"  on-tap="_uploadSelected">[[i18n('label.inputFile.uploadChoice','Upload')]]</paper-radio-button>
+            <paper-radio-button name="upload"  on-tap="_uploadSelected">[[i18n('fileEditLayout.radio.upload','Upload')]]</paper-radio-button>
           </paper-radio-group>
           <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
         </div>

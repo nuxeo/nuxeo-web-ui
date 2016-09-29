@@ -19,6 +19,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="nuxeo-chart-data-behavior.html">
 <link rel="import" href="nuxeo-mime-types.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-repository-analytics`
@@ -114,7 +115,7 @@ Contributors:
       <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" current-page="{{downloadedDocs}}">
       </nuxeo-page-provider>
 
-      <paper-card heading="Top Downloads" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading','Top Downloads')]]" elevation="0">
         <div class="card-content downloads">
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]">
@@ -126,7 +127,7 @@ Contributors:
               </nuxeo-data-table-column>
             </nuxeo-data-table>
           </template>
-          <template is="dom-if" if="[[_isEmpty(downloads)]]"><div class="message">No results</div></template>
+          <template is="dom-if" if="[[_isEmpty(downloads)]]"><div class="message">[[i18n('repositoryAnalytics.noResults','No results')]]</div></template>
         </div>
       </paper-card>
 
@@ -136,7 +137,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Documents" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documents.heading','Documents')]]" elevation="0">
         <div class="card-content">
           <iron-icon icon="icons:description"></iron-icon>
           <h1>[[totalCount]]</h1>
@@ -151,7 +152,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Document Types" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading','Document Types')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(typeCount)]]"
                      labels="[[_labels(typeCount)]]"
@@ -168,7 +169,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Top 10 creators" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', 'Top {0} creators', '10')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(topCreators)]]"
                      labels="[[_labels(topCreators)]]"
@@ -185,7 +186,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Document Created Per Week" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading','Document Created Per Week')]]" elevation="0">
         <div class="card-content">
           <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
                       values="[[_values(docsCreatedPerWeek)]]"
@@ -202,7 +203,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Documents Modified Per Week" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading','Documents Modified Per Week')]]" elevation="0">
         <div class="card-content">
           <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
                       values="[[_values(docsModifiedPerWeek)]]"
@@ -218,7 +219,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="Files by Mime Type" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading', 'Files by Mime Type')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(filesByMimeType)]]"
                      labels="[[_types(filesByMimeType)]]"
@@ -238,7 +239,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-repository-analytics',
-        behaviors: [Nuxeo.ChartDataBehavior],
+        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
         properties: {
           index: {
             type: String,

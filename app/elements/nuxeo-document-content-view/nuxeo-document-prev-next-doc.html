@@ -79,11 +79,11 @@ Contributors:
     <template is="dom-if" if="[[isVisible]]">
       <paper-icon-button id="prevDoc" icon="icons:chevron-left" on-tap="previous" disabled="[[!hasPrevious]]">
       </paper-icon-button>
-      <paper-tooltip for="prevDoc" position="right">[[i18n('label.documents.previousDocument', 'Previous Document')]]</paper-tooltip>
+      <paper-tooltip for="prevDoc" position="right">[[i18n('documentPrevNextDoc.previousDocument', 'Previous Document')]]</paper-tooltip>
 
       <paper-icon-button id="nextDoc" icon="icons:chevron-right" on-tap="next" disabled="[[!hasNext]]">
       </paper-icon-button>
-      <paper-tooltip for="nextDoc" position="left">[[i18n('label.documents.nextDocument', 'Next Document')]]</paper-tooltip>
+      <paper-tooltip for="nextDoc" position="left">[[i18n('documentPrevNextDoc.nextDocument', 'Next Document')]]</paper-tooltip>
     </template>
 
     <nuxeo-keys keys="left" on-pressed="previous"></nuxeo-keys>

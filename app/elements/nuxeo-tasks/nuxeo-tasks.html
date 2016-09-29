@@ -154,7 +154,7 @@ Contributors:
           <a href="[[_href(currentTaskDocument)]]">[[currentTaskDocument.properties.dc:title]]</a>
         </template>
         <template is="dom-if" if="[[!_hasCurrent(current)]]">
-          <span class="flex">[[i18n('ui.tasks.label', 'Tasks')]]</span>
+          <span class="flex">[[i18n('tasks.label', 'Tasks')]]</span>
         </template>
       </div>
       <div class="content">
@@ -173,7 +173,7 @@ Contributors:
                 </div>
                 <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
               </paper-dialog>
-              <paper-button noink on-tap="_toggleGraphDialog">[[i18n('ui.tasks.viewGraph', 'View Graph')]]</paper-button>
+              <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph', 'View Graph')]]</paper-button>
               <paper-icon-button icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
@@ -224,7 +224,7 @@ Contributors:
               </div>
             </template>
             <template is="dom-if" if="[[_empty(tasks)]]">
-              <div class="task-box">[[i18n('ui.tasks.noTasks',"You don't currently have any tasks.")]]</div>
+              <div class="task-box">[[i18n('tasks.noTasks','There are no tasks to show.')]]</div>
             </template>
           </div>
         </div>

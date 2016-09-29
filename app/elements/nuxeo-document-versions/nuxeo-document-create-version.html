@@ -89,30 +89,30 @@ Contributors:
     <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]"
                      response="{{version}}"></nuxeo-operation>
 
-    <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('ui.versions.create', 'Create Version')]]</nuxeo-tag>
+    <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('versions.create', 'Create Version')]]</nuxeo-tag>
 
     <paper-dialog id="dialog" class="dialog" with-backdrop
                   on-iron-overlay-opened="_dialogOpened"
                   on-iron-overlay-closed="_dialogClosed">
-      <div class="title">[[i18n('ui.createVersion.title', 'Create Version for {0} - Version {1}.{2}',
+      <div class="title">[[i18n('documentCreateVersion.title', 'Create Version for {0} - Version {1}.{2}',
         document.properties.dc:title, document.properties.uid:major_version, document.properties.uid:minor_version)]]
       </div>
       <div class="content">
         <paper-radio-group selected="{{versionType}}">
           <paper-radio-button name="minor">
             <span class="version">[[_nextMinor(document)]]</span>
-            <span>[[i18n('ui.createVersion.minor', 'Minor Version')]]</span>
+            <span>[[i18n('documentCreateVersion.minor', 'Minor Version')]]</span>
           </paper-radio-button>
           <paper-radio-button name="major">
             <span class="version">[[_nextMajor(document)]]</span>
-            <span>[[i18n('ui.createVersion.major', 'Major Version')]]</span>
+            <span>[[i18n('documentCreateVersion.major', 'Major Version')]]</span>
           </paper-radio-button>
         </paper-radio-group>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('ui.createVersion.dismiss', 'Cancel')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('documentCreateVersion.dismiss', 'Cancel')]]</paper-button>
         <paper-button dialog-confirm raised class="primary" on-tap="_create">
-          [[i18n('ui.createVersion.confirm', 'Create Version')]]
+          [[i18n('documentCreateVersion.confirm', 'Create Version')]]
         </paper-button>
       </div>
     </paper-dialog>

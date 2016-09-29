@@ -42,12 +42,12 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button noink icon="social:share" id="shareBut" on-tap="toggleDialog"></paper-icon-button>
-      <paper-tooltip for="shareBut">[[i18n('ui.shareButton.tooltip','Share')]]</paper-tooltip>
+      <paper-tooltip for="shareBut">[[i18n('shareButton.tooltip','Share')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('ui.shareButton.heading','Share the Document')]]</h1>
+        <h1>[[i18n('shareButton.heading','Share the Document')]]</h1>
         <div class="share-container">
           <paper-input id="permalink"
                        label="Copy the link and share the document [[document.properties.dc:title]]"

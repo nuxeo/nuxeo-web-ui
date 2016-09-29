@@ -128,8 +128,8 @@ Contributors:
       <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList"
         selected-item="{{selectedFavorite}}" items="{{favorites}}"
         selection-enabled as="favorite"
-        empty-label="[[i18n('label.collections.favorites.empty', 'No favorites.')]]"
-        empty-label-when-filtered="[[i18n('label.collections.favorites.empty', 'No favorites.')]]">
+        empty-label="[[i18n('favorites.empty', 'No favorites.')]]"
+        empty-label-when-filtered="[[i18n('favorites.empty', 'No favorites.')]]">
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box vertical layout">

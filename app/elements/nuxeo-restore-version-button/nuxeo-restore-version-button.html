@@ -49,11 +49,11 @@ Contributors:
     </nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(latest)]]">
-      <nuxeo-confirm-button dialog-title="[[i18n('ui.versions.confirm.title', 'Restore document version?')]]"
-                            dialog-dismiss="[[i18n('ui.versions.confirm.no', 'No')]]"
-                            dialog-confirm="[[i18n('ui.versions.confirm.yes', 'Yes')]]"
+      <nuxeo-confirm-button dialog-title="[[i18n('versions.confirm.title', 'Are you sure?')]]"
+                            dialog-dismiss="[[i18n('label.no', 'No')]]"
+                            dialog-confirm="[[i18n('label.yes', 'Yes')]]"
                             on-confirm="_restore">
-        [[i18n('ui.versions.restore', 'Restore')]]
+        [[i18n('versions.restore', 'Restore')]]
         <span class="version">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
         </span>
       </nuxeo-confirm-button>

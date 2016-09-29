@@ -291,21 +291,21 @@ Contributors:
         </a>
 
         <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
-          <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="heading.app.browse"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="recents" icon="icons:restore" label="heading.app.recentlyViewed"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="heading.app.search"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="validatedSearch" route="queue:validated" icon="icons:done-all" label="heading.app.validateSearch"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="validatedSearch" route="queue:validated" icon="icons:done-all" label="app.validatedSearch"></nuxeo-menu-icon>
 
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
 
-          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="heading.app.tasks"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks"></nuxeo-menu-icon>
           <paper-badge label="[[taskCount]]" for="menuTasks"></paper-badge>
-          <nuxeo-menu-icon name="favorites" icon="icons:star" label="heading.app.favorites"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="collections" icon="icons:book" label="heading.app.collections"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="heading.app.personalSpace"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="heading.app.clipboard"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="administration" icon="icons:build" label="heading.app.administration" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="heading.app.account" class="profile-icon"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
         <iron-collapse id="sidebar" horizontal opened>
@@ -313,7 +313,7 @@ Contributors:
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
               <section class="card browse" name="browser">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.browse', 'Browse')]]</h1>
+                  <h1>[[i18n('app.browse', 'Browse')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-document-tree current-document="[[currentDocument]]"></nuxeo-document-tree>
@@ -322,7 +322,7 @@ Contributors:
 
               <section class="card recents" name="recents">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.recentlyViewed', 'Recently Viewed')]]</h1>
+                  <h1>[[i18n('app.recentlyViewed', 'Recently Viewed')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-recent-documents max-size="10" id="recent"></nuxeo-recent-documents>
@@ -338,19 +338,19 @@ Contributors:
 
               <section class="card tasks" name="tasks">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.tasks', 'Tasks')]]</h1>
+                  <h1>[[i18n('app.tasks', 'Tasks')]]</h1>
                 </div>
                 <div class="content layout vertical">
                   <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
-                    <a href$="[[urlFor('tasks')]]">[[i18n('command.app.viewTaskDashboard', '» View Tasks Dashboard')]]</a>
+                    <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTaskDashboard', '» View Tasks Dashboard')]]</a>
                   </div>
                 </div>
               </section>
 
               <section class="card favorites" name="favorites">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.favorites', 'Favorites')]]</h1>
+                  <h1>[[i18n('app.favorites', 'Favorites')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
@@ -363,7 +363,7 @@ Contributors:
 
               <section class="card personal-space" name="personalWorkspace">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.personalSpace', 'Personal Space')]]</h1>
+                  <h1>[[i18n('app.personalSpace', 'Personal Space')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-document-tree current-document="[[currentDocument]]" user="[[currentUser]]">
@@ -373,7 +373,7 @@ Contributors:
 
               <section class="card clipboard" name="clipboard">
                 <div class="header ellipsis">
-                  <h1>[[i18n('heading.app.clipboard', 'Clipboard')]]</h1>
+                  <h1>[[i18n('app.clipboard', 'Clipboard')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
@@ -383,13 +383,13 @@ Contributors:
               <template is="dom-if" if="[[currentUser.isAdministrator]]">
                 <section class="card administration" name="administration">
                   <div class="header ellipsis">
-                    <h1>[[i18n('heading.app.administration', 'Administration')]]</h1>
+                    <h1>[[i18n('app.administration', 'Administration')]]</h1>
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                       <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics"></nuxeo-menu-item>
-                      <nuxeo-menu-item name="user-group-management" label="label.app.usersAndGroups" route="administration:user-group-management"></nuxeo-menu-item>
-                      <nuxeo-menu-item name="vocabulary-management" label="label.app.vocabularyManagement" route="administration:vocabulary-management"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
                     </iron-selector>
                   </div>
                 </section>
@@ -403,8 +403,8 @@ Contributors:
 
                   <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
 
-                  <nuxeo-menu-item label="ui.app.user.themes" route="page:themes"></nuxeo-menu-item>
-                  <nuxeo-menu-item label="ui.app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
+                  <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
+                  <nuxeo-menu-item label="app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
                 </div>
               </section>
             </iron-pages>
@@ -443,7 +443,7 @@ Contributors:
             <!-- Themes -->
             <paper-header-panel class="flex" name="themes">
               <div class="paper-header layout horizontal">
-                <span class="flex">[[i18n('ui.app.themes.heading','Themes')]]</span>
+                <span class="flex">[[i18n('app.themes.heading','Themes')]]</span>
               </div>
               <div class="content">
                 <nuxeo-themes></nuxeo-themes>
@@ -789,35 +789,35 @@ Contributors:
 
         _documentAddedToCollection: function(e) {
           if (e.detail.docIds) {
-            this.$.toast.text = this.i18n('documents_added_to_collection', 'Documents added to collection.');
+            this.$.toast.text = this.i18n('app.documents.addedToCollection', 'Documents added to collection.');
           } else {
-            this.$.toast.text = this.i18n('document_added_to_collection', 'Document added to collection.');
+            this.$.toast.text = this.i18n('app.document.addedToCollection', 'Document added to collection.');
           }
           this.$.toast.open();
         },
 
         _documentRemovedFromCollection: function() {
-          this.$.toast.text = this.i18n('document_removed_from_collection', 'Document removed from collection.');
+          this.$.toast.text = this.i18n('app.document.removedFromCollection', 'Document removed from collection.');
           this.$.toast.open();
         },
 
         _documentAddedToFavorites: function() {
-          this.$.toast.text = this.i18n('ui.favortes.addedToFavorites', 'Document added to favorites.');
+          this.$.toast.text = this.i18n('app.document.addedToFavorites', 'Added to Favorites');
           this.$.toast.open();
         },
 
         _documentRemovedFromFavorites: function() {
-          this.$.toast.text = this.i18n('ui.favortes.removedFromFavorites', 'Document removed from favorites.');
+          this.$.toast.text = this.i18n('app.document.removedFromFavorites', 'Removed from Favorites');
           this.$.toast.open();
         },
 
         _handleDocumentCreated: function(e) {
           if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
             var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-            this.$.toast.text = this.i18n('label.documents.createdDocument', 'Created {0}.',
+            this.$.toast.text = this.i18n('app.createdDocument', 'Created {0}.',
                         doc.type.toLowerCase() + ' ' + doc.title);
           } else {
-            this.$.toast.text = this.i18n('label.documents.createdDocuments', 'Created {0} documents.',
+            this.$.toast.text = this.i18n('app.createdDocuments', 'Created {0} documents.',
                         e.detail.response.entries.length);
           }
           this.$.toast.open();

@@ -83,7 +83,7 @@ Contributors:
     <div class="container">
       <template is="dom-if" if="[[_isEmpty(tasks)]]">
         <div class="horizontal layout center">
-          <span class="empty">[[i18n('ui.taskWidget.noTasks', 'There are no tasks to show.')]]</span>
+          <span class="empty">[[i18n('taskWidget.noTasks', 'There are no tasks to show.')]]</span>
         </div>
       </template>
       <template is="dom-if" if="[[!_isEmpty(tasks)]]">
@@ -98,13 +98,13 @@ Contributors:
               </div>
               <div class="task-detail">
                 <div class="taskDoc horizontal layout center">
-                  <span class="task-property">[[i18n('ui.taskWidget.on', 'On  ')]]</span>
+                  <span class="task-property">[[i18n('taskWidget.on', 'On  ')]]</span>
                   <template is="dom-repeat" items="[[task.targetDocumentIds]]" as="doc">
                     <a href$="[[urlFor('browse', doc.path)]]" class="docTitle">[[doc.title]]</a>
                   </template>
                 </div>
                 <div class="horizontal layout center">
-                  <span class="due-date task-property">[[i18n('ui.taskWidget.dueDate', 'Due date' )]]
+                  <span class="due-date task-property">[[i18n('taskWidget.dueDate', 'Due date' )]]
                   <span class="date">[[_formatDate(task.dueDate)]]</span></span>
                 </div>
               </div>

@@ -102,7 +102,7 @@ Contributors:
     <paper-toast id="errorToast"></paper-toast>
 
     <paper-dialog id="dialog" modal no-auto-focus>
-      <h1>[[i18n('ui.vocabularyManagement.editEntry','Edit vocabulary entry')]]</h1>
+      <h1>[[i18n('vocabularyManagement.popup.editEntry','Edit vocabulary entry')]]</h1>
       <div class="paper-content layout horizontal">
         <form id="form" is="iron-form" action="/">
           <div id="entry-edit">
@@ -122,13 +122,13 @@ Contributors:
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
-        <span>[[i18n('label.app.vocabularyManagement', 'Vocabularies')]]</span>
+        <span>[[i18n('vocabularyManagement.heading', 'Vocabularies')]]</span>
       </div>
       <div class="content">
         <paper-card elevation="0" class="block">
           <div class="card-content">
-            <span>[[i18n('ui.vocabularyManagement.vocabulary', 'Vocabulary')]]</span>
-            <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('ui.vocabularyManagement.select', 'Select a vocabulary')]]">
+            <span>[[i18n('vocabularyManagement.vocabulary', 'Vocabulary')]]</span>
+            <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select', 'Select a vocabulary')]]">
               <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
                 <template is="dom-repeat" items="[[vocabularyResonse.entries]]">
                   <paper-item name="[[item.name]]">[[item.name]]</paper-item>
@@ -140,12 +140,12 @@ Contributors:
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
             <paper-button on-tap="_createEntry">
-              <span>+ [[i18n('ui.vocabularyManagement.addEntry', 'Add entry')]]</span>
+              <span>+ [[i18n('vocabularyManagement.addEntry', 'Add entry')]]</span>
             </paper-button>
           </div>
           <nuxeo-data-table id="table" items="[[entries]]"
-            empty-label="[[i18n('ui.vocabularyManagement.noEntry', 'No entry')]]"
-            empty-label-when-filtered="[[i18n('ui.vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
+            empty-label="[[i18n('vocabularyManagement.noEntry', 'No entry')]]"
+            empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[col.name]]">
                 <template>
@@ -154,9 +154,9 @@ Contributors:
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.name)]]">
                     <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
-                    <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
+                    <paper-tooltip for="button">[[i18n('vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
                     <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
-                    <paper-tooltip for="button">[[i18n('ui.vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+                    <paper-tooltip for="button">[[i18n('vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
                   </template>
                 </template>
               </nuxeo-data-table-column>
@@ -313,7 +313,7 @@ Contributors:
           if (entry && entry.properties && prop) {
             if (prop === 'obsolete') {
               return entry.properties[prop] > 0 ?
-                this.i18n('ui.app.yes', 'Yes') : this.i18n('ui.app.no', 'No');
+                this.i18n('label.yes', 'Yes') : this.i18n('label.no', 'No');
             }
             return entry.properties[prop];
           } else {
@@ -337,21 +337,21 @@ Contributors:
         },
 
         _deleteEntry: function(e) {
-          if (confirm(this.i18n('ui.vocabularyManagement.confirmDelete',
+          if (confirm(this.i18n('vocabularyManagement.confirmDelete',
                                 'Delete vocabulary entry?'))) {
             var item = e.model.dataHost.parentNode.item;
             this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
             this.$.directory.remove().then(function() {
               this._refresh();
-              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyDeleted',
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyDeleted',
                 'Entry successfully deleted.');
               this.$.toast.open();
             }.bind(this), function(err) {
               if (err.status === 401) {
-                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.referencedEntry',
+                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.referencedEntry',
                   'This entry is referenced in another vocabulary.');
               } else {
-                this.$.errorToast.text = this.i18n('ui.vocabularyManagement.cannotDelete.error',
+                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.error',
                   'An error occured while deleting this entry') + ': ' + err.message;
               }
               this.$.errorToast.open();
@@ -376,15 +376,15 @@ Contributors:
             this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
             this.$.directory.post().then(function() {
               this.$.dialog.toggle();
-              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyCreated',
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyCreated',
                   'Entry successfully created.');
               this.$.toast.open();
               this._refresh();
             }.bind(this),
             function(err) {
               this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
-                this.i18n('ui.vocabularyManagement.cannotCreate',
-                  'An error occured while creating.');
+                this.i18n('vocabularyManagement.cannotCreate',
+                  'An error occured while create.');
               this.$.errorToast.open();
             }.bind(this));
           } else {
@@ -392,14 +392,14 @@ Contributors:
               '/' + this._selectedEntry.properties.id;
             this.$.directory.put().then(function() {
               this.$.dialog.toggle();
-              this.$.toast.text = this.i18n('ui.vocabularyManagement.successfullyEdited',
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyEdited',
                   'Entry successfully edited.');
               this.$.toast.open();
               this._refresh();
             }.bind(this),
             function(err) {
               this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
-                this.i18n('ui.vocabularyManagement.cannotEdit',
+                this.i18n('vocabularyManagement.cannotEdit',
                   'An error occured while editing.');
               this.$.errorToast.open();
             }.bind(this));

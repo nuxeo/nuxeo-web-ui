@@ -262,7 +262,7 @@ Contributors:
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="vertical layout flex">
         <div class="path sep horizontal layout center">
-          <span>[[i18n('label.documents.location', 'Location')]]</span>
+          <span>[[i18n('documentImportForm.location', 'Location')]]</span>
           <div class="suggestion-wrapper horizontal layout center flex">
             <div>
               <iron-icon icon="icons:folder"></iron-icon>
@@ -280,11 +280,11 @@ Contributors:
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('ui.documentCreatePopup.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
+                  [[i18n('documentImportForm.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
               </div>
               <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
               <nuxeo-liveconnect-one-drive id="oneDriveUploader"></nuxeo-liveconnect-one-drive>
-              <span>[[i18n('ui.documentCreatePopup.linkFilesFrom', 'Or link files from')]]</span>
+              <span>[[i18n('documentImportForm.linkFilesFrom', 'Or link files from')]]</span>
               <div class="horizontal layout">
                 <div class="dropzone-label horizontal layout center center-justified">
                   <iron-icon class="liveconnectIco" src="../../images/google_drive.png"></iron-icon>
@@ -320,19 +320,19 @@ Contributors:
                       </template>
                       <template is="dom-if" if="[[file.complete]]">
                         <div class="complete">
-                          Complete
+                          [[i18n('documentImportForm.item.complete','Complete')]]
                         </div>
                       </template>
                       <template is="dom-if" if="[[!file.complete]]">
                         <div class="uploading">
-                          Uploading
+                          [[i18n('documentImportForm.item.uploading','Uploading')]]
                         </div>
                         <paper-progress indeterminate></paper-progress>
                       </template>
                     </div>
                     <div class="horizontal layout center">
                       <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
+                      <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
                     </div>
                   </div>
                 </template>
@@ -355,7 +355,7 @@ Contributors:
                     </div>
                     <div class="horizontal layout center">
                       <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('ui.documentCreatePopup.file.remove', 'Remove')]]</paper-tooltip>
+                      <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
                     </div>
                   </div>
                 </template>
@@ -378,7 +378,7 @@ Contributors:
                         class="primary"
                         on-tap="_toggleCustomize"
                         disabled$="[[!hasFiles]]">
-                        [[i18n('ui.documentCreatePopup.addProperties', 'Add Properties')]]
+                        [[i18n('documentImportForm.addProperties', 'Add Properties')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
@@ -394,7 +394,7 @@ Contributors:
         <div class="horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex-3">
             <div class="path horizontal layout center">
-              <span>[[i18n('label.documents.location', 'Location')]]</span>
+              <span>[[i18n('documentImportForm.location', 'Location')]]</span>
               <div class="suggestion-wrapper horizontal layout center flex">
                 <div>
                   <iron-icon icon="icons:folder"></iron-icon>
@@ -407,7 +407,7 @@ Contributors:
               </div>
             </div>
             <div class="typePicker horizontal layout center">
-              <span>[[i18n('ui.documentCreatePopup.type.label', 'Type')]]</span>
+              <span>[[i18n('documentImportForm.type.label', 'Type')]]</span>
               <div class="flex">
                 <paper-dropdown-menu class="typeDropdown" no-label-float horizontal-align="left">
                   <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
@@ -443,7 +443,7 @@ Contributors:
                 <iron-icon icon="icons:check-circle" class="blobReady" hidden$="[[!file.ready]]"></iron-icon>
               </paper-button>
             </template>
-            <span class="disclaimer">[[i18n('ui.documentCreatePopup.unchecked.disclaimer','Unchecked files will be discarded')]]</span>
+            <span class="disclaimer">[[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]</span>
           </div>
         </div>
         <div class="buttons sep horizontal end-justified layout">
@@ -455,13 +455,13 @@ Contributors:
           <paper-button noink
                         on-tap="_previousFile"
                         disabled$=[[!_hasPreviousFile(customizing,docIdx)]]>
-                        &#x276e;&nbsp;[[i18n('ui.documentCreatePopup.previousDocument', 'Back')]]
+                        &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Back')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
                         disabled$="[[!_hasNextFile(customizing,docIdx)]]">
-                        [[i18n('ui.documentCreatePopup.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
+                        [[i18n('documentImportForm.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
@@ -658,9 +658,9 @@ Contributors:
 
         _getRemainingDocs: function() {
           var count = this._getTotalFileCount();
-          return count > 1 ? this.i18n('ui.documentCreatePopup.addProperties.otherDocuments',
+          return count > 1 ? this.i18n('documentImportForm.addProperties.otherDocuments',
                                        '+ {0} other documents',
-                                       (count - 1 - this.docIdx)) : '';
+                                       count - 1 - this.docIdx) : '';
         },
 
         _storeFile: function(index) {

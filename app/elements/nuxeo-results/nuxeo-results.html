@@ -187,20 +187,20 @@ Contributors:
             empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
             selected-items="{{tableSelectedItems}}"
             selection-enabled>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.title', 'Title')]]" sort-by="dc:title"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]" sort-by="dc:title"
               flex="100">
               <template>
                 <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
                 <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.modified', 'Modified')]]" sort-by="dc:modified"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]" sort-by="dc:modified"
               flex="50">
               <template>
                 [[_formatDate(item.properties.dc:modified)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.lastContributor', 'Last Contibutor')]]"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
               sort-by="dc:lastContributor" flex="50">
               <template>
                 <a href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
@@ -208,19 +208,19 @@ Contributors:
                 </a>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.state', 'State')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state', 'State')]]" hidden>
               <template><span class="capitalize">[[item.state]]</span></template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.version', 'Version')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version', 'Version')]]" hidden>
               <template><span>[[_displayVersion(item)]]</span></template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.created', 'Created')]]"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created', 'Created')]]"
               flex="50" hidden>
               <template>
                 [[_formatDate(item.properties.dc:created)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.author', 'Contributor')]]"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Contributor')]]"
               hidden>
               <template>
                 <a href$="[[urlFor('user', item.properties.dc:creator)]]">
@@ -228,24 +228,24 @@ Contributors:
                 </a>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.nature', 'Nature')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature', 'Nature')]]" hidden>
               <template>
                 <span>[[item.properties.dc:nature]]</span>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.coverage', 'Coverage')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage', 'Coverage')]]" hidden>
               <template>
                 <span>[[item.properties.dc:coverage]]</span>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
               <template>
                 <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
                   <span>[[subject]]</span>
                 </template>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('ui.datatable.header.rights', 'Rights')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.rights', 'Rights')]]" hidden>
               <template>
                   [[item.properties.dc:rights]]
               </template>

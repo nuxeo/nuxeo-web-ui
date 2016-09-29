@@ -125,7 +125,7 @@ Contributors:
     </style>
 
     <paper-dialog id="parentDialog" modal no-auto-focus>
-      <h1>[[i18n('ui.vocabularyManagement.selectParent', 'Select a parent')]]</h1>
+      <h1>[[i18n('vocabularyManagement.selectParent', 'Select a parent')]]</h1>
       <div class="paper-content layout horizontal">
         <form id="form" is="iron-form">
           <div>
@@ -151,7 +151,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('ui.vocabularyManagement.edit.parent', 'Parent')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.parent', 'Parent')]]</label>
       </div>
       <paper-button on-tap="_toggleParent">
         [[_parentLabel]]
@@ -160,7 +160,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('ui.vocabularyManagement.edit.id', 'ID')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.id', 'ID')]]</label>
         <span class="required">*</span>
       </div>
       <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required readonly$="[[!new]]">
@@ -182,7 +182,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('ui.vocabularyManagement.edit.obsolete', 'Obsolete')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.obsolete', 'Obsolete')]]</label>
       </div>
       <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
         on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
@@ -190,7 +190,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('ui.vocabularyManagement.edit.ordering', 'Ordering')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.ordering', 'Ordering')]]</label>
       </div>
       <input type="number" is="iron-input" name="ordering" value="{{entry.properties.ordering::change}}" class="flex"></input>
     </div>
@@ -251,7 +251,7 @@ Contributors:
             if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
               this._parentLabel = this.entry.properties.parent;
             } else {
-              this._parentLabel = this.i18n('ui.vocabularyManagement.edit.selectParent', 'Select a parent');
+              this._parentLabel = this.i18n('vocabularyManagement.edit.selectParent', 'Select a parent');
             }
             if (this.entries) {
               this.controller = {

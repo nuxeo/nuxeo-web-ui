@@ -116,7 +116,7 @@ Contributors:
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>
         <template is="dom-if" if="[[!_viewMode]]">
-          <iron-autogrow-textarea bind-value="{{_value}}" placeholder="Type here..."></iron-autogrow-textarea>
+          <iron-autogrow-textarea bind-value="{{_value}}" placeholder="[[i18n('noteViewLayout.placeholder','Type here...')]]"></iron-autogrow-textarea>
           <div class="buttons layout horizontal end-justified">
             <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
             <paper-button on-click="_editorSave" class="save">
@@ -176,7 +176,7 @@ Contributors:
           this.document.properties['note:note'] = this._value;
           this.$.note.put().then(function() {
             var toast = this.$$('#toast');
-            toast.text = 'Note has been saved.';
+            toast.text = this.i18n('noteViewLayout.note.saved', 'Note has been saved.');
             toast.open();
             this._viewMode = true;
             this.fire('document-updated');

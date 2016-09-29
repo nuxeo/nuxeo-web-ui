@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="nuxeo-chart-data-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-workflow-analytics`
@@ -97,8 +98,8 @@ Contributors:
       <div class="card-content horizontal flex end-justified layout">
         <paper-dropdown-menu no-label-float>
           <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
-            <paper-item key="ParallelDocumentReview">Parallel Document Review</paper-item>
-            <paper-item key="SerialDocumentReview">Serial Document Review</paper-item>
+            <paper-item key="ParallelDocumentReview">[[i18n('ParallelDocumentReview','Parallel document review')]]</paper-item>
+            <paper-item key="SerialDocumentReview">[[i18n('SerialDocumentReview','Serial document review')]]</paper-item>
           </paper-menu>
         </paper-dropdown-menu>
         <input type="date" value="{{startDate::change}}">
@@ -115,7 +116,7 @@ Contributors:
                            data="{{avgWorkflowLength}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="Average Workflow Duration" elevation="0">
+      <paper-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading','Average Workflow Duration')]]" elevation="0">
         <div class="card-content">
           <iron-icon icon="image:timer"></iron-icon>
           <h1>[[_asDuration(avgWorkflowLength)]]</h1>
@@ -130,7 +131,7 @@ Contributors:
                            data="{{initiators}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="Workflow Initiators" elevation="0">
+      <paper-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading','Workflow Initiators')]]" elevation="0">
         <div class="card-content">
           <chart-pie values=[[_values(initiators)]]
                      labels=[[_series(initiators)]]
@@ -147,7 +148,7 @@ Contributors:
                            data="{{numberOfActionsPerUser}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="Actions Per User" elevation="0">
+      <paper-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading','Actions Per User')]]" elevation="0">
         <div class="card-content">
           <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
                      series=[[_series(numberOfActionsPerUser)]]
@@ -166,13 +167,13 @@ Contributors:
                            data="{{avgTaskDurationPerUser}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="Average Task Duration Per User" elevation="0">
+      <paper-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading','Average Task Duration Per User')]]" elevation="0">
         <div class="card-content">
           <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
-            <nuxeo-data-table-column name="User">
+            <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user','User')]]">
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="Average duration">
+            <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.duration','Average duration')]]">
               <template>[[item.value]]</template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>
@@ -189,7 +190,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-workflow-analytics',
-        behaviors: [Nuxeo.ChartDataBehavior],
+        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
         properties: {
           workflow: {
             type: String,
