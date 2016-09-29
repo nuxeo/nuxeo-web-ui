@@ -53,16 +53,20 @@ Contributors:
       }
 
       .file-to-import {
-        width: calc(50% - 34px);
-        height: 45px;
-        margin: 4px 8px;
-        padding: 4px 8px;
+        width: calc(50% - 40px);
+        height: 56px;
+        margin: 8px;
+        padding: 12px;
         background-color: white;
         border: var(--nuxeo-border);
         border-radius: 2px;
       }
 
       .typeDropdown {
+        width: 100%;
+      }
+
+      paper-progress {
         width: 100%;
       }
 
@@ -119,12 +123,13 @@ Contributors:
       }
 
       #dropzone {
-        margin: 16px 32px 32px 32px;
+        margin: 8px 32px 64px 32px;
         padding: 8px 8px;
         border: 2px dashed #d1d1d1;
         border-radius: 4px;
         background-color: #F7F6F6;
         min-height: 100px;
+        overflow: auto;
       }
 
       #form {
@@ -176,10 +181,6 @@ Contributors:
         padding: 16px 32px 16px 36px;
       }
 
-      .file-to-import paper-icon-button {
-        margin-left: 1em;
-      }
-
       .name {
         font-size: 1.2em;
         text-overflow: ellipsis;
@@ -195,7 +196,7 @@ Contributors:
 
       .complete,
       .uploading {
-        margin-top: 4px;
+        margin: 4px 0;
       }
 
       .complete {
@@ -233,6 +234,11 @@ Contributors:
         right: 12px;
         text-align: right;
         color: var(--secondary-text-color);
+      }
+
+      .add-more {
+        position: absolute;
+        bottom: 80px;
       }
 
       iron-icon.liveconnectIco {
@@ -321,6 +327,7 @@ Contributors:
                         <div class="uploading">
                           Uploading
                         </div>
+                        <paper-progress indeterminate></paper-progress>
                       </template>
                     </div>
                     <div class="horizontal layout center">
@@ -355,10 +362,11 @@ Contributors:
               </div>
             </div>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
-              <span><a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
+              <div class="add-more">
+                <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
                  or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a> or
                  <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
-              </span>
+              </div>
             </div>
           </template>
         </div>
