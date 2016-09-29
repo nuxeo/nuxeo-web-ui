@@ -605,6 +605,9 @@ Contributors:
         },
 
         _showDocumentCreationWizard: function(e) {
+          if (e.detail.keyboardEvent && e.detail.keyboardEvent.ctrlKey) {
+            return;
+          }
           if (e.detail.files) {
             this.$.importPopup.toggleDialogImport(e.detail.files);
           } else if (e.detail.type) {
