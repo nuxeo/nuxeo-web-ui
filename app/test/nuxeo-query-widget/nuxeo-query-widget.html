@@ -203,7 +203,7 @@ Contributors:
         return waitChanged(query, 'current-page').then(function() {
           var placeholder = Polymer.dom(query.root).querySelector('.empty');
           expect(isHidden(placeholder)).to.be.false;
-          expect(placeholder.textContent).to.be.equal('There are no documents to show.');
+          expect(placeholder.textContent).to.be.equal('There is no item to show.');
         });
       })
     });
