@@ -75,7 +75,8 @@ Contributors:
 
     </style>
 
-    <nuxeo-dropzone document="{{document}}"
+    <nuxeo-dropzone id="dropzone"
+                    document="{{document}}"
                     message="Drop to replace the picture"
                     message-empty="Click here or drop to replace the picture"
                     uploaded-message="Picture uploaded"
@@ -94,9 +95,7 @@ Contributors:
                                              confirm-message="Do you really want to delente this picture?"
                                              delete-message="Picture deleted"
                                              hidden="[[!document.properties.file:content]]"></nuxeo-document-view-delete-blob>
-            <nuxeo-upload-blob-button document="{{document}}"
-                                      uploaded-message="Picture uploaded"
-                                      tool-tip="Upload picture"></nuxeo-upload-blob-button>
+            <nuxeo-upload-blob-button tooltip="Upload picture" on-tap="_upload"></nuxeo-upload-blob-button>
           </div>
         </template>
         <template is="dom-if" if="[[!document.properties.file:content]]">
@@ -184,6 +183,9 @@ Contributors:
               data: view.content.data
             };
           }.bind(this)) : [];
+        },
+        _upload: function() {
+          this.$.dropzone.open();
         }
       });
     })();

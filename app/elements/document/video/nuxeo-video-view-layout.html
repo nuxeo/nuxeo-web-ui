@@ -71,7 +71,8 @@ Contributors:
 
     </style>
 
-    <nuxeo-dropzone document="{{document}}"
+    <nuxeo-dropzone id="dropzone"
+                    document="{{document}}"
                     message="Drop to replace the video"
                     message-empty="Click here or drop to replace the video"
                     uploaded-message="Video uploaded"
@@ -91,9 +92,7 @@ Contributors:
                                              delete-message="Video deleted"
                                              hidden="[[!document.properties.file:content]]">
             </nuxeo-document-view-delete-blob>
-            <nuxeo-upload-blob-button document="{{document}}"
-                                      uploaded-message="Video uploaded"
-                                      tool-tip="Upload video"></nuxeo-upload-blob-button>
+            <nuxeo-upload-blob-button tooltip="Upload video" on-tap="_upload"></nuxeo-upload-blob-button>
           </div>
         </template>
         <template is="dom-if" if="[[!document.properties.file:content]]">
@@ -168,6 +167,9 @@ Contributors:
           } else {
             return size + ' B';
           }
+        },
+        _upload: function() {
+          this.$.dropzone.open();
         }
       });
     })();

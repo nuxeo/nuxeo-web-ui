@@ -28,26 +28,10 @@ Contributors:
       :host {
         display: block;
       }
-
-      paper-icon-button {
-        height: 32px;
-        width: 32px;
-        @apply(--nuxeo-upload-blob-button-layout);
-      }
-
-      paper-icon-button:hover {
-        cursor: pointer;
-      }
     </style>
 
-    <nuxeo-resource id="batchOp"></nuxeo-resource>
-    <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
-
-    <paper-icon-button noink icon="icons:file-upload" id="uploadBut" on-tap="_upload"></paper-icon-button>
-    <paper-tooltip for="uploadBut">[[toolTip]]</paper-tooltip>
-    <input hidden id="input" type="file" on-change="_filesChanged">
-    <paper-toast id="toast"></paper-toast>
+    <paper-icon-button id="button" noink icon="icons:file-upload"></paper-icon-button>
+    <paper-tooltip for="button">[[tooltip]]</paper-tooltip>
 
   </template>
 
@@ -57,75 +41,11 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-upload-blob-button',
-        behaviors: [Nuxeo.UploaderBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true
-          },
-          xpath: {
-            type: String,
-            value: 'file:content'
-          },
-          toolTip: {
+          tooltip: {
             type: String,
             value: 'Upload file'
-          },
-          blobList: {
-            type: Boolean,
-            value: false
-          },
-          uploadedMessage: {
-            type: String,
-            value: 'File uploaded'
           }
-        },
-        listeners: {
-          'batchFinished': 'importBatch'
-        },
-
-        ready: function() {
-          this.connection = this.$.nx;
-        },
-
-        importBatch: function(data) {
-          data.stopPropagation();
-          if (this.blobList) {
-            this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
-              useMainBlob: false,
-              context: {
-                currentDocument: this.document.path
-              }
-            }).then(function() {
-              return this.$.doc.get().then(function(response) {
-                this.document.properties[this.xpath] = response.properties[this.xpath];
-                this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
-                this._toast(this.uploadedMessage);
-              }.bind(this));
-            }.bind(this));
-          } else {
-            this.document.properties[this.xpath] = {
-              'upload-batch': data.detail.batchId,
-              'upload-fileId': '0'
-            };
-            this.$.doc.put().then(function(response) {
-              this.document = response;
-              this._toast(this.uploadedMessage);
-            }.bind(this));
-          }
-        },
-
-        _upload: function() {
-          this.$$('input').click();
-        },
-
-        _filesChanged: function(e) {
-          this.uploadFiles(e.target.files);
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
         }
       });
     })();

@@ -51,7 +51,7 @@ Contributors:
         position: relative;
         margin: var(--nuxeo-dropzone-border-margin, 16px);
         pointer-events: none;
-        @apply(--layout-horizontal);
+        @apply(--layout-vertical);
         @apply(--layout-center);
         @apply(--layout-flex);
         @apply(--layout-center-justified);
@@ -73,6 +73,7 @@ Contributors:
         pointer-events: none;
         color: #aaa;
         text-align: center;
+        margin: 8px;
       }
 
       #dzLabel.highlight {
@@ -115,21 +116,29 @@ Contributors:
       <div id="innerContent">
         <content></content>
       </div>
-      <template is="dom-if" if="[[empty]]">
+      <div hidden$="[[!empty]]">
         <input hidden id="input" type="file" on-change="_filesChanged">
         <div id="emptydz"></div>
-      </template>
+      </div>
     </div>
     <div id="dropzone">
       <div id="dzContainer">
-        <span id="dzLabel">
-          <template is="dom-if" if="[[dropping]]">
-            [[message]]
+        <div id="dzLabel">
+          <template is="dom-if" if="[[!progress]]">
+            <template is="dom-if" if="[[dropping]]">
+              [[message]]
+            </template>
+            <template is="dom-if" if="[[!dropping]]">
+              [[messageEmpty]]
+            </template>
           </template>
-          <template is="dom-if" if="[[!dropping]]">
-            [[messageEmpty]]
+          <template is="dom-if" if="[[progress]]">
+            [[progressMessage]]
           </template>
-        </span>
+        </div>
+        <template is="dom-if" if="[[progress]]">
+          <paper-progress indeterminate></paper-progress>
+        </template>
       </div>
     </div>
   </template>
@@ -171,6 +180,14 @@ Contributors:
           uploadedMessage: {
             type: String,
             value: 'File uploaded'
+          },
+          progressMessage: {
+            type: String,
+            value: 'In progress...'
+          },
+          progress: {
+            type: Boolean,
+            value: false
           }
         },
         listeners: {
@@ -182,6 +199,10 @@ Contributors:
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
+        },
+
+        open: function() {
+          this.$$('input').click();
         },
 
         importBatch: function(data) {
@@ -197,6 +218,7 @@ Contributors:
                 this.document.properties[this.xpath] = response.properties[this.xpath];
                 this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
                 this._toast(this.uploadedMessage);
+                this.progress = false;
               }.bind(this));
             }.bind(this));
           } else {
@@ -207,12 +229,13 @@ Contributors:
             this.$.doc.put().then(function(response) {
               this.document = response;
               this._toast(this.uploadedMessage);
+              this.progress = false;
             }.bind(this));
           }
         },
 
         _filesChanged: function(e) {
-          this.uploadFiles(e.target.files);
+          this._upload(e.target.files);
         },
 
         _observeEmpty: function() {
@@ -271,6 +294,7 @@ Contributors:
         },
 
         _drop: function(e) {
+          this.progress = true;
           this.dropping = false;
           if (!this.empty) {
             this.toggleClass('hover', false, this.$.dzContainer);
@@ -281,7 +305,15 @@ Contributors:
             this.toggleClass('highlight', false, this.$.dzLabel);
           }
           e.preventDefault();
-          this.uploadFiles(e.dataTransfer.files);
+          this._upload(e.dataTransfer.files);
+        },
+
+        _upload: function(files) {
+          if (files && files.length > 0) {
+            this.empty = true;
+            this.progress = true;
+            this.uploadFiles(files);
+          }
         }
       });
     })();
