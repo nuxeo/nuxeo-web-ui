@@ -9,16 +9,18 @@ const spawn = require('child_process').spawn;
 const chimpBin = path.resolve(path.join(process.cwd(), '/node_modules/.bin/chimp'));
 
 const jUnitReporter = require('cucumber-junit');
+const screenshots = './target/screenshots/';
 const jsonReport = `./target/cucumber-reports/report.json`;
 const junitReport = `./target/surefire-reports/TEST-report.xml`;
 
 const args = [
   '--chai',
   '--screenshotsOnError=true',
-  '--saveScreenshotsToDisk=true',
+  `--screenshotsPath=${screenshots}`,
   `--jsonOutput=${jsonReport}`,
   '--path=test/features',
-  '--baseUrl=http://localhost:8080/nuxeo',
+  '--webdriverio.saveScreenshotsToDisk=true',
+  '--webdriverio.baseUrl=http://localhost:8080/nuxeo',
 ];
 
 function writeJUnitReport(file) {
