@@ -28,58 +28,101 @@ Contributors:
 <dom-module id="nuxeo-recent-documents">
   <template>
     <style>
-      :host {
-        @apply(--layout-vertical-reverse);
-        @apply(--nuxeo-recent-documents-theme);
-        overflow-x: auto;
-      }
+    a, a:active,
+    a:visited, a:focus {
+      @apply(--nuxeo-link);
+    }
 
-      a, a:active,
-      a:visited, a:focus {
-        @apply(--nuxeo-link); }
+    a:hover {
+      @apply(--nuxeo-link-hover);
+    }
 
-      a:hover {
-        @apply(--nuxeo-link-hover); }
+    .list {
+      @apply(--layout-vertical);
+    }
 
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--nuxeo-sidebar-item-theme);
-      }
+    nuxeo-data-list {
+      display: block;
+      position: relative;
+      min-height: calc(100vh - 61px)
+    }
 
-      .item a {
-        @apply(--nuxeo-sidebar-item-link);
-      }
+    .ellipsis {
+      display: inline-block;
+      width: 80%;
+      vertical-align: middle;
+      text-overflow: ellipsis;
+    }
 
-      .toolbar {
-        @apply(--layout-horizontal);
-        @apply(--layout-end-justified);
-      }
+    .queue-thumbnail,
+    .queue-thumbnail ::content img {
+      height: 1.5em;
+      width: 1.5em;
+      border-radius: 20px;
+      box-sizing: border-box;
+      margin-right: 8px;
+    }
 
-      .ellipsis {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
+    .list-item {
+      @apply(--nuxeo-sidebar-item-theme);
+      @apply(--nuxeo-sidebar-item-link);
+    }
 
-      [hidden] {
-        display: none;
-      }
+    .list-item:focus,
+    .list-item.selected:focus {
+      outline: 0;
+      @apply(--nuxeo-block-hover);
+    }
+
+    .list-item.selected {
+      color: var(--default-primary-color);
+      @apply(--nuxeo-block-hover);
+    }
+
+    .list-item-detail {
+      margin-left: 40px;
+    }
+
+    .list-item-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
+    }
+
     </style>
+
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
     <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
 
-    <template is="dom-if" if="[[!documents.length]]">
-      <span class="empty">[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]</span>
-    </template>
+    <div class="list">
 
-    <template is="dom-repeat" items="[[documents]]" as="document">
-      <div class="item">
-        <a href$="[[urlFor('document', document.uid)]]" class="flex ellipsis">
-          <iron-icon icon="receipt" item-icon></iron-icon>
-          <span>[[document.title]]</span>
-        </a>
-      </div>
-    </template>
+      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document"
+        selected-item="{{selectedRecent}}" items="{{favorites}}"
+        selection-enabled
+        empty-label="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]"
+        empty-label-when-filtered="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="list-item-box vertical layout">
+              <div class="list-item-info horizontal layout center" >
+                <div class="vertical layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                </div>
+                <span class="list-item-title ellipsis">[[document.title]]</span>
+              </div>
+              <div class="list-item-detail">
+                <div class="layout center">
+                  <span class="list-item-property ellipsis">
+                    [[document.type]]
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </nuxeo-data-list>
+
+    </div>
 
   </template>
   <script>
@@ -94,6 +137,11 @@ Contributors:
         maxSize: {
           type: Number,
           value: 10
+        },
+        selectedRecent: {
+          type: Object,
+          observer: '_selectedRecentChanged',
+          notify: true
         }
       },
 
@@ -104,7 +152,27 @@ Contributors:
         if (this.documents.length > this.maxSize) {
           this.splice('documents', 0, this.documents.length - this.maxSize);
         }
-      }
+      },
+
+      _thumbnail: function(doc) {
+        var baseUrl = this.$.nxcon.url;
+        return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedRecentChanged: function(favorite) {
+        if (favorite) {
+          page.show('/doc/' + favorite.uid);
+        }
+      },
+
     });
   </script>
 </dom-module>
