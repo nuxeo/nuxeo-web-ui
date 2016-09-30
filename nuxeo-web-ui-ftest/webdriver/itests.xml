@@ -16,6 +16,14 @@
     </copy>
   </target>
 
+  <target name="prepare-tomcat" depends="_init" if="is.tomcat">
+    <echo level="info">Prepare Tomcat...</echo>
+    <property name="classifier" value="" />
+    <property name="groupId" value="org.nuxeo.ecm.distribution" />
+    <property name="artifactId" value="nuxeo-distribution-tomcat" />
+    <antcall target="prepare-server" />
+  </target>
+
   <target name="run-tests" depends="_init">
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
