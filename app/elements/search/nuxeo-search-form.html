@@ -317,6 +317,16 @@ Contributors:
         </div>
       </div>
     </paper-dialog>
+
+    <paper-dialog id="deleteDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('searchForm.delete.heading', 'Delete Saved Search?')]]</h1>
+        <div class="buttons">
+          <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes','Yes')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
   </template>
   <script>
     (function() {
@@ -524,7 +534,7 @@ Contributors:
         },
 
         saveAs: function() {
-          this.$.actionsDropdown.close();
+          this.$$('#actionsDropdown').close();
           this.$.savedSearchTitle.value = '';
           this.$.saveDialog.open();
           this._saveAs = true;
@@ -540,14 +550,19 @@ Contributors:
 
         rename: function() {
           this._renaming = true;
-          this.$.actionsDropdown.close();
+          this.$$('#actionsDropdown').close();
           this.$.renameDialog.open();
           this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
         },
 
         share: function() {
-          this.$.actionsDropdown.close();
+          this.$$('#actionsDropdown').close();
           this.$.shareDialog.open();
+        },
+
+        delete: function() {
+          this.$$('#actionsDropdown').close();
+          this.$.deleteDialog.open();
         },
 
         _saveSearch: function() {
@@ -593,6 +608,19 @@ Contributors:
             }.bind(this));
           }
           this._saveAs = false;
+        },
+
+        _deleteSearch: function() {
+          var _el = this.$['saved-search'];
+          _el.searchId = this.selectedSearch.id;
+          _el.remove().then(function() {
+            this.$.deleteDialog.close();
+            this.$['saved-searches'].get().then(function() {
+              // hack required to update the paper-input inside the paper-dropdown-menu
+              this.selectedSearchIdx = 0;
+              this.selectedSearchIdx = this.searches.length;
+            }.bind(this));
+          }.bind(this));
         },
 
         _mutateParams: function(params) {

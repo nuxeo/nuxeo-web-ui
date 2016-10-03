@@ -60,6 +60,9 @@ Contributors:
           <paper-item class="layout horizontal center" on-tap="_shareSearch">
             <iron-icon icon="social:share"></iron-icon>[[i18n('app.shareSearch', 'Share')]]
           </paper-item>
+          <paper-item class="layout horizontal center" on-tap="_deleteSearch">
+            <iron-icon icon="icons:delete"></iron-icon>[[i18n('app.deleteSearch', 'Delete')]]
+          </paper-item>
         </paper-menu>
       </paper-menu-button>
     </div>
@@ -102,6 +105,10 @@ Contributors:
 
         _shareSearch: function() {
           this._searchForm.share();
+        },
+
+        _deleteSearch: function() {
+          this._searchForm.delete();
         },
 
         _showSaveAs: function() {
