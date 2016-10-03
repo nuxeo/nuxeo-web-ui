@@ -19,6 +19,7 @@ Contributors:
 <script>
   (function () {
     var msgFolder = (window.nuxeo.I18n.baseUrl || location.origin + location.pathname) + '/i18n';
+    window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
     window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
     window.nuxeo.I18n.loadLocale();
   })();
