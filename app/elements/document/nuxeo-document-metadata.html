@@ -37,19 +37,23 @@ Contributors:
       }
     </style>
 
-    <iron-pages selected="[[mode]]" attr-for-selected="mode">
-      <section mode="view">
-        <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-        <div id="metadata-view">
-          <!-- Dynamic layout element will be inserted here -->
-          <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
-        </div>
-      </section>
+    <nuxeo-error id="error"></nuxeo-error>
 
-      <section mode="edit">
-        <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
-      </section>
-    </iron-pages>
+    <div id="metadata">
+      <iron-pages selected="[[mode]]" attr-for-selected="mode">
+        <section mode="view">
+          <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <div id="metadata-view">
+            <!-- Dynamic layout element will be inserted here -->
+            <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
+          </div>
+        </section>
+
+        <section mode="edit">
+          <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
+        </section>
+      </iron-pages>
+    </div>
 
   </template>
 
@@ -59,7 +63,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-metadata',
-
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -130,7 +134,9 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find metadata layout for ' + this.document.type);
+                this.$['metadata'].innerHTML = '';
+                this.$.error.show('404', url, this.i18n('documentMetadata.layoutNotFound',
+                  'Failed to find metadata layout for {0}', this.document.type));
               });
           } else {
             this._createLayout();

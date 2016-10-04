@@ -24,6 +24,7 @@ Contributors:
 -->
 <dom-module id="nuxeo-document-view">
   <template>
+    <nuxeo-error id="error"></nuxeo-error>
     <div id="document-view">
       <!-- Dynamic layout element will be inserted here -->
       <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
@@ -35,7 +36,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-view',
-
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -93,7 +94,9 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find view layout for ' + this.document.type);
+                this.$['document-view'].innerHTML = '';
+                this.$.error.show('404', url, this.i18n('documentView.layoutNotFound',
+                  'Failed to find view layout for {0}', this.document.type));
               });
           } else {
             this._createLayout();

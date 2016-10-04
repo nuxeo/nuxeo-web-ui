@@ -101,22 +101,25 @@ Contributors:
 
     <paper-toast id="errorToast"></paper-toast>
 
-    <paper-dialog id="dialog" modal no-auto-focus>
-      <h1>[[i18n('vocabularyManagement.popup.editEntry','Edit vocabulary entry')]]</h1>
-      <div class="paper-content layout horizontal">
-        <form id="form" is="iron-form" action="/">
-          <div id="entry-edit">
-            <!-- Dynamic layout element will be inserted here -->
-          </div>
-          <div class="card-actions">
-            <div class="buttons sep">
-             <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
-             <paper-button noink class="primary" on-tap="_save" >
-               [[i18n('command.save', 'Save')]]
-             </paper-button>
+    <paper-dialog id="dialog" with-backdrop no-auto-focus>
+      <nuxeo-error id="error"></nuxeo-error>
+      <div id="edit-container">
+        <h1>[[i18n('vocabularyManagement.popup.editEntry','Edit vocabulary entry')]]</h1>
+        <div class="paper-content layout horizontal">
+          <form id="form" is="iron-form" action="/">
+            <div id="entry-edit">
+              <!-- Dynamic layout element will be inserted here -->
             </div>
-          </div>
-        </form>
+            <div class="card-actions">
+              <div class="buttons sep">
+               <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+               <paper-button noink class="primary" on-tap="_save" >
+                 [[i18n('command.save', 'Save')]]
+               </paper-button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </paper-dialog>
 
@@ -153,10 +156,10 @@ Contributors:
                     [[_value(item, column.name)]]
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.name)]]">
-                    <paper-icon-button id="button" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
-                    <paper-tooltip for="button">[[i18n('vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
-                    <paper-icon-button id="button" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
-                    <paper-tooltip for="button">[[i18n('vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+                    <paper-icon-button id="edit-button-[[index]]" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+                    <paper-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
+                    <paper-icon-button id="delete-button-[[index]]" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+                    <paper-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
                   </template>
                 </template>
               </nuxeo-data-table-column>
@@ -246,7 +249,9 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find edit layout for ' + this._getSchemaFor(this._selectedEntry));
+                this.$['edit-container'].innerHTML = '';
+                this.$.error.show('404', url, this.i18n('documentVocabularyManagement.layoutNotFound',
+                  'Failed to find edit layout for {0}', this._getSchemaFor(this._selectedEntry)));
               });
           } else {
             this._createLayout();

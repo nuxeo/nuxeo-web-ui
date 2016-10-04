@@ -1,0 +1,124 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-error`
+@group Nuxeo UI
+@element nuxeo-error
+-->
+<dom-module id="nuxeo-error">
+  <template>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      .main {
+        margin: 16px;
+        padding: 24px;
+        background: rgba(0, 0, 0, 0.025);
+        border-radius: 4px;
+        border: 1px dashed rgba(0, 0, 0, 0.1);
+      }
+
+      .code {
+        @apply(--layout-flex);
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.5);
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .description {
+        @apply(--layout-flex);
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.3);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px;
+      }
+
+      .url {
+        @apply(--layout-flex);
+        color: rgba(0, 0, 0, 0.3);
+        text-align: center;
+        padding: 16px 0;
+        font-size: 11px;
+      }
+
+      .message {
+        @apply(--layout-flex);
+        color: rgba(0, 0, 0, 0.4);
+        text-align: center;
+        padding: 8px 0;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+    </style>
+
+    <template is="dom-if" if="[[code]]">
+      <div class="main">
+        <div class="code" hidden$="[[!code]]">[[code]]</div>
+        <div class="description" hidden$="[[!description]]">[[description]]</div>
+        <template is="dom-if" if="[[url]]">
+          <div class="url">[[url]]</div>
+        </template>
+        <template is="dom-if" if="[[message]]">
+          <div class="message">[[message]]</div>
+        </template>
+      </div>
+    </template>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    Polymer({
+      is: 'nuxeo-error',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        code: {
+          type: String,
+          observer: '_codeChanged'
+        },
+        description: String,
+        message: String,
+        url: String
+      },
+
+      show: function(code, url, message) {
+        this.code = code;
+        this.url = url;
+        this.message = message;
+      },
+
+      _codeChanged: function() {
+        this.description = this.i18n('error.' + this.code, 'Error');
+      }
+
+    });
+  })();
+</script>

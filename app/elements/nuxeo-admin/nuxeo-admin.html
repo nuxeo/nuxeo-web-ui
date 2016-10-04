@@ -46,7 +46,16 @@ Contributors:
       }
     </style>
 
-    <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+    <iron-pages selected="{{selectedTab}}" fallback-selection="error" attr-for-selected="name">
+
+      <nuxeo-page name="error">
+        <div class="header"></div>
+        <div class="content">
+          <paper-card>
+            <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
+          </paper-card>
+        </div>
+      </nuxeo-page>
 
       <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
 
@@ -110,6 +119,10 @@ Contributors:
 
         _displayLatest: function(userManagementPage) {
           return userManagementPage === 'search';
+        },
+
+        _errorUrl: function() {
+          return window.location.href;
         }
       });
     })();

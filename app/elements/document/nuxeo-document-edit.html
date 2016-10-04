@@ -69,16 +69,20 @@ Contributors:
                     headers="[[headers]]">
     </nuxeo-document>
 
-    <form id="form" is="iron-form" action="/">
-      <div id="document-edit">
-        <!-- Dynamic layout element will be inserted here -->
-        <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
-      </div>
-      <div class="card-actions">
-        <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-        <paper-button noink class="primary" on-click="_save">[[i18n('command.save', 'Save')]]</paper-button>
-      </div>
-    </form>
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="container">
+      <form id="form" is="iron-form" action="/">
+        <div id="document-edit">
+          <!-- Dynamic layout element will be inserted here -->
+          <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
+        </div>
+        <div class="card-actions">
+          <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          <paper-button noink class="primary" on-click="_save">[[i18n('command.save', 'Save')]]</paper-button>
+        </div>
+      </form>
+    </div>
 
   </template>
   <script>
@@ -88,8 +92,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-edit',
 
-        behaviors: [Polymer.IronResizableBehavior,
-                    Nuxeo.I18nBehavior],
+        behaviors: [Polymer.IronResizableBehavior, Nuxeo.I18nBehavior],
 
         properties: {
           document: {
@@ -168,7 +171,9 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find edit layout for ' + this.document.type);
+                this.$.container.innerHTML = '';
+                this.$.error.show('404', url,
+                  this.i18n('documentEdit.layoutNotFound', 'Failed to find edit layout for {0}', this.document.type));
               });
           } else {
             this._createLayout();

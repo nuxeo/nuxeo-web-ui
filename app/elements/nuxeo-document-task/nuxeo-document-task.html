@@ -81,7 +81,9 @@ Contributors:
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
-    <div class="action-container layout vertical task-body">
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="task-body" class="action-container layout vertical task-body">
 
       <div class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</div>
 
@@ -133,7 +135,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
         properties: {
 
           task: {
@@ -148,8 +150,6 @@ Contributors:
             value: 'resolution'
           }
         },
-
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         /**
          * Returns the name for the current layout element
@@ -194,10 +194,12 @@ Contributors:
           if (!this._isRegistered(layout)) {
             var url = this.resolveUrl(layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
-                // error handling
-                function() {
-                  console.error('Failed to find element layout for task ' + this.task.nodeName);
-                });
+              // error handling
+              function() {
+                this.$['task-body'].innerHTML = '';
+                this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound',
+                  'Failed to find element layout for task {0}', this.task.nodeName));
+              });
           } else {
             this._createLayout();
           }

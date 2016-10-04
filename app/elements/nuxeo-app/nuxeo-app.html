@@ -108,12 +108,6 @@ Contributors:
         @apply(--layout-center);
       }
 
-      @media (max-width: 1024px) {
-        paper-header-panel ::content .content {
-          padding: 2em .5em;
-        }
-      }
-
       paper-header-panel ::content paper-toolbar {
         color: var(--nuxeo-title-color);
         width: 100%;
@@ -121,13 +115,6 @@ Contributors:
         @apply(--layout-center);
       }
 
-      paper-header-panel .paper-header ::content paper-icon-button:hover,
-      paper-header-panel .paper-header ::content iron-icon:hover,
-      paper-header-panel .paper-header ::content paper-icon-button:focus,
-      paper-header-panel .paper-header ::content iron-icon:focus {
-        color: var(--nuxeo-header-actions-hover);
-        fill: var(--nuxeo-header-actions-hover);
-      }
 
       .logo {
         background: rgba(255,255,255,0.96);
@@ -276,28 +263,22 @@ Contributors:
                     response="{{searchDoc}}">
     </nuxeo-document>
 
-<!--    <nuxeo-document auto
-                    doc-id="[[selectedAssetsSearch.id]]"
-                    enrichers="permissions"
-                    response="{{assetsSearchDoc}}">
-    </nuxeo-document>-->
-
     <paper-toast id="toast"></paper-toast>
 
+    <!-- drawer -->
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
         <a href$="[[urlFor('home')]]">
           <paper-icon-button src$="[[baseUrl]]images/touch/icon-128x128.png" class="logo"></paper-icon-button>
         </a>
 
+        <!-- menu -->
         <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
           <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="validatedSearch" route="queue:validated" icon="icons:done-all" label="app.validatedSearch"></nuxeo-menu-icon>
-
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
-
           <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks"></nuxeo-menu-icon>
           <paper-badge label="[[taskCount]]" for="menuTasks"></paper-badge>
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
@@ -308,6 +289,7 @@ Contributors:
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
+        <!-- sidebar -->
         <iron-collapse id="sidebar" horizontal opened>
           <div>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
@@ -400,61 +382,52 @@ Contributors:
                   <h1>[[_displayUser(currentUser)]]</h1>
                 </div>
                 <div class="content userMenu">
-
                   <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
-
                   <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
                   <nuxeo-menu-item label="app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
                 </div>
               </section>
+
             </iron-pages>
           </div>
         </iron-collapse>
       </div>
 
+      <!-- main -->
       <paper-header-panel main>
-        <div class="layout horizontal">
+        <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" class="flex">
 
-          <iron-pages selected="[[page]]" attr-for-selected="name" class="flex">
-            <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
-
-            <!-- The current document's page -->
-            <nuxeo-browser id="browser"
-              name="browse"
-              document="[[currentDocument]]"
-              selected-tab="{{docAction}}"
-              clipboard="[[clipboard]]"></nuxeo-browser>
-
-            <!-- Default Search -->
-            <nuxeo-search-results id="searchResults" name="search" on-navigate="_navigateFromSearch">
-              <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
-            </nuxeo-search-results>
-
-            <nuxeo-collection-results id="collectionResults"
-              name="collection" on-navigate="_navigateFromCollection">
-            </nuxeo-collection-results>
-
-            <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
-
-            <div name="tasks">
-              <nuxeo-tasks id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+          <nuxeo-page name="error">
+            <div class="header"></div>
+            <div class="content">
+              <paper-card>
+                <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
+              </paper-card>
             </div>
+          </nuxeo-page>
 
-            <!-- Themes -->
-            <paper-header-panel class="flex" name="themes">
-              <div class="paper-header layout horizontal">
-                <span class="flex">[[i18n('app.themes.heading','Themes')]]</span>
-              </div>
-              <div class="content">
-                <nuxeo-themes></nuxeo-themes>
-              </div>
-            </paper-header-panel>
+          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
 
-            <nuxeo-slot slot="PAGES"></nuxeo-slot>
+          <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
-          </iron-pages>
-        </div>
+          <nuxeo-search-results name="search" id="searchResults" on-navigate="_navigateFromSearch">
+            <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
+          </nuxeo-search-results>
+
+          <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
+
+          <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
+
+          <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+
+          <nuxeo-themes name="themes"></nuxeo-themes>
+
+          <nuxeo-slot slot="PAGES"></nuxeo-slot>
+
+        </iron-pages>
+
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
+
       </paper-header-panel>
     </paper-drawer-panel>
 
@@ -553,6 +526,10 @@ Contributors:
         },
 
         ready: function() {
+          window.addEventListener('unhandledrejection', function(error) {
+            this._onError(error);
+          }.bind(this));
+
           this.clipboard = this.$.clipboard;
           this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
           // XXX: review this
@@ -694,14 +671,22 @@ Contributors:
 
         _toggleDrawer: function(e) {
           if (this._selected === e.detail.selected && this.drawerOpened) {
-            this.drawerWidth = '56px';
-            this.drawerOpened = false;
+            this._closeDrawer();
           } else {
-            this.drawerWidth = '350px';
-            this.$.sidebar.style.width = '100%';
-            this.drawerOpened = true;
+            this._openDrawer();
           }
           this._selected = e.detail.selected;
+        },
+
+        _openDrawer: function() {
+          this.drawerWidth = '350px';
+          this.$.sidebar.style.width = '100%';
+          this.drawerOpened = true;
+        },
+
+        _closeDrawer: function() {
+          this.drawerWidth = '56px';
+          this.drawerOpened = false;
         },
 
         _handleUGMgoHome: function() {
@@ -821,6 +806,17 @@ Contributors:
                         e.detail.response.entries.length);
           }
           this.$.toast.open();
+        },
+
+        _errorUrl: function() {
+          return window.location.href;
+        },
+
+        _onError: function(e) {
+          if (e.reason && e.reason.status === 404) {
+            this.$.error.show('404', e.reason.message, '');
+            this.page = 'error';
+          }
         }
 
       });

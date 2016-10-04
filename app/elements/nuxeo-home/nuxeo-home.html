@@ -27,9 +27,6 @@ Contributors:
 <dom-module id="nuxeo-home">
   <template>
     <style>
-      paper-header-panel {
-        height: 100vh;
-      }
 
       ::content a, ::content a:active,
       ::content a:visited, ::content a:focus {
@@ -82,10 +79,8 @@ Contributors:
                      response="{{favorites}}">
     </nuxeo-operation>
 
-    <paper-header-panel class="flex">
-      <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n(selectedLabel)]]</span>
-      </div>
+    <nuxeo-page>
+      <div class="header">[[i18n(selectedLabel)]]</div>
       <div class="content">
         <section name="dashboard" class="flex-layout">
           <paper-card class="card">
@@ -116,7 +111,7 @@ Contributors:
           </paper-card>
         </section>
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
 

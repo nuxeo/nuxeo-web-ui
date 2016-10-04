@@ -199,78 +199,81 @@ Contributors:
 
     <nuxeo-search id="saved-search"></nuxeo-search>
 
-    <div class="header ellipsis search-header">
-      <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
-      <template is="dom-if" if="[[!_onlyQueue]]">
-        <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
-          <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
-            <paper-item>[[i18n('searchForm.searchFilters', 'Search Filters')]]</paper-item>
-            <template is="dom-repeat" items="[[searches]]" as="search">
-              <paper-item>[[search.title]]</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
-        <template is="dom-if" if="[[_isQueue]]">
-          <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
-          </paper-icon-button>
-          <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
-        </template>
-        <template is="dom-if" if="[[!_isQueue]]">
-          <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
-          </paper-icon-button>
-          <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
-        </template>
-      </template>
-      <template is="dom-if" if="[[_onlyQueue]]">
-        <h1>[[i18n(label, label)]]</h1>
-      </template>
-    </div>
+    <nuxeo-error id="error"></nuxeo-error>
 
-    <div class="content">
-
-      <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
-        <div id="search-form-container">
-          <!-- Dynamic search form element will be inserted here -->
-          <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
-        </div>
-        <div class="layout vertical row">
-          <paper-button noink class="primary clear" raised on-click="_clear">
-            [[i18n('command.clear', 'Clear')]]
-          </paper-button>
-        </div>
-        <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
-          <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
-            [[i18n('command.Reset', 'Reset')]]
-          </paper-button>
-        </div>
-        <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+    <div id="search-container">
+      <div class="header ellipsis search-header">
+        <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
+        <template is="dom-if" if="[[!_onlyQueue]]">
+          <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
+            <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
+              <paper-item>[[i18n('searchForm.searchFilters', 'Search Filters')]]</paper-item>
+              <template is="dom-repeat" items="[[searches]]" as="search">
+                <paper-item>[[search.title]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+          <template is="dom-if" if="[[_isQueue]]">
+            <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
+            </paper-icon-button>
+            <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+          </template>
+          <template is="dom-if" if="[[!_isQueue]]">
+            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+            </paper-icon-button>
+            <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+          </template>
+        </template>
+        <template is="dom-if" if="[[_onlyQueue]]">
+          <h1>[[i18n(label, label)]]</h1>
+        </template>
       </div>
 
-      <div id="queue" hidden$="{{!_isQueue}}">
-        <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
-          on-nuxeo-page-loaded="_membersLoaded"
-          selected-item="{{selectedDocument}}"
-          selection-enabled>
-          <template>
-            <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-              <div class="list-item-box vertical layout">
-                <div class="list-item-info horizontal layout center">
-                  <div class="vertical layout center">
-                    <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+      <div class="content">
+        <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
+          <div id="search-form-container">
+            <!-- Dynamic search form element will be inserted here -->
+            <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
+          </div>
+          <div class="layout vertical row">
+            <paper-button noink class="primary clear" raised on-click="_clear">
+              [[i18n('command.clear', 'Clear')]]
+            </paper-button>
+          </div>
+          <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
+              [[i18n('command.Reset', 'Reset')]]
+            </paper-button>
+          </div>
+          <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+        </div>
+
+        <div id="queue" hidden$="{{!_isQueue}}">
+          <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
+            on-nuxeo-page-loaded="_membersLoaded"
+            selected-item="{{selectedDocument}}"
+            selection-enabled>
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="list-item-box vertical layout">
+                  <div class="list-item-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                    </div>
+                    <span class="list-item-title ellipsis">[[item.title]]</span>
                   </div>
-                  <span class="list-item-title ellipsis">[[item.title]]</span>
-                </div>
-                <div class="list-item-detail">
-                  <div class="layout center">
-                    <span class="list-item-property ellipsis">
-                      [[item.type]]
-                    </span>
+                  <div class="list-item-detail">
+                    <div class="layout center">
+                      <span class="list-item-property ellipsis">
+                        [[item.type]]
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </template>
-        </nuxeo-data-list>
+            </template>
+          </nuxeo-data-list>
+        </div>
       </div>
     </div>
 
@@ -647,7 +650,9 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                console.error('Failed to find search layout for ' + this.searchName);
+                this.$['search-container'].innerHTML = '';
+                this.$.error.show('404', url, this.i18n('documentSearchForm.layoutNotFound',
+                  'Failed to find search layout for ', this.searchName));
               });
           }
         },
