@@ -48,10 +48,15 @@ Contributors:
 
       _keysPressed: function(e) {
         if (this.target === document.body) {
-          switch (e.detail.keyboardEvent.srcElement.tagName) {
+          var element = e.detail.keyboardEvent.srcElement;
+          switch (element.tagName) {
             case 'INPUT':
             case 'TEXTAREA':
               return;
+            case 'DIV':
+              if (element.id === 'editor') {
+                return;
+              }
           }
         }
         e.detail.keyboardEvent.preventDefault();
