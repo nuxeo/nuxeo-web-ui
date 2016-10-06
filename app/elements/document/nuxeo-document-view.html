@@ -86,6 +86,8 @@ Contributors:
          * Retrieves and creates the view layout for the current document
          */
         _updateLayout: function() {
+          this.$['document-view'].hidden = false;
+          this.$.error.hide();
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
             var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
@@ -94,7 +96,7 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                this.$['document-view'].innerHTML = '';
+                this.$['document-view'].hidden = true;
                 this.$.error.show('404', url, this.i18n('documentView.layoutNotFound',
                   'Failed to find view layout for {0}', this.document.type));
               });

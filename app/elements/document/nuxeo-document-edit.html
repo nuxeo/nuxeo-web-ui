@@ -163,6 +163,8 @@ Contributors:
          * Retrieves and creates the edit layout for the current document
          */
         _updateLayout: function() {
+          this.$.container.hidden = false;
+          this.$.error.hide();
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
             var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
@@ -171,7 +173,7 @@ Contributors:
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                this.$.container.innerHTML = '';
+                this.$.container.hidden = true;
                 this.$.error.show('404', url,
                   this.i18n('documentEdit.layoutNotFound', 'Failed to find edit layout for {0}', this.document.type));
               });

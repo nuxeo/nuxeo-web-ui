@@ -243,13 +243,15 @@ Contributors:
          * Retrieves and creates the edit layout for the current vocabulary entry
          */
         _updateLayout: function() {
+          this.$['edit-container'].hidden = true;
+          this.$.error.hide();
           var layout = this._layoutFor(this._selectedEntry);
           if (!this._isRegistered(layout)) {
             var url = this.resolveUrl(layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                this.$['edit-container'].innerHTML = '';
+                this.$['edit-container'].hidden = true;
                 this.$.error.show('404', url, this.i18n('documentVocabularyManagement.layoutNotFound',
                   'Failed to find edit layout for {0}', this._getSchemaFor(this._selectedEntry)));
               });

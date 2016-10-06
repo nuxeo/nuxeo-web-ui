@@ -115,6 +115,10 @@ Contributors:
         this.message = message;
       },
 
+      hide: function() {
+        this.code = this.description = this.url = this.message = null;
+      },
+
       _codeChanged: function() {
         this.description = this.i18n('error.' + this.code, 'Error');
       }

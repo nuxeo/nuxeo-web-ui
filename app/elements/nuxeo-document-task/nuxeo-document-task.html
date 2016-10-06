@@ -190,13 +190,15 @@ Contributors:
          * Retrieves and creates the layout for the current task node
          */
         _taskChanged: function() {
+          this.$['task-body'].hidden = false;
+          this.$.error.hide();
           var layout = this._layoutFor(this.task);
           if (!this._isRegistered(layout)) {
             var url = this.resolveUrl(layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
-                this.$['task-body'].innerHTML = '';
+                this.$['task-body'].hidden = true;
                 this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound',
                   'Failed to find element layout for task {0}', this.task.nodeName));
               });
