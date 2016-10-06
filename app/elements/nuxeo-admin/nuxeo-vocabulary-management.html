@@ -92,10 +92,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-resource id="directoryList" path="/directory" auto response="{{vocabularyResonse}}">
-    </nuxeo-resource>
-
-    <nuxeo-resource id="directory" ></nuxeo-resource>
+    <nuxeo-resource id="directory" path="/directory"></nuxeo-resource>
 
     <paper-toast id="toast"></paper-toast>
 
@@ -133,8 +130,8 @@ Contributors:
             <span>[[i18n('vocabularyManagement.vocabulary', 'Vocabulary')]]</span>
             <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select', 'Select a vocabulary')]]">
               <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
-                <template is="dom-repeat" items="[[vocabularyResonse.entries]]">
-                  <paper-item name="[[item.name]]">[[item.name]]</paper-item>
+                <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
+                  <paper-item name="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
                 </template>
               </paper-menu>
             </paper-dropdown-menu>
@@ -179,6 +176,7 @@ Contributors:
         is: 'nuxeo-vocabulary-management',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
+          vocabularies: Array,
           selectedVocabulary: String,
           entries: {
             type: Array,
@@ -187,6 +185,10 @@ Contributors:
           colDef: {
             type: Object,
             notify: true
+          },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
           },
           _selectedEntry: {
             type: Object,
@@ -197,6 +199,14 @@ Contributors:
         observers: [
           '_refresh(selectedVocabulary)'
         ],
+
+        _visibleChanged: function() {
+          if (this.visible && !this.vocabularies) {
+            this.$.directory.get().then(function(response) {
+              this.vocabularies = response.entries;
+            }.bind(this));
+          }
+        },
 
         _entryChanged: function() {
           if (this._selectedEntry) {
