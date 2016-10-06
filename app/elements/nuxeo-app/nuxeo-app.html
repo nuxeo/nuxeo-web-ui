@@ -292,15 +292,12 @@ Contributors:
         <!-- sidebar -->
         <iron-collapse id="sidebar" horizontal opened>
           <div>
-            <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex">
-              <section class="card browse" name="browser">
-                <div class="header ellipsis">
-                  <h1>[[i18n('app.browse', 'Browse')]]</h1>
-                </div>
-                <div class="content">
-                  <nuxeo-document-tree current-document="[[currentDocument]]"></nuxeo-document-tree>
-                </div>
-              </section>
+            <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex" selected-attribute="visible">
+
+              <nuxeo-document-tree name="browser"
+                                   label="app.browse"
+                                   class="card browse"
+                                   current-document="[[currentDocument]]"></nuxeo-document-tree>
 
               <section class="card recents" name="recents">
                 <div class="header ellipsis">
@@ -311,12 +308,10 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card search" name="search">
-                <nuxeo-search-form id="searchForm" search-name="[[searchName]]"
-                  on-display-filters="_resetSearchResults" dirty="{{dirty}}"
-                  is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
-                </nuxeo-search-form>
-              </section>
+              <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
+                on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
+              </nuxeo-search-form>
 
               <section class="card tasks" name="tasks">
                 <div class="header ellipsis">
@@ -330,28 +325,16 @@ Contributors:
                 </div>
               </section>
 
-              <section class="card favorites" name="favorites">
-                <div class="header ellipsis">
-                  <h1>[[i18n('app.favorites', 'Favorites')]]</h1>
-                </div>
-                <div class="content">
-                  <nuxeo-favorites doc="[[currentDocument]]"></nuxeo-favorites>
-                </div>
-              </section>
+              <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
 
-              <section class="card collections" name="collections">
-                <nuxeo-collections id="collectionsForm"></nuxeo-collections>
-              </section>
+              <nuxeo-collections name="collections" id="collectionsForm"></nuxeo-collections>
 
-              <section class="card personal-space" name="personalWorkspace">
-                <div class="header ellipsis">
-                  <h1>[[i18n('app.personalSpace', 'Personal Space')]]</h1>
-                </div>
-                <div class="content">
-                  <nuxeo-document-tree current-document="[[currentDocument]]" user="[[currentUser]]">
-                  </nuxeo-document-tree>
-                </div>
-              </section>
+              <nuxeo-document-tree name="personalWorkspace"
+                                   class="card personal-space"
+                                   label="app.personalSpace"
+                                   current-document="[[currentDocument]]"
+                                   user="[[currentUser]]">
+              </nuxeo-document-tree>
 
               <section class="card clipboard" name="clipboard">
                 <div class="header ellipsis">
@@ -395,7 +378,7 @@ Contributors:
 
       <!-- main -->
       <paper-header-panel main>
-        <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" class="flex">
+        <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
 
           <nuxeo-page name="error">
             <div class="header"></div>
