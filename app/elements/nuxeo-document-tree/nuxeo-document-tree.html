@@ -31,7 +31,6 @@ Contributors:
     <style>
       :host {
         display: block;
-        padding: 16px 8px;
         --nuxeo-tree-theme: {
           padding: 1em;
         };
@@ -45,6 +44,27 @@ Contributors:
 
       nuxeo-tree {
         padding: 0 8px;
+      }
+
+      .content {
+        @apply(--layout-vertical);
+        padding: 16px 8px;
+      }
+
+      .header {
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .header h1 {
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
       }
 
       a, a:active, a:visited, a:focus {
@@ -77,28 +97,33 @@ Contributors:
 
     </style>
 
-    <nuxeo-document auto doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
+    <nuxeo-document id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
     <nuxeo-page-provider id="children" provider="tree_children" enrichers="children"></nuxeo-page-provider>
 
-    <div class="parents">
-      <template is="dom-repeat" items="[[parents]]" as="item">
-        <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal center">
-          <iron-icon icon="icons:chevron-left"></iron-icon>[[item.title]]
-        </a>
-      </template>
+    <div class="header ellipsis" hidden$="[[!label]]">
+      <h1>[[i18n(label)]]</h1>
     </div>
 
-    <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
-      <template>
-        <template is="dom-if" if="[[!isLeaf]]">
-          <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+    <div class="content">
+      <div class="parents">
+        <template is="dom-repeat" items="[[parents]]" as="item">
+          <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal center">
+            <iron-icon icon="icons:chevron-left"></iron-icon>[[item.title]]
+          </a>
         </template>
-        <span class="flex node-name ellipsis">
-          <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-        </span>
-      </template>
-    </nuxeo-tree>
+      </div>
 
+      <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
+        <template>
+          <template is="dom-if" if="[[!isLeaf]]">
+            <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+          </template>
+          <span class="flex node-name ellipsis">
+            <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+          </span>
+        </template>
+      </nuxeo-tree>
+    </div>
   </template>
   <script>
     (function() {
@@ -106,7 +131,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-tree',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FiltersBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           controller: Object,
           rootPath: {
@@ -128,6 +153,11 @@ Contributors:
           user: {
             type: Object,
             observer: '_userChanged'
+          },
+          label: String,
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
           }
         },
 
@@ -148,6 +178,12 @@ Contributors:
               return folders.length === 0;
             }
           };
+        },
+
+        _visibleChanged: function() {
+          if (this.visible && !this.rootDocument) {
+            this.$.root.get();
+          }
         },
 
         _userChanged: function() {
