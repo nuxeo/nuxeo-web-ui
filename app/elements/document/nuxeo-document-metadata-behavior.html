@@ -138,6 +138,14 @@ Nuxeo.DocumentMetadataBehavior = [Nuxeo.I18nBehavior, {
 
   getTypeLabel: function(type) {
     return (type && this.documentLabels) ? this.i18n(this.documentLabels[type]) : '';
-  }
+  },
+
+  _getTypeName: function(type) {
+    return this.documentTemplates[type] ? this.documentTemplates[type]().type : '';
+  },
+
+  _getTypeIcon: function(type) {
+    return this.documentIcons[type];
+  },
 }];
 </script>

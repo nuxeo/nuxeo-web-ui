@@ -80,7 +80,7 @@ Contributors:
         _doAuth: function(immediate, callback) {
           var obj = {
             client_id: this.clientId,
-            scope: 'email https://www.googleapis.com/auth/drive.readonly'
+            scope: 'email https://www.googleapis.com/auth/drive'
           };
           if (this.userId) {
             obj.user_id = this.userId;

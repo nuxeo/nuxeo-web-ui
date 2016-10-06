@@ -118,7 +118,7 @@ Contributors:
         padding-right: 16px;
       }
 
-      div[name='customize'] span {
+      div[name='customize'] #blobEditor span {
         width: 200px;
       }
 
@@ -149,19 +149,33 @@ Contributors:
         margin-top: 32px;
       }
 
-      .blobReady {
+      .sidePanel {
+        overflow-y: scroll;
+      }
+
+      .blobCheck {
+        display: block;
         width: 16px;
         height: 16px;
-        position: absolute;
-        right: 12px;
+      }
+
+      .blobCheck.checked {
         color: green;
+      }
+
+      .blobCheck.unchecked {
+        color: gray;
+      }
+
+      .blobCheck.hidden {
+        visibility: hidden;
       }
 
       .file-overview {
         border: var(--nuxeo-border);
         border-radius: 1px;
         background-color: white;
-        padding: 12px;
+        padding: 16px 14px 1px 14px;
         margin: 8px;
         font-weight: bold;
         text-transform: none;
@@ -174,7 +188,11 @@ Contributors:
 
       .file-overview.selected {
         background-color: #EAF3F8;
-        color: var(--nuxeo-secondary-color);
+        color: var(--nuxeo-title-color);
+      }
+
+      .file-overview iron-icon {
+        margin-top: 0.1em;
       }
 
       .typePicker {
@@ -184,9 +202,9 @@ Contributors:
       .name {
         font-size: 1.2em;
         text-overflow: ellipsis;
-        display: block;
         overflow: hidden;
         white-space: nowrap;
+        width: 200px;
       }
 
       .size {
@@ -229,11 +247,14 @@ Contributors:
       }
 
       .disclaimer {
-        position: absolute;
-        bottom: 60px;
-        right: 12px;
-        text-align: right;
+        display: block;
+        font-size: 0.7em;
         color: var(--secondary-text-color);
+      }
+
+      .disclaimer.checked,
+      .disclaimer.hidden {
+        visibility: hidden;
       }
 
       .add-more {
@@ -300,7 +321,7 @@ Contributors:
           <template is="dom-if" if="[[hasFiles]]">
             <div class="vertical layout flex">
               <div class="horizontal layout wrap">
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Local Files</span>
+                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.localFiles','Local Files')]]</span>
                 <template is="dom-repeat" items="[[localFiles]]" as="file">
                   <!-- local file -->
                   <div class="file-to-import horizontal layout">
@@ -336,7 +357,7 @@ Contributors:
                     </div>
                   </div>
                 </template>
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">Remote Files</span>
+                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.remoteFiles','Remote Files')]]</span>
                 <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                   <!-- remote file -->
                   <div class="file-to-import horizontal layout">
@@ -378,12 +399,12 @@ Contributors:
                         class="primary"
                         on-tap="_toggleCustomize"
                         disabled$="[[!hasFiles]]">
-                        [[i18n('documentImportForm.addProperties', 'Add Properties')]]
+                        [[i18n('documentImportForm.addProperties', '_canImportties')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_import"
-                        disabled$="[[!_canCreate(hasLocalFilesUploaded,hasRemoteFiles)]]">
+                        disabled$="[[!_canImport(hasLocalFilesUploaded,hasRemoteFiles)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
         </div>
@@ -428,22 +449,39 @@ Contributors:
               <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
             </form>
           </div>
-          <div id="blobList" class="vertical layout flex">
-            <template is="dom-repeat" items="[[localFiles]]" as="file">
-              <paper-button class$="file-overview horizontal layout center [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                <iron-icon icon="icons:check-circle" class="blobReady" hidden$="[[!file.ready]]"></iron-icon>
-              </paper-button>
-            </template>
-            <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-              <paper-button class$="file-overview horizontal layout center [[_selectedRemoteDocStyle(index,docIdx)]]" on-tap="_tapRemoteDoc">
-                <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                <iron-icon icon="icons:check-circle" class="blobReady" hidden$="[[!file.ready]]"></iron-icon>
-              </paper-button>
-            </template>
-            <span class="disclaimer">[[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]</span>
+          <div class="sidePanel horizontal layout">
+            <div id="blobList" class="flex">
+              <template is="dom-repeat" items="[[localFiles]]" as="file">
+                <paper-button class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                  <div class="horizontal layout">
+                    <div class="vertical layout">
+                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
+                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
+                        [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
+                      </span>
+                    </div>
+                    <iron-icon icon="icons:check-circle"
+                               class$="blobCheck [[_styleFileCheck(file.*)]]"
+                               on-tap="_checkTappedLocal"></iron-icon>
+                  </div>
+                </paper-button>
+              </template>
+              <template is="dom-repeat" items="[[remoteFiles]]" as="file">
+                <paper-button class$="file-overview vertical layout center [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                  <div class="horizontal layout center [[_selectedLocalDocStyle(index,docIdx)]]">
+                    <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
+                    <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                    <iron-icon icon="icons:check-circle"
+                               class$="blobCheck [[_styleFileCheck(file.*)]]"
+                               on-tap="_checkTappedRemote"></iron-icon>
+                  </div>
+                  <span class$="disclaimer horizontal layout flex [[_styleFileCheck(file.*)]]">
+                    [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
+                  </span>
+                </paper-button>
+              </template>
+            </div>
           </div>
         </div>
         <div class="buttons sep horizontal end-justified layout">
@@ -455,7 +493,7 @@ Contributors:
           <paper-button noink
                         on-tap="_previousFile"
                         disabled$=[[!_hasPreviousFile(customizing,docIdx)]]>
-                        &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Back')]]
+                        &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Edit Previous')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
@@ -466,8 +504,15 @@ Contributors:
 
           <paper-button noink
                         class="primary"
+                        on-tap="_applyToAll"
+                        disabled$="[[!_canApplyToAll(customizing,docIdx)]]">
+                        [[i18n('documentImportForm.applyToAll', 'Apply to All')]]
+                      </paper-button>
+
+          <paper-button noink
+                        class="primary"
                         on-tap="_submit"
-                        disabled$="[[!_canCreate(hasLocalFilesUploaded,hasRemoteFiles)]]">
+                        disabled$="[[!_canImportWithMetadata(hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
         </div>
@@ -475,6 +520,7 @@ Contributors:
     </iron-pages>
 
     <paper-toast id="toast"></paper-toast>
+    <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
   </template>
 
@@ -607,8 +653,14 @@ Contributors:
           return this.hasLocalFiles && this.hasRemoteFiles;
         },
 
-        _canCreate: function() {
+        _canImport: function() {
           return this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles;
+        },
+
+        _canImportWithMetadata: function() {
+          return this._getAllFiles().every(function(file) {
+            return 'checked' in file;
+          });
         },
 
         _showUploadDialog: function() {
@@ -622,10 +674,12 @@ Contributors:
         _toggleCustomize: function() {
           if (this.stage === 'upload') {
             this.stage = 'customize';
+            this.customizing = true;
             this.fire('nx-creation-wizard-hide-tabs');
             this._selectDoc(0);
           } else {
             this.stage = 'upload';
+            this.customizing = true;
             this.fire('nx-creation-wizard-show-tabs');
           }
         },
@@ -651,6 +705,33 @@ Contributors:
           return arr[this.docIdx];
         },
 
+        _isValidFileIndex: function(index) {
+          var length = this._getTotalFileCount();
+          return length > 0 && index >= 0 && index < length;
+        },
+
+        _getFile: function(index) {
+          if (this._isValidFileIndex(index)) {
+            return this._getAllFiles()[index];
+          }
+        },
+
+        _setFileProp: function(index, prop, value) {
+          if (this._isValidFileIndex(index)) {
+            var pos = index;
+            var arr = 'localFiles';
+            if (pos >= this.localFiles.length) {
+              arr = 'remoteFiles';
+              pos = pos - this.localFiles.length;
+            }
+            this._setFilePropEx(arr, pos, prop, value);
+          }
+        },
+
+        _setFilePropEx: function(arrName, index, prop, value) {
+          this.set([arrName, index,prop].join('.'), value);
+        },
+
         _getCurrentFileTitle: function() {
           var currentFile = this._getCurrentFile();
           return currentFile ? currentFile.name : '';
@@ -661,6 +742,20 @@ Contributors:
           return count > 1 ? this.i18n('documentImportForm.addProperties.otherDocuments',
                                        '+ {0} other documents',
                                        count - 1 - this.docIdx) : '';
+        },
+
+        _copyFileData: function(originIdx, destIdx) {
+          var originFile = this._getFile(originIdx);
+          var destFile = this._getFile(destIdx);
+          var docData = originFile.docData;
+          var copiedDocData = {};
+
+          if (docData && Object.keys(docData).length > 0) {
+            copiedDocData = JSON.parse(JSON.stringify(docData));
+          }
+          copiedDocData.document.properties['dc:title'] = destFile.name;
+          this._setFileProp(destIdx, 'docData', copiedDocData);
+          this._setFileProp(destIdx, 'checked', true);
         },
 
         _storeFile: function(index) {
@@ -679,7 +774,6 @@ Contributors:
             this.set([propName, pos, 'sanitizedName'].join('.'),
                       this._sanitizeName(this.document.properties['dc:title']));
             this.set([propName, pos, 'title'].join('.'), this.document.properties['dc:title']);
-            this.set([propName, pos, 'ready'].join('.'), true);
           } else {
             throw 'invalid file index: ' + index;
           }
@@ -721,11 +815,6 @@ Contributors:
           return length > 1 && this.docIdx > 0;
         },
 
-        _isValidFileIndex: function(index) {
-          var length = this._getTotalFileCount();
-          return length > 0 && index >= 0 && index < length;
-        },
-
         _selectDoc: function(index) {
           if (!this._isValidFileIndex(index)) {
             throw 'invalid file index: ' + index;
@@ -736,7 +825,7 @@ Contributors:
             var previousFile = this._getCurrentFile();
             this.docIdx = index;
             var currentFile = this._getCurrentFile();
-            if (currentFile.ready) {
+            if (currentFile.checked) {
               // load the file's own data
               this._loadFile(currentFile.docData);
             } else if (previousFile) {
@@ -744,6 +833,9 @@ Contributors:
               this._loadFile(previousFile.docData, currentFile.name);
             } else {
               this._loadFile({}, currentFile.name);
+            }
+            if (!('checked' in currentFile)) {
+              this._setFileProp(index, 'checked', true);
             }
           }
         },
@@ -842,6 +934,15 @@ Contributors:
           }
           this._clear();
           this._notify(response);
+          // store creation data
+          if (response.entries && Array.isArray(response.entries)) {
+            response.entries.forEach(function(f) {
+              // XXX remove this to lower as soon as we get type information from the server
+              this.$.creationStats.storeType(f.type.toLowerCase());
+            }.bind(this));
+          } else if (response.type) {
+            this.$.creationStats.storeType(response.type);
+          }
           if (!response.entries || response.entries.length === 1) {
             page('/browse' + (response.entries ? response.entries[0] : response).path);
           } else if (this.targetPath.replace(/\/$/, '') === this.parent.path.replace(/\/$/, '')) {
@@ -900,7 +1001,7 @@ Contributors:
                 index = count - self.localFiles.length;
               }
               count++;
-              return (arr[index].docData ? self._processFileWithMetadata(arr[index]) :
+              return ((arr[index].docData && arr[index].checked) ? self._processFileWithMetadata(arr[index]) :
                                           Promise.resolve({'entity-type': 'Documents', 'entries': []}))
                          .then(function(response2) {
                             return next(self._mergeResponses(response1, response2));
@@ -969,6 +1070,35 @@ Contributors:
 
         _getDocumentProperties: function() {
           return this._docProperties;
+        },
+
+        _styleFileCheck: function(e) {
+          return (e.base && ('checked' in e.base)) ? (e.base.checked ? 'checked' : 'unchecked') : 'hidden';
+        },
+
+        _checkTappedLocal: function(e) {
+          e.stopPropagation();
+          this._setFilePropEx('localFiles', e.model.index, 'checked', !e.model.file.checked);
+        },
+
+        _checkTappedRemote: function(e) {
+          e.stopPropagation();
+          this._setFilePropEx('remoteFiles', e.model.index, 'checked', !e.model.file.checked);
+        },
+
+        _canApplyToAll: function() {
+          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1;
+        },
+
+        _applyToAll: function() {
+          var lastIdx = this._getTotalFileCount() - 1;
+          if (this._isValidFileIndex(this.docIdx) && this._isValidFileIndex(lastIdx) && this._validate()) {
+            this._storeFile(0);
+            for (var i = 0; i <= lastIdx; i++) {
+              this._copyFileData(0, i);
+            }
+            this._selectDoc(lastIdx);
+          }
         }
       });
     })();
