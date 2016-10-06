@@ -189,7 +189,7 @@ Contributors:
                      id="removeFromCollectionOp">
     </nuxeo-operation>
 
-      <div class="header ellipsis search-header">
+    <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
         <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
@@ -206,7 +206,7 @@ Contributors:
         <neon-animatable>
 
           <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
-            <nuxeo-page-provider id="collectionsProvider" auto
+            <nuxeo-page-provider id="collectionsProvider"
                provider="user_collections"
                page-size="40"
                params='{"searchTerm":"%","user":"$currentUser"}'
@@ -356,6 +356,10 @@ Contributors:
             notify: true,
             reflectToAttribute: true,
             value: false
+          },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
           }
         },
 
@@ -518,7 +522,6 @@ Contributors:
 
         ready: function() {
           window.addEventListener('addedToCollection', function(e) {
-            this.collections = [];
             this.$.collectionsProvider.fetch();
             if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
               this.members = [];
@@ -533,11 +536,16 @@ Contributors:
               this.members = [];
               this.$.memberProvider.fetch();
             } else if (!this._isDisplayMembers) {
-              this.collections = [];
               this.$.collectionsProvider.fetch();
             }
           }.bind(this));
 
+        },
+
+        _visibleChanged: function() {
+          if (this.$.collectionsProvider.resultsCount === undefined) {
+            this.$.collectionsProvider.fetch();
+          }
         },
 
         _formatDate: function(date) {

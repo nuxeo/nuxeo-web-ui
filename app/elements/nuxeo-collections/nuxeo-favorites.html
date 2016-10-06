@@ -38,8 +38,24 @@ Contributors:
         @apply(--nuxeo-link-hover);
       }
 
-      .list {
+      .content {
         @apply(--layout-vertical);
+      }
+
+      .header {
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .header h1 {
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
       }
 
       nuxeo-data-list {
@@ -108,23 +124,23 @@ Contributors:
       }
     </style>
 
-    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <nuxeo-operation id="removeFromFavOp"
       op="Document.RemoveFromFavorites"></nuxeo-operation>
 
-    <nuxeo-operation id="fetchFavOp"
-      op="Favorite.Fetch"></nuxeo-operation>
+    <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
 
     <nuxeo-page-provider id="favoritesProvider"
        provider="default_content_collection"
        page-size="50"
-       params="[[_computeParams(favorite)]]"
        enrichers="thumbnail">
     </nuxeo-page-provider>
 
-    <div class="list">
-
+    <div class="header ellipsis">
+      <h1>[[i18n('app.favorites', 'Favorites')]]</h1>
+    </div>
+    <div class="content">
       <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList"
         selected-item="{{selectedFavorite}}" items="{{favorites}}"
         selection-enabled as="favorite"
@@ -168,24 +184,44 @@ Contributors:
           type: Object,
           observer: '_selectedFavoriteChanged',
           notify: true
+        },
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
         }
       },
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
+      _visibleChanged: function() {
+        if (this.visible && !this.favorite) {
+          this._refresh();
+        }
+      },
+
       ready: function() {
-        this.$.fetchFavOp.execute().then(function(resp) {
-          this.favorite = resp;
-          this.$.favoritesProvider.fetch();
-        }.bind(this));
-        window.addEventListener('addedToFavorites', function() {
+        window.addEventListener('addedToFavorites', this._refresh.bind(this));
+        window.addEventListener('removedFromFavorites', this._refresh.bind(this));
+      },
+
+      _refresh: function() {
+        this._fetchFavorite().then(function(favorite) {
+          this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
           this.$.favoritesProvider.fetch();
         }.bind(this));
-        window.addEventListener('removedFromFavorites', function() {
-          this.$.favoritesProvider.page = 1;
-          this.$.favoritesProvider.fetch();
-        }.bind(this));
+      },
+
+      _fetchFavorite: function() {
+        if (this.favorite) {
+          return Promise.resolve(this.favorite);
+        } else {
+          return this.$.fetchFavOp.execute()
+            .then(function(resp) {
+              this.favorite = resp;
+              return resp;
+            }.bind(this));
+        }
       },
 
       _thumbnail: function(doc) {
@@ -218,10 +254,6 @@ Contributors:
         this.$.removeFromFavOp.execute().then(function() {
           this.fire('removedFromFavorites', {docUid: docUid});
         }.bind(this));
-      },
-
-      _computeParams: function() {
-        return [this.favorite.uid];
       }
 
     });
