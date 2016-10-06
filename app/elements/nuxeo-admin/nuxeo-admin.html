@@ -29,57 +29,26 @@ Contributors:
 -->
 <dom-module id="nuxeo-admin">
   <template>
-    <style>
-      paper-header-panel {
-        height: 100vh;
-      }
+    <template is="dom-if" if="[[visible]]">
+      <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
 
-      paper-card {
-        @apply(--paper-card);
-      }
-
-      paper-card.card {
-        margin: 0 22px 22px 0;
-        min-width: 560px;
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-
-    <iron-pages selected="{{selectedTab}}" fallback-selection="error" attr-for-selected="name">
-
-      <nuxeo-page name="error">
-        <div class="header"></div>
-        <div class="content">
-          <paper-card>
-            <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
-          </paper-card>
-        </div>
-      </nuxeo-page>
-
-      <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
-
-      <section name="user-group-management">
-        <paper-header-panel class="flex">
-          <div class="paper-header layout horizontal">
-            <span class="flex">[[i18n('admin.usersAndGroups.heading', 'Users & Groups')]]</span>
-          </div>
+        <nuxeo-page name="error">
+          <div class="header"></div>
           <div class="content">
-            <paper-card class="card">
-              <div class="card-content vertical layout">
-                <nuxeo-user-group-management id="management" page="{{userManagementPage}}"></nuxeo-user-group-management>
-                <template is="dom-if" if="[[_displayLatest(userManagementPage)]]">
-                  <nuxeo-user-group-latest ></nuxeo-user-group-latest>
-                </template>
-              </div>
+            <paper-card>
+              <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
             </paper-card>
           </div>
-        </paper-header-panel>
-      </section>
+        </nuxeo-page>
 
-      <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
+        <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
 
-    </iron-pages>
+        <nuxeo-user-group-management-page name="user-group-management"></nuxeo-user-group-management-page>
+
+        <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
+
+      </iron-pages>
+    </template>
   </template>
   <script>
     (function() {
@@ -95,30 +64,9 @@ Contributors:
             type: String,
             value: 'analytics'
           },
-          entity: {
-            type: Object,
-            value: {},
-            observer: '_entityChanged'
+          visible: {
+            type: Boolean
           }
-        },
-
-        _entityChanged: function() {
-          if (this.entity && this.entity.id && this.entity.type) {
-            if (this.entity.type === 'group') {
-              this.$.management.selectedGroup = this.entity.id;
-              this.$.management.page = 'manage-group';
-            } else if (this.entity.type === 'user') {
-              this.$.management.selectedUser = this.entity.id;
-              this.$.management.page = 'manage-user';
-            }
-          } else {
-            this.$.management.page = 'search';
-            this.$.management.$$('nuxeo-user-group-search')._searchTermChanged();
-          }
-        },
-
-        _displayLatest: function(userManagementPage) {
-          return userManagementPage === 'search';
         },
 
         _errorUrl: function() {

@@ -1,0 +1,122 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-user-group-management-page`
+@group Nuxeo UI
+@element nuxeo-user-group-management-page
+-->
+<dom-module id="nuxeo-user-group-management-page">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-header-panel {
+        height: 100vh;
+      }
+
+      paper-card {
+        @apply(--paper-card);
+      }
+
+      paper-card.card {
+        margin: 0 22px 22px 0;
+        min-width: 560px;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+
+    <paper-header-panel class="flex">
+      <div class="paper-header layout horizontal">
+        <span class="flex">[[i18n('admin.usersAndGroups.heading', 'Users & Groups')]]</span>
+      </div>
+      <div class="content">
+        <paper-card class="card">
+          <div class="card-content vertical layout">
+            <template is="dom-if" if="visible">
+              <nuxeo-user-group-management id="management" page="{{page}}"></nuxeo-user-group-management>
+              <template is="dom-if" if="[[_displayLatest(page)]]">
+                <nuxeo-user-group-latest></nuxeo-user-group-latest>
+              </template>
+            </template>
+          </div>
+        </paper-card>
+      </div>
+    </paper-header-panel>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-user-group-management-page',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
+          page: {
+            type: String,
+            value: 'search'
+          },
+          entity: {
+            type: Object,
+            value: {},
+            observer: '_entityChanged'
+          }
+        },
+
+        _entityChanged: function() {
+          if (!this.visible) {
+            return;
+          }
+          if (this.entity && this.entity.id && this.entity.type) {
+            if (this.entity.type === 'group') {
+              this.$.management.selectedGroup = this.entity.id;
+              this.$.management.page = 'manage-group';
+            } else if (this.entity.type === 'user') {
+              this.$.management.selectedUser = this.entity.id;
+              this.$.management.page = 'manage-user';
+            }
+          } else {
+            this.$.management.$$('nuxeo-user-group-search')._searchTermChanged();
+          }
+        },
+
+        _visibleChanged: function() {
+          if (this.visible) {
+            this.async(function() {
+              this.$$('#management').$$('nuxeo-user-group-search')._searchTermChanged();
+            }.bind(this));
+          }
+        },
+
+        _displayLatest: function() {
+          return this.page === 'search';
+        }
+      });
+    })();
+  </script>
+</dom-module>
