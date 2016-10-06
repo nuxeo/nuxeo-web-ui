@@ -80,17 +80,13 @@ Contributors:
         </paper-dropdown-menu>
       </div>
       <div class="content">
-        <template is="dom-if" if="[[_equals(selectedTab, 'document-distribution')]]">
-          <nuxeo-distribution-analytics></nuxeo-distribution-analytics>
-        </template>
-        <template is="dom-if" if="[[_equals(selectedTab, 'repository')]]">
-          <nuxeo-repository-analytics></nuxeo-repository-analytics>
-        </template>
-        <template is="dom-if" if="[[_equals(selectedTab, 'search')]]">
-          <nuxeo-search-analytics></nuxeo-search-analytics>
-        </template>
-        <template is="dom-if" if="[[_equals(selectedTab, 'workflow')]]">
-          <nuxeo-workflow-analytics></nuxeo-workflow-analytics>
+        <template is="dom-if" if="[[visible]]">
+          <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+            <nuxeo-distribution-analytics name="document-distribution"></nuxeo-distribution-analytics>
+            <nuxeo-repository-analytics name="repository"></nuxeo-repository-analytics>
+            <nuxeo-search-analytics name="search"></nuxeo-search-analytics>
+            <nuxeo-workflow-analytics name="workflow"></nuxeo-workflow-analytics>
+          </iron-pages>
         </template>
       </div>
     </paper-header-panel>
@@ -104,7 +100,8 @@ Contributors:
         is: 'nuxeo-analytics',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          selectedTab: String
+          selectedTab: String,
+          visible: Boolean
         },
 
         _equals: function(a, b) {
