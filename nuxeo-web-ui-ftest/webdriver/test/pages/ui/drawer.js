@@ -56,6 +56,6 @@ export default class Drawer {
   }
 
   _section(name) {
-    return this.pages.element(`section[name='${name}']`);
+    return this.pages.element(`[name='${name}']`);
   }
 }
