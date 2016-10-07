@@ -468,17 +468,19 @@ Contributors:
                 </paper-button>
               </template>
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button class$="file-overview vertical layout center [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                  <div class="horizontal layout center [[_selectedLocalDocStyle(index,docIdx)]]">
-                    <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                    <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                <paper-button class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                  <div class="horizontal layout">
+                    <div class="vertical layout">
+                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
+                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
+                        [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
+                      </span>
+                    </div>
                     <iron-icon icon="icons:check-circle"
                                class$="blobCheck [[_styleFileCheck(file.*)]]"
                                on-tap="_checkTappedRemote"></iron-icon>
                   </div>
-                  <span class$="disclaimer horizontal layout flex [[_styleFileCheck(file.*)]]">
-                    [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
-                  </span>
                 </paper-button>
               </template>
             </div>
