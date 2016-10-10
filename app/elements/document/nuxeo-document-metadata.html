@@ -158,7 +158,8 @@ Contributors:
         },
 
         _canEdit: function(document) {
-          return document.type !== 'Root' && this._hasPermission(document, 'Write') && this._isMutable(document);
+          return document && document.type !== 'Root' &&
+            this._hasPermission(document, 'Write') && this._isMutable(document);
         }
       });
     })();

@@ -274,8 +274,7 @@ Contributors:
 
     <paper-toast id="toast" duration="0"></paper-toast>
 
-    <iron-localstorage id="prefStorage" name="[[_displayModeStorageName(document)]]"
-      value="{{_settings}}" auto-save-disabled>
+    <iron-localstorage id="prefStorage" name="[[_displayModeStorageName(document)]]" value="{{_settings}}" auto-save-disabled>
     </iron-localstorage>
 
   </template>
@@ -402,7 +401,7 @@ Contributors:
         },
 
         _displayModeStorageName: function(document) {
-          return this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid;
+          return (document) ? this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid : '';
         },
 
         _handleDocumentCreated: function() {

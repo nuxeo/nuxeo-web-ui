@@ -394,11 +394,13 @@ Contributors:
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         _documentChanged: function() {
-          this.workflows = this.document.contextParameters.runningWorkflows;
-          this.tasks = this.document.contextParameters.pendingTasks;
-          this.processes = this.document.contextParameters.runnableWorkflows;
-          this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
-          this.isProcessingTask = false;
+          if (this.document) {
+            this.workflows = this.document.contextParameters.runningWorkflows;
+            this.tasks = this.document.contextParameters.pendingTasks;
+            this.processes = this.document.contextParameters.runnableWorkflows;
+            this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
+            this.isProcessingTask = false;
+          }
         },
 
         _canStartProcess: function() {

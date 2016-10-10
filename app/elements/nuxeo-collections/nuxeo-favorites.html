@@ -19,6 +19,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-favorites`
@@ -95,6 +96,7 @@ Contributors:
       .list-item {
         @apply(--nuxeo-sidebar-item-theme);
         @apply(--nuxeo-sidebar-item-link);
+        cursor: pointer;
       }
 
       .list-item:focus,
@@ -175,6 +177,7 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-favorites',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         favorites: {
           type: Object,
@@ -190,8 +193,6 @@ Contributors:
           observer: '_visibleChanged'
         }
       },
-
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
       _visibleChanged: function() {
         if (this.visible && !this.favorite) {
@@ -241,9 +242,13 @@ Contributors:
         return classes;
       },
 
-      _selectedFavoriteChanged: function(favorite) {
-        if (favorite) {
-          page.show('/doc/' + favorite.uid);
+      _selectedFavoriteChanged: function(doc) {
+        if (doc) {
+          if (this._isVersion(doc)) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
         }
       },
 

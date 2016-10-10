@@ -142,7 +142,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-default-search',
-
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           params: {
             type: Object,
@@ -163,16 +163,6 @@ Contributors:
             type: String,
             value: 'default_search'
           }
-        },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        ready: function() {
-          window.addEventListener('navigation', function(e) {
-            if (e.detail.page === 'search') {
-              this.$.searchInput.$.input.focus();
-            }
-          }.bind(this));
         },
 
         _addFullTextSearch: function() {

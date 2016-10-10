@@ -44,7 +44,7 @@ Contributors:
     });
 
     page('/home', function() {
-      app.page = 'home';
+      app.show('home');
     });
 
     page('/browse', function() {
@@ -53,31 +53,29 @@ Contributors:
 
     // /browse/<path>@<action>
     page(/^\/browse\/([^@]*)(?:@(.*))?/, function(data) {
-      app.updateDoc('', '/' + data.params[0], data.params[1] || 'view');
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
-      // triggers the actual navigation thus must come last
-      app.page = 'browse';
+      app.load('browse', '', '/' + data.params[0], data.params[1] || 'view');
     });
 
     page('/search/:searchName', function(data) {
       app.selectedTab = 'search';
       app.searchName = data.params.searchName;
-      app.page = 'search';
+      app.show('search');
     });
 
     page('/queue/:searchName', function(data) {
       app.selectedTab = 'search';
       app.searchName = data.params.searchName;
+      app.show('search');
     });
 
     page('/doc/:repo?/:id/', function(data) {
-      app.updateDoc(data.params.id, '', 'view');
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
-      app.page = 'browse';
+      app.load('browse', data.params.id, '', 'view');
     });
 
     page('/admin/:tab?', function(data) {
@@ -85,13 +83,13 @@ Contributors:
         app.selectedAdminTab = data.params.tab;
       }
       app.entity = {};
-      app.page = 'admin';
+      app.show('admin');
     });
 
     page('/admin/user-group-management/:type/:id', function(data) {
       app.selectedAdminTab = 'user-group-management';
       app.entity = {type: data.params.type, id: data.params.id};
-      app.page = 'admin';
+      app.show('admin');
     });
 
     page('/user/:id', function(data) {
@@ -104,12 +102,12 @@ Contributors:
     });
 
     page('/tasks', function() {
-      app.page = 'tasks';
       app.currentTask = null;
+      app.show('tasks');
     });
 
     page('/:page', function(ctx) {
-      app.page = ctx.params.page;
+      app.show(ctx.params.page);
     });
 
     // add #! before urls

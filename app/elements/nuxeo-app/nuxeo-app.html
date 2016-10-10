@@ -115,17 +115,25 @@ Contributors:
         @apply(--layout-center);
       }
 
-
       .logo {
-        background: rgba(255,255,255,0.96);
-        border-right: 1px solid var(--divider-color);
-        height: 58px;
-        padding: 17px 16px;
         position: fixed;
+        width: 23px;
+        height: 26px;
         top: 0;
         left: 0;
-        width: 56px;
         z-index: 102;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.96);
+        border-right: 1px solid var(--divider-color);
+      }
+
+      .logo-loading {
+        animation: loading 800ms infinite;
+      }
+
+      @keyframes loading {
+        0% { transform:rotate(0deg); }
+        100% { transform:rotate(360deg); }
       }
 
       paper-badge {
@@ -268,8 +276,12 @@ Contributors:
     <!-- drawer -->
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
+
         <a href$="[[urlFor('home')]]">
-          <paper-icon-button src$="[[baseUrl]]images/touch/icon-128x128.png" class="logo"></paper-icon-button>
+          <div class="logo">
+            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png" hidden$="[[loading]]"></iron-icon>
+            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png" hidden$="[[!loading]]" class="logo-loading"></iron-icon>
+          </div>
         </a>
 
         <!-- menu -->
@@ -378,6 +390,7 @@ Contributors:
 
       <!-- main -->
       <paper-header-panel main>
+
         <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
 
           <nuxeo-page name="error">
@@ -436,11 +449,13 @@ Contributors:
             type: String,
             value: '/'
           },
-          page: {
-            type: String,
-            observer: '_navigate'
+
+          loading: {
+            type: Boolean,
+            value: false
           },
 
+          page: String,
           selectedTab: String,
           selectedAdminTab: String,
 
@@ -485,7 +500,6 @@ Contributors:
             type: Object,
             observer: '_observeCurrentUser'
           }
-
         },
 
         listeners: {
@@ -530,7 +544,12 @@ Contributors:
           }.bind(this));
         },
 
-        updateDoc: function(id, path, action) {
+        refresh: function() {
+          page('/browse' + this.docPath);
+        },
+
+        load: function(page, id, path, action) {
+          this.loading = true;
           this.docId = id;
           this.docPath = path;
           this.docAction = action;
@@ -538,18 +557,20 @@ Contributors:
             if (this.docId && !this._isVersion(doc)) {
               this.docId = '';
               this.docPath = doc.path;
-              this._navigate();
+              page('/browse' + doc.path);
             } else {
               this.$.recent.add(doc);
               this.currentParent = this._isFolderish(doc) ? doc :
                 doc.contextParameters.breadcrumb.entries.slice(-2,-1)[0];
               this.set('currentDocument', doc);
+              this.show(page);
             }
           }.bind(this));
         },
 
-        refresh: function() {
-          this.updateDoc(this.docId, this.docPath, this.docAction);
+        show: function(page) {
+          this.page = page;
+          this.loading = false;
         },
 
         _focusMenu: function() {
@@ -557,7 +578,7 @@ Contributors:
         },
 
         _showDashboard: function() {
-          this.page = 'home';
+          this.show('home');
         },
 
         _showSuggester: function() {
@@ -577,67 +598,37 @@ Contributors:
           }
         },
 
-        _navigate: function() {
-          var url = '/' + this.page, state;
-          if (this.page === 'browse') {
-            if (this.docId) {
-              return;
-            }
-            if (this.docPath) {
-              url += this.docPath;
-            }
-            if (this.docAction) {
-              url += '@' + this.docAction;
-            }
-            if (this.currentContentView) {
-              state = {contentView: this.currentContentView.provider};
-            }
-          } else if (this.page === 'admin') {
-            if (this.selectedAdminTab) {
-              url += '/' + this.selectedAdminTab;
-              if (this.selectedAdminTab === 'user-group-management' &&
-                  this.entity && this.entity.id && this.entity.type) {
-                url += '/' + this.entity.type + '/' + this.entity.id;
-              }
-            }
-          } else if (this.page === 'search') {
-            if (this.searchName) {
-              url += '/' + this.searchName;
-            }
-          }
-          page.show(url, state);
-          this.fire('navigation', {page: this.page});
-        },
-
         _navigateFromCV: function(e) {
           this.currentContentView = Polymer.dom(e).rootTarget;
+
           page.show('/browse' + this.currentContentView.currentDocument.path,
-                    {contentView: this.currentContentView.provider});
+            {contentView: this.currentContentView.provider});
         },
 
         _navigateFromSearch: function(e) {
-          page.show('/browse' + e.detail.doc.path);
+          page('/browse' + e.detail.doc.path);
           this.$.searchForm.displayQueue(e.detail.doc, e.detail.index);
         },
 
         _navigateFromAssetsSearch: function(e) {
-          page.show('/browse' + e.detail.doc.path);
+          page('/browse' + e.detail.doc.path);
           this.$.assetsForm.displayQueue(e.detail.doc, e.detail.index);
         },
 
         _navigateFromCollection: function(e) {
-          page.show('/browse' + e.detail.doc.path);
+          page('/browse' + e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
         },
 
         _resetSearchResults: function() {
-          this.selectedTab = this.page = 'search';
+          this.selectedTab = 'search';
+          this.show('search');
         },
 
         _navigateToCollection: function(e) {
           this.selectedTab = 'collections';
-          this.page = 'collection';
           this.$.collectionResults.collection = e.detail.collection;
+          this.show('collection');
         },
 
         get currentContentView() {
@@ -649,7 +640,7 @@ Contributors:
         },
 
         scrollPageToTop: function() {
-          //this.$.selectedPage.scrollToTop(true);
+          //this.$.page.scrollToTop(true);
         },
 
         _toggleDrawer: function(e) {
@@ -674,17 +665,33 @@ Contributors:
 
         _handleUGMgoHome: function() {
           this.entity = {};
-          this._navigate();
+          page('/admin/user-group-management');
         },
 
         _handleUGMmanageUser: function(e) {
           this.entity = {type: 'user', id: e.detail.user};
-          this._navigate();
+          var url = '';
+          if (this.selectedAdminTab) {
+            url += this.selectedAdminTab;
+            if (this.selectedAdminTab === 'user-group-management' &&
+              this.entity && this.entity.id && this.entity.type) {
+              url += '/' + this.entity.type + '/' + this.entity.id;
+            }
+          }
+          page('/admin/' + url);
         },
 
         _handleUGMmanageGroup: function(e) {
           this.entity = {type: 'group', id: e.detail.group};
-          this._navigate();
+          var url = '';
+          if (this.selectedAdminTab) {
+            url += this.selectedAdminTab;
+            if (this.selectedAdminTab === 'user-group-management' &&
+              this.entity && this.entity.id && this.entity.type) {
+              url += '/' + this.entity.type + '/' + this.entity.id;
+            }
+          }
+          page('/admin/' + url);
         },
 
         _fetchTasks: function() {
@@ -713,7 +720,7 @@ Contributors:
         },
 
         _onTasksListSelectionChanged: function() {
-          this.page = 'tasks';
+          this.show('tasks');
         },
 
         _onAddToClipboard: function(e) {
@@ -798,7 +805,7 @@ Contributors:
         _onError: function(e) {
           if (e.reason && e.reason.status === 404) {
             this.$.error.show('404', e.reason.message, '');
-            this.page = 'error';
+            this.show('error');
           }
         }
 
