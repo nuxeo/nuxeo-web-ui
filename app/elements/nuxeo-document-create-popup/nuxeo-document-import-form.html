@@ -20,6 +20,8 @@ Contributors:
 <link rel="import" href="../document/nuxeo-document-creation-behavior.html">
 <link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
 <link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-one-drive.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-dropbox.html">
+
 
 <!--
 `nuxeo-document-import-form`
@@ -267,6 +269,10 @@ Contributors:
         --iron-icon-width: 16px;
         margin-right: 4px;
       }
+      iron-icon.liveconnectIco.dropbox {
+        --iron-icon-height: 24px;
+        --iron-icon-width: 24px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -305,6 +311,7 @@ Contributors:
               </div>
               <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
               <nuxeo-liveconnect-one-drive id="oneDriveUploader"></nuxeo-liveconnect-one-drive>
+              <nuxeo-liveconnect-dropbox id="dropboxUploader"></nuxeo-liveconnect-dropbox>
               <span>[[i18n('documentImportForm.linkFilesFrom', 'Or link files from')]]</span>
               <div class="horizontal layout">
                 <div class="dropzone-label horizontal layout center center-justified">
@@ -314,6 +321,10 @@ Contributors:
                 <div class="dropzone-label horizontal layout center center-justified">
                   <iron-icon class="liveconnectIco" src="../../images/OneDrive.png"></iron-icon>
                   <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
+                </div>
+                <div class="dropzone-label horizontal layout center center-justified">
+                  <iron-icon class="liveconnectIco dropbox" src="../../images/dropbox.png"></iron-icon>
+                  <a href="javascript:undefined" on-tap="_uploadDropbox">Dropbox</a>
                 </div>
               </div>
             </div>
@@ -386,7 +397,8 @@ Contributors:
               <div class="add-more">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
                  or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a> or
-                 <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
+                 <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a> or
+                 <a href="javascript:undefined" on-tap="_uploadDropbox">Dropbox</a>
               </div>
             </div>
           </template>
@@ -1058,6 +1070,10 @@ Contributors:
 
         _uploadOneDrive: function() {
           this.$$('#oneDriveUploader').openPicker();
+        },
+
+        _uploadDropbox: function() {
+          this.$$('#dropboxUploader').openPicker();
         },
 
         _blobPicked: function(e) {

@@ -30,6 +30,7 @@
     "confirm": true,
     "gapi": true,
     "google": true,
-    "OneDriveFilePicker": true
+    "OneDriveFilePicker": true,
+    "Dropbox": true
   }
 }
