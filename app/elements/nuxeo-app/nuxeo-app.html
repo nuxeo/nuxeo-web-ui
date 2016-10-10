@@ -127,15 +127,6 @@ Contributors:
         border-right: 1px solid var(--divider-color);
       }
 
-      .logo-loading {
-        animation: loading 800ms infinite;
-      }
-
-      @keyframes loading {
-        0% { transform:rotate(0deg); }
-        100% { transform:rotate(360deg); }
-      }
-
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
         --paper-badge-margin-left: -24px;
@@ -251,6 +242,27 @@ Contributors:
         bottom: 5px;
         font-size: .7em;
       }
+
+      #loading {
+        position: absolute;
+        height: 4px;
+        left: 0;
+        right: 0;
+        padding: 0;
+        margin: 0;
+        z-index: 104;
+      }
+
+      #loading paper-progress {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        height: 3px;
+        --paper-progress-active-color: rgba(0, 128, 255, 0.5);
+        --paper-progress-container-color: transparent;
+        --paper-progress-indeterminate-cycle-duration: 1s;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -279,8 +291,7 @@ Contributors:
 
         <a href$="[[urlFor('home')]]">
           <div class="logo">
-            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png" hidden$="[[loading]]"></iron-icon>
-            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png" hidden$="[[!loading]]" class="logo-loading"></iron-icon>
+            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png"></iron-icon>
           </div>
         </a>
 
@@ -427,6 +438,11 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
+    <neon-animated-pages id="loading" selected="0" entry-animation="fade-in-animation" exit-animation="fade-out-animation">
+      <neon-animatable></neon-animatable>
+      <neon-animatable><paper-progress indeterminate></paper-progress></neon-animatable>
+    </neon-animated-pages>
+
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
 
@@ -443,7 +459,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-app',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        behaviors: [
+          Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior,
+          Polymer.NeonAnimatableBehavior, Polymer.NeonAnimationRunnerBehavior
+        ],
         properties: {
           baseUrl: {
             type: String,
@@ -549,6 +568,7 @@ Contributors:
         },
 
         load: function(page, id, path, action) {
+          this.$.loading.selected = 1;
           this.loading = true;
           this.docId = id;
           this.docPath = path;
@@ -557,7 +577,7 @@ Contributors:
             if (this.docId && !this._isVersion(doc)) {
               this.docId = '';
               this.docPath = doc.path;
-              page('/browse' + doc.path);
+              window.page('/browse' + doc.path);
             } else {
               this.$.recent.add(doc);
               this.currentParent = this._isFolderish(doc) ? doc :
@@ -571,6 +591,7 @@ Contributors:
         show: function(page) {
           this.page = page;
           this.loading = false;
+          this.$.loading.selected = 0;
         },
 
         _focusMenu: function() {
