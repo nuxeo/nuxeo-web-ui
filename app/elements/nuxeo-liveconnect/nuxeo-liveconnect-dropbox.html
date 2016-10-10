@@ -48,7 +48,7 @@ Contributors:
           providerId: {
             value: 'dropbox'
           },
-          hasServerToken: {
+          isUserAuthorized: {
             type: Boolean
           }
         },
@@ -57,7 +57,7 @@ Contributors:
           this.getProviderInfo().then(function(response) {
             this.clientId = response.clientId;
             this.authorizationURL = response.authorizationURL;
-            this.hasServerToken = response.hasToken;
+            this.isUserAuthorized = response.isAuthorized;
             this.userId = response.userId;
             this._init();
           }.bind(this));
@@ -66,7 +66,7 @@ Contributors:
         _init: function() {
           var self = this;
           function auth() {
-            if (!self.hasServerToken) {
+            if (!self.isUserAuthorized) {
               self.openPopup(self.authorizationURL, {
                 onMessageReceive: self._parseMessage.bind(self),
                 onClose: self._onOAuthPopupClose.bind(self)

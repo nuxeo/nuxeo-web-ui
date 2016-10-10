@@ -56,9 +56,9 @@ Contributors:
           this.getProviderInfo().then(function(response) {
             this.clientId = response.clientId;
             this.authorizationURL = response.authorizationURL;
-            this.hasServerToken = response.hasToken;
+            this.isUserAuthorized = response.isAuthorized;
             this.userId = response.userId;
-            if (this.hasServerToken) {
+            if (this.isUserAuthorized) {
               return this.getToken().then(function(response) {
                 this.accessToken = response.token;
                 this._handleAuthResult(response.token);
