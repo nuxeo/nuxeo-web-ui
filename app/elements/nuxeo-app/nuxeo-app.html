@@ -245,22 +245,13 @@ Contributors:
 
       #loading {
         position: absolute;
-        height: 4px;
-        left: 0;
-        right: 0;
-        padding: 0;
-        margin: 0;
-        z-index: 104;
-      }
-
-      #loading paper-progress {
-        position: absolute;
         width: 100%;
         top: 0;
         height: 3px;
-        --paper-progress-active-color: rgba(0, 128, 255, 0.5);
+        z-index: 104;
+        --paper-progress-active-color: rgba(0, 128, 255, 0.4);
         --paper-progress-container-color: transparent;
-        --paper-progress-indeterminate-cycle-duration: 1s;
+        --paper-progress-indeterminate-cycle-duration: 3s;
       }
 
     </style>
@@ -438,10 +429,7 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <neon-animated-pages id="loading" selected="0" entry-animation="fade-in-animation" exit-animation="fade-out-animation">
-      <neon-animatable></neon-animatable>
-      <neon-animatable><paper-progress indeterminate></paper-progress></neon-animatable>
-    </neon-animated-pages>
+    <paper-progress id="loading" indeterminate></paper-progress>
 
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
@@ -472,6 +460,19 @@ Contributors:
           loading: {
             type: Boolean,
             value: false
+          },
+
+          animationConfig: {
+            type: Object,
+            value: function() {
+              return {
+                'loading': [{
+                  name: 'fade-in-animation',
+                  timing: {delay: 1000, duration: 1500},
+                  node: this.$.loading
+                }]
+              };
+            }
           },
 
           page: String,
@@ -568,8 +569,9 @@ Contributors:
         },
 
         load: function(page, id, path, action) {
-          this.$.loading.selected = 1;
           this.loading = true;
+          this.playAnimation('loading');
+          this.$.loading.style.display = 'block';
           this.docId = id;
           this.docPath = path;
           this.docAction = action;
@@ -591,7 +593,7 @@ Contributors:
         show: function(page) {
           this.page = page;
           this.loading = false;
-          this.$.loading.selected = 0;
+          this.$.loading.style.display = 'none';
         },
 
         _focusMenu: function() {
