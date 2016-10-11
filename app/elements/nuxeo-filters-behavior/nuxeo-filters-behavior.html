@@ -38,6 +38,10 @@ Nuxeo.FiltersBehavior = {
 
   _hasContent: function(doc) {
     return (doc) ? doc.properties['file:content'] : false;
+  },
+
+  _isHiddenInNavigation: function(doc) {
+    return (doc) ? doc.facets.indexOf('HiddenInNavigation') !== -1 : true;
   }
 
 };

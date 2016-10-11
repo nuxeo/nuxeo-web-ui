@@ -97,7 +97,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-document id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
+    <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
     <nuxeo-page-provider id="children" provider="tree_children" enrichers="children"></nuxeo-page-provider>
 
     <div class="header ellipsis" hidden$="[[!label]]">
@@ -134,6 +134,10 @@ Contributors:
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           controller: Object,
+          rootAuto: {
+            type: Boolean,
+            value: false
+          },
           rootPath: {
             type: String,
             value: '/default-domain'
@@ -181,8 +185,8 @@ Contributors:
         },
 
         _visibleChanged: function() {
-          if (this.visible && !this.rootDocument) {
-            this.$.root.get();
+          if (this.visible) {
+            this.rootAuto = true;
           }
         },
 
@@ -193,13 +197,25 @@ Contributors:
         },
 
         _currentDocumentChanged: function() {
-          if (this.currentDocument && !this.user) {
-            if (this.rootPath !== this.currentDocument.path) {
+          var doc = this.currentDocument;
+          if (doc && !this.user) {
+            if (this.rootPath !== doc.path && !this._isHiddenInNavigation(doc)) {
               this.$.tree.style.display = 'none';
-              var doc = this.currentDocument;
+
               var entries = doc.contextParameters.breadcrumb.entries;
-              this.parents = entries.slice(0, entries.length - (this._isFolderish(doc) ? 1 : 2));
-              this.rootPath = this._isFolderish(doc) ? doc.path : entries[entries.length - 2].path;
+              this.parents = [];
+              for (var i = 0; i < entries.length - 1; i++) {
+                var entry = entries[i];
+                if (this._isHiddenInNavigation(entry)) {
+                  return;
+                }
+                this.push('parents', entry);
+              }
+
+              var lastEntry = entries[entries.length - 1];
+              if (this._isFolderish(lastEntry)) {
+                this.rootPath = lastEntry.path;
+              }
             }
           }
         },
