@@ -253,7 +253,7 @@ Contributors:
          * Retrieves and creates the edit layout for the current vocabulary entry
          */
         _updateLayout: function() {
-          this.$['edit-container'].hidden = true;
+          this.$['edit-container'].hidden = false;
           this.$.error.hide();
           var layout = this._layoutFor(this._selectedEntry);
           if (!this._isRegistered(layout)) {
