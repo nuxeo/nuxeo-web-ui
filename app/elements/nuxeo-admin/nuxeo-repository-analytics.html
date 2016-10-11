@@ -105,7 +105,7 @@ Contributors:
 
       <!-- Top Downloads -->
       <nuxeo-audit-data event-id="download"
-                        where='{"downloadReason": "download"}'
+                        where='{"extended.downloadReason": "download"}'
                         grouped-by="docUUID"
                         group-limit="10"
                         start-date="[[startDate]]" end-date="[[endDate]]"
