@@ -292,14 +292,6 @@ Contributors:
           }
         },
 
-        _getTypeName: function(type) {
-          return this.documentTemplates[type] ? this.documentTemplates[type]().type : '';
-        },
-
-        _getTypeIcon: function(type) {
-          return this.documentIcons[type];
-        },
-
         _selectType: function(e) {
           this.selectedDocType = e.model.type;
           this.fire('nx-creation-wizard-hide-tabs');

@@ -18,9 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../document/nuxeo-document-creation-behavior.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-one-drive.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-dropbox.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect.html">
 
 
 <!--
@@ -123,7 +121,7 @@ Contributors:
         padding: 2em;
       }
 
-      div[name='upload'] span {
+      span.location {
         padding-right: 16px;
       }
 
@@ -247,13 +245,8 @@ Contributors:
       }
 
       .dropzone-label {
-        font-weight: bold;
         cursor: pointer;
         margin: 16px 0 48px 0;
-      }
-
-      .dropzone-label + .dropzone-label {
-        margin-left: 32px;
       }
 
       .dropzone-heading {
@@ -319,6 +312,10 @@ Contributors:
         --iron-icon-width: 24px;
       }
 
+      .remoteActions {
+        display: inline-block;
+      }
+
       @media (max-width: 1024px) {
         .file-to-import {
           width: calc(100% - 2em);
@@ -341,7 +338,7 @@ Contributors:
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="vertical layout flex">
         <div class="path sep horizontal layout center">
-          <span>[[i18n('documentImportForm.location', 'Location')]]</span>
+          <span class="location">[[i18n('documentImportForm.location', 'Location')]]</span>
           <div class="suggestion-wrapper horizontal layout center flex">
             <div>
               <iron-icon icon="icons:folder"></iron-icon>
@@ -361,23 +358,9 @@ Contributors:
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
                   [[i18n('documentImportForm.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
               </div>
-              <nuxeo-liveconnect-google-drive id="googleDriveUploader"></nuxeo-liveconnect-google-drive>
-              <nuxeo-liveconnect-one-drive id="oneDriveUploader"></nuxeo-liveconnect-one-drive>
-              <nuxeo-liveconnect-dropbox id="dropboxUploader"></nuxeo-liveconnect-dropbox>
-              <span>[[i18n('documentImportForm.linkFilesFrom', 'Or link files from')]]</span>
-              <div class="horizontal layout">
-                <div class="dropzone-label horizontal layout center center-justified">
-                  <iron-icon class="liveconnectIco" src="../../images/google_drive.png"></iron-icon>
-                  <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a>
-                </div>
-                <div class="dropzone-label horizontal layout center center-justified">
-                  <iron-icon class="liveconnectIco" src="../../images/OneDrive.png"></iron-icon>
-                  <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a>
-                </div>
-                <div class="dropzone-label horizontal layout center center-justified">
-                  <iron-icon class="liveconnectIco dropbox" src="../../images/dropbox.png"></iron-icon>
-                  <a href="javascript:undefined" on-tap="_uploadDropbox">Dropbox</a>
-                </div>
+              <span hidden$="[[!hasContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
+              <div class="remoteActions">
+                <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
               </div>
             </div>
           </template>
@@ -445,11 +428,12 @@ Contributors:
               </div>
             </div>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
-              <div class="add-more">
+              <div class="add-more horizontal layout center">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
-                 or link from <a href="javascript:undefined" on-tap="_uploadGoogleDrive">Google Drive</a> or
-                 <a href="javascript:undefined" on-tap="_uploadOneDrive">OneDrive</a> or
-                 <a href="javascript:undefined" on-tap="_uploadDropbox">Dropbox</a>
+                <span hidden$="[[!hasContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
+                <div class="remoteActions">
+                  <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
+                </div>
               </div>
             </div>
           </template>
@@ -478,7 +462,7 @@ Contributors:
         <div class="horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex-3">
             <div class="path horizontal layout center">
-              <span>[[i18n('documentImportForm.location', 'Location')]]</span>
+              <span class="location">[[i18n('documentImportForm.location', 'Location')]]</span>
               <div class="suggestion-wrapper horizontal layout center flex">
                 <div>
                   <iron-icon icon="icons:folder"></iron-icon>
@@ -1115,18 +1099,6 @@ Contributors:
           }
         },
 
-        _uploadGoogleDrive: function() {
-          this.$$('#googleDriveUploader').openPicker();
-        },
-
-        _uploadOneDrive: function() {
-          this.$$('#oneDriveUploader').openPicker();
-        },
-
-        _uploadDropbox: function() {
-          this.$$('#dropboxUploader').openPicker();
-        },
-
         _blobPicked: function(e) {
           this.hasRemoteFiles = true;
           this.notifyPath('remoteFiles', this.remoteFiles.concat(e.detail.blobs));
@@ -1235,7 +1207,7 @@ Contributors:
             }
             this.fire('nx-document-layout-changed');
           }
-        },
+        }
       });
     })();
   </script>
