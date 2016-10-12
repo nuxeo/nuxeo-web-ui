@@ -54,11 +54,10 @@ Contributors:
         top: 0;
         right: 0;
         width: 60px;
-        height: 59px;
+        height: 58px;
         padding: 16px;
         z-index: 101;
-        border: 1px solid var(--divider-color);
-        border-top: none;
+        border-left: 1px solid var(--divider-color);
         background-color: var(--nuxeo-light-background);
       }
 
@@ -73,6 +72,24 @@ Contributors:
 
       ::content .unfocused-line.paper-input-container {
         background-color: transparent;
+      }
+
+      ::content paper-input {
+        --paper-input-container-input: {
+          font-family: var(--nuxeo-app-font);
+        };
+
+        --paper-input-container-underline: {
+          background-color: white;
+        };
+
+        --paper-input-container-underline-focus: {
+          background-color: white;
+        };
+
+        --paper-input-container-label: {
+          font-family: var(--nuxeo-app-font);
+        };
       }
 
       /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
