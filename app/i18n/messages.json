@@ -268,6 +268,7 @@
   "label.ui.aggregate.to_30_s": "Less than 30s",
   "label.ui.aggregate.to_500_px": "Less than 500px",
   "label.yes": "Yes",
+  "liveconnectImportActions.box": "Box",
   "liveconnectImportActions.dropbox": "Dropbox",
   "liveconnectImportActions.googledrive": "Google Drive",
   "liveconnectImportActions.onedrive": "OneDrive",

@@ -302,18 +302,20 @@ Contributors:
         @apply(--buttons-bar);
       }
 
-      iron-icon.liveconnectIco {
-        --iron-icon-height: 16px;
-        --iron-icon-width: 16px;
-        margin-right: 4px;
-      }
-      iron-icon.liveconnectIco.dropbox {
-        --iron-icon-height: 24px;
-        --iron-icon-width: 24px;
+      .add-more .remoteActions {
+        margin-left: 8px;
       }
 
-      .remoteActions {
-        display: inline-block;
+      .remoteActions > *,
+      .remoteActions::content > * {
+        margin-left: 8px;
+      }
+
+      .remoteActions > *:first-child,
+      .remoteActions > nuxeo-slot,
+      .remoteActions::content > *:first-child,
+      .remoteActions::content > nuxeo-slot {
+        margin-left: 0px;
       }
 
       @media (max-width: 1024px) {
@@ -359,7 +361,7 @@ Contributors:
                   [[i18n('documentImportForm.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
               </div>
               <span hidden$="[[!hasContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
-              <div class="remoteActions">
+              <div class="remoteActions horizontal layout">
                 <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
               </div>
             </div>
@@ -431,7 +433,7 @@ Contributors:
               <div class="add-more horizontal layout center">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
                 <span hidden$="[[!hasContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
-                <div class="remoteActions">
+                <div class="remoteActions horizontal layout">
                   <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
                 </div>
               </div>

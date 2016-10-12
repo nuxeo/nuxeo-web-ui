@@ -16,12 +16,32 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 
-<!-- FILE PICKERS -->
-<link rel="import" href="nuxeo-liveconnect-import-actions.html">
+<!-- TO BE SPLIT INTO DIFFERENT CONTRIBUTIONS -->
+<link rel="import" href="nuxeo-liveconnect-box-link.html">
+<link rel="import" href="nuxeo-liveconnect-dropbox-link.html">
+<link rel="import" href="nuxeo-liveconnect-google-drive-link.html">
+<link rel="import" href="nuxeo-liveconnect-onedrive-link.html">
 
-<!-- REMOTE FILE IMPORT ACTIONS -->
-<nuxeo-slot-content name="liveConnetImportActions" slot="REMOTE_FILE_IMPORT_ACTIONS">
+<nuxeo-slot-content name="liveConnectBoxImportActions" slot="REMOTE_FILE_IMPORT_ACTIONS">
   <template>
-    <nuxeo-liveconnect-import-actions></nuxeo-liveconnect-import-actions>
+    <nuxeo-liveconnect-box-link></nuxeo-liveconnect-box-link>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="liveConnectDropboxImportActions" slot="REMOTE_FILE_IMPORT_ACTIONS">
+  <template>
+    <nuxeo-liveconnect-dropbox-link></nuxeo-liveconnect-dropbox-link>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="liveConnectGoogleDriveImportActions" slot="REMOTE_FILE_IMPORT_ACTIONS">
+  <template>
+    <nuxeo-liveconnect-google-drive-link></nuxeo-liveconnect-google-drive-link>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="liveConnectOneDriveImportActions" slot="REMOTE_FILE_IMPORT_ACTIONS">
+  <template>
+    <nuxeo-liveconnect-onedrive-link></nuxeo-liveconnect-onedrive-link>
   </template>
 </nuxeo-slot-content>
