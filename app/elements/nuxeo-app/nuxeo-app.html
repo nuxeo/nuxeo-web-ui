@@ -46,9 +46,9 @@ Contributors:
         @apply(--nuxeo-sidebar);
         position: fixed;
         width: 56px;
-        height: calc(100% - 120px);
+        height: calc(100% - 116px);
         z-index: 100;
-        padding: 60px 0;
+        padding: 58px 0;
         overflow: auto;
       }
 
@@ -66,7 +66,7 @@ Contributors:
 
       #menu .profile-icon {
         position: fixed;
-        height: 59px;
+        height: 48px;
         bottom: 0;
         left: 0;
       }
@@ -97,10 +97,11 @@ Contributors:
       }
 
       paper-header-panel ::content .paper-header {
-        height: 59px;
+        height: 58px;
         color: var(--nuxeo-header-title-color);
         background: var(--nuxeo-header-background);
-        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-bottom: 1px solid var(--divider-color);
         font-size: 1.05em;
         font-weight: 600;
         padding: 0 4.3em 0 1.7em;
@@ -139,6 +140,12 @@ Contributors:
         overflow: auto;
       }
 
+      paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          border-right: 1px solid var(--nuxeo-border, #eee);
+        };
+      }
+
       ::content nuxeo-menu-item:hover,
       ::content .list-item:hover {
         @apply(--nuxeo-block-hover);
@@ -146,10 +153,6 @@ Contributors:
 
       #sidebar > div {
         margin-left: 56px;
-      }
-
-      #sidebar section {
-        border-right: 1px solid var(--divider-color);
       }
 
       #sidebar .content {
