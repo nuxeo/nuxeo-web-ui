@@ -455,11 +455,11 @@ Contributors:
           return this.$.provider;
         },
 
-        displayQueue: function(doc, index) {
+        displayQueue: function(doc) {
           this._isQueue = true;
           if (doc && doc.uid) {
             this.$.list.$.list.selectItem(doc);
-            this.$.list.$.list.scrollToIndex(Math.max(0, index - 5));
+            this.$.list.$.list.scrollToItem(doc);
             this.$.list.notifyResize();
           }
         },

@@ -109,6 +109,14 @@ Contributors:
         font-weight: bold;
       }
 
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
       nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select paper-icon-button {
         color: #fff;
       }
@@ -190,11 +198,12 @@ Contributors:
             empty-label="[[i18n('browse.noDocument', 'There are no items to display in this folder.')]]"
             empty-label-when-filtered="[[i18n('browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
             selected-items="{{tableSelectedItems}}"
-            selection-enabled>
+            selection-enabled
+            on-row-clicked="_navigate">
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]" flex="100" sort-by="dc:title" filter-by="title">
               <template>
-                <img class="queue-thumbnail" src="[[_thumbnail(item)]]" on-click="_navigate">
-                <a class="title ellipsis" on-click="_navigate">[[item.title]]</a>
+                <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
@@ -303,9 +312,6 @@ Contributors:
             type: Number,
             notify: true
           },
-          currentDocument: {
-            type: Object
-          },
           displayMode: {
             type: String,
             value: 'table',
@@ -407,18 +413,10 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var as = 'item';
           var detail = {
-            doc: e.model[as],
-            index: e.model.index + 1
+            doc: e.detail.item,
           };
-          this.navigate(detail.doc, detail.index);
-        },
-
-        navigate: function(doc, index) {
-          this.currentDocument = doc;
-          this.currentIndex = index; // TODO - retrieve index from currentPage
-          this.fire('nuxeo-content-view-navigate');
+          page('/browse' + detail.doc.path);
         },
 
         _dragoverSmartImport: function(e) {

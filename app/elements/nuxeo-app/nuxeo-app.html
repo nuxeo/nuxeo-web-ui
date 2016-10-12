@@ -529,7 +529,6 @@ Contributors:
           'document-updated': 'refresh',
           'create-document': '_showDocumentCreationWizard',
           'document-created': '_handleDocumentCreated',
-          'nuxeo-content-view-navigate': '_navigateFromCV',
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup',
@@ -624,16 +623,8 @@ Contributors:
           }
         },
 
-        _navigateFromCV: function(e) {
-          this.currentContentView = Polymer.dom(e).rootTarget;
-
-          page.show('/browse' + this.currentContentView.currentDocument.path,
-            {contentView: this.currentContentView.provider});
-        },
-
         _navigateFromSearch: function(e) {
-          page('/browse' + e.detail.doc.path);
-          this.$.searchForm.displayQueue(e.detail.doc, e.detail.index);
+          this.$.searchForm.displayQueue(e.detail.doc);
         },
 
         _navigateFromAssetsSearch: function(e) {
@@ -655,14 +646,6 @@ Contributors:
           this.selectedTab = 'collections';
           this.$.collectionResults.collection = e.detail.collection;
           this.show('collection');
-        },
-
-        get currentContentView() {
-          return this.$.browser.currentContentView;
-        },
-
-        set currentContentView(cv) {
-          this.$.browser.currentContentView = cv;
         },
 
         scrollPageToTop: function() {
