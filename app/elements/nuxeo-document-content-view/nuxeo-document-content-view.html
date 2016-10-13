@@ -244,12 +244,10 @@ Contributors:
                 [[_formatDate(item.properties.dc:created)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Contributor')]]"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Author')]]"
               sort-by="dc:creator" hidden>
               <template>
-                <a class="tag user" href$="[[urlFor('user', item.properties.dc:creator)]]">
-                  [[item.properties.dc:creator]]
-                </a>
+                <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature', 'Nature')]]" hidden>

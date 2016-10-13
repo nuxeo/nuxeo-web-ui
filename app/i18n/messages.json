@@ -129,6 +129,7 @@
   "documentContentView.datatable.header.coverage": "Coverage",
   "documentContentView.datatable.header.created": "Created",
   "documentContentView.datatable.header.lastContributor": "Last Contributor",
+  "documentContentView.datatable.header.author": "Author",
   "documentContentView.datatable.header.modified": "Modification Date",
   "documentContentView.datatable.header.nature": "Nature",
   "documentContentView.datatable.header.rights": "Rights",
