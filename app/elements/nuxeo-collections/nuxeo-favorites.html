@@ -94,20 +94,19 @@ Contributors:
       }
 
       .list-item {
-        @apply(--nuxeo-sidebar-item-theme);
-        @apply(--nuxeo-sidebar-item-link);
         cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
+      .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
+      .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        outline: 0;
-        @apply(--nuxeo-block-hover);
-      }
-
-      .list-item.selected {
-        color: var(--default-primary-color);
-        @apply(--nuxeo-block-hover);
+        @apply(--nuxeo-block-selected);
       }
 
       .list-item-detail {

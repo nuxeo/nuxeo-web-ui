@@ -151,6 +151,12 @@ Contributors:
         @apply(--nuxeo-block-hover);
       }
 
+      ::content .list-item.selected,
+      ::content .list-item:focus,
+      ::content .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
       #sidebar > div {
         margin-left: 56px;
       }

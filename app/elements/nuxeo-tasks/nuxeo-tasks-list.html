@@ -73,22 +73,20 @@ Contributors:
         color: var(--nuxeo-warn-text);
       }
 
-      .item {
+      .list-item {
         cursor: pointer;
-        outline: none;
-        @apply(--nuxeo-sidebar-item-theme);
-        @apply(--nuxeo-sidebar-item-link);
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
-      .item:focus,
-      .item.selected:focus {
-        outline: 0;
+      .list-item:hover {
         @apply(--nuxeo-block-hover);
       }
 
-      .item.selected {
-        color: var(--default-primary-color);
-        @apply(--nuxeo-block-hover);
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
       }
 
       nuxeo-data-list {
@@ -182,7 +180,7 @@ Contributors:
         },
 
         _computedClass: function(isSelected) {
-          var classes = 'item';
+          var classes = 'list-item';
           if (isSelected) {
             classes += ' selected';
           }
