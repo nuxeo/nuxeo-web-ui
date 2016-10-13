@@ -72,7 +72,7 @@ Contributors:
       },
 
       _isEntity: function(user) {
-        return user && user['entity-type'] && user['entity-type'] === 'user';
+        return user && user['entity-type'] && user['entity-type'] === 'user' && user.properties;
       },
 
       _id: function(user) {
