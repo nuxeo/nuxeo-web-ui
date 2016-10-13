@@ -18,12 +18,12 @@ Contributors:
 -->
 
 <!--
-`nuxeo-dublincore-edit-layout`
+`nuxeo-dublincore-create-layout`
 @group Nuxeo UI
-@element nuxeo-dublincore-edit-layout
+@element nuxeo-dublincore-create-layout
 -->
 
-<dom-module id="nuxeo-dublincore-edit-layout">
+<dom-module id="nuxeo-dublincore-create-layout">
   <template>
     <style>
       :host {
@@ -112,10 +112,8 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-dublincore-edit-layout',
-
+        is: 'nuxeo-dublincore-create-layout',
         behaviors: [Nuxeo.I18nBehavior],
-
         properties: {
           document: {
             type: Object
