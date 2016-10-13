@@ -203,9 +203,7 @@ Contributors:
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
               sort-by="dc:lastContributor" flex="50">
               <template>
-                <a href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
-                  <nuxeo-tag>[[item.properties.dc:lastContributor]]</nuxeo-tag>
-                </a>
+                <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state', 'State')]]" hidden>
@@ -223,9 +221,7 @@ Contributors:
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Contributor')]]"
               hidden>
               <template>
-                <a href$="[[urlFor('user', item.properties.dc:creator)]]">
-                  <nuxeo-tag>[[item.properties.dc:creator]]</nuxeo-tag>
-                </a>
+                <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature', 'Nature')]]" hidden>

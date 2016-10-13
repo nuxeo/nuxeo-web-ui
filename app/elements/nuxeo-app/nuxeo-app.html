@@ -264,7 +264,7 @@ Contributors:
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
                     enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
-                    headers='{"X-NXfetch.document": "lock"}'>
+                    headers='{"X-NXfetch.document": "lock,properties"}'>
     </nuxeo-document>
 
     <nuxeo-resource id="tasks" path="/task"
@@ -398,7 +398,7 @@ Contributors:
 
         <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
 
-          <nuxeo-page name="error">
+          <nuxeo-page name="error" hidden$="[[!currentDocument]]">
             <div class="header"></div>
             <div class="content">
               <paper-card>

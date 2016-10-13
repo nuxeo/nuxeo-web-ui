@@ -20,16 +20,14 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
-`nuxeo-dublincore-contribnuxeo-document-users`
+`nuxeo-document-users`
 @group Nuxeo UI
 @element nuxeo-document-users
 -->
 <dom-module id="nuxeo-document-users">
   <template>
-    <template is="dom-repeat" items="[[users]]" as="contributor">
-      <nuxeo-tag href="" icon="icons:perm-identity">
-        <a href$="[[urlFor('user', contributor)]]">[[contributor]]</a>
-      </nuxeo-tag>
+    <template is="dom-repeat" items="[[users]]" as="user">
+      <nuxeo-user-tag user="[[user]]"></nuxeo-user-tag>
     </template>
   </template>
 
@@ -39,12 +37,12 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-users',
+        behaviors: [Nuxeo.RoutingBehavior],
         properties: {
           users: {
             type: Array
           }
-        },
-        behaviors: [Nuxeo.RoutingBehavior]
+        }
       });
     })();
   </script>

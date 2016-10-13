@@ -157,6 +157,7 @@ Contributors:
           <span class="flex">[[i18n('tasks.label', 'Tasks')]]</span>
         </template>
       </div>
+
       <div class="content">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout vertical">
@@ -194,6 +195,7 @@ Contributors:
             </div>
           </div>
         </template>
+
         <template is="dom-if" if="[[!_hasCurrent(current)]]">
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
@@ -215,7 +217,19 @@ Contributors:
                 </div>
                 <div class="flex-2">
                   <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                    <nuxeo-tag icon="[[_participantIcon(actor.id)]]">[[_participantName(actor.id)]]</nuxeo-tag>
+
+                    <template is="dom-repeat" items="[[task.actors]]" as="actor">
+                      <template is="dom-if" if="[[_isUser(actor)]]">
+                        <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+                      </template>
+                      <template is="dom-if" if="[[_isGroup(actor)]]">
+                        <nuxeo-group-tag user="[[actor]]"></nuxeo-group-tag>
+                      </template>
+                      <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
+                        <nuxeo-tag>[[actor]]</nuxeo-tag>
+                      </template>
+                    </template>
+
                   </template>
                 </div>
                 <span class="date flex">
@@ -227,8 +241,9 @@ Contributors:
               <div class="task-box">[[i18n('tasks.noTasks','There are no tasks to show.')]]</div>
             </template>
           </div>
-        </div>
-      </template>
+        </template>
+
+      </div>
     </paper-header-panel>
 
   </template>
@@ -292,22 +307,16 @@ Contributors:
           return moment(date).format('MMMM D, YYYY');
         },
 
-        _participantIcon: function(participant) {
-          var split = participant.split(':');
-          return (split.length === 1 || split[0] === 'user:') ? 'social:person' : 'social:people';
+        _isUser: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'user';
         },
 
-        _participantName: function(participant) {
-          return participant.substring(participant.indexOf(':') + 1);
+        _isGroup: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'group';
         },
 
-        _participantHref: function(participant) {
-          // user:name or group:name
-          var split = participant.split(':');
-          if (split.length === 1) {
-            return this.urlFor('user', split[0]);
-          }
-          return this.urlFor(split[0], split[1]);
+        _isNotUserOrGroup: function(actor) {
+          return this._isUser(actor) && this._isGroup(actor);
         },
 
         _toggleGraphDialog: function() {

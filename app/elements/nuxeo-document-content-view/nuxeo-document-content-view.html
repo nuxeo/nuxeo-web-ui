@@ -220,9 +220,7 @@ Contributors:
                   </nuxeo-dropdown-aggregation>
               </template>
               <template>
-                <a href$="[[urlFor('user', item.properties.dc:lastContributor)]]">
-                  <nuxeo-tag>[[item.properties.dc:lastContributor]]</nuxeo-tag>
-                </a>
+                <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state', 'State')]]" hidden>

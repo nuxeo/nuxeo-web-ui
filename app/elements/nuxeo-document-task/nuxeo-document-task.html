@@ -100,9 +100,15 @@ Contributors:
               <span class="flex-3">[[i18n('documentTask.assigned', 'Assigned to')]]</span>
               <span class="flex-9">
                 <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                  <a href="[[_actorHref(actor.id)]]">
-                    <nuxeo-tag icon="[[_actorIcon(actor.id)]]">[[_actorName(actor.id)]]</nuxeo-tag>
-                  </a>
+                  <template is="dom-if" if="[[_isUser(actor)]]">
+                    <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+                  </template>
+                  <template is="dom-if" if="[[_isGroup(actor)]]">
+                    <nuxeo-group-tag user="[[actor]]"></nuxeo-group-tag>
+                  </template>
+                  <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
+                    <nuxeo-tag>[[actor]]</nuxeo-tag>
+                  </template>
                 </template>
               </span>
             </div>
@@ -221,22 +227,16 @@ Contributors:
           }
         },
 
-        _actorIcon: function(actor) {
-          var split = actor.split(':');
-          return (split.length === 1 || split[0] === 'user:') ? 'social:person' : 'social:people';
+        _isUser: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'user';
         },
 
-        _actorName: function(actor) {
-          return actor.substring(actor.indexOf(':') + 1);
+        _isGroup: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'group';
         },
 
-        _actorHref: function(actor) {
-          // user:name or group:name
-          var split = actor.split(':');
-          if (split.length === 1) {
-            return this.urlFor('user', split[0]);
-          }
-          return this.urlFor(split[0], split[1]);
+        _isNotUserOrGroup: function(actor) {
+          return this._isUser(actor) && this._isGroup(actor);
         }
       });
     })();

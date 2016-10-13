@@ -35,7 +35,7 @@ Contributors:
 
     <template is="dom-repeat" items="[[document.contextParameters.audit]]">
       <div class="row">
-        <nuxeo-tag><a class="tag user" href$="[[urlFor('user', item.principalName)]]">[[_user(item)]]</a></nuxeo-tag>
+        <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
         <span>[[_activity(item)]]</span>
       </div>
     </template>
@@ -54,10 +54,6 @@ Contributors:
           document: {
             type: Object
           }
-        },
-
-        _user: function(event) {
-          return event.principalName;
         },
 
         _activity: function(event) {

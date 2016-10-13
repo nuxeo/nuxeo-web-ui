@@ -280,9 +280,7 @@ Contributors:
                 </div>
                 <div>
                   <span class="col">[[i18n('documentPage.added.by', 'By')]]</span>
-                  <nuxeo-tag icon="icons:perm-identity">
-                    <a href$="[[urlFor('user', document.properties.dc:creator)]]">[[document.properties.dc:creator]]</a>
-                  </nuxeo-tag>
+                  <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
                 </div>
                 <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
                   <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
