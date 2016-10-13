@@ -83,6 +83,7 @@ Contributors:
                     empty="[[!document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
     </nuxeo-dropzone>
+
     <div class="card-section">
       <div class="horizontal layout center">
         <template is="dom-if" if="[[document.properties.file:content]]">
@@ -90,11 +91,12 @@ Contributors:
             <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
           </p>
           <div class="horizontal flex end-justified layout">
-            <nuxeo-document-view-delete-blob document="{{document}}"
+            <nuxeo-delete-blob-button document="{{document}}"
                                              tool-tip="[[i18n('pictureViewLayout.delete.tootltip','Delete picture')]]"
-                                             confirm-message="[[i18n('pictureViewLayout.delete.confirm.message','Do you really want to delente this picture?')]]"
+                                             confirm-message="[[i18n('pictureViewLayout.delete.confirm.message','Do you really want to delete this picture?')]]"
                                              delete-message="[[i18n('pictureViewLayout.deleted.message','Picture deleted')]]"
-                                             hidden="[[!document.properties.file:content]]"></nuxeo-document-view-delete-blob>
+                                             hidden="[[!document.properties.file:content]]">
+            </nuxeo-delete-blob-button>
             <nuxeo-upload-blob-button tool-tip="[[i18n('pictureViewLayout.upload.tooltip','Upload picture')]]"
                                       on-tap="_upload"></nuxeo-upload-blob-button>
           </div>
