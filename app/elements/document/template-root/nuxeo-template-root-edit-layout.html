@@ -26,11 +26,6 @@ Contributors:
 -->
 <dom-module id="nuxeo-template-root-edit-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
 
     <nuxeo-template-edit-layout document="[[document]]"></nuxeo-template-edit-layout>
 
@@ -41,13 +36,11 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-template-root-edit-layout',
-
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
-
           document: {
             type: Object
           }
-
         }
       });
     })();

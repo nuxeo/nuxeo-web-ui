@@ -25,41 +25,38 @@ Contributors:
 <dom-module id="nuxeo-document-edit">
   <template>
     <style>
-      :host {
+
+      .actions {
+        border-top: 1px solid var(--nuxeo-border);
+      }
+
+      ::content label {
         display: block;
-        width: 100%;
+        color: var(--secondary-text-color);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.011em;
+        line-height: 20px;
       }
 
-      paper-card {
-        display: block;
-        max-width: 50em;
-        margin: auto;
+      ::content nuxeo-directory-suggestion,
+      ::content paper-input-container {
+        padding: 0 0 8px 0;
       }
 
-      .label-container {
-        position: relative;
-        width: 200px;
-      }
-
-      textarea {
+      ::content select {
         background: none #fff;
         border: 1px solid #c6c6c6;
         border-radius: 3px;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
         box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
+        display: block;
         padding: 0.5em;
-      }
-
-      .row {
-        margin-bottom: 1rem;
-        box-sizing: inherit;
-      }
-
-      paper-icon-button {
-        float: right;
+        width: 100%;
+        margin-bottom: 8px;
       }
 
     </style>
@@ -77,9 +74,9 @@ Contributors:
           <!-- Dynamic layout element will be inserted here -->
           <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
         </div>
-        <div class="card-actions">
-          <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-          <paper-button noink class="primary" on-click="_save">[[i18n('command.save', 'Save')]]</paper-button>
+        <div class="actions">
+          <paper-button on-click="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
+          <paper-button on-click="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
         </div>
       </form>
     </div>
@@ -183,6 +180,7 @@ Contributors:
         },
 
         _save: function() {
+          delete this.document['dc:contributors']; // remove contributors or they will be duplicated in document
           this.$.doc.put().then(this._refresh.bind(this));
         },
 

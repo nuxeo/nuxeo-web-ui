@@ -25,90 +25,22 @@ Contributors:
 -->
 <dom-module id="nuxeo-note-edit-layout">
  <template>
-   <style>
-     :host {
-       display: block;
-     }
 
-     .row {
-       margin-bottom: 25px;
-     }
+   <paper-input label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
+   <paper-textarea label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
-     input,
-     textarea,
-     nuxeo-html-editor {
-       background: none #fff;
-       border: 1px solid #c6c6c6;
-       border-radius: 3px;
-       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-       box-sizing: border-box;
-       display: inline-block;
-       font-size: 1em;
-       margin-bottom: 0.5em;
-       padding: 0.5em;
-     }
-
-     select {
-       background: none #fff;
-       border: 1px solid #c6c6c6;
-       border-radius: 3px;
-       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-       box-sizing: border-box;
-       display: inline-block;
-       padding: 0.5em;
-       width: 150px;
-     }
-
-     .label-container {
-       position: relative;
-       width: 200px;
-     }
-
-     .required {
-       color: red;
-       position: absolute;
-       right: 10px;
-     }
-
-     .format {
-       font-size: 0.9em;
-       margin-right: 5px;
-     }
-
-     nuxeo-html-editor {
-       height: 500px;
-       overflow: scroll;
-     }
-   </style>
-
-   <div class="row layout horizontal">
-     <div class="label-container">
-       <label>[[i18n('title', 'Title')]]</label>
-       <span class="required">*</span>
-     </div>
-     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex" required>
-   </div>
-
-   <div class="row layout horizontal">
-     <div class="label-container">
-       <label>[[i18n('label.description', 'Description')]]</label>
-     </div>
-     <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
-   </div>
-
-   <div class="row layout horizontal">
-     <div class="label-container">
-       <label>[[i18n('noteEditLayout.format','Format')]]</label>
-     </div>
-     <select value="{{document.properties.note:mime_type::change}}" class="flex">
-       <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
-       <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
-       <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
-       <option value="text/x-web-markdown">[[i18n('mimetype.markdown','Markdown')]]</option>
+   <div>
+     <label>[[i18n('noteEditLayout.format')]]</label>
+     <select value="{{document.properties.note:mime_type::change}}">
+       <option value="text/html">[[i18n('mimetype.html')]]</option>
+       <option value="text/plain">[[i18n('mimetype.text')]]</option>
+       <option value="text/xml">[[i18n('mimetype.xml')]]</option>
+       <option value="text/x-web-markdown">[[i18n('mimetype.markdown')]]</option>
      </select>
    </div>
 
    <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
+
  </template>
  <script>
   (function() {
@@ -116,18 +48,12 @@ Contributors:
 
     Polymer({
       is: 'nuxeo-note-edit-layout',
-
+      behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: {
           type: Object
         }
-      },
-
-      behaviors: [Nuxeo.I18nBehavior],
-
-      _isHTML: function() {
-        return this.document && this.document.properties['note:mime_type'] === 'text/html';
-      },
+      }
     });
   })();
  </script>

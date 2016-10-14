@@ -26,13 +26,11 @@ Contributors:
 -->
  <dom-module id="nuxeo-picture-edit-layout">
    <template>
-     <style>
-       :host {
-         display: block;
-       }
-     </style>
 
-     <nuxeo-file-edit-layout document={{document}} upload-enabled$="[[uploadEnabled]]"></nuxeo-file-edit-layout>
+     <paper-input label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
+     <paper-textarea label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+
+     <nuxeo-dublincore-edit-layout document="[[document]]"></nuxeo-dublincore-edit-layout>
 
    </template>
    <script>
@@ -41,15 +39,10 @@ Contributors:
 
        Polymer({
          is: 'nuxeo-picture-edit-layout',
-
+         behaviors: [Nuxeo.I18nBehavior],
          properties: {
            document: {
              type: Object
-           },
-
-           uploadEnabled: {
-             type: Boolean,
-             value: false
            }
          }
        });
