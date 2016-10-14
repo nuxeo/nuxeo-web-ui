@@ -1,0 +1,129 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+
+<!--
+`nuxeo-dublincore-import-layout`
+@group Nuxeo UI
+@element nuxeo-dublincore-import-layout
+-->
+
+<dom-module id="nuxeo-dublincore-import-layout">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      input {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
+      }
+    </style>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
+      </div>
+      <nuxeo-directory-suggestion class="flex"
+                                  directory-name="nature"
+                                  value="{{document.properties.dc:nature}}"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
+      </div>
+      <nuxeo-directory-suggestion id="subjects"
+                                  class="flex"
+                                  directory-name="l10nsubjects"
+                                  value="{{document.properties.dc:subjects}}"
+                                  multiple="true"
+                                  dbl10n="true"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
+      </div>
+      <nuxeo-directory-suggestion id="coverage"
+                                  class="flex"
+                                  directory-name="l10ncoverage"
+                                  value="{{document.properties.dc:coverage}}"
+                                  dbl10n="true"
+                                  placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder', 'Select a value')]]"
+                                  min-chars="0">
+      </nuxeo-directory-suggestion>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.dublincore.expire', 'Expires on')]]</label>
+      </div>
+      <input is="iron-input" type="date" value="{{document.properties.dc:expired::change}}" class="flex">
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-dublincore-import-layout',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          document: {
+            type: Object
+          }
+        },
+
+        format: function(date) {
+          return moment(date).format('DD/MM/YYYY HH:mm');
+        }
+      });
+    })();
+  </script>
+</dom-module>

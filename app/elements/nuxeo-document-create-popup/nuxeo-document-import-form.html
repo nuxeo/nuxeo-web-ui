@@ -506,7 +506,7 @@ Contributors:
                   action="/"
                   id="form"
                   on-submit="_importWithProperties" class="form vertical layout flex">
-              <div id="document-edit">
+              <div id="document-import">
                 <!--dynamically loaded via _updateLayout-->
               </div>
               <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
@@ -1168,7 +1168,74 @@ Contributors:
             }
             this._selectDoc(lastIdx);
           }
-        }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          return ['nuxeo', type, 'import-layout'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document type
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(),
+            el = document.createElement(layout),
+            parent = this.$['document-import'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          if (Object.keys(this.document.properties).length === 0 ||
+            Object.keys(this.document.properties).every(function(prop) {
+              return !this.document.properties[prop];
+            }.bind(this))) {
+            el.uploadEnabled = true;
+          }
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current document type
+         */
+        _updateLayout: function() {
+          var func = this.documentTemplates[this.selectedDocType];
+          this.document = func ? func() : null;
+
+          if (this.document) {
+            var properties = this._getDocumentProperties();
+            if (properties) {
+              for (var prop in properties) {
+                this.document.properties[prop] = properties[prop];
+              }
+            }
+            var layout = this._layoutFor();
+            if (!this._isRegistered(layout)) {
+              var docType = this.selectedDocType.charAt(0).toLowerCase() + this.selectedDocType.slice(1);
+              var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+              var url = this.resolveUrl('../document/' + folder + layout + '.html');
+              this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find create layout for ' + this.document.type);
+                });
+            } else {
+              this._createLayout();
+            }
+            this.fire('nx-document-layout-changed');
+          }
+        },
       });
     })();
   </script>

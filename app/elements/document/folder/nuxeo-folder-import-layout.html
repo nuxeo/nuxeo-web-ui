@@ -1,0 +1,116 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+	Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../dublincore/nuxeo-dublincore-import-layout.html">
+
+<!--
+`nuxeo-folder-import-layout`
+@group Nuxeo UI
+@element nuxeo-folder-import-layout
+-->
+<dom-module id="nuxeo-folder-import-layout">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .row {
+        margin-bottom: 25px;
+      }
+
+      input,
+      textarea {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      img {
+        height: 16px;
+        width: 16px;
+      }
+
+      paper-radio-button {
+        margin-bottom: 5px;
+        padding: 0;
+      }
+
+      .radio-container > * {
+        margin-right: 10px;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+      }
+
+      .required {
+        color: red;
+        position: absolute;
+        right: 10px;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('title', 'Title')]]</label>
+        <span class="required">*</span>
+      </div>
+      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
+    </div>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('label.description', 'Description')]]</label>
+      </div>
+      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+    </div>
+
+    <nuxeo-dublincore-import-layout document="[[document]]"></nuxeo-dublincore-import-layout>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-folder-import-layout',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          document: {
+            type: Object
+          }
+        },
+
+        _icon: function() {
+          var url = this.$.nxcon.url;
+          return url + this.document.properties['common:icon'];
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

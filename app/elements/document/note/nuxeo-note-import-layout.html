@@ -1,0 +1,133 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../dublincore/nuxeo-dublincore-import-layout.html">
+
+<!--
+`nuxeo-note-import-layout`
+@group Nuxeo UI
+@element nuxeo-note-import-layout
+-->
+<dom-module id="nuxeo-note-import-layout">
+ <template>
+   <style>
+     :host {
+       display: block;
+     }
+
+     .row {
+       margin-bottom: 25px;
+     }
+
+     input,
+     textarea,
+     nuxeo-html-editor {
+       background: none #fff;
+       border: 1px solid #c6c6c6;
+       border-radius: 3px;
+       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+       box-sizing: border-box;
+       display: inline-block;
+       font-size: 1em;
+       margin-bottom: 0.5em;
+       padding: 0.5em;
+     }
+
+     select {
+       background: none #fff;
+       border: 1px solid #c6c6c6;
+       border-radius: 3px;
+       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+       box-sizing: border-box;
+       display: inline-block;
+       padding: 0.5em;
+       width: 150px;
+     }
+
+     .label-container {
+       position: relative;
+       width: 200px;
+     }
+
+     .required {
+       color: red;
+       position: absolute;
+       right: 10px;
+     }
+
+     .format {
+       font-size: 0.9em;
+       margin-right: 5px;
+     }
+
+     nuxeo-html-editor {
+       height: 500px;
+       overflow: scroll;
+     }
+   </style>
+
+   <div class="row layout horizontal">
+     <div class="label-container">
+       <label>[[i18n('title', 'Title')]]</label>
+       <span class="required">*</span>
+     </div>
+     <input is="iron-input" value="{{document.properties.dc:title::change}}" class="flex" required>
+   </div>
+
+   <div class="row layout horizontal">
+     <div class="label-container">
+       <label>[[i18n('label.description', 'Description')]]</label>
+     </div>
+     <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
+   </div>
+
+   <div class="row layout horizontal">
+     <div class="label-container">
+       <label>[[i18n('noteEditLayout.format','Format')]]</label>
+     </div>
+     <select value="{{document.properties.note:mime_type::change}}" class="flex">
+       <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
+       <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
+       <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
+       <option value="text/x-web-markdown">[[i18n('mimetype.markdown','Markdown')]]</option>
+     </select>
+   </div>
+
+   <nuxeo-dublincore-import-layout document="[[document]]"></nuxeo-dublincore-import-layout>
+
+ </template>
+ <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'nuxeo-note-import-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        document: {
+          type: Object
+        }
+      },
+
+      _isHTML: function() {
+        return this.document && this.document.properties['note:mime_type'] === 'text/html';
+      }
+    });
+  })();
+ </script>
+</dom-module>
