@@ -64,12 +64,13 @@ Contributors:
     </style>
 
     <nuxeo-page-provider auto
-                         id="query"
-                         query="{{query}}"
-                         current-page="{{currentPage}}"
-                         page="{{pageNumber}}"
-                         page-size="[[pageSize]]"
-                         number-of-pages="{{numberOfPages}}"></nuxeo-page-provider>
+      id="query"
+      query="{{query}}"
+      current-page="{{currentPage}}"
+      page="{{pageNumber}}"
+      page-size="[[pageSize]]"
+      number-of-pages="{{numberOfPages}}"
+      schemas="dublincore,common"></nuxeo-page-provider>
 
     <template is="dom-if" if="[[isEmpty]]">
       <div class="horizontal layout center">

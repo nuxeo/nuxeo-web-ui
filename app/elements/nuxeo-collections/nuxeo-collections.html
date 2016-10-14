@@ -209,7 +209,8 @@ Contributors:
                provider="user_collections"
                page-size="40"
                params='{"searchTerm":"%","user":"$currentUser"}'
-               sort='{"dc:modified":"desc"}'>
+               sort='{"dc:modified":"desc"}'
+               schemas="dublincore,common">
             </nuxeo-page-provider>
 
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
@@ -249,6 +250,7 @@ Contributors:
           <div id="queue" hidden$="{{!_isDisplayMembers}}">
             <nuxeo-page-provider id="memberProvider"
                provider="ordered_content_collection"
+               schemas="dublincore,common"
                enrichers="thumbnail">
             </nuxeo-page-provider>
 

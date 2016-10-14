@@ -98,7 +98,10 @@ Contributors:
     </style>
 
     <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
-    <nuxeo-page-provider id="children" provider="tree_children" enrichers="children"></nuxeo-page-provider>
+    <nuxeo-page-provider id="children"
+      provider="tree_children"
+      enrichers="children"
+      schemas="dublincore,common"></nuxeo-page-provider>
 
     <div class="header ellipsis" hidden$="[[!label]]">
       <h1>[[i18n(label)]]</h1>

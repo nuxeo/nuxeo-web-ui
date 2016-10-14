@@ -112,7 +112,10 @@ Contributors:
                         data="{{downloads}}">
       </nuxeo-audit-data>
 
-      <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" current-page="{{downloadedDocs}}">
+      <nuxeo-page-provider auto page-size="10"
+        query="[[_downloadsQuery(downloads)]]"
+        schemas="dublincore, common"
+        current-page="{{downloadedDocs}}">
       </nuxeo-page-provider>
 
       <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading','Top Downloads')]]" elevation="0">

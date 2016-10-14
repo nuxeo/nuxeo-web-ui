@@ -210,6 +210,7 @@ Contributors:
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
        params="[[params]]"
+       schemas="[[schemas]]"
        fetch-aggregates>
     </nuxeo-page-provider>
 
@@ -372,6 +373,9 @@ Contributors:
           },
           params: {
             type: Object
+          },
+          schemas: {
+            type: String
           },
           currentIndex: {
             type: Number,
@@ -695,6 +699,9 @@ Contributors:
           } else {
             this.provider = null;
             this.$.provider.query = this._form.query;
+          }
+          if (this._form.schemas !== undefined) {
+            this.schemas = this._form.schemas;
           }
           if (this._form.onlyQueue === true) {
             this._onlyQueue = true;
