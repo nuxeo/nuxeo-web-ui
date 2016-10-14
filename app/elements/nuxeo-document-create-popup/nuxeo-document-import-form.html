@@ -38,6 +38,14 @@ Contributors:
         @apply(--layout-vertical);
       }
 
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
       paper-dialog {
         height: 80vh;
       }
@@ -55,13 +63,13 @@ Contributors:
       }
 
       .file-to-import {
-        width: calc(50% - 40px);
-        height: 56px;
-        margin: 8px;
-        padding: 12px;
+        min-height: 3em;
+        margin: 0 .3em .8em;
+        width: calc(50% - 3em);
+        padding: .8em 1em;
         background-color: white;
-        border: var(--nuxeo-border);
-        border-radius: 2px;
+        border: 1px solid var(--divider-color);
+        position: relative;
       }
 
       .typeDropdown {
@@ -99,7 +107,7 @@ Contributors:
       }
 
       .suggestion-wrapper {
-        border: var(--nuxeo-border);
+        border: 1px solid var(--divider-color);
         border-radius: 8px;
         border-width: 2px;
         padding: 0 8px;
@@ -111,9 +119,8 @@ Contributors:
       }
 
       .path {
-        border-top: var(--nuxeo-border);
         margin-top: 0;
-        padding: 32px 32px 16px 36px;
+        padding: 2em;
       }
 
       div[name='upload'] span {
@@ -125,12 +132,16 @@ Contributors:
       }
 
       #dropzone {
-        margin: 8px 32px 64px 32px;
-        padding: 8px 8px;
-        border: 2px dashed #d1d1d1;
+        padding: 1em;
+        position: relative;
+        border: 2px dashed var(--divider-color);
         border-radius: 4px;
         background-color: #F7F6F6;
         min-height: 100px;
+        margin: 1em 2em 5em;
+      }
+
+      .drop-scrollable {
         overflow: auto;
       }
 
@@ -143,16 +154,13 @@ Contributors:
         overflow-y: auto;
       }
 
-      #blobList {
-        background-color: #F7F6F6;
-      }
-
       #blobList .file-overview:first-of-type {
         margin-top: 32px;
       }
 
       .sidePanel {
         overflow-y: scroll;
+        background-color: #F7F6F6;
       }
 
       .blobCheck {
@@ -174,7 +182,7 @@ Contributors:
       }
 
       .file-overview {
-        border: var(--nuxeo-border);
+        border: 1px solid var(--divider-color);
         border-radius: 1px;
         background-color: white;
         padding: 16px 14px 1px 14px;
@@ -202,29 +210,36 @@ Contributors:
       }
 
       .name {
-        font-size: 1.2em;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        width: 200px;
+        font-weight: bold;
+        word-break: break-word;
+        font-size: 1.1em;
       }
 
       .size {
-        font-size: 0.8em;
-        color: gray;
+        font-size: .75em;
+        color: var(--nuxeo-text-light, #aaa);
+        padding: .1em .5em;
+        white-space: nowrap;
       }
 
-      .complete,
-      .uploading {
-        margin: 4px 0;
+      .wrap.baseline {
+        align-items: baseline;
       }
 
       .complete {
-        color: green;
+        background-color: var(--nuxeo-validated);
+        border-radius: 2em;
+        width: 1.5em;
+        color: #fff;
+        position: absolute;
+        right: 1.5em;
+        top: .8em;
+        text-align: center;
       }
 
-      .uploading {
-        color: red;
+      .complete iron-icon  {
+        width: 1.2em;
+        height: 1.3em;
       }
 
       .provider {
@@ -250,8 +265,28 @@ Contributors:
 
       .disclaimer {
         display: block;
-        font-size: 0.7em;
+        font-size: .7em;
         color: var(--secondary-text-color);
+      }
+
+      .clear {
+        width: 3em;
+        visibility: hidden;
+        background-color: #fff;
+        text-align: right;
+      }
+
+      .clear paper-icon-button {
+        padding: 0 0 1em .5em;
+      }
+
+      .file-to-import:hover .clear {
+        visibility: visible;
+        z-index: 1;
+      }
+
+      .file-to-import:last-of-type {
+        margin-bottom: 3em;
       }
 
       .disclaimer.checked,
@@ -261,7 +296,17 @@ Contributors:
 
       .add-more {
         position: absolute;
-        bottom: 80px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        border-top: 1px solid var(--nuxeo-border);
+        background-color: rgba(255,255,255,0.8);
+        padding: .5em;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
 
       iron-icon.liveconnectIco {
@@ -273,6 +318,13 @@ Contributors:
         --iron-icon-height: 24px;
         --iron-icon-width: 24px;
       }
+
+      @media (max-width: 1024px) {
+        .file-to-import {
+          width: calc(100% - 2em);
+        }
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -330,67 +382,66 @@ Contributors:
             </div>
           </template>
           <template is="dom-if" if="[[hasFiles]]">
-            <div class="vertical layout flex">
-              <div class="horizontal layout wrap">
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.localFiles','Local Files')]]</span>
-                <template is="dom-repeat" items="[[localFiles]]" as="file">
-                  <!-- local file -->
-                  <div class="file-to-import horizontal layout">
-                    <div class="vertical layout flex">
-                      <div class="horizontal layout center">
-                        <div class="name flex">
-                          [[file.name]]
+            <div class="drop-scrollable">
+              <div class="vertical layout flex">
+                <div class="horizontal layout wrap baseline">
+                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.localFiles','Local Files')]]</span>
+                  <template is="dom-repeat" items="[[localFiles]]" as="file">
+                    <!-- local file -->
+                    <div class="file-to-import horizontal layout">
+                      <div class="vertical layout flex">
+                        <div class="horizontal layout">
+                          <div class="name">
+                            [[file.name]]
+                          </div>
+                          <span class="size">
+                            [[_formatSize(file.size)]]
+                          </span>
                         </div>
-                        <div class="size">
-                          [[_formatSize(file.size)]]
-                        </div>
+                        <template is="dom-if" if="[[file.providerName]]">
+                          <div class="provider">
+                            [[file.providerName]]
+                          </div>
+                        </template>
+                        <template is="dom-if" if="[[file.complete]]">
+                          <div class="complete">
+                            <iron-icon icon="icons:check"></iron-icon>
+                          </div>
+                        </template>
+                        <template is="dom-if" if="[[!file.complete]]">
+                          <paper-progress indeterminate></paper-progress>
+                        </template>
                       </div>
-                      <template is="dom-if" if="[[file.providerName]]">
+                      <div class="clear">
+                        <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
+                        <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
+                      </div>
+                    </div>
+                  </template>
+                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.remoteFiles','Remote Files')]]</span>
+                  <template is="dom-repeat" items="[[remoteFiles]]" as="file">
+                    <!-- remote file -->
+                    <div class="file-to-import horizontal layout">
+                      <div class="vertical layout flex">
+                        <div class="horizontal layout center">
+                          <div class="name">
+                            [[file.name]]
+                          </div>
+                          <span class="size">
+                            [[_formatSize(file.size)]]
+                          </span>
+                        </div>
                         <div class="provider">
                           [[file.providerName]]
                         </div>
-                      </template>
-                      <template is="dom-if" if="[[file.complete]]">
-                        <div class="complete">
-                          [[i18n('documentImportForm.item.complete','Complete')]]
-                        </div>
-                      </template>
-                      <template is="dom-if" if="[[!file.complete]]">
-                        <div class="uploading">
-                          [[i18n('documentImportForm.item.uploading','Uploading')]]
-                        </div>
-                        <paper-progress indeterminate></paper-progress>
-                      </template>
-                    </div>
-                    <div class="horizontal layout center">
-                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
-                    </div>
-                  </div>
-                </template>
-                <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.remoteFiles','Remote Files')]]</span>
-                <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                  <!-- remote file -->
-                  <div class="file-to-import horizontal layout">
-                    <div class="vertical layout flex">
+                      </div>
                       <div class="horizontal layout center">
-                        <div class="name flex">
-                          [[file.name]]
-                        </div>
-                        <div class="size">
-                          [[_formatSize(file.size)]]
-                        </div>
-                      </div>
-                      <div class="provider">
-                        [[file.providerName]]
+                        <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
+                        <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
                       </div>
                     </div>
-                    <div class="horizontal layout center">
-                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
-                    </div>
-                  </div>
-                </template>
+                  </template>
+                </div>
               </div>
             </div>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
@@ -403,7 +454,7 @@ Contributors:
             </div>
           </template>
         </div>
-        <div class="buttons sep horizontal end-justified layout">
+        <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
@@ -498,7 +549,7 @@ Contributors:
             </div>
           </div>
         </div>
-        <div class="buttons sep horizontal end-justified layout">
+        <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>

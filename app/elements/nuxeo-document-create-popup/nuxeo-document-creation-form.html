@@ -46,19 +46,34 @@ Contributors:
          };
       }
 
-      #typeSelection {
-        margin: var(--nuxeo-document-creation-form-margin, 128px);
-        overflow-y: auto;
+      .container {
+        overflow: auto;
       }
-      #typeSelection paper-button {
+
+      .typeSelection {
+        margin: var(--nuxeo-document-creation-form-margin, 1em);
+        overflow-y: auto;
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        min-height: 20em;
+        justify-content: space-around;
+      }
+      .typeSelection paper-button {
         width: var(--nuxeo-document-creation-form-button-width, 128px);
         height: var(--nuxeo-document-creation-form-button-height, 128px);
-        color: var(--nuxeo-secondary-color);
+        color: var(--nuxeo-text-default);
+        box-shadow: none;
+        border: 1px solid var(--divider-color);
       }
-      #typeSelection paper-button:hover {
-        color: var(--nuxeo-primary-color);
+      .typeSelection paper-button:hover {
+        color: var(--nuxeo-link-hover-color);
+        filter: brightness(102%);
+        -webkit-filter: brightness(102%);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
       }
-      #typeSelection iron-icon {
+      .typeSelection iron-icon {
         width: var(--nuxeo-document-creation-form-icon-width, 64px);
         height: var(--nuxeo-document-creation-form-icon-height, 64px);
       }
@@ -75,7 +90,7 @@ Contributors:
       .heading {
         text-transform: uppercase;
         font-size: 16px;
-        color: var(--nuxeo-secondary-color);
+        color: var(--nuxeo-text-default);
         padding: 16px 32px;
       }
       .heading iron-icon {
@@ -99,12 +114,16 @@ Contributors:
         padding: 0 8px;
       }
       .suggestion-wrapper iron-icon {
-        color: var(--nuxeo-secondary-color);
+        color: var(--nuxeo-text-default);
         margin-right: 8px;
       }
 
       .docTypeButton {
         margin: 4px;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
     </style>
 
@@ -118,17 +137,17 @@ Contributors:
 
       <!--Stage: allow user to choose a doc type-->
       <div name="choose" class="vertical layout flex">
-        <div class="flex">
-          <div id="typeSelection" class="horizontal layout wrap">
+        <div class="flex container">
+          <div class="typeSelection">
             <template is="dom-repeat" items="[[docTypes]]" as="type">
-              <paper-button raised class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
+              <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
                 <iron-icon icon="[[_getTypeIcon(type)]]"></iron-icon>
                 [[_getTypeName(type)]]
               </paper-button>
             </template>
           </div>
         </div>
-        <div class="buttons sep horizontal end-justified layout">
+        <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
