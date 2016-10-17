@@ -93,7 +93,7 @@ Contributors:
 
         lastType: function(n) {
           this.$.storage.reload();
-          if (this.creationStats.length === 0) {
+          if (this.creationStats.length === 0 || this.creationStats.recency.length === 0) {
             return null;
           }
           return this.creationStats.recency.slice(Math.max(this.creationStats.recency.length - (n ? n : 1), 0));

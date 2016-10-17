@@ -143,10 +143,10 @@ Contributors:
       <div name="choose" class="vertical layout flex">
         <div class="flex container">
           <div class="typeSelection">
-            <template is="dom-repeat" items="[[docTypes]]" as="type">
+            <template is="dom-repeat" items="[[subtypes]]" as="type">
               <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
                 <iron-icon icon="[[_getTypeIcon(type)]]"></iron-icon>
-                [[_getTypeName(type)]]
+                [[_getTypeLabel(type)]]
               </paper-button>
             </template>
           </div>
@@ -229,7 +229,7 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType._id).toLowerCase();
           return ['nuxeo', type, 'create-layout'].join('-');
         },
 
@@ -265,8 +265,14 @@ Contributors:
          * Retrieves and creates the layout for the current document type
          */
         _updateLayout: function() {
-          var func = this.documentTemplates[this.selectedDocType];
-          this.document = func ? func() : null;
+          this.document = this._isValidType(this.selectedDocType) ? {
+            'entity-type': 'document',
+            'type': this.selectedDocType.id,
+            'name': '',
+            'properties': {
+              'dc:description': ''
+            }
+          } : null;
 
           if (this.document) {
             var properties = this._getDocumentProperties();
@@ -277,7 +283,7 @@ Contributors:
             }
             var layout = this._layoutFor();
             if (!this._isRegistered(layout)) {
-              var docType = this.selectedDocType.charAt(0).toLowerCase() + this.selectedDocType.slice(1);
+              var docType = this.selectedDocType._id;
               var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
               var url = this.resolveUrl('../document/' + folder + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
@@ -302,7 +308,7 @@ Contributors:
           var name = this._sanitizeName(this.document.properties['dc:title']);
           this.document.name = name;
           docRequest.post().then(function(response) {
-            this.$.creationStats.storeType(this.selectedDocType);
+            this.$.creationStats.storeType(this.selectedDocType._id);
             this._clear();
             page('/browse' + response.path);
             this._notify(response);
@@ -324,13 +330,12 @@ Contributors:
         },
 
         _newDocumentLabel: function() {
-          return this.i18n('documentCreationForm.newDoc.heading', 'New {0}', this._getTypeName(this.selectedDocType));
+          return this.i18n('documentCreationForm.newDoc.heading', 'New {0}', this._getTypeLabel(this.selectedDocType));
         },
 
         _clear: function() {
           this.stage = 'choose';
-          this.selectedDocType = '';
-          this._resetTargetPath();
+          this.selectedDocType = {};
         },
 
         _layoutUpdated: function() {

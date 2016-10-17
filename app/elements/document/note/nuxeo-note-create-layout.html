@@ -100,7 +100,7 @@ Contributors:
      <div class="label-container">
        <label>[[i18n('noteEditLayout.format','Format')]]</label>
      </div>
-     <select value="{{document.properties.note:mime_type::change}}" class="flex">
+     <select id="mimeType" value="{{document.properties.note:mime_type::change}}" class="flex">
        <option value="text/html">[[i18n('mimetype.html','HTML')]]</option>
        <option value="text/plain">[[i18n('mimetype.text','Text')]]</option>
        <option value="text/xml">[[i18n('mimetype.xml','XML')]]</option>
@@ -120,12 +120,18 @@ Contributors:
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: {
-          type: Object
+          type: Object,
+          observer: '_documentChanged'
         }
       },
 
-      _isHTML: function() {
-        return this.document && this.document.properties['note:mime_type'] === 'text/html';
+      _documentChanged: function() {
+        this.document.properties = this.document.properties || {};
+        if (!this.document.properties['note:mime_type']) {
+          this.$.mimeType.selectedIndex = 0;
+          this.document.properties['note:mime_type'] = this.$.mimeType.item(0).innerHTML;
+        }
+        this.document.properties['note:note'] = this.document.properties['note:note'] || '';
       }
     });
   })();

@@ -15,14 +15,14 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
-<link rel="import" href="nuxeo-document-metadata-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <script>
 var Nuxeo = Nuxeo || {};
-Nuxeo.DocumentCreationBehavior = [Nuxeo.DocumentMetadataBehavior, {
+Nuxeo.DocumentCreationBehavior = [Nuxeo.I18nBehavior, {
   properties: {
     parent: {
       type: Object,
-      observer: '_resetTargetPath'
+      observer: '_parentChanged'
     },
 
     targetPath: {
@@ -36,12 +36,24 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.DocumentMetadataBehavior, {
     selectedDocType: {
       type: String,
       observer: '_updateLayout'
+    },
+
+    subtypes: {
+      type: Array
     }
 
   },
 
-  _resetTargetPath: function() {
-    this.targetPath = this.parent ? this.parent.path + '/' : '/default-domain/';
+  _parentChanged: function() {
+    if (this.parent) {
+      /*this.set('subtypes',((this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+                            this.parent.contextParameters.subtypes : []));*/
+      this.set('targetPath', this.parent.path);
+      this.set('subtypes', window.nuxeo.docTypes.map(function(type) {
+        type._id = type.id.toLowerCase();
+        return type;
+      }));
+    }
   },
 
   _notify: function(response) {
@@ -58,6 +70,23 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.DocumentMetadataBehavior, {
     } else {
       return size.toString() + ' B';
     }
+  },
+
+  _sanitizeName: function(name) {
+    return name.replace(/[^a-z0-9.]/gi, '_');
+  },
+
+  _isValidType: function(type) {
+    return type && this.subtypes && this.subtypes.indexOf(type) > -1;
+  },
+
+  _getTypeLabel: function(type) {
+    // TODO: review labels for doc types
+    return this._isValidType(type) ? this.i18n('label.document.type.' + type._id, type.id) : '';
+  },
+
+  _getTypeIcon: function(type) {
+    return this._isValidType(type) ? type.icon : '';
   },
 
   // extension point

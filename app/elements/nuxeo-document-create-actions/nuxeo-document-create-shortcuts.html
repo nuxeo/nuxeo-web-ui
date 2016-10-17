@@ -46,7 +46,7 @@ Contributors:
     Polymer({
       is: 'nuxeo-document-create-shortcuts',
 
-      behaviors: [Nuxeo.DocumentMetadataBehavior],
+      behaviors: [Nuxeo.I18nBehavior],
 
       properties: {
         hostVisible: {
@@ -73,8 +73,12 @@ Contributors:
         types.forEach(function(type) {
           var el = document.createElement('nuxeo-document-create-shortcut');
           el.type = type;
-          el.icon = this.documentIcons[type];
-          el.label = this.documentLabels[type];
+          // XXX retrieve this data from the server
+          var typeObj = window.nuxeo.docTypes.find(function(docType) {
+            return docType.id === (type.charAt(0).toUpperCase() + type.slice(1));
+          });
+          el.icon = typeObj.icon;
+          el.label = typeObj.id;
           shorcuts.push(el);
         }.bind(this));
 

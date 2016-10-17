@@ -481,8 +481,8 @@ Contributors:
               <div class="flex">
                 <paper-dropdown-menu class="typeDropdown" no-label-float horizontal-align="left">
                   <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-                    <template is="dom-repeat" items="[[docTypes]]" as="type">
-                      <paper-item key="[[type]]">[[getTypeLabel(type)]]</paper-item>
+                    <template is="dom-repeat" items="[[subtypes]]" as="type">
+                      <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
                     </template>
                   </paper-menu>
                 </paper-dropdown-menu>
@@ -611,8 +611,7 @@ Contributors:
           },
 
           selectedDocType: {
-            type: String,
-            value: 'file'
+            type: String
           },
 
           documentBlobProperties: {
@@ -726,6 +725,7 @@ Contributors:
           if (this.stage === 'upload') {
             this.stage = 'customize';
             this.customizing = true;
+            this.set('selectedDocType', this.subtypes[0]);
             this.fire('nx-creation-wizard-hide-tabs');
             this._selectDoc(0);
           } else {
@@ -1067,7 +1067,7 @@ Contributors:
           this.document = file.docData.document;
           this.targetPath = file.docData.parent;
           this.document.name = file.sanitizedName || file.name;
-          var blobProperty = this.documentBlobProperties[file.docData.type] ||
+          var blobProperty = this.documentBlobProperties[file.docData.type._id] ||
                              this.documentBlobProperties['default'];
           // XXX if fileData.type == Note, then the file's contents should be passed instead
           this.document.properties[blobProperty] = file.providerId ? {
@@ -1148,7 +1148,7 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType).toLowerCase();
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType._id).toLowerCase();
           return ['nuxeo', type, 'import-layout'].join('-');
         },
 
@@ -1184,8 +1184,15 @@ Contributors:
          * Retrieves and creates the layout for the current document type
          */
         _updateLayout: function() {
-          var func = this.documentTemplates[this.selectedDocType];
-          this.document = func ? func() : null;
+          this.document = this._isValidType(this.selectedDocType) ? {
+            'entity-type': 'document',
+            'type': this.selectedDocType.id,
+            'name': '',
+            'properties': {
+              'dc:title': '',
+              'dc:description': ''
+            }
+          } : null;
 
           if (this.document) {
             var properties = this._getDocumentProperties();
@@ -1196,7 +1203,7 @@ Contributors:
             }
             var layout = this._layoutFor();
             if (!this._isRegistered(layout)) {
-              var docType = this.selectedDocType.charAt(0).toLowerCase() + this.selectedDocType.slice(1);
+              var docType = this.selectedDocType._id;
               var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
               var url = this.resolveUrl('../document/' + folder + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
