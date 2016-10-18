@@ -63,6 +63,11 @@ Contributors:
       }
     </style>
 
+    <nuxeo-document id="defaultDoc"
+                    doc-path="[[defaultParentPath]]"
+                    response="{{parent}}">
+    </nuxeo-document>
+
     <paper-dialog id="createDocDialog"
                   class="container vertical layout"
                   modal
@@ -113,6 +118,9 @@ Contributors:
           selectedTab: {
             type: String,
             value: 'create'
+          },
+          defaultParentPath: {
+            type: String
           }
         },
 
@@ -152,7 +160,15 @@ Contributors:
         },
 
         toggleDialog: function() {
-          this.$.createDocDialog.toggle();
+          if (!this.parent && this.defaultParentPath) {
+            // no parent? let's fetch the default one
+            this.$.defaultDoc.get().then(function() {
+              this.$.createDocDialog.toggle();
+            }.bind(this));
+          } else {
+            this.$.createDocDialog.toggle();
+          }
+
         }
 
       });

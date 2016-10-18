@@ -441,7 +441,7 @@ Contributors:
     <paper-progress id="loading" indeterminate></paper-progress>
 
     <nuxeo-document-create-button class$="[[page]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]"></nuxeo-document-create-popup>
+    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-parent-path="/default-domain"></nuxeo-document-create-popup>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="_showDashboard"></nuxeo-keys>
@@ -591,7 +591,7 @@ Contributors:
             } else {
               this.$.recent.add(doc);
               this.currentParent = this._isFolderish(doc) ? doc :
-                doc.contextParameters.breadcrumb.entries.slice(-2,-1)[0];
+                doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
               this.set('currentDocument', doc);
               this.show(page);
             }
