@@ -25,36 +25,18 @@ Contributors:
 <dom-module id="nuxeo-note-metadata-layout">
   <template>
     <style>
-      :host {
-        display: block;
-        color: var(--nuxeo-tag-text);
-        font-size: .9em;
-        width: 100%;
-      }
-
-      .row {
-        margin-bottom: 1em;
-        width: 100%;
-      }
-
       label {
-        font-weight: normal;
+        @apply(--nuxeo-label);
       }
-
-      .label-container {
-        position: relative;
-        width: 30%;
-        display: inline-block;
-      }
-
     </style>
+
     <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('noteMetadataLayout.format', 'Format')]]</label>
-      </div>
-      [[document.properties.note:mime_type]]
+
+    <div>
+      <label>[[i18n('noteMetadataLayout.format')]]</label>
+      <div>[[document.properties.note:mime_type]]</div>
     </div>
+
   </template>
   <script>
     Polymer({

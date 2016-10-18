@@ -24,71 +24,44 @@ Contributors:
 
 <dom-module id="nuxeo-dublincore-metadata-layout">
   <template>
+
     <style>
-      :host {
-        display: block;
-        color: var(--nuxeo-tag-text);
-        font-size: .9em;
-        width: 100%;
-      }
-
-      .row {
-        margin-bottom: 1em;
-        width: 100%;
-      }
-
       label {
-        font-weight: normal;
+        @apply(--nuxeo-label);
       }
-
-      .label-container {
-        position: relative;
-        width: 30%;
-        display: inline-block;
+      .multiline {
+        white-space: pre-line;
       }
-
     </style>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.title', 'Title')]]</label>
-      </div>
-      <span class="property">[[document.properties.dc:title]]</span>
+    <div>
+      <label>[[i18n('label.dublincore.title')]]</label>
+      <div>[[document.properties.dc:title]]</div>
     </div>
 
-    <div class="row layout horizontal" hidden$="[[!document.properties.dc:description]]">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.description', 'Description')]]</label>
-      </div>
-      <span class="property">[[document.properties.dc:description]]</span>
+    <div hidden$="[[!document.properties.dc:description]]">
+      <label>[[i18n('label.dublincore.description')]]</label>
+      <div class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div class="row layout horizontal" hidden$="[[!document.properties.dc:nature]]">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.nature', 'Nature')]]</label>
-      </div>
-      <span class="property">[[document.properties.dc:nature]]</span>
+    <div hidden$="[[!document.properties.dc:nature]]">
+      <label>[[i18n('label.dublincore.nature')]]</label>
+      <div>[[document.properties.dc:nature]]</div>
     </div>
 
-    <div class="row layout horizontal" hidden$="[[!document.properties.dc:subjects.length]]">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.subjects', 'Subjects')]]</label>
-      </div>
-      <span class="property">[[document.properties.dc:subjects]]</span>
+    <div hidden$="[[!document.properties.dc:subjects.length]]">
+      <label>[[i18n('label.dublincore.subjects')]]</label>
+      <div>[[document.properties.dc:subjects]]</div>
     </div>
 
-    <div class="row layout horizontal" hidden$="[[!document.properties.dc:coverage]]">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.coverage', 'Coverage')]]</label>
-      </div>
-      <span class="property">[[document.properties.dc:coverage]]</span>
+    <div hidden$="[[!document.properties.dc:coverage]]">
+      <label>[[i18n('label.dublincore.coverage')]]</label>
+      <div>[[document.properties.dc:coverage]]</div>
     </div>
 
-    <div class="row layout horizontal" hidden$="[[!document.properties.dc:expired]]">
-      <div class="label-container">
-        <label>[[i18n('label.dublincore.expire', 'Expires on')]]</label>
-      </div>
-      <span class="property">[[_formatDate(document.properties.dc:expired)]]</span>
+    <div hidden$="[[!document.properties.dc:expired]]">
+      <label>[[i18n('label.dublincore.expire')]]</label>
+      <div>[[_formatDate(document.properties.dc:expired)]]</div>
     </div>
 
   </template>
@@ -99,9 +72,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-dublincore-metadata-layout',
-
         behaviors: [Nuxeo.I18nBehavior],
-
         properties: {
           document: Object
         },
