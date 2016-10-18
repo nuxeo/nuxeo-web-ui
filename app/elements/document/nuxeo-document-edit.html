@@ -188,7 +188,7 @@ Contributors:
         },
 
         _save: function() {
-          delete this.document['dc:contributors']; // remove contributors or they will be duplicated in document
+          delete this.document['dc:contributors']; // TODO: NXP-20782: remove contributors or they will be duplicated
           this.$.doc.put().then(this._refresh.bind(this));
         },
 
