@@ -211,6 +211,16 @@ Contributors:
       nuxeo-workflow-graph {
         position: relative;
       }
+
+      @media (max-width: 1024px) {
+        .horizontal.layout {
+          flex-direction: column;
+        }
+
+        .horizontal.layout > div {
+          padding: 0;
+        }
+      }
     </style>
 
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
