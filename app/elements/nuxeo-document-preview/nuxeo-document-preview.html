@@ -73,7 +73,7 @@ Contributors:
 
     <!-- Our available preview templates. First match will be used -->
     <template mime-pattern="image.*">
-      <nuxeo-image-viewer src="[[blob.data]]" controls responsive>
+      <nuxeo-image-viewer src="[[imageSource]]" controls responsive>
       </nuxeo-image-viewer>
     </template>
 
@@ -110,6 +110,10 @@ Contributors:
           xpath: {
             type: String,
             value: 'file:content'
+          },
+          imageSource: {
+            type: String,
+            computed: '_computeImageSource(document)'
           },
           videoSources: {
             type: Array,
@@ -173,6 +177,17 @@ Contributors:
             obj = obj[path[i]];
           }
           return obj;
+        },
+
+        _computeImageSource: function() {
+          if (this.document && this.document.properties && this.document.properties['picture:views']) {
+            var filteredViews = this.document.properties['picture:views'].filter(function(view) {
+              return view.title === 'Medium';
+            });
+            if (filteredViews.length > 0) {
+              return filteredViews[0].content.data;
+            }
+          }
         },
 
         _computeVideoSources: function() {
