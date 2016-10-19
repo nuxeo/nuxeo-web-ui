@@ -128,8 +128,7 @@ Contributors:
       _documentChanged: function() {
         this.document.properties = this.document.properties || {};
         if (!this.document.properties['note:mime_type']) {
-          this.$.mimeType.selectedIndex = 0;
-          this.document.properties['note:mime_type'] = this.$.mimeType.item(0).innerHTML;
+          this.set('document.properties.note:mime_type', 'text/html');
         }
       }
     });
