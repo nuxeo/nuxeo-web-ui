@@ -180,13 +180,19 @@ Contributors:
         },
 
         _computeImageSource: function() {
-          if (this.document && this.document.properties && this.document.properties['picture:views']) {
+          if (!this.document || !this.document.properties) {
+            return;
+          }
+          if (this.document.properties['picture:views']) {
             var filteredViews = this.document.properties['picture:views'].filter(function(view) {
               return view.title === 'Medium';
             });
             if (filteredViews.length > 0) {
               return filteredViews[0].content.data;
             }
+          }
+          if (this.document.properties['file:content']) {
+            return this.document.properties['file:content'].data;
           }
         },
 
