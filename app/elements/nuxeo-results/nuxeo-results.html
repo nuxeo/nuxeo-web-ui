@@ -177,7 +177,7 @@ Contributors:
             selected-items="{{gridSelectedItems}}"
             empty-label="[[emptyLabel]]"
             empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-            selection-enabled>
+            selection-enabled display-quick-filters>
             <template>
               <nuxeo-document-grid-thumbnail class="grid-box"
                 tabindex$="{{tabIndex}}"
@@ -194,7 +194,7 @@ Contributors:
             empty-label="[[emptyLabel]]"
             empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
             selected-items="{{tableSelectedItems}}"
-            selection-enabled
+            selection-enabled display-quick-filters
             on-row-clicked="_navigate">
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]" sort-by="dc:title"
               flex="100">
