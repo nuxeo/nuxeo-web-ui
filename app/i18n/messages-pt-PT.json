@@ -466,5 +466,8 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading":"Average Task Duration Per User",
   "workflowAnalytics.averageTaskDurationPerUser.user":"User",
   "workflowAnalytics.averageWorkflowDuration.heading":"Average Workflow Duration",
-  "workflowAnalytics.workflowInitiators.heading":"Workflow Initiators"
+  "workflowAnalytics.workflowInitiators.heading":"Workflow Initiators",
+  "ui.label.quickFilters.noFolder":"Exclude Folders",
+  "ui.label.quickFilters.mostRecent":"Most Recent Documents",
+  "ui.label.quickFilters.onlyValidated":"Only Validated Documents"
 }
