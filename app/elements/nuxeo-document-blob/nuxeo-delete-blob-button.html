@@ -90,10 +90,6 @@ Contributors:
           deleteMessage: {
             type: String,
             value: 'File deleted'
-          },
-          blobList: {
-            type: Boolean,
-            value: false
           }
         },
 
@@ -108,14 +104,9 @@ Contributors:
         },
 
         _remove: function() {
-          this.$.deleteBlobOp.execute().then(function(response) {
-            if (this.blobList) {
-              this.document.properties = response.properties;
-              this.notifyPath('document.properties', this.document.properties);
-            } else {
-              this.document = response;
-            }
+          this.$.deleteBlobOp.execute().then(function() {
             this._toast(this.deleteMessage);
+            this.fire('document-updated');
           }.bind(this));
         },
 

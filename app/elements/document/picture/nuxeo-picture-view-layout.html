@@ -30,6 +30,10 @@ Contributors:
         --nuxeo-document-preview-height: 600px;
       }
 
+      .title {
+        font-size: 1.64rem;
+      }
+
       .properties {
         -moz-column-width: 25em; /* Firefox */
         -webkit-column-width: 25em; /* webkit, Safari, Chrome */
@@ -48,106 +52,86 @@ Contributors:
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-flex);
-        line-height: 1.5em;
       }
 
       .item label {
-        color: #999;
+        color: var(--secondary-text-color);
       }
-
-      .title {
-        font-size: 1.64rem;
-      }
-
-      .title a {
-        max-width: 20em;
-        word-wrap: break-word;
-        display: inline-block;
-      }
-
-      .sep {
-        border-top: 1px solid var(--divider-color);
-      }
-
-      .card-section {
-        padding: 1em 0;
-      }
-
     </style>
 
-    <nuxeo-dropzone id="dropzone"
-                    document="{{document}}"
-                    message="[[i18n('pictureViewLayout.dropzone.message','Drop to replace the picture')]]"
-                    message-empty="[[i18n('pictureViewLayout.dropzone.empty.message','Click here or drop to replace the picture')]]"
-                    uploaded-message="[[i18n('pictureViewLayout.uploaded.message','Picture uploaded')]]"
-                    empty="[[!document.properties.file:content.data]]">
-      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-    </nuxeo-dropzone>
+    <paper-card>
+      <div class="card-content">
 
-    <div class="card-section">
-      <div class="horizontal layout center">
-        <template is="dom-if" if="[[document.properties.file:content]]">
-          <p class="title">
-            <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
-          </p>
-          <div class="horizontal flex end-justified layout">
-            <nuxeo-delete-blob-button document="{{document}}"
-                                             tool-tip="[[i18n('pictureViewLayout.delete.tootltip','Delete picture')]]"
-                                             confirm-message="[[i18n('pictureViewLayout.delete.confirm.message','Do you really want to delete this picture?')]]"
-                                             delete-message="[[i18n('pictureViewLayout.deleted.message','Picture deleted')]]"
-                                             hidden="[[!document.properties.file:content]]">
-            </nuxeo-delete-blob-button>
-            <nuxeo-upload-blob-button tool-tip="[[i18n('pictureViewLayout.upload.tooltip','Upload picture')]]"
-                                      on-tap="_upload"></nuxeo-upload-blob-button>
-          </div>
-        </template>
-        <template is="dom-if" if="[[!document.properties.file:content]]">
-          <p class="title">
-            <span>[[document.title]]</span>
-          </p>
-        </template>
+        <!-- viewer + dropzone -->
+        <nuxeo-dropzone id="dropzone"
+                        document="{{document}}"
+                        message="[[i18n('pictureViewLayout.dropzone.message')]]"
+                        message-empty="[[i18n('pictureViewLayout.dropzone.empty.message')]]"
+                        uploaded-message="[[i18n('pictureViewLayout.uploaded.message')]]"
+                        empty="[[!document.properties.file:content.data]]">
+          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+        </nuxeo-dropzone>
+
+        <!-- title + upload action -->
+        <div class="title horizontal layout center">
+          <div class="flex">[[document.title]]</div>
+          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
+        </div>
+
+        <!-- main blob -->
+        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+
       </div>
-    </div>
-    <div class="card-section sep">
-      <div class="properties">
-        <div class="item">
-          <label>[[i18n('pictureViewLayout.dimensions', 'Dimensions')]]</label>
-          [[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]
-        </div>
-        <div class="item">
-          <label>[[i18n('pictureViewLayout.format', 'Format')]]</label>
-          [[document.properties.picture:info.format]]
-        </div>
-        <div class="item">
-          <label>[[i18n('pictureViewLayout.colorSpace', 'Color Profile')]]</label>
-          [[document.properties.picture:info.colorSpace]]
-        </div>
-        <div class="item">
-          <label>[[i18n('pictureViewLayout.depth', 'Bit Depth')]]</label>
-          [[document.properties.picture:info.depth]]
-        </div>
-        <div class="item">
-          <label>[[i18n('pictureViewLayout.weight', 'Weight')]]</label>
-          [[_formatSize(document.properties.common:size)]]
-        </div>
-      </div>
-    </div>
-    <div class="card-section sep">
-      <p class="title">[[i18n('pictureVeiwLayout.formats', 'Additional Formats')]]</p>
-      <div>
-        <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+
+        <div class="properties">
           <div class="item">
-            <label class="layout flex">[[item.name]]</label>
-            <span class="layout flex-2">[[item.dimensions]]</span>
-            <span class="layout flex">[[item.size]]</span>
-            <span class="layout flex">[[item.format]]</span>
-            <a href="[[item.data]]" title="download" class="viewdla">
-              <iron-icon icon="icons:file-download"></iron-icon>
-            </a>
+            <label>[[i18n('pictureViewLayout.dimensions')]]</label>
+            <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
           </div>
-        </template>
+          <div class="item">
+            <label>[[i18n('pictureViewLayout.format')]]</label>
+            <div>[[document.properties.picture:info.format]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
+            <div>[[document.properties.picture:info.colorSpace]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('pictureViewLayout.depth')]]</label>
+            <div>[[document.properties.picture:info.depth]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('pictureViewLayout.weight')]]</label>
+            <div>[[_formatSize(document.properties.common:size)]]</div>
+          </div>
+        </div>
+
       </div>
-    </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <p class="title">[[i18n('pictureVeiwLayout.formats')]]</p>
+        <div>
+          <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
+            <div class="item">
+              <label class="layout flex">[[item.name]]</label>
+              <span class="layout flex-2">[[item.dimensions]]</span>
+              <span class="layout flex">[[item.size]]</span>
+              <span class="layout flex">[[item.format]]</span>
+              <a href="[[item.data]]" title="download" class="viewdla">
+                <iron-icon icon="icons:file-download"></iron-icon>
+              </a>
+            </div>
+          </template>
+        </div>
+      </div>
+    </paper-card>
+
   </template>
 
   <script>
@@ -156,6 +140,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-picture-view-layout',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -166,16 +151,23 @@ Contributors:
             computed: '_getAdditionalFormats(document)'
           }
         },
-        behaviors: [Nuxeo.I18nBehavior],
+
+        _upload: function() {
+          this.$.dropzone.open();
+        },
+
         _formatSize: function(size) {
-          if (size > 1048576) {
+          if (!size) {
+            return '';
+          } else if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';
           } else if (size > 1024) {
             return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else if (size) {
-            return size.toString() + ' B';
+          } else {
+            return size.toString() + ' Bytes';
           }
         },
+
         _getAdditionalFormats: function(document) {
           return document ? document.properties['picture:views'].map(function(view) {
             return {
@@ -186,10 +178,8 @@ Contributors:
               data: view.content.data
             };
           }.bind(this)) : [];
-        },
-        _upload: function() {
-          this.$.dropzone.open();
         }
+
       });
     })();
   </script>

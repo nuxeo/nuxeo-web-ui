@@ -29,20 +29,6 @@ Contributors:
         display: block;
       }
 
-      .notecontent {
-        padding: 2rem;
-      }
-
-      .title {
-        color: var(--nuxeo-title-color);
-        font-size: 1.5rem;
-      }
-
-      .attachments {
-        border-top: 1px dashed #ddd;
-        background-color: #fafafd;
-      }
-
       .item {
         @apply(--layout-vertical);
         padding: .5rem 0;
@@ -58,14 +44,6 @@ Contributors:
         color: #999;
       }
 
-      .droparea {
-        border-top: 1px solid var(--divider-color);
-        margin: 1rem 0;
-        padding-top: 2rem;
-        color: #a8a8a8;
-        text-align: center;
-      }
-
       .save {
         color: green;
       }
@@ -75,10 +53,6 @@ Contributors:
         position: absolute;
         right: 10px;
         top: 10px;
-      }
-
-      .card-section {
-        padding: 1em 0;
       }
 
       iron-autogrow-textarea {
@@ -99,36 +73,41 @@ Contributors:
 
     <nuxeo-document id="note" doc-id="[[document.uid]]" data="[[document]]"></nuxeo-document>
 
-    <div class="notecontent">
-      <template is="dom-if" if="[[_isHTML(document)]]">
-        <div class="html-editor-container">
-          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
-          <div class="buttons layout horizontal end-justified">
-            <paper-button on-click="_editorSave" class="save" hidden$="[[!_canEdit(document)]]">
-              <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
-            </paper-button>
-          </div>
-        </div>
-      </template>
-      <template is="dom-if" if="[[!_isHTML(document)]]">
-        <template is="dom-if" if="[[_viewMode]]">
-          <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-        </template>
-        <template is="dom-if" if="[[!_viewMode]]">
-          <iron-autogrow-textarea bind-value="{{_value}}" placeholder="[[i18n('noteViewLayout.placeholder','Type here...')]]"></iron-autogrow-textarea>
-          <div class="buttons layout horizontal end-justified">
-            <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-            <paper-button on-click="_editorSave" class="save">
-              <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
-            </paper-button>
+    <paper-card>
+      <div class="card-content">
+        <template is="dom-if" if="[[_isHTML(document)]]">
+          <div class="html-editor-container">
+            <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
+            <div class="buttons layout horizontal end-justified">
+              <paper-button on-click="_editorSave" class="save" hidden$="[[!_canEdit(document)]]">
+                <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
+              </paper-button>
+            </div>
           </div>
         </template>
-      </template>
-    </div>
-    <div class="card-section attachments">
-      <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
-    </div>
+        <template is="dom-if" if="[[!_isHTML(document)]]">
+          <template is="dom-if" if="[[_viewMode]]">
+            <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+            <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+          </template>
+          <template is="dom-if" if="[[!_viewMode]]">
+            <iron-autogrow-textarea bind-value="{{_value}}" placeholder="[[i18n('noteViewLayout.placeholder','Type here...')]]"></iron-autogrow-textarea>
+            <div class="buttons layout horizontal end-justified">
+              <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+              <paper-button on-click="_editorSave" class="save">
+                <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
+              </paper-button>
+            </div>
+          </template>
+        </template>
+      </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-document-attachments document="[[document]]"></nuxeo-document-attachments>
+      </div>
+    </paper-card>
 
     <paper-toast id="toast"></paper-toast>
   </template>
@@ -139,6 +118,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-note-view-layout',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -152,19 +132,19 @@ Contributors:
           }
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
-
         _documentChanged: function() {
           this._value = this.document.properties['note:note'];
         },
 
         _formatSize: function(size) {
-          if (size > 1048576) {
+          if (!size) {
+            return '';
+          } else if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';
           } else if (size > 1024) {
             return parseFloat(size / 1024).toFixed(2) + ' KB';
           } else {
-            return size.toString() + ' B';
+            return size.toString() + ' Bytes';
           }
         },
 

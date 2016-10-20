@@ -28,6 +28,10 @@ Contributors:
         display: block;
       }
 
+      .title {
+        font-size: 1.64rem;
+      }
+
       .properties {
         -moz-column-width: 25em; /* Firefox */
         -webkit-column-width: 25em; /* webkit, Safari, Chrome */
@@ -49,102 +53,86 @@ Contributors:
       }
 
       .item label {
-        color: #999;
+        color: var(--secondary-text-color);
       }
-
-      .title {
-        font-size: 1.64rem;
-      }
-
-      .attachments {
-        border-top: 1px dashed #ddd;
-        background-color: #fafafd;
-      }
-
-      .card-section {
-        padding: 1em 0;
-      }
-
-      .sep {
-        border-top: 1px solid var(--divider-color);
-      }
-
     </style>
 
-    <nuxeo-dropzone id="dropzone"
-                    document="{{document}}"
-                    message="[[i18n('videoViewLayout.dropzone.message','Drop to replace the video')]]"
-                    message-empty="[[i18n('videoViewLayout.dropzone.empty.message','Click here or drop to replace the video')]]"
-                    uploaded-message="[[i18n('videoViewLayout.uploaded.message','Video uploaded')]]"
-                    empty="[[!document.properties.file:content.data]]">
-      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-    </nuxeo-dropzone>
-    <div class="card-section">
-      <div class="horizontal layout center">
-        <template is="dom-if" if="[[document.properties.file:content]]">
-          <p class="title">
-            <a href="[[document.properties.file:content.data]]">[[document.title]]</a>
-          </p>
-          <div class="horizontal flex end-justified layout">
-            <nuxeo-delete-blob-button document="{{document}}"
-                                             tool-tip="[[i18n('videoViewLayout.delete.tootltip','Delete video')]]"
-                                             confirm-message="[[i18n('videoViewLayout.delete.confirm.message','Do you really want to delete this video?')]]"
-                                             delete-message="[[i18n('videoViewLayout.deleted.message','Video deleted')]]"
-                                             hidden="[[!document.properties.file:content]]">
-            </nuxeo-delete-blob-button>
-            <nuxeo-upload-blob-button tool-tip="[[i18n('videoViewLayout.upload.tooltip','Upload video')]]"
-                                      on-tap="_upload"></nuxeo-upload-blob-button>
-          </div>
-        </template>
-        <template is="dom-if" if="[[!document.properties.file:content]]">
-          <p class="title">
-            <span>[[document.title]]</span>
-          </p>
-        </template>
+    <paper-card>
+      <div class="card-content">
+
+        <!-- viewer + dropzone -->
+        <nuxeo-dropzone id="dropzone"
+                        document="{{document}}"
+                        message="[[i18n('videoViewLayout.dropzone.message','Drop to replace the video')]]"
+                        message-empty="[[i18n('videoViewLayout.dropzone.empty.message','Click here or drop to replace the video')]]"
+                        uploaded-message="[[i18n('videoViewLayout.uploaded.message','Video uploaded')]]"
+                        empty="[[!document.properties.file:content.data]]">
+          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+        </nuxeo-dropzone>
+
+        <!-- title + upload action -->
+        <div class="title horizontal layout center">
+          <div class="flex">[[document.title]]</div>
+          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
+        </div>
+
+        <!-- main blob -->
+        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+
       </div>
-    </div>
-    <div class="card-section sep">
-      <div class="properties">
-        <div class="item">
-          <label>[[i18n('videoViewLayout.format', 'Format')]]</label>
-          [[document.properties.vid:info.format]]
-        </div>
-        <div class="item">
-          <label>[[i18n('videoViewLayout.duration', 'Duration')]]</label>
-          [[document.properties.vid:info.duration]]
-        </div>
-        <div class="item">
-          <label>[[i18n('videoViewLayout.width', 'Width')]]</label>
-          [[document.properties.vid:info.width]]
-        </div>
-        <div class="item">
-          <label>[[i18n('videoViewLayout.height', 'Height')]]</label>
-          [[document.properties.vid:info.height]]
-        </div>
-        <div class="item">
-          <label>[[i18n('videoViewLayout.frameRate', 'Frame Rate')]]</label>
-          [[document.properties.vid:info.frameRate]]
-        </div>
-      </div>
-    </div>
-    <div class="card-section sep">
-      <p class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</p>
-      <div>
-        <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <div class="properties">
           <div class="item">
-            <label class="layout flex-2">[[conversion.name]]</label>
-            <span class="layout flex-2">[[conversion.info.width]] x [[conversion.info.height]]</span>
-            <span class="layout flex">[[_formatSize(conversion.content.length)]]</span>
-            <a href="[[conversion.content.data]]" title="download">
-              <iron-icon icon="icons:file-download"></iron-icon>
-            </a>
+            <label>[[i18n('videoViewLayout.format')]]</label>
+            <div>[[document.properties.vid:info.format]]</div>
           </div>
-        </template>
+          <div class="item">
+            <label>[[i18n('videoViewLayout.duration')]]</label>
+            <div>[[document.properties.vid:info.duration]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('videoViewLayout.width')]]</label>
+            <div>[[document.properties.vid:info.width]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('videoViewLayout.height')]]</label>
+            <div>[[document.properties.vid:info.height]]</div>
+          </div>
+          <div class="item">
+            <label>[[i18n('videoViewLayout.frameRate')]]</label>
+            <div>[[document.properties.vid:info.frameRate]]</div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="card-section attachments">
-      <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
-    </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <p class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</p>
+        <div>
+          <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
+            <div class="item">
+              <label class="layout flex-2">[[conversion.name]]</label>
+              <span class="layout flex-2">[[conversion.info.width]] x [[conversion.info.height]]</span>
+              <span class="layout flex">[[_formatSize(conversion.content.length)]]</span>
+              <a href="[[conversion.content.data]]" title="download">
+                <iron-icon icon="icons:file-download"></iron-icon>
+              </a>
+            </div>
+          </template>
+        </div>
+      </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-document-attachments document="[[document]]"></nuxeo-document-attachments>
+      </div>
+    </paper-card>
+
   </template>
 
   <script>
@@ -153,24 +141,28 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-video-view-layout',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
             notify: true
           }
         },
-        behaviors: [Nuxeo.I18nBehavior],
+
+        _upload: function() {
+          this.$.dropzone.open();
+        },
+
         _formatSize: function(size) {
-          if (size > 1048576) {
+          if (!size) {
+            return '';
+          } else if (size > 1048576) {
             return parseFloat(size / 1048576).toFixed(2) + ' MB';
           } else if (size > 1024) {
             return parseFloat(size / 1024).toFixed(2) + ' KB';
           } else {
-            return size + ' B';
+            return size.toString() + ' Bytes';
           }
-        },
-        _upload: function() {
-          this.$.dropzone.open();
         }
       });
     })();

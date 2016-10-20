@@ -30,79 +30,43 @@ Contributors:
       }
 
       .title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         color: var(--nuxeo-title-color);
         font-size: 1.5rem;
       }
-
-      .title a {
-        max-width: 20em;
-        word-wrap: break-word;
-        display: inline-block;
-      }
-
-      .attachments {
-        border-top: 1px dashed #ddd;
-        background-color: #fafafd;
-      }
-
-      .card-section {
-        padding: 1em 0;
-      }
-
-      .item {
-        @apply(--layout-vertical);
-        padding: 0.5rem 0rem;
-      }
-
-      .item label {
-        color: var(--nuxeo-title-color);
-        font-size: 1.2rem;
-      }
-
-      .item span {
-        font-size: 0.8rem;
-        color: #999;
-      }
     </style>
 
-    <nuxeo-dropzone id="dropzone"
-                    document="{{document}}"
-                    message="[[i18n('fileViewLayout.dropzone.message','Drop to replace main file')]]"
-                    message-empty="[[i18n('fileViewLayout.dropzone.empty.message','Click here or drop to replace main file')]]"
-                    empty="[[!document.properties.file:content.data]]">
-      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-    </nuxeo-dropzone>
-    <div class="card-section">
-      <div class="horizontal layout center">
-        <template is="dom-if" if="[[document.properties.file:content]]">
-          <p class="title">
-            <a href="[[document.properties.file:content.data]]">
-              <iron-icon icon="editor:insert-drive-file"></iron-icon>
-              [[document.title]]
-            </a>
-          </p>
-        </template>
-        <template is="dom-if" if="[[!document.properties.file:content]]">
-          <p class="title">
-            <iron-icon icon="editor:insert-drive-file"></iron-icon>
-            [[document.title]]
-          </p>
-        </template>
-        <div class="horizontal flex end-justified layout">
+    <paper-card>
+      <div class="card-content">
 
-          <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        <!-- viewer + dropzone -->
+        <nuxeo-dropzone id="dropzone"
+                        document="{{document}}"
+                        message="[[i18n('fileViewLayout.dropzone.message')]]"
+                        message-empty="[[i18n('fileViewLayout.dropzone.empty.message')]]"
+                        empty="[[!document.properties.file:content.data]]">
+          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+        </nuxeo-dropzone>
 
-          <nuxeo-delete-blob-button hidden$="[[!document.properties.file:content]]"
-                                    document="{{document}}"></nuxeo-delete-blob-button>
-          <nuxeo-upload-blob-button tool-tip="[[i18n('fileViewLayout.upload','Upload main file')]]"
-                                    on-tap="_upload"></nuxeo-upload-blob-button>
+        <!-- title + upload action -->
+        <div class="title horizontal layout center">
+          <div class="flex">[[document.title]]</div>
+          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
         </div>
+
+        <!-- main blob -->
+        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+
       </div>
-      <span>[[_formatSize(document.properties.common:size)]]</span>
-    </div>
-    <div class="card-section attachments">
-      <nuxeo-document-attachments document="{{document}}"></nuxeo-document-attachments>
-    </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-document-attachments document="[[document]]"></nuxeo-document-attachments>
+      </div>
+    </paper-card>
+
   </template>
 
   <script>
@@ -111,6 +75,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-file-view-layout',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -122,7 +87,6 @@ Contributors:
             computed: '_actionContext(document)'
           }
         },
-        behaviors: [Nuxeo.I18nBehavior],
 
         _actionContext: function() {
           return {document: this.document, blob: this.document.properties['file:content']};
@@ -132,17 +96,6 @@ Contributors:
 
         },
 
-        _formatSize: function(size) {
-          if (!size) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' B';
-          }
-        },
         _upload: function() {
           this.$.dropzone.open();
         }

@@ -29,59 +29,31 @@ Contributors:
     <style>
       :host {
         display: block;
-        padding: 1em;
       }
 
       .title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         color: var(--nuxeo-title-color);
         font-size: 1.5rem;
-        margin-top: 0;
-      }
-
-      .item {
-      @apply(--layout-vertical);
-        padding: 0.5rem 0rem;
-      }
-
-      .item label {
-        color: var(--nuxeo-title-color);
-        font-size: 1.2rem;
-      }
-
-      .item span {
-        font-size: 0.8rem;
-        color: #999;
-      }
-
-      paper-dialog {
-        height: 100%;
-        width: 100%;
-      }
-
-      paper-icon-button {
-        height: 32px;
-        width: 32px;
-      }
-
-      paper-icon-button:hover {
-        cursor: pointer;
       }
 
       nuxeo-dropzone {
         --nuxeo-dropzone-min-empty-height: 60px;
         --nuxeo-dropzone-border-margin: 2px;
       }
+
+      nuxeo-document-blob {
+        border-bottom: 1px solid var(--nuxeo-border);
+        padding: 8px 0;
+      }
     </style>
 
-    <div class="horizontal layout">
-      <p class="title">
-        <iron-icon icon="editor:attach-file"></iron-icon>
-        [[i18n('documentAttachments.heading', 'Attachments')]]
-      </p>
-      <div class="horizontal flex end-justified layout center" hidden$="[[!_hasAttachments(document)]]">
-        <nuxeo-upload-blob-button tool-tip="[[i18n('documentAttachments.upload.tooltip', 'Upload an attachment')]]" on-tap="_upload"></nuxeo-upload-blob-button>
-      </div>
+    <div class="title">
+      <div class="flex"><iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]</div>
+      <paper-icon-button icon="icons:add" on-tap="_upload"></paper-icon-button>
     </div>
+
     <nuxeo-dropzone id="dropzone"
                     document="{{document}}"
                     message="[[i18n('documentAttachments.dropzone.message', 'Drop to attach file')]]"
@@ -90,30 +62,16 @@ Contributors:
                     empty="[[!_hasAttachments(document, document.properties, document.properties.files:files)]]"
                     xpath="files:files"
                     blob-list>
-      <div>
-        <paper-dialog id="previewDialog" with-backdrop></paper-dialog>
+
+      <!-- attachments list -->
+      <div class="vertical layout">
         <template is="dom-repeat" items="[[document.properties.files:files]]">
-          <div class="horizontal layout start">
-            <div class="item">
-              <a href="[[item.file.data]]">[[item.filename]]</a>
-              <span>[[_formatSize(item.file.length)]]</span>
-            </div>
-            <div class="horizontal flex end-justified layout">
-              <nuxeo-delete-blob-button document="{{document}}"
-                                        tool-tip="[[i18n('documentAttachments.delete.tooltip', 'Delete attachment')]]"
-                                        confirm-message="[[i18n('documentAttachments.delete.confirm', 'Do you really want to delete this attachment?')]]"
-                                        delete-message="[[i18n('documentAttachments.attachment.deleted', 'Attachment deleted')]]"
-                                        xpath="files:files/[[index]]"
-                                        blob-list></nuxeo-delete-blob-button>
-              <paper-icon-button noink icon="icons:visibility" id="previewBut" on-tap="togglePreviewDialog"></paper-icon-button>
-              <paper-tooltip for="previewBut">
-                [[i18n('documentAttachments.preview.tooltip', 'Preview attachment')]]
-              </paper-tooltip>
-            </div>
-          </div>
+          <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]"></nuxeo-document-blob>
         </template>
       </div>
+
     </nuxeo-dropzone>
+
   </template>
 
   <script>
@@ -122,44 +80,16 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-attachments',
-        properties: {
-          document: {
-            type: Object,
-            notify: true
-          }
-        },
         behaviors: [Nuxeo.I18nBehavior],
-        togglePreviewDialog: function(e) {
-          var dialog = this.$.previewDialog,
-              preview = document.createElement('nuxeo-document-preview');
-          preview.document = this.document;
-          preview.xpath = 'files:files/' + e.model.index + '/file';
-          preview.style.height = '100%';
-          preview.style.margin = '0';
-          preview.style.padding = '0';
-          if (dialog.hasChildNodes()) {
-            dialog.replaceChild(preview, dialog.firstChild);
-          } else {
-            dialog.appendChild(preview);
-          }
-          Polymer.dom.flush();
-          dialog.toggle();
+        properties: {
+          document:  Object
         },
-        _formatSize: function(size) {
-          if (!size) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' B';
-          }
-        },
+
         _hasAttachments: function() {
           return (this.document && this.document.properties && this.document.properties['files:files']) ?
                   this.document.properties['files:files'].length > 0 : false;
         },
+
         _upload: function() {
           this.$.dropzone.open();
         }
