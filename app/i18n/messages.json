@@ -287,7 +287,7 @@
   "pageableWidget.name": "Name",
   "pageableWidget.version": "Version",
   "ParallelDocumentReview": "Parallel document review",
-  "pictureVeiwLayout.formats": "Additional Formats",
+  "pictureViewLayout.formats": "Additional Formats",
   "pictureViewLayout.colorSpace": "Color Profile",
   "pictureViewLayout.delete.confirm.message": "Do you really want to delente this picture?",
   "pictureViewLayout.delete.tootltip": "Delete picture",
