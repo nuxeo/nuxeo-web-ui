@@ -28,42 +28,18 @@ Contributors:
       :host {
         display: block;
       }
-
-      .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        color: var(--nuxeo-title-color);
-        font-size: 1.5rem;
-      }
     </style>
 
     <paper-card>
       <div class="card-content">
-
-        <!-- viewer + dropzone -->
-        <nuxeo-dropzone id="dropzone"
-                        document="{{document}}"
-                        message="[[i18n('fileViewLayout.dropzone.message')]]"
-                        message-empty="[[i18n('fileViewLayout.dropzone.empty.message')]]"
-                        empty="[[!document.properties.file:content.data]]">
-          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-        </nuxeo-dropzone>
-
-        <!-- title + upload action -->
-        <div class="title horizontal layout center">
-          <div class="flex">[[document.title]]</div>
-          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
-        </div>
-
-        <!-- main blob -->
-        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
-
+        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+        <nuxeo-document-blob role="widget" document="[[document]]" xpath="file:content"></nuxeo-document-blob>
       </div>
     </paper-card>
 
     <paper-card>
       <div class="card-content">
-        <nuxeo-document-attachments document="[[document]]"></nuxeo-document-attachments>
+        <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
       </div>
     </paper-card>
 
@@ -77,27 +53,7 @@ Contributors:
         is: 'nuxeo-file-view-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true,
-            observer: '_updateActionContext'
-          },
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(document)'
-          }
-        },
-
-        _actionContext: function() {
-          return {document: this.document, blob: this.document.properties['file:content']};
-        },
-
-        _updateActionContext: function() {
-
-        },
-
-        _upload: function() {
-          this.$.dropzone.open();
+          document: Object
         }
       });
     })();

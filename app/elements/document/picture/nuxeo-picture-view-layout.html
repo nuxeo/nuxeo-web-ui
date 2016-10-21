@@ -30,10 +30,6 @@ Contributors:
         --nuxeo-document-preview-height: 600px;
       }
 
-      .title {
-        font-size: 1.64rem;
-      }
-
       .properties {
         -moz-column-width: 25em; /* Firefox */
         -webkit-column-width: 25em; /* webkit, Safari, Chrome */
@@ -61,53 +57,37 @@ Contributors:
 
     <paper-card>
       <div class="card-content">
-
-        <!-- viewer + dropzone -->
-        <nuxeo-dropzone id="dropzone"
-                        document="{{document}}"
-                        message="[[i18n('pictureViewLayout.dropzone.message')]]"
-                        message-empty="[[i18n('pictureViewLayout.dropzone.empty.message')]]"
-                        uploaded-message="[[i18n('pictureViewLayout.uploaded.message')]]"
-                        empty="[[!document.properties.file:content.data]]">
-          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-        </nuxeo-dropzone>
-
-        <!-- title + upload action -->
-        <div class="title horizontal layout center">
-          <div class="flex">[[document.title]]</div>
-          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
-        </div>
-
-        <!-- main blob -->
-        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
-
+        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+        <nuxeo-document-blob role="widget" document="[[document]]" xpath="file:content"></nuxeo-document-blob>
       </div>
     </paper-card>
 
     <paper-card>
-      <div class="card-content">
+      <div class="card-content properties">
 
-        <div class="properties">
-          <div class="item">
-            <label>[[i18n('pictureViewLayout.dimensions')]]</label>
-            <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('pictureViewLayout.format')]]</label>
-            <div>[[document.properties.picture:info.format]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
-            <div>[[document.properties.picture:info.colorSpace]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('pictureViewLayout.depth')]]</label>
-            <div>[[document.properties.picture:info.depth]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('pictureViewLayout.weight')]]</label>
-            <div>[[_formatSize(document.properties.common:size)]]</div>
-          </div>
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.dimensions')]]</label>
+          <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.format')]]</label>
+          <div>[[document.properties.picture:info.format]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
+          <div>[[document.properties.picture:info.colorSpace]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.depth')]]</label>
+          <div>[[document.properties.picture:info.depth]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.weight')]]</label>
+          <div>[[_formatSize(document.properties.common:size)]]</div>
         </div>
 
       </div>
@@ -115,7 +95,9 @@ Contributors:
 
     <paper-card>
       <div class="card-content">
-        <p class="title">[[i18n('pictureVeiwLayout.formats')]]</p>
+
+        <!-- TODO: replace with nuxeo-picture-formats-list -->
+        <div class="title">[[i18n('pictureVeiwLayout.formats')]]</div>
         <div>
           <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
             <div class="item">
@@ -123,12 +105,13 @@ Contributors:
               <span class="layout flex-2">[[item.dimensions]]</span>
               <span class="layout flex">[[item.size]]</span>
               <span class="layout flex">[[item.format]]</span>
-              <a href="[[item.data]]" title="download" class="viewdla">
+              <a href="[[item.data]]" title="download">
                 <iron-icon icon="icons:file-download"></iron-icon>
               </a>
             </div>
           </template>
         </div>
+
       </div>
     </paper-card>
 
@@ -142,18 +125,11 @@ Contributors:
         is: 'nuxeo-picture-view-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true
-          },
+          document: Object,
           additionalFormats: {
             type: Object,
             computed: '_getAdditionalFormats(document)'
           }
-        },
-
-        _upload: function() {
-          this.$.dropzone.open();
         },
 
         _formatSize: function(size) {

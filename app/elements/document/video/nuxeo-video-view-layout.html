@@ -28,10 +28,6 @@ Contributors:
         display: block;
       }
 
-      .title {
-        font-size: 1.64rem;
-      }
-
       .properties {
         -moz-column-width: 25em; /* Firefox */
         -webkit-column-width: 25em; /* webkit, Safari, Chrome */
@@ -59,59 +55,47 @@ Contributors:
 
     <paper-card>
       <div class="card-content">
+        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+        <nuxeo-document-blob role="widget" document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+      </div>
+    </paper-card>
 
-        <!-- viewer + dropzone -->
-        <nuxeo-dropzone id="dropzone"
-                        document="{{document}}"
-                        message="[[i18n('videoViewLayout.dropzone.message','Drop to replace the video')]]"
-                        message-empty="[[i18n('videoViewLayout.dropzone.empty.message','Click here or drop to replace the video')]]"
-                        uploaded-message="[[i18n('videoViewLayout.uploaded.message','Video uploaded')]]"
-                        empty="[[!document.properties.file:content.data]]">
-          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-        </nuxeo-dropzone>
+    <paper-card>
+      <div class="card-content properties">
 
-        <!-- title + upload action -->
-        <div class="title horizontal layout center">
-          <div class="flex">[[document.title]]</div>
-          <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
+        <div role="widget" class="item">
+          <label>[[i18n('videoViewLayout.format')]]</label>
+          <div>[[document.properties.vid:info.format]]</div>
         </div>
 
-        <!-- main blob -->
-        <nuxeo-document-blob document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+        <div role="widget" class="item">
+          <label>[[i18n('videoViewLayout.duration')]]</label>
+          <div>[[document.properties.vid:info.duration]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('videoViewLayout.width')]]</label>
+          <div>[[document.properties.vid:info.width]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('videoViewLayout.height')]]</label>
+          <div>[[document.properties.vid:info.height]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('videoViewLayout.frameRate')]]</label>
+          <div>[[document.properties.vid:info.frameRate]]</div>
+        </div>
 
       </div>
     </paper-card>
 
     <paper-card>
       <div class="card-content">
-        <div class="properties">
-          <div class="item">
-            <label>[[i18n('videoViewLayout.format')]]</label>
-            <div>[[document.properties.vid:info.format]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('videoViewLayout.duration')]]</label>
-            <div>[[document.properties.vid:info.duration]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('videoViewLayout.width')]]</label>
-            <div>[[document.properties.vid:info.width]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('videoViewLayout.height')]]</label>
-            <div>[[document.properties.vid:info.height]]</div>
-          </div>
-          <div class="item">
-            <label>[[i18n('videoViewLayout.frameRate')]]</label>
-            <div>[[document.properties.vid:info.frameRate]]</div>
-          </div>
-        </div>
-      </div>
-    </paper-card>
 
-    <paper-card>
-      <div class="card-content">
-        <p class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</p>
+        <!-- TODO: replace with nuxeo-video-conversions-list -->
+        <div class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</div>
         <div>
           <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
             <div class="item">
@@ -124,6 +108,7 @@ Contributors:
             </div>
           </template>
         </div>
+
       </div>
     </paper-card>
 
@@ -143,14 +128,7 @@ Contributors:
         is: 'nuxeo-video-view-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true
-          }
-        },
-
-        _upload: function() {
-          this.$.dropzone.open();
+          document: Object
         },
 
         _formatSize: function(size) {
