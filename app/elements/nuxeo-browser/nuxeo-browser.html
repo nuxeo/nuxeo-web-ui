@@ -144,7 +144,7 @@ Contributors:
                 <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
                 [[i18n('browser.permissions', 'Permissions')]]</paper-icon-item>
 
-              <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS"></nuxeo-slot>
+              <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
 
             </paper-menu>
           </paper-dropdown-menu>
@@ -200,7 +200,7 @@ Contributors:
             <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
           </section>
 
-          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES"></nuxeo-slot>
+          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
         </iron-pages>
       </div>
@@ -238,6 +238,10 @@ Contributors:
           browseActionContext: {
             type: Object,
             computed: '_browseActionContext(document, selectedItems)'
+          },
+          viewsContext: {
+            type: Object,
+            computed: '_viewsContext(document)'
           }
         },
 
@@ -283,6 +287,10 @@ Contributors:
 
         _browseActionContext: function() {
           return {document: this.document, selectedItems: this.selectedItems};
+        },
+
+        _viewsContext: function() {
+          return {document: this.document};
         },
 
         _canDownload: function(document) {
