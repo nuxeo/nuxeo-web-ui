@@ -26,14 +26,14 @@ Contributors:
 <dom-module id="nuxeo-dublincore-edit-layout">
   <template>
 
-    <nuxeo-directory-suggestion label="[[i18n('label.dublincore.nature')]]"
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                               directory-name="nature"
                               value="{{document.properties.dc:nature}}"
                               placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
                               min-chars="0">
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion label="[[i18n('label.dublincore.subjects')]]"
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
                                 directory-name="l10nsubjects"
                                 value="{{document.properties.dc:subjects}}"
                                 multiple="true"
@@ -42,7 +42,7 @@ Contributors:
                                 min-chars="0">
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion label="[[i18n('label.dublincore.coverage')]]"
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
                                 directory-name="l10ncoverage"
                                 value="{{document.properties.dc:coverage}}"
                                 dbl10n="true"
@@ -50,7 +50,9 @@ Contributors:
                                 min-chars="0">
     </nuxeo-directory-suggestion>
 
-    <paper-input label="[[i18n('label.dublincore.expire')]]" value="{{document.properties.dc:expired::change}}" type="date"></paper-input>
+    <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
+                 type="date" value="{{document.properties.dc:expired::change}}">
+    </paper-input>
 
   </template>
 
@@ -62,9 +64,7 @@ Contributors:
         is: 'nuxeo-dublincore-edit-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object
-          }
+          document: Object
         }
       });
     })();

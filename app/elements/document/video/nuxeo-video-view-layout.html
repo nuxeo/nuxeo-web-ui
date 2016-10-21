@@ -93,22 +93,7 @@ Contributors:
 
     <paper-card>
       <div class="card-content">
-
-        <!-- TODO: replace with nuxeo-video-conversions-list -->
-        <div class="title">[[i18n('videoViewLayout.conversions', 'Conversions')]]</div>
-        <div>
-          <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
-            <div class="item">
-              <label class="layout flex-2">[[conversion.name]]</label>
-              <span class="layout flex-2">[[conversion.info.width]] x [[conversion.info.height]]</span>
-              <span class="layout flex">[[_formatSize(conversion.content.length)]]</span>
-              <a href="[[conversion.content.data]]" title="download">
-                <iron-icon icon="icons:file-download"></iron-icon>
-              </a>
-            </div>
-          </template>
-        </div>
-
+        <nuxeo-video-conversions role="widget" label="[[i18n('videoViewLayout.conversions')]]" document="[[document]]"></nuxeo-video-conversions>
       </div>
     </paper-card>
 
@@ -129,19 +114,8 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: Object
-        },
-
-        _formatSize: function(size) {
-          if (!size) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' Bytes';
-          }
         }
+
       });
     })();
   </script>

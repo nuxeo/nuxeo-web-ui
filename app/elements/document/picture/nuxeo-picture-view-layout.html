@@ -95,23 +95,7 @@ Contributors:
 
     <paper-card>
       <div class="card-content">
-
-        <!-- TODO: replace with nuxeo-picture-formats-list -->
-        <div class="title">[[i18n('pictureVeiwLayout.formats')]]</div>
-        <div>
-          <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
-            <div class="item">
-              <label class="layout flex">[[item.name]]</label>
-              <span class="layout flex-2">[[item.dimensions]]</span>
-              <span class="layout flex">[[item.size]]</span>
-              <span class="layout flex">[[item.format]]</span>
-              <a href="[[item.data]]" title="download">
-                <iron-icon icon="icons:file-download"></iron-icon>
-              </a>
-            </div>
-          </template>
-        </div>
-
+        <nuxeo-picture-formats role="widget" label="[[i18n('pictureViewLayout.formats')]]" document="[[document]]"></nuxeo-picture-formats>
       </div>
     </paper-card>
 
@@ -125,11 +109,7 @@ Contributors:
         is: 'nuxeo-picture-view-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: Object,
-          additionalFormats: {
-            type: Object,
-            computed: '_getAdditionalFormats(document)'
-          }
+          document: Object
         },
 
         _formatSize: function(size) {
@@ -142,18 +122,6 @@ Contributors:
           } else {
             return size.toString() + ' Bytes';
           }
-        },
-
-        _getAdditionalFormats: function(document) {
-          return document ? document.properties['picture:views'].map(function(view) {
-            return {
-              name: view.description,
-              dimensions: view.width + ' x ' + view.height,
-              size: this._formatSize(view.content.length),
-              format: view.info.format,
-              data: view.content.data
-            };
-          }.bind(this)) : [];
         }
 
       });

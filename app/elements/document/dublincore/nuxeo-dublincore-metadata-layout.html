@@ -34,32 +34,32 @@ Contributors:
       }
     </style>
 
-    <div>
+    <div role="widget">
       <label>[[i18n('label.dublincore.title')]]</label>
       <div>[[document.properties.dc:title]]</div>
     </div>
 
-    <div hidden$="[[!document.properties.dc:description]]">
+    <div role="widget" hidden$="[[!document.properties.dc:description]]">
       <label>[[i18n('label.dublincore.description')]]</label>
       <div class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div hidden$="[[!document.properties.dc:nature]]">
+    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
       <label>[[i18n('label.dublincore.nature')]]</label>
       <div>[[document.properties.dc:nature]]</div>
     </div>
 
-    <div hidden$="[[!document.properties.dc:subjects.length]]">
+    <div role="widget" hidden$="[[!document.properties.dc:subjects.length]]">
       <label>[[i18n('label.dublincore.subjects')]]</label>
       <div>[[document.properties.dc:subjects]]</div>
     </div>
 
-    <div hidden$="[[!document.properties.dc:coverage]]">
+    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
       <label>[[i18n('label.dublincore.coverage')]]</label>
       <div>[[document.properties.dc:coverage]]</div>
     </div>
 
-    <div hidden$="[[!document.properties.dc:expired]]">
+    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
       <div>[[_formatDate(document.properties.dc:expired)]]</div>
     </div>
