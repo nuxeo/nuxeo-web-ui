@@ -286,7 +286,7 @@
   "pageableWidget.name":"Titre",
   "pageableWidget.version":"Version",
   "ParallelDocumentReview":"Revue en parallèle",
-  "pictureVeiwLayout.formats":"Formats complémentaires",
+  "pictureViewLayout.formats":"Additional Formats",
   "pictureViewLayout.colorSpace":"Profil colorimétrique",
   "pictureViewLayout.delete.confirm.message":"Voulez-vous vraiment supprimer cette image ?",
   "pictureViewLayout.delete.tootltip":"Supprimer l'image",
