@@ -126,13 +126,9 @@ gulp.task('lint', function() {
         once: true
       }))
 
-    // JSCS has not yet a extract option
-      .pipe($.if('*.html', $.htmlExtract()))
-      .pipe($.jshint())
-      .pipe($.jscs())
-      .pipe($.jscsStylish.combineWithHintResults())
-      .pipe($.jshint.reporter('jshint-stylish'))
-      .pipe($.if(!browserSync.active, $.jshint.reporter('fail')));
+      .pipe($.eslint())
+      .pipe($.eslint.format())
+      .pipe($.if(!browserSync.active, $.eslint.failAfterError()));
 });
 
 // Optimize images
@@ -338,4 +334,6 @@ require('web-component-tester').gulp.init(gulp);
 // Load custom tasks from the `tasks` directory
 try {
   require('require-dir')('tasks');
-} catch (err) {}
+} catch (err) {
+  //
+}

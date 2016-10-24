@@ -396,7 +396,7 @@ Contributors:
 
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-        _documentChanged: function() {
+        _documentChanged: function() {
           if (this.document) {
             this.workflows = this.document.contextParameters.runningWorkflows;
             this.tasks = this.document.contextParameters.pendingTasks;

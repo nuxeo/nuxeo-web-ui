@@ -1,0 +1,36 @@
+{
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-console": 0,
+    "max-len": [2, 120, 2, {
+      "ignoreUrls": true,
+      "ignoreComments": false
+    }]
+  },
+  "env": {
+    "browser": true
+  },
+  "plugins": [
+    "html"
+  ],
+  "globals": {
+    "__dirname": false,
+    "require": false,
+    "Polymer": false,
+    "Promise": false,
+    "Nuxeo": false,
+    "Platform": true,
+    "page": true,
+    "moment": true,
+    "jsPlumb": true,
+    "AlloyEditor": true,
+    "CKEDITOR": true,
+    "jQuery": true,
+    "confirm": true,
+    "gapi": true,
+    "google": true,
+    "OneDriveFilePicker": true,
+    "Dropbox": true,
+    "BoxSelect": true
+  }
+}
