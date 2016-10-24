@@ -110,7 +110,7 @@ Contributors:
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
         color: var(--nuxeo-header-actions);
-        margin: 0 0 0 1em;
+        margin: 1em 1.8em -1.8em;
       }
 
       .document-actions::content paper-icon-button {
@@ -149,11 +149,11 @@ Contributors:
             </paper-menu>
           </paper-dropdown-menu>
 
-          <div class="document-actions">
-            <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          </div>
-
         </paper-toolbar>
+      </div>
+
+      <div class="document-actions">
+        <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
 
       <template is="dom-if" if="[[_isVersion(document)]]">
