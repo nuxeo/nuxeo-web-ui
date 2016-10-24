@@ -28,88 +28,19 @@ Contributors:
       :host {
         display: block;
       }
-
-      .item {
-        @apply(--layout-vertical);
-        padding: .5rem 0;
-      }
-
-      .item label {
-        color: var(--nuxeo-title-color);
-        font-size: 1.2rem;
-      }
-
-      .item span {
-        font-size: .8rem;
-        color: #999;
-      }
-
-      .save {
-        color: green;
-      }
-
-      .edit {
-        background: linear-gradient(to left, rgba(255,255,255,1) 80%,rgba(255,255,255,0) 100%);
-        position: absolute;
-        right: 10px;
-        top: 10px;
-      }
-
-      iron-autogrow-textarea {
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        font-size: 1em;
-        height: 400px;
-        max-height: 400px;
-        width: 100%;
-        margin-bottom: 0.5em;
-
-        --iron-autogrow-textarea: {
-          padding: .5em;
-        };
-      }
     </style>
 
-    <nuxeo-document id="note" doc-id="[[document.uid]]" data="[[document]]"></nuxeo-document>
-
     <paper-card>
       <div class="card-content">
-        <template is="dom-if" if="[[_isHTML(document)]]">
-          <div class="html-editor-container">
-            <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
-            <div class="buttons layout horizontal end-justified">
-              <paper-button on-click="_editorSave" class="save" hidden$="[[!_canEdit(document)]]">
-                <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
-              </paper-button>
-            </div>
-          </div>
-        </template>
-        <template is="dom-if" if="[[!_isHTML(document)]]">
-          <template is="dom-if" if="[[_viewMode]]">
-            <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-            <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-          </template>
-          <template is="dom-if" if="[[!_viewMode]]">
-            <iron-autogrow-textarea bind-value="{{_value}}" placeholder="[[i18n('noteViewLayout.placeholder','Type here...')]]"></iron-autogrow-textarea>
-            <div class="buttons layout horizontal end-justified">
-              <paper-button on-click="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
-              <paper-button on-click="_editorSave" class="save">
-                <iron-icon icon="check"></iron-icon>[[i18n('command.save', 'Save')]]
-              </paper-button>
-            </div>
-          </template>
-        </template>
+        <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
       </div>
     </paper-card>
 
     <paper-card>
       <div class="card-content">
-        <nuxeo-document-attachments document="[[document]]"></nuxeo-document-attachments>
+        <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
       </div>
     </paper-card>
-
-    <paper-toast id="toast"></paper-toast>
   </template>
 
   <script>
@@ -120,73 +51,7 @@ Contributors:
         is: 'nuxeo-note-view-layout',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true,
-            observer: '_documentChanged'
-          },
-
-          _viewMode: {
-            type: Boolean,
-            value: true
-          }
-        },
-
-        _documentChanged: function() {
-          this._value = this.document.properties['note:note'];
-        },
-
-        _formatSize: function(size) {
-          if (!size) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' Bytes';
-          }
-        },
-
-        _isHTML: function() {
-          return this.document && this.document.properties['note:mime_type'] === 'text/html';
-        },
-
-        _editorSave: function() {
-          this.document.properties['note:note'] = this._value;
-          this.$.note.put().then(function() {
-            var toast = this.$$('#toast');
-            toast.text = this.i18n('noteViewLayout.note.saved', 'Note has been saved.');
-            toast.open();
-            this._viewMode = true;
-            this.fire('document-updated');
-          }.bind(this));
-        },
-
-        _hasFacet: function(document, facet) {
-          return document.facets.indexOf(facet) !== -1;
-        },
-
-        _hasPermission: function(document, permission) {
-          return document.contextParameters && document.contextParameters.permissions.indexOf(permission) !== -1;
-        },
-
-        _isMutable: function(document) {
-          return !this._hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
-        },
-
-        _canEdit: function(document) {
-          return document.type !== 'Root' && this._hasPermission(document, 'Write') && this._isMutable(document);
-        },
-
-        _edit: function() {
-          this._value = this.document.properties['note:note'];
-          this._viewMode = false;
-        },
-
-        _cancel: function() {
-          this._value = '';
-          this._viewMode = true;
+          document: Object
         }
       });
     })();
