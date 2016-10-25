@@ -77,10 +77,12 @@ Contributors:
 
         test('it should display collections', function() {
           var element = fixture('collections'), collections;
-          return waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
-            collections = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.collection-box');
-            expect(collections.length).to.be.equal(1);
-            expect(collections[0].querySelector('.collection-name').textContent).to.be.equal('My Collection');
+          return flush().then(function() {
+            waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
+              collections = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.collection-box');
+              expect(collections.length).to.be.equal(1);
+              expect(collections[0].querySelector('.collection-name').textContent).to.be.equal('My Collection');
+            });
           });
         });
       });
