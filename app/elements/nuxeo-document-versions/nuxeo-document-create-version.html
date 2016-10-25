@@ -17,7 +17,7 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-document-create-version`
@@ -152,7 +152,7 @@ Contributors:
       },
 
       _isAvailable: function(doc) {
-        return this._isVersionable(doc) && !this._isVersion(doc);
+        return this.isVersionable(doc) && !this.isVersion(doc);
       },
 
       _isDisabled: function(doc) {

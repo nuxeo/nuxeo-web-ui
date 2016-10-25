@@ -21,7 +21,7 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="nuxeo-menu-item.html">
 <link rel="import" href="nuxeo-menu-icon.html">
 <script src="nuxeo-doc-types.js"></script>
@@ -585,13 +585,13 @@ Contributors:
           this.docPath = path;
           this.docAction = action;
           this.$.doc.get().then(function(doc) {
-            if (this.docId && !this._isVersion(doc)) {
+            if (this.docId && !this.isVersion(doc)) {
               this.docId = '';
               this.docPath = doc.path;
               window.page('/browse' + doc.path);
             } else {
               this.$.recent.add(doc);
-              this.currentParent = this._isFolderish(doc) ? doc :
+              this.currentParent = this.isFolderish(doc) ? doc :
                 doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
               this.set('currentDocument', doc);
               this.show(page);

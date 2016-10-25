@@ -18,7 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-favorites-toggle-button`
@@ -107,7 +107,7 @@ Contributors:
         },
 
         _isAvailable: function(doc) {
-          return this._isCollectionMember(doc);
+          return this.isCollectionMember(doc);
         },
 
         _computeTooltip: function(isFavorite) {
@@ -115,12 +115,8 @@ Contributors:
                             : this.i18n('favoritesToggleButton.addToFavorites', 'Add to Favorites');
         },
 
-        _isFavorite: function(doc) {
-          return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
-        },
-
         _observeDoc: function() {
-          this.favorite = this._isFavorite(this.document);
+          this.favorite = this.isFavorite(this.document);
         },
 
         ready: function() {

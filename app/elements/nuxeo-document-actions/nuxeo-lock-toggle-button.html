@@ -18,7 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-lock-toggle-button`
@@ -100,7 +100,7 @@ Contributors:
         },
 
         _isAvailable: function(doc) {
-          return !this._isVersion(doc);
+          return !this.isVersion(doc);
         },
 
         _computeTooltip: function(locked) {

@@ -24,7 +24,7 @@ Contributors:
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-browser`
@@ -156,7 +156,7 @@ Contributors:
         <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
 
-      <template is="dom-if" if="[[_isVersion(document)]]">
+      <template is="dom-if" if="[[isVersion(document)]]">
         <div class="card-content info-bar">
           <iron-icon class="icon" icon="icons:info"></iron-icon>
           <div class="message">
@@ -294,15 +294,15 @@ Contributors:
         },
 
         _canDownload: function(document) {
-          return this._canView(document) && this._hasContent(document);
+          return this._canView(document) && this.hasContent(document);
         },
 
         _canView: function(document) {
-          return document && !this._isFolderish(document);
+          return document && !this.isFolderish(document);
         },
 
         _canViewContent: function(document) {
-          return this._isFolderish(document); // && this._canReadChildren;
+          return this.isFolderish(document); // && this._canReadChildren;
         },
 
         _navigateToView: function() {

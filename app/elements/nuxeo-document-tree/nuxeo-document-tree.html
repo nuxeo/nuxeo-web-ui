@@ -18,7 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-document-tree`
@@ -202,21 +202,21 @@ Contributors:
         _currentDocumentChanged: function() {
           var doc = this.currentDocument;
           if (doc && !this.user) {
-            if (this.rootPath !== doc.path && !this._isHiddenInNavigation(doc)) {
+            if (this.rootPath !== doc.path && !this.isHiddenInNavigation(doc)) {
               this.$.tree.style.display = 'none';
 
               var entries = doc.contextParameters.breadcrumb.entries;
               this.parents = [];
               for (var i = 0; i < entries.length - 1; i++) {
                 var entry = entries[i];
-                if (this._isHiddenInNavigation(entry)) {
+                if (this.isHiddenInNavigation(entry)) {
                   return;
                 }
                 this.push('parents', entry);
               }
 
               var lastEntry = entries[entries.length - 1];
-              if (this._isFolderish(lastEntry)) {
+              if (this.isFolderish(lastEntry)) {
                 this.rootPath = lastEntry.path;
               }
             }

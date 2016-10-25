@@ -20,7 +20,7 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="nuxeo-document-versions-list.html">
 <link rel="import" href="nuxeo-document-create-version.html">
 
@@ -126,7 +126,7 @@ Contributors:
       </nuxeo-tag>
       <nuxeo-document-versions-list id="list" document="[[document]]">
         <div id="list-items">
-          <template is="dom-if" if="[[_isVersion(document)]]">
+          <template is="dom-if" if="[[isVersion(document)]]">
             <div id="version-latest" class="version" on-tap="_showLatest">
               <div class="row title latest">[[_labelLatest(latest)]]</div>
             </div>
@@ -148,7 +148,7 @@ Contributors:
       </iron-scroll-threshold>
     </div>
 
-    <template is="dom-if" if="[[_isVersion(document)]]">
+    <template is="dom-if" if="[[isVersion(document)]]">
       <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
     </template>
     <template is="dom-repeat" items="[[versions]]" as="item">
@@ -188,7 +188,7 @@ Contributors:
 
         _update: function() {
           if (this.document) {
-            if (this._isVersion(this.document)) {
+            if (this.isVersion(this.document)) {
               this.$.opGetLatest.execute().then(function() {
                 this._query(this.latest.uid);
               }.bind(this));

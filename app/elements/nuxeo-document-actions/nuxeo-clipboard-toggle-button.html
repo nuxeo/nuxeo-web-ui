@@ -17,7 +17,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-clipboard-toggle-button`
@@ -85,7 +85,7 @@ Contributors:
         },
 
         _isAvailable: function(doc) {
-          return this._isCollectionMember(doc) && !this._isVersion(doc);
+          return this.isCollectionMember(doc) && !this.isVersion(doc);
         },
 
         _computeTooltip: function(inClipboard) {
