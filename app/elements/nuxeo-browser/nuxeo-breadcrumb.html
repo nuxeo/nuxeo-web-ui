@@ -42,14 +42,12 @@ Contributors:
         @apply(--nuxeo-link-hover); }
 
       .breadcrumb {
-        margin: .55em 1.5em 0 0;
+        margin: .7em .5em 0 0;
         color: var(--nuxeo-text-light);
-        font-weight: 300;
         font-size: .95rem;
       }
 
       .ancestors {
-        margin-top: -.4em;
         display: block;
         line-height: 1em;
       }
@@ -59,7 +57,7 @@ Contributors:
       }
 
       .current {
-        font-weight: 600;
+        font-weight: 400;
         display: initial;
         white-space: nowrap;
         color: var(--nuxeo-header-title-color);
@@ -69,12 +67,10 @@ Contributors:
         display: inline-block;
       }
 
-      .current iron-icon,
-      .current iron-icon ::content img {
-        width: .7rem !important;
-        height: .7rem !important;
-        margin-top: -.35em;
-        margin-right: .1em;
+      .current-icon iron-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: .8em;
       }
 
       a.nuxeo-breadcrumb,
@@ -82,6 +78,10 @@ Contributors:
         color: var(--nuxeo-text-light);
         font-size: .6rem;
         font-weight: 300;
+      }
+
+      .breadcrumb-divider {
+        vertical-align: baseline;
       }
 
       a.nuxeo-breadcrumb:hover {
@@ -112,20 +112,22 @@ Contributors:
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <div class="breadcrumb">
-      <div class="current" class="breadcrumb-item breadcrumb-item-current">
+    <div class="breadcrumb layout horizontal">
+      <div class="current-icon">
         <iron-icon src="[[_icon(document)]]"></iron-icon>
-        <span>[[document.title]]</span>
       </div>
-      <div class="ancestors">
-        <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-          <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
-            <a href$="[[urlFor('browse', item.path)]]">
-              <span class="breadcrumb-item-title">[[item.title]]</span>
-            </a>
-            <span class="breadcrumb-divider">/</span>
-          </span>
-        </template>
+      <div>
+        <div class="current breadcrumb-item breadcrumb-item-current">[[document.title]]</div>
+        <div class="ancestors">
+          <template is="dom-repeat" items="[[_breadcrumb(document)]]">
+            <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
+              <a href$="[[urlFor('browse', item.path)]]">
+                <span class="breadcrumb-item-title">[[item.title]]</span>
+              </a>
+              <span class="breadcrumb-divider">></span>
+            </span>
+          </template>
+        </div>
       </div>
     </div>
 
