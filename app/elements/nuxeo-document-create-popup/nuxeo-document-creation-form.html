@@ -60,6 +60,7 @@ Contributors:
         min-height: 20em;
         justify-content: space-around;
       }
+
       .typeSelection paper-button {
         width: var(--nuxeo-document-creation-form-button-width, 128px);
         height: var(--nuxeo-document-creation-form-button-height, 128px);
@@ -67,54 +68,34 @@ Contributors:
         box-shadow: none;
         border: 1px solid var(--divider-color);
       }
+
       .typeSelection paper-button:hover {
         color: var(--nuxeo-link-hover-color);
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
       }
+
       .typeSelection iron-icon {
         width: var(--nuxeo-document-creation-form-icon-width, 64px);
         height: var(--nuxeo-document-creation-form-icon-height, 64px);
       }
 
       #editor {
-        margin: var(--nuxeo-document-creation-form-form-margin, 0);
+        margin: 0 32px;
         overflow-y: auto;
-      }
-
-      #document-edit {
-        margin: 8px 36px;
       }
 
       .heading {
         text-transform: uppercase;
         font-size: 16px;
         color: var(--nuxeo-text-default);
-        padding: 16px 32px;
+        padding: 32px;
       }
+
       .heading iron-icon {
         width: 32px;
         height: 32px;
-        margin-right: 8px;
-      }
-
-      .path {
-        margin-top: 0;
-        padding: 32px 32px 16px 32px;
-      }
-      .path span {
-        width: 200px;
-      }
-
-      .suggestion-wrapper {
-        border: var(--nuxeo-border);
-        border-radius: 8px;
-        border-width: 2px;
-        padding: 0 8px;
-      }
-      .suggestion-wrapper iron-icon {
-        color: var(--nuxeo-text-default);
         margin-right: 8px;
       }
 
@@ -122,12 +103,17 @@ Contributors:
         margin: 4px;
       }
 
-      #document-create {
-        padding: 32px;
-      }
-
       .buttons {
         @apply(--buttons-bar);
+      }
+
+      ::content label {
+        @apply(--nuxeo-label);
+        padding-top: 8px;
+      }
+
+      ::content paper-dropdown-menu {
+        width: 100%;
       }
     </style>
 
@@ -165,23 +151,8 @@ Contributors:
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
         <div id="editor" class="flex">
-          <div class="path sep horizontal layout center">
-            <span>[[i18n('documentCreationForm.location', 'Location')]]</span>
-            <div class="suggestion-wrapper horizontal layout center flex">
-              <div>
-                <iron-icon icon="icons:folder"></iron-icon>
-              </div>
-              <div class="flex">
-                <nuxeo-path-suggestion id="pathSuggester"
-                                       value="{{targetPath}}"
-                                       no-label-float></nuxeo-path-suggestion>
-              </div>
-            </div>
-          </div>
-          <form is="iron-form"
-                action="/"
-                id="form"
-                on-submit="_create" class="form vertical layout flex">
+          <nuxeo-path-suggestion id="pathSuggester" label="[[i18n('documentCreationForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
+          <form is="iron-form" action="/" id="form" on-submit="_create" class="form vertical layout flex">
             <div id="document-create">
               <!--dynamically loaded via _updateLayout-->
             </div>

@@ -16,7 +16,7 @@ limitations under the License.
 Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../dublincore/nuxeo-dublincore-create-layout.html">
+<link rel="import" href="../file/nuxeo-file-create-layout.html">
 
 <!--
 `nuxeo-workspace-create-layout`
@@ -29,53 +29,9 @@ Contributors:
       :host {
         display: block;
       }
-
-      .row {
-        margin-bottom: 25px;
-      }
-
-      input,
-      textarea {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-      }
-
-      .required {
-        color: red;
-        position: absolute;
-        right: 10px;
-      }
-
     </style>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('title', 'Title')]]</label>
-        <span class="required">*</span>
-      </div>
-      <input is="iron-input" name="title" value="{{document.properties.dc:title::change}}" class="flex" required>
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('label.description', 'Description')]]</label>
-      </div>
-      <textarea value="{{document.properties.dc:description::change}}" class="flex"></textarea>
-    </div>
-
-    <nuxeo-dublincore-create-layout document="[[document]]"></nuxeo-dublincore-create-layout>
+    <nuxeo-file-create-layout document={{document}}></nuxeo-file-create-layout>
 
   </template>
   <script>
