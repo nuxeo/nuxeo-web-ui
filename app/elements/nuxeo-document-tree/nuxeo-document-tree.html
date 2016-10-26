@@ -43,12 +43,11 @@ Contributors:
       }
 
       nuxeo-tree {
-        padding: 0 8px;
+        padding: 1em .5em;
       }
 
       .content {
         @apply(--layout-vertical);
-        padding: 16px 8px;
       }
 
       .header {
@@ -76,23 +75,37 @@ Contributors:
       }
 
       .node-name {
-        display: inline-block;
-        position: absolute;
-        text-overflow: ellipsis;
         line-height: 24px;
+        margin-left: 1.3em;
       }
 
       iron-icon {
-        color: var(--nuxeo-link-color);
+        color: var(--nuxeo-text-light);
+        width: 1.3rem;
+        position: absolute;
       }
 
       [toggle] {
         cursor: pointer;
       }
 
+      .node-name {
+        display: inline-block;
+      }
+
       .parents {
         display: block;
-        font-weight: bold;
+        font-weight: 100;
+        line-height: 1.5em;
+      }
+
+      .parents a {
+        padding: .6em .4em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .parents div {
+        padding-left: 1.3rem;
       }
 
     </style>
@@ -110,8 +123,9 @@ Contributors:
     <div class="content">
       <div class="parents">
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal center">
-            <iron-icon icon="icons:chevron-left"></iron-icon>[[item.title]]
+          <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
+            <iron-icon icon="icons:chevron-left"></iron-icon>
+            <div>[[item.title]]</div>
           </a>
         </template>
       </div>
@@ -121,7 +135,7 @@ Contributors:
           <template is="dom-if" if="[[!isLeaf]]">
             <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
           </template>
-          <span class="flex node-name ellipsis">
+          <span class="flex node-name">
             <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
           </span>
         </template>
