@@ -18,8 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 
 <!--
 `nuxeo-note-editor`
@@ -80,7 +79,7 @@ Contributors:
   (function() {
     Polymer({
       is: 'nuxeo-note-editor',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         document: {
           type: Object,
@@ -98,18 +97,6 @@ Contributors:
 
       _documentChanged: function() {
         this._value = this.document.properties['note:note'];
-      },
-
-      _formatSize: function(size) {
-        if (!size) {
-          return '';
-        } else if (size > 1048576) {
-          return parseFloat(size / 1048576).toFixed(2) + ' MB';
-        } else if (size > 1024) {
-          return parseFloat(size / 1024).toFixed(2) + ' KB';
-        } else {
-          return size.toString() + ' Bytes';
-        }
       },
 
       _isHTML: function() {

@@ -87,7 +87,7 @@ Contributors:
 
         <div role="widget" class="item">
           <label>[[i18n('pictureViewLayout.weight')]]</label>
-          <div>[[_formatSize(document.properties.common:size)]]</div>
+          <div>[[formatSize(document.properties.common:size)]]</div>
         </div>
 
       </div>
@@ -107,23 +107,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-picture-view-layout',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object
-        },
-
-        _formatSize: function(size) {
-          if (!size) {
-            return '';
-          } else if (size > 1048576) {
-            return parseFloat(size / 1048576).toFixed(2) + ' MB';
-          } else if (size > 1024) {
-            return parseFloat(size / 1024).toFixed(2) + ' KB';
-          } else {
-            return size.toString() + ' Bytes';
-          }
         }
-
       });
     })();
   </script>

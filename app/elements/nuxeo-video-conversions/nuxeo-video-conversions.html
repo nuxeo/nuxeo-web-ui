@@ -18,6 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 
 <!--
 `nuxeo-video-conversions`
@@ -46,7 +47,7 @@ Contributors:
         <div class="layout horizontal center">
           <label class="flex">[[conversion.name]]</label>
           <div class="flex">[[conversion.info.width]] x [[conversion.info.height]]</div>
-          <div class="flex">[[_formatSize(conversion.content.length)]]</div>
+          <div class="flex">[[formatSize(conversion.content.length)]]</div>
           <a href="[[conversion.content.data]]" title="download">
             <iron-icon icon="icons:file-download"></iron-icon>
           </a>
@@ -62,21 +63,9 @@ Contributors:
   (function() {
     Polymer({
       is: 'nuxeo-video-conversions',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
       properties: {
         document: Object
-      },
-
-      _formatSize: function(size) {
-        if (!size) {
-          return '';
-        } else if (size > 1048576) {
-          return parseFloat(size / 1048576).toFixed(2) + ' MB';
-        } else if (size > 1024) {
-          return parseFloat(size / 1024).toFixed(2) + ' KB';
-        } else {
-          return size.toString() + ' Bytes';
-        }
       }
     });
   })();

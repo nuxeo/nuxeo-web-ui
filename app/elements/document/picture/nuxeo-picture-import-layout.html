@@ -16,7 +16,6 @@ limitations under the License.
 Contributors:
    Andre Justo <ajusto@nuxeo.com>
 -->
-
 <link rel="import" href="../file/nuxeo-file-import-layout.html">
 
 <!--
@@ -41,10 +40,9 @@ Contributors:
 
        Polymer({
          is: 'nuxeo-picture-import-layout',
+         behaviors: [Nuxeo.LayoutBehavior],
          properties: {
-           document: {
-             type: Object
-           }
+           document: Object
          }
        });
      })();

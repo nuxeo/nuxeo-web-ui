@@ -15,10 +15,10 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
 <script>
 var Nuxeo = Nuxeo || {};
-Nuxeo.DocumentCreationBehavior = [Nuxeo.I18nBehavior, {
+Nuxeo.DocumentCreationBehavior = [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior, {
   properties: {
     parent: {
       type: Object,
@@ -58,18 +58,6 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.I18nBehavior, {
 
   _notify: function(response) {
     this.fire('document-created', {response: response});
-  },
-
-  _formatSize: function(size) {
-    if (!Number.isInteger(size)) {
-      return '';
-    } else if (size > 1048576) {
-      return parseFloat(size / 1048576).toFixed(2) + ' MB';
-    } else if (size > 1024) {
-      return parseFloat(size / 1024).toFixed(2) + ' KB';
-    } else {
-      return size.toString() + ' B';
-    }
   },
 
   _sanitizeName: function(name) {

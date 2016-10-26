@@ -62,7 +62,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-metadata',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: {
             type: Object,
@@ -144,21 +144,13 @@ Contributors:
           }
         },
 
-        _hasFacet: function(document, facet) {
-          return document.facets.indexOf(facet) !== -1;
-        },
-
-        _hasPermission: function(document, permission) {
-          return document.contextParameters && document.contextParameters.permissions.indexOf(permission) !== -1;
-        },
-
         _isMutable: function(document) {
-          return !this._hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+          return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
         },
 
         _canEdit: function(document) {
           return document && document.type !== 'Root' &&
-            this._hasPermission(document, 'Write') && this._isMutable(document);
+            this.hasPermission(document, 'Write') && this._isMutable(document);
         }
       });
     })();

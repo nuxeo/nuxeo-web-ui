@@ -15,6 +15,7 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
+-->
 
 <!--
 `nuxeo-file-metadata-layout`
@@ -27,12 +28,16 @@ Contributors:
     <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
   </template>
   <script>
-    Polymer({
-      is: 'nuxeo-file-metadata-layout',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        document: Object
-      }
-    });
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-file-metadata-layout',
+        behaviors: [Nuxeo.LayoutBehavior],
+        properties: {
+          document: Object
+        }
+      });
+    })();
   </script>
 </dom-module>

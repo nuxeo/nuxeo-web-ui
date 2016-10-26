@@ -18,8 +18,6 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
     Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-document-page`
@@ -233,7 +231,7 @@ Contributors:
             <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
             <!-- TODO: review labels with embedded markup tags -->
             [[i18n('documentPage.to.process', 'You have a task to process before ')]]
-            [[_formatDate(task.dueDate)]]
+            [[formatDate(task.dueDate)]]
             <paper-button noink class="process-task" on-tap="_processTask">
               [[i18n('documentPage.process.task', 'Process')]]
             </paper-button>
@@ -282,7 +280,7 @@ Contributors:
               <div class="details ctn">
                 <div>
                   <span class="col">[[i18n('documentPage.added.on', 'Created on')]]</span>
-                  [[_formatDate(document.properties.dc:created)]]
+                  [[formatDate(document.properties.dc:created)]]
                 </div>
                 <div>
                   <span class="col">[[i18n('documentPage.added.by', 'By')]]</span>
@@ -325,7 +323,7 @@ Contributors:
               </div>
             </paper-card>
           </template>
-          <template is="dom-if" if="[[_hasCollections(document)]]">
+          <template is="dom-if" if="[[hasCollections(document)]]">
             <paper-card class="sidecard">
               <p class="title">[[i18n('documentPage.collections', 'Collections')]]</p>
               <div class="horizontal layout wrap card-content">
@@ -350,6 +348,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-page',
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: {
             type: Object,
@@ -393,8 +392,6 @@ Contributors:
             value: false
           }
         },
-
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         _documentChanged: function() {
           if (this.document) {
@@ -440,18 +437,6 @@ Contributors:
 
         _toggleGraphDialog: function() {
           this.$$('#graphDialog').toggle();
-        },
-
-        _hasCollections: function() {
-          if (this.document) {
-            return this.document.contextParameters.collections &&
-              this.document.contextParameters.collections.length > 0;
-          }
-          return false;
-        },
-
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
         }
 
       });

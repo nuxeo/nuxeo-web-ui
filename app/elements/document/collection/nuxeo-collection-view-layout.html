@@ -31,14 +31,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-collection-view-layout',
-
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
-          document: {
-            type: Object,
-            notify: true
-          }
+          document: Object
         }
-
       });
     })();
   </script>

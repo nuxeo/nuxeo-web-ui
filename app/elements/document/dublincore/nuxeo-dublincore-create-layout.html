@@ -113,15 +113,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-dublincore-create-layout',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
-          document: {
-            type: Object
-          }
-        },
-
-        format: function(date) {
-          return moment(date).format('DD/MM/YYYY HH:mm');
+          document: Object
         }
       });
     })();

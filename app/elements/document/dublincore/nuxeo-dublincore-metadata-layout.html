@@ -15,6 +15,7 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
+-->
 
 <!--
 `nuxeo-dublincore-metadata-layout`
@@ -61,7 +62,7 @@ Contributors:
 
     <div role="widget" hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
-      <div>[[_formatDate(document.properties.dc:expired)]]</div>
+      <div>[[formatDate(document.properties.dc:expired)]]</div>
     </div>
 
   </template>
@@ -72,13 +73,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-dublincore-metadata-layout',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object
-        },
-
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
         }
       });
     })();

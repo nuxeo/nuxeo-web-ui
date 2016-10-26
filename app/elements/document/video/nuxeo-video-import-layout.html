@@ -15,7 +15,6 @@ limitations under the License.
 Contributors:
     Nelson Silva <nsilva@nuxeo.com>
 -->
-
 <link rel="import" href="../file/nuxeo-file-import-layout.html">
 
 <!--
@@ -40,10 +39,9 @@ Contributors:
 
        Polymer({
          is: 'nuxeo-video-import-layout',
+         behaviors: [Nuxeo.LayoutBehavior],
          properties: {
-           document: {
-             type: Object
-           }
+           document: Object
          }
        });
      })();

@@ -18,6 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 
 <!--
 `nuxeo-picture-formats`
@@ -65,7 +66,7 @@ Contributors:
   (function() {
     Polymer({
       is: 'nuxeo-picture-formats',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         label: String,
         document: Object,
@@ -80,7 +81,7 @@ Contributors:
           return {
             name: view.description,
             dimensions: view.width + ' x ' + view.height,
-            size: this._formatSize(view.content.length),
+            size: this.formatSize(view.content.length),
             format: view.info.format,
             data: view.content.data
           };
