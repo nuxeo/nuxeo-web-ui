@@ -85,7 +85,7 @@ Contributors:
         },
 
         _isAvailable: function(doc) {
-          return this.isCollectionMember(doc) && !this.isVersion(doc);
+          return this.isCollectionMember(doc) && !doc.isVersion;
         },
 
         _computeTooltip: function(inClipboard) {

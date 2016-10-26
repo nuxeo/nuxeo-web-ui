@@ -90,7 +90,7 @@ Contributors:
           if (!this.document) {
             return false;
           }
-          if (this.isVersion(this.document)) {
+          if (this.document.isVersion) {
             return false;
           }
           var excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];

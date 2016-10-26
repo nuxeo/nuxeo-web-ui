@@ -152,7 +152,7 @@ Contributors:
       },
 
       _isAvailable: function(doc) {
-        return this.isVersionable(doc) && !this.isVersion(doc);
+        return this.hasFacet(doc, 'Versionable') && !doc.isVersion;
       },
 
       _isDisabled: function(doc) {

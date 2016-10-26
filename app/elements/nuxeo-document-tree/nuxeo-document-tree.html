@@ -202,21 +202,21 @@ Contributors:
         _currentDocumentChanged: function() {
           var doc = this.currentDocument;
           if (doc && !this.user) {
-            if (this.rootPath !== doc.path && !this.isHiddenInNavigation(doc)) {
+            if (this.rootPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
               this.$.tree.style.display = 'none';
 
               var entries = doc.contextParameters.breadcrumb.entries;
               this.parents = [];
               for (var i = 0; i < entries.length - 1; i++) {
                 var entry = entries[i];
-                if (this.isHiddenInNavigation(entry)) {
+                if (this.hasFacet(entry, 'HiddenInNavigation')) {
                   return;
                 }
                 this.push('parents', entry);
               }
 
               var lastEntry = entries[entries.length - 1];
-              if (this.isFolderish(lastEntry)) {
+              if (this.hasFacet(lastEntry, 'Folderish')) {
                 this.rootPath = lastEntry.path;
               }
             }

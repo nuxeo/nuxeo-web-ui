@@ -18,6 +18,8 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-note-editor`
@@ -78,7 +80,7 @@ Contributors:
   (function() {
     Polymer({
       is: 'nuxeo-note-editor',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: {
           type: Object,
@@ -125,20 +127,12 @@ Contributors:
         }.bind(this));
       },
 
-      _hasFacet: function(document, facet) {
-        return document.facets.indexOf(facet) !== -1;
-      },
-
-      _hasPermission: function(document, permission) {
-        return document.contextParameters && document.contextParameters.permissions.indexOf(permission) !== -1;
-      },
-
       _isMutable: function(document) {
-        return !this._hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
       },
 
       _canEdit: function(document) {
-        return document.type !== 'Root' && this._hasPermission(document, 'Write') && this._isMutable(document);
+        return document.type !== 'Root' && this.hasPermission(document, 'Write') && this._isMutable(document);
       },
 
       _edit: function() {

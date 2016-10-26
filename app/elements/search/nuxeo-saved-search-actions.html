@@ -19,6 +19,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-saved-search-actions`
@@ -74,14 +75,12 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-saved-search-actions',
-
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           searchDoc: Object,
           searchLoaded: Boolean,
           dirty: Boolean
         },
-
-        behaviors: [Nuxeo.I18nBehavior],
 
         set searchForm(form) {
           this._searchForm = form;

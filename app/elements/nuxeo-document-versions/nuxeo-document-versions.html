@@ -17,9 +17,9 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="nuxeo-document-versions-list.html">
 <link rel="import" href="nuxeo-document-create-version.html">
@@ -113,20 +113,20 @@ Contributors:
       query="[[query]]" page-size="[[pageSize]]"
       page="{{page}}"
       sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
-      schemas="dublincore,common">
+      schemas="dublincore,common,uid">
     </nuxeo-page-provider>
 
-    <nuxeo-document-create-version document="[[document]]" hidden$="[[_hasVersions(document)]]">
+    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]">
     </nuxeo-document-create-version>
 
-    <div hidden$="[[!_hasVersions(document)]]">
+    <div hidden$="[[!hasVersions(document)]]">
       <nuxeo-tag class="toggle" on-tap="_showList">
         <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
         <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
       </nuxeo-tag>
       <nuxeo-document-versions-list id="list" document="[[document]]">
         <div id="list-items">
-          <template is="dom-if" if="[[isVersion(document)]]">
+          <template is="dom-if" if="[[document.isVersion]]">
             <div id="version-latest" class="version" on-tap="_showLatest">
               <div class="row title latest">[[_labelLatest(latest)]]</div>
             </div>
@@ -148,7 +148,7 @@ Contributors:
       </iron-scroll-threshold>
     </div>
 
-    <template is="dom-if" if="[[isVersion(document)]]">
+    <template is="dom-if" if="[[document.isVersion]]">
       <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
     </template>
     <template is="dom-repeat" items="[[versions]]" as="item">
@@ -188,7 +188,7 @@ Contributors:
 
         _update: function() {
           if (this.document) {
-            if (this.isVersion(this.document)) {
+            if (this.document.isVersion) {
               this.$.opGetLatest.execute().then(function() {
                 this._query(this.latest.uid);
               }.bind(this));
@@ -196,10 +196,6 @@ Contributors:
               this._query(this.document.uid);
             }
           }
-        },
-
-        _hasVersions: function(doc) {
-          return (doc && (doc.properties['uid:major_version'] > 0 || doc.properties['uid:minor_version'] > 0));
         },
 
         _isCreateDisabled: function(doc) {

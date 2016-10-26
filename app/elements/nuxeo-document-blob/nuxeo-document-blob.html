@@ -74,7 +74,10 @@ Contributors:
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object,
-        xpath: String,
+        xpath: {
+          type: String,
+          value: 'file:content'
+        },
         blob: Object
       },
 

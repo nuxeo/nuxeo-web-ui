@@ -19,6 +19,7 @@ Contributors:
   Guillaume Renard <grenard@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-add-to-collection-documents-button`
@@ -133,6 +134,7 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-add-to-collection-documents-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         documents: {
           type: Array,
@@ -166,13 +168,12 @@ Contributors:
           }
         }
       },
-      behaviors: [Nuxeo.I18nBehavior],
 
       _isAvailable: function() {
         if (this.documents && this.documents.length > 0) {
           return this.documents.every(function(doc) {
-            return doc.facets.indexOf('NotCollectionMember') === -1;
-          });
+            return !this.hasFacet(doc, 'NotCollectionMember');
+          }.bind(this));
         }
         return false;
       },

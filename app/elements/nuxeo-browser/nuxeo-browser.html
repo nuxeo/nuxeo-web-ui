@@ -156,7 +156,7 @@ Contributors:
         <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
 
-      <template is="dom-if" if="[[isVersion(document)]]">
+      <template is="dom-if" if="[[document.isVersion]]">
         <div class="card-content info-bar">
           <iron-icon class="icon" icon="icons:info"></iron-icon>
           <div class="message">
@@ -298,11 +298,11 @@ Contributors:
         },
 
         _canView: function(document) {
-          return document && !this.isFolderish(document);
+          return document && !this.hasFacet(document, 'Folderish');
         },
 
         _canViewContent: function(document) {
-          return this.isFolderish(document); // && this._canReadChildren;
+          return this.hasFacet(document, 'Folderish'); // && this._canReadChildren;
         },
 
         _navigateToView: function() {

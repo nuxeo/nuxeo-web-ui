@@ -18,6 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-document-attachments`
@@ -59,7 +60,7 @@ Contributors:
                     message="[[i18n('documentAttachments.dropzone.message', 'Drop to attach file')]]"
                     message-empty="[[i18n('documentAttachments.dropzone.emptyMessage', '+ Complete the document with additional files')]]"
                     uploaded-message="[[i18n('documentAttachments.upload.uploaded', 'Attachment uploaded')]]"
-                    empty="[[!_hasAttachments(document, document.properties, document.properties.files:files)]]"
+                    empty="[[!hasAttachments(document, document.properties, document.properties.files:files)]]"
                     xpath="files:files"
                     blob-list>
 
@@ -80,14 +81,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-attachments',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document:  Object
-        },
-
-        _hasAttachments: function() {
-          return (this.document && this.document.properties && this.document.properties['files:files']) ?
-                  this.document.properties['files:files'].length > 0 : false;
         },
 
         _upload: function() {

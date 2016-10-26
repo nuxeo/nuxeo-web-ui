@@ -52,7 +52,7 @@ Contributors:
       },
 
       _isAvailable: function(doc) {
-        return !this.isFolderish(doc) && this.hasContent(doc) && this.isVersion(doc);
+        return doc && !this.hasFacet('Folderish') && this.hasContent(doc) && doc.isVersion;
       },
 
       _download: function() {

@@ -168,7 +168,7 @@ Contributors:
 
       _selectedRecentChanged: function(doc) {
         if (doc) {
-          if (this.isVersion(doc)) {
+          if (doc.isVersion) {
             page('/doc/' + doc.uid);
           } else {
             page('/browse' + doc.path);

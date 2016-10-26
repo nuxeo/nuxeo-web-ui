@@ -100,7 +100,7 @@ Contributors:
         },
 
         _isAvailable: function(doc) {
-          return !this.isVersion(doc);
+          return doc && !doc.isVersion;
         },
 
         _computeTooltip: function(locked) {
