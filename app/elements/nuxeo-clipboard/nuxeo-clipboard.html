@@ -32,10 +32,19 @@ Contributors:
         @apply(--layout-vertical);
       }
 
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
+        @apply(--nuxeo-sidebar-item-link);
       }
 
       .ellipsis {
