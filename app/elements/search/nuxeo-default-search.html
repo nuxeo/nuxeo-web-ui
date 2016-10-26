@@ -161,11 +161,13 @@ Contributors:
           },
           provider: {
             type: String,
-            value: 'default_search'
+            value: 'default_search',
+            reflectToAttribute: true
           },
           schemas: {
             type: String,
-            value: 'dublincore,common'
+            value: 'dublincore,common,uid',
+            reflectToAttribute: true
           }
         },
 
