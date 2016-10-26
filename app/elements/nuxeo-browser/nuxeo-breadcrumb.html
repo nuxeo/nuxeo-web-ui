@@ -42,14 +42,15 @@ Contributors:
         @apply(--nuxeo-link-hover); }
 
       .breadcrumb {
-        margin: .7em .5em 0 0;
+        margin: .7em 2em 0 0;
         color: var(--nuxeo-text-light);
         font-size: .95rem;
       }
 
       .ancestors {
         display: block;
-        line-height: 1em;
+        line-height: 2em;
+        font-size: .6rem;
       }
 
       .breadcrumb-item {
@@ -63,10 +64,6 @@ Contributors:
         color: var(--nuxeo-header-title-color);
       }
 
-      .current span {
-        display: inline-block;
-      }
-
       .current-icon iron-icon {
         width: 1.5rem;
         height: 1.5rem;
@@ -76,7 +73,6 @@ Contributors:
       a.nuxeo-breadcrumb,
       .breadcrumb-divider {
         color: var(--nuxeo-text-light);
-        font-size: .6rem;
         font-weight: 300;
       }
 
@@ -88,7 +84,7 @@ Contributors:
         color: var(--nuxeo-link-hover-color);
       }
 
-      .current span, .ancestors {
+      .doc-path, .ancestors {
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -105,9 +101,6 @@ Contributors:
         display: inline-block;
       }
 
-      @media (max-width: 1280px) {
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -116,7 +109,7 @@ Contributors:
       <div class="current-icon">
         <iron-icon src="[[_icon(document)]]"></iron-icon>
       </div>
-      <div>
+      <div class="doc-path">
         <div class="current breadcrumb-item breadcrumb-item-current">[[document.title]]</div>
         <div class="ancestors">
           <template is="dom-repeat" items="[[_breadcrumb(document)]]">
