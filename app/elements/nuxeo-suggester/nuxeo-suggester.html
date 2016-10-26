@@ -283,7 +283,11 @@ Contributors:
         },
 
         _getIcon: function(item) {
-          return this.$.nxcon.url + item.icon;
+          if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
+            return this.$.nxcon.url + '/' + item.thumbnailUrl;
+          } else {
+            return this.$.nxcon.url + item.icon;
+          }
         },
 
         _upPressed: function() {

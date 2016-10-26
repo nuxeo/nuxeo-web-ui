@@ -210,6 +210,7 @@ Contributors:
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
        params="[[params]]"
+       quick-filters="{{quickFilters}}"
        schemas="[[schemas]]"
        fetch-aggregates>
     </nuxeo-page-provider>
@@ -269,6 +270,7 @@ Contributors:
           <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
             on-nuxeo-page-loaded="_membersLoaded"
             selected-item="{{selectedDocument}}"
+
             selection-enabled>
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
@@ -448,7 +450,7 @@ Contributors:
         },
 
         observers: [
-         '_resetResults(provider, params.*, query)',
+         '_resetResults(provider, params.*, quickFilters.*, query)',
          '_paramsChanged(params.*)',
          '_updateLayout(searchName)'
         ],
