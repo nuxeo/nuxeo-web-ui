@@ -536,8 +536,8 @@ Contributors:
           this.searchTerm = '';
           this.isSavedSearch = false;
           this.selectedSearch = {};
-          if (this._form) {
-            this._form.searchTerm = '';
+          if (this._form && this._form.clear != undefined && typeof this._form.clear == 'function') {
+            this._form.clear();
           }
           this.params = {};
           if (!this._isSavedSearch()) {
