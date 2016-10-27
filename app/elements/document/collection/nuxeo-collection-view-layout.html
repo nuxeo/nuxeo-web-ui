@@ -24,6 +24,12 @@ Contributors:
 -->
 <dom-module id="nuxeo-collection-view-layout">
   <template>
+
+    <div role="widget">
+      <label>[[i18n('label.dublincore.title')]]</label>
+      <div>[[document.properties.dc:title]]</div>
+    </div>
+
   </template>
   <script>
     (function() {

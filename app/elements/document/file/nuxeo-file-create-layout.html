@@ -16,7 +16,6 @@ limitations under the License.
 Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../dublincore/nuxeo-dublincore-create-layout.html">
 
 <!--
 `nuxeo-file-create-layout`
@@ -25,30 +24,43 @@ Contributors:
 -->
 <dom-module id="nuxeo-file-create-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
     <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <!-- TODO: NXP-20462: replace with file upload element -->
-    <div role="widget" class="row layout horizontal">
+    <div role="widget" class="layout vertical">
       <label>[[i18n('fileEditLayout.content')]]</label>
-      <paper-radio-group class="layout horizontal" selected="none">
-        <!-- none choice -->
-        <paper-radio-button name="none" on-tap="_noneSelected">[[i18n('fileEditLayout.radio.none','None')]]</paper-radio-button>
-        <!-- upload choice -->
-        <paper-radio-button name="upload" on-tap="_uploadSelected">[[i18n('fileEditLayout.radio.upload','Upload')]]</paper-radio-button>
-      </paper-radio-group>
       <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
     </div>
 
-    <nuxeo-dublincore-create-layout document="[[document]]"></nuxeo-dublincore-create-layout>
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
+                                directory-name="nature"
+                                value="{{document.properties.dc:nature}}"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
+                                directory-name="l10nsubjects"
+                                value="{{document.properties.dc:subjects}}"
+                                multiple="true"
+                                dbl10n="true"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
+                                directory-name="l10ncoverage"
+                                value="{{document.properties.dc:coverage}}"
+                                dbl10n="true"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
+                 type="date" value="{{document.properties.dc:expired::change}}">
+    </paper-input>
 
   </template>
   <script>
@@ -60,16 +72,7 @@ Contributors:
         behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object
-        },
-
-        _noneSelected: function() {
-          this.document.properties['file:content'] = null;
-        },
-
-        _uploadSelected: function() {
-          this.document.properties['file:content'] = this.$$('#nxFile').value;
         }
-
       });
     })();
   </script>

@@ -16,7 +16,6 @@ limitations under the License.
 Contributors:
     Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../dublincore/nuxeo-dublincore-import-layout.html">
 
 <!--
 `nuxeo-note-import-layout`
@@ -38,7 +37,33 @@ Contributors:
      </paper-menu>
    </paper-dropdown-menu>
 
-   <nuxeo-dublincore-import-layout document="[[document]]"></nuxeo-dublincore-import-layout>
+   <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
+                               directory-name="nature"
+                               value="{{document.properties.dc:nature}}"
+                               placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                               min-chars="0">
+   </nuxeo-directory-suggestion>
+
+   <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
+                               directory-name="l10nsubjects"
+                               value="{{document.properties.dc:subjects}}"
+                               multiple="true"
+                               dbl10n="true"
+                               placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                               min-chars="0">
+   </nuxeo-directory-suggestion>
+
+   <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
+                               directory-name="l10ncoverage"
+                               value="{{document.properties.dc:coverage}}"
+                               dbl10n="true"
+                               placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                               min-chars="0">
+   </nuxeo-directory-suggestion>
+
+   <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
+                type="date" value="{{document.properties.dc:expired::change}}">
+   </paper-input>
 
  </template>
  <script>

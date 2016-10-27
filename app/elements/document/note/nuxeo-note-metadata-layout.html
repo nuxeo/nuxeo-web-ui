@@ -25,15 +25,38 @@ Contributors:
 
 <dom-module id="nuxeo-note-metadata-layout">
   <template>
-    <style>
-      label {
-        @apply(--nuxeo-label);
-      }
-    </style>
 
-    <nuxeo-dublincore-metadata-layout document="[[document]]"></nuxeo-dublincore-metadata-layout>
+    <div role="widget">
+      <label>[[i18n('label.dublincore.title')]]</label>
+      <div>[[document.properties.dc:title]]</div>
+    </div>
 
-    <div>
+    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+      <label>[[i18n('label.dublincore.description')]]</label>
+      <div class="multiline">[[document.properties.dc:description]]</div>
+    </div>
+
+    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
+      <label>[[i18n('label.dublincore.nature')]]</label>
+      <div>[[document.properties.dc:nature]]</div>
+    </div>
+
+    <div role="widget" hidden$="[[!document.properties.dc:subjects.length]]">
+      <label>[[i18n('label.dublincore.subjects')]]</label>
+      <div>[[document.properties.dc:subjects]]</div>
+    </div>
+
+    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
+      <label>[[i18n('label.dublincore.coverage')]]</label>
+      <div>[[document.properties.dc:coverage]]</div>
+    </div>
+
+    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
+      <label>[[i18n('label.dublincore.expire')]]</label>
+      <div>[[formatDate(document.properties.dc:expired)]]</div>
+    </div>
+
+    <div role="widget">
       <label>[[i18n('noteMetadataLayout.format')]]</label>
       <div>[[document.properties.note:mime_type]]</div>
     </div>

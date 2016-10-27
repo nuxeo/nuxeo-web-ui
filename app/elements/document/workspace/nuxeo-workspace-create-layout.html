@@ -16,7 +16,6 @@ limitations under the License.
 Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
-<link rel="import" href="../file/nuxeo-file-create-layout.html">
 
 <!--
 `nuxeo-workspace-create-layout`
@@ -25,13 +24,43 @@ Contributors:
 -->
 <dom-module id="nuxeo-workspace-create-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
 
-    <nuxeo-file-create-layout document={{document}}></nuxeo-file-create-layout>
+    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
+    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+
+    <!-- TODO: NXP-20462: replace with file upload element -->
+    <div role="widget" class="layout vertical">
+      <label>[[i18n('fileEditLayout.content')]]</label>
+      <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
+    </div>
+
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
+                                directory-name="nature"
+                                value="{{document.properties.dc:nature}}"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
+                                directory-name="l10nsubjects"
+                                value="{{document.properties.dc:subjects}}"
+                                multiple="true"
+                                dbl10n="true"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
+                                directory-name="l10ncoverage"
+                                value="{{document.properties.dc:coverage}}"
+                                dbl10n="true"
+                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                min-chars="0">
+    </nuxeo-directory-suggestion>
+
+    <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
+                 type="date" value="{{document.properties.dc:expired::change}}">
+    </paper-input>
 
   </template>
   <script>
