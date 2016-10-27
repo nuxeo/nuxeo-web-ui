@@ -86,7 +86,7 @@ Contributors:
           <paper-card class="card">
             <div class="card-content vertical layout">
               <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited', 'Recently Edited')]]</span>
-              <nuxeo-query-widget query="SELECT * FROM Document WHERE dc:lastContributor = 'Administrator' AND ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
+              <nuxeo-query-widget query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"></nuxeo-query-widget>
             </div>
           </paper-card>
           <paper-card class="card">
