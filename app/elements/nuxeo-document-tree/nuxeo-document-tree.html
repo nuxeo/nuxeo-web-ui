@@ -43,11 +43,13 @@ Contributors:
       }
 
       nuxeo-tree {
-        padding: 1em .5em;
+        padding: .4em .5em;
       }
 
       .content {
         @apply(--layout-vertical);
+        font-size: .95em;
+        padding: .3em 0;
       }
 
       .header {
@@ -75,22 +77,20 @@ Contributors:
       }
 
       .node-name {
-        line-height: 24px;
+        line-height: 1.3em;
+        display: inline;
+        vertical-align: middle;
         margin-left: 1.3em;
       }
 
       iron-icon {
         color: var(--nuxeo-text-light);
         width: 1.3rem;
-        position: absolute;
+        margin-right: -1.6em;
       }
 
       [toggle] {
         cursor: pointer;
-      }
-
-      .node-name {
-        display: inline-block;
       }
 
       .parents {
@@ -100,12 +100,20 @@ Contributors:
       }
 
       .parents a {
-        padding: .6em .4em;
+        padding: .5em .4em;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       }
 
-      .parents div {
-        padding-left: 1.3rem;
+      .parents span {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        min-width: 1.3em;
+      }
+
+      .parent {
+        padding: .12em 0 0;
       }
 
     </style>
@@ -124,18 +132,18 @@ Contributors:
       <div class="parents">
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
-            <iron-icon icon="icons:chevron-left"></iron-icon>
-            <div>[[item.title]]</div>
+            <span><iron-icon icon="icons:chevron-left" class="flex"></iron-icon></span>
+            <span class="parent">[[item.title]]</span>
           </a>
         </template>
       </div>
 
       <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
-        <template>
-          <template is="dom-if" if="[[!isLeaf]]">
+        <template class="horizontal layout">
+          <template class="flex" is="dom-if" if="[[!isLeaf]]">
             <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
           </template>
-          <span class="flex node-name">
+          <span class="node-name flex">
             <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
           </span>
         </template>
