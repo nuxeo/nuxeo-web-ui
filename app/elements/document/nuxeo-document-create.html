@@ -20,11 +20,11 @@ Contributors:
 <link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
 
 <!--
-`nuxeo-document-creation-form`
+`nuxeo-document-create`
 @group Nuxeo UI
-@element nuxeo-document-creation-form
+@element nuxeo-document-create
 -->
-<dom-module id="nuxeo-document-creation-form">
+<dom-module id="nuxeo-document-create">
 
   <template>
     <style>
@@ -115,6 +115,10 @@ Contributors:
       ::content paper-dropdown-menu {
         width: 100%;
       }
+
+      #submitButton {
+        display: none;
+      }
     </style>
 
     <nuxeo-document id="docRequest"
@@ -151,12 +155,13 @@ Contributors:
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
         <div id="editor" class="flex">
-          <nuxeo-path-suggestion id="pathSuggester" label="[[i18n('documentCreationForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
+          <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+                                 label="[[i18n('documentCreationForm.location')]]"></nuxeo-path-suggestion>
           <form is="iron-form" action="/" id="form" on-submit="_create" class="form vertical layout flex">
             <div id="document-create">
               <!--dynamically loaded via _updateLayout-->
             </div>
-            <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
+            <button id="submitButton"></button>
           </form>
         </div>
         <div class="buttons sep horizontal end-justified layout">
@@ -179,7 +184,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-creation-form',
+        is: 'nuxeo-document-create',
 
         behaviors: [Nuxeo.DocumentCreationBehavior],
 

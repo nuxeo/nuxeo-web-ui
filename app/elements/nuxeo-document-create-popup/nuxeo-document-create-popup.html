@@ -18,8 +18,8 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="nuxeo-document-creation-form.html">
-<link rel="import" href="nuxeo-document-import-form.html">
+<link rel="import" href="../document/nuxeo-document-create.html">
+<link rel="import" href="../document/nuxeo-document-import.html">
 
 <!--
 `nuxeo-document-create-popup`
@@ -82,12 +82,12 @@ Contributors:
           </paper-tab>
         </paper-tabs>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex">
-          <nuxeo-document-creation-form id="simpleCreation"
+          <nuxeo-document-create id="simpleCreation"
                                           name="create"
-                                          parent="[[parent]]"></nuxeo-document-creation-form>
-          <nuxeo-document-import-form id="bulkCreation"
+                                          parent="[[parent]]"></nuxeo-document-create>
+          <nuxeo-document-import id="bulkCreation"
                                         name="import"
-                                        parent="[[parent]]"></nuxeo-document-import-form>
+                                        parent="[[parent]]"></nuxeo-document-import>
         </iron-pages>
       </div>
     </paper-dialog>
