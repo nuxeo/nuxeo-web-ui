@@ -6,7 +6,7 @@ var mapping = {};
 mapping['/components/' + rootPath  + '/app/bower_components'] = 'bower_components';
 
 module.exports = {
-  'suites': ['app/test'],
+  'suites': ['test'],
   'webserver': {
     'pathMappings': [mapping]
   }
