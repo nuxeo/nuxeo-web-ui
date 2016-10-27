@@ -44,7 +44,7 @@ var dist = function(subpath) {
   return !subpath ? DIST : path.join(DIST, subpath);
 };
 
-var APP = dist('bower_components/nuxeo-web-ui/app')
+var APP = dist('bower_components/nuxeo-web-ui')
 
 var app = function(subpath) {
   return !subpath ? APP : path.join(APP, subpath);
@@ -102,10 +102,6 @@ gulp.task('styles', function() {
   return styleTask('styles', ['**/*.css']);
 });
 
-gulp.task('elements', function() {
-  return styleTask('elements', ['**/*.css']);
-});
-
 // Optimize images
 gulp.task('images', function() {
   return imageOptimizeTask('images/**/*', dist('images'));
@@ -113,26 +109,20 @@ gulp.task('images', function() {
 
 gulp.task('copy', function() {
   gulp.src([
-    app('**'),
-    '!' + app('test'),
-    '!' + app('test/**'),
-    '!' + app('cache-config.json')
-  ]).pipe(gulp.dest(dist()));
-});
-
-// Copy web fonts to dist
-gulp.task('fonts', function() {
-  return gulp.src([app('fonts/**')])
-      .pipe(gulp.dest(dist('fonts')))
-      .pipe($.size({
-        title: 'fonts'
-      }));
+    app('*.{html,ico}'),
+    app('manifest.json'),
+    app('elements/**/*'),
+    app('i18n/**/*'),
+    app('styles/**/*')
+  ], {
+    base: app()
+  }).pipe(gulp.dest(dist()));
 });
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function() {
   return optimizeHtmlTask(
-      [app('**/*.html'), '!' + app('{elements,test}/**/*.html')],
+      [app('index.html')],
       dist());
 });
 
@@ -151,7 +141,7 @@ gulp.task('vulcanize', function() {
 
 // Move dynamic layouts to root
 gulp.task('move-layouts', function() {
-  gulp.src([
+  return gulp.src([
     dist('elements/document/**'),
     dist('elements/search/**'),
     dist('elements/nuxeo-admin/**'),
@@ -163,6 +153,7 @@ gulp.task('move-layouts', function() {
 gulp.task('strip', function() {
   return del([
     dist('index.html'), // use our JSP
+    dist('elements'),
     dist('bower_components/**'),
     '!' + dist('bower_components'),
     '!' + dist('bower_components/nuxeo-ui-elements'),
@@ -187,8 +178,7 @@ gulp.task('clean', function() {
 gulp.task('default', ['clean'], function(cb) {
   runSequence(
       ['copy', 'styles'],
-      'elements',
-      ['images', 'fonts', 'html'],
+      ['images', 'html'],
       'vulcanize',
       'move-layouts',
       'strip',
