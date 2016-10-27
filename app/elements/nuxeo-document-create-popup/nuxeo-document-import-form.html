@@ -77,51 +77,17 @@ Contributors:
         width: 100%;
       }
 
-      paper-dropdown-menu {
-        --paper-input-container-input: {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          font-size: 18px;
-          font-weight: 400;
-          text-align: left;
-          color: var(--nuxeo-link-color);
-        };
-        --paper-input-container-underline: {
-          display: none;
-        };
-        --paper-input-container-underline-focus: {
-          display: none;
-        };
+      ::content label {
+        @apply(--nuxeo-label);
+        padding-top: 8px;
       }
 
-      ::content paper-input-container .input-content.paper-input-container {
-        flex-direction: row-reverse;
+      ::content paper-dropdown-menu {
+        width: 100%;
       }
 
-      ::content paper-input-container .input-content iron-icon {
-        margin-right: .3em;
-      }
-
-      .suggestion-wrapper {
-        border: 1px solid var(--divider-color);
-        border-radius: 8px;
-        border-width: 2px;
-        padding: 0 8px;
-      }
-
-      .suggestion-wrapper iron-icon {
-        color: var(--nuxeo-secondary-color);
-        margin-right: 8px;
-      }
-
-      .path {
-        margin-top: 0;
-        padding: 2em;
-      }
-
-      span.location {
-        padding-right: 16px;
+      nuxeo-path-suggestion {
+        margin: 16px 32px;
       }
 
       div[name='customize'] #blobEditor span {
@@ -144,7 +110,11 @@ Contributors:
 
       #form {
         margin-top: 0;
-        padding: 24px 36px;
+        padding: 0 32px;
+      }
+
+      #submitButton {
+        display: none;
       }
 
       #blobEditor {
@@ -203,7 +173,7 @@ Contributors:
       }
 
       .typePicker {
-        padding: 16px 32px 16px 36px;
+        padding: 0 32px;
       }
 
       .name {
@@ -314,7 +284,7 @@ Contributors:
       .remoteActions > nuxeo-slot,
       .remoteActions::content > *:first-child,
       .remoteActions::content > nuxeo-slot {
-        margin-left: 0px;
+        margin-left: 0;
       }
 
       @media (max-width: 1024px) {
@@ -337,20 +307,10 @@ Contributors:
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
 
       <!--Stage: allow the user to upload files-->
-      <div name="upload" class="vertical layout flex">
-        <div class="path sep horizontal layout center">
-          <span class="location">[[i18n('documentImportForm.location', 'Location')]]</span>
-          <div class="suggestion-wrapper horizontal layout center flex">
-            <div>
-              <iron-icon icon="icons:folder"></iron-icon>
-            </div>
-            <div class="flex">
-              <nuxeo-path-suggestion id="pathSuggester"
-                                     value="{{targetPath}}"
-                                     no-label-float></nuxeo-path-suggestion>
-            </div>
-          </div>
-        </div>
+      <div name="upload" class="upload vertical layout flex">
+
+        <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
+
         <div id="dropzone" class="vertical layout flex">
           <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple>
           <template is="dom-if" if="[[!hasFiles]]">
@@ -447,7 +407,7 @@ Contributors:
                         class="primary"
                         on-tap="_toggleCustomize"
                         disabled$="[[!hasFiles]]">
-                        [[i18n('documentImportForm.addProperties', '_canImportties')]]
+                        [[i18n('documentImportForm.addProperties')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
@@ -462,23 +422,10 @@ Contributors:
       <div name="customize" class="vertical layout flex">
         <div class="horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex-3">
-            <div class="path horizontal layout center">
-              <span class="location">[[i18n('documentImportForm.location', 'Location')]]</span>
-              <div class="suggestion-wrapper horizontal layout center flex">
-                <div>
-                  <iron-icon icon="icons:folder"></iron-icon>
-                </div>
-                <div class="flex">
-                  <nuxeo-path-suggestion id="pathSuggester"
-                                         value="{{targetPath}}"
-                                         no-label-float></nuxeo-path-suggestion>
-                </div>
-              </div>
-            </div>
+            <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
             <div class="typePicker horizontal layout center">
-              <span>[[i18n('documentImportForm.type.label', 'Type')]]</span>
               <div class="flex">
-                <paper-dropdown-menu class="typeDropdown" no-label-float horizontal-align="left">
+                <paper-dropdown-menu label="[[i18n('documentImportForm.type.label')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
                   <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
                     <template is="dom-repeat" items="[[subtypes]]" as="type">
                       <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
@@ -487,14 +434,11 @@ Contributors:
                 </paper-dropdown-menu>
               </div>
             </div>
-            <form is="iron-form"
-                  action="/"
-                  id="form"
-                  on-submit="_importWithProperties" class="form vertical layout flex">
+            <form is="iron-form" action="/" id="form" on-submit="_importWithProperties" class="form vertical layout flex">
               <div id="document-import">
                 <!--dynamically loaded via _updateLayout-->
               </div>
-              <button id="submitButton" style="display:none;">[[i18n('command.submit', 'Submit')]]</button>
+              <button id="submitButton"></button>
             </form>
           </div>
           <div class="sidePanel horizontal layout">
@@ -1183,6 +1127,7 @@ Contributors:
          * Retrieves and creates the layout for the current document type
          */
         _updateLayout: function() {
+          this.$['document-import'].hidden = false;
           this.document = this._isValidType(this.selectedDocType) ? {
             'entity-type': 'document',
             'type': this.selectedDocType.id,
@@ -1209,6 +1154,7 @@ Contributors:
                 // error handling
                 function() {
                   console.error('Failed to find create layout for ' + this.document.type);
+                  this.$['document-import'].hidden = true;
                 });
             } else {
               this._createLayout();
