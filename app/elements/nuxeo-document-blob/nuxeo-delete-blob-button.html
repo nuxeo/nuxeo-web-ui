@@ -44,20 +44,19 @@ Contributors:
     <nuxeo-operation id="deleteBlobOp"
                      op="Blob.RemoveFromDocument"
                      input="[[document.uid]]"
-                     params="[[_opParams(xpath)]]"></nuxeo-operation>
+                     params="[[_opParams(xpath)]]">
+    </nuxeo-operation>
 
     <paper-icon-button noink icon="icons:clear" id="removeBut" on-tap="_toggleDialog"></paper-icon-button>
-    <paper-tooltip for="removeBut">[[toolTip]]</paper-tooltip>
+    <paper-tooltip for="removeBut">[[i18n('deleteBlobButton.tooltip')]]</paper-tooltip>
 
-    <paper-dialog id="confirmDialog"
-                  modal
-                  class="container vertical layout">
-      <div class="horizontal layout">
-        <p>[[confirmMessage]]</p>
-      </div>
+    <paper-dialog id="confirmDialog" modal class="container vertical layout">
+      <div class="horizontal layout">[[i18n('deleteBlobButton.confirm')]]</div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm noink class="primary" on-tap="_remove">Yes</paper-button>
+        <paper-button dialog-dismiss>[[i18n('deleteBlobButton.confirm.no')]]</paper-button>
+        <paper-button dialog-confirm noink class="primary" on-tap="_remove">
+          [[i18n('deleteBlobButton.confirm.yes')]]
+        </paper-button>
       </div>
     </paper-dialog>
 
@@ -70,6 +69,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-delete-blob-button',
+        behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object,
@@ -78,18 +78,6 @@ Contributors:
           xpath: {
             type: String,
             value: 'file:content'
-          },
-          toolTip: {
-            type: String,
-            value: 'Delete file'
-          },
-          confirmMessage: {
-            type: String,
-            value: 'Do you really want to delete this file?'
-          },
-          deleteMessage: {
-            type: String,
-            value: 'File deleted'
           }
         },
 
@@ -105,7 +93,7 @@ Contributors:
 
         _remove: function() {
           this.$.deleteBlobOp.execute().then(function() {
-            this._toast(this.deleteMessage);
+            this._toast(this.i18n('deleteBlobButton.deleted'));
             this.fire('document-updated');
           }.bind(this));
         },
