@@ -115,10 +115,6 @@ Contributors:
       ::content paper-dropdown-menu {
         width: 100%;
       }
-
-      #submitButton {
-        display: none;
-      }
     </style>
 
     <nuxeo-document id="docRequest"
@@ -157,11 +153,10 @@ Contributors:
         <div id="editor" class="flex">
           <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
                                  label="[[i18n('documentCreationForm.location')]]"></nuxeo-path-suggestion>
-          <form is="iron-form" action="/" id="form" on-submit="_create" class="form vertical layout flex">
+          <form is="iron-form" id="form" class="form vertical layout flex">
             <div id="document-create">
               <!--dynamically loaded via _updateLayout-->
             </div>
-            <button id="submitButton"></button>
           </form>
         </div>
         <div class="buttons sep horizontal end-justified layout">
@@ -169,7 +164,7 @@ Contributors:
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <paper-button on-tap="_back">[[i18n('command.back', 'Back')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_submit">[[i18n('command.create', 'Create')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_create">[[i18n('command.create', 'Create')]]</paper-button>
         </div>
       </div>
 
@@ -279,20 +274,34 @@ Contributors:
           this.fire('nx-creation-wizard-hide-tabs');
         },
 
+        _validate: function() {
+          var valid = true;
+          // run our custom validation function first to allow setting custom native validity
+          var layout = this.$['document-create'].firstChild;
+          if (layout && ('function' === typeof layout.validate)) {
+            valid = layout.validate();
+          }
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            this.$.form._doFakeSubmitForValidation();
+          }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return valid && this.$.form.validate() && this.$.form.checkValidity();
+        },
+
         _create: function() {
-          var docRequest = this.$.docRequest;
-          var name = this._sanitizeName(this.document.properties['dc:title']);
-          this.document.name = name;
-          docRequest.post().then(function(response) {
+          if (!this._validate()) {
+            return;
+          }
+          this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+          this.$.docRequest.post().then(function(response) {
             this.$.creationStats.storeType(this.selectedDocType._id);
             this._clear();
             page('/browse' + response.path);
             this._notify(response);
           }.bind(this));
-        },
-
-        _submit: function() {
-          this.$.submitButton.click();
         },
 
         _back: function() {

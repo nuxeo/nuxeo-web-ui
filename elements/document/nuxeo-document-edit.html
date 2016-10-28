@@ -81,7 +81,7 @@ Contributors:
     <nuxeo-error id="error"></nuxeo-error>
 
     <div id="container">
-      <form id="form" is="iron-form" action="/">
+      <form id="form" is="iron-form">
         <div id="document-edit">
           <!-- Dynamic layout element will be inserted here -->
           <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
@@ -191,7 +191,27 @@ Contributors:
           }
         },
 
+        _validate: function() {
+          var valid = true;
+          // run our custom validation function first to allow setting custom native validity
+          var layout = this.$['document-edit'].firstChild;
+          if (layout && ('function' === typeof layout.validate)) {
+            valid = layout.validate();
+          }
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            this.$.form._doFakeSubmitForValidation();
+          }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return valid && this.$.form.validate() && this.$.form.checkValidity();
+        },
+
         _save: function() {
+          if (!this._validate()) {
+            return;
+          }
           delete this.document['dc:contributors']; // TODO: NXP-20782: remove contributors or they will be duplicated
           this.$.doc.put().then(this._refresh.bind(this));
         },
