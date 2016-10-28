@@ -30,6 +30,16 @@ Nuxeo.LiveConnectBehavior = {
     },
     userId: {
       type: String
+    },
+    isUserAuthorized: {
+      type: Boolean,
+      value: false,
+      notify: true
+    },
+    isAvailable: {
+      type: Boolean,
+      value: false,
+      notify: true
     }
   },
 
@@ -93,12 +103,18 @@ Nuxeo.LiveConnectBehavior = {
     }, 100);
   },
 
-  getProviderInfo: function() {
+  updateProviderInfo: function() {
     if (!this.$.oauth2) {
       throw 'Missing OAuth2 resource';
     }
     this.$.oauth2.path = 'oauth2/provider/' + this.providerId;
-    return this.$.oauth2.get();
+    return this.$.oauth2.get().then(function(response) {
+      this.clientId = response.clientId;
+      this.authorizationURL = response.authorizationURL;
+      this.isUserAuthorized = response.isAuthorized;
+      this.userId = response.userId;
+      this.isAvailable = response.isAvailable;
+    }.bind(this));
   },
 
   getToken: function() {

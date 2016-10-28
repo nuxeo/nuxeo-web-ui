@@ -18,7 +18,10 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
-<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-box.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-dropbox.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-google-drive.html">
+<link rel="import" href="../nuxeo-liveconnect/nuxeo-liveconnect-onedrive.html">
 
 <!--
 `nuxeo-document-import`
@@ -271,19 +274,19 @@ Contributors:
         @apply(--buttons-bar);
       }
 
-      .add-more .remoteActions {
+      .add-more .importActions {
         margin-left: 8px;
       }
 
-      .remoteActions > *,
-      .remoteActions::content > * {
+      .importActions > *,
+      .importActions::content > * {
         margin-left: 8px;
       }
 
-      .remoteActions > *:first-child,
-      .remoteActions > nuxeo-slot,
-      .remoteActions::content > *:first-child,
-      .remoteActions::content > nuxeo-slot {
+      .importActions > *:first-child,
+      .importActions > nuxeo-slot,
+      .importActions::content > *:first-child,
+      .importActions::content > nuxeo-slot {
         margin-left: 0;
       }
 
@@ -319,9 +322,9 @@ Contributors:
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
                   [[i18n('documentImportForm.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
               </div>
-              <span hidden$="[[!hasContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
-              <div class="remoteActions horizontal layout">
-                <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
+              <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
+              <div class="importActions horizontal layout">
+                <nuxeo-slot slot="FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
               </div>
             </div>
           </template>
@@ -391,9 +394,9 @@ Contributors:
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
-                <span hidden$="[[!hasContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
-                <div class="remoteActions horizontal layout">
-                  <nuxeo-slot slot="REMOTE_FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
+                <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
+                <div class="importActions horizontal layout">
+                  <nuxeo-slot slot="FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
                 </div>
               </div>
             </div>
@@ -591,6 +594,10 @@ Contributors:
           _docProperties: {
             type: Object,
             value: {}
+          },
+
+          _hasVisibleContributions: {
+            type: Boolean
           }
         },
         listeners: {
@@ -612,6 +619,8 @@ Contributors:
           if (files) {
             this.uploadFiles(files);
           }
+          this.set('_hasVisibleContributions',
+                    this.hasContributions && !!this.$$('.importActions > *:not([hidden]):not(nuxeo-slot)'));
         },
 
         _observeFiles: function(changeRecord) {

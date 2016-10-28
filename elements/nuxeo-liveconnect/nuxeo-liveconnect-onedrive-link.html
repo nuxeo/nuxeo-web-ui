@@ -18,7 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="nuxeo-liveconnect-onedrive.html">
+<link rel="import" href="nuxeo-liveconnect-onedrive-provider.html">
 
 <!--
 `nuxeo-liveconnect-onedrive-link`
@@ -47,7 +47,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-liveconnect-onedrive id="provider"></nuxeo-liveconnect-onedrive>
+    <nuxeo-liveconnect-onedrive-provider id="provider" is-available="{{isProviderAvailable}}"></nuxeo-liveconnect-onedrive-provider>
     <a class="horizontal layout center center-justified" href="javascript:undefined" on-tap="_openPicker">
       <iron-icon src="../../images/OneDrive.png" hidden$="[[hideIcon]]"></iron-icon>
       [[i18n('liveconnectImportActions.onedrive', 'OneDrive')]]
@@ -66,7 +66,15 @@ Contributors:
         properties: {
           hideIcon: {
             type: Boolean
+          },
+          isProviderAvailable: {
+            type: Boolean,
+            notify: true
           }
+        },
+
+        ready: function() {
+          this.$.provider.updateProviderInfo();
         },
 
         _openPicker: function() {

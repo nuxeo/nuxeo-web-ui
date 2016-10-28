@@ -149,17 +149,23 @@ Contributors:
           this.selectedTab = 'create';
           this._showTabs = false;
           this.$.simpleCreation.selectedDocType = type;
-          this.toggleDialog();
+          this.$.bulkCreation.init();
+          this._toggleDialog();
         },
 
         toggleDialogImport: function(files) {
           this.selectedTab = 'import';
           this._showTabs = false;
           this.$.bulkCreation.init(files);
-          this.toggleDialog();
+          this._toggleDialog();
         },
 
         toggleDialog: function() {
+          this.$.bulkCreation.init();
+          this._toggleDialog();
+        },
+
+        _toggleDialog: function() {
           if (!this.parent && this.defaultParentPath) {
             // no parent? let's fetch the default one
             this.$.defaultDoc.get().then(function() {
@@ -168,7 +174,6 @@ Contributors:
           } else {
             this.$.createDocDialog.toggle();
           }
-
         }
 
       });
