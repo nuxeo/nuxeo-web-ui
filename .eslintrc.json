@@ -26,11 +26,6 @@
     "AlloyEditor": true,
     "CKEDITOR": true,
     "jQuery": true,
-    "confirm": true,
-    "gapi": true,
-    "google": true,
-    "OneDriveFilePicker": true,
-    "Dropbox": true,
-    "BoxSelect": true
+    "confirm": true
   }
 }
