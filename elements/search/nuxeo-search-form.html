@@ -207,7 +207,7 @@ Contributors:
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider"
        provider="[[provider]]"
-       aggregations="{{aggregations}}"
+       aggregations="{{aggregations}}displayQueue"
        enrichers="thumbnail"
        params="[[params]]"
        quick-filters="{{quickFilters}}"
@@ -268,7 +268,6 @@ Contributors:
 
         <div id="queue" hidden$="{{!_isQueue}}">
           <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
-            on-nuxeo-page-loaded="_membersLoaded"
             selected-item="{{selectedDocument}}"
 
             selection-enabled>
@@ -705,14 +704,16 @@ Contributors:
           if (this._form.schemas !== undefined) {
             this.schemas = this._form.schemas;
           }
-          if (this._form.onlyQueue === true) {
-            this._onlyQueue = true;
+          this.label = this._form.label;
+          if (this._form.displayQueue === true) {
             this.label = this._form.label;
             this.displayQueue();
           } else {
-            this._onlyQueue = false;
             this.displayFilters();
             this.$['saved-searches'].get();
+          }
+          if (this._form.getDefaultParams !== undefined) {
+            this.params = this._form.getDefaultParams();
           }
           // setup data binding
           el.addEventListener('params-changed', function(e) {
@@ -722,12 +723,6 @@ Contributors:
               this.set('params.' + param, e.detail.value);
             }
           }.bind(this));
-        },
-
-        _membersLoaded: function() {
-          if (this._onlyQueue && this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
-            this.$.list.selectItem(this.$.list.$.list.items[0]);
-          }
         }
 
       });
