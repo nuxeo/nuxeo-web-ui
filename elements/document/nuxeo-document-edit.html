@@ -212,7 +212,8 @@ Contributors:
           if (!this._validate()) {
             return;
           }
-          delete this.document.properties['dc:contributors']; // TODO: NXP-20782: remove contributors or they will be duplicated
+          // TODO: NXP-20782: remove contributors or they will be duplicated
+          delete this.document.properties['dc:contributors'];
           this.$.doc.put().then(this._refresh.bind(this));
         },
 
