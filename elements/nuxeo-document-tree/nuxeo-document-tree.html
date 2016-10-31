@@ -83,6 +83,20 @@ Contributors:
         margin-left: 1.3em;
       }
 
+      #root a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link-hover);
+        font-weight: 500;
+      }
+
+      #root iron-collapse a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+        font-weight: normal;
+      }
+
+      #root iron-collapse a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
       iron-icon {
         color: var(--nuxeo-text-light);
         width: 1.3rem;
