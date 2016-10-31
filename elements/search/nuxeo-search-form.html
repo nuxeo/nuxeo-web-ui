@@ -207,7 +207,7 @@ Contributors:
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider"
        provider="[[provider]]"
-       aggregations="{{aggregations}}displayQueue"
+       aggregations="{{aggregations}}"
        enrichers="thumbnail"
        params="[[params]]"
        quick-filters="{{quickFilters}}"
@@ -706,12 +706,12 @@ Contributors:
           }
           this.label = this._form.label;
           if (this._form.displayQueue === true) {
-            this.label = this._form.label;
             this.displayQueue();
           } else {
             this.displayFilters();
-            this.$['saved-searches'].get();
           }
+          this.label = this._form.label;
+          this.$['saved-searches'].get();
           if (this._form.getDefaultParams !== undefined) {
             this.params = this._form.getDefaultParams();
           }
