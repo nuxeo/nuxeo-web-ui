@@ -144,6 +144,11 @@ Contributors:
         is: 'nuxeo-default-search',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
+          provider: {
+            type: String,
+            value: 'default_search',
+            reflectToAttribute: true
+          },
           params: {
             type: Object,
             value: {},
@@ -158,11 +163,6 @@ Contributors:
             type: String,
             notify: true,
             observer: '_addFullTextSearch'
-          },
-          provider: {
-            type: String,
-            value: 'default_search',
-            reflectToAttribute: true
           },
           schemas: {
             type: String,

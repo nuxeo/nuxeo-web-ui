@@ -102,6 +102,11 @@ Contributors:
             value: {},
             notify: true
           },
+          searchTerm: {
+            type: String,
+            notify: true,
+            observer: '_addFullTextSearch'
+          },
           schemas: {
             type: String,
             value: 'dublincore,common,uid',
@@ -111,7 +116,6 @@ Contributors:
             type: String,
             value: 'expiredSearch.expiredDocuments'
           },
-
           displayQueue: {
             type: Boolean,
             value: true
@@ -125,6 +129,17 @@ Contributors:
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
           return {
             "expired_max" : oneWeekAgo.toJSON()
+          }
+        },
+
+        _addFullTextSearch: function() {
+          if (this.searchTerm) {
+            this.set('params.title', this.searchTerm + '*');
+          } else {
+            if (this.params.ecm_fulltext) {
+              this.set('params.title', '');
+              delete this.params.title;
+            }
           }
         },
 
