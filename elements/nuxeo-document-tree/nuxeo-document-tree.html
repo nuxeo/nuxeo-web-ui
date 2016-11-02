@@ -78,8 +78,8 @@ Contributors:
 
       .node-name {
         line-height: 1.3em;
-        display: inline;
-        vertical-align: middle;
+        display: inline-block;
+        vertical-align: text-top;
         margin-left: 1.3em;
       }
 
@@ -116,6 +116,10 @@ Contributors:
       .parents a {
         padding: .5em .4em;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .parents a:hover {
+        @apply(--nuxeo-link-hover);
       }
 
       .parents span {
