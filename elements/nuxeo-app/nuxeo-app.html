@@ -47,16 +47,16 @@ Contributors:
         @apply(--nuxeo-sidebar);
         position: fixed;
         width: 56px;
-        height: calc(100% - 116px);
+        height: calc(100% - 62px);
         z-index: 100;
-        padding: 58px 0;
+        padding: 62px 0;
         overflow: auto;
       }
 
       #menu ::content paper-icon-button {
         color: var(--nuxeo-sidebar-actions);
-        height: 48px;
-        padding: 14px 13px;
+        height: 44px;
+        padding: 13px;
         width: 56px;
         --paper-menu-selected-item: {
           background-color: rgba(0, 0, 0, 0.25);
@@ -65,11 +65,16 @@ Contributors:
         }
       }
 
-      #menu .profile-icon {
+      #menu .profile-icon,
+      #menu .admin-icon {
         position: fixed;
-        height: 48px;
+        height: 44px;
         bottom: 0;
         left: 0;
+      }
+
+      #menu .admin-icon {
+        height: 88px;
       }
 
       /* --
@@ -119,14 +124,21 @@ Contributors:
 
       .logo {
         position: fixed;
-        width: 23px;
-        height: 26px;
+        width: 56px;
+        height: 58px;
         top: 0;
         left: 0;
         z-index: 102;
-        padding: 16px;
+        padding: 18px;
         background: rgba(255, 255, 255, 0.96);
         border-right: 1px solid var(--divider-color);
+        position: fixed;
+        box-sizing: border-box;
+      }
+
+      .logo iron-icon {
+        width: 20px;
+        height: 20px;
       }
 
       paper-badge {
@@ -309,7 +321,7 @@ Contributors:
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
