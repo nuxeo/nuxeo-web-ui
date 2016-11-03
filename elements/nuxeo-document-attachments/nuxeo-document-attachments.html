@@ -30,45 +30,32 @@ Contributors:
       }
 
       .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
         color: var(--nuxeo-title-color);
         font-size: 1.5rem;
+        padding: 8px 0;
       }
 
       nuxeo-dropzone {
-        --nuxeo-dropzone-min-empty-height: 60px;
-        --nuxeo-dropzone-border-margin: 2px;
+        margin-top: 8px;
       }
 
       nuxeo-document-blob {
-        border-bottom: 1px solid var(--nuxeo-border);
+        border-top: 1px solid var(--nuxeo-border);
         padding: 8px 0;
       }
     </style>
 
     <div class="title">
-      <div class="flex"><iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]</div>
-      <paper-icon-button icon="icons:add" on-tap="_upload"></paper-icon-button>
+      <iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]
     </div>
 
-    <nuxeo-dropzone id="dropzone"
-                    document="{{document}}"
-                    message="[[i18n('documentAttachments.dropzone.message', 'Drop to attach file')]]"
-                    message-empty="[[i18n('documentAttachments.dropzone.emptyMessage', '+ Complete the document with additional files')]]"
-                    uploaded-message="[[i18n('documentAttachments.upload.uploaded', 'Attachment uploaded')]]"
-                    empty="[[!hasAttachments(document, document.properties, document.properties.files:files)]]"
-                    xpath="files:files"
-                    blob-list>
+    <div class="vertical layout">
+      <template is="dom-repeat" items="[[document.properties.files:files]]">
+        <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]"></nuxeo-document-blob>
+      </template>
+    </div>
 
-      <!-- attachments list -->
-      <div class="vertical layout">
-        <template is="dom-repeat" items="[[document.properties.files:files]]">
-          <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]"></nuxeo-document-blob>
-        </template>
-      </div>
-
-    </nuxeo-dropzone>
+    <nuxeo-dropzone document="{{document}}" xpath="files:files" blob-list update-document></nuxeo-dropzone>
 
   </template>
 
@@ -81,10 +68,6 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           document: Object
-        },
-
-        _upload: function() {
-          this.$.dropzone.open();
         }
       });
     })();

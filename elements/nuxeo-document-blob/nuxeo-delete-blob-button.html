@@ -30,12 +30,6 @@ Contributors:
         display: block;
       }
 
-      paper-icon-button {
-        height: 32px;
-        width: 32px;
-        @apply(--nuxeo-delete-blob-button-layout);
-      }
-
       paper-icon-button:hover {
         cursor: pointer;
       }
@@ -47,7 +41,7 @@ Contributors:
                      params="[[_opParams(xpath)]]">
     </nuxeo-operation>
 
-    <paper-icon-button noink icon="icons:clear" id="removeBut" on-tap="_toggleDialog"></paper-icon-button>
+    <paper-icon-button noink icon="icons:delete" id="removeBut" on-tap="_toggleDialog"></paper-icon-button>
     <paper-tooltip for="removeBut">[[i18n('deleteBlobButton.tooltip')]]</paper-tooltip>
 
     <paper-dialog id="confirmDialog" modal class="container vertical layout">
