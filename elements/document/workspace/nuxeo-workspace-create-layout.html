@@ -28,12 +28,6 @@ Contributors:
     <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
     <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
-    <!-- TODO: NXP-20462: replace with file upload element -->
-    <div role="widget" class="layout vertical">
-      <label>[[i18n('fileEditLayout.content')]]</label>
-      <nuxeo-file id="nxFile" value="{{document.properties.file:content}}"></nuxeo-file>
-    </div>
-
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 directory-name="nature"
                                 value="{{document.properties.dc:nature}}"

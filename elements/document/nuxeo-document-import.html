@@ -320,7 +320,7 @@ Contributors:
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
               <div class="importActions horizontal layout">
-                <nuxeo-slot slot="FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
+                <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
               </div>
             </div>
           </template>
@@ -392,7 +392,7 @@ Contributors:
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
                 <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
                 <div class="importActions horizontal layout">
-                  <nuxeo-slot slot="FILE_IMPORT_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
+                  <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
                 </div>
               </div>
             </div>

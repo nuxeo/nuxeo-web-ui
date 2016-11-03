@@ -32,22 +32,18 @@ Contributors:
         display: block;
       }
 
-      .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        color: var(--nuxeo-title-color);
-        font-size: 1.5rem;
+      nuxeo-dropzone {
+        height: 300px;
+      }
+
+      nuxeo-document-blob {
+        margin-top: 8px;
       }
     </style>
 
-    <nuxeo-dropzone id="dropzone" document="{{document}}" empty="[[!document.properties.file:content.data]]">
-      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-    </nuxeo-dropzone>
-
-    <div class="title">
-      <div class="flex">[[document.title]]</div>
-      <paper-icon-button icon="icons:file-upload" on-tap="_upload"></paper-icon-button>
-    </div>
+    <nuxeo-dropzone document="{{document}}" hidden$="[[document.properties.file:content.data]]" update-document></nuxeo-dropzone>
+    <nuxeo-document-preview document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-preview>
+    <nuxeo-document-blob document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-blob>
 
   </template>
 
@@ -60,10 +56,6 @@ Contributors:
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object
-      },
-
-      _upload: function() {
-        this.$.dropzone.open();
       }
     });
   })();

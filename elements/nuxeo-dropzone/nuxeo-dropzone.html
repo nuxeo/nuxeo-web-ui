@@ -27,121 +27,110 @@ Contributors:
     <style>
       :host {
         display: block;
-        position: relative;
-        width: 100%;
-        height: calc(100% - 40px);
+
+      }
+
+      label.dragging {
+        color: var(--paper-input-container-focus-color);
       }
 
       #dropzone {
-        display: flex;
-        position: absolute;
-        width: calc(100% + 20px);
-        height: calc(100%);
-        left: -10px;
-        top: -10px;
-        visibility: hidden;
         overflow: auto;
-      }
-
-      #dropzone.visible {
-        visibility: visible;
         cursor: pointer;
+        height: 100%;
       }
 
-      #dzContainer {
-        position: relative;
-        margin: var(--nuxeo-dropzone-border-margin, 16px);
-        pointer-events: none;
+      #container {
         @apply(--layout-vertical);
         @apply(--layout-center);
         @apply(--layout-flex);
         @apply(--layout-center-justified);
-      }
-
-      #dzContainer.hover {
-        border: 2px dashed #aaa;
-        border-radius: 8px;
-        @apply(--nuxeo-dropzone-hover-layout);
-      }
-
-      #dzContainer.hover-highlight {
-        border: 2px dashed #555;
-        border-radius: 8px;
-        @apply(--nuxeo-dropzone-hover-layout);
-      }
-
-      #dzLabel {
         pointer-events: none;
-        color: #aaa;
-        text-align: center;
-        margin: 8px;
+        border-radius: 2px;
+        border: 1px dashed var(--paper-input-container-color);
+        min-height: 64px;
+        height: calc(100% - 2px);
       }
 
-      #dzLabel.highlight {
-        pointer-events: none;
-        color: #555;
-        text-align: center;
+      #container.dragging {
+        border: 1px dashed var(--paper-input-container-focus-color);
+        background: rgba(0, 0, 0, 0.01);
       }
 
-      #content {
-        position: relative;
-        left: -10px;
-        top: -10px;
-        right: -10px;
-        bottom: -10px;
-        padding: 10px;
+      #container .actions {
+        text-align: center;
+        color: var(--nuxeo-text-light);
+      }
+
+      #details {
+        border: 1px solid var(--nuxeo-border);
+        padding: 16px;
+      }
+
+      .file {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .file .info {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+      }
+
+      .file .info .name {
+        font-weight: 500;
+      }
+
+      .file .info .size {
+        color: var(--nuxeo-text-light);
+        margin: 4px 0;
+      }
+
+      .file .info .progress {
         width: 100%;
+        padding: 8px 0;
       }
 
-      #content.hover {
-        filter: brightness(30%);
-        -webkit-filter: brightness(30%);
-        @apply(--nuxeo-dropzone-content-fade-layout);
+      .file .actions {
+        margin-left: 16px;
       }
 
-      #innerContent.invisible {
-        visibility: hidden;
-        display: none;
-      }
-
-      #emptydz {
-        min-height: var(--nuxeo-dropzone-min-empty-height, 300px);
-      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
 
+    <label id="label" hidden$="[[!label]]">[[label]]</label>
+
+    <input hidden id="input" type="file" on-change="_filesChanged">
     <paper-toast id="toast"></paper-toast>
-    <div id="content">
-      <div id="innerContent">
-        <content></content>
-      </div>
-      <div hidden$="[[!empty]]">
-        <input hidden id="input" type="file" on-change="_filesChanged">
-        <div id="emptydz"></div>
-      </div>
-    </div>
-    <div id="dropzone">
-      <div id="dzContainer">
-        <div id="dzLabel">
-          <template is="dom-if" if="[[!progress]]">
-            <template is="dom-if" if="[[dropping]]">
-              [[message]]
-            </template>
-            <template is="dom-if" if="[[!dropping]]">
-              [[messageEmpty]]
-            </template>
-          </template>
-          <template is="dom-if" if="[[progress]]">
-            [[progressMessage]]
-          </template>
+
+    <div id="dropzone" on-tap="open" hidden$="[[_hasFiles]]">
+      <div id="container">
+        <div class="actions">
+          <div>[[message]]</div>
+          <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
-        <template is="dom-if" if="[[progress]]">
-          <paper-progress indeterminate></paper-progress>
-        </template>
       </div>
     </div>
+
+    <div id="details" hidden$="[[!_hasFiles]]">
+      <template is="dom-repeat" items="[[files]]" as="file">
+        <div class="file">
+          <div class="info">
+            <div class="name">[[file.name]]</div>
+            <div class="size">[[formatSize(file.size)]]</div>
+            <template is="dom-if" if="[[progress]]">
+              <paper-progress class="progress" indeterminate></paper-progress>
+            </template>
+          </div>
+          <div class="actions" hidden$="[[progress]]">
+            <paper-icon-button noink icon="icons:delete" on-tap="_deleteFile"></paper-icon-button>
+          </div>
+        </div>
+      </template>
+    </div>
+
   </template>
 
   <script>
@@ -150,25 +139,18 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-dropzone',
-        behaviors: [Nuxeo.UploaderBehavior],
+        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
         properties: {
           document: {
             type: Object,
             notify: true
           },
-          empty: {
-            type: Boolean,
-            value: false
-          },
-          dropping: {
-            type: Boolean,
-            value: false
+          label: {
+            type: String
           },
           message: {
-            type: String
-          },
-          messageEmpty: {
-            type: String
+            type: String,
+            value: 'Add a file'
           },
           blobList: {
             type: Boolean,
@@ -178,28 +160,39 @@ Contributors:
             type: String,
             value: 'file:content'
           },
+          updateDocument: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
           uploadedMessage: {
             type: String,
             value: 'File uploaded'
           },
           progressMessage: {
             type: String,
-            value: 'In progress...'
+            value: 'Uploading...'
           },
           progress: {
             type: Boolean,
             value: false
+          },
+          _hasFiles: {
+            type: Boolean,
+            value: false
           }
         },
+
         listeners: {
-          'batchFinished': 'importBatch',
-          'content.dragenter': '_showOverlay'
+          'batchFinished': 'importBatch'
         },
-        observers: ['_observeEmpty(empty)'],
 
         ready: function() {
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
+          this.message = this.i18n('dropzone.message');
+          this.uploadedMessage = this.i18n('dropzone.uploaded');
+          this.progressMessage = this.i18n('dropzone.progress');
         },
 
         open: function() {
@@ -220,102 +213,71 @@ Contributors:
                 this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
                 this._toast(this.uploadedMessage);
                 this.progress = false;
+                this._hasFiles = false;
               }.bind(this));
             }.bind(this));
+
           } else {
+
             this.document.properties[this.xpath] = {
               'upload-batch': data.detail.batchId,
               'upload-fileId': '0'
             };
-            this.$.doc.put().then(function(response) {
-              this.document = response;
+
+            if (this.updateDocument) {
+              this.$.doc.put().then(function(response) {
+                this.document = response;
+                this._toast(this.uploadedMessage);
+                this.progress = false;
+              }.bind(this));
+            } else {
               this._toast(this.uploadedMessage);
               this.progress = false;
-            }.bind(this));
+            }
           }
+        },
+
+        _deleteFile: function() {
+          this.document.properties[this.xpath] = '';
+          this._hasFiles = false;
         },
 
         _filesChanged: function(e) {
           this._upload(e.target.files);
         },
 
-        _observeEmpty: function() {
-          if (!this.handleDlClick) {
-            this.handleDlClick = function handleDlClick() {
-              this.$$('input').click();
-            }.bind(this);
-          }
-          if (this.empty) {
-            this.toggleClass('hover', true, this.$.dzContainer);
-            this.toggleClass('visible', true, this.$.dropzone);
-            this.toggleClass('invisible', true, this.$.innerContent);
-            this.$.dropzone.addEventListener('click', this.handleDlClick);
-          } else {
-            this.$.dropzone.removeEventListener('click', this.handleDlClick);
-            this.toggleClass('hover', false, this.$.dzContainer);
-            this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('invisible', false, this.$.innerContent);
-          }
-          Polymer.dom.flush();
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
-        },
-
-        _showOverlay: function() {
-          if (!this.empty) {
-            this.toggleClass('visible', true, this.$.dropzone);
+        _upload: function(files) {
+          if (files && files.length > 0) {
+            this._hasFiles = true;
+            this.progress = true;
+            this.uploadFiles(files);
           }
         },
 
         _dragover: function(e) {
           e.preventDefault();
-          this.dropping = true;
-          if (!this.empty) {
-            this.toggleClass('hover', true, this.$.dzContainer);
-            this.toggleClass('hover', true, this.$.content);
-          } else {
-            this.toggleClass('hover-highlight', true, this.$.dzContainer);
-            this.toggleClass('highlight', true, this.$.dzLabel);
-          }
+          this.toggleClass('dragging', true, this.$.label);
+          this.toggleClass('dragging', true, this.$.container);
         },
 
         _dragleave: function() {
-          this.dropping = false;
-          if (!this.empty) {
-            this.toggleClass('hover', false, this.$.dzContainer);
-            this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('hover', false, this.$.content);
-          } else {
-            this.toggleClass('hover-highlight', false, this.$.dzContainer);
-            this.toggleClass('highlight', false, this.$.dzLabel);
-          }
+          this.toggleClass('dragging', false, this.$.label);
+          this.toggleClass('dragging', false, this.$.container);
         },
 
         _drop: function(e) {
-          this.progress = true;
-          this.dropping = false;
-          if (!this.empty) {
-            this.toggleClass('hover', false, this.$.dzContainer);
-            this.toggleClass('visible', false, this.$.dropzone);
-            this.toggleClass('hover', false, this.$.content);
-          } else {
-            this.toggleClass('hover-highlight', false, this.$.dzContainer);
-            this.toggleClass('highlight', false, this.$.dzLabel);
-          }
           e.preventDefault();
+          this.progress = true;
+          this.toggleClass('dragging', false, this.$.label);
+          this.toggleClass('dragging', false, this.$.container);
           this._upload(e.dataTransfer.files);
         },
 
-        _upload: function(files) {
-          if (files && files.length > 0) {
-            this.empty = true;
-            this.progress = true;
-            this.uploadFiles(files);
-          }
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
         }
+
       });
     })();
   </script>
