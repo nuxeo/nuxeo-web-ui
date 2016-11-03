@@ -28,6 +28,10 @@ Contributors:
       return (doc) ? doc.facets.indexOf('NotCollectionMember') === -1 : false;
     },
 
+    isVersion: function(doc) {
+      return (doc) && doc.isVersion;
+    },
+
     hasFacet: function(doc, facet) {
       return doc && doc.facets && doc.facets.indexOf(facet) !== -1;
     },
