@@ -30,10 +30,9 @@ Contributors:
       }
 
       .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
         color: var(--nuxeo-title-color);
         font-size: 1.5rem;
+        padding: 8px 0;
       }
 
       nuxeo-dropzone {
@@ -47,8 +46,7 @@ Contributors:
     </style>
 
     <div class="title">
-      <div class="flex"><iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]</div>
-      <paper-icon-button icon="icons:add" on-tap="_upload"></paper-icon-button>
+      <iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]
     </div>
 
     <div class="vertical layout">
