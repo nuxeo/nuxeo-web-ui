@@ -1,0 +1,326 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+`nuxeo-browser`
+@group Nuxeo UI
+@element nuxeo-browser
+-->
+<dom-module id="nuxeo-browser">
+  <template>
+    <style>
+
+      paper-header-panel {
+        height: 100vh;
+      }
+
+      .paper-header paper-dropdown-menu {
+        --paper-input-container-input: {
+          font-size: 1.05em;
+          font-family: var(--nuxeo-app-font);
+          text-align: left;
+          color: var(--nuxeo-header-title-color);
+          font-weight: 600;
+        };
+        background-color: rgba(0,0,0,0.05);
+      }
+
+      .paper-header ::content paper-menu-button {
+        padding: 0;
+        margin-left: 1em;
+      }
+
+      paper-dropdown-menu ::content .unfocused-line.paper-input-container,
+      paper-dropdown-menu ::content .focused-line.paper-input-container {
+        background-color: transparent;
+      }
+
+      ::content paper-input-container .input-content iron-icon {
+        margin-right: .3em;
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      section, .content {
+        @apply(--layout-flex);
+      }
+
+      paper-card {
+        display: block;
+        margin: auto;
+        padding: 2em;
+        @apply(--layout-flex);
+      }
+
+      .info-bar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: #333;
+        color: #fff;
+        padding: 8px;
+        margin: 32px 32px 0 32px;
+      }
+
+      .info-bar paper-card {
+        display: block;
+      }
+
+      .info-bar paper-button {
+        margin: 0;
+      }
+
+      .info-bar .icon {
+        margin: 0 8px;
+      }
+
+      .info-bar .message {
+        @apply(--layout-flex);
+      }
+
+      .info-bar .actions {
+        display: block;
+      }
+
+      .document-actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+        color: var(--nuxeo-header-actions);
+        margin: 1em 1.8em -1.8em;
+      }
+
+      .document-actions::content paper-icon-button {
+        width: 2.25rem;
+        color: var(--nuxeo-header-actions);
+      }
+
+      .document-actions::content paper-icon-button:hover {
+        color: var(--nuxeo-header-actions-hover);
+      }
+    </style>
+
+    <!-- Main content -->
+    <paper-header-panel class="main">
+
+      <div class="paper-header">
+        <paper-toolbar>
+          <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
+
+          <paper-dropdown-menu noink no-animations no-label-float>
+            <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
+              <paper-icon-item name="view">
+                <iron-icon icon="icons:visibility" item-icon></iron-icon>
+                [[i18n('command.view', 'View')]]</paper-icon-item>
+              <template is="dom-if" if="[[_canViewContent(document)]]">
+                <paper-icon-item name="edit">
+                  <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
+                  [[i18n('command.edit', 'Edit')]]</paper-icon-item>
+              </template>
+              <paper-icon-item name="permissions">
+                <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
+                [[i18n('browser.permissions', 'Permissions')]]</paper-icon-item>
+
+              <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+
+            </paper-menu>
+          </paper-dropdown-menu>
+
+        </paper-toolbar>
+      </div>
+
+      <div class="document-actions">
+        <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+      </div>
+
+      <template is="dom-if" if="[[document.isVersion]]">
+        <div class="card-content info-bar">
+          <iron-icon class="icon" icon="icons:info"></iron-icon>
+          <div class="message">
+            [[i18n('versions.info', "You're viewing the {0}.{1} version",
+            document.properties.uid:major_version, document.properties.uid:minor_version)]]
+          </div>
+          <div class="actions">
+            <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
+          </div>
+        </div>
+      </template>
+
+      <div class="content" id="nxContent">
+        <paper-toast id="toast"></paper-toast>
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+          <section name="view">
+            <template is="dom-if" if="[[_canViewContent(document)]]">
+              <nuxeo-document-content-view id="browseContent" provider="advanced_document_content"
+                params="[[cvParams]]" selected-items="{{selectedItems}}"
+                document="[[document]]">
+                <div class="actions">
+                  <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+                </div>
+              </nuxeo-document-content-view>
+            </template>
+
+            <template is="dom-if" if="[[_canView(document)]]">
+              <nuxeo-document-page document="[[document]]"></nuxeo-document-page>
+            </template>
+          </section>
+
+          <template is="dom-if" if="[[_canViewContent(document)]]">
+            <section name="edit">
+              <paper-card>
+                <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
+              </paper-card>
+            </section>
+          </template>
+
+          <section name="permissions">
+            <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
+          </section>
+
+          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
+
+        </iron-pages>
+      </div>
+    </paper-header-panel>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-browser',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        properties: {
+          document: {
+            type: Object
+          },
+          selectedTab: {
+            type: String,
+            value: 'view',
+            notify: true
+          },
+          cvParams: {
+            type: Object,
+            notify: true
+          },
+          clipboard: {
+            type: Object
+          },
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(document)'
+          },
+          browseActionContext: {
+            type: Object,
+            computed: '_browseActionContext(document, selectedItems)'
+          },
+          viewsContext: {
+            type: Object,
+            computed: '_viewsContext(document)'
+          }
+        },
+
+        listeners: {
+          'permissions.acecreated': '_documentUpdated',
+          'permissions.aceupdated': '_documentUpdated',
+          'permissions.acedeleted': '_documentUpdated',
+          'addedToCollection': '_documentUpdated',
+          'removedFromCollection': '_documentUpdated',
+          'document-restored': '_documentRestored'
+        },
+
+        observers: [
+          '_updateCvParams(document)'
+        ],
+
+        _documentUpdated: function() {
+          this.fire('document-updated');
+        },
+
+        _documentRestored: function() {
+          this.fire('document-updated');
+          this._navigateToView();
+        },
+
+        download: function() {
+          location.href = this.document.properties['file:content'].data;
+        },
+
+        get _enrichers() {
+          if (this.document) {
+            return this.document.contextParameters;
+          }
+        },
+
+        get _canReadChildren() {
+          return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
+        },
+
+        _actionContext: function() {
+          return {document: this.document, clipboard: this.clipboard};
+        },
+
+        _browseActionContext: function() {
+          return {document: this.document, selectedItems: this.selectedItems};
+        },
+
+        _viewsContext: function() {
+          return {document: this.document};
+        },
+
+        _canDownload: function(document) {
+          return this._canView(document) && this.hasContent(document);
+        },
+
+        _canView: function(document) {
+          return document && !this.hasFacet(document, 'Folderish');
+        },
+
+        _canViewContent: function(document) {
+          return this.hasFacet(document, 'Folderish'); // && this._canReadChildren;
+        },
+
+        _navigateToView: function() {
+          page('/browse' + this.document.path + '@view');
+        },
+
+        _updateCvParams: function() {
+          if (this._canViewContent(this.document)) {
+            this.cvParams = {'ecm_parentId': this.document.uid};
+          }
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

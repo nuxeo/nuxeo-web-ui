@@ -1,0 +1,286 @@
+<!doctype html>
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Nuxeo Workflow Data Elements Demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../jquery/dist/jquery.min.js"></script>
+  <script src="../../moment/min/moment-with-locales.js"></script>
+  <link rel="import" href="../nuxeo-dataviz-elements.html">
+  <style>
+    table {
+      width: 100%;
+      background-color: transparent;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+    th {
+      vertical-align: bottom;
+      border-bottom: 2px solid #ddd;
+      text-align: left;
+    }
+    td {
+      padding: 8px;
+      line-height: 1.5em;
+      vertical-align: top;
+      border-top: 1px solid #ddd;
+    }
+    tr:nth-child(odd)>td {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body unresolved>
+<template is="dom-bind">
+
+  <nuxeo-connection url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+
+  <input type="date" value="{{startDate::change}}">
+  <input type="date" value="{{endDate::change}}">
+
+  <h2>Avg Workflow duration per department (#1)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       grouped-by="workflowVariables.department"
+                       metrics="avg(timeSinceWfStarted)"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{durations}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <tr>
+      <th>Department</th>
+      <th>Avg. Duration</th>
+    </tr>
+    <template is="dom-repeat" items="[[durations]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[formatDuration(entry.value)]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Workflow instance count per amount (#2)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       with-ranges='{"workflowVariables.amount":[{"key": "<= 1500", "to": 1500 },{"key": "> 1500", "from": 1500}]}'
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{instancesCountPerAmount}}">
+  </nuxeo-workflow-data>
+  <table>
+    <template is="dom-repeat" items="[[instancesCountPerAmount]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Workflow instance count per user per date (#3)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="wf.travelExpenses.create"
+                       grouped-by="taskActor"
+                       with-date-intervals="day"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{instancesCountPerUserPerDay}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <template is="dom-repeat" items="[[instancesCountPerUserPerDay]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>
+          <table>
+            <template is="dom-repeat" items="[[entry.value]]" as="date">
+              <tr>
+                <td>[[date.key]]</td>
+                <td>[[date.value]]</td>
+              </tr>
+            </template>
+          </table>
+        </td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Sum of amount per user per day (#5)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="wf.travelExpenses.create"
+                       grouped-by="taskActor"
+                       with-date-intervals="day"
+                       metrics="sum(workflowVariables.amount)"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{amountPerUserPerDay}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <template is="dom-repeat" items="[[amountPerUserPerDay]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>
+          <table>
+            <template is="dom-repeat" items="[[entry.value]]" as="date">
+              <tr>
+                <td>[[date.key]]</td>
+                <td>[[date.value]]</td>
+              </tr>
+            </template>
+          </table>
+        </td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Average validation time per user (#6)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="Accept/ Reject"
+                       grouped-by="taskActor"
+                       metrics="avg(timeSinceWfStarted)"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{validationTimePerUser}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <tr>
+      <th>User</th><th>Avg. validation time</th>
+    </tr>
+    <template is="dom-repeat" items="[[validationTimePerUser]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[formatDuration(entry.value)]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Total number of actions triggered (#7)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="Accept/ Reject"
+                       grouped-by="action"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{numberOfActions}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <tr>
+      <th>Action</th><th>#</th>
+    </tr>
+    <template is="dom-repeat" items="[[numberOfActions]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Total number of actions by ‘department’ (#8)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="Accept/ Reject"
+                       grouped-by="action,workflowVariables.department"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{numberOfActionsPerDepartment}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <template is="dom-repeat" items="[[numberOfActionsPerDepartment]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>
+          <table>
+            <template is="dom-repeat" items="[[entry.value]]" as="department">
+              <tr>
+                <td>[[department.key]]</td>
+                <td>[[department.value]]</td>
+              </tr>
+            </template>
+          </table>
+        </td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Sum of expense’s registered per department per day (#9)</h2>
+
+  <nuxeo-workflow-data workflow="TravelExpenseValidation"
+                       task="Accept/ Reject"
+                       grouped-by="workflowVariables.department"
+                       with-date-intervals="day"
+                       metrics="sum(workflowVariables.amount)"
+                       start-date="[[startDate]]" end-date="[[endDate]]"
+                       data="{{amountPerDepartmentPerDay}}">
+  </nuxeo-workflow-data>
+
+  <table>
+    <template is="dom-repeat" items="[[amountPerDepartmentPerDay]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>
+          <table>
+            <template is="dom-repeat" items="[[entry.value]]" as="date">
+              <tr>
+                <td>[[date.key]]</td>
+                <td>[[date.value]]</td>
+              </tr>
+            </template>
+          </table>
+        </td>
+      </tr>
+    </template>
+  </table>
+
+</template>
+<script>
+  var t = document.querySelector('template');
+  var currentDate = moment();
+  t.endDate = currentDate.format("YYYY-MM-DD");
+  t.startDate = currentDate.subtract(7, 'days').format("YYYY-MM-DD");
+
+  t.formatDuration = function (duration) {
+    var seconds = Math.floor(duration/1000),
+        minutes = Math.floor(seconds/60),
+        hours = Math.floor(minutes/60),
+        days = Math.floor(hours/24),
+        result = ";";
+    hours = hours-(days*24);
+    minutes = minutes-(days*24*60)-(hours*60);
+    seconds = seconds-(days*24*60*60)-(hours*60*60)-(minutes*60);
+    if (days > 0) {
+      result += days + " Days ";
+    }
+    if (hours > 0) {
+      result += hours + " h ";
+    }
+    if (minutes > 0) {
+      result += minutes + " m ";
+    }
+    if (seconds > 0) {
+      result += seconds + " s ";
+    }
+    return result;
+  }
+</script>
+</body>
+</html>

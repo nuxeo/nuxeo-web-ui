@@ -1,0 +1,12 @@
+{
+  "name": "onedrive-file-picker",
+  "main": ["dist/onedrive-file-picker.js"],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src",
+    "lib",
+    "test"
+  ]
+}

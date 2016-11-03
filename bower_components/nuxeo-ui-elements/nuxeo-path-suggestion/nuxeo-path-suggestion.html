@@ -1,0 +1,182 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../paper-typeahead/paper-typeahead.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-document.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-page-provider.html">
+
+<!--
+An element that provides path auto completion to nuxeo folderish documents.
+
+    <nuxeo-path-suggestion value="/"></nuxeo-path-suggestion>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--nuxeo-path-suggestion-results` | Mixin applied to the results pane | `{}`
+`--nuxeo-path-suggestion-result` | Mixin applied to the result items | `{}`
+
+@group Nuxeo UI Elements
+@element nuxeo-path-suggestion
+@demo demo/nuxeo-path-suggestion/index.html
+-->
+<dom-module id="nuxeo-path-suggestion">
+  <style>
+    :host {
+      display: block;
+    --paper-typeahead-results: {
+      background-color: white;
+      @apply(--nuxeo-path-suggestion-results);
+     };
+    --paper-typeahead-result: {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      direction:rtl;
+      text-align: left;
+     @apply(--nuxeo-path-suggestion-result);
+     };
+    }
+  </style>
+  <template>
+    <nuxeo-page-provider id="provider"
+                         query="[[query]]"
+                         params="[[params]]"
+                         page-size="20"
+                         current-page="{{children}}"></nuxeo-page-provider>
+    <nuxeo-document id="parent"></nuxeo-document>
+    <paper-typeahead id="typeahead"
+                     label="[[label]]"
+                     value="{{value}}"
+                     data="[[data]]"
+                     no-label-float="[[noLabelFloat]]"
+                     allowed-pattern="[[allowedPattern]]"
+                     auto-validate="[[autoValidate]]"
+                     on-focus="_onFocus"></paper-typeahead>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-path-suggestion',
+      properties: {
+
+        parent: {
+          type: Object,
+          notify: true
+        },
+
+        query: String,
+
+        params: Object,
+
+        value: {
+          type: String,
+          observer: '_valueChanged',
+          notify: true
+        },
+
+        data: Object,
+
+        children: {
+          type: Array,
+          observer: '_childrenChanged',
+          notify: true
+        },
+
+        label: String,
+
+        noLabelFloat: {
+          type: Boolean,
+          value: false
+        },
+
+        autoValidate: {
+          type: Boolean,
+          value: true
+        },
+
+        allowedPattern: {
+          type: String,
+          value: '[^\(\)\\\+\*\%]'
+        }
+      },
+
+      displayResults: function() {
+        this.$.typeahead.tryDisplayResults();
+      },
+
+      hideResults: function() {
+        this.$.typeahead.closeResults();
+      },
+
+      _onFocus: function() {
+        this.$.typeahead.typedValue = this.value;
+        this.displayResults();
+      },
+
+      _childrenChanged: function() {
+        if (this.children) {
+          if (this.children.length == 1 && this.children[0].path === this.$.typeahead.typedValue) {
+            this.hideResults();
+          } else {
+            this.data = this.children.map(function(child) {
+              return child.path + '/'
+            });
+            this.displayResults();
+          }
+        }
+      },
+
+      _valueChanged: function() {
+        if(this.value) {
+          var idx = this.value.lastIndexOf('/');
+          if (idx > -1) {
+            var newParentPath = (idx == 0 ? '/' : this.value.substring(0, idx));
+            this._updateParent(newParentPath).then(function() {
+              this._queryChildren(this.parent, this.value.substring(idx+1))
+            }.bind(this));
+          }
+        }
+      },
+
+      _updateParent: function(newParentPath) {
+        if (!this.parent || newParentPath !== this.$.parent.docPath) {
+          this.$.parent.docPath = newParentPath;
+          return this.$.parent.get().then(function(response) {
+            this.parent = response;
+          }.bind(this));
+        } else {
+          return new Promise(function(resolve) {
+            resolve();
+          });
+        }
+      },
+
+      _queryChildren: function(parent, term) {
+        this.query = 'SELECT * FROM Document WHERE ecm:parentId = \'' + parent.uid + '\' AND ecm:name LIKE ? ' +
+                     'AND ecm:mixinType = \'Folderish\' AND ecm:mixinType != \'HiddenInNavigation\' ' +
+                     'AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != \'deleted\'';
+        this.params = [term+'%'];
+        return this.$.provider.fetch();
+      }
+
+    });
+  </script>
+</dom-module>

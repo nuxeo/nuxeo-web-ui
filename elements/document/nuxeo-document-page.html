@@ -1,0 +1,446 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+    Gabriel Barata <gbarata@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
+-->
+
+<!--
+`nuxeo-document-page`
+@group Nuxeo UI
+@element nuxeo-document-page
+-->
+<dom-module id="nuxeo-document-page">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-flex);
+      }
+
+      ::content a, ::content a:active,
+      ::content a:visited, ::content a:focus {
+        @apply(--nuxeo-link); }
+
+      ::content a:hover {
+        @apply(--nuxeo-link-hover); }
+
+      ::content .attachments {
+        margin: 0 -1em -1em;
+      }
+
+      paper-card {
+        @apply(--paper-card);
+        min-width: 22em;
+      }
+
+      .sideinfo paper-card {
+        --paper-card-content: {
+          padding: 1em 0;
+        };
+      }
+
+      paper-tooltip {
+        --paper-tooltip: {
+          width: 250px;
+        };
+      }
+
+      .sideinfo {
+        padding: .75rem 0 .75em .75em;
+        box-sizing: border-box;
+      }
+
+      .sideinfo paper-card {
+        padding: 1em;
+        margin-bottom: 1em;
+      }
+
+      .sideinfo paper-card .document-task {
+        padding: 0;
+      }
+
+      .title {
+        margin: 0;
+        font-size: 1.1em;
+        padding-bottom: .5em;
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      .start-workflow {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        vertical-align: middle;
+        border-radius: 2px;
+      }
+
+      .ctn {
+        width: 100%;
+        margin-bottom: 1em;
+      }
+
+      .ctn:last-child {
+        margin-bottom: 0;
+      }
+
+      .audit {
+        max-height: 17rem;
+        overflow-y: auto;
+        @apply(--nuxeo-document-activity-audit-theme);
+      }
+
+      .docinfo {
+        padding: .75rem .75rem .75rem 0;
+        box-sizing: border-box;
+      }
+
+      .sidecard .details {
+        font-size: .9em;
+        padding-bottom: 1em;
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      .details .col {
+        width: 30%;
+        display: inline-block;
+        line-height: 1.9em;
+      }
+
+      .details {
+        vertical-align: top;
+      }
+
+      .sidecard .icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+        margin-right: .2rem;
+      }
+
+      /* Tasks */
+      .wf-running {
+        display: block;
+        padding: 0 2em;
+        border: 0;
+        border-radius: 0;
+        min-height: 3.2em;
+        background-color: #333;
+        color: #fff;
+      }
+
+      .process-task {
+        @apply(--nuxeo-document-task-button-theme);
+        position: absolute;
+        display: inline-block;
+        text-transform: uppercase;
+        background-color: #f68500;
+        color: #fff;
+        padding: 0.3rem .8rem;
+        vertical-align: baseline;
+        border-radius: 2px;
+        font-size: .9em;
+        font-weight: 700;
+        right: .5em;
+        top: .8em;
+      }
+
+      .process-tag {
+        color: #f68500;
+      }
+
+      .task-header {
+        background-color: #fafcfd;
+        border-bottom: 1px solid #e5e5e5;
+        color: var(--dark-primary-color);
+        padding: 1em;
+      }
+
+      .task-name {
+        font-weight: bold;
+      }
+
+      iron-icon.task-name-icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+        border-radius: 50px;
+        background-color: var(--dark-primary-color);
+        color: white;
+        padding: .4em;
+        margin-right: .5em;
+      }
+
+      .workflow-name {
+        font-size: .8em;
+        font-weight: 300;
+        margin-top: .5em;
+      }
+
+      #graphDialog paper-button {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+      }
+
+      .graph-container {
+        padding: 0.5rem 2rem;
+        position: relative;
+      }
+
+      .open-graph {
+        font-size: 0.8rem;
+      }
+
+      nuxeo-workflow-graph {
+        position: relative;
+      }
+
+      @media (max-width: 1024px) {
+        .horizontal.layout {
+          flex-direction: column;
+        }
+
+        .horizontal.layout > div {
+          padding: 0;
+        }
+      }
+    </style>
+
+    <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
+    <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
+
+    <template is="dom-if" if="[[hasTaskToProcess]]">
+      <paper-card class="wf-running">
+        <div class="card-content">
+          <template is="dom-repeat" items="[[tasks]]" as="task">
+            <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
+            <!-- TODO: review labels with embedded markup tags -->
+            [[i18n('documentPage.to.process', 'You have a task to process before ')]]
+            [[formatDate(task.dueDate)]]
+            <paper-button noink class="process-task" on-tap="_processTask">
+              [[i18n('documentPage.process.task', 'Process')]]
+            </paper-button>
+          </template>
+        </div>
+      </paper-card>
+    </template>
+
+    <div class="horizontal layout">
+      <div class="docinfo vertical layout flex-2">
+        <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
+      </div>
+      <div class="sideinfo vertical layout flex">
+        <template is="dom-if" if="[[isProcessingTask]]" restamp>
+          <template is="dom-repeat" items="[[workflows]]" as="workflow">
+            <template is="dom-repeat" items="[[tasks]]" as="task">
+              <paper-card class="document-task">
+                <div class="layout horizontal center task-header">
+                  <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+                  <div class="layout vertical flex">
+                    <span class="task-name">[[i18n(task.name)]]</span>
+                    <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+                  </div>
+                  <paper-dialog id="graphDialog" with-backdrop>
+                    <div class="graph-container">
+                      <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+                    </div>
+                    <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
+                  </paper-dialog>
+                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph', 'View Graph')]]</paper-button>
+                </div>
+                <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
+                  <div class="buttons">
+                    <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later', 'Process later')]]</paper-button>
+                  </div>
+                </nuxeo-document-task>
+              </paper-card>
+            </template>
+          </template>
+        </template>
+
+        <template is="dom-if" if="[[!isProcessingTask]]">
+
+          <paper-card class="sidecard">
+            <div class="horizontal layout wrap">
+              <div class="details ctn">
+                <div>
+                  <span class="col">[[i18n('documentPage.added.on', 'Created on')]]</span>
+                  [[formatDate(document.properties.dc:created)]]
+                </div>
+                <div>
+                  <span class="col">[[i18n('documentPage.added.by', 'By')]]</span>
+                  <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
+                </div>
+                <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
+                  <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
+                </div>
+              </div>
+              <div class="ctn">
+                <template is="dom-if" if="[[hasWorkflowRunning]]">
+                  <nuxeo-tag uppercase>[[i18n('documentPage.process.running', 'Process running')]]</nuxeo-tag>
+                </template>
+                <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
+                <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+              </div>
+            </div>
+          </paper-card>
+
+          <paper-card class="sidecard">
+            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          </paper-card>
+
+          <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
+            <paper-card class="sidecard">
+              <p class="title">[[i18n('documentPage.process.title', 'Process')]]</p>
+              <div class="vertical layout card-content">
+                <div>
+                  <paper-dropdown-menu label="Start a process">
+                    <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+                      <template is="dom-repeat" items="[[processes]]" as="process">
+                        <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
+                      </template>
+                    </paper-menu>
+                  </paper-dropdown-menu>
+                </div>
+                <div>
+                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">[[i18n('documentPage.process.start', 'Start')]]</paper-button>
+                </div>
+              </div>
+            </paper-card>
+          </template>
+          <template is="dom-if" if="[[hasCollections(document)]]">
+            <paper-card class="sidecard">
+              <p class="title">[[i18n('documentPage.collections', 'Collections')]]</p>
+              <div class="horizontal layout wrap card-content">
+                <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
+              </div>
+            </paper-card>
+          </template>
+          <paper-card class="sidecard">
+            <p class="title">[[i18n('documentPage.activity', 'Activity')]]</p>
+            <div class="vertical layout card-content audit">
+              <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
+            </div>
+          </paper-card>
+        </template>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-page',
+        behaviors: [Nuxeo.LayoutBehavior],
+        properties: {
+          document: {
+            type: Object,
+            observer: '_documentChanged'
+          },
+
+          /* Running workflows on the document */
+          workflows: {
+            type: Object,
+            observer: '_workflowsChanged'
+          },
+
+          /* Tasks of the workflows running on the document whom actor is the current user */
+          tasks: {
+            type: Array,
+            observer: '_tasksChanged'
+          },
+
+          selectedProcess: {
+            type: String
+          },
+
+          processes: {
+            type: Array
+          },
+
+          /* Whether are running workflows on the document or not */
+          hasWorkflowRunning: {
+            type: Boolean,
+            notify: true
+          },
+
+          /* Whether the user has any task to process or not */
+          hasTaskToProcess: {
+            type: Boolean
+          },
+
+          /* Whether the user is processing a task or not */
+          isProcessingTask: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        _documentChanged: function() {
+          if (this.document) {
+            this.workflows = this.document.contextParameters.runningWorkflows;
+            this.tasks = this.document.contextParameters.pendingTasks;
+            this.processes = this.document.contextParameters.runnableWorkflows;
+            this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
+            this.isProcessingTask = false;
+          }
+        },
+
+        _canStartProcess: function() {
+          return !this.hasWorkflowRunning && this.processes && this.processes.length > 0;
+        },
+
+        _workflowsChanged: function() {
+          this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
+        },
+
+        _tasksChanged: function() {
+          this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
+        },
+
+        _startWorkflow: function() {
+          var workflows = this.$.workflows;
+          this.$.workflows.data = {
+            'entity-type': 'workflow',
+            'workflowModelName': this.selectedProcess,
+            'attachedDocumentIds': [this.document.uid]
+          };
+          workflows.post().then(function() {
+            this.fire('workflowStarted');
+          }.bind(this));
+        },
+
+        _processTask: function() {
+          this.isProcessingTask = true;
+        },
+
+        _cancelProcessTask: function() {
+          this.isProcessingTask = false;
+        },
+
+        _toggleGraphDialog: function() {
+          this.$$('#graphDialog').toggle();
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

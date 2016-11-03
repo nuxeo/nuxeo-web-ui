@@ -1,0 +1,138 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../nuxeo-elements/nuxeo-connection.html">
+
+<!--
+An element allowing querying the Nuxeo ES passthrough.
+
+Example:
+
+    <nuxeo-es-search></nuxeo-es-search>
+
+@group Nuxeo Data Elements
+@element nuxeo-es-search
+-->
+<dom-module id="nuxeo-es-search">
+  <style>
+    :host {
+      display: none;
+    }
+  </style>
+  <template>
+    <nuxeo-connection id="nx" connection-id="[[connectionId]]"></nuxeo-connection>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'nuxeo-es-search',
+
+        properties: {
+          /**
+           * The id of a nuxeo-connection to use.
+           */
+          connectionId: {
+            type: String,
+            value: 'nx'
+          },
+
+          /**
+           *  If true, automatically execute the operation when either `path` or `params` changes.
+           */
+          auto: {type: Boolean, value: false},
+
+          index: {
+            type: String,
+            value: 'nuxeo'
+          },
+
+          query:  Object,
+
+          aggregates: Object,
+
+          type: String,
+
+          aggregations: {
+            type: Object,
+            notify: true,
+            readOnly: true
+          },
+
+          hits: {
+            type: Object,
+            notify: true,
+            readOnly: true
+          }
+        },
+
+        observers: [
+          '_auto(connectionId, auto, index, query, aggregates)'
+        ],
+
+        _auto: function () {
+          if (this.auto && this.query && this.aggregates) {
+            this.execute();
+          }
+        },
+
+        execute: function () {
+          return this.$.nx.connect()
+              .then(this._send.bind(this));
+        },
+
+        _send: function() {
+          var url = [this.$.nx.client._baseURL, 'site/es', this.index, '_search'].join('/');
+          url = url.replace(/(^\/+)|([^:])\/\/+/g, '$2/');
+
+          if (this.type) { url += '?search_type=' + this.type; }
+           var options = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: {
+              query: this.query, aggs: this.aggregates
+            },
+            url: url
+          };
+          return this.$.nx.request().then(function(request) {
+            return request
+              .execute(options)
+              .then(this._handleResponse.bind(this))
+              .catch(this._handleError.bind(this))
+          }.bind(this));
+        },
+
+        _handleError: function(request, error) {
+          console.error(error);
+          this.fire('error', {
+            request: request,
+            error: error
+          });
+        },
+
+        _handleResponse: function(response) {
+          this._setHits(response.hits);
+          this._setAggregations(response.aggregations);
+          this.fire('results', response);
+          return response;
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

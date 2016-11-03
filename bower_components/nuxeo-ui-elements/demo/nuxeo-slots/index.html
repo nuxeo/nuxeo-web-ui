@@ -1,0 +1,148 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>nuxeo-slot Demo</title>
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../paper-button/paper-button.html">
+  <link rel="import" href="../../../paper-card/paper-card.html">
+  <link rel="import" href="../../../paper-input/paper-input.html">
+  <link rel="import" href="../../../paper-toggle-button/paper-toggle-button.html">
+  <link rel="import" href="../../../polymer/polymer.html">
+  <link rel="import" href="../../nuxeo-slots.html">
+</head>
+<body unresolved>
+
+  <!-- ACTION TEMPLATE -->
+  <dom-module id="nuxeo-alert-button">
+    <template>
+      <paper-button raised on-tap="_act">
+        <content></content>
+      </paper-button>
+    </template>
+    <script>
+      Polymer({
+        is: 'nuxeo-alert-button',
+        properties: {
+          message: ''
+        },
+        _act: function() {
+          alert(this.message);
+        }
+      });
+    </script>
+  </dom-module>
+
+
+  <template is="dom-bind">
+
+    <!-- SLOTS-->
+
+    <paper-card heading="LEFT">
+      <div class="card-content">
+        <nuxeo-slot slot="LEFT"></nuxeo-slot>
+      </div>
+    </paper-card>
+
+    <!-- MIDDLE slot can be attached after content contributions -->
+    <template is="dom-if" if="[[showMiddle]]">
+      <paper-card heading="MIDDLE">
+        <div class="card-content">
+          <nuxeo-slot slot="MIDDLE"></nuxeo-slot>
+        </div>
+      </paper-card>
+    </template>
+
+    <paper-card heading="RIGHT">
+      <div class="card-content">
+        <nuxeo-slot slot="RIGHT"></nuxeo-slot>
+      </div>
+    </paper-card>
+
+    <!-- Multiple LIST slots can be used. All will have the same slot content -->
+    <paper-card heading="LIST">
+      <div class="card-content">
+        <ul>
+          <li>
+            <nuxeo-slot slot="LIST"></nuxeo-slot>
+          </li>
+          <li>
+            <nuxeo-slot slot="LIST"></nuxeo-slot>
+          </li>
+        </ul>
+      </div>
+    </paper-card>
+
+    <!-- Slots can be used as children in elements that rely on child selectors since content is stamped as sibling -->
+    <paper-card heading="MENU">
+      <div class="card-content">
+        <paper-menu>
+          <paper-item>First item</paper-item>
+          <nuxeo-slot slot="MENU"></nuxeo-slot>
+        </paper-menu>
+      </div>
+    </paper-card>
+
+    <!-- SLOT CONTENT -->
+
+    <nuxeo-slot-content name="one" slot="LEFT">
+      <template>
+        <nuxeo-alert-button message="One">ONE</nuxeo-alert-button>
+      </template>
+    </nuxeo-slot-content>
+
+    <!--nuxeo-action id="one" category="LEFT" disabled></nuxeo-action-->
+
+    <nuxeo-slot-content name="two" slot="RIGHT">
+      <template>
+        <nuxeo-alert-button message="Two">TWO</nuxeo-alert-button>
+      </template>
+    </nuxeo-slot-content>
+
+    <nuxeo-slot-content name="yours" order="[[order]]" slot="[[category]]" disabled$="[[disabled]]">
+      <template>
+        <nuxeo-alert-button message="[[label]]">[[label]]</nuxeo-alert-button>
+      </template>
+    </nuxeo-slot-content>
+
+    <table>
+      <tr>
+        <td>
+          <paper-input label="Label" value="{{label}}"></paper-input>
+        </td>
+        <td>
+          <paper-input label="Category" value="{{category}}" placeholder="RIGHT, LEFT, etc..."></paper-input>
+        </td>
+        <td>
+          <paper-input label="Order" value="{{order}}" type="number"></paper-input>
+        </td>
+        <td>
+          <paper-toggle-button label="Disabled" checked="{{disabled}}"></paper-toggle-button>
+        </td>
+      </tr>
+    </table>
+
+    <span>[[label]]</span>
+
+    <label>Show Middle?</label>
+    <paper-toggle-button label="Middle?" checked="{{showMiddle}}"></paper-toggle-button>
+  </template>
+</body>
+</html>

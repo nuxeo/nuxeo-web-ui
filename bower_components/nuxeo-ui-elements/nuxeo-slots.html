@@ -1,0 +1,280 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<!-- SLOT REGISTRY -->
+<dom-module id="nuxeo-slot">
+  <script>
+    (function() {
+
+      // global slot registry
+      var REGISTRY = {};
+
+      function _getRegistry(slot) {
+        REGISTRY[slot] = REGISTRY[slot] || {nodes: [], slots: []};
+        return REGISTRY[slot];
+      }
+
+      function _same(n1, n2) {
+        var k1 = n1.getAttribute('name'),
+            k2 = n2.getAttribute('name');
+        return k1 && k2 && (k1 === k2);
+      }
+
+      function _registerContent(node, slot) {
+        var registry = _getRegistry(slot);
+        var existing = registry.nodes.find(function(n) { return _same(node, n); });
+        if (existing) {
+          existing.merge(node);
+        } else {
+          registry.nodes.push(node);
+        }
+        registry.nodes.sort(function(a, b) { return a.order > b.order; });
+        registry.slots.forEach(function(c) { c._updateContent(); });
+      }
+
+      function _unregisterContent(node, slot) {
+        var registry = _getRegistry(slot);
+        var idx = registry.nodes.findIndex(function(n) { return _same(node, n); });
+        if (idx !== -1) {
+          registry.nodes.splice(idx, 1);
+          registry.slots.forEach(function(c) { c._updateContent(); });
+        }
+      }
+
+      /**
+       * Custom element to help build pluggable applications.
+       * Slots allow dynamic registration of content which will be stamped in the slot's parent.
+       *
+       * Example:
+       *
+       *     <nuxeo-slot name="MY_SLOT">
+       *       <!-- <nuxeo-slot-content slot="MY_SLOT"> will appear here -->
+       *     </nuxeo-slot>
+       *
+       * @demo demo/nuxeo-slots/index.html
+       **/
+      Polymer({
+        is: 'nuxeo-slot',
+        behaviors: [Polymer.Templatizer],
+        properties: {
+
+          /**
+           * A unique name for this slot.
+           */
+          slot: {
+            type: String,
+            observer: '_register'
+          },
+
+          /**
+           * An object containing key/values to serve as properties in stamped slot content.
+           */
+          model: {
+            type: Object,
+            value: function() { return {}; }
+          },
+
+          empty: {
+            type: Boolean,
+            value: false,
+            notify: true
+          }
+        },
+
+        observers: [
+            '_updateModel(model.*)'
+        ],
+
+        attached: function() {
+          this._updateContent();
+        },
+
+        detached: function() {
+          this._unregister(this.slot);
+        },
+
+        _register: function(newSlot, oldSlot) {
+          if (oldSlot) {
+            this._unregister(oldSlot);
+          }
+          _getRegistry(newSlot).slots.push(this);
+        },
+
+        _unregister: function(slot) {
+          var idx = _getRegistry(slot).slots.indexOf(this);
+          _getRegistry(slot).slots.splice(idx, 1);
+        },
+
+        _clearContent: function() {
+          if (!this._instances) {
+            return;
+          }
+          this._instances.forEach(function(instance) {
+            var c$ = instance._children;
+            if (c$ && c$.length) {
+              // use first child parent, for case when dom-if may have been detached
+              var p = Polymer.dom(Polymer.dom(c$[0]).parentNode);
+              for (var i=0, n; (i<c$.length) && (n=c$[i]); i++) {
+                p.removeChild(n);
+              }
+            }
+          });
+        },
+
+        _render: function() {
+          // render
+          var parent = Polymer.dom(Polymer.dom(this).parentNode);
+          // keep track of stamped instances
+          this._instances = [];
+          _getRegistry(this.slot).nodes.forEach(function(node) {
+            var template = Polymer.dom(node).querySelector('template');
+            if (!node.disabled && template) {
+              this.templatize(template);
+              var el = this.stamp(this.model);
+              this._instances.push(el);
+              parent.insertBefore(el.root, this);
+            }
+          }.bind(this));
+          this.set('empty', this._instances.length === 0);
+        },
+
+        _updateContent: function() {
+          this._clearContent();
+          this._render();
+        },
+
+        // Forward model changes as properties
+        _updateModel: function(change) {
+          if (change.path === 'model') {
+            Object.keys(change.value).forEach(function(prop) {
+              this._forwardParentProp(prop, change.value[prop]);
+            }.bind(this));
+          } else {
+            this._forwardParentPath(change.path.slice('model.'.length + 1), change.value);
+          }
+        },
+
+        // Implements extension point from Templatizer mixin
+        // Called as side-effect of a host property change, responsible for
+        // notifying parent.<prop> path change on instance
+        _forwardParentProp: function(prop, value) {
+          if (!this._instances) {
+            return;
+          }
+          this._instances.forEach(function(instance) {
+            instance[prop] = value;
+          });
+        },
+
+        // Implements extension point from Templatizer
+        // Called as side-effect of a host path change, responsible for
+        // notifying parent.<path> path change on each row.
+        _forwardParentPath: function(path, value) {
+          if (!this._instances) {
+            return;
+          }
+          this._instances.forEach(function(instance) {
+            instance.notifyPath(path, value, true);
+          });
+        }
+      });
+
+      /**
+       * Registers the given template as content in a `nuxeo-slot`.
+       * Each content should have a unique `name` that can later be used to override properties
+       * (ex: disabling previously contributed content)
+       *
+       * Example:
+       *     <nuxeo-slot-content slot="MY_SLOT">
+       *       <template>
+       *         This content will go into MY_SLOT
+       *       </template>
+       *     </nuxeo-slot-content>
+       *
+       * @demo demo/nuxeo-slots/index.html
+       **/
+      Polymer({
+        is: 'nuxeo-slot-content',
+
+        properties: {
+          /**
+           * The name of the slot where this content is to be displayed.
+           * Multiple slot names can be set as comma separated values, ex: SLOT1, SLOT2
+           */
+          slot: {
+            type: String,
+            value: '',
+            observer: '_slotChanged'
+          },
+
+          /**
+           * Allows dynamic attach/detach of slot content.
+           */
+          disabled: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * Controls ordering of slot content nodes in a slot.
+           */
+          order: {
+            type: Number,
+            value: 0
+          }
+        },
+
+        observers: [
+          '_register(disabled, order)'
+        ],
+
+        detached: function() {
+          this._unregister(this.slot);
+        },
+
+        merge: function(other) {
+          this.slot = other.slot;
+          this.disabled = other.disabled;
+          this.order = other.order;
+        },
+
+        _slotChanged: function(_, oldSlot) {
+          if (oldSlot) {
+            this._unregister(oldSlot);
+          }
+          this._register();
+        },
+
+        _register: function() {
+          this.slot.split(',').forEach(function(slot) {
+            _registerContent(this, slot);
+          }.bind(this));
+        },
+
+        _unregister: function(slots) {
+          slots.split(',').forEach(function(slot) {
+            _unregisterContent(this, slot);
+          }.bind(this))
+        }
+      });
+    })();
+  </script>
+</dom-module>

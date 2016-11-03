@@ -1,0 +1,89 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-delete-documents-actions`
+@group Nuxeo UI
+@element nuxeo-delete-documents-actions
+-->
+<dom-module id="nuxeo-delete-documents-button">
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
+
+    <paper-icon-button icon="delete" id="deleteAllButtons">
+    </paper-icon-button>
+    <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
+      [[i18n('deleteDocumentsButton.tooltip', 'Delete selected items')]]
+    </paper-tooltip>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-delete-documents-button',
+        properties: {
+          documents: {
+            type: Array,
+            notify: true,
+            value: []
+          }
+        },
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        listeners: {
+          'tap': 'deleteDocuments',
+        },
+
+        deleteDocuments: function() {
+          if (confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever',
+                                'Permanently delete selected document(s)?'))) {
+            if (this.documents && this.documents.length) {
+              var uids = this.documents.map(function(doc) {
+                return doc.uid;
+              }).join(',');
+              this.$.deleteOp.input = 'docs:' + uids;
+              this.$.deleteOp.execute().then(function() {
+                this.documents = [];
+                this.fire('refresh');
+              }.bind(this));
+            }
+          }
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

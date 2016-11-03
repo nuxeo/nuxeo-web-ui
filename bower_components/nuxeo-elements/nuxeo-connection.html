@@ -1,0 +1,164 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="jquery-import.html">
+<script src="../nuxeo/dist/nuxeo.js"></script>
+
+<!--
+`nuxeo-connection` wraps a `nuxeo.Client`.
+
+    <nuxeo-connection
+        id="nx_connection"
+        url="http://demo.nuxeo.com"
+        username="Administrator"
+        password="Administrator"></nuxeo-connection>
+
+Note: Elements that depend on a connectionId use `nx` as default.
+
+@group Nuxeo Elements
+@element nuxeo-connection
+@homepage http://www.nuxeo.org
+-->
+<dom-module id="nuxeo-connection">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    // A global map of clients with connectionId as key.
+    // This map is shared between all instances of nuxeo-connection.
+    var nxClients = {};
+
+    Polymer({
+      is: 'nuxeo-connection',
+      properties: {
+        /* A unique identifier for this connection. */
+        connectionId: {type: String, value: 'nx'},
+
+        /* The base URL of the Nuxeo server. */
+        url: {type: String, value: ''},
+
+        /* The repository name. */
+        repositoryName: {type: String, value: null},
+
+        /* The username. */
+        username: {type: String, value: null},
+
+        /* The password. */
+        password: {type: String, value: null}
+      },
+
+      ready: function() {
+        this.connect();
+      },
+
+      connect: function() {
+        // Create the client if needed
+        // If we already have a client with the same connection info just keep it
+        var id = (this.connectionId) ? this.connectionId : Object.keys(nxClients)[0];
+        this.client = nxClients[id];
+        if (this.client) {
+          // if this instance does not have any properties set properties from the client
+          if (!this.url && !this.username && !this.password && !this.repositoryName) {
+            this.url = this.client._baseURL;
+            this.username = this.client._username;
+            this.password = this.client._password;
+            this.repositoryName = this.client._baseOptions.repositoryName;
+          }
+          // if properties match the existing client use it
+          if (this.client._baseURL === this.url &&
+            this.client._username === this.username &&
+            this.client._password === this.password &&
+            this.client._baseOptions.repositoryName === this.repositoryName) {
+            // return the stored connection request promise
+            return this.client._promise;
+          } else {
+            // otherwise override the client with the new properties
+            this.client = null;
+          }
+        }
+        var options = {
+          baseURL: this.url,
+          schemas: ['*']
+        };
+
+        if (this.username) {
+          options.auth = {
+            method: 'basic',
+            username: this.username,
+            password: this.password
+          };
+        }
+
+        if (this.repositoryName) {
+          options.repositoryName = this.repositoryName;
+        }
+
+        nxClients[id] = this.client = this.client || new Nuxeo(options);
+        return this.client._promise = this.client.login()
+          .catch(function(error) {
+            console.log("Nuxeo connection refused: " + error);
+            throw error;
+          });
+      },
+
+      get connected() {
+        return this.client && this.client.connected;
+      },
+
+      get active() {
+        return this.client && this.client._activeRequests > 0;
+      },
+
+      get user() {
+        return this.client.user;
+      },
+
+      handleConnected: function() {
+        if (this.client.connected) {
+          this.fire('connected');
+        }
+      },
+
+      request: function() {
+        return this.connect().then(function() {
+          return this.client.request();
+        }.bind(this));
+      },
+
+      operation: function(op) {
+        return this.connect().then(function() {
+          return this.client.operation(op);
+        }.bind(this));
+      },
+
+      batchUpload: function() {
+        return this.connect().then(function() {
+          return this.client.batchUpload();
+        }.bind(this));
+      }
+    });
+  })();
+</script>

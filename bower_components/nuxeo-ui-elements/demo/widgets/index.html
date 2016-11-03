@@ -1,0 +1,126 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <title>Nuxeo Widgets</title>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../font-roboto/roboto.html">
+  <link rel="import" href="../../../nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../widgets/nuxeo-directory-suggestion.html">
+  <link rel="import" href="../../widgets/nuxeo-user-suggestion.html">
+  <link rel="import" href="../../widgets/nuxeo-document-suggestion.html">
+  <link rel="import" href="../../widgets/nuxeo-file.html">
+  <link rel="import" href="../../widgets/nuxeo-tag.html">
+  <link rel="stylesheet" href="../../../select2/select2.css">
+  <style>
+      body {
+        margin: 0;
+        height: 100%;
+        font-family: 'RobotoDraft', sans-serif;
+      }
+      .container {
+        width: 80%;
+        margin: 50px auto;
+      }
+      table {
+        width: 100%;
+      }
+      table th {
+        text-transform: uppercase;
+        font-size: 14px;
+        text-align: left;
+        padding-right: 40px;
+        border-bottom: 1px solid #eee;
+        font-weight: 500;
+        line-height: 48px;
+      }
+      table td {
+        padding: 0;
+        margin: 0;
+        vertical-align: top;
+        padding: 12px 12px 12px 0;
+      }
+    </style>
+</head>
+<body>
+<template is="dom-bind">
+  <nuxeo-connection id="nx" url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+  <div class="container">
+    <table>
+    <thead><tr><th></th><th>Value</th><th>Widget</th></tr></thead>
+    <tbody>
+    <tr>
+      <td>Single Directory Suggestion</td>
+      <td>[[oneDirectorySuggestion]]</td>
+      <td><nuxeo-directory-suggestion directory-name="subject" value="{{oneDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
+    </tr>
+    <tr>
+      <td>Multiple Directory Suggestion</td>
+      <td>[[multipleDirectorySuggestion]]</td>
+      <td><nuxeo-directory-suggestion directory-name="subject" multiple="true" value="{{multipleDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
+    </tr>
+    <tr>
+      <td>Single User Suggestion</td>
+      <td>[[userSuggestion]]</td>
+      <td>
+        <nuxeo-user-suggestion value="{{userSuggestion}}"></nuxeo-user-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Multiple User Suggestion</td>
+      <td>[[multipleUserSuggestion]]</td>
+      <td>
+        <nuxeo-user-suggestion multiple="true" value="{{multipleUserSuggestion}}"></nuxeo-user-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Single Document Suggestion</td>
+      <td>[[documentSuggestion]]</td>
+      <td>
+        <nuxeo-document-suggestion value="{{documentSuggestion}}"></nuxeo-document-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>Multiple Document Suggestion</td>
+      <td>[[multipleDocumentSuggestion]]</td>
+      <td>
+        <nuxeo-document-suggestion multiple="true" value="{{multipleDocumentSuggestion}}"></nuxeo-document-suggestion>
+      </td>
+    </tr>
+    <tr>
+      <td>File Upload</td>
+      <td>[[upload.upload-batch]]</td>
+      <td>
+        <nuxeo-file value="{{upload}}"></nuxeo-file>
+      </td>
+    </tr>
+    <tr>
+      <td>Tag</td>
+      <td></td>
+      <td>
+        <nuxeo-tag icon="home">Home</nuxeo-tag>
+      </td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+</template>
+</body>
+</html>

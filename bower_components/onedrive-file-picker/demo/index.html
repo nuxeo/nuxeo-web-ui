@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.8.0.min.js"></script>
+    <script type="text/javascript" src="oauth.js"></script>
+    <script type="text/javascript" src="onedrive-file-picker.js"></script>
+    <link rel="stylesheet" type="text/css" href="onedrive-file-picker.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+      html, body {
+        height: 100%;
+      }
+      body {
+        font-family: 'Open Sans', Arial, sans-serif;
+        background-color: #f4fbfe;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        margin-bottom: 3em;
+        width:50%;
+        min-width: 540px;
+        margin: 0 auto;
+        min-height: 65vh;
+      }
+      .header {
+        background-color: #294a6b;
+        color: white;
+        font-size: 130%;
+        padding: .6em 2em .3em;
+      }
+      h3 {
+        font-weight: 300;
+        font-size: 1.5em;
+        margin: .5em 0 .8em;
+      }
+      .content {
+        padding: 2em 2em 0;
+        position: relative;
+        color: #34567b;
+        min-height: 60vh;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .button {
+        background: #00adff;
+        color: #fff;
+        border: none;
+        padding: 1em;
+        transition: all .2s ease-in-out;
+      }
+      .button:hover {
+        background-color: #0079b3;
+        cursor: pointer;
+      }
+      .header .button {
+        font-size: .7em;
+        font-weight: bold;
+        background-color: #ef4800;
+        text-transform: uppercase;
+        box-shadow: 0 0 5px rgba(0,0,0,0.35);
+        border-radius: 2px;
+      }
+      .header .button:hover {
+        background-color: #dd1c00;
+      }
+      .margin-bottom {
+        margin-bottom: 20px;
+      }
+      .metadata pre {
+        overflow: auto;
+        background-color: #fff;
+        border: 1px solid #cbddf0;
+        border-radius: 3px;
+        padding: .5em;
+        color: #213f7D;
+      }
+      .title {
+        width: 7em;
+        display: inline-block;
+        line-height: 1.9em;
+        color: #1e2538;
+      }
+      .team {
+        margin-bottom: 1em;
+        font-size: .8em;
+        text-align: center;
+      }
+      a, a:visited {
+        color: #00adff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      @media (max-width:1020px) {
+        .container {
+          margin: 0;
+          width: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header text-center">
+      <h3>OneDrive JavaScript File Picker</h3>
+      <div class="margin-bottom text-center">
+        <input class="odfp-button button" type="submit" onclick="openPicker()" value="Open Picker »"/>
+      </div>
+    </div>
+    <div class="container">
+      <div class="content">
+        <div id="result">
+          <div class="action"><span class="title">User action</span><span class="data"></span></div>
+          <div class="filename"><span class="title">Filename</span><span class="data"></span></div>
+          <div class="metadata"><pre class="prettyprint" style="display:none;"></pre></div>
+        </div>
+      </div>
+      <div class="team">developed by the <a href="www.nuxeo.com/" alt="nuxeo.com">nuxeo team</a></div>
+    </div>
+
+    <script type="text/javascript">
+      function openPicker() {
+        getToken().then(function(token) {
+          return new OneDriveFilePicker({ 'accessToken': token }).select();
+        }).then(function(result) {
+          $("#result .action span.data").html(result.action);
+          $("#result .filename span.data").html('');
+          $('#result .metadata pre').html('');
+          $('#result .metadata pre').hide();
+          if (result.action === 'select') {
+            $("#result .filename span.data").html(result.item.name);
+            $('#result .metadata pre').html(JSON.stringify(result.item, null, '  '));
+            $('#result .metadata pre').show();
+          }
+        });
+      }
+    </script>
+    <span id="browser-sync-binding"></span>
+  </body>
+</html>

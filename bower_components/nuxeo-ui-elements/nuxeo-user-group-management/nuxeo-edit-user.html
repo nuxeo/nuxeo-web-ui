@@ -1,0 +1,169 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<!--
+An element for creating and editing user data, which is dynamically loaded by `nuxeo-user-group-management`.
+This element can be overridden with custom fields.
+
+Example:
+
+    <nuxeo-edit-user user=[[user]] new></nuxeo-edit-user>
+
+Used by `nuxeo-user-management` and `nuxeo-create-user`
+@group Nuxeo Elements
+@element nuxeo-edit-user
+-->
+<dom-module id="nuxeo-edit-user">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        width: 100%;
+        @apply(--nuxeo-edit-user-layout);
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+        font-weight: bold;
+      }
+
+      .row {
+        margin-bottom: 12px;
+      }
+
+      input {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      form {
+        padding: 8px;
+        margin-top: 24px;
+      }
+
+      nuxeo-user-suggestion {
+        @apply(--layout-flex);
+      }
+
+      .required {
+        position: relative;
+      }
+
+      .required:before {
+        content:"*";
+        color: red;
+        display: block;
+        position: absolute;
+        left: -1em;
+        top: 0;
+      }
+    </style>
+
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('firstName', 'First Name')]]</label>
+      </div>
+      <input value="{{user.firstName::input}}" class="flex">
+    </div>
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('lastName', 'Last Name')]]</label>
+      </div>
+      <input value="{{user.lastName::input}}" class="flex">
+    </div>
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('company', 'Company')]]</label>
+      </div>
+      <input value="{{user.company::input}}" class="flex">
+    </div>
+    <div class="row layout horizontal">
+      <div class="label-container">
+        <label>[[i18n('email', 'Email')]]</label>
+      </div>
+      <div class="horizontal layout flex required">
+        <input value="{{user.email::input}}" type="email" class="flex" required>
+      </div>
+    </div>
+    <template is="dom-if" if="[[new]]">
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>[[i18n('label.groupManager.groups', 'Groups')]]</label>
+        </div>
+        <nuxeo-user-suggestion id="picker"
+                               search-type="GROUP_TYPE"
+                               placeholder="[[i18n('label.security.searchGroups', 'Search for Groups')]]"
+                               value="{{user.groups}}"
+                               multiple
+                               result-formatter="[[resultFormatter]]">
+        </nuxeo-user-suggestion>
+      </div>
+    </template>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'nuxeo-edit-user',
+
+    behaviors: [Nuxeo.I18nBehavior],
+
+    properties: {
+      /**
+       * The user object to be edited or created.
+       */
+      user: {
+        type: Object,
+        value: {}
+      },
+      /**
+       * If true, a new user is being created; if false, an already existing user is being edited.
+       */
+      new: {
+        type: Boolean,
+        value: false
+      },
+
+      resultFormatter: {
+        type: Function,
+        value: function() {
+          return this._resultFormatter.bind(this);
+        }
+      }
+    },
+
+    /**
+     * Resets the form fields to empty values.
+     */
+    resetFields: function() {
+      this.user = {};
+    },
+
+    _resultFormatter: function(item) {
+      return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
+    }
+  });
+</script>

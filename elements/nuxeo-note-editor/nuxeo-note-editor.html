@@ -1,0 +1,136 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
+
+<!--
+`nuxeo-note-editor`
+@group Nuxeo UI
+@element nuxeo-note-editor
+-->
+<dom-module id="nuxeo-note-editor">
+  <template>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      nuxeo-html-editor {
+        margin: 6px;
+      }
+
+      .edit {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
+    </style>
+
+    <nuxeo-document id="note" doc-id="[[document.uid]]" data="[[document]]"></nuxeo-document>
+
+    <template is="dom-if" if="[[_isHTML(document)]]">
+      <div class="html-editor-container">
+        <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
+        <div class="layout horizontal end-justified">
+          <paper-button on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+        </div>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[!_isHTML(document)]]">
+      <template is="dom-if" if="[[_viewMode]]">
+        <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      </template>
+      <template is="dom-if" if="[[!_viewMode]]">
+        <paper-textarea value="{{_value}}" no-label-float></paper-textarea>
+        <div class="layout horizontal end-justified">
+          <paper-button on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
+          <paper-button on-click="_editorSave">[[i18n('command.save')]]</paper-button>
+        </div>
+      </template>
+    </template>
+
+    <paper-toast id="toast"></paper-toast>
+
+  </template>
+
+</dom-module>
+
+<script>
+  (function() {
+    Polymer({
+      is: 'nuxeo-note-editor',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object,
+          observer: '_documentChanged'
+        },
+        _viewMode: {
+          type: Boolean,
+          value: true
+        },
+        _value: {
+          type: String,
+          value: ''
+        }
+      },
+
+      _documentChanged: function() {
+        this._value = this.document.properties['note:note'];
+      },
+
+      _isHTML: function() {
+        return this.document && this.document.properties['note:mime_type'] === 'text/html';
+      },
+
+      _editorSave: function() {
+        this.document.properties['note:note'] = this._value;
+        this.$.note.put().then(function() {
+          var toast = this.$$('#toast');
+          toast.text = this.i18n('noteViewLayout.note.saved', 'Note has been saved.');
+          toast.open();
+          this._viewMode = true;
+          this.fire('document-updated');
+        }.bind(this));
+      },
+
+      _isMutable: function(document) {
+        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+      },
+
+      _canEdit: function(document) {
+        return document.type !== 'Root' && this.hasPermission(document, 'Write') && this._isMutable(document);
+      },
+
+      _edit: function() {
+        this._value = this.document.properties['note:note'];
+        this._viewMode = false;
+      },
+
+      _cancel: function() {
+        this._value = '';
+        this._viewMode = true;
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,249 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../iron-form/iron-form.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-item/paper-icon-item.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+
+<link rel="import" href="../iron-input/iron-input.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/social-icons.html">
+
+<link rel="import" href="../nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="widgets/nuxeo-user-suggestion.html">
+
+<link rel="import" href="nuxeo-i18n-behavior.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-user-group-search.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-create-user.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-create-group.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-user-management.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-group-management.html">
+
+<!--
+An element for managing users and groups in Nuxeo.
+
+Example:
+
+    <nuxeo-user-group-management></nuxeo-user-group-management>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--nuxeo-user-management-layout` | Mixin applied to the host element | `{}`
+`--nuxeo-user-management-create-button-layout` | Mixin applied to the create button | `{}`
+
+@group Nuxeo UI Elements
+@element nuxeo-user-group-management
+@demo demo/nuxeo-user-group-management/index.html
+-->
+<dom-module id="nuxeo-user-group-management">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        position: relative;
+        @apply(--layout-flex);
+        @apply(--nuxeo-user-management-layout);
+      }
+
+      #createDropdown {
+        position: absolute;
+        right: 0;
+        padding: 0;
+        top: 15px;
+      }
+
+      paper-menu {
+        padding: 0;
+      }
+
+      paper-menu paper-icon-item:hover {
+        background: #fafafa;
+        cursor: pointer;
+      }
+    </style>
+
+    <paper-toast id="toast"></paper-toast>
+    <iron-pages selected="[[page]]" attr-for-selected="name">
+      <section name="search">
+        <div class="horizontal layout center">
+          <template is="dom-if" if=[[!readonly]]>
+            <paper-menu-button id="createDropdown" horizontal-align="right">
+              <paper-button class="dropdown-trigger" id="createButton">
+                <iron-icon icon="add-circle-outline"></iron-icon>
+                <span>[[i18n('action.new.usergroup', 'NEW')]]</span>
+              </paper-button>
+              <paper-menu id="menu" class="dropdown-content" selectable="item">
+                <paper-icon-item on-tap="_createUser">
+                  <iron-icon icon="social:person" item-icon></iron-icon>
+                  <span>[[i18n('action.new.user', 'User')]]</span>
+                </paper-icon-item>
+                <paper-icon-item on-tap="_createGroup">
+                  <iron-icon icon="social:people" item-icon></iron-icon>
+                  <span>[[i18n('action.new.group', 'Group')]]</span>
+                </paper-icon-item>
+              </paper-menu>
+            </paper-menu-button>
+          </template>
+        </div>
+        <nuxeo-user-group-search></nuxeo-user-group-search>
+      </section>
+
+      <section name="create-user">
+        <nuxeo-create-user></nuxeo-create-user>
+      </section>
+
+      <section name="manage-user">
+        <nuxeo-user-management username="[[selectedUser]]" readonly="[[readonly]]"></nuxeo-user-management>
+      </section>
+
+      <section name="create-group">
+        <nuxeo-create-group></nuxeo-create-group>
+      </section>
+
+      <section name="manage-group">
+        <nuxeo-group-management groupname="[[selectedGroup]]" readonly="[[readonly]]"></nuxeo-group-management>
+      </section>
+    </iron-pages>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'nuxeo-user-group-management',
+
+    behaviors: [Nuxeo.I18nBehavior],
+
+    properties: {
+      /**
+       * The user-group-management page to be displayed. Possible values are:
+       * `search`, `create-user`, `manage-user`, `create-group` and `manage-group`.
+       */
+      page: {
+        type: String,
+        value: 'search',
+        notify: true
+      },
+
+      selectedUser: String,
+      selectedGroup: String,
+
+      readonly: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      }
+    },
+
+    listeners: {
+      'goHome': '_goSearch',
+      'nuxeo-user-created': '_toast',
+      'nuxeo-user-invited': '_toast',
+      'nuxeo-group-created': '_toast'
+    },
+
+    /**
+     * Go to the 'search' page.
+     */
+    _goSearch: function() {
+      this.page = 'search';
+      this.$$('nuxeo-user-group-search')._searchTermChanged();
+    },
+
+    /**
+     * Got to the 'create-user' page.
+     */
+    _createUser: function() {
+      this.page = 'create-user';
+    },
+
+    /**
+     * Go to the 'create-group' page.
+     */
+    _createGroup: function() {
+      this.page = 'create-group';
+    },
+
+    _manageUser: function(e) {
+      this.selectedUser = e.detail.user;
+      this.page = 'manage-user';
+    },
+
+    _manageGroup: function(e) {
+      this.selectedGroup = e.detail.group;
+      this.page = 'manage-group';
+    },
+
+    /**
+     * Displays a message.
+     */
+    _toast: function(event) {
+      var msg;
+      switch (event.type) {
+        case 'nuxeo-user-created':
+        case 'nuxeo-user-invited':
+          msg = 'User ' + event.detail.id + ' created';
+          break;
+        case 'nuxeo-group-created':
+          msg = 'Group ' + event.detail.groupname + ' created';
+          break;
+      }
+      if (msg) {
+        this.$.toast.text = msg;
+        this.$.toast.open();
+      }
+    },
+
+    ready: function() {
+      // dynamic loading of user layouts
+      if (!this._isRegistered('nuxeo-view-user')) {
+        Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-view-user.html'));
+      }
+      if (!this._isRegistered('nuxeo-edit-user')) {
+        Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-edit-user.html'));
+      }
+
+      window.addEventListener('manageUser', function(e) {
+        this._manageUser(e);
+      }.bind(this));
+      window.addEventListener('manageGroup', function(e) {
+        this._manageGroup(e);
+      }.bind(this));
+    },
+
+    /**
+     * Determines whether a custom element is registered
+     */
+    _isRegistered: function(tag) {
+      return Polymer.isInstance(document.createElement(tag));
+    }
+
+  });
+</script>

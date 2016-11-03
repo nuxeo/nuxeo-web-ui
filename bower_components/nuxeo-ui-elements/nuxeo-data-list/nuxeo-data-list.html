@@ -1,0 +1,182 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-list/iron-list.html">
+<link rel="import" href="../../iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../../paper-styles/paper-styles-classes.html">
+
+<link rel="import" href="../nuxeo-page-provider-display-behavior.html">
+
+<!--
+`nuxeo-data-list'
+@group Nuxeo UI
+@element nuxeo-data-list
+@demo demo/nuxeo-data-list/index.html
+-->
+<dom-module id="nuxeo-data-list">
+  <template>
+
+    <style is="custom-style">
+      #container {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+      }
+      #scrollThreshold {
+        @apply(--layout-flex);
+      }
+
+      :host[loading] .loadable {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
+      .emptyResult {
+        color: #c6c6c6;
+        display: block;
+        font-style: italic;
+        font-weight: normal;
+        padding: 1em 0.7em 2em;
+        text-align: center;
+        font-size: 1.5em;
+      }
+    </style>
+
+    <div id="container">
+
+      <content select="nuxeo-selection-toolbar"></content>
+
+      <template is="dom-if" if="[[displayQuickFilters]]">
+        <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_quickFilterChanged">
+        </nuxeo-quick-filters>
+      </template>
+
+      <div id="filters" class="filters">
+        <template is="dom-repeat" items="[[filters]]" as="filter">
+          <span class="tag filter">
+            [[filter.name]]: [[filter.value]]
+            <iron-icon icon="icons:clear" class="remove" on-tap="_removeFilter"></iron-icon>
+          </span>
+        </template>
+      </div>
+
+      <template is="dom-if" if="[[_isEmpty]]">
+        <div class="emptyResult">[[_computedEmptyLabel]]</div>
+      </template>
+      <iron-scroll-threshold id="scrollThreshold"
+        lower-threshold="1000" class="loadable"
+        on-lower-threshold="_loadMoreData">
+        <iron-list id="list" items="[[items]]" scroll-target="scrollThreshold" selected-item="{{selectedItem}}" as="[[as]]">
+        </iron-list>
+      </iron-scroll-threshold>
+    </div>
+    <paper-spinner-lite active hidden$=[[!loading]]></paper-spinner-lite>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-data-list',
+
+        behaviors: [
+          Polymer.IronResizableBehavior,
+          Nuxeo.PageProviderDisplayBehavior
+        ],
+
+        properties: {
+          multiSelection: {
+            type: Boolean,
+            value: false,
+          },
+          selectOnTap: {
+            type: Boolean,
+            value: true
+          }
+        },
+
+        ready: function() {
+          if (!this._templateStamped) {
+            // use nuxeo-data-grid parent's datahost in the iron-list
+            // functions used in the template should be declared
+            // in the nuxeo-data-grid parent element and not here
+            this.$.list.dataHost = this.dataHost;
+            // get template from nuxeo-data-grid definition
+            this._template = Polymer.dom(this).querySelector('template');
+            // append template in the <iron-list>
+            Polymer.dom(this.$.list).appendChild(this._template);
+            // set binding to items
+            // iron-list will look for our template and stamp the items
+            this.$.list.items = [];
+            this._templateStamped = true;
+
+            // tmp fix
+            // see https://github.com/PolymerElements/iron-list/issues/236
+            this.$.list._didMoveDown = function() {
+              this._focusPhysicalItem(this._focusedIndex + 1);
+            };
+            // end tmp fix
+
+            this.$.list.selectQueuePrevious = function() {
+              this._didMoveUp();
+              this.toggleSelectionForFocusedItem();
+            };
+            this.$.list.selectQueueNext = function() {
+              this._didMoveDown();
+              this.toggleSelectionForFocusedItem();
+            };
+            this.$.list.toggleSelectionForFocusedItem = function() {
+              this.debounce('toggleSelectionForFocusedItem', function() {
+                var model = this._focusedItem._templateInstance;
+                if (model) {
+                  this.toggleSelectionForItem(model[this.as]);
+                }
+              }.bind(this), 300);
+            };
+            this.$.list.addOwnKeyBinding('up', 'toggleSelectionForFocusedItem');
+            this.$.list.addOwnKeyBinding('k', 'selectQueuePrevious');
+            this.$.list.addOwnKeyBinding('down', 'toggleSelectionForFocusedItem');
+            this.$.list.addOwnKeyBinding('j', 'selectQueueNext');
+          }
+        },
+
+        _removeFilter: function(e) {
+          this.fire('column-filter-changed', {value: '', filterBy: e.model.filter.path});
+        },
+
+        selectNext: function() {
+          this.$.list.selectQueueNext();
+        },
+
+        selectPrevious: function() {
+          this.$.list.selectQueuePrevious();
+        }
+
+        });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,200 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="nuxeo-resource.html">
+
+<!--
+`nuxeo-search` allows managing saved searches on a Nuxeo server.
+
+    <nuxeo-search></nuxeo-search>
+
+Example - Get all saved searches accessible by the current user:
+
+    <nuxeo-search auto searches="{{searches}}"></nuxeo-nuxeo-search>
+
+Example - Get a saved search by id:
+
+    <nuxeo-search auto search-id="[[id]]" search="{{search}}"></nuxeo-search>
+
+Example - Execute a saved search:
+
+    <nuxeo-search auto search-id="[[id]]" results="{{results}}"></nuxeo-search>
+
+You can trigger a method explicitly by calling `get`, `post`, `put`, `remove` or `execute on the
+element.
+
+@group Nuxeo Elements
+@element nuxeo-search
+@homepage http://www.nuxeo.org
+-->
+
+<dom-module id="nuxeo-search">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+
+    <nuxeo-resource id="resource" connection-id="[[connectionId]]" method="[[method]]"
+                    path="[[path]]" data="[[data]]" headers="[[headers]]" params="[[params]]">
+    </nuxeo-resource>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-search',
+
+        properties: {
+
+          /**
+          * Id of a saved search to be used on requests.
+          */
+          searchId: {
+            type: String,
+            value: ''
+          },
+
+          /**
+          * Body to be used on POST/PUT requests.
+          */
+          data: Object,
+
+          /**
+          * A single saved search as a result of a GET request with a given id.
+          */
+          search: {
+            type: Object,
+            notify: true
+          },
+
+          /**
+          * Saved searches accessible by the current user.
+          * Result of a GET request when an id is not specified.
+          */
+          searches: {
+            type: Array,
+            notify: true
+          },
+
+          /**
+          * Results when executing a given saved search.
+          */
+          results: {
+            type: Array,
+            notify: true
+          },
+
+          path: {
+            type: String,
+            computed: '_computePath(auto, searchId)'
+          },
+
+          params: {
+            type: Object
+          },
+
+          connectionId: String,
+
+          auto: {
+            type: Boolean,
+            value: false,
+            observer: '_autoChanged'
+          },
+
+          method: {
+            type: String,
+            value: 'get'
+          },
+
+          /**
+           * The headers of the request.
+           */
+          headers: Object,
+
+          /**
+           * The delay in milliseconds to debounce the auto fetch call.
+           */
+          autoDelay: {
+            type: Number,
+            value: 300
+          },
+        },
+
+        get: function() {
+          this.method = 'get';
+          return this.$.resource.execute().then(function(response) {
+            if (this.searchId) {
+              this.search = response;
+            } else {
+              this.searches = response.entries;
+            }
+            return response;
+          }.bind(this));
+        },
+
+        post: function() {
+          this.method = 'post';
+          return this.$.resource.execute();
+        },
+
+        put: function() {
+          this.method = 'put';
+          return this.$.resource.execute();
+        },
+
+        remove: function() {
+          this.method = 'delete';
+          return this.$.resource.execute();
+        },
+
+        execute: function() {
+          if (this.searchId) {
+            this.method = 'get';
+            this.$.resource.path += '/execute';
+            this.$.resource.execute().then(function(response) {
+              this.results = response.entries;
+            }.bind(this));
+          }
+        },
+
+        _computePath: function() {
+          var path = '/search/saved';
+          if (this.searchId) {
+            path += '/' + this.searchId;
+          }
+          return path;
+        },
+
+        _autoChanged: function() {
+          if (this.auto && this.path) {
+            this.debounce('_auto', function() {
+              this.get().then(function() {
+                this.execute();
+              }.bind(this));
+            }.bind(this), this.autoDelay);
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

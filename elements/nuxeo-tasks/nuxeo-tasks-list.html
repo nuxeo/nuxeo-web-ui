@@ -1,0 +1,196 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-tasks-list`
+@group Nuxeo UI
+@element nuxeo-tasks-list
+-->
+
+<dom-module id="nuxeo-tasks-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .task-box {
+        line-height: 155%;
+      }
+
+      .task-box + .task-box {
+        border-top: 1px solid var(--divider-color);
+      }
+
+      iron-icon.task-name-icon {
+        height: .9em;
+        width: .9em;
+        border-radius: 3em;
+        background-color: var(--dark-primary-color);
+        color: white;
+        padding: .4em;
+      }
+
+      .task-name {
+        font-weight: 700;
+        margin-left: .5em;
+      }
+
+      .task-detail {
+        margin-left: 2.2em;
+      }
+
+      .task-property {
+        color: var(--nuxeo-text-light);
+      }
+
+      .taskDoc .doc-title, .actor {
+        margin-left: 4px;
+        margin-right: 4px;
+        text-overflow: ellipsis;
+      }
+
+      .due-date .date {
+        color: var(--nuxeo-warn-text);
+      }
+
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        height: calc(100vh - 150px);
+      }
+    </style>
+
+    <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
+      <span class="empty">[[i18n('tasksList.noTasks', "You don't currently have any tasks")]]</span>
+    </div>
+    <div hidden$="[[_hidden(tasks)]]">
+
+
+      <nuxeo-data-list items="[[tasks]]" id="list" as="task"
+        selected-item="{{_selection}}"
+        selection-enabled>
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
+            <div class="task-box vertical layout">
+              <div class="task-info horizontal layout center">
+                <div class="vertical layout center">
+                  <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
+                </div>
+                <span class="task-name">[[i18n(task.name)]]</span>
+              </div>
+              <div class="task-detail">
+                <div class="taskDoc horizontal layout center">
+                  <span class="task-property">[[i18n('tasksList.on', 'On  ')]]</span>
+                  <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+                </div>
+                <div class="horizontal layout center">
+                  <span class="due-date task-property">[[i18n('tasksList.dueDate','Due date ')]]
+                  <span class="date">[[_formatDate(task.dueDate)]]</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </nuxeo-data-list>
+    </div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-tasks-list',
+
+        properties: {
+          tasks: Array,
+
+          current: {
+            type: Object,
+            observer: '_currentChanged'
+          },
+
+          _selection: {
+            type: Object,
+            observer: '_selectionChanged'
+          }
+        },
+
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+        _selectionChanged: function() {
+          if (this._selection) {
+            this.fire('taskChanged', {task: this._selection});
+          }
+        },
+
+        _currentChanged: function(newVal, oldVal) {
+          if (newVal) {
+            this.$.list.selectItem(newVal);
+          } else {
+            var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
+            // make sure this task still exists to avoid iron-list exceptions
+            if (_exists) {
+              this.$.list.deselectItem(oldVal);
+            }
+          }
+        },
+
+        _hidden: function(tasks) {
+          return tasks && tasks.length === 0;
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'list-item';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
+
+        _tap: function() {
+          this.fire('tasksListSelectionChanged');
+        },
+      });
+    })();
+  </script>
+</dom-module>

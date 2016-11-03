@@ -1,0 +1,17 @@
+{
+  "source": {
+    "include": ["README.md", "src"],
+    "includePattern": ".+\\.js(doc)?$"
+  },
+  "opts": {
+    "recurse": true,
+    "destination": "doc/"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "markdown": {
+    "parser": "gfm",
+    "hardwrap": true
+  }
+}

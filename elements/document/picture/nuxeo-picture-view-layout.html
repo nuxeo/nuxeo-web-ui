@@ -1,0 +1,118 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<!--
+`nuxeo-picture-view-layout`
+@group Nuxeo UI
+@element nuxeo-picture-view-layout
+-->
+<dom-module id="nuxeo-picture-view-layout">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --nuxeo-document-preview-height: 600px;
+      }
+
+      .properties {
+        -moz-column-width: 25em; /* Firefox */
+        -webkit-column-width: 25em; /* webkit, Safari, Chrome */
+        column-width: 25em;
+        column-count: 3;
+        -moz-column-count: 3; /* Firefox */
+        -webkit-column-count: 3; /* webkit, Safari, Chrome */
+      }
+
+      .properties label {
+        width: 10em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+      }
+
+      .item label {
+        color: var(--secondary-text-color);
+      }
+    </style>
+
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+        <nuxeo-document-blob role="widget" document="[[document]]" xpath="file:content"></nuxeo-document-blob>
+      </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content properties">
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.dimensions')]]</label>
+          <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.format')]]</label>
+          <div>[[document.properties.picture:info.format]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
+          <div>[[document.properties.picture:info.colorSpace]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.depth')]]</label>
+          <div>[[document.properties.picture:info.depth]]</div>
+        </div>
+
+        <div role="widget" class="item">
+          <label>[[i18n('pictureViewLayout.weight')]]</label>
+          <div>[[formatSize(document.properties.common:size)]]</div>
+        </div>
+
+      </div>
+    </paper-card>
+
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-picture-formats role="widget" label="[[i18n('pictureViewLayout.formats')]]" document="[[document]]"></nuxeo-picture-formats>
+      </div>
+    </paper-card>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-picture-view-layout',
+        behaviors: [Nuxeo.LayoutBehavior],
+        properties: {
+          document: Object
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

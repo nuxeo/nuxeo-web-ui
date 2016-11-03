@@ -1,0 +1,140 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+	Andre Justo <ajusto@nuxeo.com>
+-->
+<link href="../../bower_components/alloyeditor/dist/alloy-editor/assets/alloy-editor-ocean.css" rel="stylesheet">
+<!--  XXX CKEditor causes firefox to crash when scripts are inlined, moved to index.html -->
+<!-- <script src="../../bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all.js" type="text/javascript" ></script> -->
+<script type="text/javascript">
+CKEDITOR.config.customConfig = ''; // skip loading config.js
+AlloyEditor._langResourceRequested = true; // skip loading of language file
+</script>
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/config.js" type="text/javascript" ></script>
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/lang/en.js" type="text/javascript" ></script>
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/lang/alloy-editor/en.js" type="text/javascript" ></script>
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/styles.js" type="text/javascript" ></script>
+
+<!--
+`nuxeo-html-editor`
+@group Nuxeo UI
+@element nuxeo-html-editor
+-->
+
+<dom-module id="nuxeo-html-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #editor {
+        outline: none;
+        overflow: scroll;
+        height: 100%;
+      }
+
+      .ae-placeholder:empty:not(:focus):before {
+        color: grey;
+        font-style: italic;
+      }
+
+      div#editor ::content > * {
+        margin-top: 0;
+      }
+    </style>
+
+    <div id="editor" data-placeholder$="[[placeholder]]"></div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-html-editor',
+
+        properties: {
+
+          element: Object,
+
+          value: {
+            type: String,
+            notify: true
+          },
+
+          placeholder: {
+            type: String,
+            value: 'Type here...'
+          },
+
+          readOnly: Boolean
+        },
+
+        attached: function() {
+          this.async(this._init.bind(this), 100);
+        },
+
+        _init: function() {
+          // init editor
+          var editor = AlloyEditor.editable(this.$.editor, {
+            readOnly: this.readOnly,
+            toolbars: {
+              add: {
+                buttons: ['image', 'camera', 'hline', 'table'],
+                tabIndex: 2
+              },
+              styles: {
+                selections: [
+                  {
+                    name: 'link',
+                    buttons: ['linkEdit'],
+                    test: AlloyEditor.SelectionTest.link
+                  },
+                  {
+                    name: 'image',
+                    buttons: ['imageLeft', 'imageCenter', 'imageRight'],
+                    test: AlloyEditor.SelectionTest.image
+                  },
+                  {
+                    name: 'text',
+                    buttons: ['styles', 'bold', 'italic', 'underline', 'strike', 'paragraphLeft', 'paragraphCenter',
+                              'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
+                    test: AlloyEditor.SelectionTest.text
+                  },
+                  {
+                    name: 'table',
+                    buttons: ['tableRow', 'tableColumn', 'tableCell', 'tableRemove'],
+                    getArrowBoxClasses: AlloyEditor.SelectionGetArrowBoxClasses.table,
+                    setPosition: AlloyEditor.SelectionSetPosition.table,
+                    test: AlloyEditor.SelectionTest.table
+                  }
+                ],
+                tabIndex: 1
+              }
+            }
+          });
+          this.element = editor.get('nativeEditor');
+          // set initial value
+          this.element.setData(this.value);
+
+          this.element.on('change', function() {
+            this.value = this.element.getData();
+          }.bind(this));
+        }
+      });
+    })();
+  </script>
+</dom-module>

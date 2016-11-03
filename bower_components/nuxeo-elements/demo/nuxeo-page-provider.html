@@ -1,0 +1,96 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <title>Nuxeo elements samples</title>
+  <meta name="viewport"
+        content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../font-roboto/roboto.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../../nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../nuxeo-elements/nuxeo-page-provider.html">
+</head>
+<style>
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #E5E5E5;
+    font-family: 'RobotoDraft', sans-serif;
+  }
+
+  .container {
+    width: 80%;
+    margin: 50px auto;
+  }
+
+  .card {
+    display: block;
+    position: relative;
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .card h2 {
+    margin: 0;
+    font-weight: 300;
+  }
+
+  .card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin: 10px;
+  }
+
+</style>
+</head>
+<body>
+<template is="dom-bind">
+  <nuxeo-connection id="nx" url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+  <nuxeo-page-provider auto pageSize="5" current-page="{{docs}}"
+                       query="[[query(docType)]]"></nuxeo-page-provider>
+  <div class="container" class="layout vertical center">
+
+    <select flex two value="{{docType::change}}">
+      <option value="Note">Notes</option>
+      <option value="File">Files</option>
+    </select>
+
+    <hr/>
+
+    <template is="dom-repeat" items="{{docs}}">
+      <div class="card layout horizontal center">
+        <h2>[[item.title]]</h2>
+      </div>
+    </template>
+  </div>
+</template>
+<script>
+  var app = document.querySelector('template[is="dom-bind"]');
+  app.docType = 'File';
+  app.query = function(docType) {
+    return "select * from " + docType  + " where ecm:currentLifeCycleState != 'deleted'";
+  };
+</script>
+</body>
+</html>

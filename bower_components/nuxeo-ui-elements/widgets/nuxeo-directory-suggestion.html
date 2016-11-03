@@ -1,0 +1,174 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="nuxeo-select2.html">
+
+<!--
+`nuxeo-directory-suggestion`
+
+    <nuxeo-directory-suggestion></nuxeo-directory-suggestion>
+
+@group Nuxeo Widgets
+@element nuxeo-directory-suggestion
+@demo demo/widgets/index.html
+@homepage http://www.nuxeo.org
+-->
+<dom-module id="nuxeo-directory-suggestion">
+<template>
+
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
+
+  <template is="dom-if" if="[[label]]">
+    <label>[[label]]</label>
+  </template>
+
+  <nuxeo-select2 operation="Directory.SuggestEntries"
+                 min-chars="[[minChars]]"
+                 multiple="[[multiple]]"
+                 params="[[params]]"
+                 placeholder="[[placeholder]]"
+                 readonly="[[readonly]]"
+                 value="{{value}}"
+                 selected-items="{{selectedItems}}"
+                 selection-formatter="[[selectionFormatter]]"
+                 init-selection="[[initSelection]]">
+  </nuxeo-select2>
+
+</template>
+<script>
+Polymer({
+  is: 'nuxeo-directory-suggestion',
+  behaviors: [Nuxeo.I18nBehavior],
+  properties: {
+
+    /**
+     * Name of the directory.
+     */
+    directoryName: {
+      type: String
+    },
+
+    /**
+     * Checking this option means that the labels are localized with translations provided
+     * in the directory itself (i.e. in fields). Otherwise labels are translated as usual
+     * picking values in messages*.properties files.
+     */
+    dbl10n: {type: Boolean, value: false},
+
+    label: String,
+
+    params: {
+      type: Object,
+      computed: 'computeParams(directoryName, dbl10n)'
+    },
+
+    value: {
+      type: String,
+      notify: true
+    },
+
+    multiple: {
+      type: Boolean,
+      value: false
+    },
+
+    readonly: {
+      type: Boolean,
+      value: false
+    },
+
+    minChars: {
+      type: Number,
+      value: 3
+    },
+
+    placeholder: String,
+
+    selectedItems: {
+      type: Object,
+      notify: true
+    },
+
+    selectionFormatter: {
+      type: Function,
+      value: function() {
+        return this._selectionFormatter.bind(this);
+      }
+    },
+
+    initSelection: {
+      type: Function,
+      value: function () {
+        return this._initSelection.bind(this);
+      }
+    }
+  },
+
+  computeParams: function() {
+    return this.params = {
+      directoryName: this.directoryName,
+      dbl10n: this.dbl10n,
+      localize : true,
+      lang: (window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en'
+    };
+  },
+
+  _selectionFormatter: function(entry) {
+    return entry.displayLabel;
+  },
+
+  _initSelection: function(element, callback) {
+    if (!this.multiple) {
+      return callback(this._resolveEntry(this.value));
+    }
+    return callback(
+      this.value.map(function(entry) {
+        return this._resolveEntry(entry);
+      }.bind(this))
+    );
+  },
+
+  _resolveEntry: function(entry) {
+    if (entry && entry['entity-type'] && entry['entity-type'] === 'directoryEntry') {
+      if (entry.properties && entry.properties.label) {
+        return {
+          id: entry.properties.id,
+          displayLabel: this.i18n(entry.properties.label)
+        };
+      } else {
+        var label = 'label_' + ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
+        return {
+          id: entry.properties.id,
+          displayLabel: entry.properties[label]
+        };
+      }
+    }
+    return {
+      id: entry,
+      displayLabel: entry
+    };
+  }
+
+});
+</script>
+</dom-module>

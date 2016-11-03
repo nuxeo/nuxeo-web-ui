@@ -1,0 +1,132 @@
+<!doctype html>
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+  Joshua Fletcher <jfletcher@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+  <title>Nuxeo Audit Metrics Demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../moment/min/moment-with-locales.js"></script>
+
+  <link rel="import" href="../../nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../nuxeo-elements/nuxeo-document.html">
+  <link rel="import" href="../../nuxeo-elements/nuxeo-page-provider.html"/>
+
+  <link rel="import" href="../nuxeo-audit-data.html">
+
+  <style>
+    table {
+      width: 100%;
+      background-color: transparent;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    th {
+      vertical-align: bottom;
+      border-bottom: 2px solid #ddd;
+      text-align: left;
+    }
+
+    td {
+      padding: 8px;
+      line-height: 1.5em;
+      vertical-align: top;
+      border-top: 1px solid #ddd;
+    }
+
+    tr:nth-child(odd)>td {
+      background-color: #f9f9f9;
+    }
+  </style>
+
+</head>
+
+<body unresolved>
+<template is="dom-bind">
+
+  <nuxeo-connection url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+
+  <input type="date" value="{{startDate::change}}">
+  <input type="date" value="{{endDate::change}}">
+
+  <h2>Top Downloads</h2>
+
+  <nuxeo-audit-data event-id="download"
+                    where='{"downloadReason": "download"}'
+                    grouped-by="docUUID"
+                    group-limit="10"
+                    start-date="[[startDate]]" end-date="[[endDate]]"
+                    data="{{downloads}}">
+  </nuxeo-audit-data>
+
+  <nuxeo-page-provider auto
+                       page-size="10"
+                       query="[[query(downloads)]]"
+                       current-page="{{downloadedDocs}}">
+  </nuxeo-page-provider>
+
+  <table>
+    <tr>
+      <th>File</th>
+      <th>Count</th>
+    </tr>
+    <template is="dom-repeat" items="{{downloadedDocs}}" as="downloadedDoc">
+      <tr>
+        <td>
+          <span>[[downloadedDoc.title]]</span>
+        </td>
+        <td>[[numberOfDownloads(downloadedDoc)]]</td>
+      </tr>
+    </template>
+  </table>
+
+</template>
+<script>
+  var t = document.querySelector('template');
+  var currentDate = moment();
+
+  // builds page provider query to get info about downloaded docs
+  t.query = function(entries) {
+    if (entries.length > 0) {
+      var values = entries.map(function (entry) {
+        return "'" + entry.key + "'";
+      }).join(",");
+      return "select * from Document WHERE ecm:uuid IN (" + values + ")";
+    }
+  };
+
+  t.numberOfDownloads = function(doc) {
+    var count = t.downloads.find(function (entry) {
+      return entry.key === doc.uid;
+    }).value;
+    return count;
+  };
+  t.endDate = currentDate.format("YYYY-MM-DD");
+  t.startDate = currentDate.subtract(1, 'week').format("YYYY-MM-DD");
+</script>
+</body>
+
+</html>

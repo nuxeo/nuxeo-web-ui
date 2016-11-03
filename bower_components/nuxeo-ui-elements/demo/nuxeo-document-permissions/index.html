@@ -1,0 +1,36 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Thomas Roger <troger@nuxeo.com>
+-->
+<html>
+<head>
+  <link rel="stylesheet" href="../../../select2/select2.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../../moment/min/moment-with-locales.min.js"></script>
+  <script>
+    moment.locale(navigator.language || navigator.browserLanguage);
+  </script>
+  <link rel="import" href="../../nuxeo-document-permissions/nuxeo-document-permissions.html">
+</head>
+<body>
+  <template is="dom-bind">
+    <nuxeo-connection url="http://localhost:8080/nuxeo"></nuxeo-connection>
+    <h1>Permissions for /default-domain</h1>
+    <nuxeo-document-permissions doc-path="/default-domain"></nuxeo-document-permissions>
+  </template>
+</body>
+</html>

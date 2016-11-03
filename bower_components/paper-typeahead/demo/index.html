@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <link rel="import" href="../../polymer/polymer.html">
+    <link rel="import" href="../../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../paper-typeahead.html">
+  </head>
+  <body>
+    <template id="sample" is="dom-bind">
+      <iron-ajax url="data/dogs.json" last-response="{{data}}" auto></iron-ajax>
+      <paper-typeahead label="which dog?" data="[[data]]"></paper-typeahead>
+    </template>
+  </body>
+</html>

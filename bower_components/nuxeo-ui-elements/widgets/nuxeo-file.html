@@ -1,0 +1,141 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-file`
+
+    <nuxeo-file></nuxeo-file>
+
+@group Nuxeo Widgets
+@element nuxeo-file
+@demo demo/widgets/index.html
+@homepage http://www.nuxeo.org
+-->
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../iron-icons/av-icons.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-progress/paper-progress.html">
+<link rel="import" href="nuxeo-uploader-behavior.html">
+<dom-module id="nuxeo-file">
+<template>
+  <style>
+  :host {
+    @apply(--layout-flex);
+  }
+
+  [hidden] {
+    display: none;
+  }
+
+  #dropZone.hover {
+    @apply(--nuxeo-drop-zone-hover);
+  }
+  </style>
+
+  <nuxeo-connection id="nx"></nuxeo-connection>
+
+  <input hidden id="input" type="file" multiple$="[[multiple]]" accept$="[[accept]]" on-change="_filesChanged">
+
+  <div id="dropZone">
+    <template is="dom-if" if="[[!uploading]]">
+      <paper-button id="button" raised on-tap="_pick">
+        <iron-icon icon="file-upload"></iron-icon>
+        <span>Upload</span>
+      </paper-button>
+    </template>
+
+    <template is="dom-if" if="[[uploading]]">
+      <paper-button id="button" raised on-tap="pause">
+        <iron-icon icon="av:pause"></iron-icon>
+        <span>Pause</span>
+      </paper-button>
+    </template>
+  </div>
+
+  <template is="dom-repeat" items="[[files]]" as="file">
+    <div class="file">
+      <div class="layout horizontal">
+        <span>[[file.name]]</span>
+        <iron-icon icon="autorenew" title="Retry" on-click="retry" hidden$="[[!file.error]]"></iron-icon>
+        <iron-icon icon="cancel" title="Remove" on-click="cancel" hidden$="[[file.complete]]"></iron-icon>
+        <iron-icon icon="check-circle" title="Done" hidden$="[[!file.complete]]"></iron-icon>
+      </div>
+      <paper-progress value="[[file.progress]]" error="[[file.error]]" hidden="[[file.complete]]"></paper-progress>
+    </div>
+  </template>
+
+</template>
+<script>
+  Polymer({
+    is: 'nuxeo-file',
+
+    behaviors: [Nuxeo.UploaderBehavior],
+
+    properties: {
+      value: {
+        type: Object,
+        notify: true
+      },
+
+      multiple: {
+        type: Boolean,
+        value: false
+      }
+    },
+
+    listeners: {
+        'batchFinished': '_updateValue'
+    },
+
+    ready: function() {
+      this.connection = this.$.nx;
+      this.setupDropZone(this.$.dropZone);
+    },
+
+    _filesChanged: function(e) {
+      this.uploadFiles(e.target.files);
+    },
+
+    _pick: function() {
+      this.$.input.click();
+    },
+
+    _updateValue: function() {
+      this.value = {
+        "upload-batch": this.batchId,
+        "upload-fileId": (this.files.length - 1).toString()
+      }
+    },
+
+    //XXX add support for pause / resume (NXJS-33)
+    pause: function() {
+      alert("Upload paused");
+    },
+
+    retry: function() {
+      alert("Upload paused");
+    },
+
+    cancel: function() {
+      alert("Upload paused");
+    }
+  });
+  </script>
+</dom-module>

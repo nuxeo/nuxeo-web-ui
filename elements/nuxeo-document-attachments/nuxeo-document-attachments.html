@@ -1,0 +1,93 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<!--
+`nuxeo-document-attachments`
+@group Nuxeo UI
+@element nuxeo-document-attachments
+-->
+<dom-module id="nuxeo-document-attachments">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        color: var(--nuxeo-title-color);
+        font-size: 1.5rem;
+      }
+
+      nuxeo-dropzone {
+        --nuxeo-dropzone-min-empty-height: 60px;
+        --nuxeo-dropzone-border-margin: 2px;
+      }
+
+      nuxeo-document-blob {
+        border-bottom: 1px solid var(--nuxeo-border);
+        padding: 8px 0;
+      }
+    </style>
+
+    <div class="title">
+      <div class="flex"><iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]</div>
+      <paper-icon-button icon="icons:add" on-tap="_upload"></paper-icon-button>
+    </div>
+
+    <nuxeo-dropzone id="dropzone"
+                    document="{{document}}"
+                    message="[[i18n('documentAttachments.dropzone.message', 'Drop to attach file')]]"
+                    message-empty="[[i18n('documentAttachments.dropzone.emptyMessage', '+ Complete the document with additional files')]]"
+                    uploaded-message="[[i18n('documentAttachments.upload.uploaded', 'Attachment uploaded')]]"
+                    empty="[[!hasAttachments(document, document.properties, document.properties.files:files)]]"
+                    xpath="files:files"
+                    blob-list>
+
+      <!-- attachments list -->
+      <div class="vertical layout">
+        <template is="dom-repeat" items="[[document.properties.files:files]]">
+          <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]"></nuxeo-document-blob>
+        </template>
+      </div>
+
+    </nuxeo-dropzone>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-attachments',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        properties: {
+          document: Object
+        },
+
+        _upload: function() {
+          this.$.dropzone.open();
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

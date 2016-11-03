@@ -1,0 +1,30 @@
+{
+  "name": "nuxeo-elements",
+  "authors": [
+    "Nelson Silva <nsilva@nuxeo.com>"
+  ],
+  "description": "Nuxeo Web Components",
+  "keywords": [
+    "nuxeo",
+    "web-components",
+    "polymer"
+  ],
+  "main": "nuxeo-elements.html",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.4",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.4",
+    "nuxeo": "^2.0.2",
+    "es6-promise": "2.2.0",
+    "select2": "3.5.2"
+  },
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+    "web-component-tester": "^4.0.0"
+  }
+}

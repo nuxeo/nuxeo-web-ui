@@ -1,0 +1,166 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-operation` allows calling an operation on a Nuxeo server.
+
+    <nuxeo-operation auto
+        op="Document.Query"
+        params="{'query': 'select from Document'}"
+        on-response="{{handleResponse}}" enrichers="documentURL, preview"></nuxeo-operation>
+
+With `auto` set to `true`, the operation is executed whenever
+its `url` or `params` properties are changed.
+
+Note: The `params` attribute must be double quoted JSON.
+
+You can trigger an operation explicitly by calling `execute` on the
+element.
+
+@group Nuxeo Elements
+@element nuxeo-operation
+@homepage http://www.nuxeo.org
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="nuxeo-connection.html">
+<dom-module name="nuxeo-operation">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+    <nuxeo-connection id="nx" connection-id="{{connectionId}}"></nuxeo-connection>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-operation',
+      properties: {
+        /* The id of a nuxeo-connection to use. */
+        connectionId: {
+          type: String,
+          value: ''
+        },
+
+        /* The success response status */
+        success: {type: Boolean, notify: true},
+
+        /* The error response status */
+        error: {type: String, notify: true},
+
+        /* The id the operation to call. */
+        op: {
+          type: String,
+          value: ''
+        },
+
+        /* The parameters to send. */
+        params: {
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        /* The operation input. */
+        input: {
+          type: String,
+          value: ''
+        },
+
+        /* If true, automatically execute the operation when either `op` or `params` changes. */
+        auto: {
+          type: Boolean,
+          value: false
+        },
+
+        /* The response from the server. */
+        response: {
+          type: Object,
+          value: null,
+          notify: true
+        },
+
+        /* The headers of the request. */
+        headers: {type: Object, value: null},
+
+        /* The `content enricher` of the resource. */
+        enrichers: {type: String, value: ''},
+
+        /* The `content enricher` entity-type of the resource. Default value for Nuxeo Document Model*/
+        enrichersEntity: {type: String, value: 'document'},
+
+        /**
+         * List of comma separated values of the document schemas to be returned.
+         * All document schemas are returned by default.
+         */
+        schemas: {type: String, value: ''},
+      },
+      observers: [
+        '_autoExecute(op, params, enrichers, enrichersEntity)'
+      ],
+
+      execute: function() {
+        var params = (!this.params || (typeof this.params === 'object')) ? this.params : JSON.parse(this.params);
+        var options = {};
+        // Look up document schemas to be returned
+        if (this.schemas && this.schemas.length > 1) {
+          options.schemas = this.schemas.trim().split(/[\s,]+/);
+        }
+        options.headers = this.headers || {};
+        // Look up content enrichers parameter
+        if (this.enrichers) {
+          options.headers['X-NXenrichers.' + this.enrichersEntity] = this.enrichers;
+        }
+        return this.$.nx.operation(this.op).then(function(operation) {
+          this._operation = operation;
+          return this._doExecute(params, options);
+        }.bind(this));
+      },
+
+      _autoExecute: function() {
+        if (this.auto) {
+          this.execute();
+        }
+      },
+
+      _doExecute: function(params, options) {
+        if (params.context) {
+          this._operation = this._operation.context(params.context);
+        }
+        return this._operation
+          .params(params)
+          .input(this.input)
+          .execute(options)
+          .then(function(data) {
+            this.fire('response', {response: data});
+            this.response = data;
+            this.success = true;
+            return this.response;
+          }.bind(this))
+          .catch(function(error) {
+            this.success = false;
+            this.error = error;
+            console.log("Operation request failed: " + error);
+            throw error;
+          }.bind(this));
+      }
+    });
+  </script>
+</dom-module>

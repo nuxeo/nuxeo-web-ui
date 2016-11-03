@@ -1,0 +1,87 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+
+<!--
+`nuxeo-quick-filters'
+@group Nuxeo UI
+@element nuxeo-quick-filters
+-->
+<dom-module id="nuxeo-quick-filters">
+  <template>
+    <style  is="custom-style">
+      :host {
+        display: block;
+      }
+
+      .quick-filters {
+          background-color: var(--nuxeo-pill-background, #6c6f7c );
+          color: var(--nuxeo-pill-text, #fff);
+          margin: 2em 1em;
+      }
+
+      .quick-filters[active] {
+          background-color: var(--nuxeo-pill-background-active, #00adff );
+          color: var(--nuxeo-pill-text-active, #fff);
+      }
+    </style>
+
+    <div id="filters">
+      <template is="dom-repeat" items="[[quickFilters]]" as="filter" id="filterList">
+        <paper-button toggles noink raised class="quick-filters" active$="[[filter.active]]" on-tap="_selectFilter">
+            [[_computeFilterLabel(filter)]]
+        </paper-button>
+      </template>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-quick-filters',
+
+        behaviors: [
+          Nuxeo.I18nBehavior
+        ],
+
+        properties: {
+          quickFilters: {
+            type: Array
+          }
+        },
+
+        _selectFilter: function(e) {
+          for (var i = 0; i < this.quickFilters.length; i++) {
+            if (this.quickFilters[i].name === e.model.filter.name) {
+              this.set('quickFilters.' + i + '.active', !this.quickFilters[i].active);
+            }
+          }
+        },
+
+        _computeFilterLabel: function(filter) {
+          return this.i18n('ui.label.quickFilters.' + filter.name, filter.name);
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

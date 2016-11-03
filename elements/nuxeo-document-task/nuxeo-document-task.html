@@ -1,0 +1,245 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-document-task`
+@group Nuxeo UI
+@element nuxeo-document-task
+-->
+<dom-module id="nuxeo-document-task">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-card {
+        font-size: .9em;
+        display: flex;
+        padding: .5em 1em;
+      }
+
+      paper-tabs {
+        --paper-tabs-selection-bar-color: var(--dark-primary-color);
+      }
+
+      iron-pages {
+        padding: 1em 0;
+      }
+
+      iron-icon {
+        --iron-icon-height: .9rem;
+        --iron-icon-width: .9rem;
+      }
+
+      .task-body {
+        padding: 0;
+        overflow-y: auto;
+      }
+
+      .task-directive {
+        display: block;
+        font-weight: bold;
+        margin: 1em 0;
+      }
+
+      .task-buttons {
+        margin-top: 2em;
+      }
+
+      .task-buttons paper-button {
+        padding: 0 0.5em;
+      }
+
+      .action-property {
+        color: #434343;
+        margin-bottom: 0.5em;
+        padding: .5em 0;
+      }
+
+    </style>
+
+    <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
+
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="task-body" class="action-container layout vertical task-body">
+
+      <div class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</div>
+
+      <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
+        <div name="resolution">
+          <paper-card class="layout vertical">
+            <div class="layout horizontal center action-property">
+              <span class="flex-3">[[i18n('documentTask.dueDate', 'Due Date')]]</span>
+              <span class="flex-9">
+                <iron-icon icon="icons:today"></iron-icon> [[_formatDate(task.dueDate)]]
+              </span>
+            </div>
+            <div class="layout horizontal center action-property">
+              <span class="flex-3">[[i18n('documentTask.assigned', 'Assigned to')]]</span>
+              <span class="flex-9">
+                <template is="dom-repeat" items="[[task.actors]]" as="actor">
+                  <template is="dom-if" if="[[_isUser(actor)]]">
+                    <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+                  </template>
+                  <template is="dom-if" if="[[_isGroup(actor)]]">
+                    <nuxeo-group-tag user="[[actor]]"></nuxeo-group-tag>
+                  </template>
+                  <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
+                    <nuxeo-tag>[[actor]]</nuxeo-tag>
+                  </template>
+                </template>
+              </span>
+            </div>
+          </paper-card>
+
+          <span class="task-directive">
+            [[i18n(task.directive)]]
+          </span>
+
+          <form id="task-container" is="iron-form">
+            <!--dynamically loaded via _taskChanged-->
+          </form>
+
+          <div class="task-buttons layout horizontal center">
+            <content select=".buttons"></content>
+            <div class="flex horizontal layout end-justified">
+              <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
+                <paper-button noink dialog-confirm on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </iron-pages>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-task',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+        properties: {
+
+          task: {
+            type: Object,
+            observer: '_taskChanged'
+          },
+
+          _currentTaskElement: Object,
+
+          _selectedTab: {
+            type: String,
+            value: 'resolution'
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(task) {
+          if (task) {
+            // lower case first letter to avoid extra dash in camelToDashCase
+            var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
+            return ['nuxeo', 'document', 'task', Polymer.CaseMap.camelToDashCase(node)].join('-');
+          }
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current task node
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.task),
+              el = document.createElement(layout),
+              parent = this.$['task-container'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.task = this.task;
+          this._currentTaskElement = el;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current task node
+         */
+        _taskChanged: function() {
+          this.$['task-body'].hidden = false;
+          this.$.error.hide();
+          var layout = this._layoutFor(this.task);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                this.$['task-body'].hidden = true;
+                this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound',
+                  'Failed to find element layout for task {0}', this.task.nodeName));
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _formatDate: function(date) {
+          return moment(date).format('MMMM D, YYYY');
+        },
+
+        _processTask: function(e) {
+          if (this.$['task-container'].validate()) {
+            this.action = e.target.dataset.args;
+            this.taskData = this._currentTaskElement.genTaskData(this.action);
+            this.$.taskRequest.put().then(function() {
+              this.fire('workflowTaskProcessed');
+            }.bind(this));
+          }
+        },
+
+        _isUser: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'user';
+        },
+
+        _isGroup: function(actor) {
+          return actor['entity-type'] && actor['entity-type'] === 'group';
+        },
+
+        _isNotUserOrGroup: function(actor) {
+          return this._isUser(actor) && this._isGroup(actor);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

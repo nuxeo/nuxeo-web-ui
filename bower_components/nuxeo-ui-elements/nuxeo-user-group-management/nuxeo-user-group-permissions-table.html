@@ -1,0 +1,311 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../widgets/nuxeo-tag.html">
+<script src="../../moment/moment.js"></script>
+
+<!--
+An element to list the permissions of an entity.
+
+Example:
+
+    <nuxeo-user-group-permissions-table entity="Administrator"></nuxeo-user-group-permissions-table>
+
+Example:
+
+    <nuxeo-user-group-permissions-table entity="members"></nuxeo-user-group-permissions-table>
+
+Used by `nuxeo-user-group-management`
+@group Nuxeo Elements
+@element nuxeo-user-group-permissions-table
+-->
+<dom-module id="nuxeo-user-group-permissions-table">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .table {
+        border: 1px solid #e7e7e7;
+      }
+
+      .table-row {
+        @apply(--layout-horizontal);
+        border-bottom: 1px solid #e7e7e7;
+      }
+
+      .table-row:last-of-type {
+        border-bottom: none;
+      }
+
+      .table-row > div {
+        padding: 0.6em 1em;
+      }
+
+      .ace-row > div {
+        padding: .2em 0;
+      }
+
+      .table-headers > div {
+        background-color: #f8f9fb;
+        font-weight: bold;
+      }
+
+      .table-actions {
+        width: 50px;
+      }
+
+      .ace-permission-tag {
+        background-color: #7e90a5;
+        border-radius: 3px;
+        color: #fff;
+        margin: 0 0.2em 0.2em 0;
+        padding: 0.06em 0.3em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .ace-permission-path {
+        color: #213f7d;
+        font-size: 0.8em;
+        margin-top: 5px;
+      }
+    </style>
+
+    <nuxeo-operation id="permissions"
+                     op="Document.PageProvider"
+                     enrichers="acls">
+    </nuxeo-operation>
+    <nuxeo-operation id="rmPermission" op="Document.RemovePermission"></nuxeo-operation>
+
+    <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
+    <div class="table">
+      <div class="table-row table-headers">
+        <div class="flex-3">[[i18n('label.permissions.on', 'On')]]</div>
+        <div class="flex-6 layout horizontal">
+          <div class="flex-2">[[i18n('label.permissions.right', 'Right')]]</div>
+          <div class="flex-2">[[i18n('label.permissions.timeFrame', 'Time Frame')]]</div>
+          <div class="flex-2">[[i18n('label.permissions.grantedBy', 'Granted by')]]</div>
+          <div class="table-actions"></div>
+        </div>
+      </div>
+      <template is="dom-if" if=[[!empty]]>
+        <template is="dom-repeat" items="[[documents]]" as="document">
+          <div class="table-row">
+            <div class="flex-3">
+              <div>[[document.title]]</div>
+              <div class="ace-permission-path">[[document.path]]</div>
+            </div>
+            <div class="layout vertical flex-6 ace-row">
+              <template is="dom-repeat" items="[[document.aces]]" as="ace">
+                <div class="layout horizontal center">
+                  <div class="flex-2">
+                    <span class="ace-permission-tag">[[ace.permission]]</span>
+                  </div>
+                  <div class="flex-2">
+                    <span>[[ace.timeFrame]]</span>
+                  </div>
+                  <div class="flex-2">
+                    <template is="dom-if" if=[[ace.creator]]>
+                      <nuxeo-tag icon="social:people">[[ace.creator]]</nuxeo-tag>
+                    </template>
+                  </div>
+                  <div class="table-actions">
+                    <template is="dom-if" if=[[!readonly]]>
+                      <paper-icon-button icon="icons:delete"
+                                       title="[[i18n('label.permissions.delete', 'Delete permission')]]"
+                                       on-tap="_toggleDialog"
+                                       hidden$="[[!_canDelete(ace)]]">
+                      </paper-icon-button>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </template>
+      <template is="dom-if" if=[[empty]]>
+        <div class="table-row">
+          <div>
+            [[i18n('label.permissions.noPermissions', '{0} does not have permissions.', entity)]]
+          </div>
+        </div>
+      </template>
+    </div>
+    <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
+
+    <paper-dialog id="dialog" modal class="vertical layout">
+      <div class="horizontal layout">
+        <p>[[i18n('label.permissions.deleteConfirm', 'Do you really want to delete this permission?')]]</p>
+      </div>
+      <div class="buttons horizontal end-justified layout">
+        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-user-group-permissions-table',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          entity: String,
+
+          documents: Array,
+
+          /**
+           * If true, also displays inherited permissions. Otherwise, only displays local permissions.
+           */
+          displayInherited: {
+            type: Boolean,
+            value: false
+          },
+
+          empty: Boolean,
+
+          _deletedAce: Object,
+
+          _currentPage: {
+            type: Number,
+            value: 1
+          },
+
+          pageSize: {
+            type: Number,
+            value: 25
+          },
+
+          _numberOfPages: Number,
+
+          readonly: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          }
+        },
+
+        observers: [
+          '_fetchPermissions(entity, _currentPage)'
+        ],
+
+        _fetchPermissions: function() {
+          this.$.permissions.params = {
+            query: 'SELECT * FROM Document WHERE ecm:mixinType != "HiddenInNavigation"' +
+                   'AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 ' +
+                   'AND ecm:currentLifeCycleState != "deleted" ' +
+                   'AND ecm:acl/*1/principal = "' + this.entity + '"',
+            page: this._currentPage - 1,
+            pageSize: this.pageSize
+          };
+          // header for compat with 6.0
+          this.$.permissions.headers = {
+            'X-NXContext-Category': 'acls'
+          };
+          this.$.permissions.execute().then(function(response) {
+            this._numberOfPages = response.numberOfPages;
+            this._computePermissions(response.entries);
+          }.bind(this));
+        },
+
+        _computePermissions: function(entries) {
+          entries.map(function(entry) {
+            entry.aces = [];
+            entry.contextParameters.acls.map(function(acl) {
+              // in 6.0 the ace object is called 'ace' while in > 7.10 its called 'aces'
+              var entryAces = acl.aces || acl.ace;
+              return entryAces.map(function(ace) {
+                if (!this.displayInherited && this._isInherited(acl)) {
+                  return;
+                }
+                if (this._aceBelongsToEntity(ace)) {
+                  ace.docId = entry.uid;
+                  ace.docTitle = entry.title;
+                  ace.docPath = entry.path;
+                  ace.timeFrame = this._formatTimeFrame(ace);
+                  entry.aces.push(ace);
+                }
+              }.bind(this));
+            }.bind(this));
+          }.bind(this));
+          this.documents = entries;
+          this.empty = this.documents.length === 0;
+        },
+
+        _aceBelongsToEntity: function(ace) {
+          return ace.username === this.entity;
+        },
+
+        _formatTimeFrame: function(ace) {
+          var now = moment();
+          var begin = ace.begin || null;
+          var end = ace.end || null;
+          var format = 'D MMM YYYY';
+          var sinceStr = this.i18n('label.permissions.since', 'Since') + ' ';
+          var fromStr = this.i18n('label.permissions.from', 'From') + ' ';
+          var untilStr = this.i18n('label.permissions.until', 'Until') + ' ';
+          var untilMiddleStr = ' ' + this.i18n('label.permissions.untilMiddle', 'until') + ' ';
+          if (begin !== null && end === null) {
+            return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
+          } else if (begin === null && end !== null) {
+            return untilStr + moment(end).format(format);
+          } else if (begin !== null && end !== null) {
+            return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
+          } else {
+            return this.i18n('label.permissions.permanent', 'Permanent');
+          }
+        },
+
+        _deleteAce: function() {
+          var ace = this._deletedAce;
+          this.$.rmPermission.input = ace.docId;
+          this.$.rmPermission.params = {
+            id: ace.id
+          };
+          this.$.rmPermission.execute().then(function() {
+            this._fetchPermissions();
+          }.bind(this));
+        },
+
+        _isInherited: function(acl) {
+          return acl.name === "inherited";
+        },
+
+        _toggleDialog: function(e) {
+          this._deletedAce = e.model.ace;
+          this.$.dialog.toggle();
+        },
+
+        _canDelete: function(ace) {
+          return ace.id ? true : false;
+        }
+      });
+    })();
+  </script>
+</dom-module>

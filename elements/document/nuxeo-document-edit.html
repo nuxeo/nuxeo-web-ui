@@ -1,0 +1,231 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-document-edit`
+@group Nuxeo UI
+@element nuxeo-document-edit
+-->
+<dom-module id="nuxeo-document-edit">
+  <template>
+    <style>
+
+      .actions {
+        border-top: 1px solid var(--nuxeo-border);
+      }
+
+      ::content label {
+        display: block;
+        color: var(--secondary-text-color);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.011em;
+        line-height: 20px;
+      }
+
+      ::content nuxeo-directory-suggestion,
+      ::content paper-input-container {
+        padding: 0 0 8px 0;
+      }
+
+      ::content paper-input-container {
+        @apply(--paper-input-container);
+      }
+
+      ::content paper-dropdown-menu {
+        width: 100%;
+      }
+
+      ::content select {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: block;
+        padding: 0.5em;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      .actions {
+        margin-top: 16px;
+      }
+
+    </style>
+
+    <nuxeo-document id="doc" doc-id="[[document.uid]]"
+                    data="{{document}}" response="{{document}}"
+                    headers="[[headers]]">
+    </nuxeo-document>
+
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="container">
+      <form id="form" is="iron-form">
+        <div id="document-edit">
+          <!-- Dynamic layout element will be inserted here -->
+          <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
+        </div>
+        <div class="actions">
+          <paper-button on-click="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
+          <paper-button on-click="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
+        </div>
+      </form>
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-edit',
+
+        behaviors: [Polymer.IronResizableBehavior, Nuxeo.I18nBehavior],
+
+        properties: {
+          document: {
+            type: Object,
+            observer: '_documentChanged',
+            notify: true
+          },
+
+          versioningType: {
+            type: String
+          },
+
+          headers: {
+            type: Object,
+            computed: '_computeHeaders(versioningType)'
+          }
+        },
+
+        _computeHeaders: function(versioningType) {
+          return {
+            'X-Versioning-Option': versioningType,
+            'X-NXfetch.document': 'lock'
+          };
+        },
+
+        _documentChanged: function() {
+          if (this.document) {
+            this._updateLayout();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(document) {
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'edit-layout'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.document),
+              el = document.createElement(layout),
+              parent = this.$['document-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+
+          // hack to force resize event and correctly display <nuxeo-helper> elements
+          this.notifyResize();
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current document
+         */
+        _updateLayout: function() {
+          this.$.container.hidden = false;
+          this.$.error.hide();
+          var layout = this._layoutFor(this.document);
+          if (!this._isRegistered(layout)) {
+            var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
+            var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+            var url = this.resolveUrl(folder + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                this.$.container.hidden = true;
+                this.$.error.show('404', url,
+                  this.i18n('documentEdit.layoutNotFound', 'Failed to find edit layout for {0}', this.document.type));
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _validate: function() {
+          var valid = true;
+          // run our custom validation function first to allow setting custom native validity
+          var layout = this.$['document-edit'].firstChild;
+          if (layout && ('function' === typeof layout.validate)) {
+            valid = layout.validate();
+          }
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            this.$.form._doFakeSubmitForValidation();
+          }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return valid && this.$.form.validate() && this.$.form.checkValidity();
+        },
+
+        _save: function() {
+          if (!this._validate()) {
+            return;
+          }
+          // TODO: NXP-20782: remove contributors or they will be duplicated
+          delete this.document.properties['dc:contributors'];
+          this.$.doc.put().then(this._refresh.bind(this));
+        },
+
+        _cancel: function() {
+          this._refresh();
+        },
+
+        _refresh: function() {
+          this.fire('document-updated');
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

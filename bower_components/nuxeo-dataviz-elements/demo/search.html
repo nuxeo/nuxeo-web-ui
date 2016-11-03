@@ -1,0 +1,217 @@
+<!doctype html>
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Nuxeo Workflow Data Elements Demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../jquery/dist/jquery.min.js"></script>
+  <script src="../../moment/min/moment-with-locales.js"></script>
+  <link rel="import" href="../nuxeo-search-data.html">
+  <style>
+    table {
+      width: 100%;
+      background-color: transparent;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+    th {
+      vertical-align: bottom;
+      border-bottom: 2px solid #ddd;
+      text-align: left;
+    }
+    td {
+      padding: 8px;
+      line-height: 1.5em;
+      vertical-align: top;
+      border-top: 1px solid #ddd;
+    }
+    tr:nth-child(odd)>td {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body unresolved>
+<template is="dom-bind">
+
+  <nuxeo-connection url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+
+  <input type="date" value="{{startDate::change}}">
+  <input type="date" value="{{endDate::change}}">
+
+  <h2>Number of calls per PageProvider (#1)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     grouped-by="pageProviderName"
+                     data="{{ppCalls}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Pageprovider</th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[ppCalls]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Number of calls per hour (#2)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     with-date-intervals="hour"
+                     without-extended-bounds
+                     date-format="HH"
+                     data="{{callPerHour}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Hour</th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[_aggregateHourOfDay(callPerHour)]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+  <h2>Result of searches by range of number of result (#3)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     with-ranges='{"resultsCount":[
+                     {"key": "no result", "to": 0 },
+                     {"key": "less than 50", "from" : 1, "to": 50},
+                     {"key": "between 51 and 200", "from" : 51, "to": 200 },
+                     {"key": "between 200 and 1000", "from" : 201, "to": 1000},
+                     {"key": "more than 1000", "from" : 1001 }]}'
+                     data="{{callPerNumberOfResults}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Number of results </th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[callPerNumberOfResults]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+
+  <h2>Most used expressions for full text search  (#4)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext"
+                     data="{{callPerFT}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Search term</th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[callPerFT]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+
+  <h2>Searches by number of pages displayed (#5)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     with-ranges='{"pageIndex":[
+                     {"key": "First page", "from" : 0, "to": 1 },
+                     {"key": "Page 2", "from" : 1, "to": 2},
+                     {"key": "Pages 3 to 5", "from" : 2, "to": 5 },
+                     {"key": "Pages 6 to 10", "from" : 6, "to": 10},
+                     {"key": "After 10 pages", "from" : 10 }]}'
+                     data="{{callPerNumberOfPages}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Number of Pages </th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[callPerNumberOfPages]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+
+  <h2>Searches by filters used (#6)</h2>
+
+  <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+                     grouped-by="searchFields"
+                     data="{{callByFilters}}">
+  </nuxeo-search-data>
+
+  <table>
+    <tr>
+      <th>Filters used </th>
+      <th>Number of calls</th>
+    </tr>
+    <template is="dom-repeat" items="[[callByFilters]]" as="entry">
+      <tr>
+        <td>[[entry.key]]</td>
+        <td>[[entry.value]]</td>
+      </tr>
+    </template>
+  </table>
+
+</template>
+<script>
+  var t = document.querySelector('template');
+  var currentDate = moment();
+  t.endDate = currentDate.format("YYYY-MM-DD");
+  t.startDate = currentDate.subtract(1, 'week').format("YYYY-MM-DD");
+
+  t._aggregateHourOfDay = function (entries) {
+    // aggregate our buckets by key
+    var agg = {};
+    entries.forEach(function(e) {
+      agg[e.key] = (agg[e.key] || 0) + e.value;
+    });
+    // build our result data
+    var res = [];
+    for (var i = 0; i < 24; i++) {
+      res.push({key: i, value: agg[i] || 0});
+    }
+    return res;
+  };
+</script>
+</body>
+</html>

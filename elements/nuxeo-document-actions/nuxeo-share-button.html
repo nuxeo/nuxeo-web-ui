@@ -1,0 +1,91 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+`nuxeo-share-button`
+@group Nuxeo UI
+@element nuxeo-share-button
+-->
+<dom-module id="nuxeo-share-button">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+
+      .share-container {
+        min-width: 640px;
+      }
+    </style>
+
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button noink icon="social:share" id="shareBut" on-tap="toggleDialog"></paper-icon-button>
+      <paper-tooltip for="shareBut">[[i18n('shareButton.tooltip','Share')]]</paper-tooltip>
+    </template>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('shareButton.heading','Share the Document')]]</h1>
+        <div class="share-container">
+          <paper-input id="permalink"
+                       label="Copy the link and share the document [[document.properties.dc:title]]"
+                       value="[[_buildPermalink(document)]]"
+                       autofocus
+                       readonly></paper-input>
+        </div>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-share-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: Object
+      },
+
+      _toggleDialog: function() {
+        this.$.dialog.toggle();
+      },
+
+      _isAvailable: function(document) {
+        return document;
+      },
+
+      toggleDialog: function() {
+        this.$.dialog.toggle();
+        this.$.permalink.inputElement.select();
+      },
+
+      _buildPermalink: function(document) {
+        return document ? location.origin + location.pathname + '#!/doc/' + document.uid : '';
+      }
+
+    });
+  </script>
+
+</dom-module>

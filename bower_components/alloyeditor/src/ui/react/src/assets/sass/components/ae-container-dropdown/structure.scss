@@ -1,0 +1,55 @@
+.ae-container-dropdown, [class^=ae-container-dropdown-] {
+    float: left $IE9-ONLY;
+    width: $container-dropdown-width-multiplier * $container-dropdown-base-width !important;
+
+    > .ae-toolbar-element {
+        float: left $IE9-ONLY;
+        height: $container-dropdown-height;
+        text-align: left;
+        width: 100%;
+
+        .ae-container {
+            padding: $container-dropdown-padding;
+            height: 100% $IE9-ONLY;
+            width: 100%;
+
+            .ae-icon-arrow {
+                @include transform(rotate(90deg));
+
+                float: right $IE9-ONLY;
+                position: absolute $IE9-ONLY;
+                right: 0 $IE9-ONLY;
+                top: $container-dropdown-arrow-top-ie9 $IE9-ONLY;
+            }
+
+            .ae-container-dropdown-selected-item {
+                @include flex(1);
+
+                display: inline-block;
+                line-height: $container-dropdown-height;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                position: relative $IE9-ONLY;
+            }
+
+            #{$IE10-PLUS}::-ms-reveal, .ae-container-dropdown-selected-item {
+                top: 0;
+                transform: translateY(0);
+            }
+        }
+    }
+}
+
+.ae-container-dropdown-small {
+    width: $container-dropdown-small-width-multiplier * $container-dropdown-base-width !important;
+}
+
+.ae-container-dropdown-medium {
+    width: $container-dropdown-medium-width-multiplier * $container-dropdown-base-width !important;
+}
+
+.ae-container-dropdown-xl {
+    width: $container-dropdown-xl-width-multiplier * $container-dropdown-base-width !important;
+}

@@ -1,0 +1,209 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Guillaume RENARD <grenard@nuxeo.com>
+-->
+<script>
+  var Nuxeo = Nuxeo || {};
+  (function () {
+
+    /**
+     * @polymerBehavior Nuxeo.ResultBehavior
+     */
+    Nuxeo.ResultBehavior = {
+      properties: {
+        nxProvider: HTMLElement,
+        displayMode: {
+          type: String,
+          value: 'table',
+          notify: true,
+          reflectToAttribute: true
+        },
+        actionContext: {
+          type: Object,
+          value: function() {
+            return {};
+          },
+          notify: true
+        },
+        _settings: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        selectedItems: {
+          type: Object,
+          notify: true
+        }
+      },
+
+      listeners: {
+        'tableSettingsChanged': 'saveSettings',
+        'display-mode-changed': '_changeDisplayMode'
+      },
+
+      observers: [
+        '_displayModeChanged(displayMode)',
+        'restoreSettings(_settings)',
+        '_observeSelectedItems(tableSelectedItems.length, gridSelectedItems.length)'
+      ],
+
+
+      _formatDate: function(date) {
+        return moment(date).format('MMMM D, YYYY');
+      },
+
+      _thumbnail: function(doc) {
+        if (doc && doc.uid) {
+          if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
+            return doc.contextParameters.thumbnail.url;
+          } else {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+          }
+        }
+      },
+
+      _displayVersion: function(doc) {
+        if (doc.properties) {
+          if (doc.properties['uid:major_version'] !== null && doc.properties['uid:major_version'] !== undefined) {
+            return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
+          }
+        }
+      },
+
+      _updateActionContext: function() {
+        this.set('actionContext.baseUrl', this.$.nxcon.url);
+        this.set('actionContext.displayMode', this.displayMode);
+        this.set('actionContext.nxProvider', this.nxProvider);
+      },
+
+      _clearSelectedItems: function() {
+        if (this.displayMode === 'table') {
+          this.$.datatable.clearSelection();
+        } else if (this.displayMode === 'grid') {
+          this.$.datagrid.clearSelection();
+        }
+      },
+
+      restoreSettings: function() {
+        if (this._settings) {
+          if (this._settings.displayMode && this._settings.displayMode.length > 0) {
+            this.displayMode = this._settings.displayMode;
+            if (this._settings.tableSettings) {
+              this.$.datatable.settings = this._settings.tableSettings;
+            }
+          }
+        }
+      },
+
+      saveSettings: function() {
+        if (this._settings === null) {
+          this._settings = {};
+        }
+        // TODO improve when https://github.com/Polymer/polymer/issues/1550 fixed
+        this.set('_settings.displayMode', this.displayMode);
+        this.set('_settings.tableSettings', this.$.datatable.settings);
+        this.$.prefStorage.save();
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'grid-box';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _isTable: function(mode) {
+        return mode === 'table';
+      },
+
+      _isGrid: function(mode) {
+        return mode === 'grid';
+      },
+
+      _changeDisplayMode: function(e) {
+        var mode = e.detail.mode;
+        if (mode && mode !== this.displayMode) {
+          this.set('displayMode', mode);
+        }
+      },
+
+      _displayModeChanged: function() {
+        if (this.displayMode === 'table') {
+          this.$.datatable.clearSelection();
+          if (this.$.datagrid.selectedItems) {
+            this.$.datatable.selectItems(this.$.datagrid.selectedItems);
+          }
+          this.$.datatable.notifyResize();
+
+        } else if (this.displayMode === 'grid') {
+          this.$.datagrid.clearSelection();
+          if (this.$.datatable.selectedItems) {
+            this.$.datagrid.selectItems(this.$.datatable.selectedItems);
+          }
+          this.$.datagrid.notifyResize();
+        }
+        this.saveSettings();
+      },
+
+      get items() {
+        if (this.displayMode === 'table') {
+          return this.$.datatable.$.list.items;
+        } else if (this.displayMode === 'grid') {
+          return this.$.datagrid.$.list.items;
+        }
+      },
+
+      get size() {
+        if (this.displayMode === 'table') {
+          return this.$.datatable.size;
+        } else if (this.displayMode === 'grid') {
+          return this.$.datagrid.size;
+        }
+      },
+
+      _observeSelectedItems: function() {
+        this.debounce('_observeSelectedItems', function() {
+          this.$.toolbar.selectedItems = [];
+          if (this.displayMode === 'table') {
+            this.$.toolbar.set('selectedItems', this.$.datatable.selectedItems);
+          } else if (this.displayMode === 'grid') {
+            this.$.toolbar.set('selectedItems', this.$.datagrid.selectedItems);
+          }
+        }.bind(this), 50);
+      },
+
+      _refreshDisplay: function(e) {
+        this.$.datatable.notifyResize();
+        this.$.datagrid.notifyResize();
+        if (this.selectedItems && this.selectedItems.length > 0) {
+          this.selectedItems = [];
+          if (e.detail.focusIndex || e.detail.focusIndex === 0) {
+            if (this.displayMode === 'table') {
+              this.selectedItems = this.$.datatable.selectedItems;
+              this.$.datatable.focusOnIndexIfNotVisible(e.detail.focusIndex);
+            } else if (this.displayMode === 'grid') {
+              this.selectedItems = this.$.datagrid.selectedItems;
+              this.$.datagrid.focusOnIndexIfNotVisible(e.detail.focusIndex);
+            }
+          }
+        }
+      }
+    };
+  })();
+</script>

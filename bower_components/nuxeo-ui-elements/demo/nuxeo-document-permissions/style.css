@@ -1,0 +1,78 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.bubbleBox {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  display: block;
+  margin: 0 1em 1em 0;
+  padding: 0 1em 1em;
+}
+.bubbleHeader {
+  border-color: #e6e9ef;
+  border-style: none none solid;
+  border-width: 1px;
+  margin: 0 0 1em;
+  overflow: hidden;
+  padding: 0.8em 0;
+  white-space: nowrap;
+}
+.bubbleHeader h3 {
+  float: left;
+  color: #213f7d;
+  font-weight: bold;
+  line-height: normal;
+  border: 0;
+  display: inline-block;
+  margin: 0;
+  padding: 0.3em 0;
+}
+.bubbleHeader paper-button {
+  float: right;
+}
+paper-button {
+  border: 1px solid #aaa;
+  font-weight: bold;
+  padding: 0.35em 0.8em;
+  text-transform: none;
+}
+.tag {
+    background: none #f3f6f9;
+    border-radius: 16px;
+    color: #333;
+    display: inline-block;
+    font-size: 13px !important;
+    line-height: inherit;
+    margin: 0 0.3em 0.5em 0;
+    padding: 0.1em 0.8em 0.2em;
+    text-decoration: none;
+    transition: none;
+}
+input {
+  width: 100%;
+  line-height: 1.4em;
+  padding: 0.5em;
+}
+
+.required {
+  background: transparent url('required.gif') top right / 7px no-repeat;
+  padding: 0 1em 0 0;
+}
+
+.label {
+  margin: 0 0.5em;
+  vertical-align: bottom;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.9em;
+  font-weight: bold;
+  line-height: 130%;
+  padding: 0.06em 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.label-warning, .chip-warning {
+    background-color: #ffa939;
+}

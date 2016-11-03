@@ -1,0 +1,40 @@
+{
+  "name": "nuxeo-ui-elements",
+  "version": "0.2.0",
+  "description": "Nuxeo UI Web Components.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nuxeo/nuxeo-ui-elements.git"
+  },
+  "contributors": [
+    "Nelson Silva <nsilva@nuxeo.com>",
+    "Guillaume Renard <grenard@nuxeo.com>"
+  ],
+  "license": "Apache 2.0",
+  "private": true,
+  "scripts": {
+    "eslint": "eslint *.html demo/**/*.html test/**/*.html",
+    "polylint": "polymer lint nuxeo-ui-elements.html --follow-dependencies",
+    "lint": "npm run eslint",
+    "test": "polymer test --simpleOutput --expanded -l chrome"
+  },
+  "dependencies": {
+    "@polymer/polymer": "^1.2.5-npm-test.2",
+    "@polymer/iron-elements": "0.0.3",
+    "@polymer/paper-elements": "0.0.3",
+    "nuxeo-elements": "nuxeo/nuxeo-elements",
+    "cropperjs": "^0.5.6",
+    "d3": "^3.5.16",
+    "moment": "^2.10.6",
+    "paper-typeahead": "nuxeo/paper-typeahead#0.4",
+    "video.js": "^5.5.3",
+    "select2": "3.5.2-browserify"
+  },
+  "devDependencies": {
+    "@polymer/iron-component-page": "0.0.3",
+    "@polymer/test-fixture": "0.0.3",
+    "eslint": "^3.4.0",
+    "eslint-plugin-html": "^1.5.2",
+    "polymer-cli": "^0.16.0"
+  }
+}

@@ -1,0 +1,731 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Andre Justo <ajusto@nuxeo.com>
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+ `nuxeo-search-form`
+ @group Nuxeo UI
+ @element nuxeo-search-form
+ -->
+<dom-module id="nuxeo-search-form">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+        display: block;
+      }
+
+      nuxeo-data-list {
+        height: calc(100vh - 61px);
+      }
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+      }
+
+      .filters {
+        padding: 1em 0;
+        height: calc(100vh - 61px);
+        overflow: auto;
+      }
+
+      .switch {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60px;
+        height: 58px;
+        padding: 16px;
+        z-index: 101;
+        border-left: 1px solid var(--divider-color);
+        background-color: var(--nuxeo-light-background);
+      }
+
+      .switch:hover {
+        background-color: var(--nuxeo-button-primary);
+        color: var(--nuxeo-button-primary-text);
+      }
+
+      paper-dropdown-menu {
+        margin-left: 1em;
+      }
+
+      ::content .unfocused-line.paper-input-container {
+        background-color: transparent;
+      }
+
+      ::content paper-input {
+        --paper-input-container-input: {
+          font-family: var(--nuxeo-app-font);
+        };
+
+        --paper-input-container-underline: {
+          background-color: white;
+        };
+
+        --paper-input-container-underline-focus: {
+          background-color: white;
+        };
+
+        --paper-input-container-label: {
+          font-family: var(--nuxeo-app-font);
+        };
+      }
+
+      /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
+      .content {
+        font-size: .9rem;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        height: calc(100vh - 61px);
+        width: 293px;
+      }
+
+      .header {
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .header h1 {
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
+      }
+
+      .header h1,
+      .header ::content .input-content.paper-input-container input {
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+      }
+
+      /* End TODO Lise :) */
+
+      .row {
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      .clear {
+        background-color: #fafafa;
+        border-color: #fafafa;
+        width: 100%;
+      }
+
+      .reset {
+        width: 100%;
+      }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .queue-thumbnail {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
+
+      .queue-thumbnail ::content img {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
+
+      #saveDialog,
+      #renameDialog {
+        width: 400px;
+      }
+
+      :host[loading] .loadable {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
+      .list-item-detail {
+        margin-left: 40px;
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-page-provider id="provider"
+       provider="[[provider]]"
+       aggregations="{{aggregations}}"
+       enrichers="thumbnail"
+       params="[[params]]"
+       quick-filters="{{quickFilters}}"
+       schemas="[[schemas]]"
+       fetch-aggregates>
+    </nuxeo-page-provider>
+
+    <nuxeo-search id="saved-search"></nuxeo-search>
+
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="search-container">
+      <div class="header ellipsis search-header">
+        <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
+        <template is="dom-if" if="[[!_onlyQueue]]">
+          <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
+            <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
+              <paper-item>[[i18n('searchForm.searchFilters', 'Search Filters')]]</paper-item>
+              <template is="dom-repeat" items="[[searches]]" as="search">
+                <paper-item>[[search.title]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+          <template is="dom-if" if="[[_isQueue]]">
+            <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
+            </paper-icon-button>
+            <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+          </template>
+          <template is="dom-if" if="[[!_isQueue]]">
+            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+            </paper-icon-button>
+            <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+          </template>
+        </template>
+        <template is="dom-if" if="[[_onlyQueue]]">
+          <h1>[[i18n(label, label)]]</h1>
+        </template>
+      </div>
+
+      <div class="content">
+        <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
+          <div id="search-form-container">
+            <!-- Dynamic search form element will be inserted here -->
+            <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
+          </div>
+          <div class="layout vertical row">
+            <paper-button noink class="primary clear" raised on-click="_clear">
+              [[i18n('command.clear', 'Clear')]]
+            </paper-button>
+          </div>
+          <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
+              [[i18n('command.Reset', 'Reset')]]
+            </paper-button>
+          </div>
+          <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+        </div>
+
+        <div id="queue" hidden$="{{!_isQueue}}">
+          <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
+            selected-item="{{selectedDocument}}"
+
+            selection-enabled>
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="list-item-box vertical layout">
+                  <div class="list-item-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                    </div>
+                    <span class="list-item-title ellipsis">[[item.title]]</span>
+                  </div>
+                  <div class="list-item-detail">
+                    <div class="layout center">
+                      <span class="list-item-property ellipsis">
+                        [[item.type]]
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </nuxeo-data-list>
+        </div>
+      </div>
+    </div>
+
+    <paper-dialog id="saveDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('searchForm.savePopup.heading','Save Search')]]</h1>
+        <div>
+          <paper-input id="savedSearchTitle"
+                       label="[[i18n('searchForm.savePopup.label', 'Enter a name for your saved search')]]"
+                       autofocus
+                       no-label-float>
+          </paper-input>
+        </div>
+        <div class="buttons">
+         <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="renameDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('searchForm.renamePopup.heading', 'Rename Saved Search')]]</h1>
+        <div>
+          <paper-input id="savedSearchRenameTitle"
+                       label="[[i18n('searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
+                       autofocus
+                       no-label-float>
+          </paper-input>
+        </div>
+        <div class="buttons">
+         <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="shareDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('searchForm.shared.heading', 'Share Saved Search')]]</h1>
+        <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
+        <div class="buttons">
+         <paper-button dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="deleteDialog" with-backdrop>
+      <div class="vertical layout">
+        <h1>[[i18n('searchForm.delete.heading', 'Delete Saved Search?')]]</h1>
+        <div class="buttons">
+          <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes','Yes')]]</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-search-form',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          selectedSearch: {
+            type: Object,
+            notify: true,
+            observer: '_selectedSearchChanged'
+          },
+          selectedSearchIdx: {
+            type: Number,
+            value: 0,
+            observer: '_selectedSearchIdxChanged'
+          },
+          provider: {
+            type: String
+          },
+          params: {
+            type: Object
+          },
+          schemas: {
+            type: String
+          },
+          currentIndex: {
+            type: Number,
+            notify: true
+          },
+          _isQueue: {
+            type: Boolean,
+            value: false
+          },
+          docItems: {
+            type: Array,
+            value: []
+          },
+          selectedDocument: {
+            type: Object,
+            observer: '_selectedDocChanged',
+            notify: true
+          },
+          hasResults: {
+            type: Boolean,
+            value: true
+          },
+          dirty: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+          isSavedSearch: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+          _onlyQueue: {
+            type: Boolean,
+            value: false
+          },
+          paramMutator: {
+            type: Function,
+            value: function() {
+              return function(params) {
+                var result = {};
+                if (params) {
+                  // filter null values
+                  for (var param in params) {
+                    var value = params[param];
+                    if (value && param !== 'dc:title') {
+                      result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
+                    }
+                  }
+                  // allow search to be visible on JSF UI
+                  if (!('cvd:contentViewName' in result)) {
+                    result['cvd:contentViewName'] = 'default_search';
+                  }
+                }
+                return result;
+              };
+            }
+          },
+          loading: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            value: false
+          },
+          searchName: String,
+          aggregations: {
+            type: Object,
+            observer: '_aggregationsChanged'
+          }
+        },
+
+        observers: [
+         '_resetResults(provider, params.*, quickFilters.*, query)',
+         '_paramsChanged(params.*)',
+         '_updateLayout(searchName)'
+        ],
+
+        get nxProvider() {
+          return this.$.provider;
+        },
+
+        displayQueue: function(doc) {
+          this._isQueue = true;
+          if (doc && doc.uid) {
+            this.$.list.$.list.selectItem(doc);
+            this.$.list.$.list.scrollToItem(doc);
+            this.$.list.notifyResize();
+          }
+        },
+
+        _resetResults: function() {
+          this.$.list._resetResults();
+        },
+
+        displayFilters: function() {
+          this._isQueue = false;
+          this.fire('display-filters');
+        },
+
+        _computedClass: function(isSelected) {
+          var classes = 'list-item';
+          if (isSelected) {
+            classes += ' selected';
+          }
+          return classes;
+        },
+
+        _selectedDocChanged: function(doc) {
+          if (doc) {
+            page('/browse' + doc.path);
+          }
+        },
+
+        _thumbnail: function(doc) {
+          if (doc.contextParameters.thumbnail.url) {
+            return doc.contextParameters.thumbnail.url;
+          } else {
+            var baseUrl = this.$.nxcon.url;
+            return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+          }
+        },
+
+        _paramsChanged: function() {
+          this.dirty = true;
+          if (this._form) {
+            this._form.params = this.params;
+          }
+        },
+
+        _selectedSearchIdxChanged: function() {
+          if (this._isSavedSearch()) {
+            this.isSavedSearch = true;
+            this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
+            this.params = this._mutateParams(this.selectedSearch.params);
+          } else {
+            this._clear();
+          }
+          this.dirty = false;
+        },
+
+        _selectedSearchChanged: function() {
+          if (this.selectedSearch) {
+            this.params = this._mutateParams(this.selectedSearch.params);
+            if (this.params && this.params.ecm_fulltext) {
+              this.searchTerm = this.params.ecm_fulltext.replace('*', '');
+              this._form.searchTerm = this.searchTerm;
+            }
+          }
+        },
+
+        _isSavedSearch: function() {
+          return this.selectedSearchIdx > 0;
+        },
+
+        _clear: function() {
+          this.searchTerm = '';
+          this.isSavedSearch = false;
+          this.selectedSearch = {};
+          if (this._form && this._form.clear != undefined && typeof this._form.clear == 'function') {
+            this._form.clear();
+          }
+          this.params = {};
+          if (!this._isSavedSearch()) {
+            this.dirty = false;
+          }
+          this.selectedSearchIdx = 0;
+          this._resetResults();
+        },
+
+        _reset: function() {
+          var _el = this.$['saved-search'];
+          _el.searchId = this.selectedSearch.id;
+          _el.get().then(function(response) {
+            this.params = this._mutateParams(response.params);
+            this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+            this._form.searchTerm = this.searchTerm;
+            this.dirty = false;
+          }.bind(this));
+        },
+
+        saveAs: function() {
+          this.$$('#actionsDropdown').close();
+          this.$.savedSearchTitle.value = '';
+          this.$.saveDialog.open();
+          this._saveAs = true;
+        },
+
+        save: function() {
+          if (this.selectedSearchIdx === 0) {
+            this.saveAs();
+          } else {
+            this._saveSearch();
+          }
+        },
+
+        rename: function() {
+          this._renaming = true;
+          this.$$('#actionsDropdown').close();
+          this.$.renameDialog.open();
+          this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
+        },
+
+        share: function() {
+          this.$$('#actionsDropdown').close();
+          this.$.shareDialog.open();
+        },
+
+        delete: function() {
+          this.$$('#actionsDropdown').close();
+          this.$.deleteDialog.open();
+        },
+
+        _saveSearch: function() {
+          var _el = this.$['saved-search'];
+          // save a new search
+          if (this.selectedSearchIdx === 0 || this._saveAs) {
+            _el.searchId = '';
+            _el.data = {
+              'entity-type': 'savedSearch',
+              'pageProviderName': this.provider,
+              'params': this.params,
+              'title': this.$$('#savedSearchTitle').value
+            };
+            _el.post().then(function(response) {
+              this.$.saveDialog.close();
+              this.selectedSearch = response;
+              this.$['saved-searches'].get().then(function() {
+                this.selectedSearchIdx = this.searches.length;
+              }.bind(this));
+            }.bind(this));
+          } else {
+            // update an existing search
+            _el.searchId = this.selectedSearch.id;
+            _el.data = this.selectedSearch;
+            if (this._renaming) {
+              _el.data.title = this.$.savedSearchRenameTitle.value;
+              _el.data.params = this._mutateParams(_el.data.params);
+            } else {
+              _el.data.params = this.params;
+            }
+            _el.put().then(function() {
+              if (this._renaming) {
+                this.$.renameDialog.close();
+
+                this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
+                // hack required to update the paper-input inside the paper-dropdown-menu
+                var idx = this.selectedSearchIdx;
+                this.selectedSearchIdx = 0;
+                this.selectedSearchIdx = idx;
+                this._renaming = false;
+              }
+              this.dirty = false;
+            }.bind(this));
+          }
+          this._saveAs = false;
+        },
+
+        _deleteSearch: function() {
+          var _el = this.$['saved-search'];
+          _el.searchId = this.selectedSearch.id;
+          _el.remove().then(function() {
+            this.$.deleteDialog.close();
+            this.$['saved-searches'].get().then(function() {
+              // hack required to update the paper-input inside the paper-dropdown-menu
+              this.selectedSearchIdx = 0;
+              this.selectedSearchIdx = this.searches.length;
+            }.bind(this));
+          }.bind(this));
+        },
+
+        _mutateParams: function(params) {
+          return this.paramMutator ? this.paramMutator(params) : params;
+        },
+
+        _computeSavedSearchesParams: function() {
+          return {pageProvider: this.provider};
+        },
+
+        _aggregationsChanged: function() {
+          if (this._form) {
+            this._form.aggregations = this.aggregations;
+          }
+        },
+
+        /**
+         * Retrieves and creates the search form for the current search type
+         */
+        _updateLayout: function() {
+          this.$['search-container'].hidden = false;
+          this.$.error.hide();
+          if (this.searchName && this.searchName.length > 0) {
+            var layout = ['nuxeo', this.searchName, 'search'].join('-');
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                this.$['search-container'].hidden = true;
+                this.$.error.show('404', url, this.i18n('documentSearchForm.layoutNotFound',
+                  'Failed to find search layout for ', this.searchName));
+              });
+          }
+        },
+
+        /**
+         * Creates the layout for the current search type
+         */
+        _createLayout: function() {
+          var layout = ['nuxeo', this.searchName, 'search'].join('-'),
+              el = document.createElement(layout),
+              parent = this.$['search-form-container'];
+          parent.innerHTML = '';
+          this._clear();
+          parent.appendChild(el);
+          el.id = 'search-form';
+          this._form = el;
+          this._form.aggregations = this.aggregations;
+          this.$.provider.auto = true;
+          if (this._form.provider !== undefined) {
+            this.provider = this._form.provider;
+            this.$.provider.query = null;
+          } else {
+            this.provider = null;
+            this.$.provider.query = this._form.query;
+          }
+          if (this._form.schemas !== undefined) {
+            this.schemas = this._form.schemas;
+          }
+          this.label = this._form.label;
+          if (this._form.displayQueue === true) {
+            this.displayQueue();
+          } else {
+            this.displayFilters();
+          }
+          this.label = this._form.label;
+          this.$['saved-searches'].get();
+          if (this._form.getDefaultParams !== undefined) {
+            this.params = this._form.getDefaultParams();
+          }
+          // setup data binding
+          el.addEventListener('params-changed', function(e) {
+            // e.detail.path is params.prop_name eg: params.ecm_fulltext
+            if (e.detail.path) {
+              var param = e.detail.path.split('.')[1];
+              this.set('params.' + param, e.detail.value);
+            }
+          }.bind(this));
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

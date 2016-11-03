@@ -1,0 +1,205 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+	Andre Justo <ajusto@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-preview`
+@group Nuxeo UI
+@element nuxeo-document-preview
+-->
+<dom-module id="nuxeo-document-preview">
+  <template>
+    <style>
+      :host {
+        display: block;
+        height: var(--nuxeo-document-preview-height);
+      }
+
+      #preview {
+        border: none;
+        height: 100%;
+        width: 100%;
+      }
+
+      nuxeo-image-viewer {
+        height: 100%;
+        --nuxeo-image-viewer-height: 100%;
+      }
+
+      .markdown-html {
+        background-color: white;
+      }
+
+      .default-frame {
+        width: calc(100% - 2em);
+        min-height: 25em;
+        border: none;
+        padding: 1em;
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      nuxeo-pdf-viewer {
+        width: 100%;
+        height: 100%;
+        --nuxeo-pdf-viewer-iframe: {
+          min-height: 500px;
+        }
+      }
+    </style>
+
+    <!-- Our available preview templates. First match will be used -->
+    <template mime-pattern="image.*">
+      <nuxeo-image-viewer src="[[imageSource]]" controls responsive>
+      </nuxeo-image-viewer>
+    </template>
+
+    <template mime-pattern="video.*">
+      <nuxeo-video-viewer controls sources="[[videoSources]]"></nuxeo-video-viewer>
+    </template>
+
+    <template mime-pattern="text/(?:.*-)?markdown">
+      <marked-element markdown="[[blob.data]]">
+        <div class="markdown-html"></div>
+      </marked-element>
+    </template>
+
+    <template mime-pattern="application/pdf">
+      <nuxeo-pdf-viewer src="[[blob.data]]"></nuxeo-pdf-viewer>
+    </template>
+
+    <template mime-pattern=".*">
+      <iframe id="frame" class="default-frame" src="[[document.contextParameters.preview.url]]"></iframe>
+    </template>
+
+    <div id="preview"></div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-preview',
+        behaviors: [Polymer.Templatizer],
+        properties: {
+          document: Object,
+          blob: Object,
+          xpath: {
+            type: String,
+            value: 'file:content'
+          },
+          imageSource: {
+            type: String,
+            computed: '_computeImageSource(document)'
+          },
+          videoSources: {
+            type: Array,
+            computed: '_computeVideoSources(document)'
+          }
+        },
+
+        observers: [
+          '_updateBlob(document, xpath)'
+        ],
+
+        _updateBlob: function() {
+          if (this.document) {
+            // Adapt the Note to mimic a Blob
+            if (this.document.type === 'Note') {
+              this.blob = {
+                data: this.document.properties['note:note'],
+                'mime-type': this.document.properties['note:mime_type']
+              };
+            } else {
+              // by default just use the field at xpath as a Blob
+              this.blob = this.document && this._deepFind(this.document.properties, this.xpath);
+            }
+            // Update our previewer
+            if (this.blob) {
+              this._updatePreview();
+            }
+          }
+        },
+
+        _updatePreview: function() {
+          // clear current previewer
+          while (this.$.preview.firstChild) {
+            this.$.preview.removeChild(this.$.preview.firstChild);
+          }
+
+          // lookup the preview according to the blob's mimetype
+          var previewers = Polymer.dom(this.root).querySelectorAll('template');
+          for (var i = 0; i < previewers.length; i++) {
+            var previewer = previewers[i];
+            var regex = new RegExp(previewer.getAttribute('mime-pattern'));
+            if (this.blob['mime-type'].match(regex)) {
+              // Insert our previewer
+              this.templatize(previewer);
+              var instance = this.stamp({
+                document: this.document,
+                videoSources: this.videoSources,
+                blob: this.blob
+              });
+              this.$.preview.appendChild(instance.root);
+              break;
+            }
+          }
+        },
+
+        _deepFind: function(obj, props) {
+          for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+            if (!obj || obj === []) {
+              break;
+            }
+            obj = obj[path[i]];
+          }
+          return obj;
+        },
+
+        _computeImageSource: function() {
+          if (!this.document || !this.document.properties) {
+            return;
+          }
+          if (this.document.properties['picture:views']) {
+            var filteredViews = this.document.properties['picture:views'].filter(function(view) {
+              return view.title === 'FullHD';
+            });
+            if (filteredViews.length > 0) {
+              return filteredViews[0].content.data;
+            }
+          }
+          if (this.document.properties['file:content']) {
+            return this.document.properties['file:content'].data;
+          }
+        },
+
+        _computeVideoSources: function() {
+          if (this.document && this.document.properties['vid:transcodedVideos']) {
+            return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
+              return {
+                data: conversion.content.data,
+                type: conversion.content['mime-type']
+              };
+            });
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

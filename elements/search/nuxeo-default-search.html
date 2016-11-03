@@ -1,0 +1,193 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+
+<!--
+`nuxeo-default-search`
+@group Nuxeo UI
+@element nuxeo-default-search
+-->
+<dom-module id="nuxeo-default-search">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .row {
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      label {
+        color: #434343;
+        font-size: 0.8em;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+
+      input {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: .2em;
+        box-sizing: border-box;
+        color: rgba(0,0,0,.75);
+        display: block;
+        font-size: 0.8em;
+        height: 2rem;
+        margin: 0;
+        padding: .5rem;
+        width: 100%;
+      }
+
+    </style>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.fullText', 'Full Text')]]</label>
+      <paper-input id="searchInput" autofocus="true"
+                   value="{{searchTerm}}" tabindex="0"
+                   type="search"
+                   placeholder="[[i18n('defaultSearch.fullText.placeholder', 'Search something ...')]]"
+                   no-label-float>
+      </paper-input>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.creationDate', 'Creation date')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_created_agg]]"
+        value="{{params.dc_created_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.modifiedDate', 'Modification date')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_modified_agg]]"
+        value="{{params.dc_modified_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+
+    <div class="row layout vertical">
+      <label>[[i18n('defaultSearch.authors', 'Authors')]]</label>
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder', 'Search for contributors...')]]"
+        data="[[aggregations.dc_creator_agg]]"
+        value="{{params.dc_creator_agg}}"
+        multiple="true">
+      </nuxeo-dropdown-aggregation>
+    </div>
+
+    <div class="row layout vertical">
+      <label>[[i18n('defaultSearch.collections', 'Collections')]]</label>
+      <nuxeo-select2 operation="User.GetCollections"
+                     min-chars="0"
+                     placeholder="[[i18n('defaultSearch.collections.placeholder', 'Select a value')]]"
+                     value="{{params.ecm_collections}}"
+                     multiple="true">
+      </nuxeo-select2>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.nature', 'Nature')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_nature_agg]]"
+        value="{{params.dc_nature_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.subject','Subjects')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_subjects_agg]]"
+        value="{{params.dc_subjects_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.coverage', 'Coverage')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_coverage_agg]]"
+        value="{{params.dc_coverage_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+
+    <div class="layout vertical row">
+      <label>[[i18n('defaultSearch.size', 'Size')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.common_size_agg]]"
+        value="{{params.common_size_agg}}">
+      </nuxeo-checkbox-aggregation>
+    </div>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-default-search',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          provider: {
+            type: String,
+            value: 'default_search',
+            reflectToAttribute: true
+          },
+          params: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          aggregations: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          searchTerm: {
+            type: String,
+            notify: true,
+            observer: '_addFullTextSearch'
+          },
+          schemas: {
+            type: String,
+            value: 'dublincore,common,uid',
+            reflectToAttribute: true
+          }
+        },
+
+        _addFullTextSearch: function() {
+          if (this.searchTerm) {
+            this.set('params.ecm_fulltext', this.searchTerm + '*');
+          } else {
+            if (this.params.ecm_fulltext) {
+              this.set('params.ecm_fulltext', '');
+              // dirty but needed, the above line for
+              // ecm_fulltext removal being observed
+              delete this.params.ecm_fulltext;
+            }
+          }
+        },
+
+        clear: function() {
+          this.searchTerm = '';
+        }
+      });
+    })();
+  </script>
+</dom-module>

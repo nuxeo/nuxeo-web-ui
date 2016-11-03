@@ -1,0 +1,445 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume RENARD <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-vocabulary-management`
+@group Nuxeo UI
+@element nuxeo-vocabulary-management
+-->
+<dom-module id="nuxeo-vocabulary-management">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-header-panel {
+        height: 100vh;
+      }
+
+      .title {
+        display: block;
+        font-size: 1.4rem;
+        padding: 0.5em;
+      }
+
+      paper-dropdown-menu {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-input: {
+          font-size: 18px;
+          font-weight: 400;
+          text-align: left;
+          color: var(--nuxeo-header-text-color);
+        };
+        padding: .3em 0 .5em .5em;
+        margin-left: 1.5em;
+      }
+
+      ::content .unfocused-line.paper-input-container {
+        background-color: transparent;
+      }
+
+      ::content paper-input-container .input-content.paper-input-container {
+        flex-direction: row-reverse;
+      }
+
+      ::content paper-input-container .input-content iron-icon {
+        margin-right: .3em;
+      }
+
+      nuxeo-data-table {
+        min-height: calc(100vh - 280px);
+      }
+
+      nuxeo-data-table ::content #items {
+        background-color: #fff;
+      }
+
+      #errorToast {
+        --paper-toast-background-color: red;
+        --paper-toast-color: white;
+      }
+
+      .top.actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-end-justified);
+        margin: 1em 0 1em 0;
+      }
+
+      .sep {
+        border-top: 1px solid var(--divider-color);
+      }
+
+    </style>
+
+    <nuxeo-resource id="directory" path="/directory"></nuxeo-resource>
+
+    <paper-toast id="toast"></paper-toast>
+
+    <paper-toast id="errorToast"></paper-toast>
+
+    <paper-dialog id="dialog" with-backdrop no-auto-focus>
+      <nuxeo-error id="error"></nuxeo-error>
+      <div id="edit-container">
+        <h1>[[i18n('vocabularyManagement.popup.editEntry','Edit vocabulary entry')]]</h1>
+        <div class="paper-content layout horizontal">
+          <form id="form" is="iron-form" action="/">
+            <div id="entry-edit">
+              <!-- Dynamic layout element will be inserted here -->
+            </div>
+            <div class="card-actions">
+              <div class="buttons sep">
+               <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+               <paper-button noink class="primary" on-tap="_save" >
+                 [[i18n('command.save', 'Save')]]
+               </paper-button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </paper-dialog>
+
+    <paper-header-panel class="flex">
+      <div class="paper-header layout horizontal">
+        <span>[[i18n('vocabularyManagement.heading', 'Vocabularies')]]</span>
+      </div>
+      <div class="content">
+        <paper-card elevation="0" class="block">
+          <div class="card-content">
+            <span>[[i18n('vocabularyManagement.vocabulary', 'Vocabulary')]]</span>
+            <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select', 'Select a vocabulary')]]">
+              <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
+                <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
+                  <paper-item name="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+        </paper-card>
+        <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
+          <div class="top actions">
+            <paper-button on-tap="_createEntry">
+              <span>+ [[i18n('vocabularyManagement.addEntry', 'Add entry')]]</span>
+            </paper-button>
+          </div>
+          <nuxeo-data-table id="table" items="[[entries]]"
+            empty-label="[[i18n('vocabularyManagement.noEntry', 'No entry')]]"
+            empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
+            <template is="dom-repeat" items="[[colDef]]" as="col">
+              <nuxeo-data-table-column name="[[col.name]]">
+                <template>
+                  <template is="dom-if" if="[[!_entryActions(column.name)]]">
+                    [[_value(item, column.name)]]
+                  </template>
+                  <template is="dom-if" if="[[_entryActions(column.name)]]">
+                    <paper-icon-button id="edit-button-[[index]]" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+                    <paper-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
+                    <paper-icon-button id="delete-button-[[index]]" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+                    <paper-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry', 'Delete entry')]]</paper-tooltip>
+                  </template>
+                </template>
+              </nuxeo-data-table-column>
+            </template>
+          </nuxeo-data-table>
+        </template>
+
+      </div>
+    </paper-header-panel>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-vocabulary-management',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          vocabularies: Array,
+          selectedVocabulary: String,
+          entries: {
+            type: Array,
+            value: []
+          },
+          colDef: {
+            type: Object,
+            notify: true
+          },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
+          _selectedEntry: {
+            type: Object,
+            observer: '_entryChanged'
+          }
+        },
+
+        observers: [
+          '_refresh(selectedVocabulary)'
+        ],
+
+        _visibleChanged: function() {
+          if (this.visible && !this.vocabularies) {
+            this.$.directory.get().then(function(response) {
+              this.vocabularies = response.entries;
+            }.bind(this));
+          }
+        },
+
+        _entryChanged: function() {
+          if (this._selectedEntry) {
+            this._updateLayout();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var schema = this._getSchemaFor(this._selectedEntry);
+          var type = schema.charAt(0).toLowerCase() + schema.slice(1);
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'edit'].join('-');
+        },
+
+        _getSchemaFor: function(entry) {
+          var schema = '';
+          for (var i in this.vocabularies) {
+            if (this.vocabularies[i].name === entry.directoryName) {
+              schema = this.vocabularies[i].schema;
+              break;
+            }
+          }
+          if (!schema || schema.length === 0) {
+            return 'vocabulary';
+          }
+          return schema;
+        },
+
+        _getParentDirectoryFor: function(entry) {
+          var parent = '';
+          for (var i in this.vocabularies) {
+            if (this.vocabularies[i].name === entry.directoryName) {
+              parent = this.vocabularies[i].parent;
+              break;
+            }
+          }
+          return parent;
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current vocabulary entry
+         */
+        _updateLayout: function() {
+          this.$['edit-container'].hidden = false;
+          this.$.error.hide();
+          var layout = this._layoutFor(this._selectedEntry);
+          if (!this._isRegistered(layout)) {
+            var url = this.resolveUrl(layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                this.$['edit-container'].hidden = true;
+                this.$.error.show('404', url, this.i18n('documentVocabularyManagement.layoutNotFound',
+                  'Failed to find edit layout for {0}', this._getSchemaFor(this._selectedEntry)));
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        /*
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this._selectedEntry),
+              el = document.createElement(layout),
+              parent = this.$['entry-edit'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.entry = this._selectedEntry;
+          el.parentDirectory = this._getParentDirectoryFor(this._selectedEntry);
+          el.entries = this.entries;
+          el.new = this._new;
+        },
+
+        _entryActions: function(o) {
+          return o  === 'actions';
+        },
+
+        _refresh: function() {
+          if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
+            this.$.directory.path = '/directory/' + this.selectedVocabulary;
+            this.$.directory.get().then(function(resp) {
+              this.entries = [];
+              this.colDef = [];
+              var tmp = [];
+              if (resp.entries.length > 0) {
+                tmp = Object.keys(resp.entries[0].properties).map(function(key) {
+                  return {name: key, pos: this._computeColPos(key)};
+                }.bind(this));
+              }
+              tmp.push({name: 'actions', pos: 1000, actions: true});
+              tmp.sort(function(a, b) {
+                return a.pos - b.pos;
+              });
+              this.colDef = tmp;
+              this.entries = resp.entries;
+            }.bind(this));
+          }
+        },
+
+        _displayTable: function() {
+          return this.selectedVocabulary && this.selectedVocabulary.length > 0;
+        },
+
+        _value: function(entry, prop) {
+          if (entry && entry.properties && prop) {
+            if (prop === 'obsolete') {
+              return entry.properties[prop] > 0 ?
+                this.i18n('label.yes', 'Yes') : this.i18n('label.no', 'No');
+            }
+            return entry.properties[prop];
+          } else {
+            console.error('Could not resolve property ' + prop);
+            return 'N/A';
+          }
+        },
+
+        _computeColPos: function(key) {
+          if (key === 'parent') {
+            return 1;
+          } else if (key === 'id') {
+            return 2;
+          } else if (key === 'obsolete') {
+            return 98;
+          } else if (key === 'ordering') {
+            return 99;
+          } else {
+            return 50;
+          }
+        },
+
+        _deleteEntry: function(e) {
+          if (confirm(this.i18n('vocabularyManagement.confirmDelete',
+                                'Delete vocabulary entry?'))) {
+            var item = e.model.dataHost.parentNode.item;
+            this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
+            this.$.directory.remove().then(function() {
+              this._refresh();
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyDeleted',
+                'Entry successfully deleted.');
+              this.$.toast.open();
+            }.bind(this), function(err) {
+              if (err.status === 401) {
+                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.referencedEntry',
+                  'This entry is referenced in another vocabulary.');
+              } else {
+                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.error',
+                  'An error occured while deleting this entry') + ': ' + err.message;
+              }
+              this.$.errorToast.open();
+            }.bind(this));
+          }
+        },
+
+        _editEntry: function(e) {
+          this._new = false;
+          this._selectedEntry = e.model.dataHost.parentNode.item;
+          this.$.dialog.toggle();
+        },
+
+        _cancel: function() {
+          //this._refresh();
+        },
+
+        _save: function() {
+
+          this.$.directory.data = this._selectedEntry;
+          if (this._new) {
+            this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
+            this.$.directory.post().then(function() {
+              this.$.dialog.toggle();
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyCreated',
+                  'Entry successfully created.');
+              this.$.toast.open();
+              this._refresh();
+            }.bind(this),
+            function(err) {
+              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
+                this.i18n('vocabularyManagement.cannotCreate',
+                  'An error occured while create.');
+              this.$.errorToast.open();
+            }.bind(this));
+          } else {
+            this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
+              '/' + this._selectedEntry.properties.id;
+            this.$.directory.put().then(function() {
+              this.$.dialog.toggle();
+              this.$.toast.text = this.i18n('vocabularyManagement.successfullyEdited',
+                  'Entry successfully edited.');
+              this.$.toast.open();
+              this._refresh();
+            }.bind(this),
+            function(err) {
+              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
+                this.i18n('vocabularyManagement.cannotEdit',
+                  'An error occured while editing.');
+              this.$.errorToast.open();
+            }.bind(this));
+          }
+        },
+
+        _isVocabularySelected: function() {
+          return this.selectedVocabulary && this.selectedVocabulary.length > 0;
+        },
+
+        _createEntry: function() {
+          var emptyEntry = JSON.parse(JSON.stringify(this.entries[0]));
+          for (var property in this.entries[0].properties) {
+            if (this.entries[0].properties.hasOwnProperty(property)) {
+              emptyEntry.properties[property] = null;
+            }
+          }
+          this._new = true;
+          this._selectedEntry = emptyEntry;
+          this.$.dialog.toggle();
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

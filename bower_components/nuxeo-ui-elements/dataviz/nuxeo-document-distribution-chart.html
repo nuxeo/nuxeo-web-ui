@@ -1,0 +1,803 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../nuxeo-elements/nuxeo-connection.html">
+<link rel="import" href="../../paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../paper-spinner/paper-spinner-lite.html">
+<script src="../../d3/d3.min.js"></script>
+<script src="../../randomcolor/randomColor.js"></script>
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+
+<!--
+A sunburst chart presenting Nuxeo Document Distribution.
+
+Example:
+
+    <nuxeo-document-distribution-chart index="nuxeo"
+      path="/default-domain" mode="count" max-depth="7"
+      chart-hue="red" chart-lumonisity="light"
+      include-version include-hidden"
+      include-deleted only-folder">
+    </nuxeo-document-distribution-chart>
+
+@group Nuxeo UI
+@element nuxeo-document-distribution-chart
+@demo demo/nuxeo-document-distribution-chart/index.html
+-->
+<dom-module id="nuxeo-document-distribution-chart">
+  <template>
+
+    <style is="custom-style">
+      #du {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        width: 100%;
+        height: 700px;
+        margin-top: 10px;
+      }
+
+      #main {
+        float: left;
+        width: 70%;
+      }
+
+      #sb {
+        float: right;
+        width: 30%;
+      }
+
+      #sequence {
+        width: 100%;
+        height: 70px;
+      }
+
+      #chart {
+        position: relative;
+      }
+
+      #chart path {
+        stroke: #fff;
+      }
+
+      #ex {
+        position: absolute;
+        top: 260px;
+        left: 305px;
+        width: 140px;
+        text-align: center;
+        color: #666;
+        z-index: 10;
+      }
+
+      #cl {
+        font-size: 2.5em;
+      }
+
+      :host[loading] .loadable {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
+    </style>
+
+    <nuxeo-connection id="nx" connection-id="[[connectionId]]"></nuxeo-connection>
+
+    <div id="du" >
+      <div id="main" class="loadable">
+        <div id="sequence"></div>
+        <div id="chart">
+          <div id="ex" style="visibility: hidden;">
+            <span id="cl"></span><br/>
+            <span id="clb"></span>
+          </div>
+        </div>
+      </div>
+      <div id="sb" class="loadable">
+        <paper-radio-group selected="{{mode}}" on-paper-radio-group-changed="execute">
+          <paper-radio-button name="size">[[i18n('label.docdistribution.size', 'Size')]]</paper-radio-button>
+          <paper-radio-button name="count">[[i18n('label.docdistribution.count', 'Document Count')]]</paper-radio-button>
+        </paper-radio-group>
+        <p/>
+        <paper-checkbox on-change="execute" checked="{{includeHidden}}">[[i18n('label.docdistribution.include_hidden', 'Include Hidden Documents')]]</paper-checkbox>
+        <p/>
+        <paper-checkbox on-change="execute" checked="{{includeDeleted}}">[[i18n('label.docdistribution.include_deleted', 'Include Deleted Documents')]]</paper-checkbox>
+        <p/>
+        <paper-checkbox on-change="execute" checked="{{includeVersion}}">[[i18n('label.docdistribution.include_versions', 'Include Versions')]]</paper-checkbox>
+        <p/>
+        <paper-checkbox on-change="execute" checked="{{onlyFolder}}" disabled="[[_chechFolderDisabled(mode)]]">[[i18n('label.docdistribution.folders_only', 'Only Folders')]]</paper-checkbox>
+        <p/>
+      </div>
+
+      <paper-spinner-lite active hidden$=[[!loading]]></paper-spinner-lite>
+
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+
+      Polymer({
+        is: 'nuxeo-document-distribution-chart',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          /**
+           * The id of a nuxeo-connection to use.
+           */
+          connectionId: {
+            type: String,
+            value: 'nx'
+          },
+
+          /**
+           * The name of the index.
+           */
+          index: {
+            type: String,
+            value: 'nuxeo'
+          },
+
+          /**
+           * Path of the document to scan. For instance '/default-domain/workspaces'.
+           * Leave blank to scan the full repository.
+           */
+          path: {
+            type: String,
+            value: ''
+          },
+
+          /**
+           * Possible values are 'size' for Document size or 'count' for Document count.
+           */
+          mode: {
+            type: String,
+            value: 'size',
+            observer: '_observeMode'
+          },
+
+          /**
+           * Maximum depth to scan in the hierarchy.
+           */
+          maxDepth: {
+            type: Number,
+            value: 10
+          },
+
+          /**
+           * Possible values are 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink' and 'monochrome'.
+           */
+          chartLuminosity: {
+            type: String,
+            value: 'light'
+          },
+
+          /**
+           * Possible values are 'bright', 'light' or 'dark'.
+           */
+          chartHue: {
+            type: String,
+            value: 'blue'
+          },
+
+          /**
+           * Chart width.
+           */
+          width: {
+            type: Number,
+            value: 750
+          },
+
+          /**
+           * Chart height.
+           */
+          height: {
+            type: Number,
+            value: 600
+          },
+
+          _queryFiler: {
+            type: Object,
+            computed: '_computeQueryFilter(mode, path, includeHidden, includeVersion, includeDeleted, onlyFolder)'
+          },
+
+          /**
+           * To take into account hidden Documents (i.e. Documents with HiddenInNavigation facet).
+           */
+          includeHidden: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * To take into account Versions in the size/count computation.
+           *
+           * LIMITATION: the size of Versions are not properly taken into account in the final result.
+           */
+          includeVersion: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * To take into account deleted Documents (i.e. Documents with lifecycle deleted).
+           */
+          includeDeleted: {
+            type: Boolean,
+            value: true
+          },
+
+          /**
+           * To take into account folder Documents (i.e. Documents with Folderish facet).
+           */
+          onlyFolder: {
+            type: Boolean,
+            value: false
+          },
+
+          _chartData: {
+            type: Object
+          },
+
+          loading: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            value: false
+          }
+
+        },
+
+        _chechFolderDisabled: function(mode) {
+          return mode === 'size';
+        },
+
+        _observeMode: function() {
+          if (this.mode === 'size') {
+            this.onlyFolder = false;
+          }
+        },
+
+        _computeSizeQuery: function () {
+          var query;
+
+          var pathDepth = this.path.replace(/\/$/, "").split('/').length;
+
+          var subPart = {
+            "size": {
+              "sum": {
+                "field": "common:size"
+              }
+            }
+          };
+          for (var depth = pathDepth - 1 + this.maxDepth; depth > pathDepth; depth--) {
+            subPart = {
+              "size": {
+                "sum": {
+                  "field": "common:size"
+                }
+              },
+              "subLevel": {
+                "terms": {
+                  "field": "ecm:path@level" + depth,
+                  "size": 0
+                },
+                "aggs": subPart
+              }
+            };
+          }
+          query = {
+            "query": {
+              "bool": {
+                  "must": this._queryFiler
+              }
+            },
+            "size": 0,
+            "aggs": {
+              "subLevel": {
+                "terms": {
+                  "field": "ecm:path@level" + pathDepth,
+                  "size": 0
+                },
+                "aggs": subPart
+              }
+            }
+          }
+          return query;
+        },
+
+        _computeDocCountQuery: function () {
+          var query;
+
+          var pathDepth = this.path.replace(/\/$/, "").split('/').length;
+
+          var subPart = {
+            "subLevel": {
+              "terms": {
+                "field": "ecm:path@level" + (pathDepth - 1 + this.maxDepth),
+                "size": 0,
+                "order": {
+                  "_count": "desc"
+                }
+              }
+            }
+          };
+
+          for (var depth = pathDepth - 2 + this.maxDepth; depth >= pathDepth; depth--) {
+            subPart = {
+              "subLevel": {
+                "terms": {
+                  "field": "ecm:path@level" + depth,
+                  "size": 0,
+                  "order": {
+                    "_count": "desc"
+                  }
+                },
+                "aggs": subPart
+              }
+            };
+          }
+          query = {
+            "query": {
+              "bool": {
+                  "must": this._queryFiler
+              }
+            },
+            "size": 0,
+            "aggs": subPart
+          }
+          return query;
+        },
+
+        _computeQueryFilter(mode, path) {
+          var result = [];
+          if (this.onlyFolder && this.mode !== 'size') {
+            result.push({
+              "constant_score": {
+                  "filter": {
+                    "term": {
+                        "ecm:mixinType": "Folderish"
+                    }
+                  }
+              }
+            });
+          }
+          if (!this.includeHidden) {
+            result.push({
+              "constant_score": {
+                  "filter": {
+                      "not": {
+                          "filter": {
+                              "term": {
+                                  "ecm:mixinType": "HiddenInNavigation"
+                              }
+                          }
+                      }
+                  }
+              }
+            });
+          }
+          if (!this.includeVersion) {
+            result.push({
+              "constant_score" : {
+                "filter" : {
+                  "term" : {
+                    "ecm:isVersion" : "0"
+                  }
+                }
+              }
+            });
+          }
+          if (!this.includeDeleted) {
+            result.push({
+              "constant_score" : {
+                "filter" : {
+                  "not" : {
+                    "filter" : {
+                      "term" : {
+                        "ecm:currentLifeCycleState" : "deleted"
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          }
+          if (path && path.length > 0) {
+            var split = path.replace(/\/$/, "").split('/');
+            for (var i = 1; i < split.length; i++) {
+              var propName = "ecm:path@level" + i;
+              var toPush = {
+                "constant_score": {
+                    "filter": {
+                      "term": {
+                      }
+                    }
+                }
+              };
+              toPush.constant_score.filter.term["ecm:path@level" + i] = split[i];
+              result.push(toPush);
+            }
+          }
+          return result;
+        },
+
+        execute: function() {
+          this.loading = true;
+          var query;
+          if (this.mode === 'size') {
+            query = this._computeSizeQuery();
+          } else if (this.mode === 'count') {
+            query = this._computeDocCountQuery();
+          } else {
+            alert('Mode must be either size or docCount');
+            return;
+          }
+          var url = [this.$.nx.client._baseURL, 'site/es', this.index, 'doc', '_search'].join('/');
+          url = url.replace(/(^\/+)|([^:])\/\/+/g, '$2/');
+
+          if (this.type) { url += '?search_type=' + this.type; }
+          var options = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: query,
+            url: url
+          };
+          return this.$.nx.request().then(function(request) {
+            return request
+              .execute(options)
+              .then(this._handleResponse.bind(this))
+              .catch(this._handleError.bind(this))
+          }.bind(this));
+        },
+
+        _handleError: function(reason) {
+          console.error(reason);
+          this.fire('error', {
+            reason: reason,
+            error: reason
+          });
+          this.loading = false;
+        },
+
+        _handleResponse: function(response) {
+          this._buildSunBurst(response.aggregations);
+          this.loading = false;
+        },
+
+        _transformSubBuckets: function(bucket) {
+          bucket.name = bucket.key;
+          bucket.color = this._getColor(bucket.name, this.chartHue, this.chartLuminosity);
+          var size;
+          if (this.mode === 'size') {
+            size = bucket.size.value;
+            delete bucket.size;
+          } else if (this.mode === 'count') {
+            size = bucket.doc_count;
+            delete bucket.doc_count;
+          }
+          delete bucket.key;
+          bucket.size = size;
+          if (bucket.subLevel) {
+            bucket.children = bucket.subLevel.buckets;
+            delete bucket.subLevel;
+            if (bucket.children.length == 0) {
+              return;
+            }
+            for (var j = 0; j < bucket.children.length; j++) {
+              this._transformSubBuckets(bucket.children[j]);
+            }
+          }
+        },
+
+        _buildSunBurst: function(aggregations) {
+          var aggregations = aggregations.subLevel;
+          aggregations.name = "root";
+          aggregations.color = this._getColor(aggregations.name, this.chartHue, this.chartLuminosity);
+          aggregations.children = aggregations.buckets;
+          delete aggregations.buckets;
+          delete aggregations.doc_count_error_upper_bound;
+          delete aggregations.sum_other_doc_count;
+          for (var i = 0; i < aggregations.children.length; i++) {
+            this._transformSubBuckets(aggregations.children[i]);
+          }
+
+          this._chartData = aggregations;
+
+          // Dimensions of sunburst.
+          radius = Math.min(this.width, this.height) / 2;
+
+          // Total size of all segments; we set this later, after loading the data.
+          var totalSize = 0;
+          $(this.$.chart).find('svg').remove();
+
+          vis = d3.select(this.$.chart).append("svg:svg")
+              .attr("width", this.width)
+              .attr("height", this.height)
+              .append("svg:g")
+              .attr("id", "container")
+              .attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+
+          partition = d3.layout.partition()
+              .size([2 * Math.PI, radius * radius])
+              .value(function(d) { return d.size; });
+
+          arc = d3.svg.arc()
+              .startAngle(function(d) { return d.x; })
+              .endAngle(function(d) { return d.x + d.dx; })
+              .innerRadius(function(d) { return Math.sqrt(d.y); })
+              .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+
+          this._createVisualization();
+
+        },
+
+        _getColor: function(pathPart, hue, luminosity) {
+          var result = colors[pathPart];
+          if (result === undefined) {
+            result = randomColor({
+              hue: hue,
+              luminosity: luminosity
+            });
+            colors[pathPart] = result;
+          }
+          return result;
+        },
+
+        // Given a node in a partition layout, return an array of all of its ancestor
+        // nodes, highest first, but excluding the root.
+        _getAncestors: function(node) {
+          var path = [];
+          var current = node;
+          while (current.parent) {
+            path.unshift(current);
+            current = current.parent;
+          }
+          return path;
+        },
+
+        // Update the breadcrumb trail to show the current sequence and percentage.
+        _updateBreadcrumbs: function(nodeArray, percentageString) {
+
+          // Data join; key function combines name and depth (= position in sequence).
+          var g = d3.select(Polymer.dom(this.root).querySelector('#trail'))
+              .selectAll("g")
+              .data(nodeArray, function(d) { return d.name + d.depth; });
+
+          // Add breadcrumb and label for entering nodes.
+          var entering = g.enter().append("svg:g");
+
+          entering.append("svg:polygon")
+              .attr("points", this._breadcrumbPoints)
+              .style("fill", function(d) { return d.color; });
+
+          entering.append("svg:text")
+              .attr("x", (b.w + b.t) / 2)
+              .attr("y", b.h / 2)
+              .attr("dy", "0.35em")
+              .attr("text-anchor", "middle")
+              .text(function(d) {
+                if(d.name.length > 10) {
+                  return d.name.substring(0, 9) + "...";
+                } else {
+                  return d.name;
+                }
+              });
+
+          // Set position for entering and updating nodes.
+          g.attr("transform", function(d, i) {
+            return "translate(" + i * (b.w + b.s) + ", 0)";
+          });
+
+          // Remove exiting nodes.
+          g.exit().remove();
+
+          // Now move and update the percentage at the end.
+          d3.select(Polymer.dom(this.root).querySelector('#trail').querySelector('#endlabel'))
+              .attr("x", (nodeArray.length + 0.5) * (b.w + b.s))
+              .attr("y", b.h / 2)
+              .attr("dy", "0.35em")
+              .attr("text-anchor", "middle")
+              .text(percentageString);
+
+          // Make the breadcrumb trail visible, if it's hidden.
+          d3.select(Polymer.dom(this.root).querySelector('#trail'))
+              .style("visibility", "");
+
+        },
+
+        // Main function to draw and set up the visualization, once we have the data.
+        _createVisualization: function() {
+
+          this._initializeBreadcrumbTrail();
+
+          // Bounding circle underneath the sunburst, to make it easier to detect
+          // when the mouse leaves the parent g.
+          vis.append("svg:circle")
+              .attr("r", radius)
+              .style("opacity", 0);
+
+          // For efficiency, filter nodes to keep only those large enough to see.
+          var nodes = partition.nodes(this._chartData)
+              .filter(function(d) {
+              return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
+              });
+
+          var path = vis.data([this._chartData]).selectAll("path")
+              .data(nodes)
+              .enter().append("svg:path")
+              .attr("display", function(d) { return d.depth ? null : "none"; })
+              .attr("d", arc)
+              .attr("fill-rule", "evenodd")
+              .style("fill", function(d) {
+                return d.color;
+              })
+              .style("opacity", 1)
+              .on("mouseover", this._mouseover.bind(this));
+
+          // Add the mouseleave handler to the bounding circle.
+          d3.select(Polymer.dom(this.root).querySelector('#container')).on("mouseleave", this._mouseleave);
+
+          // Get total size of the tree = value of root node from partition.
+          totalSize = path.node().__data__.value;
+        },
+
+        // Fade all but the current sequence, and show it in the breadcrumb trail.
+        _mouseover: function(d) {
+
+          var percentage = (100 * d.value / totalSize).toPrecision(3);
+          var percentageString = percentage + "%";
+          if (percentage < 0.1) {
+            percentageString = "< 0.1%";
+          }
+
+          d3.select(this.$.cl)
+              .text(this._formatValue(d.value, true));
+          d3.select(this.$.clb)
+              .text('(' + percentageString + ')');
+
+          d3.select(this.$.ex)
+              .style("visibility", "");
+
+          var sequenceArray = this._getAncestors(d);
+          this._updateBreadcrumbs(sequenceArray, percentageString);
+
+          // Fade all the segments.
+          d3.selectAll(Polymer.dom(this.root).querySelectorAll('#chart path'))
+              .style("opacity", 0.3);
+
+          // Then highlight only those that are an ancestor of the current segment.
+          vis.selectAll("#chart path")
+              .filter(function(node) {
+                        return (sequenceArray.indexOf(node) >= 0);
+                      })
+              .style("opacity", 1);
+        },
+
+        // Restore everything to full opacity when moving off the visualization.
+        _mouseleave: function(d) {
+          return;
+          // Hide the breadcrumb trail
+          d3.select(Polymer.dom(this.root).querySelector('#trail'))
+              .style("visibility", "hidden");
+
+          // Deactivate all segments during transition.
+          d3.selectAll(Polymer.dom(this.root).querySelectorAll('#chart path'))
+          .on("mouseover", null);
+
+          // Transition each segment to full opacity and then reactivate it.
+          d3.selectAll(Polymer.dom(this.root).querySelectorAll('#chart path'))
+              .transition()
+              .duration(1000)
+              .style("opacity", 1)
+              .each("end", function() {
+                      d3.select(this).on("mouseover", this._mouseover.bind(this));
+                    });
+
+          d3.select(this.$.ex)
+              .style("visibility", "hidden");
+        },
+
+        _initializeBreadcrumbTrail: function() {
+          $(this.$.sequence).empty()
+          // Add the svg area.
+          var trail = d3.select(this.$.sequence).append("svg:svg")
+              .attr("width", '100%')
+              .attr("height", 50)
+              .attr("id", "trail");
+          // Add the label at the end, for the percentage.
+          trail.append("svg:text")
+            .attr("id", "endlabel")
+            .style("fill", "#000");
+
+          d3.select(this.$.cl)
+              .text('');
+          d3.select(this.$.clb)
+              .text('');
+        },
+
+        // Generate a string that describes the points of a breadcrumb polygon.
+        _breadcrumbPoints: function(d, i) {
+          var points = [];
+          points.push("0,0");
+          points.push(b.w + ",0");
+          points.push(b.w + b.t + "," + (b.h / 2));
+          points.push(b.w + "," + b.h);
+          points.push("0," + b.h);
+          if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
+            points.push(b.t + "," + (b.h / 2));
+          }
+          return points.join(" ");
+        },
+
+        _formatValue: function(value, si) {
+          if (this.mode === 'size') {
+            var thresh = si ? 1000 : 1024;
+            if(Math.abs(value) < thresh) {
+                return value + ' B';
+            }
+            var units = si
+                ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+                : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+            var u = -1;
+            do {
+                value /= thresh;
+                ++u;
+            } while(Math.abs(value) >= thresh && u < units.length - 1);
+            return value.toFixed(1)+' '+units[u];
+          } else if (this.mode === 'count') {
+            var result = value + ' ';
+            if (value > 1) {
+              result += this.i18n('label.docdistribution.documents', 'Documents');
+            } else {
+              result += this.i18n('label.docdistribution.document', 'Document');
+            }
+            return result;
+          } else {
+            return value;
+          }
+        },
+
+        ready: function() {
+          this.execute();
+        }
+
+      });
+
+      var vis, radius, partition, arc;
+
+      // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
+      var b = {
+        w: 100, h: 30, s: 3, t: 10
+      };
+
+      var colors = {};
+
+    })();
+  </script>
+
+</dom-module>

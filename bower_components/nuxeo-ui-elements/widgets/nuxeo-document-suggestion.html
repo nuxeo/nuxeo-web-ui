@@ -1,0 +1,115 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="nuxeo-select2.html">
+
+<!--
+`nuxeo-document-suggestion`
+
+    <nuxeo-document-suggestion></nuxeo-document-suggestion>
+
+@group Nuxeo Widgets
+@element nuxeo-document-suggestion
+@demo demo/widgets/index.html
+@homepage http://www.nuxeo.org
+-->
+<dom-module id="nuxeo-document-suggestion">
+<template>
+  <nuxeo-select2 operation="Repository.PageProvider"
+                 min-chars="[[minChars]]"
+                 multiple="[[multiple]]"
+                 params="[[params]]"
+                 placeholder="[[placeholder]]"
+                 readonly="[[readonly]]"
+                 value="{{value}}"
+                 selected-items="{{selectedItems}}">
+  </nuxeo-select2>
+
+  <template is="dom-if" if="[[label]]"><span>[[label]]</span> : </template>
+
+</template>
+<script>
+Polymer({
+  is: 'nuxeo-document-suggestion',
+  properties: {
+
+    pageProvider: {
+      type: String,
+      value: 'default_document_suggestion'
+    },
+
+    schemas: {
+      type: Array,
+      value: ['*']
+    },
+
+    repository: {
+      type: String,
+      value: 'default'
+    },
+
+    label: String,
+
+    params: {
+      type: Object,
+      computed: 'computeParams(pageProvider, schemas, repository)'
+    },
+
+    value: {
+      type: String,
+      notify: true
+    },
+
+    multiple: {
+      type: Boolean,
+      value: false
+    },
+
+    readonly: {
+      type: Boolean,
+      value: false
+    },
+
+    minChars: {
+      type: Number,
+      value: 3
+    },
+
+    placeholder: String,
+
+    selectedItems: {
+      type: Object,
+      notify: true
+    }
+  },
+
+  computeParams: function() {
+    return this.params = {
+      documentSchemas: this.schemas,
+      repository: this.repository,
+      providerName: this.pageProvider,
+      pageProviderName: this.pageProvider,
+      page: 0,
+      pageSize: 20
+    };
+  }
+
+});
+</script>
+</dom-module>

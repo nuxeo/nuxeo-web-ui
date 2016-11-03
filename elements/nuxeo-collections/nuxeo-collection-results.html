@@ -1,0 +1,100 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-collection-results`
+@group Nuxeo UI
+@element nuxeo-collection-results
+-->
+<dom-module id="nuxeo-collection-results">
+  <template>
+
+    <style>
+      paper-header-panel {
+        height: 100vh;
+      }
+
+      a, a:active,
+      a:visited, a:focus {
+        @apply(--nuxeo-link); }
+
+      a:hover {
+        @apply(--nuxeo-link-hover); }
+    </style>
+
+    <paper-header-panel class="flex" >
+      <div class="paper-header layout horizontal">
+        <span class="flex">[[collection.title]]</span>
+      </div>
+      <nuxeo-results id="results" name$="[[_computeName(collection)]]" selected-items="{{selectedItems}}"
+        items="{{items}}"
+        empty-label="[[i18n('collections.noDocument', 'There are no documents in this collection. You can add documents from the document view or in bulk from a list view.')]]"
+        empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered', 'There are no documents in this collection with these criteria.')]]">
+          <div class="actions">
+            <nuxeo-slot class="actions" slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </div>
+      </nuxeo-results>
+    </paper-header-panel>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-collection-results',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(collection, selectedItems)'
+          },
+          collection: {
+            type: Object
+          }
+        },
+
+        set nxProvider(nxProvider) {
+          this.$.results.nxProvider = nxProvider;
+        },
+
+        get nxProvider() {
+          return this.$.results.nxProvider;
+        },
+
+        _computeName: function(collection) {
+          if (collection) {
+            return 'collection-' + collection.uid;
+          } else {
+            return 'collection';
+          }
+        },
+
+        _actionContext: function() {
+          return {collection: this.collection, selectedItems: this.selectedItems, items: this.$.results.items};
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

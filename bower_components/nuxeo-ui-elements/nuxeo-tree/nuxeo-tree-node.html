@@ -1,0 +1,246 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-collapse/iron-collapse.html">
+
+<!--
+`nuxeo-tree-node`
+@group Nuxeo UI Elements
+@element nuxeo-tree-node
+-->
+<dom-module id="nuxeo-tree-node">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        @apply(--nuxeo-tree-node-theme);
+      }
+
+      ::content iron-collapse {
+        padding-left: 1em;
+        @apply(--nuxeo-tree-children-theme);
+      }
+
+      ::content #content {
+        position: relative;
+        margin: .1em 0 .3em;
+        line-height: 1.6em;
+      }
+
+      ::content #content > iron-icon {
+        color: var(--nuxeo-tag-text);
+        width: 1.2rem;
+      }
+
+      ::content span iron-icon {
+        width: .95rem;
+        margin: 0 .1rem .3rem 0;
+      }
+
+    </style>
+
+    <content></content>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-tree-node',
+
+        behaviors: [Polymer.Templatizer],
+
+        properties: {
+
+          data: Object,
+
+          _children: {
+            type: Array
+          },
+
+          /**
+           * An object for accessing information for rendering a tree node.
+           *
+           * getChildren(node) : Promise<Array<Object>>
+           * isLeaf(node) : Boolean
+           */
+          controller: Object,
+
+          opened: {
+            type: Boolean,
+            value: false,
+            observer: '_openedChanged'
+          },
+
+          /**
+          * Template used to render each tree node.
+          */
+          template: Object,
+
+          nodeKey: {
+            type: String,
+            value: 'id'
+          }
+        },
+
+        observers: [
+          '_renderNodeContent(data)'
+        ],
+
+        toggle: function() {
+          if (this._updated) {
+            this.opened = !this.opened;
+          } else {
+            this._fetchChildren();
+            this.opened = true;
+          }
+        },
+
+        _selectNode: function(e) {
+          if (!e.detail.item) {
+            this.fire('select', {item: this.data});
+          } else {
+            this.fire('select', {item: e.detail.item});
+          }
+        },
+
+        open: function() {
+          this.opened = true;
+          if (!this._updated) {
+            return this._fetchChildren();
+          }
+          return Promise.resolve();
+        },
+
+        close: function() {
+          this.opened = false;
+        },
+
+        _renderNodeContent: function() {
+          if (this.template) {
+            if (this._instance) {
+              // re-render if data changes
+              this._teardownInstance();
+              this._fetchChildren();
+            }
+
+            // templatize must be called once before stamp is called
+            this.templatize(this.template);
+            // stamp and prepare bindings
+            this._instance = this.stamp({});
+            this._instance.item = this.data;
+            this._instance.opened = this.opened;
+            this._instance.isLeaf = this.controller.isLeaf(this.data);
+            this.dataset[this.nodeKey] = this.data[this.nodeKey];
+
+            var content = document.createElement('div');
+            content.id = 'content';
+            Polymer.dom(content).appendChild(this._instance.root);
+            Polymer.dom(this).appendChild(content);
+
+            var children = document.createElement('iron-collapse');
+            children.id = 'children';
+            children.opened = this.opened;
+            children.noAnimation = 'true';
+            Polymer.dom(this).appendChild(children);
+
+            Polymer.dom.flush();
+            // append node content
+            //this.$.content.appendChild(this._instance.root);
+            this._setupToggleListener();
+          }
+        },
+
+        _renderChildNodes: function() {
+          if (this.template) {
+            return new Promise(function(resolve) {
+              // clear <iron-collapse> content in case we are re-rendering
+              var children = Polymer.dom(this).querySelector('#children');
+              while (children.hasChildNodes()) {
+                children.removeChild(children.lastChild);
+              }
+
+              var items = this._children || [];
+              for (var i = 0; i < items.length; i++) {
+                var el = document.createElement('nuxeo-tree-node');
+                el.controller = this.controller;
+                el.template = this.template;
+                el.nodeKey = this.nodeKey;
+                el.dataHost = this._instance._rootDataHost;
+                el.data = items[i];
+                children.appendChild(el);
+              }
+              resolve();
+            }.bind(this));
+          }
+        },
+
+        _fetchChildren: function() {
+          return this.controller.getChildren(this.data).then(function(results) {
+            this._children = results;
+            this._updated = true;
+            return this._renderChildNodes();
+          }.bind(this));
+        },
+
+        _setupToggleListener: function() {
+          this._flushTemplates();
+          var selectElts = Polymer.dom(this).querySelector('#content').querySelectorAll('[select]');
+          for (var i = 0; i < selectElts.length; i++) {
+            this.listen(selectElts[i], 'tap', '_selectNode');
+          }
+          var toggleEls = Polymer.dom(this).querySelector('#content').querySelectorAll('[toggle]');
+          for (var i = 0; i < toggleEls.length; i++) {
+            this.listen(toggleEls[i], 'tap', 'toggle');
+          }
+        },
+
+        // Implements extension point from Templatizer mixin
+        // Called as side-effect of a host property change, responsible for
+        // notifying parent.<prop> path change on instance
+        _forwardParentProp: function(prop, value) {
+          if (this._instance) {
+            this._instance[prop] = value;
+          }
+        },
+
+        _teardownInstance: function() {
+          var children = this._instance._children;
+          if (children && children.length) {
+            var parent = Polymer.dom(Polymer.dom(children[0]).parentNode);
+            for (var i = 0; i < children.length; i++) {
+              parent.removeChild(children[i]);
+            }
+          }
+          this._instance = null;
+          this._updated = false;
+        },
+
+        _openedChanged: function() {
+          if (this._instance) {
+            Polymer.dom(this).querySelector('#children').opened = this.opened;
+            this._instance.notifyPath('opened', this.opened);
+            this._setupToggleListener();
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

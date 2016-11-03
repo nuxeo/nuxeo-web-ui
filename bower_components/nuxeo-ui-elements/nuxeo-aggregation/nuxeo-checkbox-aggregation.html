@@ -1,0 +1,64 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+<link rel="import" href="nuxeo-aggregation-behavior.html">
+
+<!--
+`nuxeo-checkbox-aggregation`
+@group Nuxeo UI
+@element nuxeo-checkbox-aggregation
+-->
+<dom-module id="nuxeo-checkbox-aggregation">
+ <template>
+   <style is="custom-style" include="shared-styles">
+     paper-checkbox {
+       font-size: .8em;
+       --paper-checkbox-label-spacing: 15px;
+       margin-bottom: 5px;
+     }
+   </style>
+
+  <div class="layout vertical">
+    <template is="dom-repeat" items="{{buckets}}">
+      <paper-checkbox checked="{{item.checked}}"
+                      on-change="_computeValues">
+        [[_computeLabel(item)]] ([[item.docCount]])
+      </paper-checkbox>
+    </template>
+    <template is="dom-if" if="[[_isEmpty(data)]]">
+      <label class="empty">[[i18n('label.aggregate.no_results', 'No available result')]]</label>
+    </template>
+  </div>
+
+ </template>
+ <script>
+   (function() {
+     'use strict';
+
+     Polymer({
+       is: 'nuxeo-checkbox-aggregation',
+
+       behaviors: [Nuxeo.I18nBehavior, Nuxeo.AggregationBehavior],
+
+     });
+   })();
+ </script>
+</dom-module>

@@ -1,0 +1,300 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-chart-data-behavior.html">
+<link rel="import" href="nuxeo-mime-types.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-repository-analytics`
+@group Nuxeo UI
+@element nuxeo-repository-analytics
+-->
+<dom-module id="nuxeo-repository-analytics">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-card.dates {
+        width: 100%;
+        margin-bottom: 1.5em;
+      }
+
+      .dates input {
+        background-color: #fff;
+        border: 1px solid #c6c6c6;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
+        border-radius: 3px;
+        margin-left: .5em;
+        width: 132px;
+      }
+
+      .flex-layout {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -1em;
+      }
+
+      .flex-layout paper-card {
+        flex: 1 0 calc(33% - 2em);
+        margin: 0 1em 1.5em;
+        text-align: center;
+      }
+
+      .message {
+        color: #c6c6c6;
+      }
+
+      nuxeo-data-table {
+        height: 550px;
+      }
+
+      iron-icon {
+        color: #0f9d58;
+        --iron-icon-width: 144px;
+        --iron-icon-height: 144px;
+        margin-top: 50px;
+      }
+
+      chart-line,
+      ::content #canvas.chart-line,
+      chart-pie,
+      ::content #canvas.chart-pie {
+        margin: 25px auto 0 auto;
+        width: 100% !important;
+        min-width: 30em;
+        height: 100% !important;
+        display: block;
+        font-size: .8em;
+      }
+
+      @media (max-width: 1024px) {
+        .flex-layout paper-card {
+          flex: 1 0 calc(100% - 2em);
+        }
+      }
+
+    </style>
+
+    <paper-card elevation="0" class="dates">
+      <div class="card-content horizontal flex end-justified layout">
+        <input type="date" value="{{startDate::change}}">
+        <input type="date" value="{{endDate::change}}">
+      </div>
+    </paper-card>
+
+    <div class="flex-layout">
+
+      <!-- Top Downloads -->
+      <nuxeo-audit-data event-id="download"
+                        where='{"extended.downloadReason": "download"}'
+                        grouped-by="docUUID"
+                        group-limit="10"
+                        start-date="[[startDate]]" end-date="[[endDate]]"
+                        data="{{downloads}}">
+      </nuxeo-audit-data>
+
+      <nuxeo-page-provider auto page-size="10"
+        query="[[_downloadsQuery(downloads)]]"
+        schemas="dublincore, common"
+        current-page="{{downloadedDocs}}">
+      </nuxeo-page-provider>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading','Top Downloads')]]" elevation="0">
+        <div class="card-content downloads">
+          <template is="dom-if" if="[[!_isEmpty(downloads)]]">
+            <nuxeo-data-table items="[[downloadedDocs]]">
+              <nuxeo-data-table-column name="File">
+                <template>[[item.title]]</template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="Downloads">
+                <template>[[_numberOfDownloads(item)]]</template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </template>
+          <template is="dom-if" if="[[_isEmpty(downloads)]]"><div class="message">[[i18n('repositoryAnalytics.noResults','No results')]]</div></template>
+        </div>
+      </paper-card>
+
+      <!-- Number of documents -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             metrics="cardinality(ecm:uuid)" data="{{totalCount}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.documents.heading','Documents')]]" elevation="0">
+        <div class="card-content">
+          <iron-icon icon="icons:description"></iron-icon>
+          <h1>[[totalCount]]</h1>
+        </div>
+      </paper-card>
+
+      <!-- Document count per type -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="ecm:primaryType"
+                             group-limit="10"
+                             data="{{typeCount}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading','Document Types')]]" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(typeCount)]]"
+                     labels="[[_labels(typeCount)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Top 10 creators -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="dc:creator"
+                             group-limit="10"
+                             data="{{topCreators}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', 'Top {0} creators', '10')]]" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(topCreators)]]"
+                     labels="[[_labels(topCreators)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+          </chart-pie>
+        </div>
+      </paper-card>
+
+      <!-- Documents created per week -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             with-date-intervals="week"
+                             date-field="dc:created"
+                             data="{{docsCreatedPerWeek}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading','Document Created Per Week')]]" elevation="0">
+        <div class="card-content">
+          <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
+                      values="[[_values(docsCreatedPerWeek)]]"
+                      options='{ "legend": { "display": false }, "animation": false }'>
+          </chart-line>
+        </div>
+      </paper-card>
+
+      <!-- Documents modified per week -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             with-date-intervals="week"
+                             date-field="dc:modified"
+                             data="{{docsModifiedPerWeek}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading','Documents Modified Per Week')]]" elevation="0">
+        <div class="card-content">
+          <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
+                      values="[[_values(docsModifiedPerWeek)]]"
+                      options='{ "legend": { "display": false }, "animation": false }'>
+          </chart-line>
+        </div>
+      </paper-card>
+
+      <!-- Files by mime-type -->
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+                             grouped-by="file:content.mime-type"
+                             data="{{filesByMimeType}}"
+                             index="[[index]]">
+      </nuxeo-repository-data>
+
+      <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading', 'Files by Mime Type')]]" elevation="0">
+        <div class="card-content">
+          <chart-pie values="[[_values(filesByMimeType)]]"
+                     labels="[[_types(filesByMimeType)]]"
+                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+          </chart-pie>
+          <div></div>
+        </div>
+      </paper-card>
+
+      <!-- End of paper-cards -->
+    </div>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-repository-analytics',
+        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
+        properties: {
+          index: {
+            type: String,
+            value: '_all'
+          },
+          startDate: String,
+          endDate: String
+        },
+
+        ready: function() {
+          this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+          this.endDate = moment().format('YYYY-MM-DD');
+        },
+
+        _types: function(data) {
+          return data.map(function(obj) {
+            var mimeType = Nuxeo.mimeTypes[obj.key];
+            if (mimeType) {
+              if (mimeType.name) {
+                return mimeType.name;
+              } else if (mimeType.extensions && mimeType.extensions.length > 0) {
+                return mimeType.extensions[0].toUpperCase();
+              } else {
+                return obj.key;
+              }
+            } else {
+              return obj.key;
+            }
+          });
+        },
+
+        // builds page provider query to get info about downloaded docs
+        _downloadsQuery: function(entries) {
+          if (entries.length > 0) {
+            var values = entries.map(function(entry) {
+              return '\'' + entry.key + '\'';
+            }).join(',');
+            return 'SELECT * FROM Document WHERE ecm:uuid IN (' + values + ')';
+          }
+        },
+
+        _numberOfDownloads: function(doc) {
+          return this.downloads.find(function(entry) {
+            return entry.key === doc.uid;
+          }).value;
+        },
+
+        _isEmpty: function(array) {
+          return !array || array.length === 0;
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

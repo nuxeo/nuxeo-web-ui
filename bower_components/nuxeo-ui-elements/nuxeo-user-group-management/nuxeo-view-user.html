@@ -1,0 +1,81 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<!--
+An element for displaying user data, which is dynamically loaded by `nuxeo-user-group-management`.
+This element can be overridden with custom fields.
+
+Example:
+
+    <nuxeo-edit-user user=[[user]] new></nuxeo-edit-user>
+
+Used by `nuxeo-user-management`
+@group Nuxeo Elements
+@element nuxeo-view-user
+-->
+<dom-module id="nuxeo-view-user">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        @apply(--nuxeo-view-user-layout);
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .card {
+        background: none #fff;
+        border: 1px solid #e6e9ef;
+        margin: 2em 0;
+        padding: 2em 1.5em;
+      }
+    </style>
+
+    <div class="card layout horizontal">
+      <div class="layout vertical flex center">
+        <label>[[i18n('email', 'Email')]]</label>
+        <span>[[user.properties.email]]</span>
+      </div>
+      <div class="layout vertical flex center">
+        <label>[[i18n('company', 'Company')]]</label>
+        <span>[[user.properties.company]]</span>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'nuxeo-view-user',
+    
+    behaviors: [Nuxeo.I18nBehavior],
+
+    properties: {
+      /**
+       * The user object to be displayed.
+       */
+      user: {
+        type: Object,
+        value: {}
+      }
+    }
+  });
+</script>

@@ -1,0 +1,20 @@
+<!doctype html><html lang=""><head><meta charset="utf-8"><meta name="description" content=""><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="generator" content="Polymer Starter Kit"><title>Nuxeo</title><meta name="theme-color" content="#2E3AA1"><link rel="manifest" href="manifest.json"><meta name="msapplication-TileColor" content="#3372DF"><meta name="mobile-web-app-capable" content="yes"><meta name="application-name" content="PSK"><link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Polymer Starter Kit"><link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png"><meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png"><link rel="stylesheet" href="vendor/select2.css"><script src="webcomponentsjs/webcomponents-lite.min.js"></script><script>
+    window.Polymer = {
+      lazyRegister: true
+    };
+
+    // switch to shadow dom
+    function getQueryParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.href);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+    if (getQueryParam('dom') == 'shadow') {
+      window.Polymer.dom = 'shadow';
+    }
+
+    // apply theme
+    var link = document.createElement('link');
+    link.setAttribute('rel', 'import');
+    link.setAttribute('href', 'styles/' + (localStorage.getItem('theme') || 'default') + '-theme.html');
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script><script src="vendor/jquery.js"></script><script src="vendor/select2.js"></script><script src="vendor/moment-with-locales.js"></script><script src="vendor/alloy-editor.js"></script><link rel="import" href="elements/elements.vulcanized.html"></head><body unresolved=""><span id="browser-sync-binding"></span><nuxeo-connection url="http://webui.demo.nuxeo.com/nuxeo/"></nuxeo-connection><nuxeo-app base-url="/nuxeo-web-ui/"></nuxeo-app></body></html>

@@ -1,0 +1,120 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Guillaume Renard <grenard@nuxeo.com>
+-->
+<script>
+  var Nuxeo = Nuxeo || {};
+  (function () {
+
+    /**
+     * @polymerBehavior Nuxeo.I18nBehavior
+     */
+    Nuxeo.AggregationBehavior = {
+      properties: {
+
+        data: {
+          type: Object
+        },
+
+        value: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+
+        buckets: {
+          type: Object,
+          computed: '_computeBuckets(data)'
+        }
+
+      },
+
+      _computeBuckets: function(data) {
+        if (data) {
+          var buckets = data.extendedBuckets;
+          var selectedBuckets = data.selection;
+          buckets.forEach(function(item) {
+            item.checked = selectedBuckets.indexOf(item.key) >= 0;
+          });
+          return buckets;
+        }
+      },
+
+      _computeValues: function() {
+        var values = [];
+        this.buckets.forEach(function(item) {
+          if (item.checked) {
+            values.push(item.key);
+          }
+        });
+        this.value = values;
+      },
+
+      _isEmpty: function(data) {
+        return data && data.extendedBuckets.length === 0;
+      },
+
+      _computeLabel: function(item) {
+        if (item.fetchedKey) {
+          var entry = item.fetchedKey;
+          if (entry['entity-type'] === 'directoryEntry') {
+            return this.labelForDirectoryEntry(entry);
+          } else if (entry['entity-type'] === 'user') {
+            return this.labelForUserEntry(entry);
+          } else {
+            return this.i18n('label.ui.aggregate.' + item.key, item.key);
+          }
+        } else {
+          return this.i18n('label.ui.aggregate.' + item.key, item.key);
+        }
+     },
+
+     labelForDirectoryEntry: function(entry) {
+         var lang = window.nuxeo.I18n.language || 'en';
+         if (lang.indexOf('-') > -1) {
+           lang = lang.split('-')[0];
+         }
+         var labels = [];
+         while (entry) {
+           if (entry.properties['label_' + lang]) {
+             labels.push(entry.properties['label_' + lang]);
+           } else if (entry.properties['label']) {
+             labels.push(entry.properties['label']);
+           } else if (entry.properties['label_en']) {
+             labels.push(entry.properties['label_en']);
+           } else {
+             labels.push(entry.properties['id']);
+           }
+           entry = entry.properties.parent;
+         }
+         return labels.reverse().join('/');
+     },
+
+     labelForUserEntry: function(entry) {
+         if (entry.properties === undefined) {
+           return entry.id;
+         } else if (entry.properties['firstName'] && entry.properties['firstName'].length > 0
+           && entry.properties['lastName'] && entry.properties['lastName'].length > 0) {
+           return entry.properties['firstName'] + " " + entry.properties['lastName'];
+         } else {
+           return entry.properties['username'];
+         }
+     }
+
+    };
+  })();
+</script>

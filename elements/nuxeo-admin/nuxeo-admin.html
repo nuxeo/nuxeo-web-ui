@@ -1,0 +1,78 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+  Guillaume Renard <grenard@nuxeo.com>
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-admin`
+@group Nuxeo UI
+@element nuxeo-admin
+-->
+<dom-module id="nuxeo-admin">
+  <template>
+    <template is="dom-if" if="[[visible]]">
+      <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+
+        <nuxeo-page name="error">
+          <div class="header"></div>
+          <div class="content">
+            <paper-card>
+              <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
+            </paper-card>
+          </div>
+        </nuxeo-page>
+
+        <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
+
+        <nuxeo-user-group-management-page name="user-group-management"></nuxeo-user-group-management-page>
+
+        <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
+
+      </iron-pages>
+    </template>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-admin',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          selectedTab: {
+            type: String,
+            value: 'analytics'
+          },
+          visible: {
+            type: Boolean
+          }
+        },
+
+        _errorUrl: function() {
+          return window.location.href;
+        }
+      });
+    })();
+  </script>
+</dom-module>

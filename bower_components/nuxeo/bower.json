@@ -1,0 +1,12 @@
+{
+  "name": "nuxeo",
+  "main": ["dist/nuxeo.js"],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src",
+    "lib",
+    "test"
+  ]
+}

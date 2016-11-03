@@ -1,0 +1,205 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../iron-icons/image-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="stylesheet" href="../../cropperjs/dist/cropper.css" >
+<script src="../../cropperjs/dist/cropper.js"></script>
+
+<!--
+An element for viewing images.
+
+Example:
+
+    <nuxeo-image-viewer src="[[document.properties.file:content.data]]"
+                        controls
+                        responsive>
+    </nuxeo-image-viewer>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--nuxeo-image-viewer-height` | The height of the canvas | `100%`
+
+@group Nuxeo UI Elements
+@element nuxeo-image-viewer
+@demo demo/viewers/nuxeo-image-viewer/index.html
+-->
+<dom-module id="nuxeo-image-viewer">
+  <link rel="import" type="css" href="../../cropperjs/dist/cropper.css">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #canvas {
+        width: 100%;
+        height: var(--nuxeo-image-viewer-height, 100%);
+        position: relative;
+      }
+
+      #toolbar {
+        background-color: rgba(0,0,0,0.5);
+        bottom: 10px;
+        color: #fff;
+        height: 32px;
+        left: 50%;
+        margin-left: -90px;
+        position: absolute;
+        width: 140px;
+        z-index: 25;
+      }
+
+      paper-icon-button {
+        height: 32px;
+        width: 32px;
+      }
+
+      paper-icon-button[active] {
+        color: #3f51b5;
+      }
+
+      #image {
+        display: none;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      ::content .cropper-container {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+    </style>
+
+    <div id="canvas">
+      <img id="image" src="[[src]]" on-load="_init">
+      <template is="dom-if" if="[[controls]]">
+        <div id="toolbar">
+          <paper-icon-button on-click="_click" icon="zoom-out" data-action="zoom-out"></paper-icon-button>
+          <paper-icon-button on-click="_click" icon="zoom-in" data-action="zoom-in"></paper-icon-button>
+          <paper-icon-button on-click="_click" icon="image:rotate-left" data-action="rotate-left"></paper-icon-button>
+          <paper-icon-button on-click="_click" icon="image:rotate-right" data-action="rotate-right"></paper-icon-button>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-image-viewer',
+
+        properties: {
+
+          /**
+           * The URL of an image.
+           */
+          src: {
+            type: String
+          },
+
+          /**
+           * If true, controls for the user to interact with are displayed.
+           */
+          controls: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * If true, allows to zoom the image by wheeling mouse.
+           */
+          zoomOnWheel: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * If true, the element exhibits responsive resize behavior.
+           */
+          responsive: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        behaviors: [Polymer.IronResizableBehavior],
+
+        listeners: {
+          'iron-resize': '_resize'
+        },
+
+        _init: function() {
+          if (this._el) {
+            this._el.destroy();
+          }
+
+          if (this.src) {
+            var image = this.$.image;
+            var options = {
+              autoCrop: false,
+              background: false,
+              checkCrossOrigin: false,
+              dragMode: 'move',
+              responsive: false,
+              restore: false,
+              toggleDragModeOnDblclick: false,
+              zoomOnWheel: this.zoomOnWheel
+            };
+            this._el = new Cropper(image, options);
+          }
+        },
+
+        _click: function(event) {
+          var target = event.target;
+          var action = target.dataset.action || target.parentNode.dataset.action;
+          switch (action) {
+            case 'zoom-in':
+              this._el.zoom(0.1);
+              break;
+            case 'zoom-out':
+              this._el.zoom(-0.1);
+              break;
+            case 'rotate-left':
+              this._el.rotate(-90);
+              break;
+            case 'rotate-right':
+              this._el.rotate(90);
+              break;
+          }
+        },
+
+        _resize: function() {
+          if (this._el) {
+            this._el.resize();
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

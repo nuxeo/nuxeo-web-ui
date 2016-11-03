@@ -1,0 +1,235 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<!--
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+-->
+<link rel="import" href="../nuxeo-page-provider-display-behavior.html">
+
+<!--
+`nuxeo-data-grid'
+@group Nuxeo UI
+@element nuxeo-data-grid
+-->
+<dom-module id="nuxeo-data-grid">
+  <template>
+
+    <style is="custom-style">
+      .bubbleBoxes.hover {
+        border: 2px dashed #aaa;
+        @apply(--nuxeo-drop-zone-hover);
+      }
+
+      #container {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+      }
+
+      .grid-ctn {
+        @apply(--layout-flex);
+        flex-flow: row wrap;
+        align-items: flex-start;
+      }
+
+      #scrollThreshold {
+        padding: 0 0 3em;
+      }
+
+      ::content .grid-box {
+        width: 20%;
+        min-width: 13.5em;
+      }
+
+      :host[loading] .loadable {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
+      /* mobile */
+      @media all and (min-width: 0) and (max-width: 600px) {
+        #scrollThreshold {
+          padding: 2em 1em 0;
+        }
+
+        .grid-ctn {
+          flex-flow: column nowrap;
+        }
+
+        ::content .grid-box {
+          width: 100%;
+        }
+      }
+      /* tablet-small-landscape */
+      @media all and (min-width: 601px) and (max-width: 840px) {
+        ::content .grid-box {
+          width: 50%;
+        }
+      }
+
+      /* small desktop */
+      @media all and (min-width: 841px) and (max-width: 1024px) {
+        ::content .grid-box {
+          width: 50%;
+        }
+      }
+
+      @media all and (min-width: 1025px) and (max-width: 1280px) {
+        ::content .grid-box {
+          width: 33%;
+        }
+      }
+
+      @media all and (min-width: 1281px) and (max-width: 1600px) {
+        ::content .grid-box {
+          width: 25%;
+        }
+      }
+
+      @media all and (min-width: 1601px) {
+        ::content .grid-box {
+          width: 20%;
+        }
+      }
+
+      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select {
+        border:1px solid #00adff;
+        background-color: #00adff;
+        cursor: pointer;
+        display: block;
+      }
+
+      .emptyResult {
+        color: #c6c6c6;
+        display: block;
+        font-style: italic;
+        font-weight: normal;
+        padding: 1em 0.7em 2em;
+        text-align: center;
+        font-size: 1.5em;
+      }
+
+      .filters {
+        margin: 1em 0 0 2.3em;
+      }
+
+      .filter {
+        display: inline-block;
+        background-color: var(--nuxeo-tag-background);
+        color: var(--nuxeo-tag-text);
+        padding: .2rem .4rem;
+        margin: 0 .3em .1em 0;
+        font-size: .8em;
+        border-radius: 2.5em;
+        line-height: initial;
+      }
+
+      .filter .remove:hover {
+        cursor: pointer;
+      }
+
+    </style>
+
+    <div id="container">
+
+      <content select="nuxeo-selection-toolbar"></content>
+
+      <template is="dom-if" if="[[displayQuickFilters]]">
+        <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_quickFilterChanged">
+        </nuxeo-quick-filters>
+      </template>
+
+      <div id="filters" class="filters">
+        <template is="dom-repeat" items="[[filters]]" as="filter">
+          <span class="tag filter">
+            [[filter.name]]: [[filter.value]]
+            <iron-icon icon="icons:clear" class="remove" on-tap="_removeFilter"></iron-icon>
+          </span>
+        </template>
+      </div>
+
+      <iron-scroll-threshold id="scrollThreshold"
+        lower-threshold="1000" class="loadable"
+        on-lower-threshold="_loadMoreData">
+        <div class="grid-ctn bubbleBoxes">
+          <iron-list id="list" scroll-target="scrollThreshold" grid selected-item="{{selectedItem}}"
+            selected-items="{{selectedItems}}" selection-enabled>
+          </iron-list>
+        </div>
+      </iron-scroll-threshold>
+      <template is="dom-if" if="[[_isEmpty]]">
+        <div class="emptyResult">[[_computedEmptyLabel]]</div>
+      </template>
+    </div>
+    <paper-spinner-lite active hidden$=[[!loading]]></paper-spinner-lite>
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-data-grid',
+
+        behaviors: [
+          Polymer.IronResizableBehavior,
+          Nuxeo.PageProviderDisplayBehavior
+        ],
+
+        properties: {
+          multiSelection: {
+            type: Boolean,
+            value: true,
+          }
+        },
+
+        ready: function() {
+          if (!this._templateStamped) {
+            // use nuxeo-data-grid parent's datahost in the iron-list
+            // functions used in the template should be declared
+            // in the nuxeo-data-grid parent element and not here
+            this.$.list.dataHost = this.dataHost;
+            // get template from nuxeo-data-grid definition
+            this._template = Polymer.dom(this).querySelector('template');
+            // append template in the <iron-list>
+            Polymer.dom(this.$.list).appendChild(this._template);
+            // set binding to items
+            // iron-list will look for our template and stamp the items
+            this.$.list.items = [];
+            this._templateStamped = true;
+          }
+        },
+
+        _removeFilter: function(e) {
+          this.fire('column-filter-changed', {value: '', filterBy: e.model.filter.path});
+        }
+
+        });
+    })();
+  </script>
+
+</dom-module>

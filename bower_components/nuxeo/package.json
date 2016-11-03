@@ -1,0 +1,90 @@
+{
+  "name": "nuxeo",
+  "description": "JavaScript client library for Nuxeo API",
+  "version": "2.1.1",
+  "main": "./lib/index.js",
+  "author": "Nuxeo (http://www.nuxeo.com/)",
+  "contributors": [
+    {
+      "name": "Thomas Roger",
+      "email": "troger@nuxeo.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/nuxeo/nuxeo-js-client",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nuxeo/nuxeo-js-client.git"
+  },
+  "engines": {
+    "node": ">= 4.3.0"
+  },
+  "keywords": [
+    "nuxeo"
+  ],
+  "dependencies": {
+    "buffer": "^3.6.0",
+    "es6-promise": "^3.0.2",
+    "extend": "^3.0.0",
+    "form-data": "^1.0.0-rc1",
+    "md5": "^2.2.1",
+    "node-fetch": "^1.4.1",
+    "promise-queue": "^2.2.2",
+    "querystring": "^0.2.0",
+    "random-js": "^1.0.8",
+    "whatwg-fetch": "^0.11.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.4.0",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.4.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
+    "browserify-versionify": "^1.0.6",
+    "chai": "^3.0.0",
+    "chai-as-promised": "^5.2.0",
+    "del": "^2.2.0",
+    "dirty-chai": "^1.2.2",
+    "eslint-config-airbnb": "^3.1.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.1",
+    "gulp-eslint": "^1.1.1",
+    "gulp-karma": "0.0.5",
+    "gulp-nsp": "^2.3.0",
+    "gulp-replace": "^0.5.4",
+    "gulp-sequence": "^0.4.4",
+    "gulp-spawn-mocha": "^2.2.2",
+    "karma": "^0.13.19",
+    "karma-babel-preprocessor": "^6.0.1",
+    "karma-browserify": "^5.0.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-junit-reporter": "^0.3.8",
+    "karma-mocha": "^0.2.1",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-spec-reporter": "0.0.24",
+    "mocha-jenkins-reporter": "^0.2.1",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.7.0"
+  },
+  "scripts": {
+    "doc": "jsdoc -c jsdoc.json",
+    "release": "./bin/release.sh"
+  },
+  "browser": {
+    "./src/deps/promise.js": "./src/deps/promise-browser.js",
+    "./src/deps/form-data.js": "./src/deps/form-data-browser.js",
+    "./src/deps/fetch.js": "./src/deps/fetch-browser.js",
+    "./src/deps/utils/buffer.js": "./src/deps/utils/buffer-browser.js"
+  },
+  "react-native": {
+    "./lib/deps/fetch.js": "./lib/deps/fetch-react-native.js",
+    "./lib/deps/utils/buffer.js": "./lib/deps/utils/buffer-browser.js"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ]
+}

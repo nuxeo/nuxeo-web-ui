@@ -1,0 +1,161 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.nuxeo.ecm.distribution</groupId>
+    <artifactId>nuxeo-distribution</artifactId>
+    <version>8.4-SNAPSHOT</version>
+    <relativePath></relativePath>
+  </parent>
+
+  <artifactId>nuxeo-js-client-ftest</artifactId>
+  <name>Functional Tests for Nuxeo JS Client</name>
+  <version>8.2-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.nuxeo.ecm.distribution</groupId>
+      <artifactId>nuxeo-distribution-tomcat</artifactId>
+      <classifier>nuxeo-cap</classifier>
+      <type>zip</type>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.nuxeo.build</groupId>
+        <artifactId>ant-assembly-maven-plugin</artifactId>
+        <configuration>
+          <buildFile>${basedir}/itests.xml</buildFile>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-tomcat</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <targets>
+                <target>prepare-environment</target>
+                <target>start</target>
+              </targets>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-tomcat</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <targets>
+                <target>stop</target>
+                <target>cleanup-environment</target>
+              </targets>
+              <createSummary>true</createSummary>
+              <reportsDirectory>${project.build.directory}/js-reports</reportsDirectory>
+              <summaryFile>${project.build.directory}/js-reports/js-summary.xml</summaryFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>0.0.28</version>
+        <configuration>
+          <workingDirectory>..</workingDirectory>
+          <installDirectory>target</installDirectory>
+          <nodeVersion>v6.3.1</nodeVersion>
+          <npmVersion>3.10.3</npmVersion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>gulp build</id>
+            <goals>
+              <goal>gulp</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <arguments>it</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>public</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>public-snapshot</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>public</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <name>Nuxeo virtual release repository</name>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>public-snapshot</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
+      <name>Nuxeo virtual snapshot repository</name>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+</project>

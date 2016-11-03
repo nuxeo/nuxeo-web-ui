@@ -1,0 +1,92 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Thomas Roger <troger@nuxeo.com>
+-->
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!--
+`nuxeo-popup-confirm`
+@group Nuxeo UI
+@element nuxeo-popup-confirm
+-->
+<dom-module id="nuxeo-popup-confirm">
+  <template>
+
+    <style>
+      input {
+        width: 100%;
+        line-height: 1.4em;
+        padding: 0.5em;
+      }
+    </style>
+
+    <paper-dialog id="dialog">
+      <paper-dialog-scrollable>
+        <content></content>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismissive on-tap="_onCancel">{{cancelLabel}}</paper-button>
+        <paper-button dialog-affirmative class="colorful" on-tap="_onConfirm">{{deleteLabel}}</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+</dom-module>
+
+
+<script>
+  Polymer({
+    is: 'nuxeo-popup-confirm',
+
+    properties: {
+      onCancel: Function,
+      onConfirm: Function,
+      deleteLabel: {
+        type: String,
+        value: 'Delete'
+      },
+      cancelLabel: {
+        type: String,
+        value: 'Cancel'
+      }
+    },
+
+    toggle: function(func) {
+      if(typeof func === 'function') {
+        this.onConfirm = func;
+      }
+
+      this.$.dialog.toggle();
+    },
+
+    _onCancel: function() {
+      if(this.onCancel) {
+        this.onCancel();
+      }
+
+      this.toggle();
+    },
+
+    _onConfirm: function() {
+      if(this.onConfirm) {
+        this.onConfirm();
+      }
+
+      this.toggle();
+    }
+  });
+</script>

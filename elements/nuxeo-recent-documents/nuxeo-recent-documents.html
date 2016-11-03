@@ -1,0 +1,181 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+`nuxeo-recent-documents`
+@group Nuxeo UI
+@element nuxeo-recent-documents
+-->
+<dom-module id="nuxeo-recent-documents">
+  <template>
+    <style>
+    a, a:active,
+    a:visited, a:focus {
+      @apply(--nuxeo-link);
+    }
+
+    a:hover {
+      @apply(--nuxeo-link-hover);
+    }
+
+    .list {
+      @apply(--layout-vertical);
+    }
+
+    nuxeo-data-list {
+      display: block;
+      position: relative;
+      min-height: calc(100vh - 61px)
+    }
+
+    .ellipsis {
+      display: inline-block;
+      width: 80%;
+      vertical-align: middle;
+      text-overflow: ellipsis;
+    }
+
+    .queue-thumbnail,
+    .queue-thumbnail ::content img {
+      height: 1.5em;
+      width: 1.5em;
+      border-radius: 20px;
+      box-sizing: border-box;
+      margin-right: 8px;
+    }
+
+    .list-item {
+      cursor: pointer;
+      padding: 1em;
+      border-bottom: 1px solid var(--nuxeo-border);
+    }
+
+    .list-item:hover {
+      @apply(--nuxeo-block-hover);
+    }
+
+    .list-item.selected,
+    .list-item:focus,
+    .list-item.selected:focus {
+      @apply(--nuxeo-block-selected);
+    }
+
+    .list-item-detail {
+      margin-left: 40px;
+    }
+
+    .list-item-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
+    }
+
+    </style>
+
+    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+
+    <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
+
+    <div class="list">
+
+      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document"
+        selected-item="{{selectedRecent}}" items="{{favorites}}"
+        selection-enabled
+        empty-label="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]"
+        empty-label-when-filtered="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="list-item-box vertical layout">
+              <div class="list-item-info horizontal layout center" >
+                <div class="vertical layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                </div>
+                <span class="list-item-title ellipsis">[[document.title]]</span>
+              </div>
+              <div class="list-item-detail">
+                <div class="layout center">
+                  <span class="list-item-property ellipsis">
+                    [[document.type]]
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </nuxeo-data-list>
+
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-recent-documents',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        documents: {
+          type: Array,
+          notify: true
+        },
+        maxSize: {
+          type: Number,
+          value: 10
+        },
+        selectedRecent: {
+          type: Object,
+          observer: '_selectedRecentChanged',
+          notify: true
+        }
+      },
+
+      add: function(doc) {
+        this.$.storage.add(doc);
+        if (this.documents.length > this.maxSize) {
+          this.splice('documents', 0, this.documents.length - this.maxSize);
+        }
+      },
+
+      _thumbnail: function(doc) {
+        var baseUrl = this.$.nxcon.url;
+        return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedRecentChanged: function(doc) {
+        if (doc) {
+          if (doc.isVersion) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
+        }
+      }
+
+    });
+  </script>
+</dom-module>

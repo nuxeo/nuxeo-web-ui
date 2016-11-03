@@ -1,0 +1,166 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+
+<!--
+`nuxeo-document-metadata`
+@group Nuxeo UI
+@element nuxeo-document-metadata
+-->
+
+<dom-module id="nuxeo-document-metadata">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      ::content label {
+        @apply(--nuxeo-label);
+      }
+
+      ::content .multiline {
+        white-space: pre-line;
+      }
+
+      #edit {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
+    </style>
+
+    <nuxeo-error id="error"></nuxeo-error>
+
+    <div id="metadata">
+      <iron-pages selected="[[mode]]" attr-for-selected="mode">
+        <section mode="view">
+          <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <div id="metadata-view">
+            <!-- Dynamic layout element will be inserted here -->
+            <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
+          </div>
+        </section>
+
+        <section mode="edit">
+          <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
+        </section>
+      </iron-pages>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-metadata',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        properties: {
+          document: {
+            type: Object,
+            observer: '_documentChanged'
+          },
+          mode: {
+            type: String,
+            value: 'view'
+          }
+        },
+
+        edit: function() {
+          this.mode = 'edit';
+        },
+
+        view: function() {
+          this.mode = 'view';
+        },
+
+        _documentChanged: function() {
+          if (this.document) {
+            this.mode = 'view';
+            this._updateLayout();
+          }
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function(document) {
+          // lower case first letter to avoid extra dash in camelToDashCase
+          var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
+          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'metadata-layout'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(this.document),
+            el = document.createElement(layout),
+            parent = this.$['metadata-view'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          // setup data binding
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the edit layout for the current document
+         */
+        _updateLayout: function() {
+          this.$['metadata'].hidden = false;
+          this.$.error.hide();
+          var layout = this._layoutFor(this.document);
+          if (!this._isRegistered(layout)) {
+            var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
+            var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+            var url = this.resolveUrl(folder + layout + '.html');
+            this.importHref(url, this._createLayout.bind(this),
+              // error handling
+              function() {
+                this.$['metadata'].hidden = true;
+                this.$.error.show('404', url, this.i18n('documentMetadata.layoutNotFound',
+                  'Failed to find metadata layout for {0}', this.document.type));
+              });
+          } else {
+            this._createLayout();
+          }
+        },
+
+        _isMutable: function(document) {
+          return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+        },
+
+        _canEdit: function(document) {
+          return document && document.type !== 'Root' &&
+            this.hasPermission(document, 'Write') && this._isMutable(document);
+        }
+      });
+    })();
+  </script>
+</dom-module>

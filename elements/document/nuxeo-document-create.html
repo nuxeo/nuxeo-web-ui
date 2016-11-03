@@ -1,0 +1,334 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
+
+<!--
+`nuxeo-document-create`
+@group Nuxeo UI
+@element nuxeo-document-create
+-->
+<dom-module id="nuxeo-document-create">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+
+      nuxeo-path-suggestion {
+        --nuxeo-path-suggestion-results: {
+           z-index: 200;
+         };
+         --paper-input-container-underline: {
+           display: none;
+         };
+         --paper-input-container-underline-focus: {
+           display: none;
+         };
+      }
+
+      .container {
+        overflow: auto;
+      }
+
+      .typeSelection {
+        margin: var(--nuxeo-document-creation-form-margin, 1em);
+        overflow-y: auto;
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        min-height: 20em;
+        justify-content: space-around;
+      }
+
+      .typeSelection paper-button {
+        width: var(--nuxeo-document-creation-form-button-width, 128px);
+        height: var(--nuxeo-document-creation-form-button-height, 128px);
+        color: var(--nuxeo-text-default);
+        box-shadow: none;
+        border: 1px solid var(--divider-color);
+      }
+
+      .typeSelection paper-button:hover {
+        color: var(--nuxeo-link-hover-color);
+        filter: brightness(102%);
+        -webkit-filter: brightness(102%);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
+      }
+
+      .typeSelection iron-icon {
+        width: var(--nuxeo-document-creation-form-icon-width, 64px);
+        height: var(--nuxeo-document-creation-form-icon-height, 64px);
+      }
+
+      #editor {
+        margin: 0 32px;
+        overflow-y: auto;
+      }
+
+      .heading {
+        text-transform: uppercase;
+        font-size: 16px;
+        color: var(--nuxeo-text-default);
+        padding: 32px;
+      }
+
+      .heading iron-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 8px;
+      }
+
+      .docTypeButton {
+        margin: 4px;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
+
+      ::content label {
+        @apply(--nuxeo-label);
+        padding-top: 8px;
+      }
+
+      ::content paper-dropdown-menu {
+        width: 100%;
+      }
+    </style>
+
+    <nuxeo-document id="docRequest"
+                    doc-path="[[targetPath]]"
+                    data="[[document]]"
+                    headers='{"nx_es_sync": "true"}'
+                    response="{{createResponse}}"></nuxeo-document>
+
+    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
+
+      <!--Stage: allow user to choose a doc type-->
+      <div name="choose" class="vertical layout flex">
+        <div class="flex container">
+          <div class="typeSelection">
+            <template is="dom-repeat" items="[[subtypes]]" as="type">
+              <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
+                <iron-icon icon="[[_getTypeIcon(type)]]"></iron-icon>
+                [[_getTypeLabel(type)]]
+              </paper-button>
+            </template>
+          </div>
+        </div>
+        <div class="buttons horizontal end-justified layout">
+          <div class="flex start-justified">
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+        </div>
+      </div>
+
+      <!--Stage: allow user to fill in the properties for the selected type and create a new document-->
+      <div name="edit" class="vertical layout flex">
+        <div class="horizontal layout heading center">
+          <iron-icon icon="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
+          <span>[[_newDocumentLabel(selectedDocType)]]</span>
+        </div>
+        <div id="editor" class="flex">
+          <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+                                 label="[[i18n('documentCreationForm.location')]]"></nuxeo-path-suggestion>
+          <form is="iron-form" id="form" class="form vertical layout flex">
+            <div id="document-create">
+              <!--dynamically loaded via _updateLayout-->
+            </div>
+          </form>
+        </div>
+        <div class="buttons sep horizontal end-justified layout">
+          <div class="flex start-justified">
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+          <paper-button on-tap="_back">[[i18n('command.back', 'Back')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_create">[[i18n('command.create', 'Create')]]</paper-button>
+        </div>
+      </div>
+
+    </iron-pages>
+
+    <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-create',
+
+        behaviors: [Nuxeo.DocumentCreationBehavior],
+
+        properties: {
+
+          stage: {
+            type: String,
+            value: 'choose'
+          }
+
+        },
+
+        listeners: {
+          'nx-document-layout-changed': '_layoutUpdated'
+        },
+
+        /**
+         * Returns the name for the current layout element
+         */
+        _layoutFor: function() {
+          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType._id).toLowerCase();
+          return ['nuxeo', type, 'create-layout'].join('-');
+        },
+
+        /**
+         * Determines whether a custom element is registered
+         */
+        _isRegistered: function(tag) {
+          return document.createElement(tag).constructor !== HTMLElement;
+        },
+
+        /**
+         * Creates the layout for the current document type
+         */
+        _createLayout: function() {
+          var layout = this._layoutFor(),
+            el = document.createElement(layout),
+            parent = this.$['document-create'];
+          if (parent.hasChildNodes()) {
+            parent.replaceChild(el, parent.firstChild);
+          } else {
+            parent.appendChild(el);
+          }
+          if (Object.keys(this.document.properties).length === 0 ||
+            Object.keys(this.document.properties).every(function(prop) {
+              return !this.document.properties[prop];
+            }.bind(this))) {
+            el.uploadEnabled = true;
+          }
+          el.document = this.document;
+        },
+
+        /**
+         * Retrieves and creates the layout for the current document type
+         */
+        _updateLayout: function() {
+          this.document = this._isValidType(this.selectedDocType) ? {
+            'entity-type': 'document',
+            'type': this.selectedDocType.id,
+            'name': '',
+            'properties': {
+              'dc:description': ''
+            }
+          } : null;
+
+          if (this.document) {
+            var properties = this._getDocumentProperties();
+            if (properties) {
+              for (var prop in properties) {
+                this.document.properties[prop] = properties[prop];
+              }
+            }
+            var layout = this._layoutFor();
+            if (!this._isRegistered(layout)) {
+              var docType = this.selectedDocType._id;
+              var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+              var url = this.resolveUrl('../document/' + folder + layout + '.html');
+              this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  console.error('Failed to find create layout for ' + this.document.type);
+                });
+            } else {
+              this._createLayout();
+            }
+            this.fire('nx-document-layout-changed');
+          }
+        },
+
+        _selectType: function(e) {
+          this.selectedDocType = e.model.type;
+          this.fire('nx-creation-wizard-hide-tabs');
+        },
+
+        _validate: function() {
+          var valid = true;
+          // run our custom validation function first to allow setting custom native validity
+          var layout = this.$['document-create'].firstChild;
+          if (layout && ('function' === typeof layout.validate)) {
+            valid = layout.validate();
+          }
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            this.$.form._doFakeSubmitForValidation();
+          }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return valid && this.$.form.validate() && this.$.form.checkValidity();
+        },
+
+        _create: function() {
+          if (!this._validate()) {
+            return;
+          }
+          this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+          this.$.docRequest.post().then(function(response) {
+            this.$.creationStats.storeType(this.selectedDocType._id);
+            this._clear();
+            page('/browse' + response.path);
+            this._notify(response);
+          }.bind(this));
+        },
+
+        _back: function() {
+          this._clear();
+          this.fire('nx-creation-wizard-show-tabs');
+        },
+
+        _cancel: function() {
+          this._clear();
+          this.fire('nx-creation-wizard-show-tabs');
+        },
+
+        _newDocumentLabel: function() {
+          return this.i18n('documentCreationForm.newDoc.heading', 'New {0}', this._getTypeLabel(this.selectedDocType));
+        },
+
+        _clear: function() {
+          this.stage = 'choose';
+          this.selectedDocType = {};
+        },
+
+        _layoutUpdated: function() {
+          this.stage = 'edit';
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

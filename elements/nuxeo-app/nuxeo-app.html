@@ -1,0 +1,844 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+  Nelson Silva <nsilva@nuxeo.com>
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="nuxeo-menu-item.html">
+<link rel="import" href="nuxeo-menu-icon.html">
+<script src="nuxeo-doc-types.js"></script>
+
+<!--
+`nuxeo-app`
+@group Nuxeo UI
+@element nuxeo-app
+-->
+<dom-module id="nuxeo-app">
+  <template>
+    <style>
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
+      /* Navigation menu */
+      #menu {
+        @apply(--nuxeo-sidebar);
+        position: fixed;
+        width: 56px;
+        height: calc(100% - 62px);
+        z-index: 100;
+        padding: 62px 0;
+        overflow: auto;
+      }
+
+      #menu ::content paper-icon-button {
+        color: var(--nuxeo-sidebar-actions);
+        height: 44px;
+        padding: 13px;
+        width: 56px;
+        --paper-menu-selected-item: {
+          background-color: rgba(0, 0, 0, 0.25);
+          color: #fff;
+          fill: #fff;
+        }
+      }
+
+      #menu .profile-icon,
+      #menu .admin-icon {
+        position: fixed;
+        height: 44px;
+        bottom: 0;
+        left: 0;
+      }
+
+      #menu .admin-icon {
+        height: 88px;
+      }
+
+      /* --
+      Header page and Header subview
+      -- */
+      paper-header-panel, iron-pages::content paper-header-panel {
+        --paper-header-panel-body: {
+          background-color: var(--nuxeo-page-background);
+        };
+        --paper-header-panel-shadow: {
+          box-shadow: none;
+        };
+        --paper-header-panel-waterfall-container: {
+          display: -webkit-flex;
+          display: flex;
+        };
+        height: 100vh;
+      }
+
+      paper-header-panel ::content .content {
+        padding: 2.5em 2em;
+      }
+
+      paper-header-panel ::content #mainContainer {
+        background-color: var(--nuxeo-page-background);
+      }
+
+      paper-header-panel ::content .paper-header {
+        height: 58px;
+        color: var(--nuxeo-header-title-color);
+        background: var(--nuxeo-header-background);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-bottom: 1px solid var(--divider-color);
+        font-size: 1.05em;
+        font-weight: 600;
+        padding: 0 4.3em 0 1.7em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      paper-header-panel ::content paper-toolbar {
+        color: var(--nuxeo-title-color);
+        width: 100%;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .logo {
+        position: fixed;
+        width: 56px;
+        height: 58px;
+        top: 0;
+        left: 0;
+        z-index: 102;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.96);
+        border-right: 1px solid var(--divider-color);
+        position: fixed;
+        box-sizing: border-box;
+      }
+
+      .logo iron-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      paper-badge {
+        --paper-badge-background: var(--nuxeo-badge-background);
+        --paper-badge-margin-left: -24px;
+        --paper-badge-margin-bottom: -24px;
+        --paper-badge-width: 18px;
+        --paper-badge-height: 18px;
+      }
+
+      iron-collapse {
+        overflow: auto;
+      }
+
+      paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          border-right: 1px solid var(--nuxeo-border, #eee);
+        };
+      }
+
+      ::content nuxeo-menu-item:hover,
+      ::content .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
+      ::content .list-item.selected,
+      ::content .list-item:focus,
+      ::content .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
+      #sidebar > div {
+        margin-left: 56px;
+      }
+
+      #sidebar .content {
+        font-size: .9rem;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        overflow: auto;
+        height: calc(100vh - 59px);
+        width: 293px;
+      }
+
+      #sidebar .card .header {
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      #sidebar .card h1 {
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        margin: .1em .2em 0 1.1em;
+        font-weight: 500;
+      }
+
+      #sidebar ::content nuxeo-menu-item {
+        @apply(--nuxeo-sidebar-item-theme);
+      }
+
+      #sidebar ::content nuxeo-menu-item a {
+        @apply(--nuxeo-sidebar-item-link);
+      }
+
+      #sidebar .tasks .link {
+        font-size: 1.2em;
+        padding: 1em 1em 2em 1em;
+        text-align: center;
+      }
+
+      #sidebar .profile nuxeo-menu-item:last-of-type {
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+        border: none;
+        justify-content: flex-end;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      nuxeo-task-widget {
+        --nuxeo-task-widget-box-padding: 1em 1em 1em .7em;
+        font-size: .9em;
+      }
+
+      nuxeo-tasks-list {
+        font-size: .9em;
+      }
+
+      ::content paper-card {
+        margin: 0 22px 22px 0;
+        min-width: 22em;
+        width: 100%;
+      }
+
+      ::content paper-card .title {
+        color: var(--nuxeo-header-title-color);
+        font-size: 1.2rem;
+        margin: 0 0 .4em;
+        padding-bottom: 8px;
+      }
+
+      nuxeo-document-create-button.admin {
+        display: none;
+      }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+      }
+
+      .experimental {
+        position: absolute;
+        color: var(--nuxeo-button-primary);
+        right: 5px;
+        bottom: 5px;
+        font-size: .7em;
+      }
+
+      #loading {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        height: 3px;
+        z-index: 104;
+        --paper-progress-active-color: rgba(0, 128, 255, 0.4);
+        --paper-progress-container-color: transparent;
+        --paper-progress-indeterminate-cycle-duration: 3s;
+      }
+
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
+                    response="{{currentDocument}}"
+                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
+                    headers='{"X-NXfetch.document": "lock,properties"}'>
+    </nuxeo-document>
+
+    <nuxeo-resource id="tasks" path="/task"
+                    headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'>
+    </nuxeo-resource>
+
+    <nuxeo-document auto
+                    doc-id="[[selectedSearch.id]]"
+                    enrichers="permissions"
+                    response="{{searchDoc}}">
+    </nuxeo-document>
+
+    <paper-toast id="toast"></paper-toast>
+
+    <!-- drawer -->
+    <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
+      <div drawer>
+
+        <a href$="[[urlFor('home')]]">
+          <div class="logo">
+            <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png"></iron-icon>
+          </div>
+        </a>
+
+        <!-- menu -->
+        <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
+          <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="expiredSearch" route="queue:expired" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
+          <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
+          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks"></nuxeo-menu-icon>
+          <paper-badge label="[[taskCount]]" for="menuTasks"></paper-badge>
+          <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
+        </paper-menu>
+
+        <!-- sidebar -->
+        <iron-collapse id="sidebar" horizontal opened>
+          <div>
+            <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex" selected-attribute="visible">
+
+              <nuxeo-document-tree name="browser"
+                                   label="app.browse"
+                                   class="card browse"
+                                   current-document="[[currentDocument]]"></nuxeo-document-tree>
+
+              <section class="card recents" name="recents">
+                <div class="header ellipsis">
+                  <h1>[[i18n('app.recentlyViewed', 'Recently Viewed')]]</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-recent-documents max-size="10" id="recent"></nuxeo-recent-documents>
+                </div>
+              </section>
+
+              <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
+                on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
+              </nuxeo-search-form>
+
+              <section class="card tasks" name="tasks">
+                <div class="header ellipsis">
+                  <h1>[[i18n('app.tasks', 'Tasks')]]</h1>
+                </div>
+                <div class="content layout vertical">
+                  <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
+                  <div class="link">
+                    <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTaskDashboard', '» View Tasks Dashboard')]]</a>
+                  </div>
+                </div>
+              </section>
+
+              <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
+
+              <nuxeo-collections name="collections" id="collectionsForm"></nuxeo-collections>
+
+              <nuxeo-document-tree name="personalWorkspace"
+                                   class="card personal-space"
+                                   label="app.personalSpace"
+                                   current-document="[[currentDocument]]"
+                                   user="[[currentUser]]">
+              </nuxeo-document-tree>
+
+              <section class="card clipboard" name="clipboard">
+                <div class="header ellipsis">
+                  <h1>[[i18n('app.clipboard', 'Clipboard')]]</h1>
+                </div>
+                <div class="content">
+                  <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+                </div>
+              </section>
+
+              <template is="dom-if" if="[[currentUser.isAdministrator]]">
+                <section class="card administration" name="administration">
+                  <div class="header ellipsis">
+                    <h1>[[i18n('app.administration', 'Administration')]]</h1>
+                  </div>
+                  <div class="content">
+                    <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
+                      <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
+                    </iron-selector>
+                  </div>
+                </section>
+              </template>
+
+              <section class="card profile" name="profile">
+                <div class="header ellipsis">
+                  <h1>[[_displayUser(currentUser)]]</h1>
+                </div>
+                <div class="content userMenu">
+                  <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
+                  <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
+                  <nuxeo-menu-item label="app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
+                </div>
+              </section>
+
+            </iron-pages>
+          </div>
+        </iron-collapse>
+      </div>
+
+      <!-- main -->
+      <paper-header-panel main>
+
+        <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
+
+          <nuxeo-page name="error" hidden$="[[!currentDocument]]">
+            <div class="header"></div>
+            <div class="content">
+              <paper-card>
+                <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
+              </paper-card>
+            </div>
+          </nuxeo-page>
+
+          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
+
+          <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
+
+          <nuxeo-search-results name="search" id="searchResults" on-navigate="_navigateFromSearch">
+            <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
+          </nuxeo-search-results>
+
+          <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
+
+          <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
+
+          <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+
+          <nuxeo-themes name="themes"></nuxeo-themes>
+
+          <nuxeo-slot slot="PAGES"></nuxeo-slot>
+
+        </iron-pages>
+
+        <nuxeo-suggester id="suggester"></nuxeo-suggester>
+
+      </paper-header-panel>
+    </paper-drawer-panel>
+
+    <paper-progress id="loading" indeterminate></paper-progress>
+
+    <nuxeo-document-create-button class$="[[page]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-parent-path="/default-domain"></nuxeo-document-create-popup>
+
+    <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
+    <nuxeo-keys keys="d" on-pressed="_showDashboard"></nuxeo-keys>
+    <nuxeo-keys keys="c" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
+    <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-app',
+        behaviors: [
+          Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior,
+          Polymer.NeonAnimatableBehavior, Polymer.NeonAnimationRunnerBehavior
+        ],
+        properties: {
+          baseUrl: {
+            type: String,
+            value: '/'
+          },
+
+          loading: {
+            type: Boolean,
+            value: false
+          },
+
+          animationConfig: {
+            type: Object,
+            value: function() {
+              return {
+                'loading': [{
+                  name: 'fade-in-animation',
+                  timing: {delay: 1000, duration: 1500},
+                  node: this.$.loading
+                }]
+              };
+            }
+          },
+
+          page: String,
+          selectedTab: String,
+          selectedAdminTab: String,
+
+          currentDocument: Object,
+          currentParent: Object,
+          docId: String,
+          docPath: String,
+          docAction: String,
+
+          entity: Object,
+
+          searchName: {
+            type: String
+          },
+
+          tasks: Array,
+
+          taskCount: Number,
+
+          drawerWidth: {
+            type: String,
+            value: '56px'
+          },
+
+          drawerOpened: {
+            type: Boolean,
+            value: false
+          },
+
+          keyEventTarget: {
+            type: Object,
+            value: function() {
+              return document.body;
+            }
+          },
+
+          currentTask: {
+            type: Object
+          },
+
+          currentUser: {
+            type: Object,
+            observer: '_observeCurrentUser'
+          }
+        },
+
+        listeners: {
+          'document-updated': 'refresh',
+          'create-document': '_showDocumentCreationWizard',
+          'document-created': '_handleDocumentCreated',
+          'goHome': '_handleUGMgoHome',
+          'manageUser': '_handleUGMmanageUser',
+          'manageGroup': '_handleUGMmanageGroup',
+          'browseCollection': '_navigateToCollection',
+          'workflowStarted': '_refreshAndFetchTasks',
+          'workflowTaskProcessed': '_refreshAndFetchTasks',
+          'taskChanged': '_onTaskChanged',
+          'tasksListSelectionChanged': '_onTasksListSelectionChanged',
+          'addToClipboard': '_onAddToClipboard',
+          'addedToCollection': '_documentAddedToCollection',
+          'removedFromCollection': '_documentRemovedFromCollection',
+          'addedToFavorites': '_documentAddedToFavorites',
+          'removedFromFavorites': '_documentRemovedFromFavorites'
+        },
+
+        ready: function() {
+          window.addEventListener('unhandledrejection', function(error) {
+            this._onError(error);
+          }.bind(this));
+
+          this.clipboard = this.$.clipboard;
+          this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
+          // XXX: review this
+          this.$.searchResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.searchForm;
+          // XXX: end of review this
+          this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
+          if (this.shadowRoot) {
+            var experimental = document.createElement('div');
+            experimental.innerHTML = 'shadow dom enabled';
+            experimental.className = 'experimental';
+            Polymer.dom(this.root).appendChild(experimental);
+          }
+          this.$.nxcon.connect().then(function(res) {
+            this.currentUser = res;
+          }.bind(this));
+        },
+
+        refresh: function() {
+          page('/browse' + this.docPath);
+        },
+
+        load: function(page, id, path, action) {
+          this.loading = true;
+          this.playAnimation('loading');
+          this.$.loading.style.display = 'block';
+          this.docId = id;
+          this.docPath = path;
+          this.docAction = action;
+          this.$.doc.get().then(function(doc) {
+            if (this.docId && !doc.isVersion) {
+              this.docId = '';
+              this.docPath = doc.path;
+              window.page('/browse' + doc.path);
+            } else {
+              this.$.recent.add(doc);
+              this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
+                doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+              this.set('currentDocument', doc);
+              this.show(page);
+            }
+          }.bind(this));
+        },
+
+        show: function(page) {
+          this.page = page;
+          this.loading = false;
+          this.$.loading.style.display = 'none';
+        },
+
+        _focusMenu: function() {
+          this.$.menu.focus();
+        },
+
+        _showDashboard: function() {
+          this.show('home');
+        },
+
+        _showSuggester: function() {
+          this.$.suggester.toggle();
+        },
+
+        _showDocumentCreationWizard: function(e) {
+          if (e.detail.keyboardEvent && e.detail.keyboardEvent.ctrlKey) {
+            return;
+          }
+          if (e.detail.files) {
+            this.$.importPopup.toggleDialogImport(e.detail.files);
+          } else if (e.detail.type) {
+            this.$.importPopup.toggleDialogCreate(e.detail.type);
+          } else {
+            this.$.importPopup.toggleDialog();
+          }
+        },
+
+        _navigateFromSearch: function(e) {
+          this.$.searchForm.displayQueue(e.detail.doc);
+        },
+
+        _navigateFromAssetsSearch: function(e) {
+          page('/browse' + e.detail.doc.path);
+          this.$.assetsForm.displayQueue(e.detail.doc, e.detail.index);
+        },
+
+        _navigateFromCollection: function(e) {
+          page('/browse' + e.detail.doc.path);
+          this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
+        },
+
+        _resetSearchResults: function() {
+          this.selectedTab = 'search';
+          this.show('search');
+        },
+
+        _navigateToCollection: function(e) {
+          this.selectedTab = 'collections';
+          this.$.collectionResults.collection = e.detail.collection;
+          this.show('collection');
+        },
+
+        scrollPageToTop: function() {
+          //this.$.page.scrollToTop(true);
+        },
+
+        _toggleDrawer: function(e) {
+          if (this._selected === e.detail.selected && this.drawerOpened) {
+            this._closeDrawer();
+          } else {
+            this._openDrawer();
+          }
+          this._selected = e.detail.selected;
+        },
+
+        _openDrawer: function() {
+          this.drawerWidth = '350px';
+          this.$.sidebar.style.width = '100%';
+          this.drawerOpened = true;
+        },
+
+        _closeDrawer: function() {
+          this.drawerWidth = '56px';
+          this.drawerOpened = false;
+        },
+
+        _handleUGMgoHome: function() {
+          this.entity = {};
+          page('/admin/user-group-management');
+        },
+
+        _handleUGMmanageUser: function(e) {
+          this.entity = {type: 'user', id: e.detail.user};
+          var url = '';
+          if (this.selectedAdminTab) {
+            url += this.selectedAdminTab;
+            if (this.selectedAdminTab === 'user-group-management' &&
+              this.entity && this.entity.id && this.entity.type) {
+              url += '/' + this.entity.type + '/' + this.entity.id;
+            }
+          }
+          page('/admin/' + url);
+        },
+
+        _handleUGMmanageGroup: function(e) {
+          this.entity = {type: 'group', id: e.detail.group};
+          var url = '';
+          if (this.selectedAdminTab) {
+            url += this.selectedAdminTab;
+            if (this.selectedAdminTab === 'user-group-management' &&
+              this.entity && this.entity.id && this.entity.type) {
+              url += '/' + this.entity.type + '/' + this.entity.id;
+            }
+          }
+          page('/admin/' + url);
+        },
+
+        _fetchTasks: function() {
+          // hack to fetch tasks with user prefix and without prefix
+          // some tasks are prefixed, to be reviewed later
+          this._tmpTasks = [];
+          this.$.tasks.params = {'userId': this.currentUser.id};
+          this.$.tasks.get().then(function(response) {
+            this._tmpTasks = response.entries;
+            this.$.tasks.params = {'userId': 'user:' + this.currentUser.id};
+            this.$.tasks.get().then(function(response) {
+              this.tasks = this._tmpTasks.concat(response.entries);
+              this.taskCount = this.tasks.length;
+            }.bind(this));
+          }.bind(this));
+        },
+
+        _refreshAndFetchTasks: function() {
+          // let's refresh the current document since it might have been changed (ex: state and version)
+          this.refresh();
+          this._fetchTasks();
+        },
+
+        _onTaskChanged: function(e) {
+          this.currentTask = e.detail.task;
+        },
+
+        _onTasksListSelectionChanged: function() {
+          this.show('tasks');
+        },
+
+        _onAddToClipboard: function(e) {
+          if (e.detail.documents) {
+            e.detail.documents.forEach(function(doc) {
+              if (!this.clipboard.contains(doc)) {
+                this.clipboard.add(doc);
+              }
+            }.bind(this));
+          }
+        },
+
+        _observeCurrentUser: function() {
+          if (this.currentUser) {
+            this._fetchTasks();
+          }
+        },
+
+        _displayUser: function(user) {
+          if (user) {
+            var result = '';
+            if (user.properties['firstName']) {
+              result += user.properties['firstName'];
+            }
+            if (user.properties['lastName']) {
+              if (result.length > 0) {
+                result += ' ';
+              }
+              result += user.properties['lastName'];
+            }
+            if (result.length === 0) {
+              result = user.id;
+            }
+            return result;
+          }
+        },
+
+        _connectionUrl: function() {
+          return this.$.nxcon.url;
+        },
+
+        _documentAddedToCollection: function(e) {
+          if (e.detail.docIds) {
+            this.$.toast.text = this.i18n('app.documents.addedToCollection', 'Documents added to collection.');
+          } else {
+            this.$.toast.text = this.i18n('app.document.addedToCollection', 'Document added to collection.');
+          }
+          this.$.toast.open();
+        },
+
+        _documentRemovedFromCollection: function() {
+          this.$.toast.text = this.i18n('app.document.removedFromCollection', 'Document removed from collection.');
+          this.$.toast.open();
+        },
+
+        _documentAddedToFavorites: function() {
+          this.$.toast.text = this.i18n('app.document.addedToFavorites', 'Added to Favorites');
+          this.$.toast.open();
+        },
+
+        _documentRemovedFromFavorites: function() {
+          this.$.toast.text = this.i18n('app.document.removedFromFavorites', 'Removed from Favorites');
+          this.$.toast.open();
+        },
+
+        _handleDocumentCreated: function(e) {
+          if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
+            var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
+            this.$.toast.text = this.i18n('app.createdDocument', 'Created {0}.',
+                        doc.type.toLowerCase() + ' ' + doc.title);
+          } else {
+            this.$.toast.text = this.i18n('app.createdDocuments', 'Created {0} documents.',
+                        e.detail.response.entries.length);
+          }
+          this.$.toast.open();
+        },
+
+        _errorUrl: function() {
+          return window.location.href;
+        },
+
+        _onError: function(e) {
+          if (e.reason && e.reason.status === 404) {
+            this.$.error.show('404', e.reason.message, '');
+            this.show('error');
+          }
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

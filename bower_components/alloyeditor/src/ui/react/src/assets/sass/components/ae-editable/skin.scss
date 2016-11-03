@@ -1,0 +1,7 @@
+.ae-editable {
+    @include selection {
+        background: $selection-bg-color !important;
+        color: $selection-color;
+        text-shadow: $selection-shadow;
+    }
+}

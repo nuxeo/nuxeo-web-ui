@@ -1,0 +1,202 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+
+-->
+
+<!--
+`nuxeo-resource` allows managing REST on a Nuxeo server.
+
+    <nuxeo-resource auto
+        path="Document.Query"
+        on-response="{{handleResponse}}"></nuxeo-resource>
+
+With `auto` set to `true`, the GET method is executed whenever
+its `path` properties are changed.
+
+Note: The `params` attribute must be double quoted JSON.
+
+You can trigger a method explicitly by calling `get`, `post`, `put` or `delete` on the
+element.
+
+@group Nuxeo Elements
+@element nuxeo-resource
+@homepage http://www.nuxeo.org
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="nuxeo-connection.html">
+<dom-module id="nuxeo-resource">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+    <nuxeo-connection id="nx" connection-id="{{connectionId}}"></nuxeo-connection>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'nuxeo-resource',
+    properties: {
+      /* The id of a nuxeo-connection to use. */
+      connectionId: {type: String, value: ''},
+
+      /* The success response status */
+      success: {type: Boolean, notify: true},
+
+      /* The error response */
+      error: {type: Object, notify: true},
+
+      /* If true, automatically execute the operation when either `path` or `params` changes. */
+      auto: {type: Boolean, value: false},
+
+      method: { type: String, value: 'get'},
+
+      /* The path of the resource. */
+      path: {type: String},
+
+      /* The parameters to send. */
+      params: {type: Object, value: null},
+
+      /* The data to pass to the server. */
+      data: {type: Object, value: null},
+
+      /* The response from the server. */
+      response: {type: Object, value: null, notify: true},
+
+      /* The `entity-type` of the resource. */
+      type: {type: String, value: ''},
+
+      /* The headers of the request.
+       * 'Accept': 'text/plain,application/json' is already set by default.
+       */
+      headers: {type: Object, value: null},
+
+      /* The `content enricher` of the resource. */
+      enrichers: {type: String, value: ''},
+
+      /* The `content enricher` entity-type of the resource. Default value for Nuxeo Document Model*/
+      enrichersEntity: {type: String, value: 'document'},
+
+      /* The `content type` of the request */
+      contentType: {type: String, value: 'application/json'},
+
+      /**
+       * List of comma separated values of the document schemas to be returned.
+       * All document schemas are returned by default.
+       */
+      schemas: {type: String, value: ''},
+
+      /**
+       * The delay in milliseconds to debounce the auto get call when path, params, etc. changes.
+       */
+      autoDelay: {
+        type: Number,
+        value: 300
+      },
+    },
+
+    observers: [
+      '_autoGet(connectionId, auto, path, params, type, enrichers, enrichersEntity)'
+    ],
+
+    get: function () {
+      this.method = 'get';
+      return this.execute();
+    },
+
+    post: function () {
+      this.method = 'post';
+      return this.execute();
+    },
+
+    put: function () {
+      this.method = 'put';
+      return this.execute();
+    },
+
+    remove: function () {
+      this.method = 'delete';
+      return this.execute();
+    },
+
+    execute: function () {
+      var options = {
+        method: this.method || 'get'
+      };
+
+      if (this.data && this.method != 'get') {
+        options.body = this.data;
+      }
+
+      // Look up document schemas to be returned
+      if (this.schemas && this.schemas.length > 1) {
+          options.schemas = this.schemas.trim().split(/[\s,]+/);
+      }
+      // Look up headers parameter
+      options.headers = this.headers || {};
+      // add support for plain text responses by default
+      options.headers.accept = 'text/plain,application/json';
+      // set default content-type
+      options.headers['Content-Type'] = this.contentType;
+      // Look up content enrichers parameter
+      if (this.enrichers) {
+        options.headers['enrichers-' + this.enrichersEntity] = this.enrichers;
+        // NXP-18425: send also header with dot separator for compat with < 7.10-HF01
+        options.headers['X-NXenrichers.' + this.enrichersEntity] = this.enrichers;
+      }
+
+      var params = this.params || {};
+      return this.$.nx.request().then(function(request) {
+        this._request = request;
+        return this._doExecute(params, options);
+      }.bind(this));
+    },
+
+    _autoGet: function () {
+      if (this.auto && this.path) {
+        this.debounce('_autoGet', function() {
+          this.get();
+        }.bind(this), this.autoDelay);
+      }
+    },
+
+    _doExecute: function(params, options) {
+      return this._request
+        .path(this.path)
+        .queryParams(params)
+        .repositoryName(this._request._baseOptions.repositoryName === 'default' ? undefined : this._request._baseOptions.repositoryName)
+        .execute(options)
+        .then(function(data) {
+          this.fire('response', {response: data});
+          this.response = data;
+          this.success = true;
+          return this.response;
+        }.bind(this))
+        .catch(function(error) {
+          this.success = false;
+          return error.response.json().then(function(e) {
+            this.error = e;
+            console.log("Resource request failed: " + e.message);
+            throw e;
+          }.bind(this));
+        }.bind(this));
+    }
+
+  });
+</script>

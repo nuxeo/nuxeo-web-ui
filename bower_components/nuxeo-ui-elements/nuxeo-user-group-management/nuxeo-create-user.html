@@ -1,0 +1,276 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Gabriel Barata <gbarata@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../widgets/nuxeo-user-suggestion.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="nuxeo-edit-password.html">
+
+<!--
+Used by `nuxeo-user-group-management`
+@group Nuxeo Elements
+@element nuxeo-create-user
+-->
+<dom-module id="nuxeo-create-user">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        @apply(--nuxeo-create-user-layout);
+      }
+
+      nuxeo-user-suggestion {
+        @apply(--layout-flex);
+      }
+
+      .backButton {
+        color: #00adff;
+      }
+
+      .header > iron-icon {
+        padding: 8px;
+      }
+
+      .footer {
+        margin-top: 48px;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+        font-weight: bold;
+      }
+
+      .row {
+        margin-bottom: 12px;
+      }
+
+      input {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      form {
+        padding: 8px;
+        margin-top: 24px;
+      }
+
+      paper-button.primary {
+        background-color: var(--nuxeo-button-primary, #00adff);
+        color: #fff;
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        background-color: var(--nuxeo-button-primary-focus, #0079b3);
+        font-weight: inherit;
+        color: #fff !important;
+      }
+
+      .label-container > paper-checkbox#another {
+        margin-left: 8px;
+        margin-top: 12px;
+      }
+
+      .form-buttons > paper-button.primary {
+        margin-left: 0px;
+      }
+
+      paper-radio-group {
+        outline: none;
+      }
+
+      paper-radio-button {
+        margin-right: 10px;
+        padding: 0;
+      }
+
+      #errors {
+        color: red;
+        margin-top: 20px;
+      }
+
+      .required {
+        position: relative;
+      }
+
+      .required:before {
+        content:"*";
+        color: red;
+        display: block;
+        position: absolute;
+        left: -1em;
+        top: 0;
+      }
+    </style>
+
+    <nuxeo-resource id="request"
+                     path="/user"
+                     headers='{"Content-Type":"application/json"}'>
+    </nuxeo-resource>
+
+    <nuxeo-operation id="invite" op="User.Invite"></nuxeo-operation>
+
+    <div class="header horizontal layout center">
+      <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
+      <iron-icon icon="social:person"></iron-icon>
+      <h3>[[i18n('title.createUser', 'New User')]]</h3>
+    </div>
+    <form is="iron-form" id="form" class="vertical layout">
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>[[i18n('username', 'Username')]]</label>
+        </div>
+        <div class="horizontal layout flex required">
+          <input value="{{user.username::input}}" class="flex" required>
+        </div>
+      </div>
+      <nuxeo-edit-user id="propertyEditor" user="{{user}}" new></nuxeo-edit-user>
+      <div class="row layout horizontal">
+        <div class="label-container">
+          <label>[[i18n('label.immediateCreation', 'Set User Password')]]</label>
+        </div>
+        <div class="flex">
+          <div class="row layout horizontal">
+            <paper-toggle-button checked="{{usePassword}}"></paper-toggle-button>
+          </div>
+          <div hidden$="{{!usePassword}}">
+            <nuxeo-edit-password id="passwordEditor" password="{{user.password}}" required="{{usePassword}}"></nuxeo-edit-password>
+          </div>
+        </div>
+      </div>
+      <div class="footer horizontal layout">
+        <div class="label-container">
+          [[i18n('createAnother.checkbox', 'Create another')]]
+          <paper-checkbox id="another"></paper-checkbox>
+        </div>
+        <div class="layout vertical">
+          <div class="form-buttons">
+            <paper-button id="createButton" class="primary" on-click="_submit">[[i18n('command.create', 'Create')]]</paper-button>
+            <paper-button id="cancelButton" on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+          <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
+        </div>
+      </div>
+    </form>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'nuxeo-create-user',
+
+    behaviors: [Nuxeo.I18nBehavior],
+
+    properties: {
+      user: {
+        type: Object,
+        value: {}
+      },
+
+      usePassword: {
+        type: Boolean,
+        value: false
+      },
+
+      errors: {
+        type: String,
+        value: ''
+      }
+    },
+
+    ready: function() {
+      this.$.form.addEventListener('iron-form-presubmit', function(event) {
+        event.preventDefault();
+        this._create();
+      }.bind(this));
+    },
+
+    _goHome: function() {
+      this.fire('goHome');
+    },
+
+    /**
+     * Submits the form.
+     */
+    _submit: function() {
+      this.$.form.submit();
+    },
+
+    /**
+     * Creates a new user if the form was successfully submitted.
+     */
+    _create: function() {
+      this._doCreate(this.user).then(function(user) {
+          this._resetFields();
+          if (!this.$.another.checked) {
+            this._goHome();
+          }
+        }.bind(this))
+        .catch(function(error) {
+          this.errors = error.message;
+        }.bind(this));
+    },
+
+    _doCreate: function(user) {
+      var entity = {
+        'entity-type': 'user',
+        'id': '', // empty id for compat with NuxeoPrincipalReader deprecated on 7.10
+        'properties': user
+      };
+      if (this.usePassword) {
+        this.$.request.data = entity;
+        return this.$.request.post().then(function(user) {
+          this.fire('nuxeo-user-created', user);
+        }.bind(this))
+      } else {
+        this.$.invite.input = entity;
+        return this.$.invite.execute().then(function(id) {
+          entity.id = user.username;
+          this.fire('nuxeo-user-invited', entity);
+        }.bind(this));
+      }
+    },
+
+    _cancel: function() {
+      this._resetFields();
+      this._goHome();
+    },
+
+    _resetFields: function() {
+      this.user = {};
+      this.$.passwordEditor.resetFields();
+      this.errors = '';
+      this.usePassword = false;
+    },
+
+    _hasErrors: function() {
+      return this.errors !== '';
+    }
+  });
+</script>

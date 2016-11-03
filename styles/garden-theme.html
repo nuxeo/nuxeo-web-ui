@@ -1,0 +1,523 @@
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+<style is="custom-style">
+
+  html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    font-size: 15px; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    color: #243238;
+    background: url(../images/themes/garden.png) repeat #f7fef2;
+    font-family: var(--nuxeo-app-font);
+    font-weight: 400; }
+
+  h1,h2,h3,
+  h4,h5,h6 {
+    font-weight: 400;
+    line-height: 1em; }
+
+  a, a:active,
+  a:visited, a:focus {
+    color: var(--nuxeo-link-color);
+    text-decoration: none; }
+
+  a:hover {
+    color: var(--nuxeo-link-hover-color); }
+
+  :root {
+    /* -- Nuxeo Branding colors -- */
+    --nuxeo-app-font: 'Roboto', Arial, sans-serif;
+    --nuxeo-primary-color: #009aa0;
+
+    /* Badges & tags */
+    --nuxeo-tag-background: #edf1f5;
+    --nuxeo-tag-text: #6d7684;
+    --nuxeo-badge-background: #f68500;
+    --nuxeo-validated: #99d749;
+
+    /* Titles & text */
+    --nuxeo-title-color: #003e53;
+    --nuxeo-text-default: #243238;
+    --nuxeo-text-light: #aaa;
+
+    /* Global layout */
+    --nuxeo-page-background: url(../images/themes/garden.png) repeat #f7fef2;
+    --nuxeo-header-background: rgba(255,255,255,0.95);
+    --nuxeo-header-title-color: #003e53;
+    --nuxeo-header-text-color: #003e53;
+    --nuxeo-header-actions: #434343;
+    --nuxeo-header-actions-hover: #009aa0;
+    --nuxeo-sidebar-background: #009aa0;
+    --nuxeo-sidebar-actions: rgba(255,255,255,0.75);
+    --nuxeo-sidebar-actions-hover: rgba(255,255,255,1);
+    --nuxeo-light-background: #fafcfd;
+
+    /* Buttons & Links */
+    --nuxeo-button-primary: #009aa0;
+    --nuxeo-button-primary-focus: #00bfc6;
+    --nuxeo-button-primary-text: #ffffff;
+    --nuxeo-link-color: #003e53;
+    --nuxeo-link-hover-color: #00749b;
+
+    /* Actions in toolbar, e.g. document view */
+    --nuxeo-action-color: #003e53;
+    --nuxeo-action-color-activated: #f68500;
+    --nuxeo-container-hover: #f3f7f9;
+    --nuxeo-dialog-buttons-bar: #eff2f4;
+    /* Warn, Info, Error */
+    --nuxeo-warn-text: #d5652c;
+
+    --default-primary-color: #009aa0;
+    --dark-primary-color: #003e53;
+    --light-primary-color: #d5f0f3;
+    --text-primary-color: #ffffff;
+    --accent-color: #003e53;
+    --primary-background-color: #f8fafc;
+    --primary-text-color: #434343;
+    --secondary-text-color: #727272;
+    --disabled-text-color: #bdbdbd;
+    --divider-color: #B6B6B6;
+
+    --nuxeo-border: #e0e4e6;
+
+    /* Tabs, Toolbars & Menus */
+    --paper-tabs-selection-bar-color: #009aa0;
+    --paper-tab-ink: #009aa0;
+
+    --paper-toolbar-background: #ffffff;
+    --paper-toolbar-color: #243238;
+
+    --paper-menu-background-color: #ffffff;
+    --paper-menu-color: #243238;
+    --paper-menu-disabled-color: #e9eff3;
+
+    /* Forms & Buttons */
+    --paper-checkbox-checked-color: #009aa0;
+    --paper-checkbox-checked-ink-color: #213f7d;
+    --paper-checkbox-unchecked-color: #243238;
+    --paper-checkbox-unchecked-ink-color: #6c6f7c;
+    --paper-checkbox-label-color: #243238;
+
+    --paper-radio-button-checked-color: #009aa0;
+    --paper-radio-button-checked-ink-color: #ffffff;
+    --paper-radio-button-unchecked-color: #243238;
+    --paper-radio-button-unchecked-ink-color: #6c6f7c;
+    --paper-radio-button-label-color: #243238;
+
+    --paper-input-container-color: #6c6f7c;
+    --paper-input-container-focus-color: #009aa0;
+    --paper-input-container-invalid-color: #ff003c;
+    --paper-input-container-input-color: #6c6f7c;
+
+    --paper-slider-knob-color: #009aa0;
+    --paper-slider-active-color: #009aa0;
+    --paper-slider-pin-color: #009aa0;
+
+    --paper-toggle-button-checked-bar-color: #009aa0;
+    --paper-toggle-button-checked-button-color: #009aa0;
+    --paper-toggle-button-checked-ink-color: #009aa0;
+    --paper-toggle-button-unchecked-bar-color: #243238;
+    --paper-toggle-button-unchecked-button-color: #243238;
+    --paper-toggle-button-unchecked-ink-color: #243238;
+
+    --paper-fab-background: #009aa0;
+    --paper-fab-disabled-background: #e9eff3;
+    --paper-fab-disabled-text: #2f2b16;
+    --paper-icon-button-disabled-text: #e9eff3;
+
+    /* Loaders */
+    --paper-progress-active-color: #009aa0;
+    --paper-progress-secondary-color: #009aa0;
+
+    --paper-spinner-layer-1-color: #009aa0;
+    --paper-spinner-layer-2-color: #0075b0;
+    --paper-spinner-layer-3-color: #213f7d;
+    --paper-spinner-layer-4-color: #0d9ad6;
+
+    /* -- Nuxeo Mixins -- */
+    --nuxeo-sidebar: {
+      background-color: var(--nuxeo-sidebar-background);
+    };
+
+    --nuxeo-link: {
+      color: var(--nuxeo-link-color);
+      text-decoration: none;
+    };
+
+    --nuxeo-link-hover: {
+      color: var(--nuxeo-link-hover-color);
+    };
+
+    --nuxeo-block-hover: {
+      background-color: var(--nuxeo-container-hover);
+    };
+
+    --nuxeo-block-selected: {
+      background-color: #fff;
+      color: var(--nuxeo-link-hover-color);
+      outline: 0;
+      box-shadow: 0 0 0 1px var(--nuxeo-sidebar-actions-hover) inset;
+    };
+
+    --nuxeo-sidebar-item-theme: {
+      border-bottom: 1px solid var(--nuxeo-border);
+      display: block;
+      margin: 0;
+      white-space: nowrap;
+    };
+
+    --nuxeo-sidebar-item-link: {
+      display: block;
+      padding: 1em;
+    };
+
+    --nuxeo-label: {
+      display: block;
+      color: var(--secondary-text-color);
+      padding-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.011em;
+      line-height: 20px;
+    };
+
+    --nuxeo-tag: {
+      display: inline-block;
+      background-color: var(--nuxeo-tag-background);
+      color: var(--nuxeo-tag-text);
+      padding: 4px 6px;
+      font-size: .8em;
+      border-radius: 3px;
+      line-height: initial;
+      text-decoration: none;
+    };
+
+    --nuxeo-user: {
+      border-radius: 2.5em;
+      text-transform: capitalize;
+      color: var(--nuxeo-link-color);
+    };
+
+    --paper-tooltip: {
+      font-size: 1rem;
+      font-family: var(--nuxeo-app-font);
+      background-color: var(--nuxeo-sidebar-background);
+    };
+
+    --paper-card: {
+      box-shadow: none !important;
+      font-family: var(--nuxeo-app-font);
+      border: 1px solid var(--nuxeo-border);
+      border-radius: 0;
+      background-color: #fff;
+    };
+
+    --buttons-bar: {
+      background-color: var(--nuxeo-dialog-buttons-bar);
+    };
+
+    --iron-data-table: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-radio-button: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-font-common-base: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-tabs: {
+      border-bottom: 1px solid var(--nuxeo-border);
+    };
+
+    --paper-icon-item: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-tab: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-item: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-input: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-input-container: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-input-container-label: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-input-container-input: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-dialog: {
+      color: var(--nuxeo-text-default);
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-checkbox-label: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+    --paper-button: {
+      font-family: var(--nuxeo-app-font);
+    };
+
+  }
+
+  paper-material {
+    border-radius: 2px;
+    height: 100%;
+    padding: 16px 0;
+    width: calc(98.66% - 16px);
+    margin: 16px auto;
+    background: white;
+  }
+
+  paper-toolbar a, paper-toolbar a:hover,
+  paper-toolbar a:active,paper-toolbar a:visited,
+  paper-toolbar a:focus {
+    color: #003e53; }
+
+  paper-button.primary,
+  paper-button.btn-primary,
+  paper-button[primary] {
+    background-color: #009aa0;
+    color: #fff; }
+
+  paper-button.primary[raised],
+  paper-button.btn-primary[raised],
+  paper-button[primary][raised] {
+    background-color: #009aa0;
+    color: #fff; }
+
+  paper-button.secondary,
+  paper-button.btn-secondary,
+  paper-button[secondary] {
+    color: #003e53; }
+
+  paper-button.secondary[raised],
+  paper-button.btn-secondary[raised],
+  paper-button[secondary][raised] {
+    background-color: #003e53;
+    color: #fff; }
+
+  paper-button.success,
+  paper-button.btn-success,
+  paper-button[success] {
+    color: #88c100; }
+
+  paper-button.success[raised],
+  paper-button.btn-success[raised],
+  paper-button[success][raised] {
+    background-color: #88c100;
+    color: #fff; }
+
+  paper-button.info,
+  paper-button.btn-info,
+  paper-button[info] {
+    color: #009aa0; }
+
+  paper-button.info[raised],
+  paper-button.btn-info[raised],
+  paper-button[info][raised] {
+    background-color: #009aa0;
+    color: #fff; }
+
+  paper-button.warning,
+  paper-button.btn-warning,
+  paper-button[warning] {
+    color: #ff8a00; }
+
+  paper-button.warning[raised],
+  paper-button.btn-warning[raised],
+  paper-button[warning][raised] {
+    background-color: #ff8a00; color: #fff; }
+
+  paper-button.error,
+  paper-button.btn-error,
+  paper-button[error] {
+    color: #ff5722; }
+
+  paper-button.error[raised],
+  paper-button.btn-error[raised],
+  paper-button[error][raised] {
+    background-color: #ff5722;
+    color: #fff; }
+
+  paper-button.link,
+  paper-button.btn-link,
+  paper-button[link] {
+    text-decoration: underline; }
+
+  paper-button[raised] {
+    color: #243238; }
+
+  paper-button[disabled] {
+    color: #6c6f7c !important;
+    background: #e9eff3 !important; }
+
+  paper-icon-button.primary,
+  paper-icon-button.btn-primary,
+  paper-icon-button[primary] {
+    color: #009aa0; }
+
+  paper-icon-button.primary:hover,
+  paper-icon-button.btn-primary:hover,
+  paper-icon-button[primary]:hover {
+    background-color: #d2e8f4;
+    background-color: rgba(0,173,255,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.secondary,
+  paper-icon-button.btn-secondary,
+  paper-icon-button[secondary] {
+    color: #003e53; }
+
+  paper-icon-button.secondary:hover,
+  paper-icon-button.btn-secondary:hover,
+  paper-icon-button[secondary]:hover {
+    background-color: #d5dde7;
+    background-color: rgba(33,63,125,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.success,
+  paper-icon-button.btn-success,
+  paper-icon-button[success] {
+    color: #88c100; }
+
+  paper-icon-button.success:hover,
+  paper-icon-button.btn-success:hover,
+  paper-icon-button[success]:hover {
+    background-color: #dfeadb;
+    background-color: rgba(136,193,0,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.info,
+  paper-icon-button.btn-info,
+  paper-icon-button[info] {
+    color: #009aa0; }
+
+  paper-icon-button.info:hover,
+  paper-icon-button.btn-info:hover,
+  paper-icon-button[info]:hover {
+    background-color: #d2e8f4;
+    background-color: rgba(0,173,255,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.warning,
+  paper-icon-button.btn-warning,
+  paper-icon-button[warning] {
+    color: #ff8a00; }
+
+  paper-icon-button.warning:hover,
+  paper-icon-button.btn-warning:hover,
+  paper-icon-button[warning]:hover {
+    background-color: #ebe5db;
+    background-color: rgba(255,138,0,0.2);
+    border-radius: 50%; }
+
+  paper-icon-button.error,
+  paper-icon-button.btn-error,
+  paper-icon-button[error] {
+    color: #ff5722; }
+
+  paper-icon-button.error:hover,
+  paper-icon-button.btn-error:hover,
+  paper-icon-button[error]:hover {
+    background-color: #ebe0de;
+    background-color: rgba(255,87,34,0.2);
+    border-radius: 50%; }
+
+  paper-checkbox #checkmark.paper-checkbox {
+    border-color: #fff !important; }
+
+  paper-dialog h1,paper-dialog h2,paper-dialog h3,
+  paper-dialog h4,paper-dialog h5,paper-dialog h6 {
+    overflow: visible;
+    padding: 0 1em;
+    text-align: center; }
+
+  paper-fab {
+    background-color: #009aa0;
+    color: #fff;
+    --text-primary-color: #ffffff;
+    --paper-fab-keyboard-focus-background: #003e53; }
+
+  paper-fab.primary,
+  paper-fab.btn-primary,
+  paper-fab[primary] {
+    background-color: #009aa0;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #003e53; }
+
+  paper-fab.secondary,
+  paper-fab.btn-secondary,
+  paper-fab[secondary] {
+    background-color: #003e53;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #009aa0; }
+
+  paper-fab.success,
+  paper-fab.btn-success,
+  paper-fab[success] {
+    background-color: #88c100;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #c7ff42; }
+
+  paper-fab.info,
+  paper-fab.btn-info,
+  paper-fab[info] {
+    background-color: #009aa0;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #009aa0; }
+
+  paper-fab.warning,
+  paper-fab.btn-warning,
+  paper-fab[warning] {
+    background-color: #ff8a00;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #804500; }
+
+  paper-fab.error,
+  paper-fab.btn-error,
+  paper-fab[error] {
+    background-color: #ff5722;
+    color: #fff;
+    --paper-fab-keyboard-focus-background: #a22700; }
+
+  paper-fab[disabled] {
+    color: #2f2b16 !important;
+    background: #eceff1 !important; }
+
+  section.hero paper-menu,
+  section[hero] paper-menu {
+    --paper-menu-background-color: #ffffff; }
+
+  paper-tabs {
+    background-color: #ffffff;
+    color: #243238; }
+
+</style>

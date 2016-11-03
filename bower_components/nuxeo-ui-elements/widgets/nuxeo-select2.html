@@ -1,0 +1,83 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="nuxeo-select2-behavior.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
+
+<!--
+`nuxeo-select2`
+@group Nuxeo Widgets
+@element nuxeo-select2
+-->
+
+<dom-module id="nuxeo-select2">
+ <template>
+   <style>
+     :host {
+       display: block;
+     }
+   </style>
+
+   <nuxeo-operation id="op" op="[[operation]]"></nuxeo-operation>
+
+   <input type="hidden" id="select2">
+
+ </template>
+ <script>
+   (function() {
+     'use strict';
+
+     Polymer({
+       is: 'nuxeo-select2',
+       behaviors: [Nuxeo.Select2Behavior],
+
+       properties: {
+
+        operation: String,
+
+        params: {
+          type: Object
+        },
+
+        queryResultsFilter: Function
+       },
+
+       ready: function() {
+         this._initSelect2(this.$.select2);
+       },
+
+      // Implements abstract Nuxeo.Select2 methods
+      _query: function(query) {
+        var params = this.params || {};
+        params.searchTerm = query.term;
+        this.$.op.params = params;
+
+        this.$.op.execute().then(function(response) {
+          var results = Array.isArray(response.entries) ? response.entries : response;
+          if (this.queryResultsFilter) {
+            results = results.filter(this.queryResultsFilter);
+          }
+          query.callback({
+            results: results
+          });
+        }.bind(this));
+      }
+     });
+   })();
+ </script>
+</dom-module>

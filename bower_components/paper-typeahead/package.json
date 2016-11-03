@@ -1,0 +1,16 @@
+{
+  "name": "paper-typeahead",
+  "version": "v0.2.0",
+  "scripts": {
+    "test": "jscs *.js"
+  },
+  "dependencies": {
+    "@polymer/polymer": "^1.2.5-npm-test.2",
+    "@polymer/iron-elements": "0.0.3",
+    "@polymer/paper-elements": "0.0.3"
+  },
+  "devDependencies": {
+    "jscs": "^2.2.1",
+    "polyserve": "^0.5.0"
+  }
+}

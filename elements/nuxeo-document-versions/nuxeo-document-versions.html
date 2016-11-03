@@ -1,0 +1,283 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="nuxeo-document-versions-list.html">
+<link rel="import" href="nuxeo-document-create-version.html">
+
+<!--
+`nuxeo-document-versions`
+@group Nuxeo UI
+@element nuxeo-document-versions
+-->
+<dom-module id="nuxeo-document-versions">
+
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      .toggle {
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .toggle-text {
+        display: inline-block;
+        padding: 4px 0 4px 8px;
+      }
+
+      .toggle-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      #list-items {
+        overflow: auto;
+        width: 200px;
+        max-height: 400px;
+      }
+
+      .list-actions {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        border-top: 1px solid var(--divider-color);
+        padding: 8px;
+      }
+
+      .version {
+        @apply(--layout-vertical);
+        @apply(--layout-start);
+        padding: 8px;
+        cursor: pointer;
+        border-top: 1px solid var(--divider-color);
+      }
+
+      .version .row {
+        @apply(--layout-horizontal);
+        @apply(--layout-start);
+        margin: 0;
+        padding: 0;
+      }
+
+      .version .row ::content * {
+        display: inline-block;
+        text-align: left;
+      }
+
+      .version .title {
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .version .modified {
+        font-size: 12px;
+        margin-top: 4px;
+        color: var(--nuxeo-text-light);
+      }
+
+      .version .latest {
+        margin: 8px 0;
+      }
+
+      iron-scroll-threshold {
+        display: none;
+      }
+
+    </style>
+
+    <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
+    </nuxeo-operation>
+
+    <nuxeo-page-provider id="provider"
+      query="[[query]]" page-size="[[pageSize]]"
+      page="{{page}}"
+      sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
+      schemas="dublincore,common,uid">
+    </nuxeo-page-provider>
+
+    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]">
+    </nuxeo-document-create-version>
+
+    <div hidden$="[[!hasVersions(document)]]">
+      <nuxeo-tag class="toggle" on-tap="_showList">
+        <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
+        <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
+      </nuxeo-tag>
+      <nuxeo-document-versions-list id="list" document="[[document]]">
+        <div id="list-items">
+          <template is="dom-if" if="[[document.isVersion]]">
+            <div id="version-latest" class="version" on-tap="_showLatest">
+              <div class="row title latest">[[_labelLatest(latest)]]</div>
+            </div>
+          </template>
+          <template is="dom-repeat" items="[[versions]]" as="item">
+            <div id="version-id-[[index]]" class="version" on-tap="_showVersion">
+              <div class="row title">[[_labelTitle(item)]]</div>
+              <div class="row modified">[[_labelModified(item)]]</div>
+            </div>
+          </template>
+        </div>
+        <div class="list-actions" hidden$="[[_isCreateDisabled(document)]]">
+          <nuxeo-document-create-version document="[[document]]" on-dialog-closed="_hideList">
+          </nuxeo-document-create-version>
+        </div>
+      </nuxeo-document-versions-list>
+      <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500"
+                             on-lower-threshold="_loadMore">
+      </iron-scroll-threshold>
+    </div>
+
+    <template is="dom-if" if="[[document.isVersion]]">
+      <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
+    </template>
+    <template is="dom-repeat" items="[[versions]]" as="item">
+      <paper-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</paper-tooltip>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-versions',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        properties: {
+          document: Object,
+          latest: Object,
+          versions: {
+            type: Array,
+            value: [],
+            notify: true
+          },
+          query: String,
+          page: {
+            type: Number,
+            value: 0
+          },
+          pageSize: {
+            type: Number,
+            value: 100
+          }
+        },
+        observers: [
+          '_update(document)'
+        ],
+
+        _update: function() {
+          if (this.document) {
+            if (this.document.isVersion) {
+              this.$.opGetLatest.execute().then(function() {
+                this._query(this.latest.uid);
+              }.bind(this));
+            } else {
+              this._query(this.document.uid);
+            }
+          }
+        },
+
+        _isCreateDisabled: function(doc) {
+          return !doc || !doc.isCheckedOut;
+        },
+
+        _query: function(id) {
+          this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '"';
+          this.page = 0;
+          this._loadMore();
+        },
+
+        _loadMore: function() {
+          this.$.scrollThreshold.clearTriggers();
+          if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
+            if (this.page === 0) {
+              this.set('versions', []);
+            }
+            this.page = this.page + 1;
+            this.$.provider.fetch().then(function(results) {
+              results.entries.forEach(function(doc) {
+                this.push('versions', doc);
+              }.bind(this));
+            }.bind(this));
+          }
+        },
+
+        _showList: function() {
+          this.$.list.open();
+        },
+
+        _hideList: function() {
+          this.$.list.close();
+        },
+
+        _showLatest: function() {
+          this._hideList();
+          page('/browse' + this.document.path + '@view');
+        },
+
+        _showVersion: function(e) {
+          this._hideList();
+          page('/doc/' + e.model.item.uid);
+        },
+
+        _labelLatest: function(doc) {
+          if (doc) {
+            var number = this.i18n('versions.version', '{0}.{1}',
+                doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
+              ((doc.isCheckedOut) ? '+ ' : ' ');
+            var label = (doc.isCheckedOut) ?
+              this.i18n('versions.unversioned', 'Unversioned Changes') :
+              this.i18n('versions.latest', 'Latest');
+            return number + label;
+          }
+          this._hideList();
+          return '';
+        },
+
+        _labelTitle: function(doc) {
+          if (doc) {
+            return this.i18n('versions.version', '{0}.{1}',
+              doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
+          }
+          return '';
+        },
+
+        _labelCheckedOut: function(doc) {
+          return (doc && doc.isCheckedOut) ? '+' : '';
+        },
+
+        _labelModified: function(doc) {
+          return this.i18n('versions.modified', 'Modified {0} by {1}',
+            moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
+        },
+
+        _date: function(date) {
+          return moment(date).format('DD/MM/YYYY HH:mm');
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

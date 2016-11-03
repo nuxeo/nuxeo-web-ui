@@ -1,0 +1,89 @@
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+
+<dom-module id="nuxeo-data-table-settings">
+  <template>
+    <style is="custom-style">
+      :host {
+        position: relative;
+      }
+
+      paper-icon-button {
+        position: absolute;
+        top: 1.5em;
+        right: 8px;
+        z-index: 1000;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 0;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <paper-dialog id="columnsSettingsPopup"
+      no-auto-focus>
+      <h1>[[i18n('label.datatable.column_settings', 'Columns Settings')]]</h1>
+      <div class="paper-content layout horizontal">
+        <div class="layout vertical">
+          <div class="row layout horizontal">
+            <div class="label-container">
+              <label></label>
+            </div>
+            <table>
+              <template is="dom-repeat" items="[[columns]]" as="column">
+                <tr>
+                  <td>
+                    <paper-checkbox checked="{{!column.hidden}}" on-tap="_columnDisplayChanged">
+                    </paper-checkbox>
+                  </td>
+                  <td>
+                    [[column.name]]
+                  </td>
+                </tr>
+              </template>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="buttons sep">
+       <paper-button on-tap="_resetSettings">[[i18n('label.datatable.column_settings.reset', 'Reset')]]</paper-button>
+       <paper-button dialog-dismiss>[[i18n('label.datatable.column_settings.close', 'Close')]]</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-icon-button noink icon="icons:settings" id="toggleColSettings"
+      on-tap="toggleColsSettingsPopup">
+    </paper-icon-button>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-data-table-settings',
+
+      behaviors: [Nuxeo.I18nBehavior],
+
+      properties: {
+        columns: {
+          type: Array,
+          notify: true,
+        },
+      },
+
+      toggleColsSettingsPopup: function() {
+        this.$$('#columnsSettingsPopup').toggle();
+      },
+
+      _columnDisplayChanged: function() {
+        this.fire('tableSettingsChanged');
+      },
+
+      _resetSettings: function() {
+        this.columns.forEach(function(column, idx) {
+          this.set('columns.' + idx + '.hidden', column.hiddenBack);
+        }, this);
+        this._columnDisplayChanged();
+      }
+
+    });
+  </script>
+</dom-module>

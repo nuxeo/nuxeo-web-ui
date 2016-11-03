@@ -1,0 +1,622 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Andre Justo <ajusto@nuxeo.com>
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="nuxeo-edit-password.html">
+<link rel="import" href="nuxeo-user-group-permissions-table.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../widgets/nuxeo-user-suggestion.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-toast/paper-toast.html">
+<link rel="import" href="../widgets/nuxeo-tag.html">
+
+<!--
+An element for managing a user.
+
+Example:
+
+    <nuxeo-user-management user="Administrator"></nuxeo-user-management>
+
+Used by `nuxeo-user-group-management`
+@group Nuxeo Elements
+@element nuxeo-user-management
+-->
+
+<dom-module id="nuxeo-user-management">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 1em;
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      h1 {
+        color: #213f7d;
+        margin: 0;
+      }
+
+      #addGroup,
+      #changePasswordButton,
+      #editUserButton,
+      #deleteUserButton {
+        padding: 0.2em 0.5em;
+      }
+
+      .backButton {
+        color: #00adff;
+      }
+
+      .card {
+        background: none #fff;
+        border: 1px solid #e6e9ef;
+        margin: 2em 0;
+        padding: 2em 1.5em;
+      }
+
+      .header {
+        margin-right: 16px;
+      }
+
+      .username {
+        margin: 10px 0 5px 5px;
+      }
+
+      .name {
+        font-weight: normal;
+        margin: 0 0 0 5px;
+      }
+
+      .avatar {
+        margin-top: 10px;
+      }
+
+      .activity-entry:nth-of-type(1) {
+        margin-top: 20px;
+      }
+
+      .activity-entry {
+        margin-top: 15px;
+      }
+
+      .remove {
+        color: red;
+        cursor: pointer;
+        font-size: 0.8em;
+        margin-left: 10px;
+        text-decoration: underline;
+      }
+
+      /* Table */
+      .table-wrapper {
+        margin-bottom: 3em;
+        position: relative;
+      }
+
+      .table-wrapper .floating-header {
+        position: absolute;
+      }
+
+      .table {
+        border: 1px solid #e7e7e7;
+        margin-top: 1em;
+      }
+
+      .table-row {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .table-row > div {
+        padding: 0.6em 1em;
+      }
+
+      .table-headers > div {
+        background-color: #f8f9fb;
+        font-weight: bold;
+      }
+
+      .table-actions {
+        width: 50px;
+      }
+
+      nuxeo-user-group-permissions-table {
+        margin-top: 1em;
+      }
+
+      paper-dialog[id="editUserDialog"] {
+        width: 80%;
+      }
+
+      paper-dialog paper-button {
+        border: 0;
+        padding: 0.7em 0.57em;
+      }
+
+      paper-dialog paper-button.primary {
+        background-color: var(--nuxeo-button-primary, #00adff);
+        color: #fff;
+      }
+
+      paper-dialog paper-button.primary:hover,
+      paper-dialog paper-button.primary:focus {
+        background-color: var(--nuxeo-button-primary-focus, #0079b3);
+        font-weight: inherit;
+        color: #fff !important;
+      }
+
+      form {
+        margin-bottom: 0;
+      }
+
+      form > h1 {
+        margin-bottom: 1em;
+      }
+
+      .required {
+        position: relative;
+      }
+
+      .required:before {
+        content:"*";
+        color: red;
+        display: block;
+        position: absolute;
+        left: -1em;
+        top: 0;
+      }
+
+      .label-container {
+        position: relative;
+        width: 200px;
+        font-weight: bold;
+      }
+
+      .row {
+        margin-bottom: 12px;
+      }
+
+      input {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        padding: 0.5em;
+      }
+
+      input[disabled] {
+        border: none;
+        box-shadow: none;
+        padding-left: 0;
+      }
+    </style>
+
+    <nuxeo-resource id="request" path="user/[[username]]" enrichers="userprofile" enrichers-entity="user">
+    </nuxeo-resource>
+
+    <nuxeo-resource id="editRequest" path="user/[[username]]"></nuxeo-resource>
+
+    <paper-toast id="toast"></paper-toast>
+
+    <div class="header horizontal layout">
+      <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
+      <iron-icon icon="social:person" class="avatar"></iron-icon>
+      <div class="layout vertical">
+        <h3 class="username">[[user.id]]</h3>
+        <h4 class="name">[[user.properties.firstName]] [[user.properties.lastName]]</h4>
+      </div>
+
+      <div class="horizontal layout flex center end-justified">
+
+        <!-- change password -->
+        <template is="dom-if" if=[[!readonly]]>
+          <paper-button id="changePasswordButton" class="horizontal layout center" on-tap="_toggleChangePassword">
+            <iron-icon icon="icons:lock"></iron-icon> [[i18n('command.change.password', 'Change Password')]]
+          </paper-button>
+        </template>
+        <paper-dialog id="changePasswordDialog" modal>
+          <form is="iron-form" id="changePasswordForm" class="vertical layout">
+            <h1>[[i18n('command.change.password', 'Change Password')]]</h1>
+            <nuxeo-edit-password required id="passwordEditor"></nuxeo-edit-password>
+          </form>
+          <div class="buttons">
+            <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button class="primary" on-tap="_submitChangePassword">
+              [[i18n('command.saveChanges', 'Save Changes')]]
+            </paper-button>
+          </div>
+        </paper-dialog>
+
+        <!-- edit -->
+        <template is="dom-if" if=[[!readonly]]>
+          <paper-button id="editUserButton" class="horizontal layout center" on-tap="_toggleEditUser">
+            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('label.userManager.editUser', 'Edit')]]
+          </paper-button>
+        </template>
+        <paper-dialog id="editUserDialog" modal>
+          <form is="iron-form" id="editUserForm" class="vertical layout">
+            <h1>[[i18n('label.userManager.editUserTitle', 'Edit User')]]</h1>
+            <div class="row layout horizontal">
+              <div class="label-container">
+                <label>[[i18n('username', 'Username')]]</label>
+              </div>
+              <div class="horizontal layout flex">
+                <input value="[[user.properties.username]]" class="flex" required disabled>
+              </div>
+            </div>
+            <nuxeo-edit-user id="userEditor"></nuxeo-edit-user>
+          </form>
+          <div class="buttons">
+            <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button class="primary" on-tap="_submitEditUser">
+              [[i18n('command.saveChanges', 'Save Changes')]]
+            </paper-button>
+          </div>
+        </paper-dialog>
+
+        <!-- delete -->
+        <template is="dom-if" if=[[!readonly]]>
+          <paper-button id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
+            <iron-icon icon="icons:delete"></iron-icon> [[i18n('command.delete', 'Delete')]]
+          </paper-button>
+        </template>
+        <paper-dialog id="deleteUserDialog" modal>
+          <div class="horizontal layout center">
+            [[i18n('label.userManager.deleteConfirm', 'Do you really want to delete this user?')]]
+          </div>
+          <div class="buttons">
+            <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+            <paper-button class="primary" on-tap="_deleteUser">[[i18n('label.yes', 'Yes')]]</paper-button>
+          </div>
+        </paper-dialog>
+
+      </div>
+    </div>
+
+    <nuxeo-view-user id="userViewer" user="[[user]]"></nuxeo-view-user>
+
+    <!-- groups -->
+    <div class="table-wrapper">
+      <div class="layout horizontal">
+        <h1 class="flex">[[i18n('label.groupManager.groups', 'Groups')]]</h1>
+        <template is="dom-if" if=[[!readonly]]>
+          <paper-button id="addGroup" class="flex-end" on-tap="_toggleEditGroups">
+            <iron-icon icon="add"></iron-icon> [[i18n('label.security.addToGroup', 'Add to Group')]]
+          </paper-button>
+        </template>
+      </div>
+      <div class="card layout vertical" hidden$="[[!showEditGroups]]">
+        <nuxeo-user-suggestion id="picker" class="flex"
+                               search-type="GROUP_TYPE"
+                               placeholder="[[i18n('label.security.searchGroups', 'Search for Groups')]]"
+                               value="{{selectedGroup}}"
+                               selected-items="{{selectedGroup}}"
+                               result-formatter="[[resultFormatter]]">
+        </nuxeo-user-suggestion>
+        <template is="dom-repeat" items="[[activity]]">
+          <div class="activity-entry">
+            [[i18n('label.userManager.memberOf', '{0} is now member of', user.id)]]
+            <nuxeo-tag icon="social:people">[[item.label]]</nuxeo-tag>
+            <span class="remove" on-tap="_toggleDialog">[[i18n('label.userManager.remove', 'Remove')]]</span>
+          </div>
+        </template>
+      </div>
+      <div class="table">
+        <div class="table-row table-headers">
+          <div class="flex">[[i18n('label.name', 'Name')]]</div>
+          <div class="flex-4">[[i18n('label.security.identifier', 'Identifier')]]</div>
+          <div class="table-actions">&nbsp;</div>
+        </div>
+        <template is="dom-if" if=[[!empty]]>
+          <template is="dom-repeat" items="[[groups]]">
+            <div class="table-row">
+              <div class="flex">
+                <nuxeo-tag icon="social:people">[[item.label]]</nuxeo-tag>
+              </div>
+              <div class="flex-4">[[item.name]]</div>
+              <div class="table-actions">
+                <template is="dom-if" if=[[!readonly]]>
+                  <paper-icon-button icon="icons:clear"
+                                     title="[[i18n('label.userManager.removeFrom', 'Remove from {0}', item.label)]]"
+                                     on-tap="_toggleDialog">
+                  </paper-icon-button>
+                </template>
+              </div>
+            </div>
+          </template>
+        </template>
+        <template is="dom-if" if=[[empty]]>
+          <div class="table-row">
+            <div>[[i18n('label.userManager.noSearchResults', 'No results.')]]</div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- local permissions -->
+    <div class="table-wrapper">
+      <h1 class="floating-header">[[i18n('label.permissions.localPermissions', 'Local Permissions')]]</h1>
+      <nuxeo-user-group-permissions-table entity="[[username]]" readonly="[[readonly]]"></nuxeo-user-group-permissions-table>
+    </div>
+    <template is="dom-repeat" items="[[groups]]">
+      <div class="table-wrapper">
+        <h1 class="floating-header">[[i18n('label.permissions.entityPermissions', '{0} permissions', item.name)]]</h1>
+        <nuxeo-user-group-permissions-table entity="[[item.name]]" readonly="[[readonly]]"></nuxeo-user-group-permissions-table>
+      </div>
+    </template>
+    <paper-dialog id="dialog" modal class="vertical layout">
+      <div class="horizontal layout">
+        [[i18n('label.userManager.removeUserFromGroupConfirm', 'Do you really want to remove {0} from {1}?', user.id, _removedGroup.name)]]
+      </div>
+      <div class="buttons horizontal end-justified layout">
+        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button dialog-confirm on-tap="_remove" class="primary">[[i18n('label.yes', 'Yes')]]</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-user-management',
+
+        behaviors: [Nuxeo.I18nBehavior],
+
+        properties: {
+          username: {
+            type: String,
+            observer: '_fetch'
+          },
+
+          user: Object,
+
+          groups: {
+            type: Object,
+            computed: '_computeGroups(user)'
+          },
+
+          selectedGroup: {
+            type: Object,
+            observer: '_groupSelected'
+          },
+
+          activity: {
+            type: Array,
+            value: []
+          },
+
+          resultsFilter: {
+            type: Function,
+            value: function() {
+              return this._resultsFilter.bind(this);
+            }
+          },
+
+          resultFormatter: {
+            type: Function,
+            value: function() {
+              return this._resultFormatter.bind(this);
+            }
+          },
+
+          showEditGroups: {
+            type: Boolean,
+            value: false
+          },
+
+          empty: Boolean,
+
+          _removedGroup: Object,
+
+          readonly: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          }
+        },
+
+        observers: [
+          '_userRemovedFromGroup(groups.splices)'
+        ],
+
+        ready: function() {
+          this.$.picker.$$('nuxeo-select2').queryResultsFilter = this.resultsFilter;
+          this.$.editUserForm.addEventListener('iron-form-presubmit', function(event) {
+            event.preventDefault();
+            this._saveUser();
+          }.bind(this));
+          this.$.changePasswordForm.addEventListener('iron-form-presubmit', function(event) {
+            event.preventDefault();
+            this._savePassword();
+          }.bind(this));
+        },
+
+        _fetch: function() {
+          if (this.username) {
+            this.$.request.get().then(function(response) {
+              delete response.properties.password;
+              this.user = response;
+              this.activity = [];
+              this.showEditGroups = false;
+              this.selectedGroup = null;
+            }.bind(this));
+          }
+        },
+
+        _computeGroups: function() {
+          return this.user.extendedGroups.filter(function(group) {
+            if (this.user.properties.groups.indexOf(group.name) > -1) {
+              return group;
+            }
+          }.bind(this));
+        },
+
+        _groupSelected: function() {
+          if (this.selectedGroup) {
+            var group = {
+              'name': this.selectedGroup.groupname,
+              'label': this.selectedGroup.grouplabel
+            };
+            this.push('activity', group);
+            this.$.request.path = 'user/' + this.user.id + '/group/' + group.name;
+            this.$.request.post().then(function(response) {
+              this.user = response;
+              this._toast(this.i18n('label.userManager.addedUserToGroup', '{0} was added to {1}',
+                                    this.user.id, group.name));
+            }.bind(this));
+          }
+          this.selectedGroup = null;
+        },
+
+        _remove: function() {
+          var group = this._removedGroup;
+          this.$.request.path = 'user/' + this.user.id + '/group/' + group.name;
+          return this.$.request.remove().then(function() {
+            this._removeRecent(group.name);
+            this._removeFromGroup(group.name);
+            this._toast(this.i18n('label.userManager.removeUserFromGroup', '{0} was removed from {1}',
+                                  this.user.id, group.name));
+          }.bind(this));
+        },
+
+        _removeRecent: function(group) {
+          // remove from 'recent', if it exists
+          for (var i = 0; i < this.activity.length; i++) {
+            if (this.activity[i].name === group) {
+              this.splice('activity', i, 1);
+              return;
+            }
+          }
+        },
+
+        _removeFromGroup: function(group) {
+          // DELETE request does not return the user object, so when we remove
+          // we need to manually update the user model and the list of groups
+          var idx = this.user.properties.groups.indexOf(group);
+          this.user.properties.groups.splice(idx, 1);
+          for (var i = 0; i < this.groups.length; i++) {
+            if (this.groups[i].name === group) {
+              this.splice('groups', i, 1);
+              return;
+            }
+          }
+        },
+
+        _userRemovedFromGroup: function() {
+          this.empty = this.groups.length === 0;
+        },
+
+        _toggleEditGroups: function() {
+          this.showEditGroups = !this.showEditGroups;
+        },
+
+        _toggleDialog: function(e) {
+          this._removedGroup = e.model.item;
+          this.$.dialog.toggle();
+        },
+
+        _toggleChangePassword: function() {
+          this.$.changePasswordDialog.toggle();
+        },
+
+        _submitChangePassword: function() {
+          this.$.changePasswordForm.submit();
+        },
+
+        _savePassword: function() {
+          this.$.changePasswordDialog.toggle();
+          this.$.editRequest.data = JSON.parse(JSON.stringify(this.user));
+          this.$.editRequest.data.properties.password = this.$.passwordEditor.password;
+          this.$.editRequest.put().then(function(response) {
+            this.user = response;
+            this._toast(this.i18n('label.userManager.password.changed', 'Password changed'));
+            if (!!this.$.passwordEditor.resetFields) {
+              this.$.passwordEditor.resetFields();
+            }
+          }.bind(this));
+        },
+
+        _toggleEditUser: function() {
+          this.$.userEditor.user = JSON.parse(JSON.stringify(this.user.properties));
+          this.$.editUserDialog.toggle();
+        },
+
+        _submitEditUser: function() {
+          this.$.editUserForm.submit();
+        },
+
+        _saveUser: function() {
+          this.$.editUserDialog.toggle();
+          var editedUser = JSON.parse(JSON.stringify(this.user));
+          editedUser.properties = this.$.userEditor.user;
+          this.$.editRequest.data = editedUser;
+          this.$.editRequest.put().then(function(response) {
+            this.user = response;
+            this._toast(this.i18n('label.userManager.user.updated', 'User updated'));
+          }.bind(this));
+        },
+
+        _toggleDeleteUser: function() {
+          this.$.deleteUserDialog.toggle();
+        },
+
+        _deleteUser: function() {
+          this.$.deleteUserDialog.toggle();
+          this.$.editRequest.remove();
+          this._goHome();
+        },
+
+        _goHome: function() {
+          this.fire('goHome');
+        },
+
+        _resultsFilter: function(entry) {
+          for (var i = 0; i < this.groups.length; i++) {
+            if (entry.id === this.groups[i].name) {
+              return false;
+            }
+          }
+          return true;
+        },
+
+        _resultFormatter: function(item) {
+          return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
+        },
+
+        _toast: function(msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
+        }
+      });
+    })();
+  </script>
+</dom-module>

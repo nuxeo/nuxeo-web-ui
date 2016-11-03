@@ -1,0 +1,90 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-storage`
+@group Nuxeo UI
+@element nuxeo-document-storage
+-->
+<dom-module id="nuxeo-document-storage">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <iron-localstorage name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
+    </iron-localstorage>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-document-storage',
+
+      properties: {
+        name: 'nuxeo-document-storage',
+        documents: {
+          type: Array,
+          notify: true
+        },
+      },
+
+      initialize: function() {
+        this.documents = [];
+      },
+
+      add: function(doc) {
+        if (this.contains(doc)) {
+          return;
+        }
+        return this.push('documents', {
+          uid: doc.uid,
+          title: doc.title,
+          type: doc.type,
+          path: doc.path,
+          lastViewed: new Date()
+        });
+      },
+
+      contains: function(doc) {
+        return this.documents && this._indexOf(doc) !== -1;
+      },
+
+      remove: function(doc) {
+        this.splice('documents', this._indexOf(doc), 1);
+      },
+
+      _indexOf: function(doc) {
+        return this.documents.findIndex(function(e) {
+          return e.uid === doc.uid;
+        });
+      },
+
+      ready: function() {
+        this.$.nxcon.connect().then(function(res) {
+          this.name =  res.id + '-' + this.name;
+        }.bind(this));
+      }
+
+    });
+  </script>
+</dom-module>

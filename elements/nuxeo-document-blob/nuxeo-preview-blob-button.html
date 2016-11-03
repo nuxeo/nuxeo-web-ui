@@ -1,0 +1,79 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+
+<!--
+`nuxeo-preview-blob-button`
+@group Nuxeo UI
+@element nuxeo-preview-blob-button
+-->
+<dom-module id="nuxeo-preview-blob-button">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-dialog {
+        width: 100%;
+        height: 100%;
+      }
+
+    </style>
+
+    <paper-icon-button id="button" noink icon="icons:visibility" on-tap="_showPreview"></paper-icon-button>
+    <paper-tooltip for="button">[[i18n('previewBlobButton.tooltip')]]</paper-tooltip>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <nuxeo-document-preview id="preview"></nuxeo-document-preview>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-preview-blob-button',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          document: Object,
+          xpath: String
+        },
+
+        ready: function() {
+          document.body.appendChild(this.$.dialog);
+        },
+
+        _showPreview: function() {
+          var preview = this.$.preview;
+          preview.document = this.document;
+          preview.xpath = (this.xpath === 'file:content') ? this.xpath : this.xpath + '/file';
+          preview.style.height = '100%';
+          preview.style.margin = '0';
+          preview.style.padding = '0';
+          this.$.dialog.toggle();
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

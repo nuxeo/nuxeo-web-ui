@@ -1,0 +1,58 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+<script>
+  var Nuxeo = Nuxeo || {};
+  Nuxeo.FiltersBehavior = {
+
+    isFavorite: function(doc) {
+      return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
+    },
+
+    isCollectionMember: function(doc) {
+      return (doc) ? doc.facets.indexOf('NotCollectionMember') === -1 : false;
+    },
+
+    hasFacet: function(doc, facet) {
+      return doc && doc.facets && doc.facets.indexOf(facet) !== -1;
+    },
+
+    hasPermission: function(doc, permission) {
+      return doc && doc.contextParameters && doc.contextParameters.permissions &&
+          doc.contextParameters.permissions.indexOf(permission) !== -1;
+    },
+
+    hasContent: function(doc) {
+      return (doc) ? doc.properties['file:content'] : false;
+    },
+
+    hasAttachments: function(doc) {
+      return doc && doc.properties && doc.properties['files:files'] && doc.properties['files:files'].length > 0;
+    },
+
+    hasVersions: function(doc) {
+      return doc && (doc.properties['uid:major_version'] > 0 || doc.properties['uid:minor_version'] > 0);
+    },
+
+    hasCollections: function(doc) {
+      return doc && doc.contextParameters && doc.contextParameters.collections &&
+          doc.contextParameters.collections.length > 0;
+    }
+
+  };
+</script>

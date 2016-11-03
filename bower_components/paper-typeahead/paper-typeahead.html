@@ -1,0 +1,151 @@
+<!--
+
+Copyright 2016 Google Inc. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+### Styling
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-font-common-base`| default font base | `default`
+`--paper-input-container-color`| input container text color | `--secondary-text-color`
+`--paper-typeahead-results-layer-max-height` | max height for the results | `auto`
+`--paper-typeahead-results` | typeahead result mixin | `{}`
+`--paper-typeahead-result-selected-background` | typeahead result selected background | `--paper-indigo-50`
+`--paper-typeahead-result-pressed` | paper item pressed mixin | `{}`
+`--paper-typeahead-divider-color` | paper item result color divider | `--divider-color`
+`--paper-typeahead-result-min-height` | min height of a result |  `30px`
+`--paper-typeahead-selected-weight` | font-weight of a single result | `normal`
+`--paper-typeahead-result-selected` | selected style mixin | `{}`
+`--paper-typeahead-result-focused` | focused style mixin | `{}`
+
+
+@demo demo/index.html
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input-container.html">
+<link rel="import" href="../paper-input/paper-input-error.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="../iron-selector/iron-selectable.html">
+<link rel="import" href="../iron-behaviors/iron-control-state.html">
+<link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="../iron-input/iron-input.html">
+<link rel="import" href="../paper-input/paper-input-behavior.html">
+
+<dom-module id="paper-typeahead">
+  <template>
+    <style>
+      :host {
+        @apply(--paper-font-common-base);
+        display: block;
+      }
+      input::-webkit-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+      input:-moz-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+      input::-moz-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+      input:-ms-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+      paper-material {
+        border-radius: 0 0 2px 2px;
+        width: 100%;
+        margin-top: 2px;
+        position: absolute;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        max-height: var(--paper-typeahead-results-layer-max-height, auto);
+        @apply(--paper-typeahead-results);
+      }
+      .iron-selected:not(paper-input-container) {
+        background: var(--paper-typeahead-result-selected-background, --paper-indigo-50);
+      }
+      paper-item[pressed] {
+        @apply(--paper-typeahead-result-pressed);
+      }
+      paper-item {
+        cursor: pointer;
+        position: relative;
+        @apply(--paper-typeahead-result);
+        --paper-item-min-height: var(--paper-typeahead-result-min-height, 30px);
+        --paper-item-selected-weight: var(--paper-typeahead-selected-weight, normal);
+        --paper-item-selected: var(--paper-typeahead-result-selected);
+        --paper-item-focused: var(--paper-typeahead-result-focused);
+      }
+      paper-item:not(:last-of-type) {
+        border-bottom: solid 1px var(--paper-typeahead-divider-color, --divider-color);
+      }
+      paper-item:focus:before {
+        display: none;
+      }
+      [hidden] {
+        display:none;
+      }
+    </style>
+    <paper-input-container
+      class="selectable"
+      no-label-float="[[noLabelFloat]]"
+      always-float-label="[[_computeAlwaysFloatLabel(alwaysFloatLabel,placeholder)]]"
+      auto-validate$="[[autoValidate]]"
+      disabled$="[[disabled]]"
+      invalid="[[invalid]]">
+      <label hidden$="[[!label]]" on-tap="_onLabelTap">[[label]]</label>
+      <input is="iron-input" id="input"
+        aria-labelledby$="[[_ariaLabelledBy]]"
+        aria-describedby$="[[_ariaDescribedBy]]"
+        disabled$="[[disabled]]"
+        bind-value="{{value}}"
+        value="{{typedValue::input}}"
+        invalid="{{invalid}}"
+        prevent-invalid-input="[[preventInvalidInput]]"
+        allowed-pattern="[[allowedPattern]]"
+        validator="[[validator]]"
+        type$="[[type]]"
+        pattern$="[[pattern]]"
+        required$="[[required]]"
+        autocomplete$="[[autocomplete]]"
+        autofocus$="[[autofocus]]"
+        inputmode$="[[inputmode]]"
+        minlength$="[[minlength]]"
+        maxlength$="[[maxlength]]"
+        min$="[[min]]"
+        max$="[[max]]"
+        step$="[[step]]"
+        name$="[[name]]"
+        placeholder$="[[placeholder]]"
+        readonly$="[[readonly]]"
+        size$="[[size]]"
+        autocapitalize$="[[autocapitalize]]"
+        autocorrect$="on"
+        on-change="_onChange">
+        <paper-material hidden$="[[_hideResults]]" elevation="[[elevation]]"
+            on-mousedown="_mouseDownItems" on-mouseleave="_mouseleaveItems" tabindex="-1">
+          <template is="dom-repeat" sort="[[sortFn]]" items="[[filteredItems]]" on-dom-change="_updateItems">
+            <paper-item on-mouseenter="_mouseenterItem" class="selectable" tabindex="-1">
+              <span>[[item]]</span>
+            </paper-item>
+          </template>
+        </paper-material>
+        <paper-input-error tabindex="-1">[[errorMessage]]</paper-input-error>
+    </paper-input-container>
+  </template>
+</dom-module>
+<script src="paper-typeahead.js"></script>

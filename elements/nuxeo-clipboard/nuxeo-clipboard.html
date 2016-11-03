@@ -1,0 +1,163 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-clipboard`
+@group Nuxeo UI
+@element nuxeo-clipboard
+-->
+<dom-module id="nuxeo-clipboard">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-vertical);
+      }
+
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--nuxeo-sidebar-item-theme);
+        @apply(--nuxeo-sidebar-item-link);
+      }
+
+      .ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+      }
+
+      .remove {
+        padding: 0;
+        width: 1.5em;
+        height: 1.5em;
+      }
+
+      .toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+
+    </style>
+    <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
+
+    <template is="dom-if" if="[[!documents.length]]">
+      <span class="empty">[[i18n('clipboard.empty', 'Your clipboard is empty.')]]</span>
+    </template>
+
+    <template is="dom-repeat" items="[[documents]]" as="document">
+      <div class="item">
+        <span class="flex">
+          <iron-icon icon="receipt" item-icon></iron-icon>
+          <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
+        </span>
+        <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
+      <div class="toolbar">
+          <paper-icon-button id="paste" icon="content-copy" on-tap="execute" data-op="Document.Copy"></paper-icon-button>
+          <paper-tooltip for="paste">[[i18n('clipboard.copy', 'Copy')]]</paper-tooltip>
+          <paper-icon-button id="move" icon="content-cut" on-tap="execute" data-op="Document.Move"></paper-icon-button>
+          <paper-tooltip for="move">[[i18n('clipboard.move', 'Move')]]</paper-tooltip>
+      </div>
+    </template>
+
+    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-clipboard',
+
+      properties: {
+        documents: {
+          type: Array,
+          notify: true
+        },
+        targetDocument: {
+          type: Object
+        }
+      },
+
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+      add: function(doc) {
+        return this.$.storage.add(doc);
+      },
+
+      contains: function(doc) {
+        return this.$.storage.contains(doc);
+      },
+
+      remove: function(doc) {
+        return this.$.storage.remove(doc);
+      },
+
+      canPaste: function(documents, doc) {
+        return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
+      },
+
+      execute: function(evt) {
+        this.$.op.op = evt.currentTarget.dataset.op;
+        this.$.op.execute().then(function() {
+          this.documents = [];
+          this.fire('document-updated');
+        }.bind(this));
+      },
+
+      _remove: function(evt) {
+        this.remove(evt.model.document);
+      },
+
+      _indexOf: function(doc) {
+        return this.documents.findIndex(function(e) {
+          return e.uid === doc.uid;
+        });
+      },
+
+      _uids: function() {
+        if (this.documents && this.documents !== null) {
+          return this.documents.map(function(doc) {
+            return doc.uid;
+          }).join(',');
+        }
+        return '';
+      },
+
+      _opParams: function() {
+        if (this.targetDocument) {
+          return {
+            target: this.targetDocument.uid
+          };
+        }
+      }
+    });
+  </script>
+</dom-module>
