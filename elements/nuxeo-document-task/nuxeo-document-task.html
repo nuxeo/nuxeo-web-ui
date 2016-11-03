@@ -188,6 +188,7 @@ Contributors:
             parent.appendChild(el);
           }
           // setup data binding
+          el.document = this.task.targetDocumentIds[0];
           el.task = this.task;
           this._currentTaskElement = el;
         },
