@@ -52,6 +52,23 @@ Contributors:
         --iron-icon-width: .9rem;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
       .task-body {
         padding: 0;
         overflow-y: auto;
@@ -65,10 +82,6 @@ Contributors:
 
       .task-buttons {
         margin-top: 2em;
-      }
-
-      .task-buttons paper-button {
-        padding: 0 0.5em;
       }
 
       .action-property {
