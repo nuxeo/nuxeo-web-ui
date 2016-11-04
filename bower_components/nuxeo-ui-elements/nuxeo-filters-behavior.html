@@ -24,6 +24,11 @@ Contributors:
       return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
     },
 
+    isSubscribed: function(doc) {
+      return doc && doc.contextParameters.subscribedNotifications &&
+        doc.contextParameters.subscribedNotifications.length > 0;
+    },
+
     isCollectionMember: function(doc) {
       return (doc) ? doc.facets.indexOf('NotCollectionMember') === -1 : false;
     },
