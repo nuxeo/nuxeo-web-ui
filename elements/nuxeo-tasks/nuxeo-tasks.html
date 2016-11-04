@@ -33,6 +33,14 @@ Contributors:
         display: block;
       }
 
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
+      }
+
       paper-header-panel {
         height: 100vh;
       }
@@ -112,9 +120,9 @@ Contributors:
       }
 
       .task-header {
-        background-color: #fafcfd;
-        border: 1px solid #e5e5e5;
-        color: var(--dark-primary-color);
+        background-color: #fff;
+        border: 1px solid var(--nuxeo-border);
+        color: var(--nuxeo-text-default);
         margin-bottom: .5em;
         padding: .5em;
       }
@@ -124,15 +132,26 @@ Contributors:
         margin-left: 1em;
       }
 
-      #graphDialog paper-button {
-        position: absolute;
-        bottom: 0;
-        right: 0;
+      paper-button:hover,
+      paper-icon-button:hover {
+        @apply(--nx-button-hover);
       }
 
-      .graph-container {
-        padding: 0.5rem 2rem;
-        position: relative;
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled], {
+        @apply(--nx-button-disabled);
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
 
       nuxeo-workflow-graph {
@@ -162,28 +181,28 @@ Contributors:
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout vertical">
             <div class="layout horizontal center task-header">
-              <paper-icon-button icon="icons:chevron-left" class="prev-button" on-tap="_prev" disabled$="[[_isFirst(_currentIdx, tasks)]]"></paper-icon-button>
+              <paper-icon-button noink icon="icons:chevron-left" class="prev-button" on-tap="_prev" disabled$="[[_isFirst(_currentIdx, tasks)]]"></paper-icon-button>
               <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
               <div class="layout horizontal center flex">
                 <h3 class="task-name">[[i18n(current.name)]]</h3>
                 <span class="workflow-name">[[current.workflowModelName]]</span>
               </div>
               <paper-dialog id="graphDialog" with-backdrop>
-                <div class="graph-container">
-                  <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
+                <paper-dialog-scrollable>
+                  <div class="graph-container">
+                    <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
+                  </div>
+                </paper-dialog-scrollable>
+                <div class="buttons">
+                  <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
                 </div>
-                <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
               </paper-dialog>
               <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph', 'View Graph')]]</paper-button>
-              <paper-icon-button icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
+              <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
               <div class="vertical layout flex-2 document-view">
-                <paper-card>
-                  <div class="card-content">
-                    <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
-                  </div>
-                </paper-card>
+                <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
               </div>
               <div class="flex task-view">
                 <paper-card>

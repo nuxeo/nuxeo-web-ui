@@ -34,6 +34,19 @@ Contributors:
         @apply(--layout-vertical);
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
            z-index: 200;
@@ -66,6 +79,7 @@ Contributors:
         height: var(--nuxeo-document-creation-form-button-height, 128px);
         color: var(--nuxeo-text-default);
         box-shadow: none;
+        background-color: #fff;
         border: 1px solid var(--divider-color);
       }
 
@@ -84,6 +98,10 @@ Contributors:
       #editor {
         margin: 0 32px;
         overflow-y: auto;
+      }
+
+      #document-create {
+        margin-bottom: 2.5em;
       }
 
       .heading {
@@ -159,7 +177,7 @@ Contributors:
             </div>
           </form>
         </div>
-        <div class="buttons sep horizontal end-justified layout">
+        <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>

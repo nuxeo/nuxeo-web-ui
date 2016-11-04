@@ -29,11 +29,16 @@ Contributors:
       paper-fab {
         width: var(--nuxeo-document-create-button-width, 56px);
         height: var(--nuxeo-document-create-button-height, 56px);
-        color: #ffffff;
-        --paper-fab-background: var(--nuxeo-primary-color);
-        --paper-fab-keyboard-focus-background: var(--dark-primary-color);
+        color: var(--nuxeo-button-primary-text);
+        --paper-fab-background: var(--nuxeo-button-primary);
+        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
         @apply(--nuxeo-document-create-button);
         transition: color 0.25s ease-in-out;
+      }
+
+      paper-fab:hover,
+      paper-fab:focus {
+        background-color: var(--nuxeo-button-primary-focus);
       }
 
       #tray {

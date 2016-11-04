@@ -31,10 +31,16 @@ Contributors:
       }
 
       #createBtn {
-        --paper-fab-background: var(--nuxeo-primary-color);
-        --paper-fab-keyboard-focus-background: var(--nuxeo-secondary-color);
-        background-color: var(--nuxeo-document-create-shortcut-background-color);
+        color: var(--nuxeo-button-primary-text);
+        --paper-fab-background: var(--nuxeo-button-primary);
+        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
       }
+
+      paper-fab:hover,
+      paper-fab:focus {
+        background-color: var(--nuxeo-button-primary-focus);
+      }
+
     </style>
 
     <paper-fab mini

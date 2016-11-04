@@ -34,6 +34,35 @@ Contributors:
         display: block;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
+
+      .actions {
+        @apply(--nx-actions);
+      }
+
+      .actions paper-button {
+        @apply(--nx-actions-button);
+      }
+
       nuxeo-data-list {
         height: calc(100vh - 61px);
       }
@@ -127,16 +156,6 @@ Contributors:
         box-sizing: border-box;
         margin-bottom: 1rem;
         padding: 0 1rem;
-        width: 100%;
-      }
-
-      .clear {
-        background-color: #fafafa;
-        border-color: #fafafa;
-        width: 100%;
-      }
-
-      .reset {
         width: 100%;
       }
 
@@ -253,14 +272,12 @@ Contributors:
             <!-- Dynamic search form element will be inserted here -->
             <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
           </div>
-          <div class="layout vertical row">
-            <paper-button noink class="primary clear" raised on-click="_clear">
-              [[i18n('command.clear', 'Clear')]]
-            </paper-button>
-          </div>
-          <div class="layout vertical row" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
-            <paper-button noink class="reset" disabled$="[[!dirty]]" raised on-click="_reset">
+          <div class="row actions">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" on-click="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset', 'Reset')]]
+            </paper-button>
+            <paper-button noink class="primary clear" on-click="_clear">
+              [[i18n('command.clear', 'Clear')]]
             </paper-button>
           </div>
           <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
@@ -296,57 +313,45 @@ Contributors:
     </div>
 
     <paper-dialog id="saveDialog" with-backdrop>
-      <div class="vertical layout">
-        <h1>[[i18n('searchForm.savePopup.heading','Save Search')]]</h1>
-        <div>
-          <paper-input id="savedSearchTitle"
-                       label="[[i18n('searchForm.savePopup.label', 'Enter a name for your saved search')]]"
-                       autofocus
-                       no-label-float>
-          </paper-input>
-        </div>
-        <div class="buttons">
-         <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
-        </div>
+      <h2>[[i18n('searchForm.savePopup.heading','Save Search')]]</h2>
+      <paper-input id="savedSearchTitle"
+                   label="[[i18n('searchForm.savePopup.label', 'Enter a name for your saved search')]]"
+                   autofocus
+                   no-label-float>
+      </paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="renameDialog" with-backdrop>
-      <div class="vertical layout">
-        <h1>[[i18n('searchForm.renamePopup.heading', 'Rename Saved Search')]]</h1>
-        <div>
+        <h2>[[i18n('searchForm.renamePopup.heading', 'Rename Saved Search')]]</h2>
           <paper-input id="savedSearchRenameTitle"
                        label="[[i18n('searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
                        autofocus
                        no-label-float>
           </paper-input>
-        </div>
         <div class="buttons">
          <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
          <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
         </div>
-      </div>
     </paper-dialog>
 
     <paper-dialog id="shareDialog" with-backdrop>
-      <div class="vertical layout">
-        <h1>[[i18n('searchForm.shared.heading', 'Share Saved Search')]]</h1>
+        <h2>[[i18n('searchForm.shared.heading', 'Share Saved Search')]]</h2>
         <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
         <div class="buttons">
          <paper-button dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
         </div>
-      </div>
     </paper-dialog>
 
     <paper-dialog id="deleteDialog" with-backdrop>
-      <div class="vertical layout">
-        <h1>[[i18n('searchForm.delete.heading', 'Delete Saved Search?')]]</h1>
+        <p>[[i18n('searchForm.delete.heading', 'Delete Saved Search?')]]</p>
         <div class="buttons">
           <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
           <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes','Yes')]]</paper-button>
         </div>
-      </div>
     </paper-dialog>
   </template>
   <script>

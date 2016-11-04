@@ -25,9 +25,26 @@ Contributors:
 <dom-module id="nuxeo-document-edit">
   <template>
     <style>
-
       .actions {
-        border-top: 1px solid var(--nuxeo-border);
+        @apply(--nx-actions);
+      }
+
+      .actions paper-button {
+        @apply(--nx-actions-button);
+        max-width: 15em;
+      }
+
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
       }
 
       ::content label {
@@ -67,10 +84,6 @@ Contributors:
         margin-bottom: 8px;
       }
 
-      .actions {
-        margin-top: 16px;
-      }
-
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]"
@@ -88,7 +101,7 @@ Contributors:
         </div>
         <div class="actions">
           <paper-button on-click="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
-          <paper-button on-click="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
+          <paper-button on-click="_save" noink class="primary secondary btn-secondary" secondary>[[i18n('command.save')]]</paper-button>
         </div>
       </form>
     </div>

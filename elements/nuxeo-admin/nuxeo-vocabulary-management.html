@@ -54,6 +54,19 @@ Contributors:
         margin-left: 1.5em;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
       ::content .unfocused-line.paper-input-container {
         background-color: transparent;
       }
@@ -86,10 +99,6 @@ Contributors:
         margin: 1em 0 1em 0;
       }
 
-      .sep {
-        border-top: 1px solid var(--divider-color);
-      }
-
     </style>
 
     <nuxeo-resource id="directory" path="/directory"></nuxeo-resource>
@@ -107,13 +116,11 @@ Contributors:
             <div id="entry-edit">
               <!-- Dynamic layout element will be inserted here -->
             </div>
-            <div class="card-actions">
-              <div class="buttons sep">
-               <paper-button dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
-               <paper-button noink class="primary" on-tap="_save" >
-                 [[i18n('command.save', 'Save')]]
-               </paper-button>
-              </div>
+            <div class="actions">
+              <paper-button noink dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+              <paper-button noink class="primary" on-tap="_save" >
+               [[i18n('command.save', 'Save')]]
+              </paper-button>
             </div>
           </form>
         </div>
@@ -139,7 +146,7 @@ Contributors:
         </paper-card>
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button on-tap="_createEntry">
+            <paper-button class="primary" on-tap="_createEntry">
               <span>+ [[i18n('vocabularyManagement.addEntry', 'Add entry')]]</span>
             </paper-button>
           </div>
