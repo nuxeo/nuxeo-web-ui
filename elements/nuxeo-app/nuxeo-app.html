@@ -415,7 +415,7 @@ Contributors:
       <!-- main -->
       <paper-header-panel main>
 
-        <iron-pages selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
+        <iron-pages id="pages" selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible" class="flex">
 
           <nuxeo-page name="error" hidden$="[[!currentDocument]]">
             <div class="header"></div>
@@ -426,7 +426,9 @@ Contributors:
             </div>
           </nuxeo-page>
 
-          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
+          <div id="home" name="home">
+            <!-- dynamic home element loading -->
+          </div>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
@@ -457,7 +459,7 @@ Contributors:
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-parent-path="/default-domain"></nuxeo-document-create-popup>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
-    <nuxeo-keys keys="d" on-pressed="_showDashboard"></nuxeo-keys>
+    <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
     <nuxeo-keys keys="c" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
     <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
 
@@ -617,12 +619,30 @@ Contributors:
           this.$.loading.style.display = 'none';
         },
 
-        _focusMenu: function() {
-          this.$.menu.focus();
+        showHome: function() {
+          var url = this.resolveUrl('../nuxeo-home.html');
+          this.importHref(url,
+            // success
+            function() {
+              var el = document.createElement('nuxeo-home'),
+                  parent = this.$['home'];
+              parent.innerHTML = '';
+              parent.appendChild(el);
+              el.tasks = this.tasks;
+            }.bind(this),
+            // error handling
+            function() {
+              this.$.error.show('404',url, this.i18n('app.homeNotFound',
+                'Home layout not found'));
+              this.show('error');
+            }.bind(this)
+          );
+
+          this.show('home');
         },
 
-        _showDashboard: function() {
-          this.show('home');
+        _focusMenu: function() {
+          this.$.menu.focus();
         },
 
         _showSuggester: function() {
@@ -733,6 +753,10 @@ Contributors:
             this.$.tasks.get().then(function(response) {
               this.tasks = this._tmpTasks.concat(response.entries);
               this.taskCount = this.tasks.length;
+              var nxHomeEl = this.$.home.querySelector('nuxeo-home')
+              if (nxHomeEl) {
+                nxHomeEl.tasks = this.tasks;
+              }
             }.bind(this));
           }.bind(this));
         },
