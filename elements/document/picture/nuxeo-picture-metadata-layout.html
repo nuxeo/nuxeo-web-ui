@@ -36,20 +36,32 @@ Contributors:
       <div class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
-      <label>[[i18n('label.dublincore.nature')]]</label>
-      <div>[[document.properties.dc:nature]]</div>
-    </div>
+    <nuxeo-directory-suggestion role="widget"
+                                label="[[i18n('label.dublincore.nature')]]"
+                                directory-name="nature"
+                                value="{{document.properties.dc:nature}}"
+                                hidden$="[[!document.properties.dc:nature]]"
+                                readonly>
+    </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:subjects.length]]">
-      <label>[[i18n('label.dublincore.subjects')]]</label>
-      <div>[[document.properties.dc:subjects]]</div>
-    </div>
+    <nuxeo-directory-suggestion role="widget"
+                                label="[[i18n('label.dublincore.subjects')]]"
+                                directory-name="l10nsubjects"
+                                value="{{document.properties.dc:subjects}}"
+                                hidden$="[[!document.properties.dc:subjects.length]]"
+                                multiple="true"
+                                dbl10n="true"
+                                readonly>
+    </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
-      <label>[[i18n('label.dublincore.coverage')]]</label>
-      <div>[[document.properties.dc:coverage]]</div>
-    </div>
+    <nuxeo-directory-suggestion role="widget"
+                                label="[[i18n('label.dublincore.coverage')]]"
+                                directory-name="l10ncoverage"
+                                value="{{document.properties.dc:coverage}}"
+                                hidden$="[[!document.properties.dc:coverage]]"
+                                dbl10n="true"
+                                readonly>
+    </nuxeo-directory-suggestion>
 
     <div role="widget" hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
