@@ -48,11 +48,35 @@ Contributors:
         margin: 16px;
       }
 
-      .dialog .buttons {
+      nuxeo-tag {
+        @apply(--nx-button-primary);
+      }
+
+      nuxeo-tag:hover {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
+      .buttons {
         @apply(--layout-horizontal);
         @apply(--layout-justified);
-        padding: 16px;
-        border-top: 1px solid var(--divider-color);
+        @apply(--buttons-bar);
       }
 
       paper-radio-group {
@@ -110,8 +134,8 @@ Contributors:
         </paper-radio-group>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('documentCreateVersion.dismiss', 'Cancel')]]</paper-button>
-        <paper-button dialog-confirm raised class="primary" on-tap="_create">
+        <paper-button noink dialog-dismiss>[[i18n('documentCreateVersion.dismiss', 'Cancel')]]</paper-button>
+        <paper-button noink dialog-confirm class="primary" on-tap="_create">
           [[i18n('documentCreateVersion.confirm', 'Create Version')]]
         </paper-button>
       </div>

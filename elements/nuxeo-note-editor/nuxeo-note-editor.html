@@ -42,6 +42,24 @@ Contributors:
         right: 10px;
         top: 10px;
       }
+
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
     </style>
 
     <nuxeo-document id="note" doc-id="[[document.uid]]" data="[[document]]"></nuxeo-document>
@@ -50,7 +68,7 @@ Contributors:
       <div class="html-editor-container">
         <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
         <div class="layout horizontal end-justified">
-          <paper-button on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+          <paper-button noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
         </div>
       </div>
     </template>
@@ -63,8 +81,8 @@ Contributors:
       <template is="dom-if" if="[[!_viewMode]]">
         <paper-textarea value="{{_value}}" no-label-float></paper-textarea>
         <div class="layout horizontal end-justified">
-          <paper-button on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
-          <paper-button on-click="_editorSave">[[i18n('command.save')]]</paper-button>
+          <paper-button noink on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink class="primary" on-click="_editorSave">[[i18n('command.save')]]</paper-button>
         </div>
       </template>
     </template>

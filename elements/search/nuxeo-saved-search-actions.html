@@ -36,12 +36,29 @@ Contributors:
       paper-button {
         font-size: .8em;
         font-weight: normal;
-        margin: 0;
+        margin: 0 .5em;
         text-transform: none;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
       paper-button[disabled] {
-        background: none;
+        @apply(--nx-button-disabled);
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
     </style>
 

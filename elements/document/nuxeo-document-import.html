@@ -42,6 +42,23 @@ Contributors:
         @apply(--nuxeo-link-hover);
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
       paper-dialog {
         height: 80vh;
       }
@@ -108,8 +125,11 @@ Contributors:
       }
 
       #form {
-        margin-top: 0;
         padding: 0 32px;
+      }
+
+      #document-import {
+        margin-bottom: 2.5em;
       }
 
       #submitButton {
@@ -126,7 +146,7 @@ Contributors:
 
       .sidePanel {
         overflow-y: scroll;
-        background-color: #F7F6F6;
+        background: var(--nuxeo-page-background);
       }
 
       .blobCheck {
@@ -159,12 +179,11 @@ Contributors:
       }
 
       .file-overview:hover {
-        background-color: #EAF3F8;
+        @apply(--nuxeo-block-hover);
       }
 
       .file-overview.selected {
-        background-color: #EAF3F8;
-        color: var(--nuxeo-title-color);
+        @apply(--nuxeo-block-selected);
       }
 
       .file-overview iron-icon {

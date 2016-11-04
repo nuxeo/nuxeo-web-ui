@@ -50,6 +50,10 @@ Contributors:
         margin: 0;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
       .thumbnailContainer {
         background-color: #fafafa;
         width: 100%;
@@ -62,16 +66,15 @@ Contributors:
       }
 
       .selected {
-        background-color: var(--nuxeo-primary-color);
-        border-radius: 3px;
+        @apply(--nx-button-primary);
+        border-radius: .1em;
         color: #fff;
-        font-size: 0.9em;
+        font-size: .9em;
         font-weight: bold;
-        line-height: 130%;
-        padding: 12px;
+        padding: .7em 1.2em;
         text-transform: uppercase;
         vertical-align: baseline;
-        white-space: nowrap
+        white-space: nowrap;
       }
 
       @media (max-width: 1024px) {
@@ -93,7 +96,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('light')]]">
-              <paper-button raised data-theme="light" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="light" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -106,7 +109,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('default')]]">
-              <paper-button raised data-theme="default" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="default" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -119,7 +122,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('dark')]]">
-              <paper-button raised data-theme="dark" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="dark" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -132,7 +135,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('garden')]]">
-              <paper-button raised data-theme="garden" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="garden" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -145,7 +148,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('kawaii')]]">
-              <paper-button raised data-theme="kawaii" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="kawaii" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -158,7 +161,7 @@ Contributors:
               <span class="selected">[[i18n('themes.current', 'Current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('ocean')]]">
-              <paper-button raised data-theme="ocean" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="ocean" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
         </paper-card>

@@ -124,15 +124,25 @@ Contributors:
         margin-left: 1em;
       }
 
-      #graphDialog paper-button {
-        position: absolute;
-        bottom: 0;
-        right: 0;
+      paper-button:hover {
+        @apply(--nx-button-hover);
       }
 
-      .graph-container {
-        padding: 0.5rem 2rem;
-        position: relative;
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
 
       nuxeo-workflow-graph {
@@ -169,10 +179,14 @@ Contributors:
                 <span class="workflow-name">[[current.workflowModelName]]</span>
               </div>
               <paper-dialog id="graphDialog" with-backdrop>
-                <div class="graph-container">
-                  <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
+                <paper-dialog-scrollable>
+                  <div class="graph-container">
+                    <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
+                  </div>
+                </paper-dialog-scrollable>
+                <div class="buttons">
+                  <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
                 </div>
-                <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
               </paper-dialog>
               <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph', 'View Graph')]]</paper-button>
               <paper-icon-button icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
