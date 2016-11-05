@@ -54,6 +54,7 @@
   "app.user.themes":"Thèmes",
   "app.expiredSearch":"Expired",
   "app.viewTaskDashboard":"» Voir le tableau de bord de vos tâches",
+  "app.homeNotFound":"Home layout not found",
   "assetsSearch.assetFormat":"Format",
   "assetsSearch.assetHeight":"Hauteur",
   "assetsSearch.assetType":"Type",

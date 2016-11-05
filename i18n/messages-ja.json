@@ -54,6 +54,7 @@
   "app.user.themes":"テーマ",
   "app.expiredSearch":"Expired",
   "app.viewTaskDashboard":"» タスクダッシュボードを表示",
+  "app.homeNotFound":"Home layout not found",
   "assetsSearch.assetFormat":"Asset Format",
   "assetsSearch.assetHeight":"Asset Height",
   "assetsSearch.assetType":"Asset Type",

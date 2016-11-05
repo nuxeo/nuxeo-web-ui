@@ -54,6 +54,7 @@
   "app.user.themes":"Themes",
   "app.expiredSearch":"Expired",
   "app.viewTaskDashboard":"» View Tasks Dashboard",
+  "app.homeNotFound":"Home layout not found",
   "assetsSearch.assetFormat":"Asset Format",
   "assetsSearch.assetHeight":"Asset Height",
   "assetsSearch.assetType":"Asset Type",
