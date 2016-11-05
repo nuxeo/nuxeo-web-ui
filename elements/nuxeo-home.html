@@ -113,9 +113,9 @@ Contributors:
 
               <nuxeo-page-provider auto
                 id="latestQuery"
-                page-size="40"
+                page-size="20"
                 query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
-                schemas="dublincore,common">
+                schemas="dublincore,common,uid">
               </nuxeo-page-provider>
 
               <nuxeo-data-table
@@ -189,13 +189,17 @@ Contributors:
           <paper-card class="card">
             <div class="card-content vertical layout">
               <span class="title"><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites','Favorite Items')]]</span>
-              <nuxeo-operation auto
-                               op="Favorite.GetDocuments"
-                               input="/"
-                               response="{{favorites}}">
-              </nuxeo-operation>
+              <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
+
+              <nuxeo-page-provider id="favoritesProvider"
+                 provider="default_content_collection"
+                 page-size="20"
+                 schemas="dublincore,common,uid"
+                 enrichers="thumbnail">
+              </nuxeo-page-provider>
+
               <nuxeo-data-table
-                items="[[favorites.entries]]"
+                nx-provider="favoritesProvider"
                 on-row-clicked="_navigate">
                 <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
                   flex="100">
@@ -276,6 +280,26 @@ Contributors:
               var baseUrl = this.$.nxcon.url;
               return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
             }
+          }
+        },
+
+        ready: function() {
+          this._fetchFavorite().then(function(favorite) {
+            this.$.favoritesProvider.params = [favorite.uid];
+            this.$.favoritesProvider.page = 1;
+            this.$.favoritesProvider.fetch();
+          }.bind(this));
+        },
+
+        _fetchFavorite: function() {
+          if (this.favorite) {
+            return Promise.resolve(this.favorite);
+          } else {
+            return this.$.fetchFavOp.execute()
+              .then(function(resp) {
+                this.favorite = resp;
+                return resp;
+              }.bind(this));
           }
         }
 
