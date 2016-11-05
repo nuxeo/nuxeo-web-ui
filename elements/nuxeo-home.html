@@ -113,6 +113,7 @@ Contributors:
 
               <nuxeo-page-provider auto
                 id="latestQuery"
+                page-size="40"
                 query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
                 schemas="dublincore,common">
               </nuxeo-page-provider>
