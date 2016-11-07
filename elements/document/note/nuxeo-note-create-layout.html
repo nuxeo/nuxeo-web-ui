@@ -28,6 +28,7 @@ Contributors:
    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
+   <!-- TODO: NXP-20690: replace with nuxeo-note-format -->
    <paper-dropdown-menu role="widget" label="[[i18n('noteEditLayout.format')]]" noink always-float-label horizontal-align="left">
      <paper-menu class="dropdown-content" attr-for-selected="format" selected="{{format}}">
        <paper-item format="text/html">[[i18n('mimetype.html')]]</paper-item>

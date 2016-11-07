@@ -25,8 +25,8 @@ Contributors:
 <dom-module id="nuxeo-domain-edit-layout">
   <template>
 
-    <paper-input label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"></paper-input>
-    <paper-textarea label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"></paper-input>
+    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 directory-name="nature"
