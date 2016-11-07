@@ -15,7 +15,9 @@ limitations under the License.
 
 Contributors:
   Guillaume Renard <grenard@nuxeo.com>
+  Miguel Nixo <mnixo@nuxeo.com>
 -->
+
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
@@ -26,23 +28,38 @@ Contributors:
 -->
 <dom-module id="nuxeo-notifications-toggle-button">
   <template>
+
     <style>
       :host {
         display: inline-block;
       }
 
-      ::content iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
+      ::content iron-icon {
+        fill: var(--icon-toggle-color, rgba(0,0,0,0));
+        stroke: var(--icon-toggle-outline-color, currentcolor);
       }
 
-      :host([checked]) ::content iron-icon {
+      ::content iron-icon:hover {
+        stroke: var(--nuxeo-link-hover-color);
+      }
+
+      :host([subscribed]) ::content iron-icon {
+        stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
         fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
     </style>
 
+    <nuxeo-operation id="subscribeOp"
+      op="Document.Subscribe"
+      input="[[document.uid]]"></nuxeo-operation>
+
+    <nuxeo-operation id="unsubscribeOp"
+      op="Document.Unsubscribe"
+      input="[[document.uid]]"></nuxeo-operation>
+
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="[[_icon(checked)]]" id="notifyBut" on-tap="toggle"></paper-icon-button>
-      <paper-tooltip for="notifyBut">[[_label(checked)]]</paper-tooltip>
+      <paper-icon-button icon="[[icon]]" id="notifyBut"></paper-icon-button>
+      <paper-tooltip for="notifyBut" id="notifyButTooltip">[[tooltip]]</paper-tooltip>
     </template>
 
   </template>
@@ -56,34 +73,60 @@ Contributors:
         properties: {
           document: {
             type: Object,
-            observer: '_update'
+            observer: '_observeDoc'
           },
-          checked: {
+          subscribed: {
             type: Boolean,
             notify: true,
             reflectToAttribute: true
+          },
+          icon: {
+            type: String,
+            value: 'social:notifications'
+          },
+          tooltip: {
+            type: String,
+            computed: '_computeTooltip(subscribed)'
           }
         },
 
+        listeners: {
+          'tap': 'toggle'
+        },
+
         toggle: function() {
-          this.checked = !this.checked;
+          if (!this.subscribed) {
+            this.$.subscribeOp.execute().then(function() {
+              this.fire('subscribed', {doc: this.document});
+              this.subscribed = true;
+            }.bind(this));
+          } else {
+            this.$.unsubscribeOp.execute().then(function() {
+              this.fire('unsubscribed', {doc: this.document});
+              this.subscribed = false;
+            }.bind(this));
+          }
         },
 
         _isAvailable: function(doc) {
           return doc && !doc.isVersion;
         },
 
-        _label: function(checked) {
-          return checked ? this.i18n('notificationsToggleButton.doNotNotify','Stop notifications')
-                          : this.i18n('notificationsToggleButton.notify','Notify Me');
+        _computeTooltip: function(isSubscribed) {
+          return isSubscribed ? this.i18n('notificationsToggleButton.doNotNotify','Stop notifications')
+            : this.i18n('notificationsToggleButton.notify','Notify Me');
         },
 
-        _icon: function(checked) {
-          return checked ? 'social:notifications-active' : 'social:notifications-none';
+        _observeDoc: function() {
+          this.subscribed = this.isSubscribed(this.document);
         },
 
-        _update: function() {
-          this.checked = false;
+        ready: function() {
+          window.addEventListener('unsubscribed', function(e) {
+            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
+              this.subscribed = false;
+            }
+          }.bind(this));
         }
       });
     })();

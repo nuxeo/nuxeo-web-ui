@@ -38,6 +38,8 @@
   "app.document.addedToFavorites": "Document added to favorites.",
   "app.document.removedFromCollection": "Document removed from collection.",
   "app.document.removedFromFavorites": "Document removed from favorites.",
+  "app.document.subscribed": "You're now following this document.",
+  "app.document.unsubscribed": "You are not following this document anymore.",
   "app.documents.addedToCollection": "Documents added to collection.",
   "app.favorites": "Favorites",
   "app.personalSpace": "Personal Space",

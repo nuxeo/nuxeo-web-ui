@@ -282,7 +282,7 @@ Contributors:
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="permissions, breadcrumb, preview, favorites, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
+                    enrichers="permissions, breadcrumb, preview, favorites, subscribedNotifications, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
                     headers='{"X-NXfetch.document": "lock,properties"}'>
     </nuxeo-document>
 
@@ -562,7 +562,9 @@ Contributors:
           'addedToCollection': '_documentAddedToCollection',
           'removedFromCollection': '_documentRemovedFromCollection',
           'addedToFavorites': '_documentAddedToFavorites',
-          'removedFromFavorites': '_documentRemovedFromFavorites'
+          'removedFromFavorites': '_documentRemovedFromFavorites',
+          'subscribed': '_documentSubscribed',
+          'unsubscribed': '_documentUnsubscribed'
         },
 
         ready: function() {
@@ -835,6 +837,16 @@ Contributors:
 
         _documentRemovedFromFavorites: function() {
           this.$.toast.text = this.i18n('app.document.removedFromFavorites', 'Removed from Favorites');
+          this.$.toast.open();
+        },
+
+        _documentSubscribed: function() {
+          this.$.toast.text = this.i18n('app.document.subscribed', 'You\'re now following this document.');
+          this.$.toast.open();
+        },
+
+        _documentUnsubscribed: function() {
+          this.$.toast.text = this.i18n('app.document.unsubscribed', 'You are not following this document anymore.');
           this.$.toast.open();
         },
 
