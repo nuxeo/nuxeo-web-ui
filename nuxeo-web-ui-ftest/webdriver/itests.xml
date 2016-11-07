@@ -10,7 +10,7 @@
   <import file="${out.dir}/nuxeo-ftest.xml" />
 
   <property name="mp.install" value="file:${out.dir}/nuxeo-web-ui-marketplace-${maven.project.version}.zip" />
-  <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat,prepare-jboss">
+  <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat">
     <copy todir="${out.dir}">
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace::zip" />
     </copy>
@@ -20,7 +20,7 @@
     <echo level="info">Prepare Tomcat...</echo>
     <property name="classifier" value="" />
     <property name="groupId" value="org.nuxeo.ecm.distribution" />
-    <property name="artifactId" value="nuxeo-distribution-tomcat" />
+    <property name="artifactId" value="nuxeo-server-tomcat" />
     <antcall target="prepare-server" />
   </target>
 

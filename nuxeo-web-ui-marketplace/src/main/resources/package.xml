@@ -11,10 +11,7 @@
   <production-state>proto</production-state>
   <supported>false</supported>
   <platforms>
-    <platform>cap-@DISTRIB_VERSION@</platform>
-    <platform>cap-@DISTRIB_VERSION@-HF*</platform>
-    <platform>server-@DISTRIB_VERSION@</platform>
-    <platform>server-@DISTRIB_VERSION@-HF*</platform>
+    <platform>server-@DISTRIB_VERSION@*</platform>
   </platforms>
   <license>Apache License, Version 2.0</license>
   <license-url>http://www.apache.org/licenses/LICENSE-2.0.html</license-url>
