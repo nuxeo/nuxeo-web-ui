@@ -96,39 +96,33 @@ Contributors:
       }
     </style>
 
-    <div class="horizontal layout center" hidden$="[[!_hidden(tasks)]]">
-      <span class="empty">[[i18n('tasksList.noTasks', "You don't currently have any tasks")]]</span>
-    </div>
-    <div hidden$="[[_hidden(tasks)]]">
-
-
-      <nuxeo-data-list items="[[tasks]]" id="list" as="task"
-        selected-item="{{_selection}}"
-        selection-enabled>
-        <template>
-          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
-            <div class="task-box vertical layout">
-              <div class="task-info horizontal layout center">
-                <div class="vertical layout center">
-                  <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
-                </div>
-                <span class="task-name">[[i18n(task.name)]]</span>
+    <nuxeo-data-list items="[[tasks]]" id="list" as="task"
+      selected-item="{{_selection}}"
+      empty-label="[[i18n('tasksList.noTasks', 'You currently do not have any tasks')]]"
+      selection-enabled>
+      <template>
+        <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
+          <div class="task-box vertical layout">
+            <div class="task-info horizontal layout center">
+              <div class="vertical layout center">
+                <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
               </div>
-              <div class="task-detail">
-                <div class="taskDoc horizontal layout center">
-                  <span class="task-property">[[i18n('tasksList.on', 'On  ')]]</span>
-                  <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
-                </div>
-                <div class="horizontal layout center">
-                  <span class="due-date task-property">[[i18n('tasksList.dueDate','Due date ')]]
-                  <span class="date">[[_formatDate(task.dueDate)]]</span></span>
-                </div>
+              <span class="task-name">[[i18n(task.name)]]</span>
+            </div>
+            <div class="task-detail">
+              <div class="taskDoc horizontal layout center">
+                <span class="task-property">[[i18n('tasksList.on', 'On  ')]]</span>
+                <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+              </div>
+              <div class="horizontal layout center">
+                <span class="due-date task-property">[[i18n('tasksList.dueDate','Due date ')]]
+                <span class="date">[[_formatDate(task.dueDate)]]</span></span>
               </div>
             </div>
           </div>
-        </template>
-      </nuxeo-data-list>
-    </div>
+        </div>
+      </template>
+    </nuxeo-data-list>
   </template>
   <script>
     (function() {
@@ -169,10 +163,6 @@ Contributors:
               this.$.list.deselectItem(oldVal);
             }
           }
-        },
-
-        _hidden: function(tasks) {
-          return tasks && tasks.length === 0;
         },
 
         _formatDate: function(date) {

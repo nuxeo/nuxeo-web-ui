@@ -27,8 +27,8 @@ Contributors:
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <paper-input label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
-    <paper-textarea label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
+    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 directory-name="nature"
