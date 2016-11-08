@@ -61,6 +61,10 @@ Contributors:
     hasCollections: function(doc) {
       return doc && doc.contextParameters && doc.contextParameters.collections &&
           doc.contextParameters.collections.length > 0;
+    },
+
+    isMember: function(user, group) {
+      return user && user.properties && user.properties.groups && user.properties.groups.indexOf(group) !== -1;
     }
 
   };
