@@ -1003,6 +1003,7 @@ Contributors:
             return file.key;
           }).join();
           this.$.fileManagerImport.params = params;
+          this.$.fileManagerImport.params.noMimeTypeCheck = true;
           this.$.fileManagerImport.headers = {'nx_es_sync': 'true'};
           return this.$.fileManagerImport.execute();
         },
