@@ -16,9 +16,11 @@ limitations under the License.
 Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
+<link rel="import" href="nuxeo-i18n-behavior.html">
+
 <script>
   var Nuxeo = Nuxeo || {};
-  Nuxeo.FormatBehavior = {
+  Nuxeo.FormatBehavior = [Nuxeo.I18nBehavior, {
 
     formatSize: function(size) {
       if (!size) {
@@ -34,7 +36,11 @@ Contributors:
 
     formatDate: function(date) {
       return moment(date).format('MMMM D, YYYY');
+    },
+
+    formatMimeType: function(value) {
+      return this.i18n('mimetype.' + value, value);
     }
 
-  };
+  }];
 </script>
