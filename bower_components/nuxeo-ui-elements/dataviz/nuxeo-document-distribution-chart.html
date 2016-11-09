@@ -117,17 +117,17 @@ Example:
       </div>
       <div id="sb" class="loadable">
         <paper-radio-group selected="{{mode}}" on-paper-radio-group-changed="execute">
-          <paper-radio-button name="size">[[i18n('label.docdistribution.size', 'Size')]]</paper-radio-button>
-          <paper-radio-button name="count">[[i18n('label.docdistribution.count', 'Document Count')]]</paper-radio-button>
+          <paper-radio-button name="size">[[i18n('documentDistributionChart.size', 'Size')]]</paper-radio-button>
+          <paper-radio-button name="count">[[i18n('documentDistributionChart.count', 'Document Count')]]</paper-radio-button>
         </paper-radio-group>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeHidden}}">[[i18n('label.docdistribution.include_hidden', 'Include Hidden Documents')]]</paper-checkbox>
+        <paper-checkbox on-change="execute" checked="{{includeHidden}}">[[i18n('documentDistributionChart.includeHidden', 'Include Hidden Documents')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeDeleted}}">[[i18n('label.docdistribution.include_deleted', 'Include Deleted Documents')]]</paper-checkbox>
+        <paper-checkbox on-change="execute" checked="{{includeDeleted}}">[[i18n('documentDistributionChart.includeDeleted', 'Include Deleted Documents')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeVersion}}">[[i18n('label.docdistribution.include_versions', 'Include Versions')]]</paper-checkbox>
+        <paper-checkbox on-change="execute" checked="{{includeVersion}}">[[i18n('documentDistributionChart.includeVersions', 'Include Versions')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{onlyFolder}}" disabled="[[_chechFolderDisabled(mode)]]">[[i18n('label.docdistribution.folders_only', 'Only Folders')]]</paper-checkbox>
+        <paper-checkbox on-change="execute" checked="{{onlyFolder}}" disabled="[[_chechFolderDisabled(mode)]]">[[i18n('documentDistributionChart.foldersOnly', 'Only Folders')]]</paper-checkbox>
         <p/>
       </div>
 
@@ -772,9 +772,9 @@ Example:
           } else if (this.mode === 'count') {
             var result = value + ' ';
             if (value > 1) {
-              result += this.i18n('label.docdistribution.documents', 'Documents');
+              result += this.i18n('documentDistributionChart.documents', 'Documents');
             } else {
-              result += this.i18n('label.docdistribution.document', 'Document');
+              result += this.i18n('documentDistributionChart.document', 'Document');
             }
             return result;
           } else {

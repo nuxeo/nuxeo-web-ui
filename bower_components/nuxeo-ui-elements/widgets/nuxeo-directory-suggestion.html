@@ -159,7 +159,7 @@ Polymer({
         var label = 'label_' + ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
         return {
           id: entry.properties.id,
-          displayLabel: entry.properties[label]
+          displayLabel: entry.properties[label] || entry.properties['label_en']
         };
       }
     }

@@ -140,12 +140,12 @@ Used by `nuxeo-user-group-management`
     <div class="header horizontal layout center">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:person"></iron-icon>
-      <h3>[[i18n('title.createUser', 'New User')]]</h3>
+      <h3>[[i18n('createUser.heading', 'New User')]]</h3>
     </div>
     <form is="iron-form" id="form" class="vertical layout">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('username', 'Username')]]</label>
+          <label>[[i18n('createUser.username', 'Username')]]</label>
         </div>
         <div class="horizontal layout flex required">
           <input value="{{user.username::input}}" class="flex" required>
@@ -154,7 +154,7 @@ Used by `nuxeo-user-group-management`
       <nuxeo-edit-user id="propertyEditor" user="{{user}}" new></nuxeo-edit-user>
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('label.immediateCreation', 'Set User Password')]]</label>
+          <label>[[i18n('createUser.setPassword', 'Set User Password')]]</label>
         </div>
         <div class="flex">
           <div class="row layout horizontal">
@@ -167,7 +167,7 @@ Used by `nuxeo-user-group-management`
       </div>
       <div class="footer horizontal layout">
         <div class="label-container">
-          [[i18n('createAnother.checkbox', 'Create another')]]
+          [[i18n('createUser.createAnother.checkbox', 'Create another')]]
           <paper-checkbox id="another"></paper-checkbox>
         </div>
         <div class="layout vertical">

@@ -99,16 +99,16 @@ Custom property | Description | Default
             <paper-menu-button id="createDropdown" horizontal-align="right">
               <paper-button class="dropdown-trigger" id="createButton">
                 <iron-icon icon="add-circle-outline"></iron-icon>
-                <span>[[i18n('action.new.usergroup', 'NEW')]]</span>
+                <span>[[i18n('userGroupManagement.new.usergroup', 'NEW')]]</span>
               </paper-button>
               <paper-menu id="menu" class="dropdown-content" selectable="item">
                 <paper-icon-item on-tap="_createUser">
                   <iron-icon icon="social:person" item-icon></iron-icon>
-                  <span>[[i18n('action.new.user', 'User')]]</span>
+                  <span>[[i18n('userGroupManagement.new.user', 'User')]]</span>
                 </paper-icon-item>
                 <paper-icon-item on-tap="_createGroup">
                   <iron-icon icon="social:people" item-icon></iron-icon>
-                  <span>[[i18n('action.new.group', 'Group')]]</span>
+                  <span>[[i18n('userGroupManagement.new.group', 'Group')]]</span>
                 </paper-icon-item>
               </paper-menu>
             </paper-menu-button>

@@ -84,25 +84,25 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('firstName', 'First Name')]]</label>
+        <label>[[i18n('editUser.firstName', 'First Name')]]</label>
       </div>
       <input value="{{user.firstName::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('lastName', 'Last Name')]]</label>
+        <label>[[i18n('editUser.lastName', 'Last Name')]]</label>
       </div>
       <input value="{{user.lastName::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('company', 'Company')]]</label>
+        <label>[[i18n('editUser.company', 'Company')]]</label>
       </div>
       <input value="{{user.company::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('email', 'Email')]]</label>
+        <label>[[i18n('editUser.email', 'Email')]]</label>
       </div>
       <div class="horizontal layout flex required">
         <input value="{{user.email::input}}" type="email" class="flex" required>
@@ -111,11 +111,11 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
     <template is="dom-if" if="[[new]]">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('label.groupManager.groups', 'Groups')]]</label>
+          <label>[[i18n('editUser.groups', 'Groups')]]</label>
         </div>
         <nuxeo-user-suggestion id="picker"
                                search-type="GROUP_TYPE"
-                               placeholder="[[i18n('label.security.searchGroups', 'Search for Groups')]]"
+                               placeholder="[[i18n('editUser.searchGroups', 'Search for Groups')]]"
                                value="{{user.groups}}"
                                multiple
                                result-formatter="[[resultFormatter]]">

@@ -53,7 +53,7 @@ Contributors:
       on-response="handleResponse"></nuxeo-operation>
 
     <template is="dom-if" if="{{!updatingACE}}">
-      <paper-button on-click="togglePopup">[[i18n('label.permissions.newPermission', 'New')]]</paper-button>
+      <paper-button on-click="togglePopup">[[i18n('popupPermission.newPermission', 'New')]]</paper-button>
     </template>
     <template is="dom-if" if="{{updatingACE}}">
       <paper-icon-button on-click="togglePopup" icon="editor:mode-edit"></paper-icon-button>
@@ -62,14 +62,14 @@ Contributors:
     <paper-dialog id="popupRight" modal no-auto-focus>
       <template is="dom-if" if="{{!updatingACE}}">
         <template is="dom-if" if="{{!shareWithExternal}}">
-          <h2>[[i18n('label.permissions.addPermission', 'Add a Permission')]]</h2>
+          <h2>[[i18n('popupPermission.addPermission', 'Add a Permission')]]</h2>
         </template>
         <template is="dom-if" if="{{shareWithExternal}}">
-          <h2>[[i18n('label.permissions.shareWithExternalUser', 'Share With External User')]]</h2>
+          <h2>[[i18n('popupPermission.shareWithExternalUser', 'Share With External User')]]</h2>
         </template>
       </template>
       <template is="dom-if" if="{{updatingACE}}">
-        <h2>[[i18n('label.permissions.updatePermission', 'Update Permission')]]</h2>
+        <h2>[[i18n('popupPermission.updatePermission', 'Update Permission')]]</h2>
       </template>
 
       <!-- Give acces to row -->
@@ -77,7 +77,7 @@ Contributors:
         <template is="dom-if" if="{{!updatingACE}}">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div>
-              <div><span class="required">[[i18n('label.permissions.userGroup', 'User / Group')]]</span></div>
+              <div><span class="required">[[i18n('popupPermission.userGroup', 'User / Group')]]</span></div>
               <div>
                 <nuxeo-user-suggestion value="{{params.username}}"></nuxeo-user-suggestion>
               </div>
@@ -85,7 +85,7 @@ Contributors:
           </template>
           <template is="dom-if" if="{{shareWithExternal}}">
             <div>
-              <div><span class="required">[[i18n('label.permissions.email', 'Email')]]</span></div>
+              <div><span class="required">[[i18n('popupPermission.email', 'Email')]]</span></div>
               <div>
                 <gold-email-input id="email" label="" placeholder="name@company.com" value="{{params.email}}"
                   required auto-validate></gold-email-input>
@@ -95,7 +95,7 @@ Contributors:
         </template>
         <!-- Right row -->
         <div layout horizontal>
-          <div><span class="required">[[i18n('label.permissions.right', 'Right')]]</span></div>
+          <div><span class="required">[[i18n('popupPermission.right', 'Right')]]</span></div>
           <paper-dropdown-menu>
             <paper-menu class="dropdown-content" selected="{{params.permission}}" attr-for-selected="permission">
               <template is="dom-repeat" items="[[userVisiblePermissions]]" as="permission">
@@ -106,26 +106,26 @@ Contributors:
         </div>
         <div>
           <template is="dom-if" if="{{!shareWithExternal}}">
-            <div>[[i18n('label.permissions.timeFrame', 'Time Frame')]]</div>
+            <div>[[i18n('popupPermission.timeFrame', 'Time Frame')]]</div>
             <paper-radio-group selected="{{selectedTimeFrame}}">
               <paper-radio-button name="permanent" on-change="toggleTimeFrame">
-                [[i18n('label.permissions.permanent', 'Permanent')]]
+                [[i18n('popupPermission.permanent', 'Permanent')]]
               </paper-radio-button>
               <paper-radio-button name="datebased" on-change="toggleTimeFrame">
-                [[i18n('label.permissions.dateBased', 'Date based')]]
+                [[i18n('popupPermission.dateBased', 'Date based')]]
               </paper-radio-button>
             </paper-radio-group>
           </template>
-          <div class="timeFrameLabel">[[i18n('label.permissions.from', 'From')]]</div>
+          <div class="timeFrameLabel">[[i18n('popupPermission.from', 'From')]]</div>
           <div>
             <input id="begin" class="jsDate" type="date" data-native="mobile" data-format="MM/dd/yyyy"
               value="{{params.begin::change}}"/>
           </div>
           <template is="dom-if" if="{{!shareWithExternal}}">
-            <div class="timeFrameLabel"><span>[[i18n('label.permissions.to', 'To')]]</span></div>
+            <div class="timeFrameLabel"><span>[[i18n('popupPermission.to', 'To')]]</span></div>
           </template>
           <template is="dom-if" if="{{shareWithExternal}}">
-            <div class="timeFrameLabel"><span class="required">[[i18n('label.permissions.to', 'To')]]</span></div>
+            <div class="timeFrameLabel"><span class="required">[[i18n('popupPermission.to', 'To')]]</span></div>
           </template>
           <div>
             <input id="end" class="jsDate" type="date" data-native="mobile" data-format="MM/dd/yyyy"
@@ -136,27 +136,27 @@ Contributors:
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div layout horizontal>
               <paper-checkbox checked="{{params.notify}}" on-change="toggleCommentText">
-                [[i18n('label.permissions.notify', 'Send an email to notify user')]]
+                [[i18n('popupPermission.notify', 'Send an email to notify user')]]
               </paper-checkbox>
             </div>
           </template>
           <div layout horizontal>
             <iron-autogrow-textarea
-              placeholder="[[i18n('label.permissions.notifyPlaceholder', 'Hi! Could you comment this document and...')]]"
+              placeholder="[[i18n('popupPermission.notifyPlaceholder', 'Hi! Could you comment this document and...')]]"
               id="commentText" bind-value="{{params.comment}}"></iron-autogrow-textarea>
           </div>
         </div>
       </paper-dialog-scrollable>
 
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('label.permissions.cancel', 'Cancel')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('popupPermission.cancel', 'Cancel')]]</paper-button>
         <template is="dom-if" if="{{!updatingACE}}">
-          <paper-button on-tap="doCreateAndAdd">[[i18n('label.permissions.createAndAdd', 'Create and add another')]]
+          <paper-button on-tap="doCreateAndAdd">[[i18n('popupPermission.createAndAdd', 'Create and add another')]]
           </paper-button>
-          <paper-button class="colorful" on-tap="doCreate">[[i18n('label.permissions.create', 'Create')]]</paper-button>
+          <paper-button class="colorful" on-tap="doCreate">[[i18n('popupPermission.create', 'Create')]]</paper-button>
         </template>
         <template is="dom-if" if="{{updatingACE}}">
-          <paper-button class="colorful" on-tap="doUpdate">[[i18n('label.permissions.update', 'Update')]]</paper-button>
+          <paper-button class="colorful" on-tap="doUpdate">[[i18n('popupPermission.update', 'Update')]]</paper-button>
         </template>
       </div>
     </paper-dialog>

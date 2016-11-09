@@ -102,11 +102,11 @@ Used by `nuxeo-user-group-management`
     <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
     <div class="table">
       <div class="table-row table-headers">
-        <div class="flex-3">[[i18n('label.permissions.on', 'On')]]</div>
+        <div class="flex-3">[[i18n('userGroupPermissions.on', 'On')]]</div>
         <div class="flex-6 layout horizontal">
-          <div class="flex-2">[[i18n('label.permissions.right', 'Right')]]</div>
-          <div class="flex-2">[[i18n('label.permissions.timeFrame', 'Time Frame')]]</div>
-          <div class="flex-2">[[i18n('label.permissions.grantedBy', 'Granted by')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.right', 'Right')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.timeFrame', 'Time Frame')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.grantedBy', 'Granted by')]]</div>
           <div class="table-actions"></div>
         </div>
       </div>
@@ -134,7 +134,7 @@ Used by `nuxeo-user-group-management`
                   <div class="table-actions">
                     <template is="dom-if" if=[[!readonly]]>
                       <paper-icon-button icon="icons:delete"
-                                       title="[[i18n('label.permissions.delete', 'Delete permission')]]"
+                                       title="[[i18n('userGroupPermissions.delete.button', 'Delete permission')]]"
                                        on-tap="_toggleDialog"
                                        hidden$="[[!_canDelete(ace)]]">
                       </paper-icon-button>
@@ -149,7 +149,7 @@ Used by `nuxeo-user-group-management`
       <template is="dom-if" if=[[empty]]>
         <div class="table-row">
           <div>
-            [[i18n('label.permissions.noPermissions', '{0} does not have permissions.', entity)]]
+            [[i18n('userGroupPermissions.noPermissions', '{0} does not have permissions.', entity)]]
           </div>
         </div>
       </template>
@@ -158,7 +158,7 @@ Used by `nuxeo-user-group-management`
 
     <paper-dialog id="dialog" modal class="vertical layout">
       <div class="horizontal layout">
-        <p>[[i18n('label.permissions.deleteConfirm', 'Do you really want to delete this permission?')]]</p>
+        <p>[[i18n('userGroupPermissions.delete.confirm', 'Do you really want to delete this permission?')]]</p>
       </div>
       <div class="buttons horizontal end-justified layout">
         <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
@@ -267,10 +267,10 @@ Used by `nuxeo-user-group-management`
           var begin = ace.begin || null;
           var end = ace.end || null;
           var format = 'D MMM YYYY';
-          var sinceStr = this.i18n('label.permissions.since', 'Since') + ' ';
-          var fromStr = this.i18n('label.permissions.from', 'From') + ' ';
-          var untilStr = this.i18n('label.permissions.until', 'Until') + ' ';
-          var untilMiddleStr = ' ' + this.i18n('label.permissions.untilMiddle', 'until') + ' ';
+          var sinceStr = this.i18n('userGroupPermissions.since', 'Since') + ' ';
+          var fromStr = this.i18n('userGroupPermissions.from', 'From') + ' ';
+          var untilStr = this.i18n('userGroupPermissions.until', 'Until') + ' ';
+          var untilMiddleStr = ' ' + this.i18n('userGroupPermissions.untilMiddle', 'until') + ' ';
           if (begin !== null && end === null) {
             return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
           } else if (begin === null && end !== null) {
@@ -278,7 +278,7 @@ Used by `nuxeo-user-group-management`
           } else if (begin !== null && end !== null) {
             return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
           } else {
-            return this.i18n('label.permissions.permanent', 'Permanent');
+            return this.i18n('userGroupPermissions.permanent', 'Permanent');
           }
         },
 

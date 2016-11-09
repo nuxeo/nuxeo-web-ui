@@ -100,12 +100,12 @@ Example:
 
     <h3 class="title">
       <iron-icon icon="history" prefix></iron-icon>
-      [[i18n('label.security.recentUsersAndGroups', 'Recently created users and groups')]]
+      [[i18n('userGroupLatest.recentlyCreated', 'Recently created users and groups')]]
     </h3>
     <div class="table">
       <div class="table-header">
-        <div class="flex">[[i18n('label.name', 'Name')]]</div>
-        <div class="flex-2">[[i18n('label.security.identifier', 'Identifier')]]</div>
+        <div class="flex">[[i18n('userGroupLatest.name', 'Name')]]</div>
+        <div class="flex-2">[[i18n('userGroupLatest.identifier', 'Identifier')]]</div>
         <div class="table-actions">
           <paper-icon-button icon="refresh" on-tap="_refreshLatest"></paper-icon-button>
         </div>
@@ -129,7 +129,7 @@ Example:
         </template>
         <template is="dom-if" if=[[_empty(latestCreatedUsersGroups.entries)]]>
           <div class="table-row">
-            <div>[[i18n('label.security.emptyRecentUserOrGroup', 'No recent user or group.')]]</div>
+            <div>[[i18n('userGroupLatest.emptyRecentUserOrGroup', 'No recent user or group.')]]</div>
           </div>
         </template>
       </div>
