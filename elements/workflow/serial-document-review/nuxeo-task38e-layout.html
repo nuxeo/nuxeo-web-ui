@@ -17,13 +17,13 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
-<!--Parallel document review - Choose Participants-->
+<!--Serial document review - Choose Participants-->
 <!--
-`nuxeo-document-task-task2556`
+`nuxeo-task38e-layout`
 @group Nuxeo UI
-@element nuxeo-document-task-task2556
+@element nuxeo-task38e-layout
 -->
-<dom-module id="nuxeo-document-task-task2556">
+<dom-module id="nuxeo-task38e-layout">
   <template>
     <style>
       :host {
@@ -49,7 +49,6 @@ Contributors:
         @apply(--nuxeo-document-task-action-property-header);
       }
 
-      paper-input,
       paper-textarea {
         --paper-input-container: {
           padding: 0;
@@ -61,7 +60,7 @@ Contributors:
 
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.participants', 'Participants')]]</span>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.participants', 'Participants')]]</span>
         <div class="flex">
           <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
                                  multiple="true"
@@ -70,12 +69,18 @@ Contributors:
         </div>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.comment', 'Comment')]]</span>
-        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.review.type', 'Review Type')]]</span>
+        <paper-dropdown-menu label="Simple review or Validation?" no-label-float>
+          <paper-menu class="dropdown-content" selected="{{selectedValidationOrReview}}" attr-for-selected="key">
+            <template is="dom-repeat" items="[[validationOrReview]]">
+              <paper-item key="[[item.key]]">[[i18n(item.label)]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.endDate', 'End date')]]</span>
-        <paper-input type="date" id="end_date" value="{{selectedDate}}" no-label-float required></paper-input>
+        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
+        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
     </paper-card>
   </template>
@@ -85,8 +90,19 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-task-task2556',
-        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
+        is: 'nuxeo-task38e-layout',
+        behaviors: [Nuxeo.DocumentTaskBehavior,
+                    Nuxeo.I18nBehavior],
+
+        properties: {
+          validationOrReview: {
+            type: Array,
+            value: [
+              {key: 'simpleReview', label: 'wf.serialDocumentReview.simpleReview'},
+              {key: 'validation', label: 'wf.serialDocumentReview.validation'}
+            ]
+          }
+        },
 
         _getUsernames: function() {
           if (this.response) {
@@ -108,7 +124,7 @@ Contributors:
                   comment: this.comment,
                   participants: this.selectedParticipants,
                   assignees: this.selectedParticipants,
-                  'end_date':  moment(this.selectedDate).toISOString()
+                  'validationOrReview': this.selectedValidationOrReview
                 },
               };
             default:

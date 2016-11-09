@@ -17,13 +17,13 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 
-<!--Serial document review - Validate the Document-->
+<!--Parallel document review - Consolidate the Review-->
 <!--
-`nuxeo-document-task-task6d8`
+`nuxeo-task2169-layout`
 @group Nuxeo UI
-@element nuxeo-document-task-task6d8
+@element nuxeo-task2169-layout
 -->
-<dom-module id="nuxeo-document-task-task6d8">
+<dom-module id="nuxeo-task2169-layout">
   <template>
     <style>
       :host {
@@ -49,6 +49,13 @@ Contributors:
         @apply(--nuxeo-document-task-action-property-header);
       }
 
+      .review-result {
+        font-weight: 100;
+        margin-left: 1rem;
+        margin-top: 1rem;
+        @apply(--nuxeo-document-task-review-result);
+      }
+
       paper-textarea {
         --paper-input-container: {
           padding: 0;
@@ -58,17 +65,11 @@ Contributors:
 
     <paper-card class="layout vertical">
       <div class="action-property layout vertical">
-        <span class="action-property-header">
-          [[i18n('wf.serialDocumentReview.participants', 'Participants')]]
-        </span>
-        <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief', 'Consultation Wrap-Up')]]</span>
+        <nuxeo-document-task-review-result class="review-result" result="[[reviewResult]]"></nuxeo-document-task-review-result>
       </div>
       <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.initiatorComment', 'Initiator Comment')]]</span>
-        <span>[[task.variables.initiatorComment]]</span>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
+        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.comment', 'Comment')]]</span>
         <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
       </div>
     </paper-card>
@@ -79,8 +80,24 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-task-task6d8',
+        is: 'nuxeo-task2169-layout',
         behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
+        properties: {
+          reviewResult: {
+            type: String,
+            notify: true
+          }
+        },
+        observers: ['_taskObserver(task)'],
+
+        _taskObserver: function() {
+          var hasReviewResult = (this.task.variables['review_result'] && this.task.variables['review_result'] !== '');
+          if (hasReviewResult) {
+            this.reviewResult = this.task.variables['review_result'];
+          } else {
+            this.reviewResult = '';
+          }
+        },
 
         genTaskData: function() {
           return {
