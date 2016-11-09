@@ -145,7 +145,8 @@ gulp.task('move-layouts', function() {
     dist('elements/document/**'),
     dist('elements/search/**'),
     dist('elements/nuxeo-admin/**'),
-    dist('elements/workflow/**')
+    dist('elements/workflow/**'),
+    dist('elements/nuxeo-home.html')
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 });
 
