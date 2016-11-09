@@ -213,8 +213,9 @@ Contributors:
           this.$['task-body'].hidden = false;
           this.$.error.hide();
           var layout = this._layoutFor(this.task);
+          var workflowName = this.task.workflowModelName.charAt(0).toLowerCase() + this.task.workflowModelName.slice(1);
           if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl(layout + '.html');
+            var url = this.resolveUrl(Polymer.CaseMap.camelToDashCase(workflowName) + '/' + layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling
               function() {
