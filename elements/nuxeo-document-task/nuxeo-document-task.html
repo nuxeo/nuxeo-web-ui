@@ -177,7 +177,7 @@ Contributors:
           if (task) {
             // lower case first letter to avoid extra dash in camelToDashCase
             var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
-            return ['nuxeo', 'document', 'task', Polymer.CaseMap.camelToDashCase(node)].join('-');
+            return ['nuxeo', Polymer.CaseMap.camelToDashCase(node), 'layout'].join('-');
           }
         },
 
