@@ -94,6 +94,10 @@ Contributors:
         padding: .5em 0;
       }
 
+      ::content label {
+        @apply(--nuxeo-label);
+      }
+
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
@@ -216,19 +220,21 @@ Contributors:
         _taskChanged: function() {
           this.$['task-body'].hidden = false;
           this.$.error.hide();
-          var layout = this._layoutFor(this.task);
-          var workflowName = this.task.workflowModelName.charAt(0).toLowerCase() + this.task.workflowModelName.slice(1);
-          if (!this._isRegistered(layout)) {
-            var url = this.resolveUrl(Polymer.CaseMap.camelToDashCase(workflowName) + '/' + layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                this.$['task-body'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound',
-                  'Failed to find element layout for task {0}', this.task.nodeName));
-              });
-          } else {
-            this._createLayout();
+          if (this.task) {
+            var layout = this._layoutFor(this.task);
+            if (!this._isRegistered(layout)) {
+              var workflowName = this.task.workflowModelName.charAt(0).toLowerCase() + this.task.workflowModelName.slice(1);
+              var url = this.resolveUrl(Polymer.CaseMap.camelToDashCase(workflowName) + '/' + layout + '.html');
+              this.importHref(url, this._createLayout.bind(this),
+                  // error handling
+                  function() {
+                    this.$['task-body'].hidden = true;
+                    this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound',
+                        'Failed to find element layout for task {0}', this.task.nodeName));
+                  });
+            } else {
+              this._createLayout();
+            }
           }
         },
 
@@ -239,7 +245,11 @@ Contributors:
         _processTask: function(e) {
           if (this.$['task-container'].validate()) {
             this.action = e.target.dataset.args;
-            this.taskData = this._currentTaskElement.genTaskData(this.action);
+            this.taskData = {
+              'entity-type': 'task',
+              id: this._currentTaskElement.task.id,
+              variables: this._currentTaskElement.task.variables
+            };
             this.$.taskRequest.put().then(function() {
               this.fire('workflowTaskProcessed');
             }.bind(this));

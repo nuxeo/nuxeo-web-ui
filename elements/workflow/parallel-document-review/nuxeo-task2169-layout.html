@@ -25,52 +25,15 @@ Contributors:
 -->
 <dom-module id="nuxeo-task2169-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-
-      paper-card {
-        font-size: .9em;
-        display: flex;
-        padding: .5em 1em;
-      }
-
-      .action-property {
-        margin-bottom: 0.5em;
-        padding: .5em 0;
-        color: #434343;
-        @apply(--nuxeo-document-task-action-property);
-      }
-
-      .action-property-header {
-        font-weight: bolder;
-        margin-bottom: 0.5em;
-        @apply(--nuxeo-document-task-action-property-header);
-      }
-
-      .review-result {
-        font-weight: 100;
-        margin-left: 1rem;
-        margin-top: 1rem;
-        @apply(--nuxeo-document-task-review-result);
-      }
-
-      paper-textarea {
-        --paper-input-container: {
-          padding: 0;
-        };
-      }
-    </style>
-
-    <paper-card class="layout vertical">
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief', 'Consultation Wrap-Up')]]</span>
-        <nuxeo-document-task-review-result class="review-result" result="[[reviewResult]]"></nuxeo-document-task-review-result>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.parallelDocumentReview.comment', 'Comment')]]</span>
-        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+    <paper-card>
+      <div class="card-content">
+        <div role="widget">
+          <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
+          <nuxeo-document-task-review-result class="review-result" result="[[task.variables.review_result]]"></nuxeo-document-task-review-result>
+        </div>
+        <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
+                        value="{{task.variables.comment}}" always-float-label>
+        </paper-textarea>
       </div>
     </paper-card>
   </template>
@@ -81,30 +44,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task2169-layout',
-        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
-          reviewResult: {
-            type: String,
-            notify: true
-          }
-        },
-        observers: ['_taskObserver(task)'],
-
-        _taskObserver: function() {
-          var hasReviewResult = (this.task.variables['review_result'] && this.task.variables['review_result'] !== '');
-          if (hasReviewResult) {
-            this.reviewResult = this.task.variables['review_result'];
-          } else {
-            this.reviewResult = '';
-          }
-        },
-
-        genTaskData: function() {
-          return {
-            'entity-type': 'task',
-            id: this.task.id,
-            comment: this.comment
-          };
+          document: Object,
+          task: Object
         }
       });
     })();
