@@ -36,6 +36,8 @@ var glob = require('glob-all');
 var historyApiFallback = require('connect-history-api-fallback');
 var packageJson = require('./package.json');
 var crypto = require('crypto');
+var through = require('through2');
+var mergeJson = require('gulp-merge-json');
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -180,6 +182,26 @@ gulp.task('html', function() {
       dist());
 });
 
+// merge message files from nuxeo-ui-elements and nuxeo-web-ui
+// in case of conflict, nuxeo-web-ui prevails
+gulp.task('merge-message-files', function() {
+  var i18ndist = dist('i18n');
+  var i18ntmp = '.tmp/i18n';
+  return gulp.src(['bower_components/nuxeo-ui-elements/i18n/messages*.json'])
+             .pipe($.if(function(file) {
+               return fs.existsSync(path.join('i18n', path.basename(file.path)));
+             }, through.obj(function(file, enc, callback) {
+               gulp.src([file.path, path.join('i18n', path.basename(file.path))])
+                   .pipe(mergeJson(path.basename(file.path)))
+                   .pipe(gulp.dest(i18ntmp))
+                   .pipe(gulp.dest(i18ndist));
+               callback();
+             })))
+             .pipe(gulp.dest(i18ntmp))
+             .pipe(gulp.dest(i18ndist))
+             .pipe($.size({title: 'merge-message-files'}));
+});
+
 // Vulcanize granular configuration
 gulp.task('vulcanize', function() {
   var DEST_DIR = dist('elements');
@@ -235,7 +257,7 @@ gulp.task('clean', function() {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['lint', 'styles', 'elements', 'images'], function() {
+gulp.task('serve', ['lint', 'styles', 'elements', 'images', 'merge-message-files'], function() {
   // setup our local proxy
   var proxyOptions = require('url').parse('http://localhost:8080/nuxeo');
   proxyOptions.route = '/nuxeo';
@@ -266,6 +288,7 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'images'], function() {
   gulp.watch(['elements/**/*.css'], ['elements', reload]);
   gulp.watch(['{scripts,elements}/**/{*.js,*.html}'], ['lint']);
   gulp.watch(['images/**/*'], reload);
+  gulp.watch(['i18n/**/*'], ['merge-message-files', reload]);
 });
 
 // Build and serve the output from the dist build
@@ -297,7 +320,7 @@ gulp.task('default', ['clean'], function(cb) {
   runSequence(
       ['copy', 'styles'],
       'elements',
-      ['lint', 'images', 'html'],
+      ['lint', 'images', 'html', 'merge-message-files'],
       'vulcanize', // 'cache-config',
       cb);
 });
