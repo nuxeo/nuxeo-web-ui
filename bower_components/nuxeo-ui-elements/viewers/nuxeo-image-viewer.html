@@ -34,14 +34,6 @@ Example:
                         responsive>
     </nuxeo-image-viewer>
 
-### Styling
-
-The following custom properties and mixins are available for styling:
-
-Custom property | Description | Default
-----------------|-------------|----------
-`--nuxeo-image-viewer-height` | The height of the canvas | `100%`
-
 @group Nuxeo UI Elements
 @element nuxeo-image-viewer
 @demo demo/viewers/nuxeo-image-viewer/index.html
@@ -55,30 +47,29 @@ Custom property | Description | Default
       }
 
       #canvas {
-        width: 100%;
-        height: var(--nuxeo-image-viewer-height, 100%);
         position: relative;
+        width: 100%;
+        height: 100%;
       }
 
       #toolbar {
-        background-color: rgba(0,0,0,0.5);
-        bottom: 10px;
-        color: #fff;
-        height: 32px;
-        left: 50%;
-        margin-left: -90px;
         position: absolute;
-        width: 140px;
+        bottom: 16px;
+        width: 150px;
+        left: calc(50% - 75px);
+        color: #fff;
         z-index: 25;
+        text-align: center;
+        padding: 2px;
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.5);
       }
 
       paper-icon-button {
-        height: 32px;
-        width: 32px;
-      }
-
-      paper-icon-button[active] {
-        color: #3f51b5;
+        width: 34px;
+        height: 34px;
+        color: white !important;
+        --paper-icon-button-ink-color: white;
       }
 
       #image {
