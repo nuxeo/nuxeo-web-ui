@@ -99,45 +99,56 @@ Contributors:
 
         test('it should display favorites', function() {
           var element = fixture('favorites', {doc: doc});
-          var items;
-          return flush().then(function() {
-            return waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
-              // Assert we have two documents in favorites
-              expect(element.favorite.uid).to.be.equal('my_favorites');
-              items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
-              // Assert all items are displayed
-              expect(items.length).to.be.equal(2);
-              // Assert items names
-              expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My picture in Favorites');
-              expect(items[1].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
-            });
+
+          return waitForEvent(element, 'nuxeo-page-loaded', 1).then(function() {
+            // Assert we have two documents in favorites
+            expect(element.favorite.uid).to.be.equal('my_favorites');
+
+            // force resize of the iron-list before checking the DOM
+            var table = Polymer.dom(element.root).querySelector('nuxeo-data-list');
+            table.$.list.notifyResize();
+            Polymer.dom().flush();
+            var items = Polymer.dom(table.root).querySelectorAll('.list-item');
+
+            // Assert all items are displayed
+            expect(items.length).to.be.equal(2);
+            // Assert items names
+            expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My picture in Favorites');
+            expect(items[1].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
           });
         });
 
         test('it should be able to remove a favorite document', function() {
           var element = fixture('favorites', {doc: doc});
-          var items;
-          return flush().then(function() {
-            return waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
-              // Assert we have two documents in favorites
-              expect(element.favorite.uid).to.be.equal('my_favorites');
-              items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
-              expect(items.length).to.be.equal(2);
-              // Remove first item
-              var removeButton = items[0].querySelector('.remove');
-              // Remove first entry from mock response
-              favoritesResponse.entries.shift();
-              performFavoritesResponse();
-              MockInteractions.tap(removeButton);
-              return flush().then(function() {
-                return waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
-                  // Assert we only have one document in favorites
-                  items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item:not([hidden])');
-                  expect(items.length).to.be.equal(1);
-                  expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
-                });
-              });
-          });})
+          var table = Polymer.dom(element.root).querySelector('nuxeo-data-list');
+
+          return waitForEvent(element, 'nuxeo-page-loaded', 1).then(function() {
+            // Assert we have two documents in favorites
+            expect(element.favorite.uid).to.be.equal('my_favorites');
+
+            // force resize of the iron-list before checking the DOM
+            table.$.list.notifyResize();
+            Polymer.dom().flush();
+
+            var items = Polymer.dom(table.root).querySelectorAll('.list-item');
+            expect(items.length).to.be.equal(2);
+
+            // Remove first item
+            var removeButton = items[0].querySelector('.remove');
+            // Remove first entry from mock response
+            favoritesResponse.entries.shift();
+            performFavoritesResponse();
+            MockInteractions.tap(removeButton);
+            return waitForEvent(element, 'nuxeo-page-loaded', 1).then(function() {
+              // Assert we only have one document in favorites
+              table.$.list.notifyResize();
+              Polymer.dom().flush();
+              items = Polymer.dom(table.root).querySelectorAll('.list-item:not([hidden])');
+              expect(items.length).to.be.equal(1);
+              expect(items[0].querySelector('.list-item-title').textContent).to.be.equal('My video in Favorites');
+            });
+
+          });
         });
 
         function performFavoritesResponse() {
@@ -177,10 +188,14 @@ Contributors:
 
         test('it should display empty favorites placeholder', function() {
           var element = fixture('favorites', {doc: doc});
+          var table = Polymer.dom(element.root).querySelector('nuxeo-data-list');
           return waitForEvent(element, 'nuxeo-page-loaded', 1).then(flush).then(function() {
-            items = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelectorAll('.list-item');
-            expect(items.length).to.be.equal(0);
-            var placeholder = Polymer.dom(Polymer.dom(element.root).querySelector('nuxeo-data-list').root).querySelector('.emptyResult');
+            expect(table.$.list.items.length).to.be.equal(0);
+            // force resize of the iron-list before checking the DOM
+            table.$.list.notifyResize();
+            Polymer.dom().flush();
+
+            var placeholder = Polymer.dom(table.root).querySelector('.emptyResult');
             expect(isHidden(placeholder)).to.be.false;
             expect(placeholder.textContent).to.be.equal('No favorites.');
           });
