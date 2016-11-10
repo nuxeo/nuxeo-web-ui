@@ -238,6 +238,7 @@ Contributors:
         },
 
         _deleteFile: function() {
+          this.$.input.value = '';
           this.document.properties[this.xpath] = '';
           this._hasFiles = false;
         },
