@@ -31,6 +31,11 @@ Contributors:
 -->
 <dom-module id="nuxeo-user-suggestion">
 <template>
+
+  <template is="dom-if" if="[[label]]">
+    <label>[[label]]</label>
+  </template>
+
   <nuxeo-select2 operation="UserGroup.Suggestion"
                  min-chars="[[minChars]]"
                  multiple="[[multiple]]"
@@ -41,8 +46,6 @@ Contributors:
                  selected-items="{{selectedItems}}"
                  result-formatter="[[resultFormatter]]">
   </nuxeo-select2>
-
-  <template is="dom-if" if="[[label]]"><span>[[label]]</span> : </template>
 
 </template>
 <script>

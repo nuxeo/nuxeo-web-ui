@@ -216,6 +216,11 @@ Used by `nuxeo-user-group-management`
         box-shadow: none;
         padding-left: 0;
       }
+
+      #errors {
+        color: red;
+        margin-top: 20px;
+      }
     </style>
 
     <nuxeo-resource id="request" path="user/[[username]]" enrichers="userprofile" enrichers-entity="user">
@@ -320,6 +325,7 @@ Used by `nuxeo-user-group-management`
                                selected-items="{{selectedGroup}}"
                                result-formatter="[[resultFormatter]]">
         </nuxeo-user-suggestion>
+        <div id="errors" hidden$="[[!errors]]">[[errors]]</div>
         <template is="dom-repeat" items="[[activity]]">
           <div class="activity-entry">
             [[i18n('userManagement.memberOf.group', '{0} is now member of', user.id)]]
@@ -342,7 +348,7 @@ Used by `nuxeo-user-group-management`
               </div>
               <div class="flex-4">[[item.name]]</div>
               <div class="table-actions">
-                <template is="dom-if" if=[[!readonly]]>
+                <template is="dom-if" if="[[_canRemoveAdministratorsGroup(item)]]">
                   <paper-icon-button icon="icons:clear"
                                      title="[[i18n('userManagement.removeFrom.group', 'Remove from {0}', item.label)]]"
                                      on-tap="_toggleDialog">
@@ -441,6 +447,16 @@ Used by `nuxeo-user-group-management`
             type: Boolean,
             value: false,
             reflectToAttribute: true
+          },
+
+          errors: {
+            type: String,
+            reflectToAttribute: true
+          },
+
+          isAdministrator: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -472,6 +488,14 @@ Used by `nuxeo-user-group-management`
           }
         },
 
+        _canRemoveAdministratorsGroup: function(group) {
+          if (group.name === 'administrators') {
+            return !this.readonly && this.isAdministrator;
+          } else {
+            return !this.readonly;
+          }
+        },
+
         _computeGroups: function() {
           return this.user.extendedGroups.filter(function(group) {
             if (this.user.properties.groups.indexOf(group.name) > -1) {
@@ -482,6 +506,11 @@ Used by `nuxeo-user-group-management`
 
         _groupSelected: function() {
           if (this.selectedGroup) {
+            if (!this.user.isAdministrator && this.selectedGroup.groupname === 'administrators') {
+              this.errors = this.i18n('userManagement.errorAdministratorsGroup');
+              this.selectedGroup = null;
+              return;
+            }
             var group = {
               'name': this.selectedGroup.groupname,
               'label': this.selectedGroup.grouplabel

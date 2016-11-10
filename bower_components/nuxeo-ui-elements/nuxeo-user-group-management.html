@@ -122,7 +122,7 @@ Custom property | Description | Default
       </section>
 
       <section name="manage-user">
-        <nuxeo-user-management username="[[selectedUser]]" readonly="[[readonly]]"></nuxeo-user-management>
+        <nuxeo-user-management username="[[selectedUser]]" readonly$="[[readonly]]"></nuxeo-user-management>
       </section>
 
       <section name="create-group">
@@ -130,7 +130,7 @@ Custom property | Description | Default
       </section>
 
       <section name="manage-group">
-        <nuxeo-group-management groupname="[[selectedGroup]]" readonly="[[readonly]]"></nuxeo-group-management>
+        <nuxeo-group-management groupname="[[selectedGroup]]" readonly$="[[readonly]]"></nuxeo-group-management>
       </section>
     </iron-pages>
   </template>
@@ -153,12 +153,20 @@ Custom property | Description | Default
       },
 
       selectedUser: String,
-      selectedGroup: String,
+      selectedGroup: {
+        type: String,
+        observer: '_selectedGroupChanged'
+      },
 
       readonly: {
         type: Boolean,
         value: false,
         reflectToAttribute: true
+      },
+
+      isAdministrator: {
+        type: Boolean,
+        value: false
       }
     },
 
@@ -199,6 +207,10 @@ Custom property | Description | Default
     _manageGroup: function(e) {
       this.selectedGroup = e.detail.group;
       this.page = 'manage-group';
+    },
+
+    _selectedGroupChanged: function() {
+      this.readonly = !!(this.selectedGroup === 'administrators' && !this.isAdministrator);
     },
 
     /**
