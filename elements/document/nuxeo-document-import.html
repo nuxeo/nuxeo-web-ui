@@ -1059,6 +1059,7 @@ Contributors:
             this.$.blobRemover.remove().then(function() {
               this.splice('localFiles', e.model.index, 1);
               this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+              this.$.uploadFiles.value = '';
             }.bind(this), this._handleError.bind(this));
           }
         },
