@@ -25,51 +25,21 @@ Contributors:
 -->
 <dom-module id="nuxeo-task6d8-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
+    <paper-card>
+      <div class="card-content">
+        <div role="widget">
+          <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
+          <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
+        </div>
 
-      paper-card {
-        font-size: .9em;
-        display: flex;
-        padding: .5em 1em;
-      }
+        <div role="widget">
+          <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
+          <div>[[task.variables.initiatorComment]]</div>
+        </div>
 
-      .action-property {
-        margin-bottom: 0.5em;
-        padding: .5em 0;
-        color: #434343;
-        @apply(--nuxeo-document-task-action-property);
-      }
-
-      .action-property-header {
-        font-weight: bolder;
-        margin-bottom: 0.5em;
-        @apply(--nuxeo-document-task-action-property-header);
-      }
-
-      paper-textarea {
-        --paper-input-container: {
-          padding: 0;
-        };
-      }
-    </style>
-
-    <paper-card class="layout vertical">
-      <div class="action-property layout vertical">
-        <span class="action-property-header">
-          [[i18n('wf.serialDocumentReview.participants', 'Participants')]]
-        </span>
-        <nuxeo-document-users users="[[task.variables.participants]]"></nuxeo-document-users>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.initiatorComment', 'Initiator Comment')]]</span>
-        <span>[[task.variables.initiatorComment]]</span>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
-        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+        <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
+                        value="{{task.variables.comment}}" always-float-label>
+        </paper-textarea>
       </div>
     </paper-card>
   </template>
@@ -80,14 +50,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task6d8-layout',
-        behaviors: [Nuxeo.DocumentTaskBehavior, Nuxeo.I18nBehavior],
-
-        genTaskData: function() {
-          return {
-            'entity-type': 'task',
-            id: this.task.id,
-            comment: this.comment
-          };
+        behaviors: [Nuxeo.LayoutBehavior],
+        properties: {
+          document: Object,
+          task: Object
         }
       });
     })();

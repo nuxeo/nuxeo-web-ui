@@ -25,6 +25,11 @@ Contributors:
 @element nuxeo-document-users
 -->
 <dom-module id="nuxeo-document-users">
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
   <template>
     <template is="dom-repeat" items="[[users]]" as="user">
       <nuxeo-user-tag user="[[user]]"></nuxeo-user-tag>

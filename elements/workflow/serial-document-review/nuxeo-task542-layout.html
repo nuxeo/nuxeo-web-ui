@@ -30,14 +30,10 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task542-layout',
-        behaviors: [Nuxeo.DocumentTaskBehavior],
-
-        genTaskData: function() {
-          return {
-            'entity-type': 'task',
-            id: this.task.id,
-            comment: this.comment
-          };
+        behaviors: [Nuxeo.LayoutBehavior],
+        properties: {
+          document: Object,
+          task: Object
         }
       });
     })();

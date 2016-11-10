@@ -25,62 +25,25 @@ Contributors:
 -->
 <dom-module id="nuxeo-task38e-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-
-      paper-card {
-        font-size: .9em;
-        display: flex;
-        padding: .5em 1em;
-      }
-
-      .action-property {
-        margin-bottom: 0.5em;
-        padding: .5em 0;
-        color: #434343;
-        @apply(--nuxeo-document-task-action-property);
-      }
-
-      .action-property-header {
-        font-weight: bolder;
-        margin-bottom: 0.5em;
-        @apply(--nuxeo-document-task-action-property-header);
-      }
-
-      paper-textarea {
-        --paper-input-container: {
-          padding: 0;
-        };
-      }
-    </style>
-
     <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
-    <paper-card class="layout vertical">
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.participants', 'Participants')]]</span>
-        <div class="flex">
-          <nuxeo-user-suggestion search-type="USER_GROUP_TYPE"
-                                 multiple="true"
-                                 value="{{selectedParticipants}}">
-          </nuxeo-user-suggestion>
-        </div>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.review.type', 'Review Type')]]</span>
-        <paper-dropdown-menu label="Simple review or Validation?" no-label-float>
-          <paper-menu class="dropdown-content" selected="{{selectedValidationOrReview}}" attr-for-selected="key">
-            <template is="dom-repeat" items="[[validationOrReview]]">
-              <paper-item key="[[item.key]]">[[i18n(item.label)]]</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
-      </div>
-      <div class="action-property layout vertical">
-        <span class="action-property-header">[[i18n('wf.serialDocumentReview.comment', 'Comment')]]</span>
-        <paper-textarea label="Add a comment" value="{{comment}}" no-label-float></paper-textarea>
+    <paper-card>
+      <div class="card-content">
+        <nuxeo-user-suggestion role="widget" label="[[i18n('wf.serialDocumentReview.participants')]]"
+                               search-type="USER_GROUP_TYPE"
+                               multiple="true"
+                               value="{{task.variables.participants}}">
+        </nuxeo-user-suggestion>
+
+        <nuxeo-select role="widget"
+                      label="[[i18n('wf.serialDocumentReview.review.type')]]"
+                      options="[[types]]"
+                      selected="{{ask.variables.validationOrReview}}">
+        </nuxeo-select>
+
+        <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
+                        value="{{task.variables.comment}}" always-float-label>
+        </paper-textarea>
       </div>
     </paper-card>
   </template>
@@ -91,48 +54,18 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-task38e-layout',
-        behaviors: [Nuxeo.DocumentTaskBehavior,
-                    Nuxeo.I18nBehavior],
-
+        behaviors: [Nuxeo.LayoutBehavior],
         properties: {
-          validationOrReview: {
-            type: Array,
-            value: [
-              {key: 'simpleReview', label: 'wf.serialDocumentReview.simpleReview'},
-              {key: 'validation', label: 'wf.serialDocumentReview.validation'}
-            ]
-          }
+          document: Object,
+          task: Object,
+          types: Array
         },
 
-        _getUsernames: function() {
-          if (this.response) {
-            return this.response.map(function(user) {
-              return user.username;
-            });
-          } else {
-            return [];
-          }
-        },
-
-        genTaskData: function(action) {
-          switch (action) {
-            case 'start_review':
-              return {
-                'entity-type': 'task',
-                id: this.task.id,
-                variables: {
-                  comment: this.comment,
-                  participants: this.selectedParticipants,
-                  assignees: this.selectedParticipants,
-                  'validationOrReview': this.selectedValidationOrReview
-                },
-              };
-            default:
-              return {
-                'entity-type': 'task',
-                id: this.task.id
-              };
-          }
+        ready: function() {
+          this.types = [
+            {id: 'simpleReview', label: this.i18n('wf.serialDocumentReview.simpleReview')},
+            {id: 'validation', label: this.i18n('wf.serialDocumentReview.validation')}
+          ]
         }
       });
     })();
