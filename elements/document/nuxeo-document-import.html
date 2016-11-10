@@ -57,6 +57,7 @@ Contributors:
 
       paper-button[disabled] {
         @apply(--nx-button-disabled);
+        display: none;
       }
 
       paper-dialog {
@@ -156,11 +157,11 @@ Contributors:
       }
 
       .blobCheck.checked {
-        color: green;
+        color: var(--nuxeo-validated);
       }
 
       .blobCheck.unchecked {
-        color: gray;
+        color: var(--nuxeo-text-light);
       }
 
       .blobCheck.hidden {
@@ -245,8 +246,9 @@ Contributors:
 
       .disclaimer {
         display: block;
+        font-weight: normal;
         font-size: .7em;
-        color: var(--secondary-text-color);
+        color: var(--nuxeo-text-light);
       }
 
       .clear {
@@ -462,7 +464,7 @@ Contributors:
           <div class="sidePanel horizontal layout">
             <div id="blobList" class="flex">
               <template is="dom-repeat" items="[[localFiles]]" as="file">
-                <paper-button class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button noink class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
                   <div class="horizontal layout">
                     <div class="vertical layout">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
@@ -478,7 +480,7 @@ Contributors:
                 </paper-button>
               </template>
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button noink class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
                   <div class="horizontal layout">
                     <div class="vertical layout">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
