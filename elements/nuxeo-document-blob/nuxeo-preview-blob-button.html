@@ -64,11 +64,11 @@ Contributors:
 
         _showPreview: function() {
           var preview = this.$.preview;
-          preview.document = this.document;
           preview.xpath = (this.xpath === 'file:content') ? this.xpath : this.xpath + '/file';
           preview.style.height = '100%';
           preview.style.margin = '0';
           preview.style.padding = '0';
+          preview.document = this.document;
           this.$.dialog.toggle();
         }
 
