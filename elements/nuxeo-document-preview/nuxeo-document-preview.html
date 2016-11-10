@@ -87,7 +87,7 @@ Contributors:
     </template>
 
     <template mime-pattern=".*">
-      <iframe id="frame" class="default-frame" src="[[document.contextParameters.preview.url]]"></iframe>
+      <iframe id="frame" class="default-frame" src="[[iFrameSource]]"></iframe>
     </template>
 
     <div id="preview"></div>
@@ -113,6 +113,10 @@ Contributors:
           videoSources: {
             type: Array,
             computed: '_computeVideoSources(document)'
+          },
+          iFrameSource: {
+            type: String,
+            computed: '_computeIFrameSource(document)'
           }
         },
 
@@ -155,6 +159,7 @@ Contributors:
               this.templatize(previewer);
               var instance = this.stamp({
                 document: this.document,
+                imageSource: this.imageSource,
                 videoSources: this.videoSources,
                 blob: this.blob
               });
@@ -175,6 +180,12 @@ Contributors:
         },
 
         _computeImageSource: function() {
+          if (this.xpath) {
+            this._updateBlob();
+            if (this.blob && this.blob['mime-type'].match('image.*')) {
+              return this.blob.data;
+            }
+          }
           if (!this.document || !this.document.properties) {
             return;
           }
@@ -186,9 +197,6 @@ Contributors:
               return filteredViews[0].content.data;
             }
           }
-          if (this.document.properties['file:content']) {
-            return this.document.properties['file:content'].data;
-          }
         },
 
         _computeVideoSources: function() {
@@ -199,6 +207,15 @@ Contributors:
                 type: conversion.content['mime-type']
               };
             });
+          }
+        },
+
+        _computeIFrameSource: function() {
+          if (this.xpath === 'file:content' && this.document && this.document.contextParameters &&
+            this.document.contextParameters.preview) {
+            return this.document.contextParameters.preview.url;
+          } else if (this.blob) {
+            return this.blob.data;
           }
         }
       });
