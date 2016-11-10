@@ -322,7 +322,7 @@ Contributors:
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
@@ -382,14 +382,14 @@ Contributors:
                 </div>
               </section>
 
-              <template is="dom-if" if="[[currentUser.isAdministrator]]">
+              <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
                 <section class="card administration" name="administration">
                   <div class="header ellipsis">
                     <h1>[[i18n('app.administration', 'Administration')]]</h1>
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                      <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
                       <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
                       <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
                     </iron-selector>
@@ -439,7 +439,7 @@ Contributors:
 
           <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
 
-          <nuxeo-admin name="admin" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
+          <nuxeo-admin name="admin" user="[[currentUser]]" selected-tab="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
 
           <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
@@ -861,6 +861,10 @@ Contributors:
                         e.detail.response.entries.length);
           }
           this.$.toast.open();
+        },
+
+        _hasAdministrationPermissions: function(user) {
+          return user.isAdministrator || this.isMember(user, 'powerusers');
         },
 
         _errorUrl: function() {

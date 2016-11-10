@@ -54,7 +54,7 @@ Contributors:
         <paper-card class="card">
           <div class="card-content vertical layout">
             <template is="dom-if" if="visible">
-              <nuxeo-user-group-management id="management" page="{{page}}"></nuxeo-user-group-management>
+              <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
               <template is="dom-if" if="[[_displayLatest(page)]]">
                 <nuxeo-user-group-latest></nuxeo-user-group-latest>
               </template>
@@ -85,6 +85,11 @@ Contributors:
             type: Object,
             value: {},
             observer: '_entityChanged'
+          },
+          isAdministrator: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
           }
         },
 
