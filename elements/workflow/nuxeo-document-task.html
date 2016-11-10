@@ -69,6 +69,10 @@ Contributors:
         @apply(--nx-button-disabled);
       }
 
+      h3 {
+        margin: .5em;
+      }
+
       .task-body {
         padding: 0;
         overflow-y: auto;
@@ -98,7 +102,7 @@ Contributors:
 
     <div id="task-body" class="action-container layout vertical task-body">
 
-      <div class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</div>
+      <h3 class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</h3>
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
