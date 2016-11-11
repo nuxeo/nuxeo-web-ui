@@ -124,6 +124,10 @@ Contributors:
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
       }
 
+      nuxeo-tag {
+        margin-right: 2px;
+      }
+
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -162,7 +166,8 @@ Contributors:
                          enrichers="thumbnail"
                          page="[[pageNumber]]"
                          params="[[params]]"
-                         schemas="dublincore,common"
+                         schemas="dublincore,common,uid"
+                         headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
                          fetch-aggregates>
     </nuxeo-page-provider>
 
@@ -180,8 +185,8 @@ Contributors:
       <div id="dropzone" class="content-view">
         <div id="grid" hidden$="[[_isTable(displayMode)]]">
           <nuxeo-data-grid id="datagrid" nx-provider="nxProvider"
-            empty-label="[[i18n('browse.noDocument', 'There are no items to display in this folder.')]]"
-            empty-label-when-filtered="[[i18n('browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
+            empty-label="[[i18n('browse.noDocument')]]"
+            empty-label-when-filtered="[[i18n('browse.noDocumentWhenFiltered')]]"
             filters="{{filters}}"
             selected-items="{{gridSelectedItems}}"
             selection-enabled>
@@ -199,42 +204,38 @@ Contributors:
           <nuxeo-data-table id="datatable"
             nx-provider="nxProvider"
             settings-enabled filters="{{filters}}"
-            empty-label="[[i18n('browse.noDocument', 'There are no items to display in this folder.')]]"
-            empty-label-when-filtered="[[i18n('browse.noDocumentWhenFiltered', 'There are no documents with these search criteria.')]]"
+            empty-label="[[i18n('browse.noDocument')]]"
+            empty-label-when-filtered="[[i18n('browse.noDocumentWhenFiltered')]]"
             selected-items="{{tableSelectedItems}}"
             selection-enabled
             on-row-clicked="_navigate">
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
-              sort-by="dc:title"
-              filter-by="title"
-              flex="100">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
+                                     sort-by="dc:title" filter-by="title" flex="100">
               <template>
                 <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                 <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
               sort-by="dc:modified"
               filter-by="dc_modified_agg"
               flex="50">
               <template is="header">
                   <nuxeo-dropdown-aggregation
-                      placeholder="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
+                      placeholder="[[i18n('documentContentView.datatable.header.modified')]]"
                       data="[[aggregations.dc_modified_agg]]"
                       value="{{column.filterValue}}" multiple>
                   </nuxeo-dropdown-aggregation>
               </template>
               <template>
-                [[_formatDate(item.properties.dc:modified)]]
+                [[formatDate(item.properties.dc:modified)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
-              filter-by="dc_last_contributor_agg"
-              sort-by="dc:lastContributor"
-              flex="50">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
+              filter-by="dc_last_contributor_agg" sort-by="dc:lastContributor" flex="50">
               <template is="header">
                   <nuxeo-dropdown-aggregation
-                      placeholder="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
+                      placeholder="[[i18n('documentContentView.datatable.header.lastContributor')]]"
                       data="[[aggregations.dc_last_contributor_agg]]"
                       value="{{column.filterValue}}" multiple>
                   </nuxeo-dropdown-aggregation>
@@ -243,41 +244,45 @@ Contributors:
                 <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state', 'State')]]" hidden>
-              <template><span class="capitalize">[[item.state]]</span></template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version', 'Version')]]" hidden>
-              <template><span>[[_displayVersion(item)]]</span></template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created', 'Created')]]"
-              sort-by="dc:created"
-              flex="50" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]" hidden>
               <template>
-                [[_formatDate(item.properties.dc:created)]]
+                <nuxeo-tag class="capitalize">[[item.state]]</nuxeo-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Author')]]"
-              sort-by="dc:creator"
-              hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" hidden>
+              <template>
+                <nuxeo-tag>[[formatVersion(item)]]</nuxeo-tag>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]" sort-by="dc:created" flex="50" hidden>
+              <template>
+                [[formatDate(item.properties.dc:created)]]
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]" sort-by="dc:creator" hidden>
               <template>
                 <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature', 'Nature')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" hidden>
               <template>
-                <span>[[item.properties.dc:nature]]</span>
+                <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
+                  [[formatDirectory(item.properties.dc:nature)]]
+                </nuxeo-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage', 'Coverage')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" hidden>
               <template>
-                <span>[[item.properties.dc:coverage]]</span>
+                <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
+                  [[formatDirectory(item.properties.dc:coverage)]]
+                </nuxeo-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects')]]" hidden flex="60">
               <template>
-                  <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
-                    <span class="tag vocabulary">[[subject]]</span>
-                  </template>
+                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                  <nuxeo-tag>[[formatDirectory(subject)]]</nuxeo-tag>
+                </template>
               </template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>
@@ -300,7 +305,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-content-view',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.ResultBehavior],
         properties: {
           params: {
             type: Object,
@@ -319,12 +324,6 @@ Contributors:
             notify: true
           }
         },
-
-        behaviors: [
-          Nuxeo.RoutingBehavior,
-          Nuxeo.I18nBehavior,
-          Nuxeo.ResultBehavior
-        ],
 
         listeners: {
           'document-created': '_handleDocumentCreated',
@@ -384,7 +383,6 @@ Contributors:
         _handleDocumentCreated: function() {
           this.fire('document-updated');
         }
-
 
       });
     })();

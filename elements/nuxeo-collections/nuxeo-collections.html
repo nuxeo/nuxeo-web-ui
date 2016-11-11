@@ -210,7 +210,8 @@ Contributors:
                page-size="40"
                params='{"searchTerm":"%","user":"$currentUser"}'
                sort='{"dc:modified":"desc"}'
-               schemas="dublincore,common">
+               schemas="dublincore,common"
+               headers='{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
 
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"

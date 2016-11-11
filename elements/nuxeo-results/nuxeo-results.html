@@ -201,61 +201,59 @@ Contributors:
             selection-enabled
             display-quick-filters
             on-row-clicked="_navigate">
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
-              sort-by="dc:title"
-              flex="100">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" sort-by="dc:title" flex="100">
               <template>
                 <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                 <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
-              sort-by="dc:modified"
-              flex="50">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" sort-by="dc:modified" flex="50">
               <template>
-                [[_formatDate(item.properties.dc:modified)]]
+                [[formatDate(item.properties.dc:modified)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
-              sort-by="dc:lastContributor"
-              flex="50">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" sort-by="dc:lastContributor" flex="50">
               <template>
                 <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state', 'State')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]" hidden>
               <template><span class="capitalize">[[item.state]]</span></template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version', 'Version')]]" hidden>
-              <template><span>[[_displayVersion(item)]]</span></template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created', 'Created')]]"
-              flex="50" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" hidden>
               <template>
-                [[_formatDate(item.properties.dc:created)]]
+                [[formatVersion(item)]]
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author', 'Author')]]"
-              hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]" flex="50" hidden>
+              <template>
+                [[formatDate(item.properties.dc:created)]]
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]" hidden>
               <template>
                 <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature', 'Nature')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" hidden>
               <template>
-                <span>[[item.properties.dc:nature]]</span>
+                <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
+                  [[formatDirectory(item.properties.dc:nature)]]
+                </nuxeo-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage', 'Coverage')]]" hidden>
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" hidden>
               <template>
-                <span>[[item.properties.dc:coverage]]</span>
+                <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
+                  [[formatDirectory(item.properties.dc:coverage)]]
+                </nuxeo-tag>
               </template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects', 'Subjects')]]" hidden flex="60">
+            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects')]]" hidden flex="60">
               <template>
-                  <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
-                    <span class="tag vocabulary">[[subject]]</span>
-                  </template>
+                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
+                  <nuxeo-tag>[[formatDirectory(subject)]]</nuxeo-tag>
+                </template>
               </template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>
@@ -278,7 +276,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-results',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.ResultBehavior],
         properties: {
           name: {
             type: String
@@ -288,16 +286,9 @@ Contributors:
           }
         },
 
-        behaviors: [
-          Nuxeo.RoutingBehavior,
-          Nuxeo.I18nBehavior,
-          Nuxeo.ResultBehavior
-        ],
-
-
         observers: [
           '_updateActionContext(displayMode, nxProvider.*)',
-          '_observeName(name)',
+          '_observeName(name)'
         ],
 
         ready: function() {
@@ -322,12 +313,12 @@ Contributors:
           var detail;
           if (e.detail.item) {
             detail = {
-              doc: e.detail.item,
+              doc: e.detail.item
             };
             page('/browse' + detail.doc.path);
           } else {
             detail = {
-              doc: e.model.item,
+              doc: e.model.item
             };
           }
           this.fire('navigate', detail);
@@ -338,7 +329,6 @@ Contributors:
             this._localStorageName =  this.$.nxcon.user.id + '-nxrs-' + this.name;
           }
         }
-
 
       });
     })();
