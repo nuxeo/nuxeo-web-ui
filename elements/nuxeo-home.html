@@ -105,122 +105,128 @@ Contributors:
       <div class="header">[[i18n('home.dashboard')]]</div>
       <div class="content">
         <section name="dashboard" class="flex-layout">
+
+          <!-- recently edited -->
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited', 'Recently Edited')]]</span>
+              <span class="title">
+                <iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>
+                [[i18n('home.latestDocumentsEdited')]]
+              </span>
 
               <nuxeo-page-provider auto
                 id="latestQuery"
                 page-size="20"
                 query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
-                schemas="dublincore,common,uid">
+                schemas="dublincore,common,uid"
+                headers='{"X-NXfetch.document": "properties"}'>
               </nuxeo-page-provider>
 
               <nuxeo-data-table
                 nx-provider="latestQuery"
-                empty-label="[[i18n('queryWidget.noDocuments', 'There is no item to show.')]]"
+                empty-label="[[i18n('queryWidget.noDocuments')]]"
                 on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
-                  flex="100">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                   <template>
                     <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                     <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
                   <template>
-                    [[_formatDate(item.properties.dc:modified)]]
+                    [[formatDate(item.properties.dc:modified)]]
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
                   <template>
                     <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version', 'Version')]]">
-                  <template><span>[[_displayVersion(item)]]</span></template>
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]">
+                  <template><span>[[formatVersion(item)]]</span></template>
                 </nuxeo-data-table-column>
               </nuxeo-data-table>
 
             </div>
           </paper-card>
+
+          <!-- tasks -->
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>
-                [[i18n('home.tasks', 'Tasks')]]
-              </span>
+              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</span>
               <nuxeo-tasks-list tasks="[[tasks]]" class="flex"></nuxeo-tasks-list>
             </div>
           </paper-card>
+
+          <!-- recently viewed -->
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed','Recently Viewed')]]</span>
+              <span class="title">
+                <iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]
+              </span>
               <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}">
               </nuxeo-document-storage>
               <nuxeo-data-table id="datatable"
                 items="[[recentDocuments]]"
                 on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
-                  flex="100">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                   <template>
                     <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                     <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type', 'Type')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
                   <template>
                     [[item.type]]
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed', 'Last viewed')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">
                   <template>
-                    [[_formatDate(item.lastViewed)]]
+                    [[formatDate(item.lastViewed)]]
                   </template>
                 </nuxeo-data-table-column>
               </nuxeo-data-table>
             </div>
           </paper-card>
+
+          <!-- favorites -->
           <paper-card class="card">
             <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites','Favorite Items')]]</span>
+              <span class="title">
+                <iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]
+              </span>
               <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
 
               <nuxeo-page-provider id="favoritesProvider"
                  provider="default_content_collection"
                  page-size="20"
                  schemas="dublincore,common,uid"
+                 headers='{"X-NXfetch.document": "properties"}'
                  enrichers="thumbnail">
               </nuxeo-page-provider>
 
               <nuxeo-data-table
                 nx-provider="favoritesProvider"
-                empty-label="[[i18n('favorites.empty', 'No favorites.')]]"
+                empty-label="[[i18n('favorites.empty')]]"
                 on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title', 'Title')]]"
-                  flex="100">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                   <template>
                     <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
                     <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified', 'Modification Date')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
                   <template>
-                    [[_formatDate(item.properties.dc:modified)]]
+                    [[formatDate(item.properties.dc:modified)]]
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor', 'Last Contributor')]]"
-                  flex="50">
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
                   <template>
                     <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
                   </template>
                 </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version', 'Version')]]">
-                  <template><span>[[_displayVersion(item)]]</span></template>
+                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]">
+                  <template><span>[[formatVersion(item)]]</span></template>
                 </nuxeo-data-table-column>
               </nuxeo-data-table>
             </div>
@@ -237,9 +243,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-home',
-
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
         properties: {
 
         },
@@ -257,18 +261,6 @@ Contributors:
             };
           }
           this.fire('navigate', detail);
-        },
-
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
-        },
-
-        _displayVersion: function(doc) {
-          if (doc.properties) {
-            if (doc.properties['uid:major_version'] !== null && doc.properties['uid:major_version'] !== undefined) {
-              return doc.properties['uid:major_version'] + '.' + doc.properties['uid:minor_version'];
-            }
-          }
         },
 
         _thumbnail: function(doc) {
