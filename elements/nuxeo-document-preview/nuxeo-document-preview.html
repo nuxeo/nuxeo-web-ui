@@ -31,22 +31,26 @@ Contributors:
         display: block;
       }
 
-      #preview {
-        border: none;
-        height: 100%;
-        width: 100%;
-      }
-
       nuxeo-image-viewer {
         width: 100%;
         height: 100%;
       }
 
-      .markdown-html {
+      nuxeo-video-viewer {
+        width: 100%;
+        height: 100%;
+      }
+
+      marked-element {
         background-color: white;
       }
 
-      .default-frame {
+      nuxeo-pdf-viewer {
+        width: 100%;
+        height: 100%;
+      }
+
+      iframe {
         height: calc(100% - 2em);
         max-height: 90vh;
         min-height: 60vh;
@@ -56,19 +60,17 @@ Contributors:
         border-bottom: 1px solid var(--divider-color);
       }
 
-      nuxeo-pdf-viewer {
+      #preview {
+        border: none;
         width: 100%;
         height: 100%;
-        --nuxeo-pdf-viewer-iframe: {
-          min-height: 60vh;
-        }
       }
+
     </style>
 
     <!-- Our available preview templates. First match will be used -->
     <template mime-pattern="image.*">
-      <nuxeo-image-viewer src="[[imageSource]]" controls responsive>
-      </nuxeo-image-viewer>
+      <nuxeo-image-viewer src="[[imageSource]]" controls responsive></nuxeo-image-viewer>
     </template>
 
     <template mime-pattern="video.*">
@@ -86,7 +88,7 @@ Contributors:
     </template>
 
     <template mime-pattern=".*">
-      <iframe id="frame" class="default-frame" src="[[iFrameSource]]"></iframe>
+      <iframe id="frame" src="[[iFrameSource]]"></iframe>
     </template>
 
     <div id="preview"></div>
@@ -217,6 +219,7 @@ Contributors:
             return this.blob.data;
           }
         }
+
       });
     })();
   </script>
