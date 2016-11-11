@@ -389,7 +389,7 @@ Contributors:
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                      <nuxeo-menu-item name="analytics" label="Analytics" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
+                      <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
                       <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
                       <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
                     </iron-selector>
@@ -653,7 +653,7 @@ Contributors:
         },
 
         _showDocumentCreationWizard: function(e) {
-          if (e.detail.keyboardEvent && e.detail.keyboardEvent.ctrlKey) {
+          if (e.detail.keyboardEvent && (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey)) {
             return;
           }
           if (e.detail.files) {

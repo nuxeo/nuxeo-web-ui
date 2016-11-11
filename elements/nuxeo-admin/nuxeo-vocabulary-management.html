@@ -154,7 +154,7 @@ Contributors:
             empty-label="[[i18n('vocabularyManagement.noEntry', 'No entry')]]"
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
             <template is="dom-repeat" items="[[colDef]]" as="col">
-              <nuxeo-data-table-column name="[[col.name]]">
+              <nuxeo-data-table-column name="[[i18n(col.name)]]">
                 <template>
                   <template is="dom-if" if="[[!_entryActions(column.name)]]">
                     [[_value(item, column.name)]]
@@ -316,10 +316,10 @@ Contributors:
               var tmp = [];
               if (resp.entries.length > 0) {
                 tmp = Object.keys(resp.entries[0].properties).map(function(key) {
-                  return {name: key, pos: this._computeColPos(key)};
+                  return {name: 'vocabularyManagement.edit.' + key, pos: this._computeColPos(key)};
                 }.bind(this));
               }
-              tmp.push({name: 'actions', pos: 1000, actions: true});
+              tmp.push({name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true});
               tmp.sort(function(a, b) {
                 return a.pos - b.pos;
               });
