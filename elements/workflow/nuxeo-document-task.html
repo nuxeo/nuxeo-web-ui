@@ -33,18 +33,8 @@ Contributors:
         display: block;
       }
 
-      paper-card {
-        font-size: .9em;
-        display: flex;
-        padding: .5em 1em;
-      }
-
       paper-tabs {
         --paper-tabs-selection-bar-color: var(--dark-primary-color);
-      }
-
-      iron-pages {
-        padding: 1em 0;
       }
 
       iron-icon {
@@ -70,28 +60,16 @@ Contributors:
       }
 
       h3 {
-        margin: .5em;
+        margin: 16px 0 8px 0;
+      }
+
+      h4 {
+        margin: 0 0 8px 0;
       }
 
       .task-body {
+        margin: 0;
         padding: 0;
-        overflow-y: auto;
-      }
-
-      .task-directive {
-        display: block;
-        font-weight: bold;
-        margin: 1em 0;
-      }
-
-      .task-buttons {
-        margin-top: 2em;
-      }
-
-      .action-property {
-        color: #434343;
-        margin-bottom: 0.5em;
-        padding: .5em 0;
       }
 
       ::content label {
@@ -106,38 +84,36 @@ Contributors:
 
     <div id="task-body" class="action-container layout vertical task-body">
 
-      <h3 class="layout vertical center">[[i18n('documentTask.taskResolution', 'Task Resolution')]]</h3>
+      <h3>[[i18n('documentTask.taskResolution')]]</h3>
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
-          <paper-card class="layout vertical">
-            <div class="layout horizontal center action-property">
-              <span class="flex-3">[[i18n('documentTask.dueDate', 'Due Date')]]</span>
-              <span class="flex-9">
-                <iron-icon icon="icons:today"></iron-icon> [[_formatDate(task.dueDate)]]
-              </span>
-            </div>
-            <div class="layout horizontal center action-property">
-              <span class="flex-3">[[i18n('documentTask.assigned', 'Assigned to')]]</span>
-              <span class="flex-9">
-                <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                  <template is="dom-if" if="[[_isUser(actor)]]">
-                    <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+          <paper-card>
+            <div class="card-content">
+              <div>
+                <label>[[i18n('documentTask.dueDate')]]</label>
+                <div>[[formatDate(task.dueDate)]]</div>
+              </div>
+              <div>
+                <label>[[i18n('documentTask.assigned')]]</label>
+                <div>
+                  <template is="dom-repeat" items="[[task.actors]]" as="actor">
+                    <template is="dom-if" if="[[_isUser(actor)]]">
+                      <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+                    </template>
+                    <template is="dom-if" if="[[_isGroup(actor)]]">
+                      <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
+                    </template>
+                    <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
+                      <nuxeo-tag>[[actor]]</nuxeo-tag>
+                    </template>
                   </template>
-                  <template is="dom-if" if="[[_isGroup(actor)]]">
-                    <nuxeo-group-tag user="[[actor]]"></nuxeo-group-tag>
-                  </template>
-                  <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
-                    <nuxeo-tag>[[actor]]</nuxeo-tag>
-                  </template>
-                </template>
-              </span>
+                </div>
+              </div>
             </div>
           </paper-card>
 
-          <span class="task-directive">
-            [[i18n(task.directive)]]
-          </span>
+          <h4 class="task-directive">[[i18n(task.directive)]]</h4>
 
           <form id="task-container" is="iron-form">
             <!--dynamically loaded via _taskChanged-->
@@ -162,7 +138,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-task',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
         properties: {
 
           task: {
@@ -238,10 +214,6 @@ Contributors:
           }
         },
 
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
-        },
-
         _processTask: function(e) {
           if (this.$['task-container'].validate()) {
             this.action = e.target.dataset.args;
@@ -265,8 +237,9 @@ Contributors:
         },
 
         _isNotUserOrGroup: function(actor) {
-          return this._isUser(actor) && this._isGroup(actor);
+          return !this._isUser(actor) && !this._isGroup(actor);
         }
+
       });
     })();
   </script>
