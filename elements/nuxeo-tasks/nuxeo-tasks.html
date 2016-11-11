@@ -146,7 +146,7 @@ Contributors:
         @apply(--nx-button-primary-hover);
       }
 
-      paper-button[disabled], {
+      paper-button[disabled] {
         @apply(--nx-button-disabled);
       }
 
@@ -242,7 +242,7 @@ Contributors:
                         <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
                       </template>
                       <template is="dom-if" if="[[_isGroup(actor)]]">
-                        <nuxeo-group-tag user="[[actor]]"></nuxeo-group-tag>
+                        <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
                       </template>
                       <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
                         <nuxeo-tag>[[actor]]</nuxeo-tag>
@@ -335,7 +335,7 @@ Contributors:
         },
 
         _isNotUserOrGroup: function(actor) {
-          return this._isUser(actor) && this._isGroup(actor);
+          return !this._isUser(actor) && !this._isGroup(actor);
         },
 
         _toggleGraphDialog: function() {
