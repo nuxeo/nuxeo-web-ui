@@ -168,6 +168,8 @@ Contributors:
               </nuxeo-document-storage>
               <nuxeo-data-table id="datatable"
                 items="[[recentDocuments]]"
+                empty-label="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]"
+                empty-label-when-filtered="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]"
                 on-row-clicked="_navigate">
                 <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                   <template>
