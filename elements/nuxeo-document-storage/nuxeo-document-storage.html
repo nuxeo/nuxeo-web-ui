@@ -56,7 +56,7 @@ Contributors:
         if (this.contains(doc)) {
           return;
         }
-        return this.push('documents', {
+        return this.unshift('documents', {
           uid: doc.uid,
           title: doc.title,
           type: doc.type,
