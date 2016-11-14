@@ -159,7 +159,7 @@ Contributors:
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
-            <paper-item ame="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
+            <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
           </paper-listbox>
