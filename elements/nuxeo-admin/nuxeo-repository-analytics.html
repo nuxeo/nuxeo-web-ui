@@ -122,10 +122,10 @@ Contributors:
         <div class="card-content downloads">
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]">
-              <nuxeo-data-table-column name="File">
+              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file', 'File')]]">
                 <template>[[item.title]]</template>
               </nuxeo-data-table-column>
-              <nuxeo-data-table-column name="Downloads">
+              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads','Downloads')]]">
                 <template>[[_numberOfDownloads(item)]]</template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>

@@ -55,7 +55,10 @@ Contributors:
       </template>
     </div>
 
-    <nuxeo-dropzone document="{{document}}" xpath="files:files" blob-list update-document></nuxeo-dropzone>
+    <nuxeo-dropzone document="{{document}}"
+                    xpath="files:files"
+                    uploaded-message="[[i18n('documentAttachments.upload.uploaded','Attachment(s) uploaded')]]"
+                    blob-list update-document></nuxeo-dropzone>
 
   </template>
 

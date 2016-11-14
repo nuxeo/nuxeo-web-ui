@@ -65,7 +65,9 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   _isValidType: function(type) {
-    return type && this.subtypes && this.subtypes.indexOf(type) > -1;
+    return type && this.subtypes && this.subtypes.findIndex(function(t) {
+        return t._id === type._id && t.type === type.type && t.icon === type.icon;
+      }) > -1;
   },
 
   _getTypeLabel: function(type) {

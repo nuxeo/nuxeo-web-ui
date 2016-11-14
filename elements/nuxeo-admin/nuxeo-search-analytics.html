@@ -139,10 +139,10 @@ Contributors:
       <paper-card heading="[[i18n('searchAnalytics.numberOfResults.heading','Number of results')]]" elevation="0">
         <div class="card-content">
           <nuxeo-data-table items="[[callPerNumberOfResults]]">
-            <nuxeo-data-table-column name="[[i18n(''searchAnalytics.numberOfResults.range'','Range')]]">
+            <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range','Range')]]">
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="Number of calls">
+            <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.calls', 'Number of calls')]]">
               <template>[[item.value]]</template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>

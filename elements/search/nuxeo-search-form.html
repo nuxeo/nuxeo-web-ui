@@ -287,7 +287,8 @@ Contributors:
         <div id="queue" hidden$="{{!_isQueue}}">
           <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
             selected-item="{{selectedDocument}}"
-
+            empty-label="[[i18n('searchForm.queue.noResults', 'No Results')]]"
+            empty-label-when-filtered=""
             selection-enabled>
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">

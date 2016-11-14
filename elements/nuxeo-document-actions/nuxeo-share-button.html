@@ -50,7 +50,7 @@ Contributors:
         <h1>[[i18n('shareButton.heading','Share the Document')]]</h1>
         <div class="share-container">
           <paper-input id="permalink"
-                       label="Copy the link and share the document [[document.properties.dc:title]]"
+                       label="[[i18n('shareButton.copy.label', 'Copy the link and share the document {0}', document.properties.dc:title)]]"
                        value="[[_buildPermalink(document)]]"
                        autofocus
                        readonly></paper-input>

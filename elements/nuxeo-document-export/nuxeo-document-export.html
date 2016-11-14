@@ -56,7 +56,7 @@ Contributors:
   <template is="dom-repeat" items="[[_filterRenditions(document)]]">
     <div class="rendition-container horizontal layout center">
       <iron-icon src="[[item.icon]]"></iron-icon>
-      <a href="[[item.url]]">[[item.name]]</a>
+      <a href="[[item.url]]">[[i18n(item.name)]]</a>
     </div>
   </template>
 
@@ -72,10 +72,15 @@ Contributors:
           document: Object
         },
 
+        behaviors: [Nuxeo.I18nBehavior],
+
         _filterRenditions: function(document) {
           if (document && document.contextParameters) {
             return document.contextParameters.renditions.filter(function(rendition) {
               return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
+            }).map(function(item) {
+              item.name = 'documentExport.' + item.name;
+              return item;
             });
           } else {
             return [];
