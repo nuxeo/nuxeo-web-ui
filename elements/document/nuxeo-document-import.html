@@ -1108,7 +1108,7 @@ Contributors:
           var lastIdx = this._getTotalFileCount() - 1;
           if (this._isValidFileIndex(this.docIdx) && this._isValidFileIndex(lastIdx) && this._validate()) {
             this._storeFile(0);
-            for (var i = 0; i <= lastIdx; i++) {
+            for (var i = 1; i <= lastIdx; i++) {
               this._copyFileData(0, i);
             }
             this._selectDoc(lastIdx);
