@@ -87,7 +87,8 @@ Contributors:
           type: String,
           value: 'file:content'
         },
-        blob: Object
+        blob: Object,
+        actionContext: Object
       },
 
       observers: [
@@ -97,6 +98,7 @@ Contributors:
       _updateBlob: function(document, xpath) {
         var array = xpath.split('/');
         this.blob = (array.length > 1) ? document.properties[array[0]][array[1]].file : document.properties[xpath];
+        this.actionContext = {document: this.document, blob: this.blob, xpath: this.xpath};
       }
 
     });
