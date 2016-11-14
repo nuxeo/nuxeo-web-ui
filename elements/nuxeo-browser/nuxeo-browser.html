@@ -120,6 +120,35 @@ Contributors:
       .document-actions::content paper-icon-button:hover {
         color: var(--nuxeo-header-actions-hover);
       }
+
+      paper-listbox {
+        @apply(--layout-horizontal);
+        --paper-listbox-background-color: transparent;
+      }
+
+      paper-listbox paper-item {
+        user-select: none;
+        border: 1px solid var(--nuxeo-pill-color);
+        border-radius: 16px;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        margin: 0 0 0 8px;
+        color: var(--nuxeo-pill-text-color);
+        --paper-item-min-height: 32px;
+        --paper-item-selected-weight: 300;
+        --paper-item-selected: {
+          background: var(--nuxeo-pill-color);
+        };
+        --paper-item-focused: {
+          background: var(--nuxeo-pill-color);
+        };
+        --paper-item-focused-before: {
+          background: none;
+        };
+      }
+
     </style>
 
     <!-- Main content -->
@@ -128,26 +157,12 @@ Contributors:
       <div class="paper-header">
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
-
-          <paper-dropdown-menu noink no-animations no-label-float>
-            <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
-              <paper-icon-item name="view">
-                <iron-icon icon="icons:visibility" item-icon></iron-icon>
-                [[i18n('command.view', 'View')]]</paper-icon-item>
-              <template is="dom-if" if="[[_canViewContent(document)]]">
-                <paper-icon-item name="edit">
-                  <iron-icon icon="editor:mode-edit" item-icon></iron-icon>
-                  [[i18n('command.edit', 'Edit')]]</paper-icon-item>
-              </template>
-              <paper-icon-item name="permissions">
-                <iron-icon icon="communication:vpn-key" item-icon></iron-icon>
-                [[i18n('browser.permissions', 'Permissions')]]</paper-icon-item>
-
-              <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
-
-            </paper-menu>
-          </paper-dropdown-menu>
-
+          <paper-listbox selected="{{selectedTab}}" attr-for-selected="name">
+            <paper-item name="view">[[i18n('browser.view')]]</paper-item>
+            <paper-item ame="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
+            <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
+            <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+          </paper-listbox>
         </paper-toolbar>
       </div>
 
