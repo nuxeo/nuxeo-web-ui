@@ -121,12 +121,12 @@ Contributors:
         color: var(--nuxeo-header-actions-hover);
       }
 
-      paper-listbox {
+      ::content #documentViews {
         @apply(--layout-horizontal);
         --paper-listbox-background-color: transparent;
       }
 
-      paper-listbox paper-item {
+      ::content #documentViews paper-item {
         user-select: none;
         border: 1px solid var(--nuxeo-pill-color);
         border-radius: 16px;
@@ -157,7 +157,7 @@ Contributors:
       <div class="paper-header">
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
-          <paper-listbox selected="{{selectedTab}}" attr-for-selected="name">
+          <paper-listbox id="documentViews" selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
             <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
