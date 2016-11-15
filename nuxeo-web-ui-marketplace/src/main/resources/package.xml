@@ -1,7 +1,7 @@
 <package type="addon" name="nuxeo-web-ui" version="@VERSION@">
   <title>Nuxeo Web UI</title>
   <description>
-    <p>Ongoing work to build a new Nuxeo Web UI.</p>
+    <p>Try Nuxeo Web UI, the future of the user interface for the Nuxeo Platform.</p>
   </description>
   <home-page>https://github.com/nuxeo/nuxeo-web-ui</home-page>
   <vendor>Nuxeo</vendor>
