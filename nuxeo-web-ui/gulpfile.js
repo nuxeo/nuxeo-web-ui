@@ -25,6 +25,10 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var merge = require('merge-stream');
 var path = require('path');
+var through = require('through2');
+var mergeJson = require('gulp-merge-json');
+var path = require('path');
+var fs = require('fs');
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -170,6 +174,23 @@ gulp.task('strip', function() {
   ]);
 });
 
+// merge message files from nuxeo-ui-elements and nuxeo-web-ui
+// in case of conflict, nuxeo-web-ui prevails
+gulp.task('merge-message-files', function() {
+  var i18ndist = app('i18n');
+  return gulp.src([dist('bower_components/nuxeo-ui-elements/i18n/messages*.json')])
+      .pipe($.if(function(file) {
+        return fs.existsSync(path.join(i18ndist, path.basename(file.path)));
+      }, through.obj(function(file, enc, callback) {
+        gulp.src([file.path, path.join(i18ndist, path.basename(file.path))])
+            .pipe(mergeJson(path.basename(file.path)))
+            .pipe(gulp.dest(i18ndist));
+        callback();
+      })))
+      .pipe(gulp.dest(i18ndist))
+      .pipe($.size({title: 'merge-message-files'}));
+});
+
 // Clean output directory
 gulp.task('clean', function() {
   return del(['.tmp']);
@@ -178,6 +199,7 @@ gulp.task('clean', function() {
 // Build production files, the default task
 gulp.task('default', ['clean'], function(cb) {
   runSequence(
+      'merge-message-files',
       ['copy', 'styles'],
       ['images', 'html'],
       'vulcanize',
