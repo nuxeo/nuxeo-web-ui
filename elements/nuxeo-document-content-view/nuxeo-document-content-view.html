@@ -128,6 +128,14 @@ Contributors:
         margin-right: 2px;
       }
 
+      #grid, #table {
+        border: 2px solid transparent;
+      }
+
+      #grid.dragging, #table.dragging {
+        border: 2px dashed var(--nuxeo-primary-color);
+      }
+
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -327,9 +335,9 @@ Contributors:
 
         listeners: {
           'document-created': '_handleDocumentCreated',
-          'dropzone.dragover': '_dragoverSmartImport',
-          'dropzone.dragleave': '_dragleaveSmartImport',
-          'dropzone.drop': '_dropSmartImport'
+          'dropzone.dragover': '_dragoverImport',
+          'dropzone.dragleave': '_dragleaveImport',
+          'dropzone.drop': '_dropImport'
         },
 
         observers: [
@@ -360,19 +368,25 @@ Contributors:
           page('/browse' + detail.doc.path);
         },
 
-        _dragoverSmartImport: function(e) {
+        _dragoverImport: function(e) {
           e.preventDefault();
-          this.$.toast.text = this.i18n('documentContentView.drag.import', 'Drop to Smart Import');
+          this.$.toast.text = this.i18n('documentContentView.drag.import', 'Drop to import');
           this.$.toast.open();
+          this.toggleClass('dragging', true, this.$.grid);
+          this.toggleClass('dragging', true, this.$.table);
         },
 
-        _dragleaveSmartImport: function() {
+        _dragleaveImport: function() {
           this.$.toast.close();
+          this.toggleClass('dragging', false, this.$.grid);
+          this.toggleClass('dragging', false, this.$.table);
         },
 
-        _dropSmartImport: function(e) {
+        _dropImport: function(e) {
           e.preventDefault();
           this.$.toast.close();
+          this.toggleClass('dragging', false, this.$.grid);
+          this.toggleClass('dragging', false, this.$.table);
           this.fire('create-document', {files: e.dataTransfer.files});
         },
 
