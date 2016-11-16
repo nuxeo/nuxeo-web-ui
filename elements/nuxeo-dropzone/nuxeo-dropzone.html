@@ -36,7 +36,6 @@ Contributors:
 
       #dropzone {
         overflow: auto;
-        cursor: pointer;
         height: 100%;
       }
 
@@ -45,7 +44,6 @@ Contributors:
         @apply(--layout-center);
         @apply(--layout-flex);
         @apply(--layout-center-justified);
-        pointer-events: none;
         border-radius: 2px;
         border: 1px dashed var(--paper-input-container-color);
         min-height: 64px;
@@ -60,11 +58,20 @@ Contributors:
       #container .actions {
         text-align: center;
         color: var(--nuxeo-text-light);
+        @apply(--layout-horizontal);
       }
 
       #details {
         border: 1px solid var(--nuxeo-border);
         padding: 16px;
+      }
+
+      a, a:active, a:visited, a:focus {
+        @apply(--nuxeo-link);
+      }
+
+      a:hover {
+        @apply(--nuxeo-link-hover);
       }
 
       .file {
@@ -95,20 +102,32 @@ Contributors:
         margin-left: 16px;
       }
 
+      .actions > *,
+      .actions::content > * {
+        margin-left: 8px;
+      }
+
+      .actions > *:first-child,
+      .actions > nuxeo-slot,
+      .actions::content > *:first-child,
+      .actions::content > nuxeo-slot {
+        margin-left: 0;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
+    <nuxeo-operation id="bulkAttach" op="BlobHolder.AttachOnCurrentDocument"></nuxeo-operation>
 
     <label id="label" hidden$="[[!label]]">[[label]]</label>
 
     <input hidden id="input" type="file" on-change="_filesChanged">
     <paper-toast id="toast"></paper-toast>
 
-    <div id="dropzone" on-tap="open" hidden$="[[_hasFiles]]">
+    <div id="dropzone" hidden$="[[_hasFiles]]">
       <div id="container">
+        <a href="javascript:undefined" on-tap="open">[[message]]</a>
         <div class="actions">
-          <div>[[message]]</div>
           <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
       </div>
@@ -184,7 +203,8 @@ Contributors:
         },
 
         listeners: {
-          'batchFinished': 'importBatch'
+          'batchFinished': 'importBatch',
+          'nx-blob-picked': '_blobPicked'
         },
 
         ready: function() {
@@ -207,34 +227,64 @@ Contributors:
               context: {
                 currentDocument: this.document.path
               }
-            }).then(function() {
-              return this.$.doc.get().then(function(response) {
-                this.document.properties[this.xpath] = response.properties[this.xpath];
-                this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
-                this._toast(this.uploadedMessage);
-                this.progress = false;
-                this._hasFiles = false;
-              }.bind(this));
-            }.bind(this));
-
+            }).then(this._handleBlobListUploaded.bind(this));
           } else {
-
             this.document.properties[this.xpath] = {
               'upload-batch': data.detail.batchId,
               'upload-fileId': '0'
             };
+            this._handleBlobUploaded();
+          }
+        },
 
-            if (this.updateDocument) {
-              this.$.doc.put().then(function(response) {
-                this.document = response;
-                this._toast(this.uploadedMessage);
-                this.progress = false;
-              }.bind(this));
-            } else {
+        _blobPicked: function(e) {
+          this._hasFiles = true;
+          this.set('files', e.detail.blobs);
+          if (this.blobList) {
+            this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) {
+                return file.key;
+              }).join();
+            this.$.bulkAttach.params = {
+              useMainBlob: false,
+              context: {
+                currentDocument: this.document.path
+              },
+              noMimeTypeCheck: true
+            };
+            this.$.bulkAttach.headers = {'nx_es_sync': 'true'};
+            return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
+          } else {
+            var file = e.detail.blobs[e.detail.blobs.length - 1];
+            this.document.properties[this.xpath] = {
+              'providerId': file.providerId,
+              'user': file.user,
+              'fileId': file.fileId
+            };
+            this._handleBlobUploaded();
+          }
+        },
+
+        _handleBlobUploaded: function() {
+          if (this.updateDocument) {
+            this.$.doc.put().then(function(response) {
+              this.document = response;
               this._toast(this.uploadedMessage);
               this.progress = false;
-            }
+            }.bind(this));
+          } else {
+            this._toast(this.uploadedMessage);
+            this.progress = false;
           }
+        },
+
+        _handleBlobListUploaded: function() {
+          return this.$.doc.get().then(function(response) {
+            this.document.properties[this.xpath] = response.properties[this.xpath];
+            this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
+            this._toast(this.uploadedMessage);
+            this.progress = false;
+            this._hasFiles = false;
+          }.bind(this));
         },
 
         _deleteFile: function() {
