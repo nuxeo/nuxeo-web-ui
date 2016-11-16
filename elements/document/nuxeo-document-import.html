@@ -447,7 +447,7 @@ Contributors:
               <div class="flex">
                 <paper-dropdown-menu label="[[i18n('documentImportForm.type.label')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
                   <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-                    <template is="dom-repeat" items="[[subtypes]]" as="type">
+                    <template is="dom-repeat" items="[[subtypes]]" as="type" filter="_filterDocTypes">
                       <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
                     </template>
                   </paper-menu>
@@ -694,7 +694,10 @@ Contributors:
           if (this.stage === 'upload') {
             this.stage = 'customize';
             this.customizing = true;
-            this.set('selectedDocType', this.subtypes[0]);
+            var filteredDocTypes = this.subtypes.filter(this._filterDocTypes);
+            if (filteredDocTypes.length > 0) {
+              this.set('selectedDocType', filteredDocTypes[0]);
+            }
             this.fire('nx-creation-wizard-hide-tabs');
             this._selectDoc(0);
           } else {
@@ -1113,6 +1116,10 @@ Contributors:
             }
             this._selectDoc(lastIdx);
           }
+        },
+
+        _filterDocTypes: function(type) {
+          return window.nuxeo.importBlacklist.indexOf(type.id) === -1;
         },
 
         /**
