@@ -1,0 +1,108 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+
+<!--
+`nuxeo-document-history`
+@group Nuxeo UI
+@element nuxeo-document-history
+-->
+<dom-module id="nuxeo-document-history">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      nuxeo-data-table {
+        width: 100%;
+        height: 82vh;
+        background: white;
+        border: 1px solid var(--nuxeo-border);
+      }
+    </style>
+
+    <nuxeo-operation id="operation" op="Audit.QueryWithPageProvider" response="{{response}}"></nuxeo-operation>
+
+    <nuxeo-data-table items="[[response.entries]]" empty-label="[[i18n('documentHistory.empty')]]">
+      <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]">
+        <template>[[item.extended.downloadReason]]</template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]">
+        <template>[[formatDate(item.logDate)]]</template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]">
+        <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]">
+        <template>[[item.category]]</template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.directive')]]">
+        <template></template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.dueDate')]]">
+        <template></template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
+        <template>[[item.comment]]</template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
+        <template><nuxeo-tag>[[item.docLifeCycle]]</nuxeo-tag></template>
+      </nuxeo-data-table-column>
+    </nuxeo-data-table>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    Polymer({
+      is: 'nuxeo-document-history',
+      behaviors: [Nuxeo.FormatBehavior],
+      properties: {
+        document: Object,
+        response: Object,
+        visible: {
+          type: Boolean,
+          value: false,
+          observer: '_refresh'
+        }
+      },
+
+      _refresh: function() {
+        if (this.document) {
+          this.$.operation.params = {
+            language: 'NXQL',
+            providerName: 'DOCUMENT_HISTORY_PROVIDER',
+            queryParams: this.document.uid,
+            sortOrder: 'DESC'
+          };
+          this.$.operation.execute();
+        }
+      },
+
+      _activity: function(event) {
+        return this.i18n('documentHistory.eventId.' + event.eventId);
+      }
+
+    });
+  })();
+</script>
