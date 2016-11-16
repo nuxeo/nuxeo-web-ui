@@ -230,6 +230,15 @@ Contributors:
         font-size: .8em;
       }
 
+      ::content #checkbox.paper-checkbox {
+        border: 1px solid var(--paper-checkbox-unchecked-ink-color);
+      }
+
+      ::content *[checked] #checkbox.paper-checkbox {
+        border-color: #75b226 !important;
+        background-color: #75b226 !important;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
