@@ -221,6 +221,15 @@ Contributors:
         color: var(--nuxeo-text-light);
         margin-right: .2em;
       }
+
+      ::content nuxeo-quick-filters {
+        padding: .5em 0 .3em;
+        border-bottom: 1px solid var(--nuxeo-border);
+        max-height: 6em;
+        overflow: auto;
+        font-size: .8em;
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -289,7 +298,8 @@ Contributors:
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults', 'No Results')]]"
             empty-label-when-filtered=""
-            selection-enabled>
+            selection-enabled
+            display-quick-filters>
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box vertical layout">
