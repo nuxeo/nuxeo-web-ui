@@ -38,28 +38,26 @@ Contributors:
         background: white;
         border: 1px solid var(--nuxeo-border);
       }
+
+      nuxeo-tag {
+        text-transform: uppercase;
+      }
     </style>
 
     <nuxeo-operation id="operation" op="Audit.QueryWithPageProvider" response="{{response}}"></nuxeo-operation>
 
     <nuxeo-data-table items="[[response.entries]]" empty-label="[[i18n('documentHistory.empty')]]">
       <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]">
-        <template>[[item.extended.downloadReason]]</template>
+        <template>[[_formatActivity(item.eventId)]]</template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]">
-        <template>[[formatDate(item.logDate)]]</template>
+        <template>[[formatDate(item.eventDate)]]</template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]">
         <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]">
-        <template>[[item.category]]</template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.directive')]]">
-        <template></template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.dueDate')]]">
-        <template></template>
+        <template>[[_formatActivity(item.category)]]</template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
         <template>[[item.comment]]</template>
@@ -88,7 +86,7 @@ Contributors:
       },
 
       _refresh: function() {
-        if (this.document) {
+        if (this.document && this.visible) {
           this.$.operation.params = {
             language: 'NXQL',
             providerName: 'DOCUMENT_HISTORY_PROVIDER',
@@ -99,8 +97,8 @@ Contributors:
         }
       },
 
-      _activity: function(event) {
-        return this.i18n('documentHistory.eventId.' + event.eventId);
+      _formatActivity: function(key) {
+        return this.i18n('activity.' + key);
       }
 
     });
