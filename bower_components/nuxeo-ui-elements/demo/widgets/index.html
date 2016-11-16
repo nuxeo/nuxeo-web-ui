@@ -21,13 +21,18 @@ Contributors:
   <title>Nuxeo Widgets</title>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../polymer/polymer.html">
   <link rel="import" href="../../../font-roboto/roboto.html">
+  <link rel="import" href="../../../iron-icons/iron-icons.html">
+  <link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
   <link rel="import" href="../../../nuxeo-elements/nuxeo-connection.html">
   <link rel="import" href="../../widgets/nuxeo-directory-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-user-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-document-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-file.html">
   <link rel="import" href="../../widgets/nuxeo-tag.html">
+  <link rel="import" href="../../widgets/nuxeo-operation-button.html">
   <link rel="stylesheet" href="../../../select2/select2.css">
   <style>
       body {
@@ -52,7 +57,6 @@ Contributors:
         line-height: 48px;
       }
       table td {
-        padding: 0;
         margin: 0;
         vertical-align: top;
         padding: 12px 12px 12px 0;
@@ -116,6 +120,15 @@ Contributors:
       <td></td>
       <td>
         <nuxeo-tag icon="home">Home</nuxeo-tag>
+      </td>
+    </tr>
+    <tr>
+      <td>Operation button</td>
+      <td>[[operationResponse.uid]]</td>
+      <td>
+        <nuxeo-operation-button icon="icons:account-box" label="Get user"
+                                operation="User.Get" response="{{operationResponse}}">
+        </nuxeo-operation-button>
       </td>
     </tr>
     </tbody>

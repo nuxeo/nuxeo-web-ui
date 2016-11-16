@@ -32,20 +32,28 @@ Contributors:
       }
 
       .quick-filters {
-          background-color: var(--nuxeo-pill-background, #6c6f7c );
-          color: var(--nuxeo-pill-text, #fff);
-          margin: 2em 1em;
+        background-color: var(--nuxeo-pill-background, #fff );
+        color: var(--nuxeo-pill-text, #6d7684);
+        border: 1px solid var(--nuxeo-border, #e8edee);
+        border-radius: 3em;
+        box-shadow: none;
+        font-size: 1em;
+        padding: .4em .7em .3em;
+        margin: 0 0 .5em .5em;
+        text-transform: none;
       }
 
       .quick-filters[active] {
-          background-color: var(--nuxeo-pill-background-active, #00adff );
-          color: var(--nuxeo-pill-text-active, #fff);
+        box-shadow: none;
+        border: 1px solid var(--nuxeo-pill-background-active, #00adff );
+        background-color: var(--nuxeo-pill-background-active, #00adff );
+        color: var(--nuxeo-pill-text-active, #fff);
       }
     </style>
 
     <div id="filters">
       <template is="dom-repeat" items="[[quickFilters]]" as="filter" id="filterList">
-        <paper-button toggles noink raised class="quick-filters" active$="[[filter.active]]" on-tap="_selectFilter">
+        <paper-button toggles noink class="quick-filters" active$="[[filter.active]]" on-tap="_selectFilter">
             [[_computeFilterLabel(filter)]]
         </paper-button>
       </template>
