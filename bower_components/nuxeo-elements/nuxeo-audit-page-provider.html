@@ -1,0 +1,223 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="nuxeo-operation.html">
+
+<!--
+@group Nuxeo Elements
+@element nuxeo-audit-page-provider
+@demo demo/nuxeo-audit-page-provider.html
+@homepage http://www.nuxeo.org
+-->
+<dom-module id="nuxeo-audit-page-provider">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+
+    <nuxeo-operation id="auditOp"
+      op="Audit.QueryWithPageProvider"
+      enrichers="{{enrichers}}"
+      schemas="[[schemas]]"
+      headers="{{headers}}">
+    </nuxeo-operation>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-audit-page-provider',
+      properties: {
+
+        /* The id of a nuxeo-connection to use. */
+        connectionId: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * If true, automatically execute the operation when either `provider` or `params` changes.
+         */
+        auto: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * The delay in milliseconds to debounce the auto fetch call when provider, params, etc. changes.
+         */
+        autoDelay: {
+          type: Number,
+          value: 300
+        },
+
+        /**
+         * The query parameters.
+         */
+        params: {
+          type: Object,
+          value: {}
+        },
+
+        /**
+         * The number of results per page.
+         */
+        pageSize: {
+          type: Number,
+          value: -1
+        },
+
+        /**
+         * The current page.
+         */
+        page: {
+          type: Number,
+          value: 1
+        },
+
+        /**
+         * The current page entries.
+         */
+        currentPage: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+
+        /**
+         * Map of properties and direction 'asc' / 'desc'
+         */
+        sort: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+
+        numberOfPages: {
+          type: Number,
+          notify: true
+        },
+
+        resultsCount: {
+          type: Number,
+          notify: true
+        },
+
+        isNextPageAvailable: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
+        currentPageSize: {
+          type: Number,
+          notify: true
+        },
+
+        /* The headers of the request.
+         * 'Accept': 'text/plain,application/json' is already set by default.
+         */
+        headers: {type: Object, value: null},
+
+        docUid: String
+
+      },
+
+      observers: [
+        '_autoFetch(params.*, pageSize, page, sort, docUid)'
+      ],
+
+      /**
+       * Fetch the currentPage.
+       *
+       * @method fetch
+       */
+      fetch: function() {
+        if (typeof this.docUid === "undefined" || this.docUid.length === 0) {
+          return;
+        }
+        var queryParams, namedQueryParams = this.params;
+
+        if (this.docUid && this.docUid.length > 0) {
+          queryParams = this.docUid;
+        }
+
+        if (this.params !== null) {
+          Object.keys(this.params).forEach(function(key) {
+            if (typeof this.params[key] === "string") {
+              namedQueryParams[key] = this.params[key];
+            } else {
+              namedQueryParams[key] = JSON.stringify(this.params[key]);
+            }
+          }, this);
+        }
+
+        var params = {
+          providerName: 'DOCUMENT_HISTORY_PROVIDER',
+          queryParams: queryParams,
+          namedQueryParams: namedQueryParams,
+          currentPageIndex: this.page - 1,
+          pageSize: this.pageSize
+        }
+
+        if (this._sortKeys.length > 0) {
+          params.sortBy = this._sortKeys.join(",");
+          params.sortOrder = this._sortValues.join(",");
+        }
+
+        this.$.auditOp.params = params;
+        return this.$.auditOp.execute()
+          .then(function(response) {
+            this.currentPage = response.entries.slice(0);
+            this.numberOfPages = response.numberOfPages;
+            this.resultsCount = response.resultsCount;
+            this.isNextPageAvailable = response.isNextPageAvailable;
+            this.currentPageSize = response.currentPageSize;
+            this.fire('update');
+            return response;
+          }.bind(this));
+      },
+
+      get _sortKeys() {
+        return Object.keys(this.sort);
+      },
+
+      get _sortValues() {
+        return this._sortKeys.map(function(k) { return this.sort[k];}.bind(this));
+      },
+
+      _autoFetch: function () {
+        if (this.docUid && this.docUid.length > 0
+            && (this.docUid !== this.$.auditOp.queryParams)) {
+          this.page = 1;
+        }
+        if (this.auto) {
+          // debounce in case of multiple param changes
+          this.debounce('_autoFetch', function() {
+            this.fetch();
+          }.bind(this), this.autoDelay);
+        }
+      }
+
+    });
+  </script>
+
+</dom-module>

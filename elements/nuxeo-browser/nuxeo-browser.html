@@ -161,6 +161,7 @@ Contributors:
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
             <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
+            <paper-item name="history">[[i18n('browser.history')]]</paper-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
           </paper-listbox>
         </paper-toolbar>
@@ -185,7 +186,7 @@ Contributors:
 
       <div class="content" id="nxContent">
         <paper-toast id="toast"></paper-toast>
-        <iron-pages selected="[[selectedTab]]" attr-for-selected="name">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
           <section name="view">
             <template is="dom-if" if="[[_canViewContent(document)]]">
               <nuxeo-document-content-view id="browseContent" provider="advanced_document_content"
@@ -213,6 +214,8 @@ Contributors:
           <section name="permissions">
             <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
           </section>
+
+          <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
 
           <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
