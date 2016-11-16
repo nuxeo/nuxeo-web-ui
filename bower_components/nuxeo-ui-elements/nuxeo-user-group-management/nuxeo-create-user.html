@@ -201,6 +201,11 @@ Used by `nuxeo-user-group-management`
       errors: {
         type: String,
         value: ''
+      },
+
+      isAdministrator: {
+        type: Boolean,
+        value: false
       }
     },
 
@@ -226,7 +231,7 @@ Used by `nuxeo-user-group-management`
      * Creates a new user if the form was successfully submitted.
      */
     _create: function() {
-      if (!this.user.isAdministrator && this.user.groups.indexOf('administrators') !== -1) {
+      if (!this.isAdministrator && this.user.groups && this.user.groups.indexOf('administrators') !== -1) {
         this.errors = this.i18n('createUser.errorAdministratorsGroup');
         return;
       }
