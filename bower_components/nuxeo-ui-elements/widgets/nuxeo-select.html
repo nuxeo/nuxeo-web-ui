@@ -17,12 +17,21 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../paper-menu/paper-menu.html">
+<link rel="import" href="../../paper-item/paper-item.html">
 
 <!--
+An element for selecting options.
+
+Example:
+
+    <nuxeo-select label="Options" options=[[options]] selected={{selected}}></nuxeo-select>
+
 `nuxeo-select`
-@group Nuxeo UI
+@group Nuxeo Widgets
 @element nuxeo-select
+@demo demo/widgets/index.html
 -->
 <dom-module id="nuxeo-select">
   <template>

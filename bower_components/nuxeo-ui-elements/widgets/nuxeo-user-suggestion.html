@@ -93,13 +93,22 @@ Polymer({
       notify: true
     },
 
-    resultFormatter: Function
+    resultFormatter: {
+      type: Function,
+      value: function () {
+        return this._resultFormatter.bind(this);
+      }
+    }
   },
 
   computeParams: function() {
     return this.params = {
       searchType: this.searchType
     };
+  },
+
+  _resultFormatter: function (item) {
+    return (item.displayLabel || item.title) + ((item.type && item.type === 'USER_TYPE') ? '<br>' + item.email : '');
   }
 
 });

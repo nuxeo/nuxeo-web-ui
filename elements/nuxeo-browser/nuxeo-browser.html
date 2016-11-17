@@ -187,37 +187,34 @@ Contributors:
       <div class="content" id="nxContent">
         <paper-toast id="toast"></paper-toast>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
-          <section name="view">
-            <template is="dom-if" if="[[_canViewContent(document)]]">
-              <nuxeo-document-content-view id="browseContent" provider="advanced_document_content"
-                params="[[cvParams]]" selected-items="{{selectedItems}}"
-                document="[[document]]">
-                <div class="actions">
-                  <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
-                </div>
-              </nuxeo-document-content-view>
-            </template>
 
-            <template is="dom-if" if="[[_canView(document)]]">
-              <nuxeo-document-page document="[[document]]"></nuxeo-document-page>
-            </template>
-          </section>
+          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
-          <template is="dom-if" if="[[_canViewContent(document)]]">
-            <section name="edit">
+          <template is="dom-if" if="[[_canView(document)]]" restamp>
+            <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
+          </template>
+
+          <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
+            <nuxeo-document-content-view name="view" id="browseContent" provider="advanced_document_content"
+                                         params="[[cvParams]]" selected-items="{{selectedItems}}"
+                                         document="[[document]]">
+              <div class="actions">
+                <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+              </div>
+            </nuxeo-document-content-view>
+          </template>
+
+          <section name="edit">
+            <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
               <paper-card>
                 <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
               </paper-card>
-            </section>
-          </template>
-
-          <section name="permissions">
-            <nuxeo-document-permissions id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
+            </template>
           </section>
 
-          <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
+          <nuxeo-document-permissions id="permissions" name="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
 
-          <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
+          <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
 
         </iron-pages>
       </div>
