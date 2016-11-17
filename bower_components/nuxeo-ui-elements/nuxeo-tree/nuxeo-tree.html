@@ -196,7 +196,20 @@ controller = {
         */
         _find: function(key) {
           return this.querySelector('[data-' + this.nodeKey + '="' + key + '"]');
+        },
+
+        removeNodes: function(keys) {
+          if (!keys || keys.length === 0) {
+            return;
+          }
+          var node = this._find(keys[0]);
+          if (node) {
+            node.removeSelf().then(function() {
+              this.removeNodes(Array.prototype.slice.call(keys, 1));
+            }.bind(this));
+          }
         }
+
       });
     })();
   </script>

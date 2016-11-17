@@ -333,7 +333,7 @@ Contributors:
           <div>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex" selected-attribute="visible">
 
-              <nuxeo-document-tree name="browser"
+              <nuxeo-document-tree id="navTree" name="browser"
                                    label="app.browse"
                                    class="card browse"
                                    current-document="[[currentDocument]]"></nuxeo-document-tree>
@@ -573,6 +573,10 @@ Contributors:
         ready: function() {
           window.addEventListener('unhandledrejection', function(error) {
             this._onError(error);
+          }.bind(this));
+
+          window.addEventListener('nuxeo-documents-deleted', function(e) {
+            this.$.navTree.removeDocuments(e.detail.documentIds);
           }.bind(this));
 
           this.clipboard = this.$.clipboard;

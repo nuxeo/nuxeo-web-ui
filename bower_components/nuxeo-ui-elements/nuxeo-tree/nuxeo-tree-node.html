@@ -239,6 +239,11 @@ Contributors:
             this._instance.notifyPath('opened', this.opened);
             this._setupToggleListener();
           }
+        },
+
+        removeSelf: function() {
+          this.remove();
+          return Promise.resolve();
         }
       });
     })();
