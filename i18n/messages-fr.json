@@ -420,6 +420,8 @@
 	"label.dublincore.nature": "Nature",
 	"label.dublincore.subjects": "Sujets",
 	"label.dublincore.title": "Titre",
+	"label.dublincore.state": "Statut",
+	"label.dublincore.version": "Version",
 	"label.myCollections.title": "Mes collections",
 	"label.permissions.addPermission": "Ajouter une permission",
 	"label.permissions.block": "Bloquer",

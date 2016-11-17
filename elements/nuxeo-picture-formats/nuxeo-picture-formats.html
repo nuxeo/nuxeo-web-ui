@@ -41,11 +41,28 @@ Contributors:
         @apply(--nuxeo-link-hover);
       }
 
+      label {
+        color: var(--nuxeo-text-light);
+        width: 30%;
+        display: inline-block;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+        line-height: 1.5em;
+      }
+
       .title {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         color: var(--nuxeo-title-color);
         font-size: 1.5rem;
+      }
+
+      .flex.actions {
+        text-align: right;
+        flex: 0.5;
       }
 
     </style>
@@ -54,12 +71,12 @@ Contributors:
 
     <div>
       <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
-        <div class="item">
-          <label class="layout flex">[[item.name]]</label>
-          <span class="layout flex-2">[[item.dimensions]]</span>
-          <span class="layout flex">[[item.size]]</span>
-          <span class="layout flex">[[item.format]]</span>
-          <a href="[[item.data]]" title="download">
+        <div class="item horizontal layout">
+          <label class="flex">[[item.name]]</label>
+          <span class="flex-2">[[item.dimensions]]</span>
+          <span class="flex">[[item.size]]</span>
+          <span class="flex">[[item.format]]</span>
+          <a class="flex actions" href="[[item.data]]" title="download">
             <iron-icon icon="icons:file-download"></iron-icon>
           </a>
         </div>

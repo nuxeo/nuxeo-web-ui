@@ -100,6 +100,7 @@ Contributors:
         max-height: 17rem;
         overflow-y: auto;
         @apply(--nuxeo-document-activity-audit-theme);
+        padding: .5em 0;
       }
 
       .docinfo {
@@ -109,11 +110,20 @@ Contributors:
 
       .sidecard .details {
         font-size: .9em;
-        padding-bottom: 1em;
-        border-bottom: 1px solid var(--divider-color);
       }
 
-      .details .col {
+      .details > div {
+        display: flex;
+        align-items: stretch;
+        margin-bottom: .5em;
+      }
+
+      .details > div span {
+        width: 70%;
+      }
+
+      label {
+        color: var(--nuxeo-text-light);
         width: 30%;
         display: inline-block;
         line-height: 1.9em;
@@ -130,6 +140,11 @@ Contributors:
       }
 
       /* Tasks */
+      .process.ctn {
+        border-top: 1px solid var(--nuxeo-border);
+        padding-top: 1em;
+      }
+
       .wf-running {
         display: block;
         padding: 0 2em;
@@ -158,6 +173,11 @@ Contributors:
 
       .process-tag {
         color: #f68500;
+      }
+
+      .process-running {
+        background-color: #f68500;
+        color: #fff;
       }
 
       .task-header {
@@ -275,24 +295,31 @@ Contributors:
             <div class="horizontal layout wrap">
               <div class="details ctn">
                 <div>
-                  <span class="col">[[i18n('documentPage.added.on', 'Created on')]]</span>
-                  [[formatDate(document.properties.dc:created)]]
+                  <label class="col">[[i18n('documentPage.added.on', 'Created on')]]</label>
+                  <span>[[formatDate(document.properties.dc:created)]]</span>
                 </div>
                 <div>
-                  <span class="col">[[i18n('documentPage.added.by', 'By')]]</span>
-                  <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
+                  <label class="col">[[i18n('documentPage.added.by', 'By')]]</label>
+                  <span><nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag></span>
                 </div>
-                <div><span class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</span>
-                  <nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users>
+                <div>
+                  <label class="col">[[i18n('label.dublincore.state', 'State')]]</label>
+                  <span><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></span>
+                </div>
+                <div>
+                  <label class="col">[[i18n('label.dublincore.version', 'Version')]]</label>
+                  <span><nuxeo-document-versions document="[[document]]"></nuxeo-document-versions></span>
+                </div>
+                <div>
+                  <label class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
+                  <span><nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users></span>
                 </div>
               </div>
-              <div class="ctn">
-                <template is="dom-if" if="[[hasWorkflowRunning]]">
-                  <nuxeo-tag uppercase>[[i18n('documentPage.process.running', 'Process running')]]</nuxeo-tag>
-                </template>
-                <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
-                <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
-              </div>
+              <template is="dom-if" if="[[hasWorkflowRunning]]">
+                <div class="process ctn">
+                  <nuxeo-tag uppercase class="process-running">[[i18n('documentPage.process.running', 'Process running')]]</nuxeo-tag>
+                </div>
+              </template>
             </div>
           </paper-card>
 
