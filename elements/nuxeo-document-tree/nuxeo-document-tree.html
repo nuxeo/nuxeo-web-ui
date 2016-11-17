@@ -272,6 +272,10 @@ Contributors:
 
         _icon: function(opened) {
           return opened ? 'icons:folder-open' : 'icons:folder';
+        },
+
+        removeDocuments: function(documentIds) {
+          this.$.tree.removeNodes(documentIds);
         }
       });
     })();
