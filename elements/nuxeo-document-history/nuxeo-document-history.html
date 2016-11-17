@@ -34,7 +34,7 @@ Contributors:
 
       nuxeo-data-table {
         width: 100%;
-        height: 82vh;
+        height: 70vh;
         background: white;
         border: 1px solid var(--nuxeo-border);
       }
@@ -42,10 +42,34 @@ Contributors:
       nuxeo-tag {
         text-transform: uppercase;
       }
+
+      paper-card.dates {
+        width: 100%;
+        margin-bottom: 1.5em;
+      }
+
+      .dates paper-input {
+        margin-left: 1em;
+      }
+
     </style>
 
     <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
     </nuxeo-audit-page-provider>
+
+    <paper-card elevation="0" class="dates">
+      <div class="card-content horizontal flex end-justified layout">
+      <paper-input role="widget" label="[[i18n('documentHistory.filter.after', 'After')]]"
+                   value="{{startDate::change}}"
+                   type="date">
+      </paper-input>
+
+      <paper-input role="widget" label="[[i18n('documentHistory.filter.before', 'Before')]]"
+                   value="{{endDate::change}}"
+                   type="date">
+      </paper-input>
+      </div>
+    </paper-card>
 
     <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
       <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]"
@@ -67,8 +91,7 @@ Contributors:
       <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
         <template>[[item.comment]]</template>
       </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]"
-        sort-by="state">
+      <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
         <template><nuxeo-tag>[[item.docLifeCycle]]</nuxeo-tag></template>
       </nuxeo-data-table-column>
     </nuxeo-data-table>
@@ -88,6 +111,50 @@ Contributors:
           type: Boolean,
           value: false,
           observer: '_refresh'
+        },
+        startDate: {
+          type: String,
+          notify: true,
+          observer: '_observeStartDate'
+        },
+        endDate: {
+          type: String,
+          notify: true,
+          observer: '_observeEndDate'
+        }
+      },
+
+      _observeStartDate: function() {
+        if (this.startDate && this.startDate.length > 0) {
+          this.$.provider.params.startDate = this.startDate;
+          if (this.endDate && this.endDate.length > 0) {
+            var start = Date.parse(this.startDate);
+            var end = Date.parse(this.endDate);
+            if (start > end) {
+              this.endDate = moment(start).add(7, 'day').format('YYYY-MM-DD');
+            }
+          }
+          this._refresh();
+        } else if(this.$.provider.params.startDate) {
+          delete this.$.provider.params.startDate;
+          this._refresh();
+        }
+      },
+
+      _observeEndDate: function() {
+        if (this.endDate && this.endDate.length > 0) {
+          this.$.provider.params.endDate = this.endDate;
+          if (this.startDate && this.startDate.length > 0) {
+            var start = Date.parse(this.startDate);
+            var end = Date.parse(this.endDate);
+            if (start > end) {
+              this.startDate = moment(end).subtract(7, 'day').format('YYYY-MM-DD');
+            }
+          }
+          this._refresh();
+        } else if(this.$.provider.params.endDate) {
+          delete this.$.provider.params.endDate;
+          this._refresh();
         }
       },
 
