@@ -51,7 +51,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .footer {
-        margin-top: 48px;
+        margin: 2em 0 4em;
       }
 
       .label-container {
@@ -172,8 +172,8 @@ Used by `nuxeo-user-group-management`
         </div>
         <div class="layout vertical">
           <div class="form-buttons">
-            <paper-button id="createButton" class="primary" on-click="_submit">[[i18n('command.create', 'Create')]]</paper-button>
-            <paper-button id="cancelButton" on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button noink id="createButton" class="primary" on-click="_submit">[[i18n('command.create', 'Create')]]</paper-button>
+            <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
         </div>

@@ -46,13 +46,31 @@ Used by `nuxeo-user-group-management`
         display: block;
       }
 
-      .table {
-        border: 1px solid #e7e7e7;
+      .table-header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
+        font-size: 12px;
+        font-weight: 400;
+        height: 4em;
+        padding: 0 0 0 12px;
       }
 
       .table-row {
         @apply(--layout-horizontal);
-        border-bottom: 1px solid #e7e7e7;
+        @apply(--layout-center);
+        padding: 12px 0 12px 12px;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
+        cursor: pointer;
+      }
+
+      .table-row:hover {
+        background: var(--nuxeo-container-hover, #fafafa);
+      }
+
+      .table {
+        border: 1px solid var(--nuxeo-border, #eee);
       }
 
       .table-row:last-of-type {
@@ -101,7 +119,7 @@ Used by `nuxeo-user-group-management`
 
     <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
     <div class="table">
-      <div class="table-row table-headers">
+      <div class="table-header">
         <div class="flex-3">[[i18n('userGroupPermissions.on', 'On')]]</div>
         <div class="flex-6 layout horizontal">
           <div class="flex-2">[[i18n('userGroupPermissions.right', 'Right')]]</div>
@@ -133,7 +151,7 @@ Used by `nuxeo-user-group-management`
                   </div>
                   <div class="table-actions">
                     <template is="dom-if" if=[[!readonly]]>
-                      <paper-icon-button icon="icons:delete"
+                      <paper-icon-button icon="icons:delete" noink
                                        title="[[i18n('userGroupPermissions.delete.button', 'Delete permission')]]"
                                        on-tap="_toggleDialog"
                                        hidden$="[[!_canDelete(ace)]]">
@@ -161,8 +179,8 @@ Used by `nuxeo-user-group-management`
         <p>[[i18n('userGroupPermissions.delete.confirm', 'Do you really want to delete this permission?')]]</p>
       </div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-        <paper-button dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button noink dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
   </template>

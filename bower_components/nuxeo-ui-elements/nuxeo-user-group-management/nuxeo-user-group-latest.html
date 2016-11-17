@@ -49,7 +49,7 @@ Example:
       }
 
       .title {
-        margin: 0 0 4px 0;
+        margin: 0 0 .8em;
         padding: 0;
       }
 
@@ -60,26 +60,24 @@ Example:
       .table-header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        border-bottom: 1px solid var(--divider-color);
-        background-color: #f8f9fb;
-        font-weight: bold;
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
+        font-size: 12px;
+        font-weight: 400;
+        height: 4em;
         padding: 0 0 0 12px;
-        margin-bottom: 4px;
-      }
-
-      .table-rows {
-        padding: 4px 0;
       }
 
       .table-row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding: 8px 0 8px 12px;
+        padding: 12px 0 12px 12px;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
         cursor: pointer;
       }
 
       .table-row:hover {
-        background: rgba(0, 0, 0, 0.025);
+        background: var(--nuxeo-container-hover, #fafafa);
       }
 
       .table-actions {
@@ -87,7 +85,7 @@ Example:
       }
 
       .table {
-        border: 1px solid #e7e7e7;
+        border: 1px solid var(--nuxeo-border, #eee);
       }
 
     </style>
@@ -107,7 +105,7 @@ Example:
         <div class="flex">[[i18n('userGroupLatest.name', 'Name')]]</div>
         <div class="flex-2">[[i18n('userGroupLatest.identifier', 'Identifier')]]</div>
         <div class="table-actions">
-          <paper-icon-button icon="refresh" on-tap="_refreshLatest"></paper-icon-button>
+          <paper-icon-button noink icon="refresh" on-tap="_refreshLatest"></paper-icon-button>
         </div>
       </div>
       <div class="table-rows">
@@ -139,7 +137,7 @@ Example:
 <script>
   Polymer({
     is: 'nuxeo-user-group-latest',
-    
+
     behaviors: [Nuxeo.I18nBehavior],
 
     properties: {

@@ -242,7 +242,7 @@ Used by `nuxeo-user-group-management`
 
         <!-- change password -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button id="changePasswordButton" class="horizontal layout center" on-tap="_toggleChangePassword">
+          <paper-button noink id="changePasswordButton" class="horizontal layout center" on-tap="_toggleChangePassword">
             <iron-icon icon="icons:lock"></iron-icon> [[i18n('command.change.password', 'Change Password')]]
           </paper-button>
         </template>
@@ -252,8 +252,8 @@ Used by `nuxeo-user-group-management`
             <nuxeo-edit-password required id="passwordEditor"></nuxeo-edit-password>
           </form>
           <div class="buttons">
-            <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-            <paper-button class="primary" on-tap="_submitChangePassword">
+            <paper-button noink dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button noink class="primary" on-tap="_submitChangePassword">
               [[i18n('command.save.changes', 'Save Changes')]]
             </paper-button>
           </div>
@@ -261,7 +261,7 @@ Used by `nuxeo-user-group-management`
 
         <!-- edit -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button id="editUserButton" class="horizontal layout center" on-tap="_toggleEditUser">
+          <paper-button noink id="editUserButton" class="horizontal layout center" on-tap="_toggleEditUser">
             <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('userManagement.editUser.button', 'Edit')]]
           </paper-button>
         </template>
@@ -279,8 +279,8 @@ Used by `nuxeo-user-group-management`
             <nuxeo-edit-user id="userEditor"></nuxeo-edit-user>
           </form>
           <div class="buttons">
-            <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-            <paper-button class="primary" on-tap="_submitEditUser">
+            <paper-button noink dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button noink class="primary" on-tap="_submitEditUser">
               [[i18n('command.save.changes', 'Save Changes')]]
             </paper-button>
           </div>
@@ -288,8 +288,8 @@ Used by `nuxeo-user-group-management`
 
         <!-- delete -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
-            <iron-icon icon="icons:delete"></iron-icon> [[i18n('command.delete', 'Delete')]]
+          <paper-button noink id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
+            <iron-icon noink icon="icons:delete"></iron-icon> [[i18n('command.delete', 'Delete')]]
           </paper-button>
         </template>
         <paper-dialog id="deleteUserDialog" modal>
@@ -297,8 +297,8 @@ Used by `nuxeo-user-group-management`
             [[i18n('userManagement.delete.user.confirm', 'Do you really want to delete this user?')]]
           </div>
           <div class="buttons">
-            <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-            <paper-button class="primary" on-tap="_deleteUser">[[i18n('label.yes', 'Yes')]]</paper-button>
+            <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+            <paper-button noink class="primary" on-tap="_deleteUser">[[i18n('label.yes', 'Yes')]]</paper-button>
           </div>
         </paper-dialog>
 
@@ -312,7 +312,7 @@ Used by `nuxeo-user-group-management`
       <div class="layout horizontal">
         <h1 class="flex">[[i18n('userManagement.groups', 'Groups')]]</h1>
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button id="addGroup" class="flex-end" on-tap="_toggleEditGroups">
+          <paper-button noink id="addGroup" class="flex-end" on-tap="_toggleEditGroups">
             <iron-icon icon="add"></iron-icon> [[i18n('userManagement.addToGroup.button', 'Add to Group')]]
           </paper-button>
         </template>
@@ -382,8 +382,8 @@ Used by `nuxeo-user-group-management`
         [[i18n('userManagement.removeUserFromGroup.confirm', 'Do you really want to remove {0} from {1}?', user.id, _removedGroup.name)]]
       </div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-        <paper-button dialog-confirm on-tap="_remove" class="primary">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button noink dialog-confirm on-tap="_remove" class="primary">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
   </template>

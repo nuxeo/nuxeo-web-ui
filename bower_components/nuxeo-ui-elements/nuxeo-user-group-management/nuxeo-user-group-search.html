@@ -48,37 +48,35 @@ Used by `nuxeo-user-management`
       }
 
       .title {
-        margin: 0 0 4px 0;
+        margin: 0 0 .8em;
         padding: 0;
-      }
-
-      .table {
-        border: 1px solid var(--divider-color);
       }
 
       .table-header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        border-bottom: 1px solid var(--divider-color);
-        background-color: #f8f9fb;
-        font-weight: bold;
-        padding: 8px 0 8px 12px;
-        margin-bottom: 4px;
-      }
-
-      .table-rows {
-        padding: 4px 0;
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
+        font-size: 12px;
+        font-weight: 400;
+        height: 4em;
+        padding: 0 0 0 12px;
       }
 
       .table-row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding: 8px 0 8px 12px;
+        padding: 12px 0 12px 12px;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
         cursor: pointer;
       }
 
       .table-row:hover {
-        background: rgba(0, 0, 0, 0.025);
+        background: var(--nuxeo-container-hover, #fafafa);
+      }
+
+      .table {
+        border: 1px solid var(--nuxeo-border, #eee);
       }
 
       .counter {
@@ -95,7 +93,7 @@ Used by `nuxeo-user-management`
     </nuxeo-resource>
 
     <div class="search">
-      <paper-input autofocus="true" value="{{searchTerm}}" type="search"
+      <paper-input noink autofocus="true" value="{{searchTerm}}" type="search"
                    placeholder="[[i18n('userGroupSearch.search.placeholder', 'Search for users and groups')]]">
         <iron-icon icon="search" prefix></iron-icon>
       </paper-input>

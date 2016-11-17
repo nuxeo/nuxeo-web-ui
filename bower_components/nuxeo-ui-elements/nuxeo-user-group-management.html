@@ -86,9 +86,14 @@ Custom property | Description | Default
       }
 
       paper-menu paper-icon-item:hover {
-        background: #fafafa;
+        background: var(--nuxeo-container-hover, #fafafa);
         cursor: pointer;
       }
+
+      paper-button iron-icon {
+        margin-right: .5em;
+      }
+
     </style>
 
     <paper-toast id="toast"></paper-toast>
@@ -96,12 +101,12 @@ Custom property | Description | Default
       <section name="search">
         <div class="horizontal layout center">
           <template is="dom-if" if=[[!readonly]]>
-            <paper-menu-button id="createDropdown" horizontal-align="right">
-              <paper-button class="dropdown-trigger" id="createButton">
+            <paper-menu-button noanimations id="createDropdown" horizontal-align="right">
+              <paper-button noink class="dropdown-trigger" id="createButton">
                 <iron-icon icon="add-circle-outline"></iron-icon>
                 <span>[[i18n('userGroupManagement.new.usergroup', 'NEW')]]</span>
               </paper-button>
-              <paper-menu id="menu" class="dropdown-content" selectable="item">
+              <paper-menu noAnimation id="menu" class="dropdown-content" selectable="item">
                 <paper-icon-item on-tap="_createUser">
                   <iron-icon icon="social:person" item-icon></iron-icon>
                   <span>[[i18n('userGroupManagement.new.user', 'User')]]</span>

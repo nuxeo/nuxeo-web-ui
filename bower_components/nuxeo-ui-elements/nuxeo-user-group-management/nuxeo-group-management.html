@@ -48,7 +48,7 @@ Used by `nuxeo-user-group-management`
       }
 
       paper-button {
-        padding: 0.2em 0.5em;
+        padding: .2em .5em;
       }
 
       h1 {
@@ -71,15 +71,15 @@ Used by `nuxeo-user-group-management`
       }
 
       .groupname {
-        margin: 0.3em 0.1em 0 0.1em;
-        padding: 0.2em;
+        margin: .3em .1em 0 .1em;
+        padding: .2em;
       }
 
       .grouplabel,
       .counter {
         font-weight: normal;
-        margin: 0.1em 0.2em;
-        padding: 0.2em;
+        margin: .1em .2em;
+        padding: .2em;
       }
 
       .counter {
@@ -92,7 +92,7 @@ Used by `nuxeo-user-group-management`
 
       .header-actions {
         height: 2em;
-        margin-top: 0.5em;
+        margin-top: .5em;
       }
 
       .activity-entry {
@@ -100,11 +100,14 @@ Used by `nuxeo-user-group-management`
       }
 
       .remove {
-        color: red;
-        cursor: pointer;
-        font-size: 0.8em;
-        margin-left: 10px;
+        @apply(--nuxeo-link);
         text-decoration: underline;
+        padding-left: .5em;
+        font-size: .8em;
+      }
+
+      .remove:hover {
+        @apply(--nuxeo-link-hover);
       }
 
       /* Table */
@@ -117,32 +120,39 @@ Used by `nuxeo-user-group-management`
       }
 
       .title {
-        margin: 0 0 4px 0;
+        margin: 0 0 .8em 0;
         padding: 0;
       }
 
       .table {
-        border: 1px solid var(--divider-color);
+        border: 1px solid var(--nuxeo-border, #e3e3e3);
       }
 
       .table-header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        border-bottom: 1px solid var(--divider-color);
-        background-color: #f8f9fb;
-        font-weight: bold;
-        padding: 8px 0 8px 12px;
-        margin-bottom: 4px;
-      }
-
-      .table-rows {
-        padding: 4px 0;
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
+        font-size: 12px;
+        font-weight: 400;
+        height: 4em;
+        padding: 0 0 0 12px;
       }
 
       .table-row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding: 8px 0 8px 12px;
+        padding: 12px 0 12px 12px;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
+        cursor: pointer;
+      }
+
+      .table-row:hover {
+        background: var(--nuxeo-container-hover, #fafafa);
+      }
+
+      .table-row:last-of-type {
+        border-bottom: none;
       }
 
       .table-actions {
@@ -172,7 +182,7 @@ Used by `nuxeo-user-group-management`
       }
 
       paper-dialog paper-button {
-        padding: 0.7em 0.57em;
+        padding: .7em .57em;
       }
 
       paper-dialog paper-button.primary {
@@ -204,8 +214,8 @@ Used by `nuxeo-user-group-management`
         [[i18n('groupManagement.delete.confirm', 'Do you really want to delete this group?')]]
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-        <paper-button class="primary" on-tap="_deleteGroup">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_deleteGroup">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
 
@@ -214,8 +224,8 @@ Used by `nuxeo-user-group-management`
         [[i18n('groupManagement.removeUserFromGroup.confirm', 'Do you really want to remove {0} from this group?', _removedMember.id)]]
       </div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-        <paper-button class="primary" dialog-confirm on-tap="_removeMember">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <paper-button noink class="primary" dialog-confirm on-tap="_removeMember">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
 
@@ -232,13 +242,13 @@ Used by `nuxeo-user-group-management`
         </div>
       </form>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-        <paper-button class="primary" on-tap="_submitEditForm">[[i18n('command.save.changes', 'Save Changes')]]</paper-button>
+        <paper-button noink dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_submitEditForm">[[i18n('command.save.changes', 'Save Changes')]]</paper-button>
       </div>
     </paper-dialog>
 
     <div class="header horizontal layout">
-      <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
+      <paper-icon-button noink class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:people" class="avatar"></iron-icon>
       <div class="layout vertical flex">
         <h3 class="groupname">[[group.groupname]]</h3>
@@ -248,13 +258,13 @@ Used by `nuxeo-user-group-management`
 
       <template is="dom-if" if=[[!readonly]]>
         <div class="layout horizontal header-actions">
-          <paper-button class="flex-end" on-tap="_toggleEditMembers">
+          <paper-button noink class="flex-end" on-tap="_toggleEditMembers">
             <iron-icon icon="add"></iron-icon> [[i18n('groupManagement.addMembers', 'Add Members')]]
           </paper-button>
-          <paper-button on-tap="_toggleEditGroup">
+          <paper-button noink on-tap="_toggleEditGroup">
             <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('groupManagement.editGroup', 'Edit')]]
           </paper-button>
-          <paper-button class="flex-end" on-tap="_toggleDeleteGroup">
+          <paper-button noink class="flex-end" on-tap="_toggleDeleteGroup">
             <iron-icon icon="icons:delete"></iron-icon> [[i18n('command.delete', 'Delete')]]
           </paper-button>
         </div>
@@ -307,7 +317,7 @@ Used by `nuxeo-user-group-management`
                 <div class="flex-4">[[item.id]]</div>
                 <div class="table-actions">
                   <template is="dom-if" if=[[!readonly]]>
-                    <paper-icon-button icon="icons:clear"
+                    <paper-icon-button icon="icons:clear" noink
                                        title="[[i18n('groupManagement.removeFrom', 'Remove from {0}', item.label)]]"
                                        on-tap="_toggleDeleteDialog">
                     </paper-icon-button>
@@ -353,7 +363,7 @@ Used by `nuxeo-user-group-management`
                 <div class="flex-4">[[item.grouplabel]]</div>
                 <div class="table-actions">
                   <template is="dom-if" if=[[!readonly]]>
-                    <paper-icon-button icon="icons:clear"
+                    <paper-icon-button icon="icons:clear" noink
                                        title="[[i18n('groupManagement.removeFrom', 'Remove from {0}', item.label)]]"
                                        on-tap="_toggleDeleteDialog">
                     </paper-icon-button>
