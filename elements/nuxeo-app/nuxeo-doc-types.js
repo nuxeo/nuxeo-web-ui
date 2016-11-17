@@ -8,6 +8,7 @@ window.nuxeo.docTypes = window.nuxeo.docTypes || [
   {id: 'Note', icon: 'icons:subject'},
   {id: 'Picture', icon: 'image:image'},
   {id: 'Video', icon: 'av:video-library'},
+  {id: 'Audio', icon: 'image:audiotrack'},
   {id: 'Folder', icon: 'icons:folder'},
   {id: 'Workspace', icon: 'icons:folder-open'}
 ];

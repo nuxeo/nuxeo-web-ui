@@ -41,6 +41,12 @@ Contributors:
         height: 100%;
       }
 
+      audio {
+        width: calc(100% - 32px);
+        height: 50%;
+        padding: 16px;
+      }
+
       marked-element {
         background-color: white;
       }
@@ -75,6 +81,10 @@ Contributors:
 
     <template mime-pattern="video.*">
       <nuxeo-video-viewer controls sources="[[videoSources]]"></nuxeo-video-viewer>
+    </template>
+
+    <template mime-pattern="audio.*">
+      <audio controls><source src="[[audioSource]]">AUDIO</audio>
     </template>
 
     <template mime-pattern="text/(?:.*-)?markdown">
@@ -114,6 +124,10 @@ Contributors:
           videoSources: {
             type: Array,
             computed: '_computeVideoSources(document)'
+          },
+          audioSource: {
+            type: String,
+            computed: '_computeAudioSource(document)'
           },
           iFrameSource: {
             type: String,
@@ -162,6 +176,7 @@ Contributors:
                 document: this.document,
                 imageSource: this.imageSource,
                 videoSources: this.videoSources,
+                audioSource: this.audioSource,
                 blob: this.blob
               });
               this.$.preview.appendChild(instance.root);
@@ -208,6 +223,12 @@ Contributors:
                 type: conversion.content['mime-type']
               };
             });
+          }
+        },
+
+        _computeAudioSource: function() {
+          if (this.blob) {
+            return this.blob.data;
           }
         },
 
