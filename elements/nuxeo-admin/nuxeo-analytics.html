@@ -65,19 +65,49 @@ Contributors:
         color: var(--nuxeo-link-hover-color);
       }
 
+      .title {
+        @apply(--layout-flex);
+      }
+
+      ::content #analyticsViews {
+        @apply(--layout-horizontal);
+        --paper-listbox-background-color: transparent;
+      }
+
+      ::content #analyticsViews paper-item {
+        user-select: none;
+        border: 1px solid var(--nuxeo-pill-color);
+        border-radius: 16px;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        margin: 0 0 0 8px;
+        color: var(--nuxeo-pill-text-color);
+        --paper-item-min-height: 32px;
+        --paper-item-selected-weight: 300;
+        --paper-item-selected: {
+          background: var(--nuxeo-pill-color);
+        };
+        --paper-item-focused: {
+          background: var(--nuxeo-pill-color);
+        };
+        --paper-item-focused-before: {
+          background: none;
+        };
+      }
+
     </style>
 
-    <paper-header-panel class="flex">
-      <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n('analytics.heading', 'Analytics')]]</span>
-        <paper-dropdown-menu noink no-animations no-label-float>
-          <paper-menu class="dropdown-content" selected="{{selectedTab}}" attr-for-selected="name">
-            <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution', 'Document Distribution')]]</paper-item>
-            <paper-item name="repository">[[i18n('analytics.repository', 'Repository Content')]]</paper-item>
-            <paper-item name="search">[[i18n('analytics.search', 'Search')]]</paper-item>
-            <paper-item name="workflow">[[i18n('analytics.workflow', 'Workflow')]]</paper-item>
-          </paper-menu>
-        </paper-dropdown-menu>
+    <paper-header-panel>
+      <div class="paper-header">
+        <div class="title">[[i18n('analytics.heading')]]</div>
+        <paper-listbox id="analyticsViews" selected="{{selectedTab}}" attr-for-selected="name">
+          <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution')]]</paper-item>
+          <paper-item name="repository">[[i18n('analytics.repository')]]</paper-item>
+          <paper-item name="search">[[i18n('analytics.search')]]</paper-item>
+          <paper-item name="workflow">[[i18n('analytics.workflow')]]</paper-item>
+        </paper-listbox>
       </div>
       <div class="content">
         <template is="dom-if" if="[[visible]]">
