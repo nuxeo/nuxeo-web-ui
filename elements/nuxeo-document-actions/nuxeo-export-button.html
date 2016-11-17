@@ -36,8 +36,13 @@ Contributors:
       }
 
       .export-container {
-        min-width: 240px;
+        min-width: 25em;
         border: 1px solid #ddd;
+        margin: 1em 0 2em;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
     </style>
 
@@ -48,9 +53,14 @@ Contributors:
 
     <paper-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('exportButton.heading','Export')]]</h1>
+        <h2>[[i18n('exportButton.heading','Export')]]</h2>
         <div class="export-container">
           <nuxeo-document-export document="[[document]]"></nuxeo-document-export>
+        </div>
+      </div>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.close', 'Close')]]</paper-button>
         </div>
       </div>
     </paper-dialog>

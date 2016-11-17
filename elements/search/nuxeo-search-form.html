@@ -329,8 +329,10 @@ Contributors:
                    autofocus
                    no-label-float>
       </paper-input>
-      <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        </div>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
       </div>
     </paper-dialog>
@@ -342,9 +344,11 @@ Contributors:
                        autofocus
                        no-label-float>
           </paper-input>
-        <div class="buttons">
-         <paper-button dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
+        <div class="buttons horizontal end-justified layout">
+          <div class="flex start-justified">
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          </div>
+          <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
         </div>
     </paper-dialog>
 

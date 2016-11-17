@@ -37,6 +37,11 @@ Contributors:
 
       .share-container {
         min-width: 640px;
+        padding: 2em 0;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
     </style>
 
@@ -47,13 +52,18 @@ Contributors:
 
     <paper-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
-        <h1>[[i18n('shareButton.heading','Share the Document')]]</h1>
+        <h2>[[i18n('shareButton.heading','Share the Document')]]</h2>
         <div class="share-container">
           <paper-input id="permalink"
                        label="[[i18n('shareButton.copy.label', 'Copy the link and share the document {0}', document.properties.dc:title)]]"
                        value="[[_buildPermalink(document)]]"
                        autofocus
                        readonly></paper-input>
+        </div>
+      </div>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.close', 'Close')]]</paper-button>
         </div>
       </div>
     </paper-dialog>

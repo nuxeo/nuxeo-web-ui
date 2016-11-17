@@ -51,8 +51,8 @@ Used by `nuxeo-user-group-management`
         padding: .2em .5em;
       }
 
-      h1 {
-        color: #213f7d;
+      h2 {
+        color: var(--nuxeo-title-color, #213f7d);
       }
 
       nuxeo-user-group-permissions-table {
@@ -60,7 +60,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .backButton {
-        color: #00adff;
+        color: var(--nuxeo-button-primary, #00adff);
       }
 
       .card {
@@ -196,6 +196,20 @@ Used by `nuxeo-user-group-management`
         font-weight: inherit;
         color: #fff !important;
       }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
+
+      #editForm {
+        padding: 1em 2em 2em;
+      }
+
+      .confirm {
+        padding: 2em;
+        font-size: 1.1em;
+      }
+
     </style>
 
     <nuxeo-resource id="request"
@@ -210,27 +224,31 @@ Used by `nuxeo-user-group-management`
     <paper-toast id="toast"></paper-toast>
 
     <paper-dialog id="deleteGroupDialog" modal>
-      <div class="horizontal layout">
+      <div class="horizontal layout confirm">
         [[i18n('groupManagement.delete.confirm', 'Do you really want to delete this group?')]]
       </div>
-      <div class="buttons">
-        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        </div>
         <paper-button noink class="primary" on-tap="_deleteGroup">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="rmFromGroupDialog" modal class="vertical layout">
-      <div class="horizontal layout">
+      <div class="horizontal layout confirm">
         [[i18n('groupManagement.removeUserFromGroup.confirm', 'Do you really want to remove {0} from this group?', _removedMember.id)]]
       </div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        <div class="flex start-justified">
+          <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        </div>
         <paper-button noink class="primary" dialog-confirm on-tap="_removeMember">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="editGroupDialog" modal>
-      <h1>[[i18n('groupManagement.editGroup.heading', 'Edit Group')]]</h1>
+      <h2>[[i18n('groupManagement.editGroup.heading', 'Edit Group')]]</h2>
       <form is="iron-form" id="editForm" class="vertical layout">
         <div class="layout horizontal">
           <div class="label-container">
@@ -241,10 +259,11 @@ Used by `nuxeo-user-group-management`
           </div>
         </div>
       </form>
-      <div class="buttons">
-        <paper-button noink dialog-dismiss>[[i18n('command.cancel', 'Cancel')]]</paper-button>
-        <paper-button noink class="primary" on-tap="_submitEditForm">[[i18n('command.save.changes', 'Save Changes')]]</paper-button>
-      </div>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+        </div>
+        <paper-button noink class="primary" on-tap="_submitEditForm">[[i18n('command.save.changes', 'Save Changes')]]</paper-button>      </div>
     </paper-dialog>
 
     <div class="header horizontal layout">

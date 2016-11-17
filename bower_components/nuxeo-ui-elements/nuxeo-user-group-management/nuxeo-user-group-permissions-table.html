@@ -46,6 +46,19 @@ Used by `nuxeo-user-group-management`
         display: block;
       }
 
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
       .table-header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -108,6 +121,15 @@ Used by `nuxeo-user-group-management`
         color: #213f7d;
         font-size: 0.8em;
         margin-top: 5px;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
+
+      .confirm {
+        padding: 2em;
+        font-size: 1.1em;
       }
     </style>
 
@@ -175,12 +197,14 @@ Used by `nuxeo-user-group-management`
     <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
 
     <paper-dialog id="dialog" modal class="vertical layout">
-      <div class="horizontal layout">
+      <div class="horizontal layout confirm">
         <p>[[i18n('userGroupPermissions.delete.confirm', 'Do you really want to delete this permission?')]]</p>
       </div>
       <div class="buttons horizontal end-justified layout">
-        <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-        <paper-button noink dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <div class="flex start-justified">
+          <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+        </div>
+        <paper-button class="primary" noink dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
       </div>
     </paper-dialog>
   </template>
