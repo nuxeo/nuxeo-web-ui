@@ -165,7 +165,10 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document id="currentTaskDoc" doc-id="[[_docId(current)]]" response="{{currentTaskDocument}}"></nuxeo-document>
+    <nuxeo-document id="currentTaskDoc"
+                    doc-id="[[_docId(current)]]"
+                    enrichers="preview"
+                    response="{{currentTaskDocument}}"></nuxeo-document>
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
