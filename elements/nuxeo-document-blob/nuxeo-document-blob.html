@@ -56,13 +56,18 @@ Contributors:
         @apply(--layout-center);
       }
 
+      .detail {
+        color: var(--nuxeo-text-light);
+        font-size: .9em;
+      }
+
     </style>
 
     <template is="dom-if" if="[[blob]]">
       <div class="row">
         <div class="info">
           <div><a href="[[blob.data]]">[[blob.name]]</a></div>
-          <div>[[formatSize(blob.length)]]</div>
+          <div class="detail">[[formatSize(blob.length)]]</div>
         </div>
         <div class="actions">
           <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
