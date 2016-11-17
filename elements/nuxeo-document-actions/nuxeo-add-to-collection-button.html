@@ -61,6 +61,10 @@ Contributors:
         box-sizing: inherit;
       }
 
+      .container {
+        padding: 1em 0 2em;
+      }
+
       paper-button:hover {
         @apply(--nx-button-hover);
       }
@@ -103,9 +107,9 @@ Contributors:
     </template>
 
     <paper-dialog id="dialog" modal on-iron-overlay-closed="_resetPopup" no-auto-focus>
-      <h1>[[i18n('addToCollectionButton.dialog.heading','Add to Collection')]]</h1>
-      <div class="paper-content layout horizontal">
-        <div class="layout vertical">
+      <h2>[[i18n('addToCollectionButton.dialog.heading','Add to Collection')]]</h2>
+      <paper-dialog-scrollable>
+        <div class="container layout vertical">
           <div class="row layout horizontal">
             <div class="label-container">
               <label>[[i18n('shareButton.dialog.collections','Collections')]]</label>
@@ -138,8 +142,11 @@ Contributors:
                          id="createCollectionOp">
         </nuxeo-operation>
       </div>
-      <div class="buttons">
-       <paper-button noink dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+      </paper-dialog-scrollable>
+      <div class="buttons horizontal end-justified layout">
+       <div class="flex start-justified">
+         <paper-button noink dialog-dismiss>[[i18n('command.cancel','Cancel')]]</paper-button>
+       </div>
        <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
          [[i18n('shareButton.dialog.add','Add to Collection')]]
        </paper-button>
