@@ -259,6 +259,8 @@
   "label.dublincore.nature":"性質",
   "label.dublincore.subjects":"件名",
   "label.dublincore.title":"題名",
+  "label.dublincore.state":"State",
+  "label.dublincore.version":"Version",
   "label.myCollections.title":"My collections",
   "label.no":"なし",
   "label.permissions.addPermission":"アクセス許可を追加",

@@ -53,6 +53,7 @@ Contributors:
       width: 80%;
       vertical-align: middle;
       text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .queue-thumbnail,
@@ -106,18 +107,8 @@ Contributors:
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box vertical layout">
               <div class="list-item-info horizontal layout center" >
-                <div class="vertical layout center">
-                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
-                </div>
+                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
                 <span class="list-item-title ellipsis">[[document.title]]</span>
-              </div>
-              <div class="list-item-detail">
-                <div class="layout center">
-                  <span class="list-item-property ellipsis">
-                    [[document.type]]
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </template>

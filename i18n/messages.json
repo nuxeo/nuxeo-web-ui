@@ -261,6 +261,8 @@
   "label.dublincore.nature": "Nature",
   "label.dublincore.subjects": "Subjects",
   "label.dublincore.title": "Title",
+  "label.dublincore.state": "State",
+  "label.dublincore.version": "Version",
   "label.myCollections.title": "My collections",
   "label.no": "No",
   "label.permissions.addPermission":"Add a Permission",
