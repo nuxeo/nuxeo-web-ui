@@ -1126,8 +1126,7 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          var type = Polymer.CaseMap.camelToDashCase(this.selectedDocType._id).toLowerCase();
-          return ['nuxeo', type, 'import-layout'].join('-');
+          return ['nuxeo', this.selectedDocType.id.toLowerCase(), 'import-layout'].join('-');
         },
 
         /**
@@ -1182,8 +1181,7 @@ Contributors:
             }
             var layout = this._layoutFor();
             if (!this._isRegistered(layout)) {
-              var docType = this.selectedDocType._id;
-              var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+              var folder = this.selectedDocType.id.toLowerCase() + '/';
               var url = this.resolveUrl('../document/' + folder + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
                 // error handling
