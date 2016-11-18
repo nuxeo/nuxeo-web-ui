@@ -140,7 +140,7 @@ Contributors:
       add: function(doc) {
         this.$.storage.add(doc);
         if (this.documents.length > this.maxSize) {
-          this.splice('documents', 0, this.documents.length - this.maxSize);
+          this.splice('documents', -1, 1);
         }
       },
 
