@@ -349,7 +349,9 @@ Contributors:
               </section>
 
               <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
-                on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                on-display-filters="_resetSearchResults"
+                on-show-results="_showSearchResults"
+                dirty="{{dirty}}"
                 is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
               </nuxeo-search-form>
 
@@ -676,11 +678,6 @@ Contributors:
           this.$.searchForm.displayQueue(e.detail.doc);
         },
 
-        _navigateFromAssetsSearch: function(e) {
-          page('/browse' + e.detail.doc.path);
-          this.$.assetsForm.displayQueue(e.detail.doc, e.detail.index);
-        },
-
         _navigateFromCollection: function(e) {
           page('/browse' + e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
@@ -688,6 +685,9 @@ Contributors:
 
         _resetSearchResults: function() {
           this.selectedTab = 'search';
+        },
+
+        _showSearchResults: function() {
           this.show('search');
         },
 

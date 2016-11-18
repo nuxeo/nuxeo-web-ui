@@ -271,7 +271,7 @@ Contributors:
             <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
           </template>
           <template is="dom-if" if="[[!_isQueue]]">
-            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
             <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
           </template>
@@ -477,12 +477,20 @@ Contributors:
           return this.$.provider;
         },
 
+        displayQueueAndNavigateToFirst: function() {
+          if (this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
+            this.displayQueue(this.$.list.$.list.items[0]);
+          } else {
+            this.displayQueue();
+          }
+        },
+
         displayQueue: function(doc) {
           this._isQueue = true;
+          this.$.list.notifyResize();
           if (doc && doc.uid) {
             this.$.list.$.list.selectItem(doc);
             this.$.list.$.list.scrollToItem(doc);
-            this.$.list.notifyResize();
           }
         },
 
@@ -493,6 +501,10 @@ Contributors:
         displayFilters: function() {
           this._isQueue = false;
           this.fire('display-filters');
+        },
+
+        _navigateToResults: function() {
+          this.fire('show-results');
         },
 
         _computedClass: function(isSelected) {
@@ -740,6 +752,7 @@ Contributors:
             if (e.detail.path) {
               var param = e.detail.path.split('.')[1];
               this.set('params.' + param, e.detail.value);
+              this._navigateToResults();
             }
           }.bind(this));
         }
