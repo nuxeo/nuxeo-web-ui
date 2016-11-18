@@ -117,6 +117,10 @@ Contributors:
         margin-right: 8px;
       }
 
+      .typeSelection span {
+        margin-top: 1em;
+      }
+
       .docTypeButton {
         margin: 4px;
       }
@@ -149,8 +153,8 @@ Contributors:
           <div class="typeSelection">
             <template is="dom-repeat" items="[[subtypes]]" as="type">
               <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
-                <iron-icon icon="[[_getTypeIcon(type)]]"></iron-icon>
-                [[_getTypeLabel(type)]]
+                <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
+                <span>[[_getTypeLabel(type)]]</span>
               </paper-button>
             </template>
           </div>
@@ -165,7 +169,7 @@ Contributors:
       <!--Stage: allow user to fill in the properties for the selected type and create a new document-->
       <div name="edit" class="vertical layout flex">
         <div class="horizontal layout heading center">
-          <iron-icon icon="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
+          <iron-icon src="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
         <div id="editor" class="flex">
