@@ -136,7 +136,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="children"></nuxeo-document>
+    <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="hasFolderishChild"></nuxeo-document>
     <nuxeo-page-provider id="children"
       provider="tree_children"
       enrichers="hasFolderishChild"
@@ -218,7 +218,7 @@ Contributors:
             }.bind(this),
 
             isLeaf: function(node) {
-              var hasFolderishChild = node.contextParameters.hasFolderishChild;
+              var hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
               return !hasFolderishChild;
             }
           };
