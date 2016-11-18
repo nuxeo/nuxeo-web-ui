@@ -349,7 +349,9 @@ Contributors:
               </section>
 
               <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
-                on-display-filters="_resetSearchResults" dirty="{{dirty}}"
+                on-display-filters="_resetSearchResults"
+                on-show-results="_showSearchResults"
+                dirty="{{dirty}}"
                 is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
               </nuxeo-search-form>
 
@@ -688,6 +690,9 @@ Contributors:
 
         _resetSearchResults: function() {
           this.selectedTab = 'search';
+        },
+
+        _showSearchResults: function() {
           this.show('search');
         },
 
