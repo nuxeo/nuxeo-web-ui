@@ -138,6 +138,7 @@ gulp.task('vulcanize', function() {
         inlineCss: true,
         inlineScripts: true
       }))
+      .pipe($.replace('assetpath="..\/bower_components', 'assetpath="bower_components'))
       //.pipe($.minifyInline())
       .pipe(gulp.dest(dist()))
       .pipe($.size({title: 'vulcanize'}));
