@@ -25,10 +25,32 @@ Contributors:
 <dom-module id="nuxeo-collection-view-layout">
   <template>
 
-    <div role="widget">
-      <label>[[i18n('label.dublincore.title')]]</label>
-      <div>[[document.properties.dc:title]]</div>
-    </div>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 40vh;
+      }
+    </style>
+
+    <nuxeo-page-provider id="provider"
+                         provider="ordered_content_collection"
+                         schemas="dublincore,common"
+                         enrichers="thumbnail">
+    </nuxeo-page-provider>
+
+    <nuxeo-results id="results"
+                   items="{{items}}"
+                   selected-items="{{selectedItems}}"
+                   empty-label="[[i18n('collections.noDocument')]]"
+                   empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]"
+                   hide-content-view-actions>
+      <div class="actions">
+        <nuxeo-slot slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+      </div>
+    </nuxeo-results>
 
   </template>
   <script>
@@ -39,7 +61,27 @@ Contributors:
         is: 'nuxeo-collection-view-layout',
         behaviors: [Nuxeo.LayoutBehavior],
         properties: {
-          document: Object
+          document: {
+            type: Object,
+            observer: '_documentChanged'
+          },
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(document, selectedItems)'
+          }
+        },
+
+        _documentChanged: function() {
+          if (this.document) {
+            this.$.results.nxProvider = this.$.provider;
+            this.$.provider.params = [this.document.uid];
+            this.$.provider.page = 1;
+            this.$.provider.fetch();
+          }
+        },
+
+        _actionContext: function() {
+          return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
         }
       });
     })();
