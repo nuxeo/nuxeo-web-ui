@@ -678,11 +678,6 @@ Contributors:
           this.$.searchForm.displayQueue(e.detail.doc);
         },
 
-        _navigateFromAssetsSearch: function(e) {
-          page('/browse' + e.detail.doc.path);
-          this.$.assetsForm.displayQueue(e.detail.doc, e.detail.index);
-        },
-
         _navigateFromCollection: function(e) {
           page('/browse' + e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
