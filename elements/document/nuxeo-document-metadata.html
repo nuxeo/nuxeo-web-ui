@@ -36,30 +36,15 @@ Contributors:
       ::content .multiline {
         white-space: pre-line;
       }
-
-      #edit {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-      }
     </style>
 
     <nuxeo-error id="error"></nuxeo-error>
 
     <div id="metadata">
-      <iron-pages selected="[[mode]]" attr-for-selected="mode">
-        <section mode="view">
-          <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-          <div id="metadata-view">
-            <!-- Dynamic layout element will be inserted here -->
-            <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
-          </div>
-        </section>
-
-        <section mode="edit">
-          <nuxeo-document-edit document="[[document]]"></nuxeo-document-edit>
-        </section>
-      </iron-pages>
+      <div id="metadata-view">
+        <!-- Dynamic layout element will be inserted here -->
+        <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
+      </div>
     </div>
 
   </template>
@@ -75,24 +60,11 @@ Contributors:
           document: {
             type: Object,
             observer: '_documentChanged'
-          },
-          mode: {
-            type: String,
-            value: 'view'
           }
-        },
-
-        edit: function() {
-          this.mode = 'edit';
-        },
-
-        view: function() {
-          this.mode = 'view';
         },
 
         _documentChanged: function() {
           if (this.document) {
-            this.mode = 'view';
             this._updateLayout();
           }
         },
@@ -150,16 +122,8 @@ Contributors:
           } else {
             this._createLayout();
           }
-        },
-
-        _isMutable: function(document) {
-          return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
-        },
-
-        _canEdit: function(document) {
-          return document && document.type !== 'Root' &&
-            this.hasPermission(document, 'Write') && this._isMutable(document);
         }
+
       });
     })();
   </script>

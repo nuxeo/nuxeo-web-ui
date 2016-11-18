@@ -238,6 +238,12 @@ Contributors:
           padding: 0;
         }
       }
+
+      #edit {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
     </style>
 
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
@@ -294,6 +300,7 @@ Contributors:
 
         <template is="dom-if" if="[[!isProcessingTask]]">
 
+          <!-- details -->
           <paper-card class="sidecard">
             <div class="horizontal layout wrap">
               <div class="details ctn">
@@ -326,8 +333,13 @@ Contributors:
             </div>
           </paper-card>
 
-          <paper-card class="sidecard">
-            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          <!-- metadata -->
+          <paper-card class="sidecard metadata">
+            <div hidden$="[[edit]]">
+              <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+              <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+            </div>
+            <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
           </paper-card>
 
           <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
@@ -416,6 +428,11 @@ Contributors:
           isProcessingTask: {
             type: Boolean,
             value: false
+          },
+
+          edit: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -426,6 +443,7 @@ Contributors:
             this.processes = this.document.contextParameters.runnableWorkflows;
             this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
             this.isProcessingTask = false;
+            this.edit = false;
           }
         },
 
@@ -463,6 +481,19 @@ Contributors:
 
         _toggleGraphDialog: function() {
           this.$$('#graphDialog').toggle();
+        },
+
+        _isMutable: function(document) {
+          return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+        },
+
+        _canEdit: function(document) {
+          return document && document.type !== 'Root' &&
+            this.hasPermission(document, 'Write') && this._isMutable(document);
+        },
+
+        _editMode: function() {
+          this.edit = true;
         }
 
       });
