@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="164px" height="205px" viewBox="0 0 164 205" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>collection</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-43.000000, -26.000000)" fill="#384248">
+            <g id="collection" transform="translate(43.000000, 26.000000)">
+                <path d="M143.5,0 L20.5,0 C9.225,0 0,9.225 0,20.5 L0,184.5 C0,195.775 9.225,205 20.5,205 L143.5,205 C154.775,205 164,195.775 164,184.5 L164,20.5 C164,9.225 154.775,0 143.5,0 Z M20.5,20.5 L71.75,20.5 L71.75,102.5 L46.125,87.125 L20.5,102.5 L20.5,20.5 Z" id="Combined-Shape"></path>
+            </g>
+        </g>
+    </g>
+</svg>

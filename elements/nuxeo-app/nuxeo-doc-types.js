@@ -4,11 +4,11 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Workspace', 'Folder', 'OrderedFolder'
 ];
 window.nuxeo.docTypes = window.nuxeo.docTypes || [
-  {id: 'File', icon: 'icons:description'},
-  {id: 'Note', icon: 'icons:subject'},
-  {id: 'Picture', icon: 'image:image'},
-  {id: 'Video', icon: 'av:video-library'},
-  {id: 'Audio', icon: 'image:audiotrack'},
-  {id: 'Folder', icon: 'icons:folder'},
-  {id: 'Workspace', icon: 'icons:folder-open'}
+  {id: 'File', icon: '/images/doctypes/document_file.svg'},
+  {id: 'Note', icon: '/images/doctypes/document_note.svg'},
+  {id: 'Picture', icon: '/images/doctypes/document_picture.svg'},
+  {id: 'Video', icon: '/images/doctypes/document_video.svg'},
+  {id: 'Audio', icon: '/images/doctypes/document_audio.svg'},
+  {id: 'Folder', icon: '/images/doctypes/container.svg'},
+  {id: 'Workspace', icon: '/images/doctypes/container.svg'}
 ];
