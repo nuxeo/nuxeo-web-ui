@@ -479,10 +479,10 @@ Contributors:
 
         displayQueue: function(doc) {
           this._isQueue = true;
+          this.$.list.notifyResize();
           if (doc && doc.uid) {
             this.$.list.$.list.selectItem(doc);
             this.$.list.$.list.scrollToItem(doc);
-            this.$.list.notifyResize();
           }
         },
 
