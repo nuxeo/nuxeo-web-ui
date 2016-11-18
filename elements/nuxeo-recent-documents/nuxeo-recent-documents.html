@@ -146,7 +146,7 @@ Contributors:
 
       _thumbnail: function(doc) {
         var baseUrl = this.$.nxcon.url;
-        return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+        return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
       },
 
       _computedClass: function(isSelected) {

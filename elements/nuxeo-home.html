@@ -118,6 +118,7 @@ Contributors:
                 page-size="20"
                 query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
                 schemas="dublincore,common,uid"
+                enrichers="thumbnail"
                 headers='{"X-NXfetch.document": "properties"}'>
               </nuxeo-page-provider>
 
@@ -264,7 +265,7 @@ Contributors:
               return doc.contextParameters.thumbnail.url;
             } else {
               var baseUrl = this.$.nxcon.url;
-              return baseUrl + '/nxthumb/default/' + doc.uid + '/blobholder:0/';
+              return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
             }
           }
         },
