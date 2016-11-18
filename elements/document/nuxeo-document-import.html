@@ -76,6 +76,10 @@ Contributors:
          };
       }
 
+      .suggester {
+        margin: 16px 32px;
+      }
+
       .file-to-import {
         min-height: 3em;
         margin: 0 .3em .8em;
@@ -101,10 +105,6 @@ Contributors:
 
       ::content paper-dropdown-menu {
         width: 100%;
-      }
-
-      nuxeo-path-suggestion {
-        margin: 16px 32px;
       }
 
       div[name='customize'] #blobEditor span {
@@ -313,6 +313,10 @@ Contributors:
         }
       }
 
+      .error {
+        color: var(--nuxeo-warn-text);
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -323,13 +327,22 @@ Contributors:
                     data="[[document]]"
                     headers='{"nx_es_sync": "true", "X-Batch-No-Drop": "true"}'
                     response="{{createResponse}}"></nuxeo-document>
+    <nuxeo-document id="parentFetcher"
+                    doc-path="[[targetPath]]"></nuxeo-document>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
 
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex">
 
-        <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
+        <div class="suggester">
+          <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]"
+                                 value="{{targetPath}}"
+                                 parent="{{suggesterParent}}"
+                                 children="{{suggesterChildren}}"
+                                 disabled$="[[!_visibleOnStage('upload',visible,stage)]]"></nuxeo-path-suggestion>
+          <span class="error">&#8203;[[targetLocationError]]</span>
+        </div>
 
         <div id="dropzone" class="vertical layout flex">
           <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple>
@@ -432,7 +445,7 @@ Contributors:
           <paper-button noink
                         class="primary"
                         on-tap="_import"
-                        disabled$="[[!_canImport(hasLocalFilesUploaded,hasRemoteFiles)]]">
+                        disabled$="[[!_canImport(hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
         </div>
@@ -442,7 +455,14 @@ Contributors:
       <div name="customize" class="vertical layout flex">
         <div class="horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex-3">
-            <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}"></nuxeo-path-suggestion>
+            <div class="suggester">
+              <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]"
+                                     value="{{targetPath}}"
+                                     parent="{{suggesterParent}}"
+                                     children="{{suggesterChildren}}"
+                                     disabled$="[[!_visibleOnStage('customize',visible,stage)]]"></nuxeo-path-suggestion>
+              <span class="error">&#8203;[[targetLocationError]]</span>
+            </div>
             <div class="typePicker horizontal layout center">
               <div class="flex">
                 <paper-dropdown-menu label="[[i18n('documentImportForm.type.label')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
@@ -506,27 +526,27 @@ Contributors:
 
           <paper-button noink
                         on-tap="_previousFile"
-                        disabled$=[[!_hasPreviousFile(customizing,docIdx)]]>
+                        disabled$=[[!_hasPreviousFile(canCreate,customizing,docIdx)]]>
                         &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Edit Previous')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
-                        disabled$="[[!_hasNextFile(customizing,docIdx)]]">
+                        disabled$="[[!_hasNextFile(canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
-                        disabled$="[[!_canApplyToAll(customizing,docIdx)]]">
+                        disabled$="[[!_canApplyToAll(canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.applyToAll', 'Apply to All')]]
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_submit"
-                        disabled$="[[!_canImportWithMetadata(hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
+                        disabled$="[[!_canImportWithMetadata(canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
         </div>
@@ -603,6 +623,10 @@ Contributors:
             computed: '_computeHasFiles(hasLocalFiles,hasRemoteFiles)'
           },
 
+          visible: {
+            type: Boolean
+          },
+
           _doNotCreate: {
             type: Boolean,
             value: false
@@ -673,13 +697,13 @@ Contributors:
         },
 
         _canImport: function() {
-          return this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles;
+          return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate;
         },
 
         _canImportWithMetadata: function() {
           return this._getAllFiles().every(function(file) {
             return 'checked' in file;
-          });
+          }) && this.canCreate;
         },
 
         _showUploadDialog: function() {
@@ -830,12 +854,12 @@ Contributors:
 
         _hasNextFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx < length - 1;
+          return length > 1 && this.docIdx < length - 1 && this.canCreate;
         },
 
         _hasPreviousFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx > 0;
+          return length > 1 && this.docIdx > 0  && this.canCreate;
         },
 
         _selectDoc: function(index) {
@@ -869,11 +893,15 @@ Contributors:
         },
 
         _tapLocalDoc: function(e) {
-          this._selectDoc(e.model.index);
+          if (this.canCreate) {
+            this._selectDoc(e.model.index);
+          }
         },
 
         _tapRemoteDoc: function(e) {
-          this._selectDoc(e.model.index + this.localFiles.length);
+          if (this.canCreate) {
+            this._selectDoc(e.model.index + this.localFiles.length);
+          }
         },
 
         _selectedLocalDocStyle: function(index) {
@@ -1040,7 +1068,7 @@ Contributors:
           this.document = file.docData.document;
           this.targetPath = file.docData.parent;
           this.document.name = file.sanitizedName || file.name;
-          var blobProperty = this.documentBlobProperties[file.docData.type._id] ||
+          var blobProperty = this.documentBlobProperties[file.docData.type.id] ||
                              this.documentBlobProperties['default'];
           // XXX if fileData.type == Note, then the file's contents should be passed instead
           this.document.properties[blobProperty] = file.providerId ? {
@@ -1104,7 +1132,7 @@ Contributors:
         },
 
         _canApplyToAll: function() {
-          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1;
+          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 && this.canCreate;
         },
 
         _applyToAll: function() {
@@ -1122,11 +1150,15 @@ Contributors:
           return window.nuxeo.importBlacklist.indexOf(type.id) === -1;
         },
 
+        _visibleOnStage: function(stage) {
+          return this.stage == stage && this.visible;
+        },
+
         /**
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          return ['nuxeo', this.selectedDocType.id.toLowerCase(), 'import-layout'].join('-');
+          return ['nuxeo', this.selectedDocType.type.toLowerCase(), 'import-layout'].join('-');
         },
 
         /**
@@ -1164,7 +1196,7 @@ Contributors:
           this.$['document-import'].hidden = false;
           this.document = this._isValidType(this.selectedDocType) ? {
             'entity-type': 'document',
-            'type': this.selectedDocType.id,
+            'type': this.selectedDocType.type,
             'name': '',
             'properties': {
               'dc:title': '',
@@ -1181,7 +1213,7 @@ Contributors:
             }
             var layout = this._layoutFor();
             if (!this._isRegistered(layout)) {
-              var folder = this.selectedDocType.id.toLowerCase() + '/';
+              var folder = this.selectedDocType.type.toLowerCase() + '/';
               var url = this.resolveUrl('../document/' + folder + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
                 // error handling

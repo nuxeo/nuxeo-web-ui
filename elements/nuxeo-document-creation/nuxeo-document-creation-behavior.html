@@ -26,7 +26,33 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
     },
 
     targetPath: {
+      type: Object,
+      notify: true
+    },
+
+    suggesterParent: {
       type: Object
+    },
+
+    suggesterChildren: {
+      type: Array,
+      observer: '_suggesterChildrenChanged',
+      notify: true
+    },
+
+    isValidTargetPath: {
+      type: Boolean,
+      notify: true
+    },
+
+    canCreate: {
+      type: Boolean,
+      notify: true
+    },
+
+    targetLocationError: {
+      type: String,
+      notify: true
     },
 
     document: {
@@ -44,20 +70,67 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
 
   },
 
+  observers: [
+    '_validateLocation(isValidTargetPath,suggesterChildren)'
+  ],
+
   _parentChanged: function() {
     if (this.parent) {
-      /*this.set('subtypes',((this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-                            this.parent.contextParameters.subtypes : []));*/
-      this.set('targetPath', this.parent.path);
-      this.set('subtypes', window.nuxeo.docTypes.map(function(type) {
-        type._id = type.id.toLowerCase();
-        return type;
-      }));
+      if (this.targetPath.replace(/\/$/, "") !== this.parent.path) {
+        this.set('targetPath', this.parent.path);
+      }
+      var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+                            this.parent.contextParameters.subtypes.map(function(type) {
+                              type.id = type.type.toLowerCase();
+                              return type;
+                            }) : [];
+      var filteredSubtypes = [];
+      if (this._canCreateIn(this.parent)) {
+        subtypes.forEach(function(type) {
+          if (type.facets.indexOf('HiddenInCreation') === -1) {
+            filteredSubtypes.push(type);
+          }
+        }.bind(this));
+      }
+      this.set('subtypes', filteredSubtypes);
+    }
+  },
+
+  _suggesterChildrenChanged: function() {
+    var valid = (this.parent ? this.targetPath.replace(/\/$/, "") === this.parent.path : false) ||
+                (this.suggesterParent ? this.targetPath.replace(/\/$/, "") === this.suggesterParent.path : false) ||
+                (this.suggesterChildren ? this.suggesterChildren.some(function(child) {
+                  return this.targetPath === child.path;
+                }.bind(this)) : false);
+    this.set('isValidTargetPath', valid);
+    this.fire('nx-document-creation-parent-changed', {isValidTargetPath: valid});
+  },
+
+  _validateLocation: function() {
+    if (!this.isValidTargetPath) {
+      this.set('canCreate', false);
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.invalidLocation','Invalid location'));
+    } else if (!this._canCreateIn(this.parent)) {
+      this.set('canCreate', false);
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noPermission',
+        'You do not have permissions to create under this location'));
+    } else {
+      this.set('canCreate', true);
+      this.set('targetLocationError', '');
     }
   },
 
   _notify: function(response) {
     this.fire('document-created', {response: response});
+  },
+
+  _canCreateIn: function(document) {
+    if (document && document.contextParameters && document.contextParameters.permissions) {
+      return document.contextParameters.permissions.indexOf('Write') > -1 ||
+             document.contextParameters.permissions.indexOf('Everything') > -1;
+    } else {
+      return false;
+    }
   },
 
   _sanitizeName: function(name) {
@@ -72,7 +145,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
 
   _getTypeLabel: function(type) {
     // TODO: review labels for doc types
-    return this._isValidType(type) ? this.i18n('label.document.type.' + type._id, type.id) : '';
+    return this._isValidType(type) ? this.i18n('label.document.type.' + type.id, type.type) : '';
   },
 
   _getTypeIcon: function(type) {
