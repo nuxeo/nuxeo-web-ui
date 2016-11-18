@@ -271,7 +271,7 @@ Contributors:
             <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
           </template>
           <template is="dom-if" if="[[!_isQueue]]">
-            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueue">
+            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
             <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
           </template>
@@ -475,6 +475,14 @@ Contributors:
 
         get nxProvider() {
           return this.$.provider;
+        },
+
+        displayQueueAndNavigateToFirst: function() {
+          if (this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
+            this.displayQueue(this.$.list.$.list.items[0]);
+          } else {
+            this.displayQueue();
+          }
         },
 
         displayQueue: function(doc) {
