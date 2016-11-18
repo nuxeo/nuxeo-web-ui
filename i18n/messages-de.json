@@ -164,6 +164,8 @@
   "documentExport.thumbnail":"Thumbnail",
   "documentExport.xmlExport":"XML Export",
   "documentExport.zipExport":"ZIP Export",
+  "documentHistory.filter.after":"After",
+  "documentHistory.filter.before":"Before",
   "documentHistory.category":"Category",
   "documentHistory.comment":"Comment",
   "documentHistory.date":"Date",
