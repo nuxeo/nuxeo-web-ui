@@ -115,6 +115,9 @@ Contributors:
           },
           parentPath: {
             type: String
+          },
+          defaultPath: {
+            type: String
           }
         },
 
@@ -161,8 +164,10 @@ Contributors:
         },
 
         _toggleDialog: function() {
-          if (!this.parent && this.parentPath) {
-            // no parent? let's fetch the default one
+          if (!this.parentPath) {
+            this.set('parentPath', this.defaultPath);
+          }
+          if (!this.parent || !this.parent.contextParameters) {
             this.$.defaultDoc.get().then(function() {
               this.$.createDocDialog.toggle();
             }.bind(this));

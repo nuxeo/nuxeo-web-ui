@@ -92,8 +92,17 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
           }
         }.bind(this));
       }
-      this.set('subtypes', filteredSubtypes);
+      this.set('subtypes', filteredSubtypes.sort(function(a, b) {
+        if (a.id < b.id) {
+          return -1;
+        }
+        if (a.id > b.id) {
+          return 1;
+        }
+        return 0;
+      }));
     }
+    this._validateLocation();
   },
 
   _suggesterChildrenChanged: function() {
@@ -118,6 +127,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
       this.set('canCreate', true);
       this.set('targetLocationError', '');
     }
+    this.fire('nx-document-creation-parent-validated');
   },
 
   _notify: function(response) {
