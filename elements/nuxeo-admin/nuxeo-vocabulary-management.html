@@ -225,10 +225,8 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          // lower case first letter to avoid extra dash in camelToDashCase
           var schema = this._getSchemaFor(this._selectedEntry);
-          var type = schema.charAt(0).toLowerCase() + schema.slice(1);
-          return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'edit'].join('-');
+          return ['nuxeo', schema.toLowerCase(), 'edit'].join('-');
         },
 
         _getSchemaFor: function(entry) {

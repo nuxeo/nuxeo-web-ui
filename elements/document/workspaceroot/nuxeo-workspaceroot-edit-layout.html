@@ -19,11 +19,11 @@ Contributors:
 <link rel="import" href="../workspace/nuxeo-workspace-edit-layout.html">
 
 <!--
-`nuxeo-workspace-root-edit-layout`
+`nuxeo-workspaceroot-edit-layout`
 @group Nuxeo UI
-@element nuxeo-workspace-root-edit-layout
+@element nuxeo-workspaceroot-edit-layout
 -->
-<dom-module id="nuxeo-workspace-root-edit-layout">
+<dom-module id="nuxeo-workspaceroot-edit-layout">
   <template>
 
     <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
@@ -63,7 +63,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-workspace-root-edit-layout',
+        is: 'nuxeo-workspaceroot-edit-layout',
         behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object

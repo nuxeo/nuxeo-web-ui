@@ -53,9 +53,7 @@ Contributors:
          */
         _layoutFor: function(document) {
           if (document) {
-            // lower case first letter to avoid extra dash in camelToDashCase
-            var type = document.type.charAt(0).toLowerCase() + document.type.slice(1);
-            return ['nuxeo', Polymer.CaseMap.camelToDashCase(type), 'view-layout'].join('-');
+            return ['nuxeo', document.type.toLowerCase(), 'view-layout'].join('-');
           }
         },
 
@@ -90,8 +88,7 @@ Contributors:
           this.$.error.hide();
           var layout = this._layoutFor(this.document);
           if (!this._isRegistered(layout)) {
-            var docType = this.document.type.charAt(0).toLowerCase() + this.document.type.slice(1);
-            var folder = Polymer.CaseMap.camelToDashCase(docType) + '/';
+            var folder = this.document.type.toLowerCase() + '/';
             var url = this.resolveUrl(folder + layout + '.html');
             this.importHref(url, this._createLayout.bind(this),
               // error handling

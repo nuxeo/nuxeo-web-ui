@@ -159,9 +159,7 @@ Contributors:
          */
         _layoutFor: function(task) {
           if (task) {
-            // lower case first letter to avoid extra dash in camelToDashCase
-            var node = task.nodeName.charAt(0).toLowerCase() + task.nodeName.slice(1);
-            return ['nuxeo', Polymer.CaseMap.camelToDashCase(node), 'layout'].join('-');
+            return ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
           }
         },
 
@@ -199,8 +197,7 @@ Contributors:
           if (this.task) {
             var layout = this._layoutFor(this.task);
             if (!this._isRegistered(layout)) {
-              var workflowName = this.task.workflowModelName.charAt(0).toLowerCase() + this.task.workflowModelName.slice(1);
-              var url = this.resolveUrl(Polymer.CaseMap.camelToDashCase(workflowName) + '/' + layout + '.html');
+              var url = this.resolveUrl(this.task.workflowModelName.toLowerCase() + '/' + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
                   // error handling
                   function() {

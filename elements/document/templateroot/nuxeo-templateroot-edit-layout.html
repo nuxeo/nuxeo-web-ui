@@ -18,11 +18,11 @@ Contributors:
 -->
 
 <!--
-`nuxeo-template-root-edit-layout`
+`nuxeo-templateroot-edit-layout`
 @group Nuxeo UI
-@element nuxeo-template-root-edit-layout
+@element nuxeo-templateroot-edit-layout
 -->
-<dom-module id="nuxeo-template-root-edit-layout">
+<dom-module id="nuxeo-templateroot-edit-layout">
   <template>
 
     <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
@@ -62,7 +62,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-template-root-edit-layout',
+        is: 'nuxeo-templateroot-edit-layout',
         behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object
