@@ -77,11 +77,11 @@ Contributors:
           var typeObj = window.nuxeo.docTypes.find(function(docType) {
             return docType.id === (type.charAt(0).toUpperCase() + type.slice(1));
           });
-          el.icon = typeObj.icon;
+          el.icon =  'images/doctypes/' + typeObj.id + '.svg';
           el.label = typeObj.id;
           shorcuts.push(el);
         }.bind(this));
-
+        
         this._putNodes(Polymer.dom(this.$.shortcuts), shorcuts.reverse());
       },
 

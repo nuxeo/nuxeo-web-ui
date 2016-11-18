@@ -149,7 +149,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   _getTypeIcon: function(type) {
-    return this._isValidType(type) ? type.icon : '';
+    return this._isValidType(type) ? 'images/doctypes/' + type.id + '.svg' : '';
   },
 
   // extension point
