@@ -1,0 +1,247 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="nuxeo-filters-behavior.html">
+<script>
+  /**
+   * Stamps the template if and only if all of its conditions are met.
+   *
+   * Example:
+   *
+   *     <nuxeo-filter document="[[document]]" type="Picture"
+   *                   user="[[user]]" group="Administrator">
+   *       <template>
+   *         ...
+   *       </template>
+   *     </nuxeo-filter>
+   *
+   * @demo demo/nuxeo-filter/index.html
+   */
+  Polymer({
+    is: 'nuxeo-filter',
+
+    properties: {
+
+      /**
+       * The context document
+       */
+      document: {
+        type: Object,
+        value: {}
+      },
+
+      /**
+       * The context user
+       */
+      user: {
+        type: Object,
+        value: {}
+      },
+
+      /**
+       * Document has one of these types
+       */
+      type: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document'],  // the context made available to the filter function
+          fn: 'hasType',      // the filter function name
+          multiple: true      // flag to indicate if the property takes csv values
+        }
+      },
+
+      /**
+       * Document has one of these facets
+       */
+      facet: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document'],
+          fn: 'hasFacet',
+          multiple: true
+        }
+      },
+
+      /**
+       * Document state
+       */
+      state: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document'],
+          fn: 'hasState',
+          multiple: true
+        }
+      },
+
+      /**
+       * Document path starts with
+       */
+      path: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document'],
+          fn: 'pathStartsWith'
+        }
+      },
+
+      /**
+       * User has one of these permissions in the document
+       */
+      permission: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document'],
+          fn: 'hasPermission',
+          multiple: true
+        }
+      },
+
+      /**
+       * Javascript expression to evaluate
+       */
+      expression: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['document', 'user'],
+          fn: '_evaluate'
+        }
+      },
+
+      /**
+       * User is member of one of these groups
+       */
+      group: {
+        type: String,
+        value: '',
+        _filter: {
+          ctx: ['user'],
+          fn: 'isMember',
+          multiple: true
+        }
+      }
+
+    },
+
+    behaviors: [
+      Polymer.Templatizer, Nuxeo.FiltersBehavior
+    ],
+
+    observers: [
+      '_update(document, user, facet, type, state, path, permission, expression, group)'
+    ],
+
+    _evaluate: function(document, user, expression) {
+      try {
+        var fn = new Function(['document', 'user'], 'return ' + expression + ';');
+        return fn.apply(this, [document, user]);
+      } catch (err) {
+        return false;
+      }
+    },
+
+    // Evaluate the filter
+    check: function() {
+      for (var k in this.properties) {
+        var v = this[k],
+            filter = this.properties[k]._filter;
+        if (v && filter) {
+          var args = filter.ctx.map(function(arg) { return this[arg]; }.bind(this));
+          // if filter supports multiple values apply the function to each one
+          var values = filter.multiple ? v.split(',') : [v];
+          var fn = this[filter.fn];
+
+          // pass if any check returns true, basically Array.some()
+          var pass = false;
+          for (var i = 0; i < values.length; i++) {
+            if (pass = fn.apply(this, args.concat(values[i]))) {
+              break;
+            }
+          }
+
+          // if any of the filters fail the check fails
+          if (!pass) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+
+    _update: function() {
+      this.async(function() {
+        this.check() ? this._render() : this._clear();
+      });
+    },
+
+    _render: function() {
+      if (this._instance) {
+        return;
+      }
+      var parentNode = Polymer.dom(this).parentNode;
+      if (parentNode) {
+        var template = Polymer.dom(this).querySelector('template');
+        var parent = Polymer.dom(parentNode);
+        if (template) {
+          this.templatize(template);
+          this._instance = this.stamp();
+          var root = this._instance.root;
+          parent.insertBefore(root, this);
+        }
+      }
+    },
+
+    attached: function() {
+      this._update();
+    },
+
+    _clear: function() {
+      if (this._instance) {
+        var c$ = this._instance._children;
+        if (c$ && c$.length) {
+          // use first child parent, for case when dom-if may have been detached
+          var parent = Polymer.dom(Polymer.dom(c$[0]).parentNode);
+          for (var i=0, n; (i<c$.length) && (n=c$[i]); i++) {
+            parent.removeChild(n);
+          }
+        }
+        this._instance = null;
+      }
+    },
+
+    _forwardParentProp: function(prop, value) {
+      if (this._instance) {
+        this._instance.__setProperty(prop, value, true);
+      }
+    },
+
+    _forwardParentPath: function(path, value) {
+      if (this._instance) {
+        this._instance._notifyPath(path, value, true);
+      }
+    }
+  });
+</script>

@@ -1,0 +1,233 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>nuxeo-filter Demo</title>
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../polymer/polymer.html">
+  <link rel="import" href="../../nuxeo-filter.html">
+  <link rel="import" href="../../../iron-icons/iron-icons.html">
+  <link rel="import" href="../../../paper-button/paper-button.html">
+  <link rel="import" href="../../../paper-card/paper-card.html">
+  <link rel="import" href="../../../paper-input/paper-input.html">
+  <link rel="import" href="../../../paper-item/paper-item.html">
+  <link rel="import" href="../../../paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../../paper-styles/paper-styles.html">
+  <style is="custom-style">
+    paper-listbox {
+      max-width: 200px;
+      @apply(--shadow-elevation-2dp);
+    }
+    paper-button {
+      background-color: var(--paper-indigo-500);
+      color: white;
+    }
+    paper-card {
+      @apply(--layout-flex);
+    }
+    iron-icon {
+      color: green;
+    }
+    li {
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+<template is="dom-bind">
+
+  <div class="layout horizontal">
+  <paper-card heading="Document">
+    <div class="card-content">
+      <paper-input label="Title" value="{{title}}"></paper-input>
+
+      <h4>Type</h4>
+      <paper-listbox selected="{{type}}" attr-for-selected="value">
+        <paper-item value="File">File</paper-item>
+        <paper-item value="Folder">Folder</paper-item>
+        <paper-item value="Note">Note</paper-item>
+      </paper-listbox>
+
+      <h4>Facets</h4>
+      <paper-listbox multi selected-values="{{facets}}" attr-for-selected="value">
+        <paper-item value="Folderish">Folderish</paper-item>
+        <paper-item value="Commentable">Commentable</paper-item>
+      </paper-listbox>
+
+      <h4>Permissions</h4>
+      <paper-listbox multi selected-values="{{permissions}}" attr-for-selected="value">
+        <paper-item value="Read">Read</paper-item>
+        <paper-item value="Write">Write</paper-item>
+      </paper-listbox>
+    </div>
+  </paper-card>
+
+  <paper-card heading="User">
+    <div class="card-content">
+      <paper-input label="Username" value="{{username}}"></paper-input>
+
+      <h4>Groups</h4>
+      <paper-listbox multi selected-values="{{groups}}" attr-for-selected="value">
+        <paper-item value="Administrators">Administrators</paper-item>
+        <paper-item value="Members">Members</paper-item>
+        <paper-item value="Others">Others</paper-item>
+      </paper-listbox>
+    </div>
+  </paper-card>
+  </div>
+
+  <paper-button raised primary on-tap="save">Apply</paper-button>
+
+  <ul>
+    <li>facet="Folderish"
+      <nuxeo-filter document="[[document]]" facet="Folderish">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>facet="Folderish,Commentable"
+      <nuxeo-filter document="[[document]]" facet="Folderish,Commentable">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>type="Folder"
+      <nuxeo-filter document="[[document]]" type="Folder">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>type="File,Folder"
+      <nuxeo-filter document="[[document]]" type="Folder,File">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>permission="Write"
+      <nuxeo-filter document="[[document]]" permission="Write">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>groups="Administrators"
+      <nuxeo-filter user="[[user]]" group="Administrators">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>groups="Administrators,Members"
+      <nuxeo-filter user="[[user]]" group="Administrators,Members">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>expression="this.isMember(user, 'Administrators')"
+      <nuxeo-filter user="[[user]]" expression="this.isMember(user, 'Administrators')">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>facet="Folderish" expression="document.title === 'Title'"
+      <nuxeo-filter document="[[document]]" facet="Folderish" expression="document.title === 'Title'">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>type="Folder" facet="Folderish" expression="document.title === 'Title'"
+      <nuxeo-filter document="[[document]]" type="Folder" facet="Folderish" expression="document.title === 'Title'">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>type="Folder" facet="Folderish" expression="document.title === 'Title'"
+      <nuxeo-filter document="[[document]]" expression="this.hasType(document, 'Folder') && this.hasFacet(document, 'Folderish') && document.title === 'Title'">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+
+    <li>group="Administrators" type="Folder" facet="Folderish" expression="user.id === 'Administrator' && document.title === 'Title'"
+      <nuxeo-filter user="[[user]]" group="Administrators"
+                    document="[[document]]" type="Folder" facet="Folderish"
+                    expression="user.id === 'Administrator' && document.title === 'Title'">
+        <template>
+          <iron-icon icon="icons:check"></iron-icon>
+        </template>
+      </nuxeo-filter>
+    </li>
+  </ul>
+
+</template>
+<script>
+  var t = document.querySelector('template');
+
+  // default document properties
+  t.title = 'Title';
+  t.type = 'Folder';
+  t.facets = ['Folderish'];
+  t.permissions = ['Read', 'Write'];
+
+  // default user properties
+  t.username = 'Administrator';
+  t.groups = ['Administrators', 'Members'];
+
+  t.save = function() {
+    t.document = {
+      title: t.title,
+      type: t.type,
+      facets: t.facets,
+      contextParameters: {
+        permissions: t.permissions
+      }
+    };
+
+    t.user = {
+      id: t.username,
+      properties: {
+        groups: t.groups
+      }
+    };
+  };
+
+  t.save();
+</script>
+</body>
+</html>
