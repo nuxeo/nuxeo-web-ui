@@ -112,7 +112,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
                   return this.targetPath === child.path;
                 }.bind(this)) : false);
     this.set('isValidTargetPath', valid);
-    this.fire('nx-document-creation-parent-changed', {isValidTargetPath: valid});
+    this.fire('nx-document-creation-suggester-parent-changed', {isValidTargetPath: valid});
   },
 
   _validateLocation: function() {
@@ -158,7 +158,6 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   _getTypeLabel: function(type) {
-    // TODO: review labels for doc types
     return this._isValidType(type) ? this.i18n('label.document.type.' + type.id, type.type) : '';
   },
 

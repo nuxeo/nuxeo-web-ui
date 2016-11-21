@@ -250,6 +250,15 @@ Contributors:
           'nx-document-layout-changed': '_layoutUpdated'
         },
 
+        init: function(typeId) {
+          var typeObj = this.subtypes.find(function(type) {
+            return type.id === typeId;
+          });
+          if (typeObj) {
+            this.selectedDocType = typeObj;
+          }
+        },
+
         /**
          * Returns the name for the current layout element
          */

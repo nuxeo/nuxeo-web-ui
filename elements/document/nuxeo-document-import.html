@@ -458,9 +458,9 @@ Contributors:
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
-          <div class="horizontal layout">
-            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
-            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          <div class="horizontal layout" hidden$="[[!_creating]]">
+            <span class="importing-label">[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active></paper-spinner-lite>
           </div>
         </div>
       </div>
@@ -565,9 +565,9 @@ Contributors:
                         disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
-          <div class="horizontal layout">
-            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
-            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          <div class="horizontal layout" hidden$="[[!_creating]]">
+            <span class="importing-label">[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active></paper-spinner-lite>
           </div>
         </div>
       </div>
@@ -1035,9 +1035,8 @@ Contributors:
           }
           if (!response.entries || response.entries.length === 1) {
             page('/browse' + (response.entries ? response.entries[0] : response).path);
-          } else if (this.targetPath.replace(/\/$/, '') === this.parent.path.replace(/\/$/, '')) {
-            this.fire('document-updated');
           } else {
+            this.fire('document-updated');
             page('/browse' + this.targetPath);
           }
         },

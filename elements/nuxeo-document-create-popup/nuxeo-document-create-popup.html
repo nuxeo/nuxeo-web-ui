@@ -125,7 +125,7 @@ Contributors:
           'nx-creation-wizard-hide-tabs': '_hideTabs',
           'nx-creation-wizard-show-tabs': '_displayTabs',
           'document-created': '_close',
-          'nx-document-creation-parent-changed': '_parentPathChanged'
+          'nx-document-creation-suggester-parent-changed': '_parentPathChanged'
         },
 
         _hideTabs: function() {
@@ -146,33 +146,36 @@ Contributors:
         toggleDialogCreate: function(type) {
           this.selectedTab = 'create';
           this._showTabs = false;
-          this.$.simpleCreation.selectedDocType = type;
-          this.$.bulkCreation.init();
-          this._toggleDialog();
+          this._fetchParent().then(function() {
+            this.$.simpleCreation.init(type);
+            this.$.bulkCreation.init();
+            this.$.createDocDialog.toggle();
+          }.bind(this));
         },
 
         toggleDialogImport: function(files) {
           this.selectedTab = 'import';
-          this._showTabs = false;
-          this.$.bulkCreation.init(files);
-          this._toggleDialog();
+          this._fetchParent().then(function() {
+            this.$.bulkCreation.init(files);
+            this.$.createDocDialog.toggle();
+          }.bind(this));
         },
 
         toggleDialog: function() {
-          this.$.bulkCreation.init();
-          this._toggleDialog();
+          this._fetchParent().then(function() {
+            this.$.bulkCreation.init();
+            this.$.createDocDialog.toggle();
+          }.bind(this));
         },
 
-        _toggleDialog: function() {
+        _fetchParent: function() {
           if (!this.parentPath) {
             this.set('parentPath', this.defaultPath);
           }
           if (!this.parent || !this.parent.contextParameters) {
-            this.$.defaultDoc.get().then(function() {
-              this.$.createDocDialog.toggle();
-            }.bind(this));
+            return this.$.defaultDoc.get();
           } else {
-            this.$.createDocDialog.toggle();
+            return Promise.resolve();
           }
         },
 

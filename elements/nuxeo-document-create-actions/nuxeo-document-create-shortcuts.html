@@ -52,6 +52,9 @@ Contributors:
         hostVisible: {
           type: Boolean,
           observer: '_observeVisibility'
+        },
+        subtypes: {
+          type: Array
         }
       },
 
@@ -71,15 +74,13 @@ Contributors:
 
         var shorcuts = [];
         types.forEach(function(type) {
-          var el = document.createElement('nuxeo-document-create-shortcut');
-          el.type = type;
-          // XXX retrieve this data from the server
-          var typeObj = window.nuxeo.docTypes.find(function(docType) {
-            return docType.id === (type.charAt(0).toUpperCase() + type.slice(1));
-          });
-          el.icon =  'images/doctypes/' + typeObj.id + '.svg';
-          el.label = typeObj.id;
-          shorcuts.push(el);
+          if (this.subtypes.indexOf(type) > -1) {
+            var el = document.createElement('nuxeo-document-create-shortcut');
+            el.type = type;
+            el.icon =  'images/doctypes/' + type + '.svg';
+            el.label = this.i18n('label.document.type.' + type, type);
+            shorcuts.push(el);
+          }
         }.bind(this));
         
         this._putNodes(Polymer.dom(this.$.shortcuts), shorcuts.reverse());
