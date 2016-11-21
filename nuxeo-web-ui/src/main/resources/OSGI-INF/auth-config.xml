@@ -2,7 +2,7 @@
   <extension point="startURL" target="org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService">
     <startURLPattern>
       <patterns>
-        <pattern>ui/</pattern>
+        <pattern>ui</pattern>
       </patterns>
     </startURLPattern>
   </extension>
