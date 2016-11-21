@@ -461,7 +461,7 @@ Contributors:
 
     <paper-progress id="loading" indeterminate></paper-progress>
 
-    <nuxeo-document-create-button class$="[[page]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
