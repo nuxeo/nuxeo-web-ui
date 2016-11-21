@@ -76,7 +76,11 @@ Contributors:
       },
 
       _id: function(user) {
-        return this._isEntity(user) ? user.id : user;
+        if(user.id) {
+          return user.id;
+        } else {
+          return user;
+        }
       },
 
       _name: function(user) {
@@ -84,6 +88,8 @@ Contributors:
           var firstName = user.properties.firstName;
           var lastName = user.properties.lastName;
           return (firstName || lastName) ? firstName + ' ' + lastName : user.properties.email;
+        } else if(user.id) {
+          return user.id;
         } else {
           return user;
         }
