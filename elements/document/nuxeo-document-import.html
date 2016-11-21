@@ -1166,10 +1166,10 @@ Contributors:
         },
 
         _parentValidated: function() {
-          if (this._importDocTypes && this._importDocTypes.length === 0) {
+          if (this.canCreate && this._importDocTypes && this._importDocTypes.length === 0) {
             this.set('canCreate', false);
             this.set('targetLocationError',
-              this.i18n('documentImport.error.cannotImport','Cannot import documents in this location'));
+              this.i18n('documentImport.error.cannotImport','Unable to import documents in this location'));
           }
         },
 
