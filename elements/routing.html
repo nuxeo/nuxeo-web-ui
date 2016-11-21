@@ -48,7 +48,7 @@ Contributors:
     });
 
     page('/browse', function() {
-      page.redirect('/browse/default-domain');
+      app.load('browse', '', '/', 'view');
     });
 
     // /browse/<path>@<action>
