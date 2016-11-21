@@ -73,10 +73,6 @@ Contributors:
       return doc && doc.facets && doc.facets.indexOf(facet) !== -1;
     },
 
-    hasSchema: function(doc, facet) {
-      return doc && doc.facets && doc.facets.indexOf(facet) !== -1;
-    },
-
     hasPermission: function(doc, permission) {
       return doc && doc.contextParameters && doc.contextParameters.permissions &&
           doc.contextParameters.permissions.indexOf(permission) !== -1;
