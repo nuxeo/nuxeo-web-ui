@@ -76,6 +76,10 @@ Contributors:
          };
       }
 
+      paper-spinner-lite {
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
       .suggester {
         margin: 16px 32px;
       }
@@ -317,6 +321,10 @@ Contributors:
         color: var(--nuxeo-warn-text);
       }
 
+      .importing-label {
+        margin-right: 8px;
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -435,12 +443,13 @@ Contributors:
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss
-                          on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+                          on-tap="_cancel"
+                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <paper-button noink
                         class="primary"
                         on-tap="_toggleCustomize"
-                        disabled$="[[!_canAddProperties(hasFiles,canCreate)]]">
+                        disabled$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
                         [[i18n('documentImportForm.addProperties')]]
                       </paper-button>
           <paper-button noink
@@ -449,6 +458,10 @@ Contributors:
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
+          <div class="horizontal layout">
+            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          </div>
         </div>
       </div>
 
@@ -522,35 +535,40 @@ Contributors:
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button dialog-dismiss
-                          on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+                          on-tap="_cancel"
+                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back', 'Back')]]</paper-button>-->
 
           <paper-button noink
                         on-tap="_previousFile"
-                        disabled$=[[!_hasPreviousFile(canCreate,customizing,docIdx)]]>
+                        disabled$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
                         &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Edit Previous')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
-                        disabled$="[[!_hasNextFile(canCreate,customizing,docIdx)]]">
+                        disabled$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
-                        disabled$="[[!_canApplyToAll(canCreate,customizing,docIdx)]]">
+                        disabled$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.applyToAll', 'Apply to All')]]
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_submit"
-                        disabled$="[[!_canImportWithMetadata(_creating, canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
+                        disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
+          <div class="horizontal layout">
+            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          </div>
         </div>
       </div>
     </iron-pages>
@@ -722,7 +740,7 @@ Contributors:
         },
 
         _canAddProperties: function() {
-          return this.hasFiles && this.canCreate;
+          return this.hasFiles && this.canCreate && !this._creating;
         },
 
         _showUploadDialog: function() {
@@ -872,12 +890,12 @@ Contributors:
 
         _hasNextFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx < length - 1 && this.canCreate;
+          return length > 1 && this.docIdx < length - 1 && this.canCreate && !this._creating;
         },
 
         _hasPreviousFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx > 0  && this.canCreate;
+          return length > 1 && this.docIdx > 0  && this.canCreate && !this._creating;
         },
 
         _selectDoc: function(index) {
@@ -1153,7 +1171,8 @@ Contributors:
         },
 
         _canApplyToAll: function() {
-          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 && this.canCreate;
+          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 &&
+            this.canCreate && !this._creating;
         },
 
         _applyToAll: function() {

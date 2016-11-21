@@ -179,6 +179,7 @@
   "documentHistory.state": "State",
   "documentHistory.username": "Username",
   "documentImport.error.cannotImport": "Unable to import documents in this location",
+  "documentImport.importing": "Importing...",
   "documentImportForm.addProperties.otherDocuments": "+ {0} other documents",
   "documentImportForm.addProperties": "Add Properties",
   "documentImportForm.applyToAll": "Apply to All",
