@@ -245,6 +245,14 @@ Contributors:
 
               var entries = doc.contextParameters.breadcrumb.entries;
               this.parents = [];
+
+              var lastEntry = entries[entries.length - 1];
+              if (this.hasFacet(lastEntry, 'Folderish')) {
+                this.rootPath = lastEntry.path;
+              } else {
+                this.rootPath = entries[entries.length - 2];
+              }
+
               for (var i = 0; i < entries.length - 1; i++) {
                 var entry = entries[i];
                 if (this.hasFacet(entry, 'HiddenInNavigation')) {
@@ -253,10 +261,7 @@ Contributors:
                 this.push('parents', entry);
               }
 
-              var lastEntry = entries[entries.length - 1];
-              if (this.hasFacet(lastEntry, 'Folderish')) {
-                this.rootPath = lastEntry.path;
-              }
+
             }
           }
         },
