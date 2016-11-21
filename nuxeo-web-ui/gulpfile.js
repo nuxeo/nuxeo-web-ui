@@ -121,6 +121,10 @@ gulp.task('copy', function() {
   ], {
     base: app()
   }).pipe(gulp.dest(dist()));
+  // copy user-group-management layouts
+  gulp.src([dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
+            dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
+      .pipe(gulp.dest(dist('nuxeo-user-group-management')));
 });
 
 // Scan your HTML for assets & optimize them
