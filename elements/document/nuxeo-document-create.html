@@ -47,6 +47,11 @@ Contributors:
         @apply(--nx-button-primary-hover);
       }
 
+      paper-button[disabled] {
+        @apply(--nx-button-disabled);
+        display: none;
+      }
+
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
            z-index: 200;
@@ -61,6 +66,10 @@ Contributors:
 
       .container {
         overflow: auto;
+      }
+
+      .container .suggester {
+        margin: 16px 32px;
       }
 
       .typeSelection {
@@ -137,12 +146,17 @@ Contributors:
       ::content paper-dropdown-menu {
         width: 100%;
       }
+
+      .error {
+        color: var(--nuxeo-warn-text);
+      }
     </style>
 
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
                     headers='{"nx_es_sync": "true"}'
+                    enrichers="permissions, subtypes"
                     response="{{createResponse}}"></nuxeo-document>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
@@ -150,6 +164,14 @@ Contributors:
       <!--Stage: allow user to choose a doc type-->
       <div name="choose" class="vertical layout flex">
         <div class="flex container">
+          <div class="suggester">
+            <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+                                   label="[[i18n('documentCreationForm.location')]]"
+                                   parent="{{suggesterParent}}"
+                                   children="{{suggesterChildren}}"
+                                   disabled$="[[!_visibleOnStage('choose',visible,stage)]]"></nuxeo-path-suggestion>
+            <span class="error">&#8203;[[targetLocationError]]</span>
+          </div>
           <div class="typeSelection">
             <template is="dom-repeat" items="[[subtypes]]" as="type">
               <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
@@ -173,8 +195,14 @@ Contributors:
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
         <div id="editor" class="flex">
-          <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
-                                 label="[[i18n('documentCreationForm.location')]]"></nuxeo-path-suggestion>
+          <div class="suggester">
+            <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+                                   label="[[i18n('documentCreationForm.location')]]"
+                                   parent="{{suggesterParent}}"
+                                   children="{{suggesterChildren}}"
+                                   distabled$="[[!_visibleOnStage('edit',visible,stage)]]"></nuxeo-path-suggestion>
+            <span class="error">&#8203;[[targetLocationError]]</span>
+          </div>
           <form is="iron-form" id="form" class="form vertical layout flex">
             <div id="document-create">
               <!--dynamically loaded via _updateLayout-->
@@ -186,7 +214,7 @@ Contributors:
             <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <paper-button on-tap="_back">[[i18n('command.back', 'Back')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_create">[[i18n('command.create', 'Create')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_create" disabled$="[[!canCreate]]">[[i18n('command.create', 'Create')]]</paper-button>
         </div>
       </div>
 
@@ -210,6 +238,10 @@ Contributors:
           stage: {
             type: String,
             value: 'choose'
+          },
+
+          visible: {
+            type: Boolean
           }
 
         },
@@ -222,7 +254,7 @@ Contributors:
          * Returns the name for the current layout element
          */
         _layoutFor: function() {
-          return ['nuxeo', this.selectedDocType.id.toLowerCase(), 'create-layout'].join('-');
+          return ['nuxeo', this.selectedDocType.type.toLowerCase(), 'create-layout'].join('-');
         },
 
         /**
@@ -259,7 +291,7 @@ Contributors:
         _updateLayout: function() {
           this.document = this._isValidType(this.selectedDocType) ? {
             'entity-type': 'document',
-            'type': this.selectedDocType.id,
+            'type': this.selectedDocType.type,
             'name': '',
             'properties': {
               'dc:description': ''
@@ -275,7 +307,7 @@ Contributors:
             }
             var layout = this._layoutFor();
             if (!this._isRegistered(layout)) {
-              var folder = this.selectedDocType.id.toLowerCase() + '/';
+              var folder = this.selectedDocType.type.toLowerCase() + '/';
               var url = this.resolveUrl('../document/' + folder + layout + '.html');
               this.importHref(url, this._createLayout.bind(this),
                 // error handling
@@ -317,7 +349,7 @@ Contributors:
           }
           this.document.name = this._sanitizeName(this.document.properties['dc:title']);
           this.$.docRequest.post().then(function(response) {
-            this.$.creationStats.storeType(this.selectedDocType._id);
+            this.$.creationStats.storeType(this.selectedDocType.id);
             this._clear();
             page('/browse' + response.path);
             this._notify(response);
@@ -345,6 +377,10 @@ Contributors:
 
         _layoutUpdated: function() {
           this.stage = 'edit';
+        },
+
+        _visibleOnStage: function(stage) {
+          return this.stage == stage && this.visible;
         }
 
       });

@@ -286,7 +286,7 @@ Contributors:
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="permissions, breadcrumb, preview, favorites, subscribedNotifications, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit"
+                    enrichers="permissions, breadcrumb, preview, favorites, subscribedNotifications, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes"
                     headers='{"X-NXfetch.document": "lock,properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch.task": "actors"}'>
     </nuxeo-document>
 
@@ -462,7 +462,7 @@ Contributors:
     <paper-progress id="loading" indeterminate></paper-progress>
 
     <nuxeo-document-create-button class$="[[page]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-parent-path="/default-domain"></nuxeo-document-create-popup>
+    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>

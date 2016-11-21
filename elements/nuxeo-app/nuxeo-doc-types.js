@@ -1,7 +1,7 @@
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
 window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
-  'Workspace', 'Folder', 'OrderedFolder'
+  'Workspace', 'Folder', 'OrderedFolder', 'Collection'
 ];
 window.nuxeo.docTypes = window.nuxeo.docTypes || [
   {id: 'File', icon: '/images/doctypes/document_file.svg'},
