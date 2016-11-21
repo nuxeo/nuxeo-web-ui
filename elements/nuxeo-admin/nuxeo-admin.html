@@ -44,7 +44,7 @@ Contributors:
         <template is="dom-if" if="[[user.isAdministrator]]">
           <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
         </template>
-        <nuxeo-user-group-management-page name="user-group-management" is-administrator$="[[user.isAdministrator]]"></nuxeo-user-group-management-page>
+        <nuxeo-user-group-management-page name="user-group-management" is-administrator$="[[user.isAdministrator]]" entity="[[entity]]"></nuxeo-user-group-management-page>
         <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
 
       </iron-pages>

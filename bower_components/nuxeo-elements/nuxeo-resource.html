@@ -161,6 +161,9 @@ element.
         options.headers['X-NXenrichers.' + this.enrichersEntity] = this.enrichers;
       }
 
+      // resolve with full response to skip default unmarshallers
+      options.resolveWithFullResponse = true;
+
       var params = this.params || {};
       return this.$.nx.request().then(function(request) {
         this._request = request;
@@ -182,6 +185,9 @@ element.
         .queryParams(params)
         .repositoryName(this._request._baseOptions.repositoryName === 'default' ? undefined : this._request._baseOptions.repositoryName)
         .execute(options)
+        .then(function(response) {
+          return response.json();
+        })
         .then(function(data) {
           this.fire('response', {response: data});
           this.response = data;
