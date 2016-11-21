@@ -38,8 +38,8 @@ Contributors:
       }
 
       .flex-layout paper-card {
-        flex: 1 0 calc(33% - 2em);
         margin: 0 16px 32px;
+        flex-basis: calc(50% - 32px);
       }
 
       paper-card .card-content {
@@ -153,7 +153,7 @@ Contributors:
           </div>
         </paper-card>
 
-        <paper-card elevation="0">
+        <!--paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/ocean-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
             <span class="name flex">[[i18n('themes.ocean', 'Ocean')]]</span>
@@ -164,7 +164,7 @@ Contributors:
               <paper-button data-theme="ocean" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
             </template>
           </div>
-        </paper-card>
+        </paper-card-->
 
         <paper-toast id="toast" text="[[i18n('themes.applying', 'Applying Theme...')]]"></paper-toast>
       </div>

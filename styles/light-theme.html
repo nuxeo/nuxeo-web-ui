@@ -34,7 +34,7 @@
     --nuxeo-primary-color: #00ccff;
 
     /* Badges & tags */
-    --nuxeo-tag-background: #edf1f5;
+    --nuxeo-tag-background: transparent;
     --nuxeo-tag-text: #6d7684;
     --nuxeo-badge-background: #f68500;
     --nuxeo-validated: #99d749;
@@ -69,8 +69,10 @@
     --nuxeo-link-hover-color: #00ccff;
 
     /* Actions in toolbar, e.g. document view */
-    --nuxeo-pill-color: #eeeeee;
-    --nuxeo-pill-text-color: #aaaaaa;
+    --nuxeo-pill-color: #eff2f4;
+    --nuxeo-pill-text-color: #434343;
+    --nuxeo-pill-color-hover: #eff2f4;
+    --nuxeo-pill-text-hover: #434343;
     --nuxeo-action-color: #434343;
     --nuxeo-action-color-activated: #f68500;
     --nuxeo-container-hover: #f3f7f9;
@@ -199,7 +201,7 @@
       background-color: #fff;
       color: var(--nuxeo-link-hover-color);
       outline: 0;
-      box-shadow: 0 0 0 1px var(--nuxeo-sidebar-actions-hover) inset;
+      box-shadow: 0 0 0 1px var(--nuxeo-header-actions-hover) inset;
     };
 
     --nuxeo-sidebar-item-theme: {
@@ -229,12 +231,13 @@
 
     --nuxeo-tag: {
       display: inline-block;
+      border: 1px solid var(--nuxeo-border);
       background-color: var(--nuxeo-tag-background);
       color: var(--nuxeo-tag-text);
       padding: 4px 6px;
       font-size: .8em;
       margin-bottom: .3em;
-      border-radius: 3px;
+      border-radius: 2em;
       line-height: initial;
       text-decoration: none;
     };

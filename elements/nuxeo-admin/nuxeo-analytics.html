@@ -84,17 +84,25 @@ Contributors:
         cursor: pointer;
         margin: 0 0 0 8px;
         color: var(--nuxeo-pill-text-color);
-        --paper-item-min-height: 32px;
-        --paper-item-selected-weight: 300;
         --paper-item-selected: {
-          background: var(--nuxeo-pill-color);
+          background: var(--nuxeo-pill-color-hover);
+          color: var(--nuxeo-pill-text-hover);
         };
         --paper-item-focused: {
-          background: var(--nuxeo-pill-color);
+          background: var(--nuxeo-pill-color-hover);
+          color: var(--nuxeo-pill-text-hover);
         };
         --paper-item-focused-before: {
           background: none;
         };
+      }
+
+      ::content #analyticsViews paper-item.iron-selected,
+      ::content #analyticsViews paper-item:hover,
+      ::content #analyticsViews paper-item:focus {
+        background: var(--nuxeo-pill-color-hover);
+        border-color: var(--nuxeo-pill-color-hover);
+        color: var(--nuxeo-pill-text-hover);
       }
 
     </style>
