@@ -76,6 +76,10 @@ Contributors:
          };
       }
 
+      paper-spinner-lite {
+        --paper-spinner-color: var(--default-primary-color);
+      }
+
       .suggester {
         margin: 16px 32px;
       }
@@ -317,6 +321,10 @@ Contributors:
         color: var(--nuxeo-warn-text);
       }
 
+      .importing-label {
+        margin-right: 8px;
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -434,20 +442,26 @@ Contributors:
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button dialog-dismiss
+                          on-tap="_cancel"
+                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <paper-button noink
                         class="primary"
                         on-tap="_toggleCustomize"
-                        disabled$="[[!_canAddProperties(hasFiles,canCreate)]]">
+                        disabled$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
                         [[i18n('documentImportForm.addProperties')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_import"
-                        disabled$="[[!_canImport(hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+                        disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
+          <div class="horizontal layout">
+            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          </div>
         </div>
       </div>
 
@@ -520,35 +534,41 @@ Contributors:
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button dialog-dismiss
+                          on-tap="_cancel"
+                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
           </div>
           <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back', 'Back')]]</paper-button>-->
 
           <paper-button noink
                         on-tap="_previousFile"
-                        disabled$=[[!_hasPreviousFile(canCreate,customizing,docIdx)]]>
+                        disabled$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
                         &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Edit Previous')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
-                        disabled$="[[!_hasNextFile(canCreate,customizing,docIdx)]]">
+                        disabled$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
-                        disabled$="[[!_canApplyToAll(canCreate,customizing,docIdx)]]">
+                        disabled$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.applyToAll', 'Apply to All')]]
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_submit"
-                        disabled$="[[!_canImportWithMetadata(canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
+                        disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create', 'Create')]]
                       </paper-button>
+          <div class="horizontal layout">
+            <span class="importing-label" hidden$=[[!_creating]]>[[i18n('documentImport.importing','Importing...')]]</span>
+            <paper-spinner-lite active hidden$=[[!_creating]]></paper-spinner-lite>
+          </div>
         </div>
       </div>
     </iron-pages>
@@ -644,7 +664,13 @@ Contributors:
           _importDocTypes: {
             type: Array,
             computed: '_computeImportDocTypes(subtypes)'
+          },
+
+          _creating: {
+            type: Boolean,
+            value: false
           }
+
         },
         listeners: {
           'batchFinished': '_batchReady',
@@ -703,17 +729,18 @@ Contributors:
         },
 
         _canImport: function() {
-          return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate;
+          return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles)
+            && this.canCreate && !this._creating;
         },
 
         _canImportWithMetadata: function() {
           return this._getAllFiles().every(function(file) {
             return 'checked' in file;
-          }) && this.canCreate;
+          }) && this.canCreate && !this._creating;
         },
 
         _canAddProperties: function() {
-          return this.hasFiles && this.canCreate;
+          return this.hasFiles && this.canCreate && !this._creating;
         },
 
         _showUploadDialog: function() {
@@ -863,12 +890,12 @@ Contributors:
 
         _hasNextFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx < length - 1 && this.canCreate;
+          return length > 1 && this.docIdx < length - 1 && this.canCreate && !this._creating;
         },
 
         _hasPreviousFile: function() {
           var length = this._getTotalFileCount();
-          return length > 1 && this.docIdx > 0  && this.canCreate;
+          return length > 1 && this.docIdx > 0  && this.canCreate && !this._creating;
         },
 
         _selectDoc: function(index) {
@@ -943,6 +970,7 @@ Contributors:
           this.docIdx = -1;
           this._doNotCreate = false;
           this._docProperties = {};
+          this._creating = false;
         },
 
         _submit: function(justValidate) {
@@ -954,6 +982,7 @@ Contributors:
 
         _importWithProperties: function() {
           if (!this._doNotCreate) {
+            this._creating = true;
             this._storeFile(this.docIdx);
             this._processFilesWithMetadata();
           }
@@ -962,6 +991,7 @@ Contributors:
         },
 
         _import: function() {
+          this._creating = true;
           var params = {
             context: {
               currentDocument: this.targetPath
@@ -1141,7 +1171,8 @@ Contributors:
         },
 
         _canApplyToAll: function() {
-          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 && this.canCreate;
+          return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 &&
+            this.canCreate && !this._creating;
         },
 
         _applyToAll: function() {
@@ -1166,10 +1197,10 @@ Contributors:
         },
 
         _parentValidated: function() {
-          if (this._importDocTypes && this._importDocTypes.length === 0) {
+          if (this.canCreate && this._importDocTypes && this._importDocTypes.length === 0) {
             this.set('canCreate', false);
             this.set('targetLocationError',
-              this.i18n('documentImport.error.cannotImport','Cannot import documents in this location'));
+              this.i18n('documentImport.error.cannotImport','Unable to import documents in this location'));
           }
         },
 

@@ -123,6 +123,10 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
       this.set('canCreate', false);
       this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noPermission',
         'You do not have permissions to create under this location'));
+    } else if (this.subtypes && this.subtypes.length === 0) {
+      this.set('canCreate', false);
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noSubtypes',
+        'Unable to create content in this location'));
     } else {
       this.set('canCreate', true);
       this.set('targetLocationError', '');
