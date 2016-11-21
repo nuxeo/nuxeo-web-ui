@@ -64,11 +64,20 @@ Contributors:
         @apply(--layout-end-justified);
       }
 
+      .emptyResult {
+        color: var(--nuxeo-text-light, #939caa);
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+        font-size: 1.3em;
+      }
+
     </style>
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="empty">[[i18n('clipboard.empty', 'Your clipboard is empty.')]]</span>
+      <span class="emptyResult">[[i18n('clipboard.empty', 'Your clipboard is empty.')]]</span>
     </template>
 
     <template is="dom-repeat" items="[[documents]]" as="document">
