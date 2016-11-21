@@ -135,7 +135,13 @@ Contributors:
         padding: .12em 0 0;
       }
 
+      .root {
+        padding: 2px 0 0 20px;
+      }
+
     </style>
+
+    <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
 
     <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="hasFolderishChild"></nuxeo-document>
     <nuxeo-page-provider id="children"
@@ -149,6 +155,11 @@ Contributors:
 
     <div class="content">
       <div class="parents">
+
+        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden="[[_isRoot(rootDocument)]]">
+          <span class="root">[[i18n('browse.root')]]</span>
+        </a>
+
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
             <span><iron-icon icon="icons:chevron-left" class="flex"></iron-icon></span>
@@ -163,7 +174,7 @@ Contributors:
             <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
           </template>
           <span class="node-name flex">
-            <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+            <a href$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>
           </span>
         </template>
       </nuxeo-tree>
@@ -184,7 +195,7 @@ Contributors:
           },
           rootPath: {
             type: String,
-            value: '/default-domain'
+            value: '/'
           },
           rootDocument: {
             type: Object,
@@ -231,9 +242,15 @@ Contributors:
           }
         },
 
+        _isRoot: function(doc) {
+          return this.user || doc && doc.type && doc.type === 'Root';
+        },
+
         _userChanged: function() {
           if (this.user) {
-            this.rootPath = '/default-domain/UserWorkspaces/' + this.user.id;
+            this.$.userWorkspace.execute().then(function(response) {
+              this.rootPath = response.path;
+            }.bind(this));
           }
         },
 
@@ -242,10 +259,14 @@ Contributors:
           if (doc && !this.user) {
             if (this.rootPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
               this.$.tree.style.display = 'none';
-
-              var entries = doc.contextParameters.breadcrumb.entries;
               this.parents = [];
 
+              if (doc.type === 'Root') {
+                this.rootPath = doc.path;
+                return;
+              }
+
+              var entries = doc.contextParameters.breadcrumb.entries;
               var lastEntry = entries[entries.length - 1];
               if (this.hasFacet(lastEntry, 'Folderish')) {
                 this.rootPath = lastEntry.path;
@@ -260,7 +281,6 @@ Contributors:
                 }
                 this.push('parents', entry);
               }
-
 
             }
           }
@@ -278,6 +298,10 @@ Contributors:
 
         _icon: function(opened) {
           return opened ? 'icons:folder-open' : 'icons:folder';
+        },
+
+        _title: function(item) {
+          return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
         },
 
         removeDocuments: function(documentIds) {

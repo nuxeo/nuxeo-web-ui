@@ -113,7 +113,7 @@ Contributors:
         <iron-icon src="[[_icon(document)]]"></iron-icon>
       </div>
       <div class="doc-path">
-        <div class="current breadcrumb-item breadcrumb-item-current">[[document.title]]</div>
+        <div class="current breadcrumb-item breadcrumb-item-current">[[_title(document)]]</div>
         <div class="ancestors">
           <template is="dom-repeat" items="[[_breadcrumb(document)]]">
             <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
@@ -127,7 +127,6 @@ Contributors:
       </div>
     </div>
 
-
   </template>
 
   <script>
@@ -135,16 +134,13 @@ Contributors:
       'use strict';
 
       Polymer({
-
         is: 'nuxeo-breadcrumb',
-
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
         properties: {
           document: {
             type: Object
           }
         },
-
-        behaviors: [Nuxeo.RoutingBehavior],
 
         _breadcrumb: function() {
           if (this._enrichers) {
@@ -166,10 +162,17 @@ Contributors:
           }
         },
 
-        _icon: function(document)  {
+        _title: function(document) {
           if (document) {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + document.properties['common:icon'];
+            return (document.type === 'Root') ? this.i18n('browse.root') : document.title;
+          }
+        },
+
+        _icon: function(document)  {
+          if (document && document.properties && document.properties['common:icon']) {
+            return this.$.nxcon.url + document.properties['common:icon'];
+          } else {
+            return '';
           }
         },
 
@@ -177,7 +180,7 @@ Contributors:
           if (this.document) {
             return this.document.contextParameters;
           }
-        },
+        }
 
       });
     })();
