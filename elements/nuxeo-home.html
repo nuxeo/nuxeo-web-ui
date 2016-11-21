@@ -69,31 +69,25 @@ Contributors:
         height: 350px;
       }
 
+      .capitalize {
+        text-transform: capitalize;
+      }
+
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 32px;
+        width: 32px;
+        border-radius: 3px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
+
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
         display: block;
-      }
-
-      .capitalize {
-        text-transform: capitalize;
-      }
-
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
+        width: calc(100% - 38px);
       }
 
     </style>
