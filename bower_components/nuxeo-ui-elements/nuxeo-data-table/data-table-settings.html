@@ -7,6 +7,11 @@
         position: relative;
       }
 
+      .paper-content {
+        min-width: 20vw;
+        margin-bottom: 2em;
+      }
+
       paper-icon-button {
         position: absolute;
         top: 1.5em;
@@ -16,13 +21,35 @@
         height: 1.5em;
         padding: 0;
       }
+
+      paper-button {
+        margin: 0;
+        padding: 8px 16px;
+      }
+
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <paper-dialog id="columnsSettingsPopup"
       no-auto-focus>
-      <h1>[[i18n('tableSettings.columnSettings', 'Columns Settings')]]</h1>
+      <h2>[[i18n('tableSettings.columnSettings', 'Columns Settings')]]</h2>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
           <div class="row layout horizontal">
@@ -45,9 +72,11 @@
           </div>
         </div>
       </div>
-      <div class="buttons sep">
-       <paper-button on-tap="_resetSettings">[[i18n('tableSettings.columnSettings.reset', 'Reset')]]</paper-button>
-       <paper-button dialog-dismiss>[[i18n('tableSettings.columnSettings.close', 'Close')]]</paper-button>
+      <div class="buttons horizontal end-justified layout">
+        <div class="flex start-justified">
+          <paper-button noink on-tap="_resetSettings">[[i18n('tableSettings.columnSettings.reset', 'Reset')]]</paper-button>
+        </div>
+        <paper-button noink class="primary" dialog-dismiss>[[i18n('tableSettings.columnSettings.close', 'Close')]]</paper-button>
       </div>
     </paper-dialog>
 
