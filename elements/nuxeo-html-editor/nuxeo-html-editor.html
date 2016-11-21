@@ -80,7 +80,9 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
             value: 'Type here...'
           },
 
-          readOnly: Boolean
+          readOnly: Boolean,
+
+          hideToolbars: Boolean
         },
 
         attached: function() {
@@ -89,42 +91,43 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
 
         _init: function() {
           // init editor
+          var toolbars = this.hideToolbars ? {} : {
+            add: {
+              buttons: ['image', 'camera', 'hline', 'table'],
+              tabIndex: 2
+            },
+            styles: {
+              selections: [
+                {
+                  name: 'link',
+                  buttons: ['linkEdit'],
+                  test: AlloyEditor.SelectionTest.link
+                },
+                {
+                  name: 'image',
+                  buttons: ['imageLeft', 'imageCenter', 'imageRight'],
+                  test: AlloyEditor.SelectionTest.image
+                },
+                {
+                  name: 'text',
+                  buttons: ['styles', 'bold', 'italic', 'underline', 'strike', 'paragraphLeft', 'paragraphCenter',
+                            'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
+                  test: AlloyEditor.SelectionTest.text
+                },
+                {
+                  name: 'table',
+                  buttons: ['tableRow', 'tableColumn', 'tableCell', 'tableRemove'],
+                  getArrowBoxClasses: AlloyEditor.SelectionGetArrowBoxClasses.table,
+                  setPosition: AlloyEditor.SelectionSetPosition.table,
+                  test: AlloyEditor.SelectionTest.table
+                }
+              ],
+              tabIndex: 1
+            }
+          };
           var editor = AlloyEditor.editable(this.$.editor, {
             readOnly: this.readOnly,
-            toolbars: {
-              add: {
-                buttons: ['image', 'camera', 'hline', 'table'],
-                tabIndex: 2
-              },
-              styles: {
-                selections: [
-                  {
-                    name: 'link',
-                    buttons: ['linkEdit'],
-                    test: AlloyEditor.SelectionTest.link
-                  },
-                  {
-                    name: 'image',
-                    buttons: ['imageLeft', 'imageCenter', 'imageRight'],
-                    test: AlloyEditor.SelectionTest.image
-                  },
-                  {
-                    name: 'text',
-                    buttons: ['styles', 'bold', 'italic', 'underline', 'strike', 'paragraphLeft', 'paragraphCenter',
-                              'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
-                    test: AlloyEditor.SelectionTest.text
-                  },
-                  {
-                    name: 'table',
-                    buttons: ['tableRow', 'tableColumn', 'tableCell', 'tableRemove'],
-                    getArrowBoxClasses: AlloyEditor.SelectionGetArrowBoxClasses.table,
-                    setPosition: AlloyEditor.SelectionSetPosition.table,
-                    test: AlloyEditor.SelectionTest.table
-                  }
-                ],
-                tabIndex: 1
-              }
-            }
+            toolbars: toolbars
           });
           this.element = editor.get('nativeEditor');
           // set initial value
