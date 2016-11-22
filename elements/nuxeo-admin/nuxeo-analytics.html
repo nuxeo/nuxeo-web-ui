@@ -115,11 +115,13 @@ Contributors:
           <paper-item name="repository">[[i18n('analytics.repository')]]</paper-item>
           <paper-item name="search">[[i18n('analytics.search')]]</paper-item>
           <paper-item name="workflow">[[i18n('analytics.workflow')]]</paper-item>
+          <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
       <div class="content">
         <template is="dom-if" if="[[visible]]">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+            <nuxeo-slot slot="ANALYTICS_PAGES"></nuxeo-slot>
             <nuxeo-distribution-analytics name="document-distribution"></nuxeo-distribution-analytics>
             <nuxeo-repository-analytics name="repository"></nuxeo-repository-analytics>
             <nuxeo-search-analytics name="search"></nuxeo-search-analytics>
