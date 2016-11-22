@@ -266,7 +266,7 @@ Contributors:
             </paper-menu>
           </paper-dropdown-menu>
           <template is="dom-if" if="[[_isQueue]]">
-            <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="displayFilters">
+            <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
             <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
           </template>
@@ -498,9 +498,13 @@ Contributors:
           this.$.list._resetResults();
         },
 
+        _displayFiltersTapped: function() {
+          this.displayFilters();
+          this._navigateToResults();
+        },
+
         displayFilters: function() {
           this._isQueue = false;
-          this._navigateToResults();
           this.fire('display-filters');
         },
 
