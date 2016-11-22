@@ -58,11 +58,11 @@ Contributors:
         height: 44px;
         padding: 13px;
         width: 56px;
-        --paper-menu-selected-item: {
-          background-color: rgba(0, 0, 0, 0.25);
-          color: #fff;
-          fill: #fff;
-        }
+      }
+
+      #menu nuxeo-menu-icon.selected ::content paper-icon-button {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-actions-hover);
       }
 
       #menu .profile-icon,
@@ -709,6 +709,11 @@ Contributors:
             this._openDrawer();
           }
           this._selected = e.detail.selected;
+
+          document.querySelectorAll('nuxeo-menu-icon').forEach(function(element) {
+            this.toggleClass('selected', false, element);
+          }.bind(this));
+          this.toggleClass('selected', true, e.detail.item);
         },
 
         _openDrawer: function() {
