@@ -204,7 +204,7 @@ Contributors:
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" sort-by="dc:title" flex="100">
               <template>
                 <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-click="_navigate">[[item.title]]</a>
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" sort-by="dc:modified" flex="50">
@@ -326,7 +326,9 @@ Contributors:
               doc: e.model.item
             };
           }
-          this.fire('navigate', detail);
+          if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
+            this.fire('navigate', detail);
+          }
         },
 
         _observeName: function() {

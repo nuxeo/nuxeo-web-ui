@@ -159,7 +159,7 @@ Contributors:
       <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
         on-tap="handleClick">
       </iron-image>
-      <a class="title" href$="[[urlFor('browse', doc.path)]]">
+      <a class="title" href$="[[urlFor('browse', doc.path)]]" on-click="handleClick">
         <div class="dataContainer">
           <div class="title">[[doc.title]]</div>
           <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
@@ -221,8 +221,10 @@ Contributors:
           return this.doc.type;
         },
 
-        handleClick: function() {
-          this.fire('navigate', {item: this.doc});
+        handleClick: function(e) {
+          if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
+            this.fire('navigate', {item: this.doc});
+          }
         },
 
         _onCheckBoxTap: function() {
