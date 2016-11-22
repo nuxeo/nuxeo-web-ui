@@ -60,7 +60,7 @@ Contributors:
         width: 56px;
       }
 
-      #menu nuxeo-menu-icon.selected ::content paper-icon-button {
+      #menu ::content nuxeo-menu-icon.selected ::content  paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-actions-hover);
       }
@@ -319,8 +319,8 @@ Contributors:
           <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="expiredSearch" route="search:expired" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
-          <nuxeo-slot slot="SEARCH_MENU_BUTTONS"></nuxeo-slot>
+          <nuxeo-menu-icon name="expiredSearch" route="queue:expired" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
+          <nuxeo-slot slot="SEARCH_MENU_BUTTONS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
@@ -334,6 +334,8 @@ Contributors:
         <iron-collapse id="sidebar" horizontal opened>
           <div>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="flex" selected-attribute="visible">
+
+              <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
               <nuxeo-document-tree id="navTree" name="browser"
                                    label="app.browse"
@@ -398,6 +400,7 @@ Contributors:
                       <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
                       <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
                       <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
+                      <nuxeo-slot slot="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
                     </iron-selector>
                   </div>
                 </section>
@@ -408,7 +411,7 @@ Contributors:
                   <h1>[[_displayUser(currentUser)]]</h1>
                 </div>
                 <div class="content userMenu">
-                  <nuxeo-slot slot="USER_MENU"></nuxeo-slot>
+                  <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
                   <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
                   <nuxeo-menu-item label="app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
                 </div>
@@ -433,6 +436,8 @@ Contributors:
             </div>
           </nuxeo-page>
 
+          <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
+          
           <div id="home" name="home">
             <!-- dynamic home element loading -->
           </div>
@@ -451,7 +456,6 @@ Contributors:
 
           <nuxeo-themes name="themes"></nuxeo-themes>
 
-          <nuxeo-slot slot="PAGES"></nuxeo-slot>
 
         </iron-pages>
 
@@ -550,6 +554,11 @@ Contributors:
           currentUser: {
             type: Object,
             observer: '_observeCurrentUser'
+          },
+
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(currentDocument, currentUser)'
           }
         },
 
@@ -652,6 +661,10 @@ Contributors:
           );
 
           this.show('home');
+        },
+
+        _actionContext: function() {
+          return {document: this.currentDocument, user: this.currentUser};
         },
 
         _focusMenu: function() {

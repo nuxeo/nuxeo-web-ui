@@ -41,6 +41,8 @@ Contributors:
           </div>
         </nuxeo-page>
 
+        <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
+
         <template is="dom-if" if="[[user.isAdministrator]]">
           <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
         </template>
