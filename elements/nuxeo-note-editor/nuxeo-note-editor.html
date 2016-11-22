@@ -62,7 +62,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-document id="note" doc-id="[[document.uid]]" data="[[document]]"></nuxeo-document>
+    <nuxeo-document id="note" doc-id="[[document.uid]]"></nuxeo-document>
 
     <template is="dom-if" if="[[_isHTMLorXML(document)]]">
       <div class="html-editor-container">
@@ -130,10 +130,16 @@ Contributors:
       },
 
       _editorSave: function() {
-        this.document.properties['note:note'] = this._value;
+        this.$.note.data = {
+          'entity-type': 'document',
+          uid: this.document.uid,
+          properties: {
+            'note:note': this._value
+          }
+        };
         this.$.note.put().then(function() {
           var toast = this.$$('#toast');
-          toast.text = this.i18n('noteViewLayout.note.saved', 'Note has been saved.');
+          toast.text = this.i18n('noteViewLayout.note.saved');
           toast.open();
           this._viewMode = true;
           this.fire('document-updated');
