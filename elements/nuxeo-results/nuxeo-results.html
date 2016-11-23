@@ -305,13 +305,7 @@ Contributors:
         _refresh: function() {
           this.$.datatable.loading = true;
           this.$.datagrid.loading = true;
-          var pn = this.nxProvider.page;
           this.nxProvider.page = 1;
-          if (pn === 1) {
-            // normally the page provider is on auto mode
-            // so the fetch should be triggered when changing page
-            this.nxProvider.fetch();
-          }
         },
 
         _navigate: function(e) {
