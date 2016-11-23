@@ -585,7 +585,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-import',
 
-        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.DocumentCreationBehavior],
+        behaviors: [Polymer.IronResizableBehavior, Nuxeo.UploaderBehavior, Nuxeo.DocumentCreationBehavior],
 
         properties: {
 
@@ -1240,6 +1240,7 @@ Contributors:
             el.uploadEnabled = true;
           }
           el.document = this.document;
+          this.notifyResize();
         },
 
         /**
