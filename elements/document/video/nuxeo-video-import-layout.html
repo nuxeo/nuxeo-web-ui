@@ -53,9 +53,9 @@ Contributors:
                                  min-chars="0">
      </nuxeo-directory-suggestion>
 
-     <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
-                  type="date" value="{{document.properties.dc:expired::change}}">
-     </paper-input>
+     <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
+                  value="{{document.properties.dc:expired::change}}">
+     </nuxeo-date-picker>
 
    </template>
    <script>
