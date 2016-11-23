@@ -169,7 +169,8 @@ Contributors:
                                    label="[[i18n('documentCreationForm.location')]]"
                                    parent="{{suggesterParent}}"
                                    children="{{suggesterChildren}}"
-                                   disabled$="[[!_visibleOnStage('choose',visible,stage)]]"></nuxeo-path-suggestion>
+                                   disabled$="[[!_visibleOnStage('choose',visible,stage)]]"
+                                   always-float-label></nuxeo-path-suggestion>
             <span class="error">&#8203;[[targetLocationError]]</span>
           </div>
           <div class="typeSelection">
@@ -200,7 +201,8 @@ Contributors:
                                    label="[[i18n('documentCreationForm.location')]]"
                                    parent="{{suggesterParent}}"
                                    children="{{suggesterChildren}}"
-                                   distabled$="[[!_visibleOnStage('edit',visible,stage)]]"></nuxeo-path-suggestion>
+                                   distabled$="[[!_visibleOnStage('edit',visible,stage)]]"
+                                   always-float-label></nuxeo-path-suggestion>
             <span class="error">&#8203;[[targetLocationError]]</span>
           </div>
           <form is="iron-form" id="form" class="form vertical layout flex">

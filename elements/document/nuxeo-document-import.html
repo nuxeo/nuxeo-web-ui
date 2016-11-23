@@ -348,7 +348,8 @@ Contributors:
                                  value="{{targetPath}}"
                                  parent="{{suggesterParent}}"
                                  children="{{suggesterChildren}}"
-                                 disabled$="[[!_visibleOnStage('upload',visible,stage)]]"></nuxeo-path-suggestion>
+                                 disabled$="[[!_visibleOnStage('upload',visible,stage)]]"
+                                 always-float-label></nuxeo-path-suggestion>
           <span class="error">&#8203;[[targetLocationError]]</span>
         </div>
 
@@ -474,7 +475,8 @@ Contributors:
                                      value="{{targetPath}}"
                                      parent="{{suggesterParent}}"
                                      children="{{suggesterChildren}}"
-                                     disabled$="[[!_visibleOnStage('customize',visible,stage)]]"></nuxeo-path-suggestion>
+                                     disabled$="[[!_visibleOnStage('customize',visible,stage)]]"
+                                     always-float-label></nuxeo-path-suggestion>
               <span class="error">&#8203;[[targetLocationError]]</span>
             </div>
             <div class="typePicker horizontal layout center">

@@ -55,6 +55,10 @@ Custom property | Description | Default
      @apply(--nuxeo-path-suggestion-result);
      };
     }
+    paper-typeahead:focus {
+      outline: none;
+      @apply(--nuxeo-path-suggestion-focus);
+    }
   </style>
   <template>
     <nuxeo-page-provider id="provider"
@@ -71,7 +75,8 @@ Custom property | Description | Default
                      allowed-pattern="[[allowedPattern]]"
                      auto-validate="[[autoValidate]]"
                      on-focus="_onFocus"
-                     disabled$="[[disabled]]"></paper-typeahead>
+                     disabled$="[[disabled]]"
+                     always-float-label="[[alwaysFloatLabel]]"></paper-typeahead>
   </template>
   <script>
     Polymer({
@@ -104,6 +109,11 @@ Custom property | Description | Default
         label: String,
 
         noLabelFloat: {
+          type: Boolean,
+          value: false
+        },
+
+        alwaysFloatLabel: {
           type: Boolean,
           value: false
         },
@@ -168,6 +178,11 @@ Custom property | Description | Default
           this.$.parent.docPath = newParentPath;
           return this.$.parent.get().then(function(response) {
             this.parent = response;
+          }.bind(this)).catch(function(error) {
+            if (!(error.code === 'org.nuxeo.ecm.core.api.DocumentNotFoundException' &&
+                  error.message === newParentPath)) {
+              throw error;
+            }
           }.bind(this));
         } else {
           return new Promise(function(resolve) {
