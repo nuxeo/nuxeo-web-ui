@@ -536,6 +536,7 @@ Contributors:
         },
 
         _paramsChanged: function() {
+          this.$.provider.page = 1;
           this.dirty = true;
           if (this._form) {
             this._form.params = this.params;
