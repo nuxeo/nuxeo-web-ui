@@ -34,7 +34,8 @@
     "randomcolor": "0.4.1",
     "paper-typeahead": "nuxeo/paper-typeahead#0.4",
     "iron-iconset-svg": "^1.0.9",
-    "select2": "3.5.2"
+    "select2": "3.5.2",
+    "iron-list": "PolymerElements/iron-list#1.3.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
