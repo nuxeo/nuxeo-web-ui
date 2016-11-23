@@ -316,10 +316,12 @@ Contributors:
                   <label class="col">[[i18n('label.dublincore.state', 'State')]]</label>
                   <span><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></span>
                 </div>
-                <div>
-                  <label class="col">[[i18n('label.dublincore.version', 'Version')]]</label>
-                  <span><nuxeo-document-versions document="[[document]]"></nuxeo-document-versions></span>
-                </div>
+                <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
+                  <div>
+                    <label class="col">[[i18n('label.dublincore.version', 'Version')]]</label>
+                    <span><nuxeo-document-versions document="[[document]]"></nuxeo-document-versions></span>
+                  </div>
+                </template>
                 <div>
                   <label class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
                   <span><nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users></span>
