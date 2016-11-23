@@ -116,7 +116,7 @@ Contributors:
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" enrichers="preview"></nuxeo-document>
     <nuxeo-operation id="bulkAttach" op="BlobHolder.AttachOnCurrentDocument"></nuxeo-operation>
 
     <label id="label" hidden$="[[!label]]">[[label]]</label>
