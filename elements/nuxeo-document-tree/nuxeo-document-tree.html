@@ -271,7 +271,7 @@ Contributors:
               if (this.hasFacet(lastEntry, 'Folderish')) {
                 this.rootPath = lastEntry.path;
               } else {
-                this.rootPath = entries[entries.length - 2];
+                this.rootPath = entries[entries.length - 2].path;
               }
 
               for (var i = 0; i < entries.length - 1; i++) {
