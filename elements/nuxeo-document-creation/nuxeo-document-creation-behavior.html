@@ -106,7 +106,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   _suggesterChildrenChanged: function() {
-    var valid = (this.parent ? this.targetPath.replace(/\/$/, "") === this.parent.path : false) ||
+    var valid = (this.parent ? this.targetPath.replace(/(.+)\/$/, "$1") === this.parent.path : false) ||
                 (this.suggesterParent ? this.targetPath.replace(/\/$/, "") === this.suggesterParent.path : false) ||
                 (this.suggesterChildren ? this.suggesterChildren.some(function(child) {
                   return this.targetPath === child.path;

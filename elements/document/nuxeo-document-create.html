@@ -231,7 +231,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-document-create',
 
-        behaviors: [Nuxeo.DocumentCreationBehavior],
+        behaviors: [Polymer.IronResizableBehavior, Nuxeo.DocumentCreationBehavior],
 
         properties: {
 
@@ -251,11 +251,13 @@ Contributors:
         },
 
         init: function(typeId) {
-          var typeObj = this.subtypes.find(function(type) {
-            return type.id === typeId;
-          });
-          if (typeObj) {
-            this.selectedDocType = typeObj;
+          if (typeId) {
+            var typeObj = this.subtypes.find(function(type) {
+              return type.id === typeId;
+            });
+            if (typeObj) {
+              this.selectedDocType = typeObj;
+            }
           }
         },
 
@@ -292,6 +294,7 @@ Contributors:
             el.uploadEnabled = true;
           }
           el.document = this.document;
+          this.notifyResize();
         },
 
         /**
