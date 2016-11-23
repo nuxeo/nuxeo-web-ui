@@ -58,8 +58,8 @@ Contributors:
 
     </style>
 
-    <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
-    </nuxeo-audit-page-provider>
+    <nuxeo-document-history-page-provider id="provider" page-size="40" current-page="{{entries}}">
+    </nuxeo-document-history-page-provider>
 
     <paper-card elevation="0" class="dates">
       <div class="card-content horizontal flex end-justified layout">
@@ -165,7 +165,7 @@ Contributors:
       _refresh: function() {
         if (this.document && this.visible) {
           this.$.provider.page = 1;
-          this.$.provider.docUid = this.document.uid;
+          this.$.provider.docId = this.document.uid;
           this.$.provider.fetch();
         }
       },

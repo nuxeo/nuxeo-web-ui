@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
-
 -->
 
 <!--
@@ -65,6 +62,7 @@ element.
       /* If true, automatically execute the operation when either `path` or `params` changes. */
       auto: {type: Boolean, value: false},
 
+      /* The HTTP method to use ('GET', 'POST', 'PUT', or 'DELETE'). Default is 'GET' */
       method: { type: String, value: 'get'},
 
       /* The path of the resource. */
@@ -108,33 +106,38 @@ element.
       autoDelay: {
         type: Number,
         value: 300
-      },
+      }
     },
 
     observers: [
       '_autoGet(connectionId, auto, path, params, type, enrichers, enrichersEntity)'
     ],
 
+    /* Execute a 'GET' request */
     get: function () {
       this.method = 'get';
       return this.execute();
     },
 
+    /* Execute a 'POST' request */
     post: function () {
       this.method = 'post';
       return this.execute();
     },
 
+    /* Execute a 'PUT' request */
     put: function () {
       this.method = 'put';
       return this.execute();
     },
 
+    /* Execute a 'DELETE' request */
     remove: function () {
       this.method = 'delete';
       return this.execute();
     },
 
+    /* Execute the request */
     execute: function () {
       var options = {
         method: this.method || 'get'

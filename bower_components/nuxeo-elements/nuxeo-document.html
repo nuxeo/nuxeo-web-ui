@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
-  Vladimir Pasquier <vpasquier@nuxeo.com>
-  Vincent Vergnolle <vvergnolle@nuxeo.com>
-
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -66,6 +61,7 @@ element.
       /* If true, automatically execute the operation when either `path` or `params` changes. */
       auto: {type: Boolean, value: false},
 
+      /* The HTTP method to use ('GET', 'POST', 'PUT', or 'DELETE'). Default is 'GET' */
       method: { type: String, value: 'get'},
 
       /* The document id. Either 'docId' or 'docPath' must be defined. */
@@ -77,7 +73,7 @@ element.
       /* The path of the resource. */
       path: {
         type: String,
-        computed: 'computePath(docId, docPath)'
+        computed: '_computePath(docId, docPath)'
       },
 
       /* The parameters to send. */
@@ -107,31 +103,36 @@ element.
       schemas: {type: String, value: ''},
     },
 
+    /* Fetch the document */
     get: function () {
       this.method = 'get';
       return this.execute();
     },
 
+    /* Create the document */
     post: function () {
       this.method = 'post';
       return this.execute();
     },
 
+    /* 'Update the document */
     put: function () {
       this.method = 'put';
       return this.execute();
     },
 
+    /* Delete the document */
     remove: function () {
       this.method = 'delete';
       return this.execute();
     },
 
+    /* Execute the request */
     execute: function() {
       return this.$.nxResource.execute();
     },
 
-    computePath: function(docId, docPath) {
+    _computePath: function(docId, docPath) {
       var path = '';
       if (docId) {
         path = '/id/' + docId;
