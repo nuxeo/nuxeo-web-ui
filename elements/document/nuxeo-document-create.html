@@ -165,11 +165,11 @@ Contributors:
       <div name="choose" class="vertical layout flex">
         <div class="flex container">
           <div class="suggester">
-            <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+            <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
                                    parent="{{suggesterParent}}"
                                    children="{{suggesterChildren}}"
-                                   disabled$="[[!_visibleOnStage('choose',visible,stage)]]"
+                                   disabled
                                    always-float-label></nuxeo-path-suggestion>
             <span class="error">&#8203;[[targetLocationError]]</span>
           </div>
@@ -197,11 +197,11 @@ Contributors:
         </div>
         <div id="editor" class="flex">
           <div class="suggester">
-            <nuxeo-path-suggestion id="pathSuggester" value="{{targetPath}}"
+            <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
                                    parent="{{suggesterParent}}"
                                    children="{{suggesterChildren}}"
-                                   distabled$="[[!_visibleOnStage('edit',visible,stage)]]"
+                                   disabled
                                    always-float-label></nuxeo-path-suggestion>
             <span class="error">&#8203;[[targetLocationError]]</span>
           </div>
@@ -251,6 +251,10 @@ Contributors:
         listeners: {
           'nx-document-layout-changed': '_layoutUpdated'
         },
+
+        observers: [
+            '_visibleOnStage(visible,stage)'
+        ],
 
         init: function(typeId) {
           if (typeId) {
@@ -393,8 +397,9 @@ Contributors:
           this.stage = 'edit';
         },
 
-        _visibleOnStage: function(stage) {
-          return this.stage == stage && this.visible;
+        _visibleOnStage: function() {
+          this.$.pathSuggesterChoose.disabled = !this.visible || this.stage !== 'choose';
+          this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
         }
 
       });
