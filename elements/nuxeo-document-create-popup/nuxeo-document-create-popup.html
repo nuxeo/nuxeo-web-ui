@@ -60,6 +60,8 @@ Contributors:
 
     <paper-dialog id="createDocDialog"
                   class="container vertical layout"
+                  on-iron-overlay-opened="_onOpen"
+                  on-iron-overlay-closed="_onClose"
                   modal
                   no-auto-focus>
       <div id="holder" class="vertical layout flex">
@@ -101,8 +103,7 @@ Contributors:
 
         properties: {
           parent: {
-            type: Object,
-            nottify: true
+            type: Object
           },
 
           _showTabs: {
@@ -111,7 +112,7 @@ Contributors:
           },
           selectedTab: {
             type: String,
-            value: 'create'
+            value: ''
           },
           parentPath: {
             type: String
@@ -184,6 +185,16 @@ Contributors:
               (!this.parent || (this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
               this.$.defaultDoc.get();
           }
+        },
+
+        _onOpen: function() {
+          if (this.selectedTab === '') {
+            this.selectedTab = 'create';
+          }
+        },
+
+        _onClose: function() {
+          this.selectedTab = '';
         }
 
       });

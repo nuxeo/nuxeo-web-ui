@@ -344,11 +344,12 @@ Contributors:
       <div name="upload" class="upload vertical layout flex">
 
         <div class="suggester">
-          <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]"
+          <nuxeo-path-suggestion id="pathSuggesterUpload"
+                                 label="[[i18n('documentImportForm.location')]]"
                                  value="{{targetPath}}"
                                  parent="{{suggesterParent}}"
                                  children="{{suggesterChildren}}"
-                                 disabled$="[[!_visibleOnStage('upload',visible,stage)]]"
+                                 disabled
                                  always-float-label></nuxeo-path-suggestion>
           <span class="error">&#8203;[[targetLocationError]]</span>
         </div>
@@ -471,11 +472,12 @@ Contributors:
         <div class="horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex-3">
             <div class="suggester">
-              <nuxeo-path-suggestion label="[[i18n('documentImportForm.location')]]"
+              <nuxeo-path-suggestion id="pathSuggesterCustomize"
+                                     label="[[i18n('documentImportForm.location')]]"
                                      value="{{targetPath}}"
                                      parent="{{suggesterParent}}"
                                      children="{{suggesterChildren}}"
-                                     disabled$="[[!_visibleOnStage('customize',visible,stage)]]"
+                                     disabled
                                      always-float-label></nuxeo-path-suggestion>
               <span class="error">&#8203;[[targetLocationError]]</span>
             </div>
@@ -681,7 +683,8 @@ Contributors:
         },
         observers: [
           '_observeFiles(files.*)',
-          '_observeRemoteFiles(remoteFiles.splices)'
+          '_observeRemoteFiles(remoteFiles.splices)',
+          '_visibleOnStage(visible,stage)'
         ],
 
         ready: function() {
@@ -1205,8 +1208,9 @@ Contributors:
           }
         },
 
-        _visibleOnStage: function(stage) {
-          return this.stage == stage && this.visible;
+        _visibleOnStage: function() {
+          this.$.pathSuggesterUpload.disabled = !this.visible || this.stage !== 'upload';
+          this.$.pathSuggesterCustomize.disabled = !this.visible || this.stage !== 'customize';
         },
 
         /**
