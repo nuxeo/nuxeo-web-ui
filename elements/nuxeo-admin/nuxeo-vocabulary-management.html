@@ -154,12 +154,12 @@ Contributors:
             empty-label="[[i18n('vocabularyManagement.noEntry', 'No entry')]]"
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered', 'There are no vocabulary entries with these search criteria.')]]">
             <template is="dom-repeat" items="[[colDef]]" as="col">
-              <nuxeo-data-table-column name="[[i18n(col.name)]]">
+              <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
                 <template>
-                  <template is="dom-if" if="[[!_entryActions(column.name)]]">
-                    [[_value(item, column.name)]]
+                  <template is="dom-if" if="[[!_entryActions(column.key)]]">
+                    [[_value(item, column.key)]]
                   </template>
-                  <template is="dom-if" if="[[_entryActions(column.name)]]">
+                  <template is="dom-if" if="[[_entryActions(column.key)]]">
                     <paper-icon-button id="edit-button-[[index]]" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
                     <paper-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry', 'Edit entry')]]</paper-tooltip>
                     <paper-icon-button id="delete-button-[[index]]" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
@@ -308,16 +308,16 @@ Contributors:
         _refresh: function() {
           if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
             this.$.directory.path = '/directory/' + this.selectedVocabulary;
+            this.entries = [];
+            this.colDef = [];
             this.$.directory.get().then(function(resp) {
-              this.entries = [];
-              this.colDef = [];
               var tmp = [];
               if (resp.entries.length > 0) {
                 tmp = Object.keys(resp.entries[0].properties).map(function(key) {
-                  return {name: 'vocabularyManagement.edit.' + key, pos: this._computeColPos(key)};
+                  return {key: key, name: 'vocabularyManagement.edit.' + key, pos: this._computeColPos(key)};
                 }.bind(this));
               }
-              tmp.push({name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true});
+              tmp.push({key: 'actions', name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true});
               tmp.sort(function(a, b) {
                 return a.pos - b.pos;
               });
