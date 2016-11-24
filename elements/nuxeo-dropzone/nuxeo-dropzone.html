@@ -266,6 +266,10 @@ Contributors:
 
         _handleBlobUploaded: function() {
           if (this.updateDocument) {
+
+            // TODO: NXP-20782: remove contributors or they will be duplicated
+            delete this.document.properties['dc:contributors'];
+
             this.$.doc.put().then(function(response) {
               this.document = response;
               this._toast(this.uploadedMessage);
