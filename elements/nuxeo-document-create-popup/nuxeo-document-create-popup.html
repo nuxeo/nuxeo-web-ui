@@ -60,8 +60,7 @@ Contributors:
 
     <paper-dialog id="createDocDialog"
                   class="container vertical layout"
-                  on-iron-overlay-opened="_onOpen"
-                  on-iron-overlay-closed="_onClose"
+                  opened="{{opened}}"
                   modal
                   no-auto-focus>
       <div id="holder" class="vertical layout flex">
@@ -119,6 +118,11 @@ Contributors:
           },
           defaultPath: {
             type: String
+          },
+          opened: {
+            type: Boolean,
+            value: false,
+            observer: '_openedChanged'
           }
         },
 
@@ -187,14 +191,14 @@ Contributors:
           }
         },
 
-        _onOpen: function() {
-          if (this.selectedTab === '') {
-            this.selectedTab = 'create';
+        _openedChanged: function() {
+          if (this.opened) {
+            if (this.selectedTab === '') {
+              this.selectedTab = 'create';
+            }
+          } else {
+            this.selectedTab = '';
           }
-        },
-
-        _onClose: function() {
-          this.selectedTab = '';
         }
 
       });
