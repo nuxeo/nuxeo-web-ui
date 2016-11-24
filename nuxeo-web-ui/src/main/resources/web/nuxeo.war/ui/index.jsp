@@ -85,7 +85,6 @@ limitations under the License.
   <link rel="import" href="nuxeo-user-group-management/nuxeo-view-user.html">
   <link rel="import" href="nuxeo-user-group-management/nuxeo-edit-user.html">
 
-  <style is="custom-style" include="shared-styles"></style>
 </head>
 
 <body unresolved class="fullbleed layout vertical">
