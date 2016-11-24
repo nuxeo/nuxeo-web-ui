@@ -36,10 +36,10 @@ Contributors:
     </style>
 
     <nuxeo-tag icon="icons:perm-identity">
-      <template is="dom-if" if="[[!disabled]]">
+      <template is="dom-if" if="[[_hasLink(user)]]">
         <a href$="[[_href(user)]]">[[_name(user)]]</a>
       </template>
-      <template is="dom-if" if="[[disabled]]">
+      <template is="dom-if" if="[[!_hasLink(user)]]">
         [[_name(user)]]
       </template>
       <template is="dom-if" if="[[_isEntity(user)]]">
@@ -76,7 +76,7 @@ Contributors:
       },
 
       _id: function(user) {
-        if(user.id) {
+        if (user.id) {
           return user.id;
         } else {
           return user;
@@ -101,6 +101,10 @@ Contributors:
 
       _href: function(user) {
         return this.urlFor('user', this._id(user));
+      },
+
+      _hasLink: function(user) {
+        return !(this.disabled || (this._name(user) === 'system'));
       }
 
     });
