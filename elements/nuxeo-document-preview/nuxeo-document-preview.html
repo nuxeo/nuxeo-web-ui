@@ -197,21 +197,18 @@ Contributors:
         },
 
         _computeImageSource: function() {
-          if (this.xpath) {
-            this._updateBlob();
-            if (this.blob && this.blob['mime-type'].match('image.*')) {
-              return this.blob.data;
-            }
-          }
-          if (!this.document || !this.document.properties) {
-            return;
-          }
-          if (this.document.properties['picture:views']) {
+          if (this.document && this.document.properties && this.document.properties['picture:views']) {
             var filteredViews = this.document.properties['picture:views'].filter(function(view) {
               return view.title === 'FullHD';
             });
             if (filteredViews.length > 0) {
               return filteredViews[0].content.data;
+            }
+          }
+          if (this.xpath) {
+            this._updateBlob();
+            if (this.blob && this.blob['mime-type'].match('image.*')) {
+              return this.blob.data;
             }
           }
         },
