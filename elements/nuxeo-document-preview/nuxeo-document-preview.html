@@ -234,9 +234,12 @@ Contributors:
         },
 
         _computeIFrameSource: function() {
-          if (this.xpath === 'file:content' && this.document && this.document.contextParameters &&
-            this.document.contextParameters.preview) {
-            return this.document.contextParameters.preview.url;
+          if (this.document && this.document.contextParameters && this.document.contextParameters.preview) {
+            var url = this.document.contextParameters.preview.url;
+            if (this.xpath !== 'file:content') {
+              url = url.replace('/@preview/', '/@blob/' + this.xpath + '/@preview/');
+            }
+            return url;
           } else if (this.blob) {
             return this.blob.data;
           }
