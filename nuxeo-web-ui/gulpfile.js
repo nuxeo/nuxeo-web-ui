@@ -125,6 +125,10 @@ gulp.task('copy', function() {
   gulp.src([dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
             dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
       .pipe(gulp.dest(dist('nuxeo-user-group-management')));
+  gulp.src([dist('bower_components/select2/select2.png'),
+            dist('bower_components/select2/select2-spinner.gif'),
+            dist('bower_components/select2/select2x2.png')])
+      .pipe(gulp.dest(dist('vendor')));
 });
 
 // Scan your HTML for assets & optimize them
