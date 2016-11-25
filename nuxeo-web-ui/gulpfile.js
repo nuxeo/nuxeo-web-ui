@@ -112,7 +112,7 @@ gulp.task('images', function() {
 });
 
 gulp.task('copy', function() {
-  gulp.src([
+  var application = gulp.src([
     app('*.{html,ico}'),
     app('manifest.json'),
     app('elements/**/*'),
@@ -121,18 +121,19 @@ gulp.task('copy', function() {
   ], {
     base: app()
   }).pipe(gulp.dest(dist()));
+
   // copy user-group-management layouts
-  gulp.src([dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
+  var userGroupManagement = gulp.src([dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
             dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
       .pipe(gulp.dest(dist('nuxeo-user-group-management')));
-});
 
-// Fix select2
-gulp.task('fixSelect2', function() {
-    return gulp.src([dist('bower_components/select2/select2.png'),
-            dist('bower_components/select2/select2-spinner.gif'),
-            dist('bower_components/select2/select2x2.png')])
+  // copy select2 resources
+  var select2 = gulp.src([dist('bower_components/select2/select2.png'),
+    dist('bower_components/select2/select2-spinner.gif'),
+    dist('bower_components/select2/select2x2.png')])
       .pipe(gulp.dest(dist('vendor')));
+
+  return merge(application, userGroupManagement, select2);
 });
 
 // Scan your HTML for assets & optimize them
@@ -150,7 +151,7 @@ gulp.task('vulcanize', function() {
         inlineCss: true,
         inlineScripts: true
       }))
-      .pipe($.replace('assetpath="..\/bower_components', 'assetpath="bower_components'))
+      .pipe($.replace('..\/bower_components', 'bower_components'))
       //.pipe($.minifyInline())
       .pipe(gulp.dest(dist()))
       .pipe($.size({title: 'vulcanize'}));
@@ -214,7 +215,6 @@ gulp.task('default', ['clean'], function(cb) {
   runSequence(
       'merge-message-files',
       ['copy', 'styles'],
-      'fixSelect2',
       ['images', 'html'],
       'vulcanize',
       'move-layouts',
