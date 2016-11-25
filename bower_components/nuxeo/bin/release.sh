@@ -30,8 +30,8 @@ npm install
 npm shrinkwrap --dev
 
 # build, test and publish
-gulp prepublish
-
+gulp nsp
+mvn clean verify -f ftest/pom.xml -Pqa
 npm publish
 
 # update README links to point to the released doc

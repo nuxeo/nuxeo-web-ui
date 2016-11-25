@@ -240,6 +240,7 @@ Contributors:
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider"
        provider="[[provider]]"
+       page-size="[[pageSize]]"
        aggregations="{{aggregations}}"
        enrichers="thumbnail"
        params="[[params]]"
@@ -390,6 +391,10 @@ Contributors:
           },
           provider: {
             type: String
+          },
+          pageSize: {
+            type: Number,
+            value: 40
           },
           params: {
             type: Object

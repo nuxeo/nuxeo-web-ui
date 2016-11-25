@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-    Nelson Silva <nsilva@nuxeo.com>
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -22,6 +20,8 @@ Contributors:
 <script>
   /**
    * Stamps the template if and only if all of its conditions are met.
+   *
+   * Evaluation context includes `document` and `user` which need to be set if used.
    *
    * Example:
    *
@@ -169,7 +169,9 @@ Contributors:
         var v = this[k],
             filter = this.properties[k]._filter;
         if (v && filter) {
-          var args = filter.ctx.map(function(arg) { return this[arg]; }.bind(this));
+          var args = filter.ctx.map(function(arg) {
+            return this[arg];
+          }.bind(this));
           // if filter supports multiple values apply the function to each one
           var values = filter.multiple ? v.split(',') : [v];
           var fn = this[filter.fn];
@@ -177,7 +179,7 @@ Contributors:
           // pass if any check returns true, basically Array.some()
           var pass = false;
           for (var i = 0; i < values.length; i++) {
-            if (pass = fn.apply(this, args.concat(values[i]))) {
+            if ((pass = fn.apply(this, args.concat(values[i])))) {
               break;
             }
           }

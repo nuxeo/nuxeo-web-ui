@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +13,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
 -->
 
 <!--
-`nuxeo-file`
+An element for uploading blobs using the batch upload API.
 
-    <nuxeo-file></nuxeo-file>
+    <nuxeo-file value="{{document.properties.file:content}}"></nuxeo-file>
 
 @group Nuxeo Widgets
 @element nuxeo-file
@@ -89,11 +87,17 @@ Contributors:
     behaviors: [Nuxeo.UploaderBehavior],
 
     properties: {
+      /**
+       * Blob reference (`upload-batch` and `upload-fileId).
+       */
       value: {
         type: Object,
         notify: true
       },
 
+      /**
+       * Set to `true` to allow uploading multiple files.
+       */
       multiple: {
         type: Boolean,
         value: false
@@ -124,8 +128,8 @@ Contributors:
       }
     },
 
-    //XXX add support for pause / resume (NXJS-33)
     pause: function() {
+      //XXX add support for pause / resume (NXJS-33)
       alert("Upload paused");
     },
 

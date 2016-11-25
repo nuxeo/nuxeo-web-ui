@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
@@ -22,7 +20,17 @@ Contributors:
 <link rel="import" href="nuxeo-aggregation-behavior.html">
 
 <!--
-`nuxeo-checkbox-aggregation`
+An element to interact with page provider aggregations as checkboxes.
+
+    <nuxeo-page-provider provider="default_search" auto
+                         aggregations="{{aggregations}}"
+                         params="[[params]]">
+    </nuxeo-page-provider>
+
+    <nuxeo-checkbox-aggregation data="[[aggregations.dc_created_agg]]"
+                                value="{{params.dc_created_agg}}">
+    </nuxeo-checkbox-aggregation>
+
 @group Nuxeo UI
 @element nuxeo-checkbox-aggregation
 -->
@@ -56,7 +64,7 @@ Contributors:
      Polymer({
        is: 'nuxeo-checkbox-aggregation',
 
-       behaviors: [Nuxeo.I18nBehavior, Nuxeo.AggregationBehavior],
+       behaviors: [Nuxeo.I18nBehavior, Nuxeo.AggregationBehavior]
 
      });
    })();

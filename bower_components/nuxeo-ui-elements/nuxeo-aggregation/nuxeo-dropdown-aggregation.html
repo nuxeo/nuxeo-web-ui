@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../widgets/nuxeo-select2.html">
@@ -22,7 +20,17 @@ Contributors:
 <link rel="import" href="nuxeo-aggregation-behavior.html">
 
 <!--
-`nuxeo-dropdown-aggregation`
+An element to interact with page provider aggregations as suggestions.
+
+    <nuxeo-page-provider provider="default_search" auto
+                         aggregations="{{aggregations}}"
+                         params="[[params]]">
+    </nuxeo-page-provider>
+
+    <nuxeo-dropdown-aggregation data="[[aggregations.dc_creator_agg]]" multiple
+                                value="{{params.dc_creator_agg}}">
+    </nuxeo-dropdown-aggregation>
+
 @group Nuxeo UI
 @element nuxeo-dropdown-aggregation
 -->

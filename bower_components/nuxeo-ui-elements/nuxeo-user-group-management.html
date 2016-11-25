@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,10 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-    Andre Justo <ajusto@nuxeo.com>
-    Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
@@ -157,18 +154,31 @@ Custom property | Description | Default
         notify: true
       },
 
+      /**
+       * Selected user id.
+       */
       selectedUser: String,
+
+      /**
+       * Selected group id.
+       */
       selectedGroup: {
         type: String,
         observer: '_selectedGroupChanged'
       },
 
+      /**
+       * True if currently in read only mode.
+       */
       readonly: {
         type: Boolean,
         value: false,
         reflectToAttribute: true
       },
 
+      /**
+       * Set to true for administrators to remove restrictions.
+       */
       isAdministrator: {
         type: Boolean,
         value: false

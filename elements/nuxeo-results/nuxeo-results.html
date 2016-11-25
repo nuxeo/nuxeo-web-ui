@@ -165,7 +165,7 @@ Contributors:
     <div class="main">
 
       <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar"
-        on-refresh="_refresh"
+        on-refresh="_refreshAndFetch"
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
         <content select=".actions"></content>
@@ -300,6 +300,16 @@ Contributors:
           this.$.nxcon.connect().then(function(res) {
             this._localStorageName =  res.id + '-nxrs-' + this.name;
           }.bind(this));
+        },
+
+        _refreshAndFetch: function() {
+          var pn = this.nxProvider.page;
+          this._refresh();
+          if (pn === 1) {
+            // normally the page provider is on auto mode
+            // so the fetch should be triggered when changing page
+            this.nxProvider.fetch();
+          }
         },
 
         _refresh: function() {

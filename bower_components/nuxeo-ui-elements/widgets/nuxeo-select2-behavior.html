@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
 -->
 <link rel="import" href="../jquery-import.html">
 
@@ -39,31 +37,49 @@ Contributors:
 
     properties: {
 
+      /**
+       * Selected value(s).
+       */
       value: {
         notify: true,
-        observer: 'valueChanged'
+        observer: '_valueChanged'
       },
 
+      /**
+       * Set to `true` to allow multiple selection.
+       */
       multiple: {
         type: Boolean,
         value: false
       },
 
+      /**
+       * Set to `true` for read only mode.
+       */
       readonly: {
         type: Boolean,
         value: false
       },
 
+      /**
+       * Minimum number of chars to trigger the suggestions.
+       */
       minChars: {
         type: Number,
         value: 3
       },
 
+      /**
+       * Placeholder.
+       */
       placeholder: {
         type: String,
-        observer: 'placeholderChanged'
+        observer: '_placeholderChanged'
       },
 
+      /**
+       * Separator to use with multiple selection.
+       */
       separator: {
         type: String,
         value: ','
@@ -74,6 +90,9 @@ Contributors:
         value: false
       },
 
+      /**
+       * Formatter for selected entries.
+       */
       idFunction: {
         type: Function,
         value: function () {
@@ -81,6 +100,9 @@ Contributors:
         }
       },
 
+      /**
+       * Formatter for selected entries.
+       */
       selectionFormatter: {
         type: Function,
         value: function () {
@@ -88,6 +110,9 @@ Contributors:
         }
       },
 
+      /**
+       * Formatter for suggested entries.
+       */
       resultFormatter: {
         type: Function,
         value: function () {
@@ -95,6 +120,9 @@ Contributors:
         }
       },
 
+      /**
+       * Formatter for new entries.
+       */
       newEntryFormatter: {
         type: Function,
         value: function () {
@@ -102,6 +130,9 @@ Contributors:
         }
       },
 
+      /**
+       * Formatter for initial selection.
+       */
       initSelection: {
         type: Function,
         value: function () {
@@ -111,15 +142,21 @@ Contributors:
 
       data: {
         type: Object,
-        observer: 'dataChanged'
+        observer: '_dataChanged'
       },
 
+      /**
+       * Selected items.
+       */
       selectedItems: {
         type: Object,
         notify: true
       }
     },
 
+    /**
+     * HTML escaping function to be used in formatters.
+     */
     escapeHTML: function (markup) {
       return markup && window.Select2.util.escapeMarkup(markup);
     },
@@ -246,18 +283,18 @@ Contributors:
       }
     },
 
-    valueChanged: function (newValue) {
+    _valueChanged: function (newValue) {
       if (this._el && !this._inUpdateSelection) {
         jQuery(this._el).select2('val', newValue);
       }
       this._inUpdateSelection = false;
     },
 
-    dataChanged: function() {
+    _dataChanged: function() {
       this._initSelect2(this._el);
     },
 
-    placeholderChanged: function() {
+    _placeholderChanged: function() {
       if (this._el) {
         var obj = jQuery(this._el).attr('data-placeholder', this.placeholder).data('select2');
         this.multiple ? obj.val(this.value) : obj.setPlaceholder();

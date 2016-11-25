@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the 'License');
@@ -12,16 +13,22 @@ distributed under the License is distributed on an 'AS IS' BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-   Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <link rel="import" href="nuxeo-i18n-behavior.html">
 
 <script>
   var Nuxeo = Nuxeo || {};
+
+  /**
+   * `Nuxeo.FormatBehavior` provides a set of helpers to format values.
+   *
+   * @polymerBehavior
+   */
   Nuxeo.FormatBehavior = [Nuxeo.I18nBehavior, {
 
+    /**
+     * Formats a size given in bytes in MB, KB, or bytes.
+     */
     formatSize: function(size) {
       if (!size) {
         return '';
@@ -34,14 +41,23 @@ Contributors:
       }
     },
 
-    formatDate: function(date) {
-      return moment(date).format('MMMM D, YYYY');
+    /**
+     * Formats a date as a string. Default format is 'MMM D, YYYY'.
+     */
+    formatDate: function(date, fmt) {
+      return moment(date).format(fmt || 'MMMM D, YYYY');
     },
 
+    /**
+     * Returns the translated mimetype. Message key is 'mimetype.<value>'.
+     */
     formatMimeType: function(value) {
       return this.i18n('mimetype.' + value, value);
     },
 
+    /**
+     * Returns the version of a document as <major>.<minor>.
+     */
     formatVersion: function(doc) {
       if (doc && doc.properties
           && doc.properties['uid:major_version'] !== undefined && doc.properties['uid:minor_version'] !== undefined) {
@@ -51,6 +67,9 @@ Contributors:
       }
     },
 
+    /**
+     * Returns the label for the given directory entry.
+     */
     formatDirectory: function(value) {
       if (value && value['entity-type'] && value['entity-type'] === 'directoryEntry') {
         if (value.properties && value.properties.label) {

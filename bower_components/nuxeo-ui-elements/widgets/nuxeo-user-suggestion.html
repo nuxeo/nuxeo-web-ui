@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +13,16 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Nelson Silva <nsilva@nuxeo.com>
-  Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="nuxeo-select2.html">
 
 <!--
-`nuxeo-user-suggestion`
+`nuxeo-user-suggestion` allows selecting one or more users.
 
-    <nuxeo-user-suggestion></nuxeo-user-suggestion>
+    <nuxeo-user-suggestion search-type="GROUP_TYPE"
+                           placeholder="Search for Groups"
+                           value="{{groups}}"
+                           multiple></nuxeo-user-suggestion>
 
 @group Nuxeo Widgets
 @element nuxeo-user-suggestion
@@ -59,40 +59,67 @@ Polymer({
       value: 'USER_GROUP_TYPE'
     },
 
+    /**
+     * Label.
+     */
     label: String,
 
+    /**
+     * Computed parameters for the `UserGroup.Suggestion` operation.
+     */
     params: {
       type: Object,
-      computed: 'computeParams(searchType)'
+      computed: '_computeParams(searchType)'
     },
 
+    /**
+     * Selected value(s).
+     */
     value: {
       type: String,
       notify: true
     },
 
+    /**
+     * Set to `true` to allow multiple selection.
+     */
     multiple: {
       type: Boolean,
       value: false
     },
 
+    /**
+     * Set to `true` for read only mode.
+     */
     readonly: {
       type: Boolean,
       value: false
     },
 
+    /**
+     * Minimum number of chars to trigger the suggestions.
+     */
     minChars: {
       type: Number,
       value: 3
     },
 
+    /**
+     * Placeholder.
+     */
     placeholder: String,
 
+    /**
+     * Selected items.
+     */
     selectedItems: {
       type: Object,
       notify: true
     },
 
+    /**
+     * Formatter for suggested entries.
+     */
     resultFormatter: {
       type: Function,
       value: function () {
@@ -101,7 +128,7 @@ Polymer({
     }
   },
 
-  computeParams: function() {
+  _computeParams: function() {
     return this.params = {
       searchType: this.searchType
     };

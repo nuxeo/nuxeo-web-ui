@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the 'License');
@@ -12,89 +13,136 @@ distributed under the License is distributed on an 'AS IS' BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-   Adilio Araujo <aaraujo@nuxeo.com>
 -->
 <script>
   var Nuxeo = Nuxeo || {};
 
   /**
+   * `Nuxeo.FilterBehavior` provides a set of helpers to use in filter expressions.
+   *
    * @polymerBehavior
    */
   Nuxeo.FiltersBehavior = {
 
+    /**
+     * Checks if the document is a favorite.
+     */
     isFavorite: function(doc) {
       return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
     },
 
+    /**
+     * Checks if the current user is subscribed to document notifications.
+     */
     isSubscribed: function(doc) {
       return doc && doc.contextParameters.subscribedNotifications &&
         doc.contextParameters.subscribedNotifications.length > 0;
     },
 
+    /**
+     * Checks if the document can be added to a collection.
+     */
     isCollectionMember: function(doc) {
       return (doc) ? doc.facets.indexOf('NotCollectionMember') === -1 : false;
     },
 
+    /**
+     * Checks if the document is a version.
+     */
     isVersion: function(doc) {
       return (doc) && doc.isVersion;
     },
 
+    /**
+     * Checks if the document is immutable.
+     */
     isImmutable: function(doc) {
-      return this.hasFacet('Immutable');
+      return this.hasFacet(doc, 'Immutable');
     },
 
+    /**
+     * Checks the document's type.
+     */
     hasType: function(doc, type) {
       return doc && doc.type === type;
     },
 
-    isVersion: function(doc) {
-      return doc && doc.isVersion;
-    },
-
+    /**
+     * Checks if the document is a proxy.
+     */
     isProxy: function(doc) {
       return doc && doc.isProxy;
     },
 
+    /**
+     * Checks if the document's path matches the given string regexp.
+     */
     pathMatches: function(doc, regex) {
       return doc && doc.path && new RegExp(regex).test(regex);
     },
 
+    /**
+     * Checks if the document's path starts with the given path.
+     */
     pathStartsWith: function(doc, path) {
       return this.pathMatches(doc, '^' + path);
     },
 
+    /**
+     * Checks the document's life cycle state..
+     */
     hasState: function(doc, state) {
       return doc && doc.state === state;
     },
 
+
+    /**
+     * Checks if the document has the given facet.
+     */
     hasFacet: function(doc, facet) {
       return doc && doc.facets && doc.facets.indexOf(facet) !== -1;
     },
 
+    /**
+     * Checks if the document has the given permission.
+     */
     hasPermission: function(doc, permission) {
       return doc && doc.contextParameters && doc.contextParameters.permissions &&
           doc.contextParameters.permissions.indexOf(permission) !== -1;
     },
 
+    /**
+     * Checks if the document has a main blob.
+     */
     hasContent: function(doc) {
       return (doc) ? doc.properties['file:content'] : false;
     },
 
+    /**
+     * Checks if the document has attachments.
+     */
     hasAttachments: function(doc) {
       return doc && doc.properties && doc.properties['files:files'] && doc.properties['files:files'].length > 0;
     },
 
+    /**
+     * Checks if the document has attachments.
+     */
     hasVersions: function(doc) {
       return doc && (doc.properties['uid:major_version'] > 0 || doc.properties['uid:minor_version'] > 0);
     },
 
+    /**
+     * Checks if the document belongs to a collection.
+     */
     hasCollections: function(doc) {
       return doc && doc.contextParameters && doc.contextParameters.collections &&
           doc.contextParameters.collections.length > 0;
     },
 
+    /**
+     * Checks if given user is member of the group.
+     */
     isMember: function(user, group) {
       return user && user.properties && user.properties.groups && user.properties.groups.indexOf(group) !== -1;
     }
