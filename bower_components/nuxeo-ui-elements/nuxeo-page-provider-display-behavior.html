@@ -357,7 +357,9 @@ limitations under the License.
           this._ppSort = tmpSort;
           this.nxProvider.sort = this._ppSort;
           this._resetResults();
-          this.nxProvider.fetch();
+          if (!this.nxProvider.auto) {
+            this.nxProvider.fetch();
+          }
         }
       },
 
@@ -390,6 +392,8 @@ limitations under the License.
 
         if (this.nxProvider.params[e.detail.filterBy] && e.detail.value.length === 0) {
           delete this.nxProvider.params[e.detail.filterBy];
+          this._resetResults();
+          this.nxProvider.fetch();
         } else {
           if (e.detail.value.length > 0) {
             if (e.detail.filterBy === 'title' || e.detail.filterBy === 'ecm_fulltext') {
@@ -397,10 +401,10 @@ limitations under the License.
             } else {
               this.nxProvider.params[e.detail.filterBy] = e.detail.value;
             }
+            this._resetResults();
+            this.nxProvider.fetch();
           }
         }
-        this._resetResults();
-        this.nxProvider.fetch();
       },
 
       scrollToItem: function(item){
