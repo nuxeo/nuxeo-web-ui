@@ -44,14 +44,12 @@ Contributors:
       <template is="dom-if" if="[[_isTable(mode)]]">
         <paper-icon-button icon="icons:apps" id="toogleGrid" on-tap="_toggle"></paper-icon-button>
         <paper-tooltip for="toogleGrid">
-          [[i18n('displayModeButton.display.grid', 'Switch to grid view')]]
+          [[i18n('displayModeButton.display.grid')]]
         </paper-tooltip>
       </template>
       <template is="dom-if" if="[[_isGrid(mode)]]">
         <paper-icon-button icon="icons:list" id="toogleTable" on-tap="_toggle"></paper-icon-button>
-        <paper-tooltip for="toogleTable">
-          [[i18n('displayModeButton.display.table', 'Switch to table view')]]
-        </paper-tooltip>
+        <paper-tooltip for="toogleTable">[[i18n('displayModeButton.display.table')]]</paper-tooltip>
       </template>
     </template>
 

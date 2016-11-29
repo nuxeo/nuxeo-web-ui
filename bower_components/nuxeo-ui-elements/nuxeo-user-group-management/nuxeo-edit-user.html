@@ -82,25 +82,25 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('editUser.firstName', 'First Name')]]</label>
+        <label>[[i18n('editUser.firstName')]]</label>
       </div>
       <input value="{{user.firstName::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('editUser.lastName', 'Last Name')]]</label>
+        <label>[[i18n('editUser.lastName')]]</label>
       </div>
       <input value="{{user.lastName::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('editUser.company', 'Company')]]</label>
+        <label>[[i18n('editUser.company')]]</label>
       </div>
       <input value="{{user.company::input}}" class="flex">
     </div>
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('editUser.email', 'Email')]]</label>
+        <label>[[i18n('editUser.email')]]</label>
       </div>
       <div class="horizontal layout flex required">
         <input value="{{user.email::input}}" type="email" class="flex" required>
@@ -109,11 +109,11 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
     <template is="dom-if" if="[[new]]">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('editUser.groups', 'Groups')]]</label>
+          <label>[[i18n('editUser.groups')]]</label>
         </div>
         <nuxeo-user-suggestion id="picker"
                                search-type="GROUP_TYPE"
-                               placeholder="[[i18n('editUser.searchGroups', 'Search for Groups')]]"
+                               placeholder="[[i18n('editUser.searchGroups')]]"
                                value="{{user.groups}}"
                                multiple
                                result-formatter="[[resultFormatter]]">

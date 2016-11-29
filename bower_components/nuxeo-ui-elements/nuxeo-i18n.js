@@ -24,10 +24,10 @@ window.nuxeo.I18n = window.nuxeo.I18n || {};
  * Translates the given key.
  * Also accepts a default value and multiple arguments which will be replaced on the value.
  */
-window.nuxeo.I18n.translate = function (key, defaultValue) {
+window.nuxeo.I18n.translate = function (key) {
   var language = window.nuxeo.I18n.language || 'en';
-  var value = (window.nuxeo.I18n[language] && window.nuxeo.I18n[language][key]) || defaultValue || key;
-  var params = Array.prototype.slice.call(arguments, 2);
+  var value = (window.nuxeo.I18n[language] && window.nuxeo.I18n[language][key]) || key;
+  var params = Array.prototype.slice.call(arguments, 1);
   for (var i = 0; i < params.length; i++) {
     value = value.replace('{' + i + '}', params[i]);
   } // improve this to use both numbered and named parameters

@@ -91,7 +91,7 @@ Used by `nuxeo-user-management`
 
     <div class="search">
       <paper-input noink autofocus="true" value="{{searchTerm}}" type="search"
-                   placeholder="[[i18n('userGroupSearch.search.placeholder', 'Search for users and groups')]]">
+                   placeholder="[[i18n('userGroupSearch.search.placeholder')]]">
         <iron-icon icon="search" prefix></iron-icon>
       </paper-input>
     </div>
@@ -100,13 +100,13 @@ Used by `nuxeo-user-management`
 
       <!-- groups -->
       <h3 class="title">
-        <iron-icon icon="social:people"></iron-icon> [[i18n('userGroupSearch.groups', 'Groups')]]
+        <iron-icon icon="social:people"></iron-icon> [[i18n('userGroupSearch.groups')]]
       </h3>
       <div class="table">
         <div class="table-header">
-          <div class="flex-4">[[i18n('userGroupSearch.name', 'Name')]]</div>
-          <div class="flex-2">[[i18n('userGroupSearch.identifier', 'Identifier')]]</div>
-          <div class="flex-4">[[i18n('userGroupSearch.contains', 'Contains')]]</div>
+          <div class="flex-4">[[i18n('userGroupSearch.name')]]</div>
+          <div class="flex-2">[[i18n('userGroupSearch.identifier')]]</div>
+          <div class="flex-4">[[i18n('userGroupSearch.contains')]]</div>
         </div>
         <div class="table-rows">
           <template is="dom-repeat" items="[[groups.entries]]" as="item">
@@ -123,7 +123,7 @@ Used by `nuxeo-user-management`
           </template>
           <template is="dom-if" if=[[_empty(groups.entries)]]>
             <div class="table-row">
-              <div>[[i18n('userGroupSearch.empty.groups', 'No group matches the entered criteria.')]]</div>
+              <div>[[i18n('userGroupSearch.empty.groups')]]</div>
             </div>
           </template>
         </div>
@@ -132,13 +132,13 @@ Used by `nuxeo-user-management`
 
       <!-- users -->
       <h3 class="title">
-        <iron-icon icon="social:person"></iron-icon> [[i18n('userGroupSearch.users.heading', 'Users')]]
+        <iron-icon icon="social:person"></iron-icon> [[i18n('userGroupSearch.users.heading')]]
       </h3>
       <div class="table">
         <div class="table-header">
-          <div class="flex-4">[[i18n('userGroupSearch.name', 'Name')]]</div>
-          <div class="flex-2">[[i18n('userGroupSearch.identifier', 'Identifier')]]</div>
-          <div class="flex-4">[[i18n('userGroupSearch.email', 'Email')]]</div>
+          <div class="flex-4">[[i18n('userGroupSearch.name')]]</div>
+          <div class="flex-2">[[i18n('userGroupSearch.identifier')]]</div>
+          <div class="flex-4">[[i18n('userGroupSearch.email')]]</div>
         </div>
         <div class="table-rows">
           <template is="dom-repeat" items="[[users.entries]]" as="item">
@@ -154,7 +154,7 @@ Used by `nuxeo-user-management`
           </template>
           <template is="dom-if" if=[[_empty(users.entries)]]>
             <div class="table-row">
-              <div>[[i18n('userGroupSearch.empty.users', 'No user matches the entered criteria.')]]</div>
+              <div>[[i18n('userGroupSearch.empty.users')]]</div>
             </div>
           </template>
         </div>
@@ -230,15 +230,15 @@ Used by `nuxeo-user-management`
     },
 
     _countUsers: function(users) {
-      var label = ' ' + (users.length === 1 ? this.i18n('userGroupSearch.member', 'member') :
-                                              this.i18n('userGroupSearch.members', 'members'));
+      var label = ' ' + (users.length === 1 ? this.i18n('userGroupSearch.member') :
+                                              this.i18n('userGroupSearch.members'));
       return users.length + label;
     },
 
     _countGroups: function(groups) {
       if (groups.length > 0) {
-        var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nesteGroup', 'nested group') :
-                                                 this.i18n('userGroupSearch.nesteGroups', 'nested groups'));
+        var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nesteGroup') :
+                                                 this.i18n('userGroupSearch.nesteGroups'));
         return groups.length + label;
       }
     },

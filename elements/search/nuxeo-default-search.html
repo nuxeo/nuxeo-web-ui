@@ -60,17 +60,17 @@ Contributors:
     </style>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.fullText', 'Full Text')]]</label>
+      <label>[[i18n('defaultSearch.fullText')]]</label>
       <paper-input id="searchInput" autofocus="true"
                    value="{{searchTerm}}" tabindex="0"
                    type="search"
-                   placeholder="[[i18n('defaultSearch.fullText.placeholder', 'Search something ...')]]"
+                   placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
                    no-label-float>
       </paper-input>
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.creationDate', 'Creation date')]]</label>
+      <label>[[i18n('defaultSearch.creationDate')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_created_agg]]"
         value="{{params.dc_created_agg}}">
@@ -78,7 +78,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.modifiedDate', 'Modification date')]]</label>
+      <label>[[i18n('defaultSearch.modifiedDate')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}">
@@ -86,8 +86,8 @@ Contributors:
     </div>
 
     <div class="row layout vertical">
-      <label>[[i18n('defaultSearch.authors', 'Authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder', 'Search for contributors...')]]"
+      <label>[[i18n('defaultSearch.authors')]]</label>
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true">
@@ -95,17 +95,17 @@ Contributors:
     </div>
 
     <div class="row layout vertical">
-      <label>[[i18n('defaultSearch.collections', 'Collections')]]</label>
+      <label>[[i18n('defaultSearch.collections')]]</label>
       <nuxeo-select2 operation="User.GetCollections"
                      min-chars="0"
-                     placeholder="[[i18n('defaultSearch.collections.placeholder', 'Select a value')]]"
+                     placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
                      value="{{params.ecm_collections}}"
                      multiple="true">
       </nuxeo-select2>
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.nature', 'Nature')]]</label>
+      <label>[[i18n('defaultSearch.nature')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_nature_agg]]"
         value="{{params.dc_nature_agg}}">
@@ -113,7 +113,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.subject','Subjects')]]</label>
+      <label>[[i18n('defaultSearch.subject')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
         value="{{params.dc_subjects_agg}}">
@@ -121,7 +121,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.coverage', 'Coverage')]]</label>
+      <label>[[i18n('defaultSearch.coverage')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
         value="{{params.dc_coverage_agg}}">
@@ -129,7 +129,7 @@ Contributors:
     </div>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.size', 'Size')]]</label>
+      <label>[[i18n('defaultSearch.size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}">

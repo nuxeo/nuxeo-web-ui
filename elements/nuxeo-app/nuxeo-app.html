@@ -344,7 +344,7 @@ Contributors:
 
               <section class="card recents" name="recents">
                 <div class="header ellipsis">
-                  <h1>[[i18n('app.recentlyViewed', 'Recently Viewed')]]</h1>
+                  <h1>[[i18n('app.recentlyViewed')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-recent-documents max-size="10" id="recent"></nuxeo-recent-documents>
@@ -360,12 +360,12 @@ Contributors:
 
               <section class="card tasks" name="tasks">
                 <div class="header ellipsis">
-                  <h1>[[i18n('app.tasks', 'Tasks')]]</h1>
+                  <h1>[[i18n('app.tasks')]]</h1>
                 </div>
                 <div class="content layout vertical">
                   <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]" class="flex"></nuxeo-tasks-list>
                   <div class="link">
-                    <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTaskDashboard', '» View Tasks Dashboard')]]</a>
+                    <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTaskDashboard')]]</a>
                   </div>
                 </div>
               </section>
@@ -383,7 +383,7 @@ Contributors:
 
               <section class="card clipboard" name="clipboard">
                 <div class="header ellipsis">
-                  <h1>[[i18n('app.clipboard', 'Clipboard')]]</h1>
+                  <h1>[[i18n('app.clipboard')]]</h1>
                 </div>
                 <div class="content">
                   <nuxeo-clipboard id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
@@ -393,7 +393,7 @@ Contributors:
               <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
                 <section class="card administration" name="administration">
                   <div class="header ellipsis">
-                    <h1>[[i18n('app.administration', 'Administration')]]</h1>
+                    <h1>[[i18n('app.administration')]]</h1>
                   </div>
                   <div class="content">
                     <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
@@ -654,8 +654,7 @@ Contributors:
             }.bind(this),
             // error handling
             function() {
-              this.$.error.show('404',url, this.i18n('app.homeNotFound',
-                'Home layout not found'));
+              this.$.error.show('404',url, this.i18n('app.homeNotFound'));
               this.show('error');
             }.bind(this)
           );
@@ -845,46 +844,44 @@ Contributors:
 
         _documentAddedToCollection: function(e) {
           if (e.detail.docIds) {
-            this.$.toast.text = this.i18n('app.documents.addedToCollection', 'Documents added to collection.');
+            this.$.toast.text = this.i18n('app.documents.addedToCollection');
           } else {
-            this.$.toast.text = this.i18n('app.document.addedToCollection', 'Document added to collection.');
+            this.$.toast.text = this.i18n('app.document.addedToCollection');
           }
           this.$.toast.open();
         },
 
         _documentRemovedFromCollection: function() {
-          this.$.toast.text = this.i18n('app.document.removedFromCollection', 'Document removed from collection.');
+          this.$.toast.text = this.i18n('app.document.removedFromCollection');
           this.$.toast.open();
         },
 
         _documentAddedToFavorites: function() {
-          this.$.toast.text = this.i18n('app.document.addedToFavorites', 'Added to Favorites');
+          this.$.toast.text = this.i18n('app.document.addedToFavorites');
           this.$.toast.open();
         },
 
         _documentRemovedFromFavorites: function() {
-          this.$.toast.text = this.i18n('app.document.removedFromFavorites', 'Removed from Favorites');
+          this.$.toast.text = this.i18n('app.document.removedFromFavorites');
           this.$.toast.open();
         },
 
         _documentSubscribed: function() {
-          this.$.toast.text = this.i18n('app.document.subscribed', 'You\'re now following this document.');
+          this.$.toast.text = this.i18n('app.document.subscribed');
           this.$.toast.open();
         },
 
         _documentUnsubscribed: function() {
-          this.$.toast.text = this.i18n('app.document.unsubscribed', 'You are not following this document anymore.');
+          this.$.toast.text = this.i18n('app.document.unsubscribed');
           this.$.toast.open();
         },
 
         _handleDocumentCreated: function(e) {
           if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
             var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-            this.$.toast.text = this.i18n('app.createdDocument', 'Created {0}.',
-                        doc.type.toLowerCase() + ' ' + doc.title);
+            this.$.toast.text = this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title);
           } else {
-            this.$.toast.text = this.i18n('app.createdDocuments', 'Created {0} documents.',
-                        e.detail.response.entries.length);
+            this.$.toast.text = this.i18n('app.createdDocuments', e.detail.response.entries.length);
           }
           this.$.toast.open();
         },

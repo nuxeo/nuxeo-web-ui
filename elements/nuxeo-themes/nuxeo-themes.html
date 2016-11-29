@@ -85,18 +85,18 @@ Contributors:
     </style>
 
     <nuxeo-page>
-      <div class="header">[[i18n('app.themes.heading', 'Themes')]]</div>
+      <div class="header">[[i18n('app.themes.heading')]]</div>
       <div class="content flex-layout">
 
         <paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/light-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.light', 'Light')]]</span>
+            <span class="name flex">[[i18n('themes.light')]]</span>
             <template is="dom-if" if="[[_selected('light')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('light')]]">
-              <paper-button data-theme="light" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="light" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -104,12 +104,12 @@ Contributors:
         <paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/default-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.nuxeo', 'Nuxeo')]]</span>
+            <span class="name flex">[[i18n('themes.nuxeo')]]</span>
             <template is="dom-if" if="[[_selected('default')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('default')]]">
-              <paper-button data-theme="default" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="default" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -117,12 +117,12 @@ Contributors:
         <paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/dark-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.dark', 'Dark')]]</span>
+            <span class="name flex">[[i18n('themes.dark')]]</span>
             <template is="dom-if" if="[[_selected('dark')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('dark')]]">
-              <paper-button data-theme="dark" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="dark" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -130,12 +130,12 @@ Contributors:
         <paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/garden-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.garden', 'Garden')]]</span>
+            <span class="name flex">[[i18n('themes.garden')]]</span>
             <template is="dom-if" if="[[_selected('garden')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('garden')]]">
-              <paper-button data-theme="garden" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="garden" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -143,12 +143,12 @@ Contributors:
         <paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/kawaii-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.kawaii', 'Kawaii')]]</span>
+            <span class="name flex">[[i18n('themes.kawaii')]]</span>
             <template is="dom-if" if="[[_selected('kawaii')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('kawaii')]]">
-              <paper-button data-theme="kawaii" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="kawaii" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card>
@@ -156,17 +156,17 @@ Contributors:
         <!--paper-card elevation="0">
           <iron-image src="[[baseUrl]]images/themes/ocean-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
           <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.ocean', 'Ocean')]]</span>
+            <span class="name flex">[[i18n('themes.ocean')]]</span>
             <template is="dom-if" if="[[_selected('ocean')]]">
-              <span class="selected">[[i18n('themes.current', 'Current')]]</span>
+              <span class="selected">[[i18n('themes.current')]]</span>
             </template>
             <template is="dom-if" if="[[!_selected('ocean')]]">
-              <paper-button data-theme="ocean" on-tap="_apply">[[i18n('themes.apply', 'Apply')]]</paper-button>
+              <paper-button data-theme="ocean" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
             </template>
           </div>
         </paper-card-->
 
-        <paper-toast id="toast" text="[[i18n('themes.applying', 'Applying Theme...')]]"></paper-toast>
+        <paper-toast id="toast" text="[[i18n('themes.applying')]]"></paper-toast>
       </div>
     </nuxeo-page>
 

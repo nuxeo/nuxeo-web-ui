@@ -65,12 +65,8 @@ Contributors:
                   no-auto-focus>
       <div id="holder" class="vertical layout flex">
         <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
-          <paper-tab name="create">
-            [[i18n('documentCreatePopup.create','Create')]]
-          </paper-tab>
-          <paper-tab name="import">
-            [[i18n('documentCreatePopup.import','Import')]]
-          </paper-tab>
+          <paper-tab name="create">[[i18n('documentCreatePopup.create')]]</paper-tab>
+          <paper-tab name="import">[[i18n('documentCreatePopup.import')]]</paper-tab>
         </paper-tabs>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex" selected-attribute="visible">
           <nuxeo-document-create id="simpleCreation"

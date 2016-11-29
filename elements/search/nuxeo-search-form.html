@@ -260,7 +260,7 @@ Contributors:
         <template is="dom-if" if="[[!_onlyQueue]]">
           <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
             <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
-              <paper-item>[[i18n('searchForm.searchFilters', 'Search Filters')]]</paper-item>
+              <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
               <template is="dom-repeat" items="[[searches]]" as="search">
                 <paper-item>[[search.title]]</paper-item>
               </template>
@@ -269,16 +269,16 @@ Contributors:
           <template is="dom-if" if="[[_isQueue]]">
             <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
-            <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView', 'Switch to filter view')]]</paper-tooltip>
+            <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</paper-tooltip>
           </template>
           <template is="dom-if" if="[[!_isQueue]]">
             <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
-            <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView', 'Switch to queue view')]]</paper-tooltip>
+            <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</paper-tooltip>
           </template>
         </template>
         <template is="dom-if" if="[[_onlyQueue]]">
-          <h1>[[i18n(label, label)]]</h1>
+          <h1>[[i18n(label)]]</h1>
         </template>
       </div>
 
@@ -290,10 +290,10 @@ Contributors:
           </div>
           <div class="row actions">
             <paper-button noink class="reset" disabled$="[[!dirty]]" on-click="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
-              [[i18n('command.Reset', 'Reset')]]
+              [[i18n('command.Reset')]]
             </paper-button>
             <paper-button noink class="primary clear" on-click="_clear">
-              [[i18n('command.clear', 'Clear')]]
+              [[i18n('command.clear')]]
             </paper-button>
           </div>
           <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
@@ -302,7 +302,7 @@ Contributors:
         <div id="queue" hidden$="{{!_isQueue}}">
           <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
             selected-item="{{selectedDocument}}"
-            empty-label="[[i18n('searchForm.queue.noResults', 'No Results')]]"
+            empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered=""
             selection-enabled
             display-quick-filters>
@@ -324,48 +324,48 @@ Contributors:
     </div>
 
     <paper-dialog id="saveDialog" with-backdrop>
-      <h2>[[i18n('searchForm.savePopup.heading','Save Search')]]</h2>
+      <h2>[[i18n('searchForm.savePopup.heading')]]</h2>
       <paper-input id="savedSearchTitle"
-                   label="[[i18n('searchForm.savePopup.label', 'Enter a name for your saved search')]]"
+                   label="[[i18n('searchForm.savePopup.label')]]"
                    autofocus
                    no-label-float>
       </paper-input>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="renameDialog" with-backdrop>
-        <h2>[[i18n('searchForm.renamePopup.heading', 'Rename Saved Search')]]</h2>
+        <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
           <paper-input id="savedSearchRenameTitle"
-                       label="[[i18n('searchForm.renamePopup.label', 'Enter a new name for your saved search')]]"
+                       label="[[i18n('searchForm.renamePopup.label')]]"
                        autofocus
                        no-label-float>
           </paper-input>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save','Save')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
         </div>
     </paper-dialog>
 
     <paper-dialog id="shareDialog" with-backdrop>
-        <h2>[[i18n('searchForm.shared.heading', 'Share Saved Search')]]</h2>
+        <h2>[[i18n('searchForm.shared.heading')]]</h2>
         <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
         <div class="buttons">
-         <paper-button dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
+         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
         </div>
     </paper-dialog>
 
     <paper-dialog id="deleteDialog" with-backdrop>
-        <p>[[i18n('searchForm.delete.heading', 'Delete Saved Search?')]]</p>
+        <p>[[i18n('searchForm.delete.heading')]]</p>
         <div class="buttons">
-          <paper-button dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes','Yes')]]</paper-button>
+          <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
         </div>
     </paper-dialog>
   </template>
@@ -716,8 +716,7 @@ Contributors:
               // error handling
               function() {
                 this.$['search-container'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentSearchForm.layoutNotFound',
-                  'Failed to find search layout for ', this.searchName));
+                this.$.error.show('404', url, this.i18n('documentSearchForm.layoutNotFound', this.searchName));
               });
           }
         },

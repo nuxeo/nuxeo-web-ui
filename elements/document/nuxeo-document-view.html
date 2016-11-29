@@ -94,8 +94,7 @@ Contributors:
               // error handling
               function() {
                 this.$['document-view'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentView.layoutNotFound',
-                  'Failed to find view layout for {0}', this.document.type));
+                this.$.error.show('404', url, this.i18n('documentView.layoutNotFound', this.document.type));
               });
           } else {
             this._createLayout();

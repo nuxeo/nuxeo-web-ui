@@ -164,12 +164,12 @@ Used by `nuxeo-user-group-management`
     <div class="header horizontal layout center">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:people"></iron-icon>
-      <h3>[[i18n('createGroup.heading', 'New Group')]]</h3>
+      <h3>[[i18n('createGroup.heading')]]</h3>
     </div>
     <form is="iron-form" id="form" class="vertical layout">
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('createGroup.group.name', 'Group Name')]]</label>
+          <label>[[i18n('createGroup.group.name')]]</label>
         </div>
         <div class="horizontal layout flex required">
           <input id="groupName" value="{{groupName::input}}" class="flex" required>
@@ -177,17 +177,17 @@ Used by `nuxeo-user-group-management`
       </div>
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('createGroup.group.label', 'Group Label')]]</label>
+          <label>[[i18n('createGroup.group.label')]]</label>
         </div>
         <input id="groupLabel" value="{{groupLabel::input}}" class="flex">
       </div>
       <div class="row layout horizontal">
         <div class="label-container">
-          <label>[[i18n('createGroup.members', 'Members')]]</label>
+          <label>[[i18n('createGroup.members')]]</label>
         </div>
         <nuxeo-user-suggestion id="picker"
                                search-type="USER_GROUP_TYPE"
-                               placeholder="[[i18n('createGroup.search.placeholder', 'Search for users and groups')]]"
+                               placeholder="[[i18n('createGroup.search.placeholder')]]"
                                value="[[selectedUser]]"
                                selected-items="{{selectedUser}}"
                                result-formatter="[[resultFormatter]]">
@@ -222,13 +222,13 @@ Used by `nuxeo-user-group-management`
       </div>
       <div class="footer horizontal layout">
         <div class="label-container">
-          [[i18n('createGroup.createAnother.checkbox', 'Create another')]]
+          [[i18n('createGroup.createAnother.checkbox')]]
           <paper-checkbox id="another"></paper-checkbox>
         </div>
         <div class="layout vertical">
           <div class="form-buttons">
-            <paper-button noink id="createButton" class="primary" on-tap="_submit">[[i18n('command.create', 'Create')]]</paper-button>
-            <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button noink id="createButton" class="primary" on-tap="_submit">[[i18n('command.create')]]</paper-button>
+            <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
           </div>
           <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
         </div>

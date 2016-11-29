@@ -119,15 +119,13 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   _validateLocation: function() {
     if (!this.isValidTargetPath) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.invalidLocation','Invalid location'));
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.invalidLocation'));
     } else if (!this._canCreateIn(this.parent)) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noPermission',
-        'You do not have permissions to create under this location'));
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noPermission'));
     } else if (this.subtypes && this.subtypes.length === 0) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noSubtypes',
-        'Unable to create content in this location'));
+      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noSubtypes'));
     } else {
       this.set('canCreate', true);
       this.set('targetLocationError', '');
@@ -159,7 +157,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   _getTypeLabel: function(type) {
-    return this._isValidType(type) ? this.i18n('label.document.type.' + type.id, type.type) : '';
+    return this._isValidType(type) ? this.i18n('label.document.type.' + type.id) : '';
   },
 
   _getTypeIcon: function(type) {

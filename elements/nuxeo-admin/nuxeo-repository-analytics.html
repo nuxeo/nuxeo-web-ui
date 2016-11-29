@@ -130,7 +130,9 @@ Contributors:
               </nuxeo-data-table-column>
             </nuxeo-data-table>
           </template>
-          <template is="dom-if" if="[[_isEmpty(downloads)]]"><div class="message">[[i18n('repositoryAnalytics.noResults','No results')]]</div></template>
+          <template is="dom-if" if="[[_isEmpty(downloads)]]">
+            <div class="message">[[i18n('repositoryAnalytics.noResults')]]</div>
+          </template>
         </div>
       </paper-card>
 

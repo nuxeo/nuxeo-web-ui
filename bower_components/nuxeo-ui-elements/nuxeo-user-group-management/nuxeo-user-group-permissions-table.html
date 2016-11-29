@@ -140,11 +140,11 @@ Used by `nuxeo-user-group-management`
     <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
     <div class="table">
       <div class="table-header">
-        <div class="flex-3">[[i18n('userGroupPermissions.on', 'On')]]</div>
+        <div class="flex-3">[[i18n('userGroupPermissions.on')]]</div>
         <div class="flex-6 layout horizontal">
-          <div class="flex-2">[[i18n('userGroupPermissions.right', 'Right')]]</div>
-          <div class="flex-2">[[i18n('userGroupPermissions.timeFrame', 'Time Frame')]]</div>
-          <div class="flex-2">[[i18n('userGroupPermissions.grantedBy', 'Granted by')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.right')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.timeFrame')]]</div>
+          <div class="flex-2">[[i18n('userGroupPermissions.grantedBy')]]</div>
           <div class="table-actions"></div>
         </div>
       </div>
@@ -172,7 +172,7 @@ Used by `nuxeo-user-group-management`
                   <div class="table-actions">
                     <template is="dom-if" if=[[!readonly]]>
                       <paper-icon-button icon="icons:delete" noink
-                                       title="[[i18n('userGroupPermissions.delete.button', 'Delete permission')]]"
+                                       title="[[i18n('userGroupPermissions.delete.button')]]"
                                        on-tap="_toggleDialog"
                                        hidden$="[[!_canDelete(ace)]]">
                       </paper-icon-button>
@@ -186,9 +186,7 @@ Used by `nuxeo-user-group-management`
       </template>
       <template is="dom-if" if=[[empty]]>
         <div class="table-row">
-          <div>
-            [[i18n('userGroupPermissions.noPermissions', '{0} does not have permissions.', entity)]]
-          </div>
+          <div>[[i18n('userGroupPermissions.noPermissions', entity)]]</div>
         </div>
       </template>
     </div>
@@ -196,13 +194,13 @@ Used by `nuxeo-user-group-management`
 
     <paper-dialog id="dialog" modal class="vertical layout">
       <div class="horizontal layout confirm">
-        <p>[[i18n('userGroupPermissions.delete.confirm', 'Do you really want to delete this permission?')]]</p>
+        <p>[[i18n('userGroupPermissions.delete.confirm')]]</p>
       </div>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink dialog-dismiss>[[i18n('label.no', 'No')]]</paper-button>
+          <paper-button noink dialog-dismiss>[[i18n('label.no')]]</paper-button>
         </div>
-        <paper-button class="primary" noink dialog-confirm on-tap="_deleteAce">[[i18n('label.yes', 'Yes')]]</paper-button>
+        <paper-button class="primary" noink dialog-confirm on-tap="_deleteAce">[[i18n('label.yes')]]</paper-button>
       </div>
     </paper-dialog>
   </template>
@@ -307,10 +305,10 @@ Used by `nuxeo-user-group-management`
           var begin = ace.begin || null;
           var end = ace.end || null;
           var format = 'D MMM YYYY';
-          var sinceStr = this.i18n('userGroupPermissions.since', 'Since') + ' ';
-          var fromStr = this.i18n('userGroupPermissions.from', 'From') + ' ';
-          var untilStr = this.i18n('userGroupPermissions.until', 'Until') + ' ';
-          var untilMiddleStr = ' ' + this.i18n('userGroupPermissions.untilMiddle', 'until') + ' ';
+          var sinceStr = this.i18n('userGroupPermissions.since') + ' ';
+          var fromStr = this.i18n('userGroupPermissions.from') + ' ';
+          var untilStr = this.i18n('userGroupPermissions.until') + ' ';
+          var untilMiddleStr = ' ' + this.i18n('userGroupPermissions.untilMiddle') + ' ';
           if (begin !== null && end === null) {
             return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
           } else if (begin === null && end !== null) {
@@ -318,7 +316,7 @@ Used by `nuxeo-user-group-management`
           } else if (begin !== null && end !== null) {
             return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
           } else {
-            return this.i18n('userGroupPermissions.permanent', 'Permanent');
+            return this.i18n('userGroupPermissions.permanent');
           }
         },
 

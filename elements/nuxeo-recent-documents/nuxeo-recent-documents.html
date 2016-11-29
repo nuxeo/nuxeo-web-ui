@@ -101,8 +101,8 @@ Contributors:
       <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document"
         selected-item="{{selectedRecent}}" items="{{favorites}}"
         selection-enabled
-        empty-label="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]"
-        empty-label-when-filtered="[[i18n('recentDocuments.empty', 'There are no recent documents to display.')]]">
+        empty-label="[[i18n('recentDocuments.empty')]]"
+        empty-label-when-filtered="[[i18n('recentDocuments.empty')]]">
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box vertical layout">
