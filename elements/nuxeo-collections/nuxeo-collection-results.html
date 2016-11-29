@@ -45,8 +45,8 @@ Contributors:
       </div>
       <nuxeo-results id="results" name$="[[_computeName(collection)]]" selected-items="{{selectedItems}}"
         items="{{items}}"
-        empty-label="[[i18n('collections.noDocument', 'There are no documents in this collection. You can add documents from the document view or in bulk from a list view.')]]"
-        empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered', 'There are no documents in this collection with these criteria.')]]">
+        empty-label="[[i18n('collections.noDocument')]]"
+        empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]">
           <div class="actions">
             <nuxeo-slot class="actions" slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </div>

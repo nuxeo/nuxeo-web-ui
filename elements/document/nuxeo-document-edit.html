@@ -193,8 +193,7 @@ Contributors:
               // error handling
               function() {
                 this.$.container.hidden = true;
-                this.$.error.show('404', url,
-                  this.i18n('documentEdit.layoutNotFound', 'Failed to find edit layout for {0}', this.document.type));
+                this.$.error.show('404', url, this.i18n('documentEdit.layoutNotFound', this.document.type));
               });
           } else {
             this._createLayout();

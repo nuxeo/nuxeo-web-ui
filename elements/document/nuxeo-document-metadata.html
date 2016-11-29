@@ -120,8 +120,7 @@ Contributors:
               // error handling
               function() {
                 this.$['metadata'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentMetadata.layoutNotFound',
-                  'Failed to find metadata layout for {0}', this.document.type));
+                this.$.error.show('404', url, this.i18n('documentMetadata.layoutNotFound', this.document.type));
               });
           } else {
             this._createLayout();

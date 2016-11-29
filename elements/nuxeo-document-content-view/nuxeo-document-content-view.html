@@ -375,7 +375,7 @@ Contributors:
 
         _dragoverImport: function(e) {
           e.preventDefault();
-          this.$.toast.text = this.i18n('documentContentView.drag.import', 'Drop to import');
+          this.$.toast.text = this.i18n('documentContentView.drag.import');
           this.$.toast.open();
           this.toggleClass('dragging', true, this.$.grid);
           this.toggleClass('dragging', true, this.$.table);

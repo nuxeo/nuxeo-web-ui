@@ -360,9 +360,9 @@ Contributors:
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('documentImportForm.clickOrDrop', 'Click to select files or drag them to upload')]]</a>
+                  [[i18n('documentImportForm.clickOrDrop')]]</a>
               </div>
-              <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]</span>
+              <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout">
                 <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
               </div>
@@ -372,7 +372,9 @@ Contributors:
             <div class="drop-scrollable">
               <div class="vertical layout flex">
                 <div class="horizontal layout wrap baseline">
-                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.localFiles','Local Files')]]</span>
+                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
+                    [[i18n('documentImportForm.localFiles')]]
+                  </span>
                   <template is="dom-repeat" items="[[localFiles]]" as="file">
                     <!-- local file -->
                     <div class="file-to-import horizontal layout">
@@ -401,11 +403,13 @@ Contributors:
                       </div>
                       <div class="clear">
                         <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
+                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
                       </div>
                     </div>
                   </template>
-                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">[[i18n('documentImportForm.remoteFiles','Remote Files')]]</span>
+                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
+                    [[i18n('documentImportForm.remoteFiles')]]
+                  </span>
                   <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                     <!-- remote file -->
                     <div class="file-to-import horizontal layout">
@@ -424,7 +428,7 @@ Contributors:
                       </div>
                       <div class="horizontal layout center">
                         <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove', 'Remove')]]</paper-tooltip>
+                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
                       </div>
                     </div>
                   </template>
@@ -434,7 +438,7 @@ Contributors:
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
-                <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom', 'or link files from')]]&nbsp;</span>
+                <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span>
                 <div class="importActions horizontal layout">
                   <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
                 </div>
@@ -446,7 +450,7 @@ Contributors:
           <div class="flex start-justified">
             <paper-button dialog-dismiss
                           on-tap="_cancel"
-                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+                          disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
           <paper-button noink
                         class="primary"
@@ -458,10 +462,10 @@ Contributors:
                         class="primary"
                         on-tap="_import"
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                        [[i18n('command.create', 'Create')]]
+                        [[i18n('command.create')]]
                       </paper-button>
           <div class="horizontal layout" hidden$="[[!_creating]]">
-            <span class="importing-label">[[i18n('documentImport.importing','Importing...')]]</span>
+            <span class="importing-label">[[i18n('documentImport.importing')]]</span>
             <paper-spinner-lite active></paper-spinner-lite>
           </div>
         </div>
@@ -508,7 +512,7 @@ Contributors:
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
+                        [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
                     </div>
                     <iron-icon icon="icons:check-circle"
@@ -524,7 +528,7 @@ Contributors:
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer','Unchecked files will be discarded')]]
+                        [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
                     </div>
                     <iron-icon icon="icons:check-circle"
@@ -540,37 +544,37 @@ Contributors:
           <div class="flex start-justified">
             <paper-button dialog-dismiss
                           on-tap="_cancel"
-                          disabled$="[[_creating]]">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+                          disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back', 'Back')]]</paper-button>-->
+          <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back')]]</paper-button>-->
 
           <paper-button noink
                         on-tap="_previousFile"
                         disabled$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
-                        &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument', 'Edit Previous')]]
+                        &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
                         disabled$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
-                        [[i18n('documentImportForm.nextDocument', 'Edit Next')]]&nbsp;&#x276f;
+                        [[i18n('documentImportForm.nextDocument')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
                         disabled$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
-                        [[i18n('documentImportForm.applyToAll', 'Apply to All')]]
+                        [[i18n('documentImportForm.applyToAll')]]
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_submit"
                         disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
-                        [[i18n('command.create', 'Create')]]
+                        [[i18n('command.create')]]
                       </paper-button>
           <div class="horizontal layout" hidden$="[[!_creating]]">
-            <span class="importing-label">[[i18n('documentImport.importing','Importing...')]]</span>
+            <span class="importing-label">[[i18n('documentImport.importing')]]</span>
             <paper-spinner-lite active></paper-spinner-lite>
           </div>
         </div>
@@ -827,9 +831,7 @@ Contributors:
 
         _getRemainingDocs: function() {
           var count = this._getTotalFileCount();
-          return count > 1 ? this.i18n('documentImportForm.addProperties.otherDocuments',
-                                       '+ {0} other documents',
-                                       count - 1 - this.docIdx) : '';
+          return count > 1 ? this.i18n('documentImportForm.addProperties.otherDocuments', count - 1 - this.docIdx) : '';
         },
 
         _copyFileData: function(originIdx, destIdx) {
@@ -1203,8 +1205,7 @@ Contributors:
         _parentValidated: function() {
           if (this.canCreate && this._importDocTypes && this._importDocTypes.length === 0) {
             this.set('canCreate', false);
-            this.set('targetLocationError',
-              this.i18n('documentImport.error.cannotImport','Unable to import documents in this location'));
+            this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
           }
         },
 

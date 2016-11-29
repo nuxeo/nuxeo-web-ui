@@ -60,18 +60,18 @@ Contributors:
     </style>
 
     <div class="layout vertical row">
-      <label>[[i18n('defaultSearch.fullText', 'Full Text')]]</label>
+      <label>[[i18n('defaultSearch.fullText')]]</label>
       <paper-input id="searchInput" autofocus="true"
                    value="{{searchTerm}}" tabindex="0"
                    type="search"
-                   placeholder="[[i18n('defaultSearch.fullText.placeholder', 'Search something ...')]]"
+                   placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
                    no-label-float>
       </paper-input>
     </div>
 
     <div class="row layout vertical">
-      <label>[[i18n('defaultSearch.authors', 'Authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder', 'Search for contributors...')]]"
+      <label>[[i18n('defaultSearch.authors')]]</label>
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true">

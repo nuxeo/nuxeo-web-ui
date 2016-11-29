@@ -255,10 +255,9 @@ Contributors:
           <template is="dom-repeat" items="[[tasks]]" as="task">
             <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
             <!-- TODO: review labels with embedded markup tags -->
-            [[i18n('documentPage.to.process', 'You have a task to process before ')]]
-            [[formatDate(task.dueDate)]]
+            [[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]
             <paper-button noink class="process-task" on-tap="_processTask">
-              [[i18n('documentPage.process.task', 'Process')]]
+              [[i18n('documentPage.process.task')]]
             </paper-button>
           </template>
         </div>
@@ -284,13 +283,13 @@ Contributors:
                     <div class="graph-container">
                       <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
                     </div>
-                    <paper-button noink dialog-dismiss>[[i18n('command.close', 'Close')]]</paper-button>
+                    <paper-button noink dialog-dismiss>[[i18n('command.close')]]</paper-button>
                   </paper-dialog>
-                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph', 'View Graph')]]</paper-button>
+                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
                 </div>
                 <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
                   <div class="buttons">
-                    <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later', 'Process later')]]</paper-button>
+                    <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later')]]</paper-button>
                   </div>
                 </nuxeo-document-task>
               </paper-card>
@@ -305,31 +304,31 @@ Contributors:
             <div class="horizontal layout wrap">
               <div class="details ctn">
                 <div>
-                  <label class="col">[[i18n('documentPage.added.on', 'Created on')]]</label>
+                  <label class="col">[[i18n('documentPage.added.on')]]</label>
                   <span>[[formatDate(document.properties.dc:created)]]</span>
                 </div>
                 <div>
-                  <label class="col">[[i18n('documentPage.added.by', 'By')]]</label>
+                  <label class="col">[[i18n('documentPage.added.by')]]</label>
                   <span><nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag></span>
                 </div>
                 <div>
-                  <label class="col">[[i18n('label.dublincore.state', 'State')]]</label>
+                  <label class="col">[[i18n('label.dublincore.state')]]</label>
                   <span><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></span>
                 </div>
                 <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
                   <div>
-                    <label class="col">[[i18n('label.dublincore.version', 'Version')]]</label>
+                    <label class="col">[[i18n('label.dublincore.version')]]</label>
                     <span><nuxeo-document-versions document="[[document]]"></nuxeo-document-versions></span>
                   </div>
                 </template>
                 <div>
-                  <label class="col">[[i18n('label.dublincore.contributors', 'Contributors')]]</label>
+                  <label class="col">[[i18n('label.dublincore.contributors')]]</label>
                   <span><nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users></span>
                 </div>
               </div>
               <template is="dom-if" if="[[hasWorkflowRunning]]">
                 <div class="process ctn">
-                  <nuxeo-tag uppercase class="process-running">[[i18n('documentPage.process.running', 'Process running')]]</nuxeo-tag>
+                  <nuxeo-tag uppercase class="process-running">[[i18n('documentPage.process.running')]]</nuxeo-tag>
                 </div>
               </template>
             </div>
@@ -346,10 +345,10 @@ Contributors:
 
           <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
             <paper-card class="sidecard">
-              <p class="title">[[i18n('documentPage.process.title', 'Process')]]</p>
+              <p class="title">[[i18n('documentPage.process.title')]]</p>
               <div class="vertical layout card-content">
                 <div>
-                  <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder', 'Start a process')]]">
+                  <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]">
                     <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
                       <template is="dom-repeat" items="[[processes]]" as="process">
                         <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
@@ -358,21 +357,21 @@ Contributors:
                   </paper-dropdown-menu>
                 </div>
                 <div>
-                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">[[i18n('documentPage.process.start', 'Start')]]</paper-button>
+                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
                 </div>
               </div>
             </paper-card>
           </template>
           <template is="dom-if" if="[[hasCollections(document)]]">
             <paper-card class="sidecard">
-              <p class="title">[[i18n('documentPage.collections', 'Collections')]]</p>
+              <p class="title">[[i18n('documentPage.collections')]]</p>
               <div class="horizontal layout wrap card-content">
                 <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
               </div>
             </paper-card>
           </template>
           <paper-card class="sidecard">
-            <p class="title">[[i18n('documentPage.activity', 'Activity')]]</p>
+            <p class="title">[[i18n('documentPage.activity')]]</p>
             <div class="vertical layout card-content audit">
               <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
             </div>

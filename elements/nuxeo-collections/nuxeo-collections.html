@@ -194,10 +194,10 @@ Contributors:
         <h1>[[selectedCollection.title]]</h1>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
-        <paper-tooltip for="backToCollections">[[i18n('collections.backToCollections', 'Back to collections list')]]</paper-tooltip>
+        <paper-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        <h1>[[i18n('collections.heading', 'Collections')]]</h1>
+        <h1>[[i18n('collections.heading')]]</h1>
       </template>
     </div>
 
@@ -218,8 +218,8 @@ Contributors:
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
               selected-item="{{selectedCollection}}"
               selection-enabled as="collection"
-              empty-label="[[i18n('collections.empty', 'There is no collection to display')]]"
-              empty-label-when-filtered="[[i18n('collections.empty', 'There is no collection to display')]]">
+              empty-label="[[i18n('collections.empty')]]"
+              empty-label-when-filtered="[[i18n('collections.empty')]]">
               <template>
                 <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                   <div class="collection-box vertical layout">
@@ -231,11 +231,11 @@ Contributors:
                     </div>
                     <div class="collection-detail">
                       <div class="date horizontal layout center">
-                        <span class="collection-property">[[i18n('collections.lastModified', 'Last Modified')]] </span>
+                        <span class="collection-property">[[i18n('collections.lastModified')]] </span>
                         <span>[[_formatDate(collection.properties.dc:modified)]]</span>
                       </div>
                       <div class="layout center">
-                        <span class="collection-property">[[i18n('collections.ownedBy', 'Owned by')]]</span>
+                        <span class="collection-property">[[i18n('collections.ownedBy')]]</span>
                         <nuxeo-user-tag user="[[collection.properties.dc:creator]]"></nuxeo-user-tag>
                       </div>
                     </div>
@@ -259,8 +259,8 @@ Contributors:
             <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
               selected-item="{{selectedMember}}"
               selection-enabled as="member"
-              empty-label="[[i18n('collections.members.empty', 'Empty collection')]]"
-              empty-label-when-filtered="[[i18n('collections.members.empty', 'Empty collection')]]">
+              empty-label="[[i18n('collections.members.empty')]]"
+              empty-label-when-filtered="[[i18n('collections.members.empty')]]">
               <template>
                 <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                   <div class="list-item-box vertical layout">

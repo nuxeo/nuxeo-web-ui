@@ -80,10 +80,10 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.parent', 'Parent')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
         <span class="required">*</span>
       </div>
-      <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.selectParent', 'Select a parent')]]">
+      <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.selectParent')]]">
         <paper-menu class="dropdown-content" selected="{{entry.properties.parent}}" attr-for-selected="name">
           <template is="dom-repeat" items="[[parentResponse.entries]]">
             <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
@@ -94,7 +94,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.id', 'ID')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.id')]]</label>
         <span class="required">*</span>
       </div>
       <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required readonly$="[[!new]]">
@@ -102,14 +102,14 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.label', 'Label')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.label')]]</label>
       </div>
       <input is="iron-input" name="label" value="{{entry.properties.label::change}}" class="flex"></input>
     </div>
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.obsolete', 'Obsolete')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
       </div>
       <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
         on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
@@ -117,7 +117,7 @@ Contributors:
 
     <div class="row layout horizontal">
       <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.ordering', 'Ordering')]]</label>
+        <label>[[i18n('vocabularyManagement.edit.ordering')]]</label>
       </div>
       <input type="number" is="iron-input" name="ordering" value="{{entry.properties.ordering::change}}" class="flex"></input>
     </div>

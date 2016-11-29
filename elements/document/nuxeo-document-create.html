@@ -184,7 +184,7 @@ Contributors:
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
           </div>
         </div>
       </div>
@@ -213,10 +213,10 @@ Contributors:
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel', 'Cancel')]]</paper-button>
+            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button on-tap="_back">[[i18n('command.back', 'Back')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_create" disabled$="[[!canCreate]]">[[i18n('command.create', 'Create')]]</paper-button>
+          <paper-button on-tap="_back">[[i18n('command.back')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_create" disabled$="[[!canCreate]]">[[i18n('command.create')]]</paper-button>
         </div>
       </div>
 
@@ -385,7 +385,7 @@ Contributors:
         },
 
         _newDocumentLabel: function() {
-          return this.i18n('documentCreationForm.newDoc.heading', 'New {0}', this._getTypeLabel(this.selectedDocType));
+          return this.i18n('documentCreationForm.newDoc.heading', this._getTypeLabel(this.selectedDocType));
         },
 
         _clear: function() {

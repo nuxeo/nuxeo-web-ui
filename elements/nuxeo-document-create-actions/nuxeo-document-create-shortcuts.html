@@ -78,11 +78,11 @@ Contributors:
             var el = document.createElement('nuxeo-document-create-shortcut');
             el.type = type;
             el.icon =  'images/doctypes/' + type + '.svg';
-            el.label = this.i18n('label.document.type.' + type, type);
+            el.label = this.i18n('label.document.type.' + type);
             shorcuts.push(el);
           }
         }.bind(this));
-        
+
         this._putNodes(Polymer.dom(this.$.shortcuts), shorcuts.reverse());
       },
 

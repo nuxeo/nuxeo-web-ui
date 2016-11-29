@@ -97,7 +97,7 @@ Contributors:
 
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
       selected-item="{{_selection}}"
-      empty-label="[[i18n('tasksList.noTasks', 'You currently do not have any tasks')]]"
+      empty-label="[[i18n('tasksList.noTasks')]]"
       selection-enabled>
       <template>
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]" on-tap="_tap">
@@ -110,11 +110,11 @@ Contributors:
             </div>
             <div class="task-detail">
               <div class="taskDoc horizontal layout center">
-                <span class="task-property">[[i18n('tasksList.on', 'On  ')]]</span>
+                <span class="task-property">[[i18n('tasksList.on')]]</span>
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
               <div class="horizontal layout center">
-                <span class="due-date task-property">[[i18n('tasksList.dueDate','Due date ')]]
+                <span class="due-date task-property">[[i18n('tasksList.dueDate')]]
                 <span class="date">[[_formatDate(task.dueDate)]]</span></span>
               </div>
             </div>

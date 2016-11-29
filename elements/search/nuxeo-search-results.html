@@ -35,7 +35,7 @@ Contributors:
 
     <paper-header-panel class="flex">
       <div class="paper-header layout horizontal">
-        <span class="flex">[[i18n('searchResults.results', 'Search Results')]]</span>
+        <span class="flex">[[i18n('searchResults.results')]]</span>
         <content select=".actions"></content>
       </div>
 
@@ -43,8 +43,8 @@ Contributors:
                      name="[[name]]"
                      display-mode="[[displayMode]]"
                      selected-items="{{selectedItems}}"
-                     empty-label="[[i18n('searchResults.noResults', 'No results')]]"
-                     empty-label-when-filtered="[[i18n('searchResults.noResults', 'No results')]]">
+                     empty-label="[[i18n('searchResults.noResults')]]"
+                     empty-label-when-filtered="[[i18n('searchResults.noResults')]]">
         <div class="actions">
           <nuxeo-slot slot="SEARCH_ACTIONS" model="[[actionContext]]"/>
         </div>

@@ -185,8 +185,7 @@ Contributors:
         <div class="card-content info-bar">
           <iron-icon class="icon" icon="icons:info"></iron-icon>
           <div class="message">
-            [[i18n('versions.info', "You're viewing the {0}.{1} version",
-            document.properties.uid:major_version, document.properties.uid:minor_version)]]
+            [[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]
           </div>
           <div class="actions">
             <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
