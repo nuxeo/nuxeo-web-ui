@@ -8834,7 +8834,7 @@ exports.encode = exports.stringify = require('./encode');
 module.exports={
   "name": "nuxeo",
   "description": "JavaScript client library for Nuxeo API",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "main": "./lib/index.js",
   "author": "Nuxeo (http://www.nuxeo.com/)",
   "contributors": [
@@ -8906,14 +8906,14 @@ module.exports={
     "release": "./bin/release.sh"
   },
   "browser": {
+    "./lib/deps/fetch.js": "./lib/deps/fetch-browser.js",
     "./lib/deps/promise.js": "./lib/deps/promise-browser.js",
     "./lib/deps/form-data.js": "./lib/deps/form-data-browser.js",
-    "./lib/deps/fetch.js": "./lib/deps/fetch-browser.js",
     "./lib/deps/utils/buffer.js": "./lib/deps/utils/buffer-browser.js"
   },
   "react-native": {
     "./lib/deps/fetch.js": "./lib/deps/fetch-react-native.js",
-    "./lib/deps/utils/buffer.js": "./lib/deps/utils/buffer-browser.js"
+    "./lib/deps/promise.js": "./lib/deps/promise.js"
   },
   "files": [
     "lib",

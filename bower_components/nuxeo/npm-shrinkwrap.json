@@ -1,6 +1,6 @@
 {
   "name": "nuxeo",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "dependencies": {
     "abbrev": {
       "version": "1.0.9",
@@ -1040,14 +1040,14 @@
       }
     },
     "engine.io": {
-      "version": "1.8.0",
-      "from": "engine.io@1.8.0",
-      "resolved": "https://registry.npmjs.org/engine.io/-/engine.io-1.8.0.tgz"
+      "version": "1.8.1",
+      "from": "engine.io@1.8.1",
+      "resolved": "https://registry.npmjs.org/engine.io/-/engine.io-1.8.1.tgz"
     },
     "engine.io-client": {
-      "version": "1.8.0",
-      "from": "engine.io-client@1.8.0",
-      "resolved": "https://registry.npmjs.org/engine.io-client/-/engine.io-client-1.8.0.tgz",
+      "version": "1.8.1",
+      "from": "engine.io-client@1.8.1",
+      "resolved": "https://registry.npmjs.org/engine.io-client/-/engine.io-client-1.8.1.tgz",
       "dependencies": {
         "component-emitter": {
           "version": "1.2.1",
@@ -4379,9 +4379,9 @@
       "resolved": "https://registry.npmjs.org/json3/-/json3-3.3.2.tgz"
     },
     "json5": {
-      "version": "0.5.0",
+      "version": "0.5.1",
       "from": "json5@>=0.5.0 <0.6.0",
-      "resolved": "https://registry.npmjs.org/json5/-/json5-0.5.0.tgz"
+      "resolved": "https://registry.npmjs.org/json5/-/json5-0.5.1.tgz"
     },
     "jsonify": {
       "version": "0.0.0",
@@ -5591,9 +5591,9 @@
       "resolved": "https://registry.npmjs.org/slash/-/slash-1.0.0.tgz"
     },
     "socket.io": {
-      "version": "1.6.0",
+      "version": "1.7.1",
       "from": "socket.io@>=1.4.5 <2.0.0",
-      "resolved": "https://registry.npmjs.org/socket.io/-/socket.io-1.6.0.tgz"
+      "resolved": "https://registry.npmjs.org/socket.io/-/socket.io-1.7.1.tgz"
     },
     "socket.io-adapter": {
       "version": "0.5.0",
@@ -5601,9 +5601,9 @@
       "resolved": "https://registry.npmjs.org/socket.io-adapter/-/socket.io-adapter-0.5.0.tgz"
     },
     "socket.io-client": {
-      "version": "1.6.0",
-      "from": "socket.io-client@1.6.0",
-      "resolved": "https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.6.0.tgz",
+      "version": "1.7.1",
+      "from": "socket.io-client@1.7.1",
+      "resolved": "https://registry.npmjs.org/socket.io-client/-/socket.io-client-1.7.1.tgz",
       "dependencies": {
         "component-emitter": {
           "version": "1.2.1",
@@ -5791,16 +5791,9 @@
       "resolved": "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
     },
     "through2": {
-      "version": "2.0.1",
-      "from": "through2@^2.0.0",
-      "resolved": "https://registry.npmjs.org/through2/-/through2-2.0.1.tgz",
-      "dependencies": {
-        "readable-stream": {
-          "version": "2.0.6",
-          "from": "readable-stream@~2.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.0.6.tgz"
-        }
-      }
+      "version": "2.0.3",
+      "from": "through2@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/through2/-/through2-2.0.3.tgz"
     },
     "thunks": {
       "version": "4.7.5",
