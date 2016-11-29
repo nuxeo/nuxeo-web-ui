@@ -145,8 +145,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('`--paper-radio-button-ink-size` sets the ink size', function() {
         var radioButton = fixture('CustomInkSize');
-        assert.equal(radioButton.getComputedStyleValue('--calculated-paper-radio-button-size'), '25px');
-        assert.equal(radioButton.getComputedStyleValue('--calculated-paper-radio-button-ink-size'), '30px');
+        assert.equal(radioButton.getComputedStyleValue('--calculated-paper-radio-button-size').trim(), '25px');
+        assert.equal(radioButton.getComputedStyleValue('--calculated-paper-radio-button-ink-size').trim(), '30px');
       });
 
       test('ink sizes are near (3 * radio button size) by default', function() {

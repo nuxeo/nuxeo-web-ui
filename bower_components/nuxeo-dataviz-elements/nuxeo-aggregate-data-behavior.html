@@ -333,7 +333,7 @@ limitations under the License.
       var term = {range: {}};
       var range = term.range[this.dateField] = {};
       if (this.startDate) { range.gte = this.startDate; }
-      if (this.endDate) { range.lte = this.endDate + '||+1d'; }
+      if (this.endDate) { range.lte = this.endDate; }
       return term;
     },
 
