@@ -32,33 +32,31 @@ Contributors:
         display: block;
       }
 
-      #header {
+      paper-header-panel {
+        height: 100vh;
+      }
+
+      paper-toolbar {
         height: 59px;
         color: var(--nuxeo-header-title-color);
         background: var(--nuxeo-header-background);
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-        font-size: 1.05em;
-        font-weight: 400;
-        padding: 0 4.3em 0 1.7em;
-        position: fixed;
-        top: 0;
-        z-index: 2;
+      }
+
+      ::content .header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         width: 100%;
+        padding: 0 70px 0 24px;
       }
-
-      #content {
-        margin-top: 59px;
-      }
-
     </style>
 
-    <div id="header" class="layout horizontal center">
-      <content select=".header"></content>
-    </div>
-
-    <div id="content" class="layout vertical">
+    <paper-header-panel>
+      <paper-toolbar>
+        <content select=".header"></content>
+      </paper-toolbar>
       <content select=".content"></content>
-    </div>
+    </paper-header-panel>
 
   </template>
 </dom-module>

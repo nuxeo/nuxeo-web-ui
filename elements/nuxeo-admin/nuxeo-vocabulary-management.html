@@ -30,16 +30,6 @@ Contributors:
         display: block;
       }
 
-      paper-header-panel {
-        height: 100vh;
-      }
-
-      .title {
-        display: block;
-        font-size: 1.4rem;
-        padding: 0.5em;
-      }
-
       paper-dropdown-menu {
         --paper-input-container-underline: {
           display: none;
@@ -125,8 +115,8 @@ Contributors:
       </div>
     </paper-dialog>
 
-    <paper-header-panel class="flex">
-      <div class="paper-header layout horizontal">
+    <nuxeo-page>
+      <div class="header layout horizontal">
         <span>[[i18n('vocabularyManagement.heading')]]</span>
       </div>
       <div class="content">
@@ -168,9 +158,8 @@ Contributors:
             </template>
           </nuxeo-data-table>
         </template>
-
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
   <script>

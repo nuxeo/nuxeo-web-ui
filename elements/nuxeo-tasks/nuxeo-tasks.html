@@ -33,10 +33,6 @@ Contributors:
         display: block;
       }
 
-      paper-header-panel {
-        height: 100vh;
-      }
-
       h3 {
         margin: 0;
         padding: 0;
@@ -162,8 +158,8 @@ Contributors:
                     enrichers="preview"
                     response="{{currentTaskDocument}}"></nuxeo-document>
 
-    <paper-header-panel class="flex">
-      <div class="paper-header layout horizontal">
+    <nuxeo-page>
+      <div class="header">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <a href="[[_href(currentTaskDocument)]]">[[currentTaskDocument.properties.dc:title]]</a>
         </template>
@@ -258,7 +254,7 @@ Contributors:
         </template>
 
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
   <script>

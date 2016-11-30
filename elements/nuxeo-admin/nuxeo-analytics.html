@@ -30,47 +30,15 @@ Contributors:
         display: block;
       }
 
-      paper-header-panel {
-        height: 100vh;
-      }
-
-      .paper-header paper-dropdown-menu {
-        --paper-input-container-input: {
-          font-size: 1.05em;
-          font-weight: 400;
-          font-family: var(--nuxeo-app-font);
-          text-align: left;
-          color: var(--nuxeo-header-title-color);
-        };
-        background-color: rgba(0,0,0,0.05);
-      }
-
-      .paper-header ::content paper-button,
-      .paper-header ::content paper-icon-button {
-        background-color: rgba(0,0,0,0.05);
-      }
-
-      .paper-header ::content paper-menu-button {
-        padding: 0;
-        margin-left: 1em;
-      }
-
-      ::content .unfocused-line.paper-input-container,
-      ::content .focused-line.paper-input-container {
-        background-color: transparent !important;
-      }
-
-      ::content paper-input-container .input-content iron-icon {
-        margin-right: .3em;
-        color: var(--nuxeo-link-hover-color);
-      }
-
-      .title {
+      .header .title {
         @apply(--layout-flex);
       }
 
-      ::content #analyticsViews {
+      .header paper-listbox {
         @apply(--layout-horizontal);
+      }
+
+      ::content #analyticsViews {
         --paper-listbox-background-color: transparent;
       }
 
@@ -82,7 +50,7 @@ Contributors:
         font-size: 12px;
         font-weight: 500;
         cursor: pointer;
-        margin: 0 0 0 8px;
+        margin: 0 4px;
         color: var(--nuxeo-pill-text-color);
         --paper-item-min-height: 32px;
         --paper-item-selected: {
@@ -108,10 +76,10 @@ Contributors:
 
     </style>
 
-    <paper-header-panel>
-      <div class="paper-header">
+    <nuxeo-page>
+      <div class="header">
         <div class="title">[[i18n('analytics.heading')]]</div>
-        <paper-listbox id="analyticsViews" selected="{{selectedTab}}" attr-for-selected="name">
+        <paper-listbox id="analyticsViews" selected="{{selected}}" attr-for-selected="name">
           <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution')]]</paper-item>
           <paper-item name="repository">[[i18n('analytics.repository')]]</paper-item>
           <paper-item name="search">[[i18n('analytics.search')]]</paper-item>
@@ -121,7 +89,7 @@ Contributors:
       </div>
       <div class="content">
         <template is="dom-if" if="[[visible]]">
-          <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+          <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="ANALYTICS_PAGES"></nuxeo-slot>
             <nuxeo-distribution-analytics name="document-distribution"></nuxeo-distribution-analytics>
             <nuxeo-repository-analytics name="repository"></nuxeo-repository-analytics>
@@ -130,23 +98,18 @@ Contributors:
           </iron-pages>
         </template>
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
   <script>
     (function() {
       'use strict';
-
       Polymer({
         is: 'nuxeo-analytics',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          selectedTab: String,
-          visible: Boolean
-        },
-
-        _equals: function(a, b) {
-          return a === b;
+          visible: Boolean,
+          selected: String
         }
       });
     })();

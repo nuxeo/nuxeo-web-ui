@@ -35,31 +35,6 @@ Contributors:
   <template>
     <style>
 
-      paper-header-panel {
-        height: 100vh;
-      }
-
-      .paper-header paper-dropdown-menu {
-        --paper-input-container-input: {
-          font-size: 1.05em;
-          font-family: var(--nuxeo-app-font);
-          text-align: left;
-          color: var(--nuxeo-header-title-color);
-          font-weight: 600;
-        };
-        background-color: rgba(0,0,0,0.05);
-      }
-
-      .paper-header ::content paper-menu-button {
-        padding: 0;
-        margin-left: 1em;
-      }
-
-      paper-dropdown-menu ::content .unfocused-line.paper-input-container,
-      paper-dropdown-menu ::content .focused-line.paper-input-container {
-        background-color: transparent;
-      }
-
       ::content paper-input-container .input-content iron-icon {
         margin-right: .3em;
         color: var(--nuxeo-link-hover-color);
@@ -162,9 +137,9 @@ Contributors:
     </style>
 
     <!-- Main content -->
-    <paper-header-panel class="main">
+    <nuxeo-page class="main">
 
-      <div class="paper-header">
+      <div class="header">
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox id="documentViews" selected="{{selectedTab}}" attr-for-selected="name">
@@ -227,7 +202,7 @@ Contributors:
 
         </iron-pages>
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
 
