@@ -90,7 +90,7 @@ Contributors:
 
     <div class="flex-layout">
       <!-- Number of calls per PageProvider -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          grouped-by="pageProviderName"
                          data="{{callsPerProvider}}"
                          index="[[index]]">
@@ -106,7 +106,7 @@ Contributors:
       </paper-card>
 
       <!-- Number of calls per hour -->
-     <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+     <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                         with-date-intervals="hour"
                         without-extended-bounds
                         date-format="HH"
@@ -125,7 +125,7 @@ Contributors:
      </paper-card>
 
      <!-- Result ranges -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          with-ranges='{"resultsCount":[
                        {"key": "no result", "to": 1 },
                        {"key": "less than 50", "from" : 1, "to": 50},
@@ -150,7 +150,7 @@ Contributors:
       </paper-card>
 
       <!-- Most used expressions for full text search  -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext"
                          group-limit="5"
                          data="{{callsPerFT}}"
@@ -171,7 +171,7 @@ Contributors:
       </paper-card>
 
       <!-- Searches by number of pages displayed -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          with-ranges='{"pageIndex":[
                            {"key": "First page", "from" : 0, "to": 1 },
                            {"key": "Page 2", "from" : 1, "to": 2},
@@ -196,7 +196,7 @@ Contributors:
       </paper-card>
 
       <!-- Searches by filters used -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          grouped-by="searchFields"
                          group-limit="5"
                          data="{{callByFilters}}">

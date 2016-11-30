@@ -42,6 +42,9 @@ Nuxeo.ChartDataBehavior = {
         return entry.value;
       }
     })];
+  },
+  _extendEndDate: function(date) {
+    return date ? date + 'T23:59:59.999' : date;
   }
 };
 </script>

@@ -108,7 +108,7 @@ Contributors:
                         where='{"extended.downloadReason": "download"}'
                         grouped-by="docUUID"
                         group-limit="10"
-                        start-date="[[startDate]]" end-date="[[endDate]]"
+                        start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                         data="{{downloads}}">
       </nuxeo-audit-data>
 
@@ -137,7 +137,7 @@ Contributors:
       </paper-card>
 
       <!-- Number of documents -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                              metrics="cardinality(ecm:uuid)" data="{{totalCount}}"
                              index="[[index]]">
       </nuxeo-repository-data>
@@ -150,7 +150,7 @@ Contributors:
       </paper-card>
 
       <!-- Document count per type -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                              grouped-by="ecm:primaryType"
                              group-limit="10"
                              data="{{typeCount}}"
@@ -167,7 +167,7 @@ Contributors:
       </paper-card>
 
       <!-- Top 10 creators -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                              grouped-by="dc:creator"
                              group-limit="10"
                              data="{{topCreators}}"
@@ -218,7 +218,7 @@ Contributors:
       </paper-card>
 
       <!-- Files by mime-type -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                              grouped-by="file:content.mime-type"
                              data="{{filesByMimeType}}"
                              index="[[index]]">
