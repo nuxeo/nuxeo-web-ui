@@ -118,14 +118,14 @@ Contributors:
         current-page="{{downloadedDocs}}">
       </nuxeo-page-provider>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading','Top Downloads')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]" elevation="0">
         <div class="card-content downloads">
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]">
-              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file', 'File')]]">
+              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
                 <template>[[item.title]]</template>
               </nuxeo-data-table-column>
-              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads','Downloads')]]">
+              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads')]]">
                 <template>[[_numberOfDownloads(item)]]</template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>
@@ -142,7 +142,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documents.heading','Documents')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documents.heading')]]" elevation="0">
         <div class="card-content">
           <iron-icon icon="icons:description"></iron-icon>
           <h1>[[totalCount]]</h1>
@@ -157,7 +157,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading','Document Types')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(typeCount)]]"
                      labels="[[_labels(typeCount)]]"
@@ -174,7 +174,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', 'Top {0} creators', '10')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(topCreators)]]"
                      labels="[[_labels(topCreators)]]"
@@ -191,7 +191,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading','Document Created Per Week')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]" elevation="0">
         <div class="card-content">
           <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
                       values="[[_values(docsCreatedPerWeek)]]"
@@ -208,7 +208,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading','Documents Modified Per Week')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]" elevation="0">
         <div class="card-content">
           <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
                       values="[[_values(docsModifiedPerWeek)]]"
@@ -224,7 +224,7 @@ Contributors:
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading', 'Files by Mime Type')]]" elevation="0">
+      <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]" elevation="0">
         <div class="card-content">
           <chart-pie values="[[_values(filesByMimeType)]]"
                      labels="[[_types(filesByMimeType)]]"
