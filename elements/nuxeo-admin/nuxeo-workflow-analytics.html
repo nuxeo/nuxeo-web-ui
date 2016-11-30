@@ -112,7 +112,7 @@ Contributors:
       <nuxeo-workflow-data workflow="[[workflow]]"
                            event="afterWorkflowFinish"
                            metrics="avg(timeSinceWfStarted)"
-                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                            data="{{avgWorkflowLength}}">
       </nuxeo-workflow-data>
 
@@ -127,7 +127,7 @@ Contributors:
       <nuxeo-workflow-data workflow="[[workflow]]"
                            event="afterWorkflowStarted"
                            grouped-by="workflowInitiator"
-                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                            data="{{initiators}}">
       </nuxeo-workflow-data>
 
@@ -144,7 +144,7 @@ Contributors:
       <nuxeo-workflow-data workflow="[[workflow]]"
                            event="afterWorkflowTaskEnded"
                            grouped-by="taskActor, action"
-                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                            data="{{numberOfActionsPerUser}}">
       </nuxeo-workflow-data>
 
@@ -163,7 +163,7 @@ Contributors:
                            event="afterWorkflowTaskEnded"
                            grouped-by="taskActor"
                            metrics="avg(timeSinceTaskStarted)"
-                           start-date="[[startDate]]" end-date="[[endDate]]"
+                           start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                            data="{{avgTaskDurationPerUser}}">
       </nuxeo-workflow-data>
 
