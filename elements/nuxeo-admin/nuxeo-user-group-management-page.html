@@ -30,10 +30,6 @@ Contributors:
         display: block;
       }
 
-      paper-header-panel {
-        height: 100vh;
-      }
-
       paper-card {
         @apply(--paper-card);
       }
@@ -46,8 +42,8 @@ Contributors:
       }
     </style>
 
-    <paper-header-panel class="flex">
-      <div class="paper-header layout horizontal">
+    <nuxeo-page>
+      <div class="header">
         <span class="flex">[[i18n('admin.usersAndGroups.heading')]]</span>
       </div>
       <div class="content">
@@ -62,7 +58,7 @@ Contributors:
           </div>
         </paper-card>
       </div>
-    </paper-header-panel>
+    </nuxeo-page>
 
   </template>
   <script>

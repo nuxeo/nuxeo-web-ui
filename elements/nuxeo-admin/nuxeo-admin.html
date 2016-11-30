@@ -30,7 +30,7 @@ Contributors:
 <dom-module id="nuxeo-admin">
   <template>
     <template is="dom-if" if="[[visible]]">
-      <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+      <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
 
         <nuxeo-page name="error">
           <div class="header"></div>
@@ -44,9 +44,11 @@ Contributors:
         <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
         <template is="dom-if" if="[[user.isAdministrator]]">
-          <nuxeo-analytics name="analytics" selected-tab="document-distribution"></nuxeo-analytics>
+          <nuxeo-analytics name="analytics" selected="document-distribution"></nuxeo-analytics>
         </template>
+
         <nuxeo-user-group-management-page name="user-group-management" is-administrator$="[[user.isAdministrator]]" entity="[[entity]]"></nuxeo-user-group-management-page>
+
         <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
 
       </iron-pages>
@@ -58,16 +60,12 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-admin',
-
         behaviors: [Nuxeo.I18nBehavior],
-
         properties: {
-          selectedTab: {
+          visible: Boolean,
+          selected: {
             type: String,
             value: 'analytics'
-          },
-          visible: {
-            type: Boolean
           },
           isAdministrator: {
             type: Boolean,

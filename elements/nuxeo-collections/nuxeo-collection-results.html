@@ -26,25 +26,21 @@ Contributors:
 <dom-module id="nuxeo-collection-results">
   <template>
 
-    <style>
-      paper-header-panel {
-        height: 100vh;
-      }
-    </style>
-
-    <paper-header-panel class="flex" >
-      <div class="paper-header layout horizontal">
-        <span class="flex">[[collection.title]]</span>
+    <nuxeo-page>
+      <div class="header">
+        <span>[[collection.title]]</span>
       </div>
-      <nuxeo-results id="results" name$="[[_computeName(collection)]]" selected-items="{{selectedItems}}"
-        items="{{items}}"
-        empty-label="[[i18n('collections.noDocument')]]"
-        empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]">
-          <div class="actions">
-            <nuxeo-slot class="actions" slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          </div>
-      </nuxeo-results>
-    </paper-header-panel>
+      <div class="content">
+        <nuxeo-results id="results" name$="[[_computeName(collection)]]" selected-items="{{selectedItems}}"
+          items="{{items}}"
+          empty-label="[[i18n('collections.noDocument')]]"
+          empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]">
+            <div class="actions">
+              <nuxeo-slot class="actions" slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            </div>
+        </nuxeo-results>
+      </div>
+    </nuxeo-page>
 
   </template>
   <script>
