@@ -26,15 +26,6 @@ Contributors:
 <dom-module id="nuxeo-user-tag">
   <template>
 
-    <style>
-      a, a:active, a:visited, a:focus {
-        @apply(--nuxeo-link);
-      }
-      a:hover {
-        @apply(--nuxeo-link-hover);
-      }
-    </style>
-
     <nuxeo-tag icon="icons:perm-identity">
       <template is="dom-if" if="[[_hasLink(user)]]">
         <a href$="[[_href(user)]]">[[_name(user)]]</a>

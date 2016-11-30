@@ -26,15 +26,6 @@ Contributors:
 <dom-module id="nuxeo-group-tag">
   <template>
 
-    <style>
-      a, a:active, a:visited, a:focus {
-        @apply(--nuxeo-link);
-      }
-      a:hover {
-        @apply(--nuxeo-link-hover);
-      }
-    </style>
-
     <nuxeo-tag icon="social:person">
       <template is="dom-if" if="[[!disabled]]">
         <a href$="[[_href(group)]]">[[_label(group)]]</a>
