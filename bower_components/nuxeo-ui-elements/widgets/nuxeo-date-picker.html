@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../paper-input/paper-input.html">
+<link rel="import" href="../moment-import.html">
 
 <!--
 An element for picking a W3C YYYY-MM-DDThh:mm:ss.sTZD based date (eg 1997-07-16T19:20:30.45+01:00).
@@ -55,14 +56,14 @@ Example:
       },
 
       _valueChanged: function() {
-        if (this.value && this.value.indexOf('T') === 10) {
-          this.$.date.value = this.value  .substring(0, 10)
+        if (this.$.date.value.length === 0 && this.value && this.value.indexOf('T') === 10) {
+           this.$.date.value = moment(this.value).format('YYYY-MM-DD');
         }
       },
 
       _onChange: function() {
         if (this.$.date.value && this.$.date.value.length > 0) {
-          this.value = new Date(this.$.date.value).toJSON();
+          this.value = moment(this.$.date.value).toJSON();
         }
       }
 
