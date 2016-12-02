@@ -53,7 +53,7 @@ Contributors:
     </nuxeo-directory-suggestion>
 
     <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
-                 value="{{document.properties.dc:expired::change}}">
+                 value="{{document.properties.dc:expired}}">
     </nuxeo-date-picker>
 
   </template>
@@ -66,10 +66,6 @@ Contributors:
         behaviors: [Nuxeo.LayoutBehavior],
         properties: {
           document: Object
-        },
-
-        _change: function() {
-          console.log('_change');
         }
       });
     })();
