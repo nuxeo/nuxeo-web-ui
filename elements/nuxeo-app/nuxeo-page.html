@@ -37,13 +37,16 @@ Contributors:
       }
 
       paper-toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        width: 100%;
         height: 59px;
         color: var(--nuxeo-header-title-color);
         background: var(--nuxeo-header-background);
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
       }
 
-      ::content .header {
+      paper-toolbar ::content .header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         width: 100%;

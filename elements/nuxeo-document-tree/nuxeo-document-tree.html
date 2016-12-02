@@ -42,8 +42,18 @@ Contributors:
         };
       }
 
-      nuxeo-tree {
-        padding: .4em .5em;
+      .header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        padding: 0 16px;
+        text-overflow: ellipsis;
+        font-weight: 400;
       }
 
       .content {
@@ -53,20 +63,8 @@ Contributors:
         height: calc(100vh - 69px);
       }
 
-      .header {
-        height: 59px;
-        background-color: var(--nuxeo-light-background);
-        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      .header h1 {
-        color: var(--nuxeo-tag-text);
-        text-transform: uppercase;
-        font-size: 1rem;
-        margin: .1em .2em 0 1.1em;
-        font-weight: 400;
+      nuxeo-tree {
+        padding: .4em .5em;
       }
 
       .node-name {
@@ -136,22 +134,20 @@ Contributors:
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
 
     <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="hasFolderishChild"></nuxeo-document>
+
     <nuxeo-page-provider id="children"
       provider="tree_children"
       enrichers="hasFolderishChild"
-      schemas="dublincore,common"></nuxeo-page-provider>
+      schemas="dublincore,common">
+    </nuxeo-page-provider>
 
-    <div class="header ellipsis" hidden$="[[!label]]">
-      <h1>[[i18n(label)]]</h1>
-    </div>
+    <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
 
     <div class="content">
       <div class="parents">
-
         <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden="[[_isRoot(rootDocument)]]">
           <span class="root">[[i18n('browse.root')]]</span>
         </a>
-
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
             <span><iron-icon icon="icons:chevron-left" class="flex"></iron-icon></span>
@@ -159,7 +155,6 @@ Contributors:
           </a>
         </template>
       </div>
-
       <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">

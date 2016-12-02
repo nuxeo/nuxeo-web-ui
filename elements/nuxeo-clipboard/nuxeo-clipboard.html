@@ -32,6 +32,20 @@ Contributors:
         @apply(--layout-vertical);
       }
 
+      .header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        padding: 0 16px;
+        text-overflow: ellipsis;
+        font-weight: 400;
+      }
+
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -67,6 +81,8 @@ Contributors:
 
     </style>
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
+
+    <div class="header">[[i18n('app.clipboard')]]</div>
 
     <template is="dom-if" if="[[!documents.length]]">
       <span class="emptyResult">[[i18n('clipboard.empty')]]</span>
