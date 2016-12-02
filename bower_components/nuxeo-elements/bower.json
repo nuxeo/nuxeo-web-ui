@@ -15,8 +15,7 @@
     "polymer": "Polymer/polymer#^1.1.4",
     "iron-elements": "PolymerElements/iron-elements#^1.0.4",
     "nuxeo": "^2.0.2",
-    "es6-promise": "2.2.0",
-    "select2": "3.5.2"
+    "es6-promise": "2.2.0"
   },
   "ignore": [
     "/.*",
