@@ -30,24 +30,22 @@ Contributors:
   <template>
     <style>
 
-      .content {
-        @apply(--layout-vertical);
-      }
-
       .header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         height: 59px;
         background-color: var(--nuxeo-light-background);
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      .header h1 {
         color: var(--nuxeo-tag-text);
         text-transform: uppercase;
         font-size: 1rem;
-        margin: .1em .2em 0 1.1em;
+        padding: 0 16px;
+        text-overflow: ellipsis;
         font-weight: 400;
+      }
+
+      .content {
+        @apply(--layout-vertical);
       }
 
       nuxeo-data-list {
@@ -132,9 +130,7 @@ Contributors:
        enrichers="thumbnail">
     </nuxeo-page-provider>
 
-    <div class="header ellipsis">
-      <h1>[[i18n('app.favorites')]]</h1>
-    </div>
+    <div class="header">[[i18n('app.favorites')]]</div>
     <div class="content">
       <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList"
         selected-item="{{selectedFavorite}}" items="{{favorites}}"

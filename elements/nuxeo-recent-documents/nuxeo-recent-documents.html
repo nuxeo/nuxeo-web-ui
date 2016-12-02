@@ -30,66 +30,80 @@ Contributors:
   <template>
     <style>
 
-    .list {
-      @apply(--layout-vertical);
-    }
+      .header {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        height: 59px;
+        background-color: var(--nuxeo-light-background);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        color: var(--nuxeo-tag-text);
+        text-transform: uppercase;
+        font-size: 1rem;
+        padding: 0 16px;
+        text-overflow: ellipsis;
+        font-weight: 400;
+      }
 
-    nuxeo-data-list {
-      display: block;
-      position: relative;
-      min-height: calc(100vh - 61px)
-    }
+      .content {
+        @apply(--layout-vertical);
+      }
 
-    .ellipsis {
-      display: inline-block;
-      width: 80%;
-      vertical-align: middle;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 61px)
+      }
 
-    .queue-thumbnail,
-    .queue-thumbnail ::content img {
-      height: 32px;
-      width: 32px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      margin-right: 8px;
-    }
+      .ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
 
-    .list-item {
-      cursor: pointer;
-      padding: 1em;
-      border-bottom: 1px solid var(--nuxeo-border);
-    }
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 32px;
+        width: 32px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
 
-    .list-item:hover {
-      @apply(--nuxeo-block-hover);
-    }
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
 
-    .list-item.selected,
-    .list-item:focus,
-    .list-item.selected:focus {
-      @apply(--nuxeo-block-selected);
-    }
+      .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
 
-    .list-item-detail {
-      margin-left: 40px;
-    }
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
 
-    .list-item-property {
-      color: var(--nuxeo-text-light);
-      margin-right: .2em;
-    }
+      .list-item-detail {
+        margin-left: 40px;
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
 
     </style>
 
-    <nuxeo-connection id="nxcon"> </nuxeo-connection>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
 
-    <div class="list">
-
+    <div class="header">[[i18n('app.recentlyViewed')]]</div>
+    <div class="content">
       <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document"
         selected-item="{{selectedRecent}}" items="{{favorites}}"
         selection-enabled
@@ -101,11 +115,11 @@ Contributors:
               <div class="list-item-info horizontal layout center" >
                 <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
                 <span class="list-item-title ellipsis">[[document.title]]</span>
+              </div>
             </div>
           </div>
         </template>
       </nuxeo-data-list>
-
     </div>
 
   </template>
