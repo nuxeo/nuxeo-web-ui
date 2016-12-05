@@ -46,14 +46,13 @@ Contributors:
         margin-right: .4rem;
       }
 
-      paper-card.card {
+      paper-card {
         min-width: 25em;
         width: 49%;
-        margin: 0 0 2em;
       }
 
       @media (max-width: 1024px) {
-        paper-card.card {
+        paper-card {
           width: 100%;
         }
       }
@@ -93,7 +92,7 @@ Contributors:
         <section name="dashboard" class="flex-layout">
 
           <!-- recently edited -->
-          <paper-card class="card">
+          <paper-card>
             <div class="card-content vertical layout">
               <span class="title">
                 <iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>
@@ -135,7 +134,7 @@ Contributors:
           </paper-card>
 
           <!-- tasks -->
-          <paper-card class="card">
+          <paper-card>
             <div class="card-content vertical layout">
               <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</span>
               <nuxeo-tasks-list tasks="[[tasks]]" class="flex"></nuxeo-tasks-list>
@@ -143,7 +142,7 @@ Contributors:
           </paper-card>
 
           <!-- recently viewed -->
-          <paper-card class="card">
+          <paper-card>
             <div class="card-content vertical layout">
               <span class="title">
                 <iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]
@@ -176,7 +175,7 @@ Contributors:
           </paper-card>
 
           <!-- favorites -->
-          <paper-card class="card">
+          <paper-card>
             <div class="card-content vertical layout">
               <span class="title">
                 <iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]
