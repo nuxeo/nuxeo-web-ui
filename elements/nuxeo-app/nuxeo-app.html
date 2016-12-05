@@ -43,6 +43,21 @@ Contributors:
         @apply(--nuxeo-link-hover);
       }
 
+      /* scrollbars */
+      ::content ::-webkit-scrollbar-track {
+        width: 8px;
+        height: 8px;
+      }
+      ::content ::-webkit-scrollbar {
+        background-color: rgba(0, 0, 0, 0.05);
+        width: 8px;
+        height: 8px;
+      }
+      ::content ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 2px;
+      }
+
       /* logo */
       #logo {
         position: fixed;
@@ -114,7 +129,7 @@ Contributors:
 
       paper-header-panel ::content .content {
         position: relative;
-        padding: 8px 24px;
+        padding: 16px;
       }
 
       paper-header-panel ::content #mainContainer {
@@ -205,8 +220,7 @@ Contributors:
       }
 
       ::content paper-card {
-        margin: 0 22px 22px 0;
-        min-width: 22em;
+        margin: 0 8px 16px 0;
         width: 100%;
       }
 

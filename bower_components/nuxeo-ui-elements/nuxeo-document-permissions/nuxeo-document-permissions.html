@@ -49,22 +49,22 @@ An element providing document permissions management
 
     <style>
       .bubbleBox {
+        @apply(--paper-card);
         background-color: #fff;
         box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
         display: block;
-        margin: 0 1em 1em 0;
         padding: 0 1em 1em;
+        margin-bottom: 16px;
       }
       .bubbleHeader {
-        border-color: #e6e9ef;
-        border-style: none none solid;
-        border-width: 1px;
-        margin: 0 0 1em;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
         overflow: hidden;
-        padding: 0.8em 0;
         white-space: nowrap;
+        padding: 16px 0;
       }
       .bubbleHeader h3 {
+        @apply(--layout-flex);
         float: left;
         color: #213f7d;
         font-weight: bold;
@@ -75,11 +75,7 @@ An element providing document permissions management
         padding: 0.3em 0;
       }
       .bubbleHeader paper-button {
-        float: right;
-        border: 1px solid #aaa;
-        font-weight: bold;
-        padding: 0.35em 0.8em;
-        text-transform: none;
+        margin: 0;
       }
       .tag {
         background: none #f3f6f9;
@@ -104,8 +100,8 @@ An element providing document permissions management
         box-shadow: none;
         color: #9a9a9a;
         display: block;
-        margin: 0.1em 0 0.5em;
-        padding: 0.8em;
+        margin: 8px 0;
+        padding: 8px;
         text-align: center;
       }
       .label, .chip {
@@ -154,6 +150,10 @@ An element providing document permissions management
     <!-- Inherited permissions -->
     <div class="bubbleBox">
       <div class="bubbleHeader">
+        <h3>[[i18n('documentPermissions.inherited')]]</h3>
+        <template is="dom-if" if="[[_empty(inheritedAces)]]">
+          <span class="label label-warning">[[i18n('documentPermissions.blocked')]]</span>
+        </template>
         <template is="dom-if" if="[[_hasPermission(doc,'Everything')]]">
           <template is="dom-if" if="[[!_empty(inheritedAces)]]">
             <paper-button id="block" on-click="blockInheritance">[[i18n('documentPermissions.block')]]</paper-button>
@@ -161,11 +161,6 @@ An element providing document permissions management
           <template is="dom-if" if="[[_empty(inheritedAces)]]">
             <paper-button id="unblock" on-click="unblockInheritance">[[i18n('documentPermissions.unblock')]]</paper-button>
           </template>
-        </template>
-
-        <h3>[[i18n('documentPermissions.inherited')]]</h3>
-        <template is="dom-if" if="[[_empty(inheritedAces)]]">
-          <span class="label label-warning">[[i18n('documentPermissions.blocked')]]</span>
         </template>
       </div>
       <div>
