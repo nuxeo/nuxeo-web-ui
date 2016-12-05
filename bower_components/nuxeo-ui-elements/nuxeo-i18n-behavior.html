@@ -40,18 +40,14 @@ limitations under the License.
         }
       },
 
-      attached: function() {
-        this.localeLoadedHandler = this.refresh_18n.bind(this);
+      created: function() {
+        this.localeLoadedHandler = this.refreshI18n.bind(this);
         document.addEventListener('i18n-locale-loaded', this.localeLoadedHandler);
       },
 
-      detached: function() {
-        document.removeEventListener('i18n-locale-loaded', this.localeLoadedHandler);
-      },
-
-      refresh_18n: function() {
+      refreshI18n: function() {
         this.i18n = null;
-        this.i18n = window.nuxeo.I18n.translate;
+        this.set('i18n', window.nuxeo.I18n.translate);
       }
     };
   })();

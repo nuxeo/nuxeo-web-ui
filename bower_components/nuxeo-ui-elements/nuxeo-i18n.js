@@ -48,7 +48,11 @@ window.nuxeo.I18n.loadLocale = function() {
  */
 function XHRLocaleResolver(msgFolder) {
   return function() {
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve) {
+      // point all english based locales to the reference file
+      if (window.nuxeo.I18n.language.startsWith('en-')) {
+        window.nuxeo.I18n.language = 'en';
+      }
       function loadLang(url) {
         var referenceFile = msgFolder +  '/messages.json';
         var xhr = new XMLHttpRequest();
