@@ -1,0 +1,116 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/social-icons.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../nuxeo-routing-behavior.html">
+<link rel="import" href="nuxeo-tag.html">
+
+<!--
+An element for showing a user entity with a tooltip.
+
+Example:
+
+    <nuxeo-user-tag user="[[user]]"></nuxeo-user-tag>
+
+@group Nuxeo UI
+@element nuxeo-user-tag
+@demo demo/widgets/index.html
+-->
+<dom-module id="nuxeo-user-tag">
+  <template>
+
+    <nuxeo-tag icon="icons:perm-identity">
+      <template is="dom-if" if="[[_hasLink(user)]]">
+        <a href$="[[_href(user)]]">[[_name(user)]]</a>
+      </template>
+      <template is="dom-if" if="[[!_hasLink(user)]]">
+        [[_name(user)]]
+      </template>
+      <template is="dom-if" if="[[_isEntity(user)]]">
+        <paper-tooltip id="tooltip" position="top" offset="0" animation-delay="0">
+          [[_id(user)]]<br>[[_email(user)]]
+        </paper-tooltip>
+      </template>
+    </nuxeo-tag>
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    Polymer({
+      is: 'nuxeo-user-tag',
+      behaviors: [Nuxeo.RoutingBehavior],
+      properties: {
+
+        /**
+         * User entity or a string
+         */
+        user: Object,
+
+        /**
+         * Disable link
+         */
+        disabled: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      ready: function() {
+        if (this.$.tooltip) {
+          document.body.appendChild(this.$.tooltip);
+        }
+      },
+
+      _isEntity: function(user) {
+        return user && user['entity-type'] && user['entity-type'] === 'user' && user.properties;
+      },
+
+      _id: function(user) {
+        return user.id ? user.id : user;
+      },
+
+      _name: function(user) {
+        if (this._isEntity(user)) {
+          var firstName = user.properties.firstName;
+          var lastName = user.properties.lastName;
+          return (firstName || lastName) ? firstName + ' ' + lastName : user.properties.email;
+        } else if(user.id) {
+          return user.id;
+        } else {
+          return user;
+        }
+      },
+
+      _email: function(user) {
+        return this._isEntity(user) ? user.properties.email : '';
+      },
+
+      _href: function(user) {
+        return this.urlFor('user', this._id(user));
+      },
+
+      _hasLink: function(user) {
+        return !(this.disabled || (this._name(user) === 'system'));
+      }
+
+    });
+  })();
+</script>

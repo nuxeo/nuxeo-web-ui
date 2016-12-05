@@ -34,6 +34,17 @@ Example:
   <template>
     <style>
       :host {
+        display: inline-block;
+        border: 1px solid var(--nuxeo-border, #ccc);
+        background-color: var(--nuxeo-tag-background, transparent);
+        color: var(--nuxeo-tag-text, #000);
+        padding: 4px 6px;
+        font-size: .8em;
+        margin-bottom: .3em;
+        border-radius: 2em;
+        line-height: initial;
+        text-decoration: none;
+
         @apply(--nuxeo-tag);
       }
 
