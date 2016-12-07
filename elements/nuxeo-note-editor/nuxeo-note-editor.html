@@ -33,8 +33,8 @@ Contributors:
         display: block;
       }
 
-      nuxeo-html-editor {
-        margin: 6px;
+      .main {
+        position: relative;
       }
 
       .edit {
@@ -64,28 +64,32 @@ Contributors:
 
     <nuxeo-document id="note" doc-id="[[document.uid]]"></nuxeo-document>
 
-    <template is="dom-if" if="[[_isHTMLorXML(document)]]">
-      <div class="html-editor-container">
-        <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]] hide-toolbars="[[_isXML(document)]]"></nuxeo-html-editor>
-        <div class="layout horizontal end-justified">
-          <paper-button noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
-        </div>
-      </div>
-    </template>
+    <div class="main">
 
-    <template is="dom-if" if="[[!_isHTMLorXML(document)]]">
-      <template is="dom-if" if="[[_viewMode]]">
-        <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-        <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
-      </template>
-      <template is="dom-if" if="[[!_viewMode]]">
-        <paper-textarea value="{{_value}}" no-label-float></paper-textarea>
-        <div class="layout horizontal end-justified">
-          <paper-button noink on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
-          <paper-button noink class="primary" on-click="_editorSave">[[i18n('command.save')]]</paper-button>
+      <template is="dom-if" if="[[_isHTMLorXML(document)]]">
+        <div class="html-editor-container">
+          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]] hide-toolbars="[[_isXML(document)]]"></nuxeo-html-editor>
+          <div class="layout horizontal end-justified">
+            <paper-button noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+          </div>
         </div>
       </template>
-    </template>
+
+      <template is="dom-if" if="[[!_isHTMLorXML(document)]]">
+        <template is="dom-if" if="[[_viewMode]]">
+          <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+        </template>
+        <template is="dom-if" if="[[!_viewMode]]">
+          <paper-textarea value="{{_value}}" no-label-float></paper-textarea>
+          <div class="layout horizontal end-justified">
+            <paper-button noink on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink class="primary" on-click="_editorSave">[[i18n('command.save')]]</paper-button>
+          </div>
+        </template>
+      </template>
+
+    </div>
 
     <paper-toast id="toast"></paper-toast>
 

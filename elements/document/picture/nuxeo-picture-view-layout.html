@@ -23,79 +23,11 @@ Contributors:
 @element nuxeo-picture-view-layout
 -->
 <dom-module id="nuxeo-picture-view-layout">
+
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-
-      .properties {
-        -moz-column-width: 25em; /* Firefox */
-        -webkit-column-width: 25em; /* webkit, Safari, Chrome */
-        column-width: 25em;
-        column-count: 3;
-        -moz-column-count: 3; /* Firefox */
-        -webkit-column-count: 3; /* webkit, Safari, Chrome */
-      }
-
-      .properties label {
-        width: 10em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: var(--nuxeo-text-light);
-      }
-
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-        line-height: 1.5em;
-      }
-
-    </style>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content properties">
-
-        <div role="widget" class="item">
-          <label>[[i18n('pictureViewLayout.dimensions')]]</label>
-          <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('pictureViewLayout.format')]]</label>
-          <div>[[document.properties.picture:info.format]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
-          <div>[[document.properties.picture:info.colorSpace]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('pictureViewLayout.depth')]]</label>
-          <div>[[document.properties.picture:info.depth]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('pictureViewLayout.weight')]]</label>
-          <div>[[formatSize(document.properties.common:size)]]</div>
-        </div>
-
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-picture-formats role="widget" label="[[i18n('pictureViewLayout.formats')]]" document="[[document]]"></nuxeo-picture-formats>
-      </div>
-    </paper-card>
-
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-picture-info role="widget" document="[[document]]"></nuxeo-picture-info>
+    <nuxeo-picture-formats role="widget" document="[[document]]" label="[[i18n('pictureViewLayout.formats')]]"></nuxeo-picture-formats>
   </template>
 
   <script>

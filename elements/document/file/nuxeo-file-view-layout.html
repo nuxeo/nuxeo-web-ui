@@ -23,20 +23,10 @@ Contributors:
 @element nuxeo-file-view-layout
 -->
 <dom-module id="nuxeo-file-view-layout">
+
   <template>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
-      </div>
-    </paper-card>
-
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
   </template>
 
   <script>
