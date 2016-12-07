@@ -239,6 +239,7 @@ Contributors:
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider"
+       auto="[[_auto]]"
        provider="[[provider]]"
        page-size="[[pageSize]]"
        aggregations="{{aggregations}}"
@@ -294,6 +295,9 @@ Contributors:
             </paper-button>
             <paper-button noink class="primary clear" on-click="_clear">
               [[i18n('command.clear')]]
+            </paper-button>
+            <paper-button noink class="primary search" on-click="_search" hidden$="[[_auto]]">
+              [[i18n('command.search')]]
             </paper-button>
           </div>
           <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
@@ -368,6 +372,8 @@ Contributors:
           <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
         </div>
     </paper-dialog>
+
+    <nuxeo-keys keys="enter" on-pressed="_search" invasive></nuxeo-keys>
   </template>
   <script>
     (function() {
@@ -469,6 +475,14 @@ Contributors:
           aggregations: {
             type: Object,
             observer: '_aggregationsChanged'
+          },
+          _auto: {
+            type: Boolean,
+            value: true
+          },
+          _displayAutoControl: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -491,11 +505,18 @@ Contributors:
         },
 
         displayQueue: function(doc) {
-          this._isQueue = true;
-          this.$.list.notifyResize();
-          if (doc && doc.uid) {
-            this.$.list.$.list.selectItem(doc);
-            this.$.list.$.list.scrollToItem(doc);
+          var doDisplay = function() {
+            this._isQueue = true;
+            this.$.list.notifyResize();
+            if (doc && doc.uid) {
+              this.$.list.$.list.selectItem(doc);
+              this.$.list.$.list.scrollToItem(doc);
+            }
+          }.bind(this);
+          if (!this._auto) {
+            this.$.provider.fetch().then(doDisplay);
+          } else {
+            doDisplay();
           }
         },
 
@@ -586,6 +607,18 @@ Contributors:
           }
           this.selectedSearchIdx = 0;
           this._resetResults();
+          if (!this._auto) {
+            this.aggregations = {};
+            this.loading = false;
+          }
+        },
+
+        _search: function() {
+          if (!this._auto) {
+            this.$.provider.fetch().then(function() {
+              this._navigateToResults();
+            }.bind(this));
+          }
         },
 
         _reset: function() {
@@ -729,12 +762,17 @@ Contributors:
               el = document.createElement(layout),
               parent = this.$['search-form-container'];
           parent.innerHTML = '';
+          this._auto = typeof el.auto !== "undefined" ? el.auto === true : true;
           this._clear();
           parent.appendChild(el);
           el.id = 'search-form';
           this._form = el;
           this._form.aggregations = this.aggregations;
-          this.$.provider.auto = true;
+          this._displayAutoControl =
+            typeof this._form.displayAutoControl !== "undefined" ? this._form.displayAutoControl === true : false;
+          if (!this._auto) {
+            this.$.list.loading = false;
+          }
           if (this._form.provider !== undefined) {
             this.provider = this._form.provider;
             this.$.provider.query = null;
@@ -762,7 +800,9 @@ Contributors:
             if (e.detail.path) {
               var param = e.detail.path.split('.')[1];
               this.set('params.' + param, e.detail.value);
-              this._navigateToResults();
+              if (this._auto) {
+                this._navigateToResults();
+              }
             }
           }.bind(this));
         }

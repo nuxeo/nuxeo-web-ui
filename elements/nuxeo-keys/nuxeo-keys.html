@@ -43,6 +43,10 @@ Contributors:
           value: function() {
             return document.body;
           }
+        },
+        invasive: {
+          type: Boolean,
+          value: false
         }
       },
 
@@ -52,9 +56,12 @@ Contributors:
           switch (element.tagName) {
             case 'INPUT':
             case 'TEXTAREA':
-              return;
+              if(!this.invasive) {
+                return;
+              }
+              break;
             case 'DIV':
-              if (element.id === 'editor') {
+              if (!this.invasive && element.id === 'editor') {
                 return;
               }
           }
