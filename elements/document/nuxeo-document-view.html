@@ -24,6 +24,22 @@ Contributors:
 -->
 <dom-module id="nuxeo-document-view">
   <template>
+
+    <style>
+      ::content nuxeo-document-viewer,
+      ::content nuxeo-document-attachments,
+      ::content nuxeo-note-editor,
+      ::content nuxeo-picture-info,
+      ::content nuxeo-picture-formats,
+      ::content nuxeo-video-info,
+      ::content nuxeo-video-conversions {
+        @apply(--paper-card);
+        display: block;
+        margin-bottom: 16px;
+        padding: 16px;
+      }
+    </style>
+
     <nuxeo-error id="error"></nuxeo-error>
     <div id="document-view">
       <!-- Dynamic layout element will be inserted here -->

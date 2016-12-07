@@ -23,20 +23,10 @@ Contributors:
 @element nuxeo-note-view-layout
 -->
 <dom-module id="nuxeo-note-view-layout">
+
   <template>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
-      </div>
-    </paper-card>
-
+    <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
+    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
   </template>
 
   <script>

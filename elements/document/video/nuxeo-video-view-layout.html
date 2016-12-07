@@ -22,86 +22,12 @@ Contributors:
 @element nuxeo-video-view-layout
 -->
 <dom-module id="nuxeo-video-view-layout">
+
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-
-      .properties {
-        -moz-column-width: 25em; /* Firefox */
-        -webkit-column-width: 25em; /* webkit, Safari, Chrome */
-        column-width: 25em;
-        column-count: 3;
-        -moz-column-count: 3; /* Firefox */
-        -webkit-column-count: 3; /* webkit, Safari, Chrome */
-      }
-
-      .properties label {
-        width: 10em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
-      }
-
-      .item label {
-        color: var(--secondary-text-color);
-      }
-    </style>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content properties">
-
-        <div role="widget" class="item">
-          <label>[[i18n('videoViewLayout.format')]]</label>
-          <div>[[document.properties.vid:info.format]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('videoViewLayout.duration')]]</label>
-          <div>[[document.properties.vid:info.duration]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('videoViewLayout.width')]]</label>
-          <div>[[document.properties.vid:info.width]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('videoViewLayout.height')]]</label>
-          <div>[[document.properties.vid:info.height]]</div>
-        </div>
-
-        <div role="widget" class="item">
-          <label>[[i18n('videoViewLayout.frameRate')]]</label>
-          <div>[[document.properties.vid:info.frameRate]]</div>
-        </div>
-
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-video-conversions role="widget" label="[[i18n('videoViewLayout.conversions')]]" document="[[document]]"></nuxeo-video-conversions>
-      </div>
-    </paper-card>
-
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
-      </div>
-    </paper-card>
-
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-video-info role="widget" document="[[document]]"></nuxeo-video-info>
+    <nuxeo-video-conversions role="widget" document="[[document]]" label="[[i18n('videoViewLayout.conversions')]]"></nuxeo-video-conversions>
+    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
   </template>
 
   <script>
