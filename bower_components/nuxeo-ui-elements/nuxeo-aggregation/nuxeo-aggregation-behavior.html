@@ -37,8 +37,25 @@ limitations under the License.
         buckets: {
           type: Object,
           computed: '_computeBuckets(data)'
+        },
+
+        _isEmpty: {
+          type: Boolean,
+          value: true
         }
 
+      },
+
+      observers: [
+        '_observeData(data)'
+      ],
+
+      _observeData: function() {
+        if (this.data && this.data.extendedBuckets) {
+          this._isEmpty = this.data.extendedBuckets.length === 0;
+        } else {
+          this._isEmpty = true;
+        }
       },
 
       _computeBuckets: function(data) {
@@ -60,10 +77,6 @@ limitations under the License.
           }
         });
         this.value = values;
-      },
-
-      _isEmpty: function(data) {
-        return data && data.extendedBuckets.length === 0;
       },
 
       _computeLabel: function(item) {

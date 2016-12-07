@@ -1,0 +1,74 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+<head>
+  <title>nuxeo-document-preview</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../polymer/polymer.html">
+  <link rel="import" href="../../../nuxeo-elements/nuxeo-page-provider.html">
+  <link rel="import" href="../../nuxeo-document-preview.html">
+</head>
+
+<body unresolved>
+
+  <dom-module id="nuxeo-document-preview-demo">
+    <template>
+
+      <nuxeo-connection url="http://webui.demo.nuxeo.com/nuxeo" username="demo" password="demo"></nuxeo-connection>
+
+      <nuxeo-page-provider auto
+                           provider="default_search"
+                           params='{"ecm_fulltext": "Picture*"}'
+                           page-size="1"
+                           current-page="{{results}}">
+      </nuxeo-page-provider>
+
+      <h4>[[document.title]]</h4>
+      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+
+    </template>
+
+    <script>
+      (function() {
+        'use strict';
+
+        Polymer({
+          is: 'nuxeo-document-preview-demo',
+          properties: {
+            document: Object,
+            results: {
+              type: Array,
+              observer: '_resultsChanged'
+            }
+          },
+
+          _resultsChanged: function() {
+            if (this.results && this.results.length > 0) {
+              this.document = this.results[0];
+            }
+          }
+
+        });
+      })();
+    </script>
+  </dom-module>
+
+  <nuxeo-document-preview-demo></nuxeo-document-preview-demo>
+
+</body>
+</html>

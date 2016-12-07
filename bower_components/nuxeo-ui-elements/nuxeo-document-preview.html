@@ -1,0 +1,266 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../marked-element/marked-element.html">
+<link rel="import" href="viewers/nuxeo-image-viewer.html">
+<link rel="import" href="viewers/nuxeo-video-viewer.html">
+<link rel="import" href="viewers/nuxeo-pdf-viewer.html">
+
+<!--
+An element to display a preview of a document.
+
+Example:
+
+    <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+
+@group Nuxeo UI
+@element nuxeo-document-preview
+@demo demo/nuxeo-document-preview/index.html
+-->
+<dom-module id="nuxeo-document-preview">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      nuxeo-image-viewer {
+        width: 100%;
+        height: 60vh;
+      }
+
+      nuxeo-video-viewer {
+        width: 100%;
+        height: 100%;
+      }
+
+      audio {
+        width: calc(100% - 32px);
+        height: 50%;
+        padding: 16px;
+      }
+
+      marked-element {
+        background-color: white;
+      }
+
+      nuxeo-pdf-viewer {
+        width: 100%;
+        height: 100%;
+        min-height: 60vh;
+      }
+
+      ::content iframe {
+        height: 100%;
+        min-height: 60vh;
+        max-height: 90vh;
+        width: 100%;
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #preview {
+        border: none;
+        width: 100%;
+        height: 60vh;
+      }
+
+    </style>
+
+    <!-- Our available preview templates. First match will be used -->
+    <template mime-pattern="image.*">
+      <nuxeo-image-viewer src="[[_imageSource]]" controls responsive></nuxeo-image-viewer>
+    </template>
+
+    <template mime-pattern="video.*">
+      <nuxeo-video-viewer controls sources="[[_videoSources]]"></nuxeo-video-viewer>
+    </template>
+
+    <template mime-pattern="audio.*">
+      <audio controls><source src="[[_audioSource]]">AUDIO</audio>
+    </template>
+
+    <template mime-pattern="text/(?:.*-)?markdown">
+      <marked-element markdown="[[_blob.data]]">
+        <div class="markdown-html"></div>
+      </marked-element>
+    </template>
+
+    <template mime-pattern="application/pdf">
+      <nuxeo-pdf-viewer src="[[_blob.data]]"></nuxeo-pdf-viewer>
+    </template>
+
+    <template mime-pattern=".*">
+      <iframe id="frame" src="[[_iFrameSource]]"></iframe>
+    </template>
+
+    <div id="preview"></div>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-preview',
+        behaviors: [Polymer.Templatizer],
+        properties: {
+
+          /**
+           * Document
+           */
+          document: Object,
+
+          /**
+           * By default it will display a preview of the main file.
+           * For example using `xpath="files:files/0/file"` will display the preview of the document's first attachment.
+           */
+          xpath: {
+            type: String,
+            value: 'file:content'
+          },
+
+          _blob: Object,
+
+          _imageSource: {
+            type: String,
+            computed: '_computeImageSource(document)'
+          },
+
+          _videoSources: {
+            type: Array,
+            computed: '_computeVideoSources(document)'
+          },
+
+          _audioSource: {
+            type: String,
+            computed: '_computeAudioSource(document)'
+          },
+
+          _iFrameSource: {
+            type: String,
+            computed: '_computeIFrameSource(document)'
+          }
+        },
+
+        observers: [
+          '_updateBlob(document, xpath)'
+        ],
+
+        _updateBlob: function() {
+          if (this.document) {
+            // adapt the Note to mimic a Blob
+            if (this.document.type === 'Note') {
+              this._blob = {
+                data: this.document.properties['note:note'],
+                'mime-type': this.document.properties['note:mime_type']
+              };
+            } else {
+              // by default just use the field at xpath as a Blob
+              this._blob = this.document && this._deepFind(this.document.properties, this.xpath);
+            }
+            // update our previewer
+            if (this._blob) {
+              this._updatePreview();
+            }
+          }
+        },
+
+        _updatePreview: function() {
+          // clear current previewer
+          while (this.$.preview.firstChild) {
+            this.$.preview.removeChild(this.$.preview.firstChild);
+          }
+
+          // lookup the preview according to the blob's mimetype
+          var previewers = Polymer.dom(this.root).querySelectorAll('template');
+          for (var i = 0; i < previewers.length; i++) {
+            var previewer = previewers[i];
+            var regex = new RegExp(previewer.getAttribute('mime-pattern'));
+            if (this._blob['mime-type'].match(regex)) {
+              // Insert our previewer
+              this.templatize(previewer);
+              var instance = this.stamp();
+              this.$.preview.appendChild(instance.root);
+              break;
+            }
+          }
+        },
+
+        _deepFind: function(obj, props) {
+          for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+            if (!obj || obj === []) {
+              break;
+            }
+            obj = obj[path[i]];
+          }
+          return obj;
+        },
+
+        _computeImageSource: function() {
+          if (this.document && this.document.properties && this.document.properties['picture:views']) {
+            var filteredViews = this.document.properties['picture:views'].filter(function(view) {
+              return view.title === 'FullHD';
+            });
+            if (filteredViews.length > 0) {
+              return filteredViews[0].content.data;
+            }
+          }
+          if (this.xpath) {
+            this._updateBlob();
+            if (this._blob && this._blob['mime-type'].match('image.*')) {
+              return this._blob.data;
+            }
+          }
+        },
+
+        _computeVideoSources: function() {
+          if (this.document && this.document.properties && this.document.properties['vid:transcodedVideos']) {
+            return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
+              return {
+                data: conversion.content.data,
+                type: conversion.content['mime-type']
+              };
+            });
+          }
+        },
+
+        _computeAudioSource: function() {
+          if (this._blob) {
+            return this._blob.data;
+          }
+        },
+
+        _computeIFrameSource: function() {
+          if (this.document && this.document.contextParameters && this.document.contextParameters.preview) {
+            var url = this.document.contextParameters.preview.url;
+            if (this.xpath !== 'file:content') {
+              url = url.replace('/@preview/', '/@blob/' + this.xpath + '/@preview/');
+            }
+            return url;
+          } else if (this._blob) {
+            return this._blob.data;
+          }
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

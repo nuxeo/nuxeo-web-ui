@@ -51,7 +51,7 @@ An element to interact with page provider aggregations as checkboxes.
         [[_computeLabel(item)]] ([[item.docCount]])
       </paper-checkbox>
     </template>
-    <template is="dom-if" if="[[_isEmpty(data)]]">
+    <template is="dom-if" if="[[_isEmpty]]">
       <label class="empty">[[i18n('checkboxAggregation.noResults')]]</label>
     </template>
   </div>

@@ -64,8 +64,6 @@ An element to interact with page provider aggregations as suggestions.
 
        properties: {
 
-         data: Object,
-
          value: {
            type: Array,
            value: [],
@@ -86,13 +84,17 @@ An element to interact with page provider aggregations as suggestions.
 
          _computedData: {
            type: Object,
-           computed: '_computeData(data)'
+           value: []
          }
        },
 
+       observers: [
+         '_computeData(data)'
+       ],
+
        _computeData: function() {
          if (this.data) {
-           return this.data.extendedBuckets.map(function(item) {
+           this._computedData = this.data.extendedBuckets.map(function(item) {
              var label = this._computeLabel(item) + ' (' + item.docCount + ')';
              return {
                id: item.key,
@@ -100,6 +102,8 @@ An element to interact with page provider aggregations as suggestions.
                displayLabel: label
              };
            }.bind(this));
+         } else {
+           this._computedData = [];
          }
        }
      });
