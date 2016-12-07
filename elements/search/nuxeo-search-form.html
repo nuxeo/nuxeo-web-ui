@@ -289,6 +289,12 @@ Contributors:
             <!-- Dynamic search form element will be inserted here -->
             <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
           </div>
+          <div class="layout vertical row" hidden$="[[!_displayAutoControl]]">
+            <paper-toggle-button id="autoToogle" checked="{{_auto}}">
+              [[i18n('searchForm.auto')]]
+            </paper-toggle-button>
+            <paper-tooltip for="autoToogle">[[i18n('searchForm.auto.description')]]</paper-tooltip>
+          </div>
           <div class="row actions">
             <paper-button noink class="reset" disabled$="[[!dirty]]" on-click="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset')]]

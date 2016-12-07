@@ -414,6 +414,8 @@
   "searchAnalytics.numberOfResults.calls": "Number of calls",
   "searchAnalytics.numberOfResults.heading": "Number of results",
   "searchAnalytics.numberOfResults.range": "Range",
+  "searchForm.auto": "Auto search",
+  "searchForm.auto.description": "Enable to refresh the search each time a parameter changes",
   "searchForm.displayFilterView": "Switch to filter view",
   "searchForm.displayQueueView": "Switch to queue view",
   "searchForm.queue.noResults": "No Results",
