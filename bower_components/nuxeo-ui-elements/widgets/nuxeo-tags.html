@@ -1,0 +1,87 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="nuxeo-tag.html">
+<link rel="import" href="nuxeo-user-tag.html">
+<link rel="import" href="nuxeo-group-tag.html">
+
+<!--
+An element to display a list of tags.
+
+Example:
+
+    <nuxeo-tags type="user" tags='["User 1", "User 2", "User 3"]'></nuxeo-tags>
+
+@group Nuxeo UI
+@element nuxeo-tags
+@demo demo/widgets/index.html
+-->
+<dom-module id="nuxeo-tags">
+  <style>
+    :host {
+      display: inline-block;
+    }
+  </style>
+
+  <template>
+    <template is="dom-repeat" items="[[items]]" as="item">
+      <template is="dom-if" if="[[_type('tag')]]">
+        <nuxeo-tag>[[item]]</nuxeo-tag>
+      </template>
+      <template is="dom-if" if="[[_type('user')]]">
+        <nuxeo-user-tag user="[[item]]"></nuxeo-user-tag>
+      </template>
+      <template is="dom-if" if="[[_type('group')]]">
+        <nuxeo-group-tag group="[[item]]"></nuxeo-group-tag>
+      </template>
+    </template>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-tags',
+        properties: {
+
+          /**
+           * Type ("tag", "user", "group").
+           */
+          type: {
+            type: String,
+            value: 'tag'
+          },
+
+          /**
+           * Array of user/group entities or strings.
+           */
+          items: {
+            type: Array
+          }
+        },
+
+        _type: function(value) {
+          return this.type === value;
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
