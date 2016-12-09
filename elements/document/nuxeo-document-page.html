@@ -314,7 +314,7 @@ Contributors:
                 </template>
                 <div>
                   <label class="col">[[i18n('label.dublincore.contributors')]]</label>
-                  <span><nuxeo-document-users users="[[document.properties.dc:contributors]]"></nuxeo-document-users></span>
+                  <span><nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags></span>
                 </div>
               </div>
               <template is="dom-if" if="[[hasWorkflowRunning]]">
