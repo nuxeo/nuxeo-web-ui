@@ -208,7 +208,7 @@ Contributors:
                headers='{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" loading="{{loading}}"
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList"
               selected-item="{{selectedCollection}}"
               selection-enabled as="collection"
               empty-label="[[i18n('collections.empty')]]"
@@ -249,7 +249,7 @@ Contributors:
                enrichers="thumbnail">
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="memberProvider" id="membersList" loading="{{loading}}"
+            <nuxeo-data-list nx-provider="memberProvider" id="membersList"
               selected-item="{{selectedMember}}"
               selection-enabled as="member"
               empty-label="[[i18n('collections.members.empty')]]"
@@ -345,12 +345,6 @@ Contributors:
           _exitAnimation: {
             type: String,
             value: 'slide-left-animation'
-          },
-          loading: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true,
-            value: false
           },
           visible: {
             type: Boolean,
