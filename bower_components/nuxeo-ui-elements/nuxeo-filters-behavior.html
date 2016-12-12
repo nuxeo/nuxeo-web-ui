@@ -28,14 +28,15 @@ limitations under the License.
      * Checks if the document is a favorite.
      */
     isFavorite: function(doc) {
-      return doc && doc.contextParameters.favorites && doc.contextParameters.favorites.isFavorite;
+      return doc && doc.contextParameters && doc.contextParameters.favorites &&
+        doc.contextParameters.favorites.isFavorite;
     },
 
     /**
      * Checks if the current user is subscribed to document notifications.
      */
     isSubscribed: function(doc) {
-      return doc && doc.contextParameters.subscribedNotifications &&
+      return doc && doc.contextParameters && doc.contextParameters.subscribedNotifications &&
         doc.contextParameters.subscribedNotifications.length > 0;
     },
 
@@ -50,7 +51,7 @@ limitations under the License.
      * Checks if the document is a version.
      */
     isVersion: function(doc) {
-      return (doc) && doc.isVersion;
+      return doc && doc.isVersion;
     },
 
     /**

@@ -106,11 +106,31 @@ element.
       autoDelay: {
         type: Number,
         value: 300
+      },
+
+      /**
+       * Active request count.
+       */
+      activeRequests: {
+        type: Number,
+        value: 0,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * True while requests are in flight.
+       */
+      loading: {
+        type: Boolean,
+        notify: true,
+        readOnly: true
       }
     },
 
     observers: [
-      '_autoGet(connectionId, auto, path, params, type, enrichers, enrichersEntity)'
+      '_autoGet(connectionId, auto, path, params, type, enrichers, enrichersEntity)',
+      '_isLoading(activeRequests)'
     ],
 
     /* Execute a 'GET' request */
@@ -139,6 +159,7 @@ element.
 
     /* Execute the request */
     execute: function () {
+      this._setActiveRequests(this.activeRequests + 1);
       var options = {
         method: this.method || 'get'
       };
@@ -195,16 +216,22 @@ element.
           this.fire('response', {response: data});
           this.response = data;
           this.success = true;
+          this._setActiveRequests(this.activeRequests - 1);
           return this.response;
         }.bind(this))
         .catch(function(error) {
           this.success = false;
+          this._setActiveRequests(this.activeRequests - 1);
           return error.response.json().then(function(e) {
             this.error = e;
             console.log("Resource request failed: " + e.message);
             throw e;
           }.bind(this));
         }.bind(this));
+    },
+
+    _isLoading: function() {
+      this._setLoading(this.activeRequests > 0 ? true : false);
     }
 
   });

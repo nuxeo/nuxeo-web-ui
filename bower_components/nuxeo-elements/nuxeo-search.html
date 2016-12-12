@@ -150,6 +150,15 @@ element.
           autoDelay: {
             type: Number,
             value: 300
+          },
+
+          /**
+           * True while requests are in flight.
+           */
+          loading: {
+            type: Boolean,
+            notify: true,
+            readOnly: true
           }
         },
 
@@ -218,6 +227,12 @@ element.
               }.bind(this));
             }.bind(this), this.autoDelay);
           }
+        },
+
+        ready: function() {
+          this.$.resource.addEventListener('loading-changed', function(e) {
+            this._setLoading(this.$.resource.loading);
+          }.bind(this));
         }
       });
     })();

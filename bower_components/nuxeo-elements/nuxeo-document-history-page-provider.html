@@ -174,8 +174,16 @@ limitations under the License.
         /**
          * The document id.
          */
-        docId: String
+        docId: String,
 
+        /**
+         * True while requests are in flight.
+         */
+        loading: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        }
       },
 
       observers: [
@@ -252,6 +260,12 @@ limitations under the License.
             this.fetch();
           }.bind(this), this.autoDelay);
         }
+      },
+
+      ready: function() {
+        this.$.auditOp.addEventListener('loading-changed', function(e) {
+          this._setLoading(this.$.auditOp.loading);
+        }.bind(this));
       }
 
     });

@@ -16,6 +16,11 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -45,7 +50,7 @@ limitations under the License.
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
-      <paper-tooltip>[[tooltip]]</paper-tooltip>
+      <paper-tooltip>[[_tooltip]]</paper-tooltip>
     </template>
 
   </template>
@@ -57,20 +62,24 @@ limitations under the License.
         is: 'nuxeo-favorites-toggle-button',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
+
           document: {
             type: Object,
             observer: '_observeDoc'
           },
+
+          icon: {
+            type: String,
+            value: 'icons:grade'
+          },
+
           favorite: {
             type: Boolean,
             notify: true,
             reflectToAttribute: true
           },
-          icon: {
-            type: String,
-            value: 'icons:grade'
-          },
-          tooltip: {
+
+          _tooltip: {
             type: String,
             computed: '_computeTooltip(favorite)'
           }

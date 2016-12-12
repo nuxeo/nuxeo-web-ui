@@ -16,6 +16,15 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../widgets/nuxeo-select2.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -97,7 +106,7 @@ limitations under the License.
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="icons:book" on-tap="_toggleDialog" noink></paper-icon-button>
+      <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
       <paper-tooltip>[[i18n('addToCollectionButton.tooltip')]]</paper-tooltip>
     </template>
 
@@ -151,7 +160,13 @@ limitations under the License.
       is: 'nuxeo-add-to-collection-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
+
         document: Object,
+
+        icon: {
+          type: String,
+          value: 'icons:book'
+        },
 
         collection: {
           type: String,

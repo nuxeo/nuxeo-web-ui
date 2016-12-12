@@ -109,15 +109,36 @@ element.
          * All document schemas are returned by default.
          */
         schemas: {type: String, value: ''},
+
+        /**
+         * Active request count.
+         */
+        activeRequests: {
+          type: Number,
+          value: 0,
+          notify: true,
+          readOnly: true
+        },
+
+        /**
+         * True while requests are in flight.
+         */
+        loading: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        }
       },
       observers: [
-        '_autoExecute(op, params, enrichers, enrichersEntity)'
+        '_autoExecute(op, params, enrichers, enrichersEntity)',
+        '_isLoading(activeRequests)'
       ],
 
       /**
        * Call the operation
        */
       execute: function() {
+        this._setActiveRequests(this.activeRequests + 1);
         var params = (!this.params || (typeof this.params === 'object')) ? this.params : JSON.parse(this.params);
         var options = {};
         // Look up document schemas to be returned
@@ -153,14 +174,20 @@ element.
             this.fire('response', {response: data});
             this.response = data;
             this.success = true;
+            this._setActiveRequests(this.activeRequests - 1);
             return this.response;
           }.bind(this))
           .catch(function(error) {
             this.success = false;
             this.error = error;
             console.log("Operation request failed: " + error);
+            this._setActiveRequests(this.activeRequests - 1);
             throw error;
           }.bind(this));
+      },
+
+      _isLoading: function() {
+        this._setLoading(this.activeRequests > 0 ? true : false);
       }
     });
   </script>

@@ -18,8 +18,11 @@ limitations under the License.
   <title>nuxeo-document-actions</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
   <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
   <link rel="import" href="../../../polymer/polymer.html">
+  <link rel="import" href="../../../nuxeo-elements/nuxeo-connection.html">
   <link rel="import" href="../../nuxeo-i18n-behavior.html">
   <link rel="import" href="../../nuxeo-document-actions/nuxeo-add-to-collection-button.html">
   <link rel="import" href="../../nuxeo-document-actions/nuxeo-favorites-toggle-button.html">
@@ -30,6 +33,13 @@ limitations under the License.
   <link rel="import" href="../../nuxeo-document-actions/nuxeo-preview-button.html">
   <link rel="import" href="../../nuxeo-document-actions/nuxeo-export-button.html">
   <link rel="import" href="../../nuxeo-document-actions/nuxeo-download-button.html">
+
+  <script>
+    window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
+    window.nuxeo.I18n.localeResolver = new XHRLocaleResolver('../../i18n');
+    window.nuxeo.I18n.loadLocale();
+  </script>
+
 </head>
 
 <body unresolved>
@@ -45,6 +55,7 @@ limitations under the License.
       <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
       <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
       <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
+      <nuxeo-download-button document="[[document]]"></nuxeo-download-button>
 
     </template>
 
@@ -54,9 +65,28 @@ limitations under the License.
 
         Polymer({
           is: 'nuxeo-document-actions-demo',
-          behaviors: [Nuxeo.I18nBehavior],
           properties: {
-            document: Object
+            document: Object,
+            clipboard: Object
+          },
+
+          ready: function() {
+            this.document = {
+              "entity-type": "document",
+              "uid": "1",
+              "properties": {
+                "file:content": {
+                  "data": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+                  "mime-type": "image/gif"
+                }
+              },
+              "contextParameters": {
+                "favorites": {
+                  "isFavorite": true
+                }
+              },
+              "facets": []
+            };
           }
 
         });
@@ -64,6 +94,7 @@ limitations under the License.
     </script>
   </dom-module>
 
+  <nuxeo-connection url="http://webui-demo.nuxeo.com/nuxeo" username="demo" password="demo"></nuxeo-connection>
   <nuxeo-document-actions-demo></nuxeo-document-actions-demo>
 
 </body>

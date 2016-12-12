@@ -16,6 +16,10 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -34,7 +38,7 @@ limitations under the License.
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="icons:file-download" on-tap="_download" noink></paper-icon-button>
+      <paper-icon-button icon="[[icon]]" on-tap="_download" noink></paper-icon-button>
       <paper-tooltip>[[i18n('downloadButton.tooltip')]]</paper-tooltip>
     </template>
 
@@ -45,7 +49,13 @@ limitations under the License.
       is: 'nuxeo-download-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
-        document: Object
+
+        document: Object,
+
+        icon: {
+          type: String,
+          value: 'icons:file-download'
+        }
       },
 
       _isAvailable: function(doc) {

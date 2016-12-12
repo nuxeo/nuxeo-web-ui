@@ -101,6 +101,15 @@ element.
        * All document schemas are returned by default.
        */
       schemas: {type: String, value: ''},
+
+      /**
+       * True while requests are in flight.
+       */
+      loading: {
+        type: Boolean,
+        notify: true,
+        readOnly: true
+      }
     },
 
     /* Fetch the document */
@@ -140,6 +149,12 @@ element.
         path = '/path/' + docPath;
       }
       return path;
+    },
+
+    ready: function() {
+      this.$.nxResource.addEventListener('loading-changed', function(e) {
+        this._setLoading(this.$.nxResource.loading);
+      }.bind(this));
     }
   });
 </script>

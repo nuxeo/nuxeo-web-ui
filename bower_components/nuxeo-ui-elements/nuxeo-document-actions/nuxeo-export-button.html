@@ -16,6 +16,12 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -52,7 +58,7 @@ limitations under the License.
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="icons:archive" on-tap="_toggleDialog" noink></paper-icon-button>
+      <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
       <paper-tooltip>[[i18n('exportButton.tooltip')]]</paper-tooltip>
     </template>
 
@@ -82,7 +88,13 @@ limitations under the License.
       is: 'nuxeo-export-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
-        document: Object
+
+        document: Object,
+
+        icon: {
+          type: String,
+          value: 'icons:archive'
+        }
       },
 
       _isAvailable: function(document) {
@@ -94,7 +106,7 @@ limitations under the License.
       },
 
       _filterRenditions: function(document) {
-        if (document && document.contextParameters) {
+        if (document && document.contextParameters && document.contextParameters.renditions) {
           return document.contextParameters.renditions.filter(function(rendition) {
             return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
           }).map(function(item) {

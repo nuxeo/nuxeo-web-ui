@@ -233,6 +233,15 @@ element.
           type: Boolean,
           value: false,
           observer: '_fetchAggregatesChanged'
+        },
+
+        /**
+         * True while requests are in flight.
+         */
+        loading: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
         }
       },
 
@@ -338,7 +347,14 @@ element.
         } else {
           delete this.headers['X-NXfetch.aggregate'];
         }
+      },
+
+      ready: function() {
+        this.$.nxResource.addEventListener('loading-changed', function(e) {
+          this._setLoading(this.$.nxResource.loading);
+        }.bind(this));
       }
+
     });
   </script>
 

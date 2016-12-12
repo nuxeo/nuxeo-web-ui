@@ -115,10 +115,11 @@ limitations under the License.
          * `true` if the table is currently loading data from the data source.
          */
         loading: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
+         type: Boolean,
+         reflectToAttribute: true,
+         notify: true,
+         readOnly: true,
+         value: false
         },
 
         selectionEnabled: {
@@ -180,9 +181,11 @@ limitations under the License.
             var parentNode = Polymer.dom(this).parentNode;
             this.nxProvider = parentNode.querySelector('#' + nxProvider);
           }
-          this.listen(this.nxProvider, 'update', '_updateResults');
         } else if (nxProvider) {
           this.listen(this.nxProvider, 'update', '_updateResults');
+          this.nxProvider.addEventListener('loading-changed', function(e) {
+            this._setLoading(this.nxProvider.loading);
+          }.bind(this));
         }
       },
 
@@ -192,7 +195,6 @@ limitations under the License.
         }
         if (this.nxProvider &&
             this.nxProvider.isNextPageAvailable) {
-          this.loading = true;
           this.nxProvider.page = this.nxProvider.page + 1;
           if (!this.nxProvider.auto) {
             this.nxProvider.fetch();
@@ -217,7 +219,6 @@ limitations under the License.
         this.$.list.notifyResize();
         this.notifyResize();
         this.$.scrollThreshold.clearTriggers();
-        this.loading = false;
         // just to notify that the update is finished
         // you can use a property with notify: true instead
         this.fire('nuxeo-page-loaded');
@@ -227,7 +228,6 @@ limitations under the License.
         if (!this._isPPLoaded()) {
           return;
         }
-        this.loading = true;
         this.nxProvider.page = 1;
         this.$.list.items = [];
         this.size = 0;
