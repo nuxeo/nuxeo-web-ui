@@ -183,7 +183,7 @@ limitations under the License.
           }
         } else if (nxProvider) {
           this.listen(this.nxProvider, 'update', '_updateResults');
-          this.nxProvider.addEventListener('loading-changed', function(e) {
+          this.nxProvider.addEventListener('loading-changed', function() {
             this._setLoading(this.nxProvider.loading);
           }.bind(this));
         }

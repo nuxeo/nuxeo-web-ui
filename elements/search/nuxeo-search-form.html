@@ -247,6 +247,7 @@ Contributors:
        params="[[params]]"
        quick-filters="{{quickFilters}}"
        schemas="[[schemas]]"
+       loading="{{loading}}"
        headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
        fetch-aggregates>
     </nuxeo-page-provider>
@@ -310,7 +311,7 @@ Contributors:
         </div>
 
         <div id="queue" hidden$="{{!_isQueue}}">
-          <nuxeo-data-list nx-provider="provider" id="list" loading="{{loading}}"
+          <nuxeo-data-list nx-provider="provider" id="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered=""
@@ -473,7 +474,6 @@ Contributors:
           },
           loading: {
             type: Boolean,
-            notify: true,
             reflectToAttribute: true,
             value: false
           },
@@ -615,7 +615,6 @@ Contributors:
           this._resetResults();
           if (!this._auto) {
             this.aggregations = {};
-            this.loading = false;
           }
         },
 
@@ -776,9 +775,6 @@ Contributors:
           this._form.aggregations = this.aggregations;
           this._displayAutoControl =
             typeof this._form.displayAutoControl !== "undefined" ? this._form.displayAutoControl === true : false;
-          if (!this._auto) {
-            this.$.list.loading = false;
-          }
           if (this._form.provider !== undefined) {
             this.provider = this._form.provider;
             this.$.provider.query = null;
