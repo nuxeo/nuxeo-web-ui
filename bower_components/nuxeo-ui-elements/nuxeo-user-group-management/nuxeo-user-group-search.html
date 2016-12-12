@@ -237,8 +237,8 @@ Used by `nuxeo-user-management`
 
     _countGroups: function(groups) {
       if (groups.length > 0) {
-        var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nesteGroup') :
-                                                 this.i18n('userGroupSearch.nesteGroups'));
+        var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nestedGroup') :
+                                                 this.i18n('userGroupSearch.nestedGroups'));
         return groups.length + label;
       }
     },

@@ -100,22 +100,22 @@ Contributors:
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
       <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
-      <paper-tooltip for="addColBut">[[i18n('addToCollectionButton.tooltip')]]</paper-tooltip>
+      <paper-tooltip for="addColBut">[[i18n('addToCollectionDocumentsButton.tooltip')]]</paper-tooltip>
     </template>
 
     <paper-dialog id="dialog" on-iron-overlay-closed="_resetPopup" no-auto-focus>
-      <h1>[[i18n('addToCollectionButton.dialog.heading')]]</h1>
+      <h1>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h1>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
           <div class="row layout horizontal">
             <div class="label-container">
-              <label>[[i18n('shareButton.dialog.collections')]]</label>
+              <label>[[i18n('addToCollectionDocumentsButton.dialog.collections')]]</label>
               <span class="required">*</span>
             </div>
             <nuxeo-select2 id="nxSelect"
                operation="Collection.Suggestion"
                min-chars="0"
-               placeholder="[[i18n('addToCollectionButton.dialog.select')]]"
+               placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
                value="{{collection}}"
                tagging="true"
                query-results-filter="[[resultsFilter]]"
@@ -126,7 +126,7 @@ Contributors:
           </div>
           <div class="row layout horizontal" hidden$="[[!_isNew(collection)]]">
             <div class="label-container">
-              <label>[[i18n('shareButton.dialog.description')]]</label>
+              <label>[[i18n('addToCollectionDocumentsButton.dialog.description')]]</label>
             </div>
             <textarea value="{{description::input}}"></textarea>
           </div>
@@ -139,9 +139,9 @@ Contributors:
         </nuxeo-operation>
       </div>
       <div class="buttons">
-       <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+       <paper-button noink dialog-dismiss>[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button>
        <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
-         [[i18n('shareButton.dialog.add')]]
+         [[i18n('addToCollectionDocumentsButton.dialog.add')]]
        </paper-button>
       </div>
     </paper-dialog>

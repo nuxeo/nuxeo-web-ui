@@ -52,126 +52,124 @@ limitations under the License.
       }
       table th {
         text-transform: uppercase;
-        font-size: 14px;
         text-align: left;
-        padding-right: 40px;
         border-bottom: 1px solid #eee;
         font-weight: 500;
         line-height: 48px;
       }
       table td {
         margin: 0;
-        vertical-align: top;
+        vertical-align: middle;
         padding: 12px 12px 12px 0;
+        width: 33%;
+      }
+      table tr td:first-child {
+        font-weight: normal;
+      }
+      table tr td:last-child, table tr th:last-child {
+        text-align: center;
       }
     </style>
 </head>
 <body>
 <template is="dom-bind">
   <nuxeo-connection id="nx" url="http://localhost:8080/nuxeo" username="Administrator" password="Administrator"></nuxeo-connection>
+
   <div class="container">
     <table>
-    <thead><tr><th></th><th>Value</th><th>Widget</th></tr></thead>
+    <thead>
+      <tr><th>Element</th><th>Widget</th><th>Value</th></tr></thead>
     <tbody>
-    <tr>
-      <td>Single Directory Suggestion</td>
-      <td>[[oneDirectorySuggestion]]</td>
-      <td><nuxeo-directory-suggestion directory-name="subject" value="{{oneDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
-    </tr>
-    <tr>
-      <td>Multiple Directory Suggestion</td>
-      <td>[[multipleDirectorySuggestion]]</td>
-      <td><nuxeo-directory-suggestion directory-name="subject" multiple="true" value="{{multipleDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
-    </tr>
-    <tr>
-      <td>Single User Suggestion</td>
-      <td>[[userSuggestion]]</td>
-      <td>
-        <nuxeo-user-suggestion value="{{userSuggestion}}"></nuxeo-user-suggestion>
-      </td>
-    </tr>
-    <tr>
-      <td>Multiple User Suggestion</td>
-      <td>[[multipleUserSuggestion]]</td>
-      <td>
-        <nuxeo-user-suggestion multiple="true" value="{{multipleUserSuggestion}}"></nuxeo-user-suggestion>
-      </td>
-    </tr>
-    <tr>
-      <td>Single Document Suggestion</td>
-      <td>[[documentSuggestion]]</td>
-      <td>
-        <nuxeo-document-suggestion value="{{documentSuggestion}}"></nuxeo-document-suggestion>
-      </td>
-    </tr>
-    <tr>
-      <td>Multiple Document Suggestion</td>
-      <td>[[multipleDocumentSuggestion]]</td>
-      <td>
-        <nuxeo-document-suggestion multiple="true" value="{{multipleDocumentSuggestion}}"></nuxeo-document-suggestion>
-      </td>
-    </tr>
-    <tr>
-      <td>File Upload</td>
-      <td>[[upload.upload-batch]]</td>
-      <td>
-        <nuxeo-file value="{{upload}}"></nuxeo-file>
-      </td>
-    </tr>
-    <tr>
-      <td>Tag</td>
-      <td></td>
-      <td>
-        <nuxeo-tag icon="home">Home</nuxeo-tag>
-      </td>
-    </tr>
-    <tr>
-      <td>Tags</td>
-      <td></td>
-      <td>
-        <nuxeo-tags items='["Tag 1", "Tag 2", "Tag 3"]'></nuxeo-tags>
-      </td>
-    </tr>
-    <tr>
-      <td>User tag</td>
-      <td></td>
-      <td>
-        <nuxeo-user-tag user="User Name"></nuxeo-user-tag>
-      </td>
-    </tr>
-    <tr>
-      <td>Group tag</td>
-      <td></td>
-      <td>
-        <nuxeo-group-tag group="Group Name"></nuxeo-group-tag>
-      </td>
-    </tr>
-    <tr>
-      <td>Date picker</td>
-      <td>[[dateValue]]</td>
-      <td>
-        <nuxeo-date-picker label="My Date" value="{{dateValue}}"></nuxeo-date-picker>
-      </td>
-    </tr>
-    <tr>
-      <td>Operation button</td>
-      <td>[[operationResponse.uid]]</td>
-      <td>
-        <nuxeo-operation-button icon="icons:account-box" label="Get user"
-                                operation="User.Get" response="{{operationResponse}}">
-        </nuxeo-operation-button>
-      </td>
-    </tr>
-    <tr>
-      <td>Select</td>
-      <td>[[optionSelected]]</td>
-      <td>
-        <nuxeo-select label="Select an option"
-                      options='[{"id": 1, "label": "Option 1"}, {"id": 2, "label": "Option 2"}]'
-                      selected="{{optionSelected}}">
-        </nuxeo-select>
-      </td>
-    </tr>
+
+      <tr>
+        <td>nuxeo-directory-suggestion</td>
+        <td><nuxeo-directory-suggestion directory-name="subject" value="{{oneDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
+        <td>[[oneDirectorySuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-directory-suggestion (multiple)</td>
+        <td><nuxeo-directory-suggestion directory-name="subject" multiple="true" value="{{multipleDirectorySuggestion}}"></nuxeo-directory-suggestion></td>
+        <td>[[multipleDirectorySuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-user-suggestion</td>
+        <td><nuxeo-user-suggestion value="{{userSuggestion}}"></nuxeo-user-suggestion></td>
+        <td>[[userSuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-user-suggestion (multiple)</td>
+        <td><nuxeo-user-suggestion multiple="true" value="{{multipleUserSuggestion}}"></nuxeo-user-suggestion></td>
+        <td>[[multipleUserSuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-document-suggestion</td>
+        <td><nuxeo-document-suggestion value="{{documentSuggestion}}"></nuxeo-document-suggestion></td>
+        <td>[[documentSuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-document-suggestion (multiple)</td>
+        <td><nuxeo-document-suggestion multiple="true" value="{{multipleDocumentSuggestion}}"></nuxeo-document-suggestion></td>
+        <td>[[multipleDocumentSuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-date-picker</td>
+        <td><nuxeo-date-picker label="Date" value="{{dateValue}}"></nuxeo-date-picker></td>
+        <td>[[dateValue]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-select</td>
+        <td>
+          <nuxeo-select label="Select an option"
+                        options='[{"id": 1, "label": "Option 1"}, {"id": 2, "label": "Option 2"}]'
+                        selected="{{optionSelected}}">
+          </nuxeo-select>
+        </td>
+        <td>[[optionSelected]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-file</td>
+        <td><nuxeo-file value="{{upload}}"></nuxeo-file></td>
+        <td>[[upload.upload-batch]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-tag</td>
+        <td><nuxeo-tag icon="home">Home</nuxeo-tag></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-tags</td>
+        <td><nuxeo-tags items='["Tag 1", "Tag 2", "Tag 3"]'></nuxeo-tags></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-user-tag</td>
+        <td><nuxeo-user-tag user="User Name"></nuxeo-user-tag></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-group-tag</td>
+        <td><nuxeo-group-tag group="Group Name"></nuxeo-group-tag></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-operation-button</td>
+        <td><nuxeo-operation-button icon="icons:account-box" label="Get user" operation="User.Get" response="{{operationResponse}}"></nuxeo-operation-button></td>
+        <td>[[operationResponse.uid]]</td>
+      </tr>
+
     </tbody>
     </table>
   </div>

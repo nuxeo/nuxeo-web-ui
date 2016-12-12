@@ -1,0 +1,70 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+<head>
+  <title>nuxeo-document-actions</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../../polymer/polymer.html">
+  <link rel="import" href="../../nuxeo-i18n-behavior.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-add-to-collection-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-favorites-toggle-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-share-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-notifications-toggle-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-clipboard-toggle-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-lock-toggle-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-preview-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-export-button.html">
+  <link rel="import" href="../../nuxeo-document-actions/nuxeo-download-button.html">
+</head>
+
+<body unresolved>
+
+  <dom-module id="nuxeo-document-actions-demo">
+    <template>
+
+      <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
+      <nuxeo-favorites-toggle-button document="[[document]]"></nuxeo-favorites-toggle-button>
+      <nuxeo-share-button document="[[document]]"></nuxeo-share-button>
+      <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
+      <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
+      <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+      <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
+      <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
+
+    </template>
+
+    <script>
+      (function() {
+        'use strict';
+
+        Polymer({
+          is: 'nuxeo-document-actions-demo',
+          behaviors: [Nuxeo.I18nBehavior],
+          properties: {
+            document: Object
+          }
+
+        });
+      })();
+    </script>
+  </dom-module>
+
+  <nuxeo-document-actions-demo></nuxeo-document-actions-demo>
+
+</body>
+</html>

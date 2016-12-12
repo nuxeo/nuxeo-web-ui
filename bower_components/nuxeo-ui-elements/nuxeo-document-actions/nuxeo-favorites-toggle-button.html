@@ -1,0 +1,121 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behavior.html">
+
+<!--
+`nuxeo-favorites-toggle-button`
+@group Nuxeo UI
+@element nuxeo-favorites-toggle-button
+@demo demo/nuxeo-document-actions/index.html
+-->
+<dom-module id="nuxeo-favorites-toggle-button">
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      :host([favorite]) ::content iron-icon {
+        stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
+        fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+      }
+    </style>
+
+    <nuxeo-operation id="addToFavOp" op="Document.AddToFavorites" input="[[document.uid]]"></nuxeo-operation>
+
+    <nuxeo-operation id="removeFromFavOp" op="Document.RemoveFromFavorites" input="[[document.uid]]"></nuxeo-operation>
+
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
+      <paper-tooltip>[[tooltip]]</paper-tooltip>
+    </template>
+
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'nuxeo-favorites-toggle-button',
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        properties: {
+          document: {
+            type: Object,
+            observer: '_observeDoc'
+          },
+          favorite: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          },
+          icon: {
+            type: String,
+            value: 'icons:grade'
+          },
+          tooltip: {
+            type: String,
+            computed: '_computeTooltip(favorite)'
+          }
+        },
+
+        listeners: {
+          'tap': '_toggle'
+        },
+
+        ready: function() {
+          window.addEventListener('removedFromFavorites', function(e) {
+            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
+              this.favorite = false;
+            }
+          }.bind(this));
+        },
+
+        _isAvailable: function(doc) {
+          return this.isCollectionMember(doc);
+        },
+
+        _toggle: function() {
+          if (!this.favorite) {
+            this.$.addToFavOp.execute().then(function() {
+              this.fire('addedToFavorites', {doc: this.document});
+              this.favorite = true;
+            }.bind(this));
+          } else {
+            this.$.removeFromFavOp.execute().then(function() {
+              this.fire('removedFromFavorites', {doc: this.document});
+              this.favorite = false;
+            }.bind(this));
+          }
+        },
+
+        _computeTooltip: function(isFavorite) {
+          return isFavorite ? this.i18n('favoritesToggleButton.remove') : this.i18n('favoritesToggleButton.add');
+        },
+
+        _observeDoc: function() {
+          this.favorite = this.isFavorite(this.document);
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>
