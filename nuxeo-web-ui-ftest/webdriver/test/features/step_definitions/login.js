@@ -31,8 +31,8 @@ module.exports = function () {
   this.When('I logout', () => driver.url('/logout'));
 
   this.Then('I am logged in as "$username"', (username) => {
-    driver.isExisting(`//section[@name="profile"]//h1[contains(text(),"${username}")]`).should.be.true;
-    // XXX: this.ui.drawer.profile.getText('h1').should.be.equal(username);
+    const currentUser = this.ui.drawer.open('profile').getText('.title').toLowerCase();
+    currentUser.should.be.equal(username.toLowerCase());
   });
 
   this.Then('I am logged out', () => driver.isVisible('#username').should.be.true);
