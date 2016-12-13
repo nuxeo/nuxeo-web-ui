@@ -11,8 +11,7 @@ var doc = {
 
 module.exports = function() {
 
-  this.Given(/^I have a(?: (.*))document$/, (docType) => {
-    docType = docType || 'File';
+  this.Given(/^I have a(?: (.*))document$/, (docType = 'File') => {
     doc.type = docType.trim();
     // create the document
     return this.client.repository().create('/default-domain/', doc).then((doc) => {

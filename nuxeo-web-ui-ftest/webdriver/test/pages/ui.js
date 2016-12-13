@@ -24,7 +24,7 @@ export default class UI {
   }
 
   static get() {
-    driver.url('/ui');
+    driver.url(process.env.NUXEO_URL ? '/' : '/ui');
     return new UI('nuxeo-app');
   }
 
