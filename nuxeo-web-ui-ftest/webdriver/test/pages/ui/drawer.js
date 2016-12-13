@@ -45,14 +45,16 @@ export default class Drawer {
     return this._section('profile');
   }
 
-  selectSearch(name) {
+  openSearch(name) {
     this.menu.click(`nuxeo-menu-icon[name='${name}Search']`);
     this._section('search').waitForVisible();
   }
 
-  select(name) {
+  open(name) {
     this.menu.click(`nuxeo-menu-icon[name='${name}']`);
-    this._section(name).waitForVisible();
+    const section = this._section(name);
+    section.waitForVisible();
+    return section;
   }
 
   _section(name) {
