@@ -31,8 +31,7 @@ export default class Browser {
 
   get title() {
     // XXX: this.breadcrumb.getText('a span'); not working with waitUntil
-    const texts = this.breadcrumb.getText('a span'); //driver.getText('nuxeo-breadcrumb a span');
-    return Array.isArray(texts) ? texts.pop() : texts;
+    return this.page.getText('nuxeo-breadcrumb .current');
   }
 
   _section(name) {

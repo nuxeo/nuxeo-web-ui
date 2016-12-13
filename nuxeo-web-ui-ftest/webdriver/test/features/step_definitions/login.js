@@ -28,7 +28,7 @@ module.exports = function () {
 
   this.When(/^I visit (.*)$/, (url) => driver.url(url));
 
-  this.When('I logout', () => driver.url('/logout'));
+  this.When('I logout', () => Login.get());
 
   this.Then('I am logged in as "$username"', (username) => {
     const currentUser = this.ui.drawer.open('profile').getText('.title').toLowerCase();

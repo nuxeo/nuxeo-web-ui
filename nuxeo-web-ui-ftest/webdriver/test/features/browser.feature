@@ -1,3 +1,4 @@
+@focus
 Feature: Browser
 
   I can browse the repository
@@ -7,9 +8,12 @@ Feature: Browser
 
   Scenario: Browse
     When I click the "browser" button
-    Then I can see the tree
+    Then I can see the browser tree
+    And I can see the "Domain" browser tree node
+
+    When I click "Domain" in the browser tree
+    Then I can see the "Workspaces" browser tree node
 
     # XXX - missing href in tree nodes
-    # When I click "Workspaces" in the browser tree
-    # Then I can see the "Workspaces" document content
-
+    When I click "Workspaces" in the browser tree
+    Then I can see the "Workspaces" document content

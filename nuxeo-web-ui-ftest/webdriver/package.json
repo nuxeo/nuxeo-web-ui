@@ -4,6 +4,7 @@
   "scripts": {
     "lint": "eslint scripts test",
     "test": "scripts/test.js",
+    "test:dev": "NUXEO_URL=http://localhost:8080/nuxeo chimp --chai --path=test/features --webdriverio.baseUrl=http://localhost:5000 --watch",
     "test:watch": "chimp --chai --path=test/features --webdriverio.baseUrl=http://localhost:8080/nuxeo --watch"
   },
   "license": "Apache-2.0",
@@ -16,6 +17,6 @@
     "mkdirp": "^0.5.1"
   },
   "dependencies": {
-    "nuxeo": "^1.0.0"
+    "nuxeo": "~1.1.1"
   }
 }
