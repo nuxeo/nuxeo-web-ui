@@ -449,6 +449,7 @@
   "threeDViewLayout.dropzone.uploaded.message": "3D file uploaded",
   "threeDViewLayout.renderViews.download": "Download Render View",
   "threeDViewLayout.renderViews.heading": "Render Views",
+  "threeDViewLayout.renderViews.notAvailable:": "No render views available.",
   "threeDViewLayout.threed_transmissionFormats.heading": "Transmission Formats",
   "threeDViewLayout.transmissionFormats.download": "Download Transmission Format",
   "threeDViewLayout.transmissionFormats.notAvailable": "No transmission formats available.",
