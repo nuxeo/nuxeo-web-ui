@@ -1,0 +1,178 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../es6-promise/promise.min.js"></script>
+  <link rel="import" href="../../polymer/polymer.html">
+  <script>
+    window.fetch = null;
+  </script>
+  <link rel="import" href="../nuxeo-connection.html">
+</head>
+<body>
+<test-fixture id="nxc-ok">
+  <template>
+    <nuxeo-connection connection-id="nxc-ok"></nuxeo-connection>
+  </template>
+</test-fixture>
+<test-fixture id="nxc-ko">
+  <template>
+    <nuxeo-connection connection-id="nxc-ko"></nuxeo-connection>
+  </template>
+</test-fixture>
+<test-fixture id="nxc">
+  <template>
+    <nuxeo-connection></nuxeo-connection>
+  </template>
+</test-fixture>
+<test-fixture id="nxc-dup">
+  <template>
+    <nuxeo-connection></nuxeo-connection>
+  </template>
+</test-fixture>
+<script>
+  suite('<nuxeo-connection>', function() {
+
+    var responseHeaders = {
+      json: {'Content-Type': 'application/json'},
+      plain: {'Content-Type': 'text/plain'}
+    };
+    var server;
+
+    var loginResponse = [
+      200,
+      responseHeaders.json,
+      '{"entity-type":"login","username":"Administrator"}'
+    ];
+
+    var userResponse = [
+      200,
+      responseHeaders.json,
+      '{"entity-type":"user","username":"Administrator"}'
+    ]
+
+    function timePasses(ms) {
+      return new Promise(function(resolve) {
+        window.setTimeout(function() {
+          resolve();
+        }, ms);
+      });
+    }
+
+    setup(function() {
+      server = sinon.fakeServer.create();
+      server.autoRespond = true;
+    });
+
+    teardown(function() {
+      server.restore();
+    });
+
+    suite('when login request succeed', function() {
+
+      setup(function() {
+        server.respondWith('POST','/api/v1/automation/login', loginResponse);
+        server.respondWith('GET', '/api/v1/repo/default/user/Administrator?', userResponse);
+      });
+
+      test('should run the next', function() {
+        var connection = fixture('nxc-ok');
+        return timePasses(100).then(function() {
+          // Test if component succeeded to log in
+          expect(connection.connected).to.be.equal(true);
+
+          // Return current connection
+          return connection.connect();
+        }).catch(function() {
+          // We shouldn't be there
+          throw new Error('Expected to run something after a succeeded connection!');
+        });
+      });
+
+    });
+
+    suite('when login request fail', function() {
+
+      setup(function() {
+        server.respondWith(
+          'POST',
+          '/api/v1/automation/login',
+          [
+            401,
+            responseHeaders.json,
+            '{"error":true,"message":"An error occurred"}'
+          ]
+        );
+      });
+
+      test('should not run the next', function() {
+        var connection = fixture('nxc-ko');
+        return timePasses(10).then(function() {
+          // Test if component failed to log in
+          expect(connection.connected).to.be.equal(false);
+
+          // Return current connection
+          return connection.connect();
+        }).then(function() {
+          // We shouldn't be there
+          throw new Error('Expected to not run something after a failed connection!');
+        }, function(error) {
+          expect(error).to.be.instanceof(Error);
+          expect(error.message).to.be.eq('Unauthorized');
+        });
+      });
+
+    });
+
+    suite('when using multiple connections', function() {
+
+      setup(function() {
+        server.respondWith('POST','/api/v1/automation/login', loginResponse);
+        server.respondWith('GET', '/api/v1/repo/default/user/Administrator?', userResponse);
+      });
+
+      test('first connection should succeed', function() {
+        var connection = fixture('nxc');
+        return timePasses(100).then(function() {
+          // Ensure two requests are done so far
+          expect(server.requests.length).to.be.equal(2);
+          // Test if component succeeded to log in
+          expect(connection.connected).to.be.equal(true);
+          // Return current connection
+          return connection.connect();
+        })
+      });
+
+      test('similar connections should not issue requests', function() {
+        var connection = fixture('nxc-dup');
+        return timePasses(100).then(function() {
+          // Ensure no requests were done
+          expect(server.requests.length).to.be.equal(0);
+          // Test if component succeeded to log in
+          expect(connection.connected).to.be.equal(true);
+          // Return current connection
+          return connection.connect();
+        })
+      });
+    });
+
+  });
+</script>
+</body>
+</html>

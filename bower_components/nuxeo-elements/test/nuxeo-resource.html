@@ -1,0 +1,176 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../../polymer/polymer.html">
+  <script>
+    window.fetch = null;
+  </script>
+  <link rel="import" href="../nuxeo-resource.html">
+</head>
+<body>
+<test-fixture id="nxc-ok">
+  <template>
+    <nuxeo-resource id="nxc-ok" connection-id="nxc-ok" path="something"></nuxeo-resource>
+  </template>
+</test-fixture>
+<test-fixture id="nxc-ko">
+  <template>
+    <nuxeo-resource id="nxc-ko" connection-id="nxc-ko" path="something"></nuxeo-resource>
+  </template>
+</test-fixture>
+<script>
+  suite('<nuxeo-resource>', function() {
+
+    var responseHeaders = {
+      json: {'Content-Type': 'application/json'},
+      plain: {'Content-Type': 'text/plain'}
+    };
+    var server;
+
+    setup(function() {
+      server = sinon.fakeServer.create();
+      server.autoRespond = true;
+    });
+
+    teardown(function() {
+      server.restore();
+    });
+
+    suite('when login request succeed', function() {
+
+      setup(function() {
+        server.respondWith(
+          'POST',
+          '/api/v1/automation/login',
+          [
+            200,
+            responseHeaders.json,
+            '{"entity-type":"login","username":"Administrator"}'
+          ]
+        );
+        server.respondWith(
+          'GET',
+          '/api/v1/repo/default/user/Administrator?',
+          [
+            200,
+            responseHeaders.json,
+            '{"entity-type":"user","username":"Administrator"}'
+          ]
+        );
+      });
+
+      test('should retrieve something valid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/something?',
+          [
+            200,
+            responseHeaders.json,
+            '{"success":true,"entity-type":"login"}'
+          ]
+        );
+
+        var resource = fixture('nxc-ok');
+        return resource.get().catch(function() {
+          throw new Error('Expected to a valid response!');
+        });
+      });
+
+      // This test fails on firefox due to the 'error' event fired in component
+      // https://github.com/webcomponents/webcomponentsjs/issues/138
+       test('shouldn\'t retrieve something invalid', function() {
+         server.respondWith(
+           'GET',
+           '/api/v1/something?',
+           [
+             500,
+             responseHeaders.json,
+             '{"message":"Internal Server Error"}'
+           ]
+         );
+
+         var resource = fixture('nxc-ok');
+         return resource.get().then(function() {
+           throw new Error('Expected to an invalid response!');
+         }).catch(function(error) {
+           expect(error.message).to.be.eq('Internal Server Error');
+         });
+       });
+
+    });
+
+    suite('when login request fail', function() {
+
+      setup(function() {
+        server.respondWith(
+          'POST',
+          '/api/v1/automation/login',
+          [
+            401,
+            responseHeaders.json,
+            '{"error":true,"message":"An error occurred"}'
+          ]
+        );
+      });
+
+      test('should\'t retrieve something valid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/something?',
+          [
+            200,
+            responseHeaders.json,
+            '{"success":true,"entity-type":"login"}'
+          ]
+        );
+
+        var resource = fixture('nxc-ko');
+        return resource.get().then(function() {
+          throw new Error('Expected to fail the login!');
+        }).catch(function(error) {
+          expect(error.message).to.be.eq('Unauthorized');
+        });
+      });
+
+      test('should\'t retrieve something invalid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/something?',
+          [
+            500,
+            responseHeaders.json,
+            '{"message":"Unauthorized"}'
+          ]
+        );
+
+        var resource = fixture('nxc-ko');
+        return resource.get().then(function() {
+          throw new Error('Expected to fail the login!');
+        }).catch(function(error) {
+          expect(error.message).to.be.eq('Unauthorized');
+        });
+      });
+
+    });
+
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+​
+    http://www.apache.org/licenses/LICENSE-2.0
+​
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../../polymer/polymer.html">
+  <script src="test-helpers.js"></script>
+  <script>
+    window.fetch = null;
+  </script>
+  <link rel="import" href="../nuxeo-document.html">
+</head>
+<body>
+<test-fixture id="nxc-ok">
+  <template>
+    <nuxeo-document id="nxc-ok" connection-id="nxc-ok" doc-path="something"></nuxeo-document>
+  </template>
+</test-fixture>
+<test-fixture id="nxc-ko">
+  <template>
+    <nuxeo-document id="nxc-ko" connection-id="nxc-ko" doc-path="something"></nuxeo-document>
+  </template>
+</test-fixture>
+<test-fixture id="nxd-id">
+  <template>
+    <nuxeo-document id="nxd-id" connection-id="nxc-ok" doc-id="something"></nuxeo-document>
+  </template>
+</test-fixture>
+<test-fixture id="nxd-path">
+  <template>
+    <nuxeo-document id="nxd-path" connection-id="nxc-ok" doc-path="something"></nuxeo-document>
+  </template>
+</test-fixture>
+<test-fixture id="nxd-loading">
+  <template>
+    <nuxeo-document id="nxd-loading" connection-id="nxc-ok" doc-id="something"></nuxeo-document>
+  </template>
+</test-fixture>
+<script>
+  suite('<nuxeo-document>', function() {
+
+    var responseHeaders = {
+      json: {'Content-Type': 'application/json'},
+      plain: {'Content-Type': 'text/plain'}
+    };
+    var server;
+
+    setup(function() {
+      server = sinon.fakeServer.create();
+      server.autoRespond = true;
+    });
+
+    teardown(function() {
+      server.restore();
+    });
+
+    suite('when login request succeed', function() {
+
+      setup(function() {
+        server.respondWith(
+          'POST',
+          '/api/v1/automation/login',
+          [
+            200,
+            responseHeaders.json,
+            '{"entity-type":"login","username":"Administrator"}'
+          ]
+        );
+        server.respondWith(
+          'GET',
+          '/api/v1/repo/default/user/Administrator?',
+          [
+            200,
+            responseHeaders.json,
+            '{"entity-type":"login","username":"Administrator"}'
+          ]
+        );
+      });
+
+      test('should retrieve something valid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/path/something?',
+          [
+            200,
+            responseHeaders.json,
+            '{"success":true,"entity-type":"login"}'
+          ]
+        );
+
+        var document = fixture('nxc-ok');
+        return document.get().catch(function() {
+          throw new Error('Expected to a valid response!');
+        });
+      });
+
+      // This test fails on firefox due to the 'error' event fired in component
+      // https://github.com/webcomponents/webcomponentsjs/issues/138
+      test('shouldn\'t retrieve something invalid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/path/something?',
+          [
+            500,
+            responseHeaders.json,
+            '{"message":"Internal Server Error"}'
+          ]
+        );
+
+        var document = fixture('nxc-ok');
+        return document.get().then(function() {
+          throw new Error('Expected to an invalid response!');
+        }).catch(function(error) {
+          expect(error.message).to.be.eq('Internal Server Error');
+        });
+      });
+
+    });
+
+    suite('when login request fail', function() {
+
+      setup(function() {
+        server.respondWith(
+          'POST',
+          '/api/v1/automation/login',
+          [
+            401,
+            responseHeaders.json,
+            '{"error":true,"message":"An error occurred"}'
+          ]
+        );
+      });
+
+      test('should\'t retrieve something valid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/path/something?',
+          [
+            200,
+            responseHeaders.json,
+            '{"success":true,"entity-type":"login"}'
+          ]
+        );
+
+        var document = fixture('nxc-ko');
+        return document.get().then(function() {
+          throw new Error('Expected to fail the login!');
+        }).catch(function(error) {
+          expect(error).to.be.instanceof(Error);
+          expect(error.message).to.be.eq('Unauthorized');
+        });
+      });
+
+      test('should\'t retrieve something invalid', function() {
+        server.respondWith(
+          'GET',
+          '/api/v1/path/something?',
+          [
+            500,
+            responseHeaders.json,
+            '{"error":"Internal Error"}'
+          ]
+        );
+
+        var document = fixture('nxc-ko');
+        return document.get().then(function() {
+          throw new Error('Expected to fail the login!');
+        }).catch(function(error) {
+          expect(error).to.be.instanceof(Error);
+          expect(error.message).to.be.eq('Unauthorized');
+        });
+      });
+
+    });
+
+    suite('when generating the path', function() {
+
+      test('should build a path from an id', function() {
+        var document = fixture('nxd-id');
+        expect(document.path).to.be.eq('/id/something');
+      });
+
+      test('should build a path from a path', function() {
+        var document = fixture('nxd-path');
+        expect(document.path).to.be.eq('/path/something');
+      });
+
+    });
+
+    suite('when requesting a document', function() {
+
+      test('should tell it is loading', function() {
+        var document = fixture('nxd-loading');
+        // wait for loading state to toggle on and off
+        return waitChanged(document, 'loading', 2)
+          .then(document.get().then(function() {
+            expect(document.path).to.be.eq('/id/something');
+        }));
+      });
+
+    });
+  });
+</script>
+</body>
+</html>

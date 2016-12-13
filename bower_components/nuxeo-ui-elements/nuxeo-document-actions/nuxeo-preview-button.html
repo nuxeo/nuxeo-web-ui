@@ -59,7 +59,7 @@ limitations under the License.
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
-      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      <nuxeo-document-preview document="[[document]]" xpath="[[xpath]]"></nuxeo-document-preview>
     </paper-dialog>
 
   </template>
@@ -71,6 +71,11 @@ limitations under the License.
       properties: {
 
         document: Object,
+
+        xpath: {
+          type: String,
+          value: 'file:content'
+        },
 
         icon: {
           type: String,
