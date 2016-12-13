@@ -374,7 +374,7 @@ Example:
           return query;
         },
 
-        _computeQueryFilter(mode, path) {
+        _computeQueryFilter: function(mode, path) {
           var result = [];
           if (this.onlyFolder && this.mode !== 'size') {
             result.push({
