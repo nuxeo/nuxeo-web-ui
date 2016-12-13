@@ -95,7 +95,7 @@ Contributors:
 
         _opParams: function(xpath) {
           return {
-            xpath: xpath
+            xpath: xpath.startsWith('files:') ? xpath.split('/file')[0] : xpath
           };
         },
 
