@@ -47,7 +47,7 @@ export default class Drawer {
 
   openSearch(name) {
     this.menu.click(`nuxeo-menu-icon[name='${name}Search']`);
-    this._section('search').waitForVisible();
+    this._section('search').waitForVisible(2000);
   }
 
   open(name) {
