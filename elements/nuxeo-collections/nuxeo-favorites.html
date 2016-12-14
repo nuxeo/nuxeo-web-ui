@@ -183,8 +183,8 @@ Contributors:
       },
 
       ready: function() {
-        window.addEventListener('addedToFavorites', this._refresh.bind(this));
-        window.addEventListener('removedFromFavorites', this._refresh.bind(this));
+        window.addEventListener('added-to-favorites', this._refresh.bind(this));
+        window.addEventListener('removed-from-favorites', this._refresh.bind(this));
       },
 
       _refresh: function() {
@@ -239,7 +239,7 @@ Contributors:
         var docUid = e.model.favorite.uid;
         this.$.removeFromFavOp.input = docUid;
         this.$.removeFromFavOp.execute().then(function() {
-          this.fire('removedFromFavorites', {docUid: docUid});
+          this.fire('removed-from-favorites', {docUid: docUid});
         }.bind(this));
       }
 

@@ -59,11 +59,11 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         listeners: {
-          'tap': 'addToClipBoard',
+          'tap': 'addToClipBoard'
         },
 
         addToClipBoard: function() {
-          this.fire('addToClipboard', {documents: this.documents});
+          this.fire('add-to-clipboard', {documents: this.documents});
         }
 
       });

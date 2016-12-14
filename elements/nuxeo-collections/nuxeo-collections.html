@@ -455,7 +455,7 @@ Contributors:
             if (this.$.membersList.length > memberIndex) {
               this.$.membersList.selectItem(memberIndex);
             }
-            this.fire('removedFromCollection',
+            this.fire('removed-from-collection',
               {
                 innerRemove: true,
                 docId: memberId,
@@ -514,14 +514,14 @@ Contributors:
         },
 
         ready: function() {
-          window.addEventListener('addedToCollection', function(e) {
+          window.addEventListener('added-to-collection', function(e) {
             this.$.collectionsProvider.fetch();
             if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
               this.members = [];
               this.$.memberProvider.fetch();
             }
           }.bind(this));
-          window.addEventListener('removedFromCollection', function(e) {
+          window.addEventListener('removed-from-collection', function(e) {
             if (e.detail.innerRemove) {
               return;
             }
