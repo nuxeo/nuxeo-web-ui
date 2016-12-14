@@ -93,6 +93,8 @@
   "clipboard.empty": "Your clipboard is empty.",
   "clipboard.move": "Move",
   "clipboardDocumentsButton.addToClipboard": "Add to Clipboard",
+  "clipboardToggleButton.tooltip.add": "Add to Clipboard",
+  "clipboardToggleButton.tooltip.remove": "Remove from clipboard",
   "collections.backToCollections": "Back to collections list",
   "collections.empty": "There is no collection to display.",
   "collections.heading": "Collections",
