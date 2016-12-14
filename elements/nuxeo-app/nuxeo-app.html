@@ -489,12 +489,13 @@ Contributors:
           'taskChanged': '_onTaskChanged',
           'tasksListSelectionChanged': '_onTasksListSelectionChanged',
           'addToClipboard': '_onAddToClipboard',
-          'addedToCollection': '_documentAddedToCollection',
-          'removedFromCollection': '_documentRemovedFromCollection',
-          'addedToFavorites': '_documentAddedToFavorites',
-          'removedFromFavorites': '_documentRemovedFromFavorites',
-          'subscribed': '_documentSubscribed',
-          'unsubscribed': '_documentUnsubscribed'
+          'added-to-collection': '_documentAddedToCollection',
+          'removed-from-collection': '_documentRemovedFromCollection',
+          'file-deleted': '_documentFileDeleted',
+          'added-to-favorites': '_documentAddedToFavorites',
+          'removed-from-favorites': '_documentRemovedFromFavorites',
+          'document-subscribed': '_documentSubscribed',
+          'document-unsubscribed': '_documentUnsubscribed'
         },
 
         ready: function() {
@@ -782,6 +783,12 @@ Contributors:
 
         _documentUnsubscribed: function() {
           this.$.toast.text = this.i18n('app.document.unsubscribed');
+          this.$.toast.open();
+        },
+
+        _documentFileDeleted: function() {
+          this.fire('document-updated');
+          this.$.toast.text = this.i18n('app.document.fileDeleted');
           this.$.toast.open();
         },
 

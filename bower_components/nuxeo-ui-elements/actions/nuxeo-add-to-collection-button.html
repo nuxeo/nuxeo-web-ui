@@ -23,16 +23,22 @@ limitations under the License.
 <link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../../paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../paper-input/paper-textarea.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../widgets/nuxeo-select2.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-add-to-collection-button`
+A button element for adding a document to a collection.
+
+Example:
+
+    <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
+
 @group Nuxeo UI
 @element nuxeo-add-to-collection-button
-@demo demo/nuxeo-document-actions/index.html
+@demo demo/actions/index.html
 -->
 <dom-module id="nuxeo-add-to-collection-button">
   <template>
@@ -41,116 +47,62 @@ limitations under the License.
         display: inline-block;
       }
 
-      nuxeo-select2, textarea {
-        width: 250px;
+      paper-dialog {
+        min-width: 480px;
       }
 
-      .label-container {
-        position: relative;
-        width: 150px;
+      paper-dialog .buttons {
+        @apply(--layout-justified);
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        margin-top: 2em;
+      }
+
+      nuxeo-select2, textarea {
+        width: 100%;
       }
 
       .required {
         color: red;
-        position: absolute;
-        right: 10px;
+        padding: 4px;
       }
 
-      .paper-content {
-        padding: 1.6em;
-      }
-
-      .row {
-        margin-bottom: 1rem;
-        box-sizing: inherit;
-      }
-
-      .container {
-        padding: 1em 0 2em;
-      }
-
-      paper-button:hover {
-        @apply(--nx-button-hover);
-      }
-
-      paper-button.primary {
-        @apply(--nx-button-primary);
-      }
-
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
-      }
-
-      paper-button[disabled] {
-        @apply(--nx-button-disabled);
-      }
-
-      .buttons {
-        @apply(--buttons-bar);
-      }
-
-      textarea {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        height: 6em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-        resize: none;
-      }
     </style>
+
+    <nuxeo-operation id="addToCollectionOp" op="Document.AddToCollection" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="createCollectionOp" op="Collection.Create"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
       <paper-tooltip>[[i18n('addToCollectionButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" modal on-iron-overlay-closed="_resetPopup" no-auto-focus>
+    <paper-dialog id="dialog" with-backdrop on-iron-overlay-closed="_resetPopup" no-auto-focus>
       <h2>[[i18n('addToCollectionButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
-        <div class="container layout vertical">
-          <div class="row layout horizontal">
-            <div class="label-container">
-              <label>[[i18n('addToCollectionButton.dialog.collections')]]</label>
-              <span class="required">*</span>
-            </div>
-            <nuxeo-select2 id="nxSelect"
-               operation="Collection.Suggestion"
-               min-chars="0"
-               placeholder="[[i18n('addToCollectionButton.dialog.select')]]"
-               value="{{collection}}"
-               tagging="true"
-               query-results-filter="[[resultsFilter]]"
-               result-formatter="[[resultAndSelectionFormatter]]"
-               selection-formatter="[[resultAndSelectionFormatter]]"
-               new-entry-formatter="[[newEntryFormatter]]">
-            </nuxeo-select2>
-          </div>
-          <div class="row layout horizontal" hidden$="[[!_isNew(collection)]]">
-            <div class="label-container">
-              <label>[[i18n('addToCollectionButton.dialog.description')]]</label>
-            </div>
-            <textarea value="{{description::input}}"></textarea>
-          </div>
-        </div>
-
-        <nuxeo-operation id="addToCollectionOp" op="Document.AddToCollection" input="[[document.uid]]"></nuxeo-operation>
-        <nuxeo-operation id="createCollectionOp" op="Collection.Create"></nuxeo-operation>
-
+        <label>[[i18n('addToCollectionButton.dialog.collections')]]<span class="required">*</span></label>
+        <nuxeo-select2 id="nxSelect"
+                       operation="Collection.Suggestion"
+                       min-chars="0"
+                       placeholder="[[i18n('addToCollectionButton.dialog.select')]]"
+                       value="{{collection}}"
+                       tagging="true"
+                       query-results-filter="[[resultsFilter]]"
+                       result-formatter="[[resultAndSelectionFormatter]]"
+                       selection-formatter="[[resultAndSelectionFormatter]]"
+                       new-entry-formatter="[[newEntryFormatter]]">
+        </nuxeo-select2>
+        <paper-textarea label="[[i18n('addToCollectionButton.dialog.description')]]"
+                        value="{{description::input}}"
+                        hidden$="[[!_isNew(collection)]]"
+                        always-float-label>
+        </paper-textarea>
       </paper-dialog-scrollable>
-
-      <div class="buttons horizontal end-justified layout">
-       <div class="flex start-justified">
-         <paper-button noink dialog-dismiss>[[i18n('addToCollectionButton.dialog.cancel')]]</paper-button>
-       </div>
-       <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">[[i18n('addToCollectionButton.dialog.add')]]</paper-button>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('addToCollectionButton.dialog.cancel')]]</paper-button>
+        <paper-button dialog-confirm class="primary" on-tap="_add" disabled$="[[!_isValid(collection)]]">
+          [[i18n('addToCollectionButton.dialog.add')]]
+        </paper-button>
       </div>
-
     </paper-dialog>
 
   </template>
@@ -161,8 +113,14 @@ limitations under the License.
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
 
+        /**
+         * Input document.
+         */
         document: Object,
 
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
         icon: {
           type: String,
           value: 'icons:book'
@@ -195,7 +153,15 @@ limitations under the License.
         }
       },
 
-      add: function() {
+      _isAvailable: function(doc) {
+        return this.isCollectionMember(doc);
+      },
+
+      _toggleDialog: function() {
+        this.$.dialog.toggle();
+      },
+
+      _add: function() {
         if (this._isNew()) {
           var op = this.$$('#createCollectionOp');
           var name = this.$.nxSelect.textContent.trim();
@@ -213,21 +179,13 @@ limitations under the License.
         }
       },
 
-      _isAvailable: function(doc) {
-        return this.isCollectionMember(doc);
-      },
-
-      _toggleDialog: function() {
-        this.$.dialog.toggle();
-      },
-
       _addToCollection: function() {
         var op = this.$$('#addToCollectionOp');
         op.params = {
           'collection': this.collection
         };
         return op.execute().then(function() {
-          this.fire('addedToCollection', {docId: this.document.uid, collectionId: this.collection});
+          this.fire('added-to-collection', {docId: this.document.uid, collectionId: this.collection});
           this._resetPopup();
           this._toggleDialog();
         }.bind(this));
@@ -239,8 +197,7 @@ limitations under the License.
 
       _resultAndSelectionFormatter: function(item) {
         var label = item.displayLabel || item.title;
-        // if we are adding a new entry with the _newEntryFormatter
-        // we don't want to escape the HTML
+        // if we are adding a new entry with the _newEntryFormatter we don't want to escape the HTML
         return item.id === -1 ? label : this.$.nxSelect.escapeHTML(label);
       },
 

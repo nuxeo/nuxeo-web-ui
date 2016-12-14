@@ -228,7 +228,7 @@ Contributors:
         var uidsString = uids.join(',');
         op.input = 'docs:' + uidsString;
         return op.execute().then(function() {
-          this.fire('addedToCollection', {docIds: uids, collectionId: this.collection});
+          this.fire('added-to-collection', {docIds: uids, collectionId: this.collection});
           this._resetPopup();
           this._toggleDialog();
         }.bind(this));

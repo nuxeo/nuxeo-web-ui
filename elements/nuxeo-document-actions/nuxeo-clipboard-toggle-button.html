@@ -15,19 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<link rel="import" href="../../polymer/polymer.html">
-<link rel="import" href="../../iron-icon/iron-icon.html">
-<link rel="import" href="../../iron-icons/iron-icons.html">
-<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-filters-behavior.html">
-
 <!--
 `nuxeo-clipboard-toggle-button`
 @group Nuxeo UI
 @element nuxeo-clipboard-toggle-button
-@demo demo/nuxeo-document-actions/index.html
 -->
 <dom-module id="nuxeo-clipboard-toggle-button">
   <template>
@@ -55,11 +46,17 @@ limitations under the License.
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
 
+          /**
+           * Input document.
+           */
           document: {
             type: Object,
             observer: '_update'
           },
 
+          /**
+           * Icon to use (iconset_name:icon_name).
+           */
           icon: {
             type: String,
             value: 'icons:content-paste'
@@ -90,8 +87,7 @@ limitations under the License.
         },
 
         _computeTooltip: function(inClipboard) {
-          return inClipboard ? this.i18n('clipboardToggleButton.remove.tooltip')
-                              : this.i18n('clipboardToggleButton.add.tooltip');
+          return this.i18n('clipboardToggleButton.tooltip.' + (inClipboard ? 'remove' : 'add'));
         },
 
         _update: function() {

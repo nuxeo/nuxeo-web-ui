@@ -15,7 +15,7 @@ limitations under the License.
 -->
 <html>
 <head>
-  <title>nuxeo-document-actions</title>
+  <title>nuxeo-actions</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
@@ -24,16 +24,15 @@ limitations under the License.
   <link rel="import" href="../../../polymer/polymer.html">
   <link rel="import" href="../../../nuxeo-elements/nuxeo-connection.html">
   <link rel="import" href="../../nuxeo-i18n-behavior.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-add-to-collection-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-favorites-toggle-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-share-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-notifications-toggle-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-clipboard-toggle-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-lock-toggle-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-preview-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-export-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-download-button.html">
-  <link rel="import" href="../../nuxeo-document-actions/nuxeo-delete-blob-button.html">
+  <link rel="import" href="../../actions/nuxeo-add-to-collection-button.html">
+  <link rel="import" href="../../actions/nuxeo-favorites-toggle-button.html">
+  <link rel="import" href="../../actions/nuxeo-share-button.html">
+  <link rel="import" href="../../actions/nuxeo-notifications-toggle-button.html">
+  <link rel="import" href="../../actions/nuxeo-lock-toggle-button.html">
+  <link rel="import" href="../../actions/nuxeo-preview-button.html">
+  <link rel="import" href="../../actions/nuxeo-export-button.html">
+  <link rel="import" href="../../actions/nuxeo-download-button.html">
+  <link rel="import" href="../../actions/nuxeo-delete-blob-button.html">
 
   <script>
     window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
@@ -45,14 +44,13 @@ limitations under the License.
 
 <body unresolved>
 
-  <dom-module id="nuxeo-document-actions-demo">
+  <dom-module id="nuxeo-actions-demo">
     <template>
 
       <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
       <nuxeo-favorites-toggle-button document="[[document]]"></nuxeo-favorites-toggle-button>
       <nuxeo-share-button document="[[document]]"></nuxeo-share-button>
       <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
-      <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
       <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
       <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
       <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
@@ -66,7 +64,7 @@ limitations under the License.
         'use strict';
 
         Polymer({
-          is: 'nuxeo-document-actions-demo',
+          is: 'nuxeo-actions-demo',
           properties: {
             document: Object,
             clipboard: Object
@@ -84,7 +82,7 @@ limitations under the License.
               },
               "contextParameters": {
                 "favorites": {
-                  "isFavorite": true
+                  "isFavorite": false
                 }
               },
               "facets": []
@@ -97,7 +95,7 @@ limitations under the License.
   </dom-module>
 
   <nuxeo-connection url="http://webui-demo.nuxeo.com/nuxeo" username="demo" password="demo"></nuxeo-connection>
-  <nuxeo-document-actions-demo></nuxeo-document-actions-demo>
+  <nuxeo-actions-demo></nuxeo-actions-demo>
 
 </body>
 </html>

@@ -20,50 +20,91 @@ limitations under the License.
 <link rel="import" href="../../iron-icons/iron-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../nuxeo-document-preview.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-download-button`
+A button element for show the preview of a document.
+
+Example:
+
+    <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
+
 @group Nuxeo UI
-@element nuxeo-download-button
-@demo demo/nuxeo-document-actions/index.html
+@element nuxeo-preview-button
+@demo demo/actions/index.html
 -->
-<dom-module id="nuxeo-download-button">
+<dom-module id="nuxeo-preview-button">
   <template>
     <style>
       :host {
         display: inline-block;
       }
+
+      paper-dialog {
+        width: 100%;
+        height: 100%;
+        min-width: 480px;
+      }
+
+      paper-dialog > nuxeo-document-preview {
+        height: 100%;
+      }
+
+      paper-dialog > * {
+        margin: 0;
+        padding: 0;
+      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="[[icon]]" on-tap="_download" noink></paper-icon-button>
-      <paper-tooltip>[[i18n('downloadButton.tooltip')]]</paper-tooltip>
+      <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
+      <paper-tooltip>[[i18n('previewButton.tooltip')]]</paper-tooltip>
     </template>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <nuxeo-document-preview document="[[document]]" xpath="[[xpath]]"></nuxeo-document-preview>
+    </paper-dialog>
 
   </template>
 
   <script>
     Polymer({
-      is: 'nuxeo-download-button',
+      is: 'nuxeo-preview-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
 
+        /**
+         * Input document.
+         */
         document: Object,
 
+        /**
+         * Path of the file object to preview.
+         * For example `xpath="files:files/0/file"`.
+         */
+        xpath: {
+          type: String,
+          value: 'file:content'
+        },
+
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
         icon: {
           type: String,
-          value: 'icons:file-download'
+          value: 'icons:visibility'
         }
       },
 
-      _isAvailable: function(doc) {
-        return this.hasContent(doc);
+      _isAvailable: function(document) {
+        return document;
       },
 
-      _download: function() {
-        location.href = this.document.properties['file:content'].data;
+      _toggleDialog: function() {
+        this.$.dialog.toggle();
       }
 
     });

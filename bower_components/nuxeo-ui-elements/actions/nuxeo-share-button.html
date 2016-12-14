@@ -28,10 +28,15 @@ limitations under the License.
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-share-button`
+A button element for sharing a document.
+
+Example:
+
+    <nuxeo-share-button document="[[document]]"></nuxeo-share-button>
+
 @group Nuxeo UI
 @element nuxeo-share-button
-@demo demo/nuxeo-document-actions/index.html
+@demo demo/actions/index.html
 -->
 <dom-module id="nuxeo-share-button">
   <template>
@@ -40,13 +45,14 @@ limitations under the License.
         display: inline-block;
       }
 
-      .share-container {
-        min-width: 640px;
-        padding: 2em 0;
+      paper-dialog {
+        min-width: 480px;
       }
 
-      .buttons {
-        @apply(--buttons-bar);
+      paper-dialog .buttons {
+        @apply(--layout-start-justified);
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        margin-top: 2em;
       }
     </style>
 
@@ -56,20 +62,14 @@ limitations under the License.
     </template>
 
     <paper-dialog id="dialog" with-backdrop>
-      <div class="vertical layout">
-        <h2>[[i18n('shareButton.heading')]]</h2>
-        <div class="share-container">
-          <paper-input id="permalink"
-                       label="[[i18n('shareButton.copy.label', document.properties.dc:title)]]"
-                       value="[[_buildPermalink(document)]]"
-                       autofocus
-                       readonly></paper-input>
-        </div>
-      </div>
-      <div class="buttons horizontal end-justified layout">
-        <div class="flex start-justified">
-          <paper-button dialog-dismiss>[[i18n('shareButton.dialog.close')]]</paper-button>
-        </div>
+      <h2>[[i18n('shareButton.dialog.heading')]]</h2>
+      <paper-input id="permalink" label="[[i18n('shareButton.copy.label', document.properties.dc:title)]]"
+                   value="[[_buildPermalink(document)]]"
+                   autofocus
+                   readonly>
+      </paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('shareButton.dialog.close')]]</paper-button>
       </div>
     </paper-dialog>
 
@@ -81,8 +81,14 @@ limitations under the License.
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
 
+        /**
+         * Input document.
+         */
         document: Object,
 
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
         icon: {
           type: String,
           value: 'social:share'

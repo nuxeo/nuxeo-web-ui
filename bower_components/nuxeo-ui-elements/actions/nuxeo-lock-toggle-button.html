@@ -18,7 +18,6 @@ limitations under the License.
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-icon/iron-icon.html">
 <link rel="import" href="../../iron-icons/iron-icons.html">
-<link rel="import" href="../../iron-icons/social-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
@@ -26,27 +25,30 @@ limitations under the License.
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-notifications-toggle-button`
-@group Nuxeo UI
-@element nuxeo-notifications-toggle-button
-@demo demo/nuxeo-document-actions/index.html
--->
-<dom-module id="nuxeo-notifications-toggle-button">
-  <template>
+A toggle button element for lock/unlock a document.
 
+Example:
+
+    <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+
+@group Nuxeo UI
+@element nuxeo-lock-toggle-button
+@demo demo/actions/index.html
+-->
+<dom-module id="nuxeo-lock-toggle-button">
+  <template>
     <style>
       :host {
         display: inline-block;
       }
 
-      :host([subscribed]) ::content iron-icon {
-        stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
+      :host([locked]) ::content iron-icon {
         fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
     </style>
 
-    <nuxeo-operation id="subscribeOp" op="Document.Subscribe" input="[[document.uid]]"></nuxeo-operation>
-    <nuxeo-operation id="unsubscribeOp" op="Document.Unsubscribe" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opLock" op="Document.Lock" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opUnlock" op="Document.Unlock" input="[[document.uid]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
@@ -59,21 +61,27 @@ limitations under the License.
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-notifications-toggle-button',
+        is: 'nuxeo-lock-toggle-button',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
 
+          /**
+           * Input document.
+           */
           document: {
             type: Object,
-            observer: '_observeDoc'
+            observer: '_documentChanged'
           },
 
+          /**
+           * Icon to use (iconset_name:icon_name).
+           */
           icon: {
             type: String,
-            value: 'social:notifications'
+            computed: '_computeIcon(locked)'
           },
 
-          subscribed: {
+          locked: {
             type: Boolean,
             notify: true,
             reflectToAttribute: true
@@ -81,7 +89,7 @@ limitations under the License.
 
           _tooltip: {
             type: String,
-            computed: '_computeTooltip(subscribed)'
+            computed: '_computeTooltip(locked)'
           }
         },
 
@@ -89,41 +97,33 @@ limitations under the License.
           'tap': '_toggle'
         },
 
-        ready: function() {
-          window.addEventListener('unsubscribed', function(e) {
-            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
-              this.subscribed = false;
-            }
-          }.bind(this));
-        },
-
         _isAvailable: function(doc) {
           return doc && !doc.isVersion;
         },
 
         _toggle: function() {
-          if (!this.subscribed) {
-            this.$.subscribeOp.execute().then(function() {
-              this.fire('subscribed', {doc: this.document});
-              this.subscribed = true;
+          if (!this.locked) {
+            this.$.opLock.execute().then(function() {
+              this.locked = true;
             }.bind(this));
           } else {
-            this.$.unsubscribeOp.execute().then(function() {
-              this.fire('unsubscribed', {doc: this.document});
-              this.subscribed = false;
+            this.$.opUnlock.execute().then(function() {
+              this.locked = false;
             }.bind(this));
           }
         },
 
-        _computeTooltip: function(isSubscribed) {
-          return isSubscribed ? this.i18n('notificationsToggleButton.doNotNotify')
-                              : this.i18n('notificationsToggleButton.notify');
+        _computeTooltip: function(locked) {
+          return this.i18n('lockToggleButton.tooltip.' + (locked ? 'unlock' : 'lock'));
         },
 
-        _observeDoc: function() {
-          this.subscribed = this.isSubscribed(this.document);
-        }
+        _computeIcon: function(locked) {
+          return locked ? 'icons:lock' : 'icons:lock-open';
+        },
 
+        _documentChanged: function() {
+          this.locked = !!(this.document && this.document.lockCreated);
+        }
       });
     })();
   </script>

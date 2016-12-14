@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-icon/iron-icon.html">
 <link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../iron-icons/social-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
@@ -25,12 +26,17 @@ limitations under the License.
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-favorites-toggle-button`
+A toggle button element for subscribe/unsubscribe a document.
+
+Example:
+
+    <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
+
 @group Nuxeo UI
-@element nuxeo-favorites-toggle-button
-@demo demo/nuxeo-document-actions/index.html
+@element nuxeo-notifications-toggle-button
+@demo demo/actions/index.html
 -->
-<dom-module id="nuxeo-favorites-toggle-button">
+<dom-module id="nuxeo-notifications-toggle-button">
   <template>
 
     <style>
@@ -38,15 +44,14 @@ limitations under the License.
         display: inline-block;
       }
 
-      :host([favorite]) ::content iron-icon {
+      :host([subscribed]) ::content iron-icon {
         stroke: var(--icon-toggle-outline-color, --nuxeo-action-color-activated);
         fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
     </style>
 
-    <nuxeo-operation id="addToFavOp" op="Document.AddToFavorites" input="[[document.uid]]"></nuxeo-operation>
-
-    <nuxeo-operation id="removeFromFavOp" op="Document.RemoveFromFavorites" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opSubscribe" op="Document.Subscribe" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opUnsubscribe" op="Document.Unsubscribe" input="[[document.uid]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
@@ -59,21 +64,27 @@ limitations under the License.
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-favorites-toggle-button',
+        is: 'nuxeo-notifications-toggle-button',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
 
+          /**
+           * Input document.
+           */
           document: {
             type: Object,
-            observer: '_observeDoc'
+            observer: '_documentChanged'
           },
 
+          /**
+           * Icon to use (iconset_name:icon_name).
+           */
           icon: {
             type: String,
-            value: 'icons:grade'
+            value: 'social:notifications'
           },
 
-          favorite: {
+          subscribed: {
             type: Boolean,
             notify: true,
             reflectToAttribute: true
@@ -81,7 +92,7 @@ limitations under the License.
 
           _tooltip: {
             type: String,
-            computed: '_computeTooltip(favorite)'
+            computed: '_computeTooltip(subscribed)'
           }
         },
 
@@ -90,37 +101,37 @@ limitations under the License.
         },
 
         ready: function() {
-          window.addEventListener('removedFromFavorites', function(e) {
+          window.addEventListener('document-unsubscribed', function(e) {
             if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
-              this.favorite = false;
+              this.subscribed = false;
             }
           }.bind(this));
         },
 
         _isAvailable: function(doc) {
-          return this.isCollectionMember(doc);
+          return doc && !doc.isVersion;
         },
 
         _toggle: function() {
-          if (!this.favorite) {
-            this.$.addToFavOp.execute().then(function() {
-              this.fire('addedToFavorites', {doc: this.document});
-              this.favorite = true;
+          if (!this.subscribed) {
+            this.$.opSubscribe.execute().then(function() {
+              this.fire('document-subscribed', {doc: this.document});
+              this.subscribed = true;
             }.bind(this));
           } else {
-            this.$.removeFromFavOp.execute().then(function() {
-              this.fire('removedFromFavorites', {doc: this.document});
-              this.favorite = false;
+            this.$.opUnsubscribe.execute().then(function() {
+              this.fire('document-unsubscribed', {doc: this.document});
+              this.subscribed = false;
             }.bind(this));
           }
         },
 
-        _computeTooltip: function(isFavorite) {
-          return isFavorite ? this.i18n('favoritesToggleButton.remove') : this.i18n('favoritesToggleButton.add');
+        _computeTooltip: function(isSubscribed) {
+          return this.i18n('notificationsToggleButton.tooltip.' + (isSubscribed ? 'doNotNotify' : 'notify'));
         },
 
-        _observeDoc: function() {
-          this.favorite = this.isFavorite(this.document);
+        _documentChanged: function() {
+          this.subscribed = this.isSubscribed(this.document);
         }
 
       });

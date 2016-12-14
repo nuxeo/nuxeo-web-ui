@@ -25,26 +25,31 @@ limitations under the License.
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-lock-toggle-button`
-@group Nuxeo UI
-@element nuxeo-lock-toggle-button
-@demo demo/nuxeo-document-actions/index.html
--->
-<dom-module id="nuxeo-lock-toggle-button">
-  <template>
+A toggle button element for adding/removing a document from the favorites.
 
+Example:
+
+    <nuxeo-favorites-toggle-button document="[[document]]"></nuxeo-favorites-toggle-button>
+
+@group Nuxeo UI
+@element nuxeo-favorites-toggle-button
+@demo demo/actions/index.html
+-->
+<dom-module id="nuxeo-favorites-toggle-button">
+  <template>
     <style>
       :host {
         display: inline-block;
       }
 
-      :host([locked]) ::content iron-icon {
-        fill: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+      :host([favorite]) ::content iron-icon {
+        stroke: var(--nuxeo-action-color-activated, orange);
+        fill: var(--nuxeo-action-color-activated, orange);
       }
     </style>
 
-    <nuxeo-operation id="lockOp" op="Document.Lock" input="[[document.uid]]"></nuxeo-operation>
-    <nuxeo-operation id="unLockOp" op="Document.Unlock" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opAdd" op="Document.AddToFavorites" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opRemove" op="Document.RemoveFromFavorites" input="[[document.uid]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
@@ -57,21 +62,27 @@ limitations under the License.
     (function() {
       'use strict';
       Polymer({
-        is: 'nuxeo-lock-toggle-button',
+        is: 'nuxeo-favorites-toggle-button',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
 
+          /**
+           * Input document.
+           */
           document: {
             type: Object,
-            observer: '_observeDoc'
+            observer: '_documentChanged'
           },
 
+          /**
+           * Icon to use (iconset_name:icon_name).
+           */
           icon: {
             type: String,
-            computed: '_computeIcon(locked)'
+            value: 'icons:grade'
           },
 
-          locked: {
+          favorite: {
             type: Boolean,
             notify: true,
             reflectToAttribute: true
@@ -79,7 +90,7 @@ limitations under the License.
 
           _tooltip: {
             type: String,
-            computed: '_computeTooltip(locked)'
+            computed: '_computeTooltip(favorite)'
           }
         },
 
@@ -87,42 +98,40 @@ limitations under the License.
           'tap': '_toggle'
         },
 
+        ready: function() {
+          window.addEventListener('removed-from-favorites', function(e) {
+            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
+              this.favorite = false;
+            }
+          }.bind(this));
+        },
+
         _isAvailable: function(doc) {
-          return doc && !doc.isVersion;
+          return this.isCollectionMember(doc);
         },
 
         _toggle: function() {
-          if (!this.locked) {
-            this.$.lockOp.execute().then(function() {
-              this.locked = true;
+          if (!this.favorite) {
+            this.$.opAdd.execute().then(function() {
+              this.fire('added-to-favorites', {doc: this.document});
+              this.favorite = true;
             }.bind(this));
           } else {
-            this.$.unLockOp.execute().then(function() {
-              this.locked = false;
+            this.$.opRemove.execute().then(function() {
+              this.fire('removed-from-favorites', {doc: this.document});
+              this.favorite = false;
             }.bind(this));
           }
         },
 
-        _computeTooltip: function(locked) {
-          return locked ? this.i18n('lockToggleButton.unlock') : this.i18n('lockToggleButton.lock');
+        _computeTooltip: function(favorite) {
+          return this.i18n('favoritesToggleButton.tooltip.' + (favorite ? 'remove' : 'add'));
         },
 
-        _computeIcon: function(locked) {
-          return locked ? 'icons:lock' : 'icons:lock-open';
-        },
-
-        _isLocked: function(doc) {
-          if (doc) {
-            if (doc.lockCreated) {
-              return true;
-            }
-          }
-          return false;
-        },
-
-        _observeDoc: function() {
-          this.locked = this._isLocked(this.document);
+        _documentChanged: function() {
+          this.favorite = this.isFavorite(this.document);
         }
+
       });
     })();
   </script>

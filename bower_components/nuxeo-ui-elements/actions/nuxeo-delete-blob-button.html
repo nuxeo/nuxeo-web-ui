@@ -22,13 +22,19 @@ limitations under the License.
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-delete-blob-button`
+A button element for deleting a file blob from a document.
+
+Example:
+
+    <nuxeo-delete-blob-button document="[[document]]"></nuxeo-delete-blob-button>
+
 @group Nuxeo UI
 @element nuxeo-delete-blob-button
-@demo demo/nuxeo-document-actions/index.html
+@demo demo/actions/index.html
 -->
 <dom-module id="nuxeo-delete-blob-button">
 
@@ -38,30 +44,32 @@ limitations under the License.
         display: inline-block;
       }
 
-      .buttons {
-        @apply(--buttons-bar);
+      paper-dialog {
+        min-width: 480px;
       }
 
+      paper-dialog .buttons {
+        @apply(--layout-justified);
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        margin-top: 2em;
+      }
     </style>
 
     <nuxeo-operation id="operation" op="Blob.RemoveFromDocument" input="[[document.uid]]" params="[[_params(xpath)]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button  icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
+      <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
       <paper-tooltip>[[i18n('deleteBlobButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" class="container vertical layout" modal>
-      <div class="horizontal layout">[[i18n('deleteBlobButton.confirm')]]</div>
-      <div class="buttons horizontal end-justified layout">
-        <paper-button dialog-dismiss>[[i18n('deleteBlobButton.confirm.no')]]</paper-button>
-        <paper-button dialog-confirm noink class="primary" on-tap="_remove">
-          [[i18n('deleteBlobButton.confirm.yes')]]
-        </paper-button>
+    <paper-dialog id="dialog" with-backdrop>
+      <h2>[[i18n('deleteBlobButton.dialog.heading')]]</h2>
+      <div>[[i18n('deleteBlobButton.dialog.message')]]</div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('deleteBlobButton.dialog.no')]]</paper-button>
+        <paper-button dialog-confirm on-tap="_remove">[[i18n('deleteBlobButton.dialog.yes')]]</paper-button>
       </div>
     </paper-dialog>
-
-    <paper-toast id="toast"></paper-toast>
 
   </template>
 
@@ -74,13 +82,23 @@ limitations under the License.
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
 
+          /**
+           * Input document.
+           */
           document: Object,
 
+          /**
+           * Path of the file object to delete.
+           * For example `xpath="files:files/0/file"`.
+           */
           xpath: {
             type: String,
             value: 'file:content'
           },
 
+          /**
+           * Icon to use (iconset_name:icon_name).
+           */
           icon: {
             type: String,
             value: 'icons:delete'
@@ -103,15 +121,10 @@ limitations under the License.
 
         _remove: function() {
           this.$.operation.execute().then(function() {
-            this._toast(this.i18n('deleteBlobButton.deleted'));
-            this.fire('document-updated');
+            this.fire('file-deleted');
           }.bind(this));
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
         }
+
       });
     })();
   </script>
