@@ -448,6 +448,7 @@
   "threeDViewLayout.renderViews.heading": "Render Views",
   "threeDViewLayout.renderViews.notAvailable:": "No render views available.",
   "threeDViewLayout.threed_transmissionFormats.heading": "Transmission Formats",
+  "threeDViewLayout.transmissionFormats.preview": "Preview Transmission Format",
   "threeDViewLayout.transmissionFormats.download": "Download Transmission Format",
   "threeDViewLayout.transmissionFormats.notAvailable": "No transmission formats available.",
   "threeDViewLayout.unit.polygons": "polygons",
