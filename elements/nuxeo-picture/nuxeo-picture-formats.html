@@ -45,13 +45,6 @@ Contributors:
         line-height: 1.5em;
       }
 
-      .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        color: var(--nuxeo-title-color);
-        font-weight: 500;
-      }
-
       .flex.actions {
         text-align: right;
         flex: 0.5;
@@ -59,8 +52,7 @@ Contributors:
 
     </style>
 
-    <div class="title">[[label]]</div>
-
+    <h3>[[label]]</h3>
     <div>
       <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
         <div class="item horizontal layout">

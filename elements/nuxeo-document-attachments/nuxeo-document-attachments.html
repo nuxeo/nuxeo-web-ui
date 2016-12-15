@@ -29,12 +29,6 @@ Contributors:
         display: block;
       }
 
-      .title {
-        color: var(--nuxeo-title-color);
-        font-size: 1.5rem;
-        padding: 8px 0;
-      }
-
       nuxeo-dropzone {
         margin-top: 8px;
       }
@@ -45,9 +39,7 @@ Contributors:
       }
     </style>
 
-    <div class="title">
-      <iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]
-    </div>
+    <h3><iron-icon icon="editor:attach-file"></iron-icon>[[i18n('documentAttachments.heading')]]</h3>
 
     <div class="vertical layout">
       <template is="dom-repeat" items="[[document.properties.files:files]]">
