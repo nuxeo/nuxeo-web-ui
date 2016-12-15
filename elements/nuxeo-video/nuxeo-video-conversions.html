@@ -27,21 +27,7 @@ Contributors:
 -->
 <dom-module id="nuxeo-video-conversions">
   <template>
-
-    <style>
-      :host {
-        display: block;
-      }
-
-      .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        color: var(--nuxeo-title-color);
-        font-size: 1.5rem;
-      }
-    </style>
-
-    <div class="title">[[label]]</div>
+    <h3>[[label]]</h3>
     <div>
       <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
         <div class="layout horizontal center">
@@ -54,9 +40,7 @@ Contributors:
         </div>
       </template>
     </div>
-
   </template>
-
 </dom-module>
 
 <script>

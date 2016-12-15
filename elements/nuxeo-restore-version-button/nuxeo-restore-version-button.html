@@ -100,7 +100,8 @@ Contributors:
             this.$.opRestoreVersion.input = this.document.uid;
             this.$.opRestoreVersion.params = {checkout: true};
             this.$.opRestoreVersion.execute().then(function() {
-              this.fire('document-restored');
+              this.fire('document-updated');
+              page('/browse' + this.document.path + '@view');
             }.bind(this));
           }
         }

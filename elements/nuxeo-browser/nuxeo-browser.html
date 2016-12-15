@@ -51,35 +51,6 @@ Contributors:
         @apply(--layout-flex);
       }
 
-      .info-bar {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        background-color: #333;
-        color: #fff;
-        padding: 8px;
-        margin: 32px 32px 0 32px;
-      }
-
-      .info-bar paper-card {
-        display: block;
-      }
-
-      .info-bar paper-button {
-        margin: 0;
-      }
-
-      .info-bar .icon {
-        margin: 0 8px;
-      }
-
-      .info-bar .message {
-        @apply(--layout-flex);
-      }
-
-      .info-bar .actions {
-        display: block;
-      }
-
       .document-actions {
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
@@ -158,18 +129,6 @@ Contributors:
           <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
         </div>
 
-        <template is="dom-if" if="[[document.isVersion]]">
-          <div class="card-content info-bar">
-            <iron-icon class="icon" icon="icons:info"></iron-icon>
-            <div class="message">
-              [[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]
-            </div>
-            <div class="actions">
-              <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
-            </div>
-          </div>
-        </template>
-
         <div id="nxContent">
           <paper-toast id="toast"></paper-toast>
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
@@ -198,7 +157,7 @@ Contributors:
               </template>
             </div>
 
-            <nuxeo-document-permissions id="permissions" name="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
+            <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
 
             <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
 
@@ -251,8 +210,7 @@ Contributors:
           'permissions.aceupdated': '_documentUpdated',
           'permissions.acedeleted': '_documentUpdated',
           'added-to-collection': '_documentUpdated',
-          'removed-from-collection': '_documentUpdated',
-          'document-restored': '_documentRestored'
+          'removed-from-collection': '_documentUpdated'
         },
 
         observers: [
@@ -261,11 +219,6 @@ Contributors:
 
         _documentUpdated: function() {
           this.fire('document-updated');
-        },
-
-        _documentRestored: function() {
-          this.fire('document-updated');
-          this._navigateToView();
         },
 
         download: function() {

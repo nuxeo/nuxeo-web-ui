@@ -32,8 +32,27 @@ Contributors:
         display: block;
       }
 
-      ::content .attachments {
-        margin: 0 -1em -1em;
+      .info-bar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-justified);
+        background: black;
+        color: white;
+        padding: 8px;
+        margin-bottom: 16px;
+      }
+
+      paper-button:hover {
+        @apply(--nx-button-hover);
+      }
+
+      paper-button.primary {
+        @apply(--nx-button-primary);
+      }
+
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply(--nx-button-primary-hover);
       }
 
       paper-card {
@@ -60,13 +79,6 @@ Contributors:
         padding: 0;
       }
 
-      .title {
-        margin: 0;
-        font-size: 1.15em;
-        padding-bottom: .5em;
-        font-weight: 500;
-      }
-
       .start-workflow {
         position: relative;
         display: inline-block;
@@ -87,23 +99,9 @@ Contributors:
         margin-bottom: 0;
       }
 
-      .audit {
-        max-height: 17rem;
-        overflow-y: auto;
-        @apply(--nuxeo-document-activity-audit-theme);
-      }
-
       .docinfo {
         padding: 0 16px;
         box-sizing: border-box;
-      }
-
-      .sidecard .card-content {
-        padding: .5em 0;
-      }
-
-      .sidecard .details {
-        font-size: .9em;
       }
 
       .details > div {
@@ -125,12 +123,6 @@ Contributors:
 
       .details {
         vertical-align: top;
-      }
-
-      .sidecard .icon {
-        --iron-icon-height: .9rem;
-        --iron-icon-width: .9rem;
-        margin-right: .2rem;
       }
 
       /* Tasks */
@@ -163,10 +155,6 @@ Contributors:
         font-weight: 700;
         right: .5em;
         top: .8em;
-      }
-
-      .process-tag {
-        color: #f68500;
       }
 
       .process-running {
@@ -240,26 +228,39 @@ Contributors:
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
     <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
 
+    <!-- infoBar - tasks -->
     <template is="dom-if" if="[[hasTaskToProcess]]">
-      <paper-card class="wf-running">
-        <div class="card-content">
-          <template is="dom-repeat" items="[[tasks]]" as="task">
+      <template is="dom-repeat" items="[[tasks]]" as="task">
+        <div class="info-bar">
+          <div>
             <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-            <!-- TODO: review labels with embedded markup tags -->
-            [[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]
-            <paper-button noink class="process-task" on-tap="_processTask">
-              [[i18n('documentPage.process.task')]]
-            </paper-button>
-          </template>
+            <span>[[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]</span>
+          </div>
+          <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
         </div>
-      </paper-card>
+      </template>
     </template>
 
+    <!-- infoBar - version -->
+    <template is="dom-if" if="[[document.isVersion]]">
+      <div class="info-bar">
+        <div>
+          <iron-icon icon="icons:info"></iron-icon>
+          <span>[[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
+        </div>
+        <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
+      </div>
+    </template>
+
+    <!-- page -->
     <div class="horizontal layout">
+
       <div class="docinfo vertical layout flex-2">
         <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
       </div>
+
       <div class="sideinfo vertical layout flex">
+
         <template is="dom-if" if="[[isProcessingTask]]" restamp>
           <template is="dom-repeat" items="[[workflows]]" as="workflow">
             <template is="dom-repeat" items="[[tasks]]" as="task">
@@ -289,9 +290,8 @@ Contributors:
         </template>
 
         <template is="dom-if" if="[[!isProcessingTask]]">
-
           <!-- details -->
-          <paper-card class="sidecard">
+          <paper-card>
             <div class="horizontal layout wrap">
               <div class="details ctn">
                 <div>
@@ -326,7 +326,7 @@ Contributors:
           </paper-card>
 
           <!-- metadata -->
-          <paper-card class="sidecard metadata">
+          <paper-card>
             <div hidden$="[[edit]]">
               <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
               <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
@@ -334,39 +334,37 @@ Contributors:
             <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
           </paper-card>
 
+          <!-- process -->
           <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
-            <paper-card class="sidecard">
-              <p class="title">[[i18n('documentPage.process.title')]]</p>
-              <div class="vertical layout card-content">
-                <div>
-                  <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]">
-                    <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
-                      <template is="dom-repeat" items="[[processes]]" as="process">
-                        <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
-                      </template>
-                    </paper-menu>
-                  </paper-dropdown-menu>
-                </div>
-                <div>
-                  <paper-button noink class="start-workflow" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
-                </div>
+            <paper-card class="layout vertical">
+              <h3>[[i18n('documentPage.process.title')]]</h3>
+              <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]" no-animations horizontal-align="left">
+                <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+                  <template is="dom-repeat" items="[[processes]]" as="process">
+                    <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
+                  </template>
+                </paper-menu>
+              </paper-dropdown-menu>
+              <div class="buttons">
+                <paper-button class="primary" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
               </div>
             </paper-card>
           </template>
+
+          <!-- collections -->
           <template is="dom-if" if="[[hasCollections(document)]]">
-            <paper-card class="sidecard">
-              <p class="title">[[i18n('documentPage.collections')]]</p>
-              <div class="horizontal layout wrap card-content">
-                <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
-              </div>
+            <paper-card>
+              <h3>[[i18n('documentPage.collections')]]</h3>
+              <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
             </paper-card>
           </template>
-          <paper-card class="sidecard">
-            <p class="title">[[i18n('documentPage.activity')]]</p>
-            <div class="vertical layout card-content audit">
-              <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
-            </div>
+
+          <!-- activity -->
+          <paper-card>
+            <h3>[[i18n('documentPage.activity')]]</h3>
+            <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
           </paper-card>
+
         </template>
       </div>
     </div>
