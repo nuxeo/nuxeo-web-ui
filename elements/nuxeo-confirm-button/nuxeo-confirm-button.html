@@ -50,11 +50,6 @@ Contributors:
         text-align: right;
       }
 
-      paper-button {
-        margin: 0;
-        padding: 8px 16px;
-      }
-
       paper-button:hover {
         @apply(--nx-button-hover);
       }
@@ -74,12 +69,11 @@ Contributors:
       <content></content>
     </paper-button>
 
-    <paper-dialog id="dialog" class="dialog" no-overlap horizontal-align="auto" vertical-align="auto"
-                  on-iron-overlay-closed="_dismiss">
+    <paper-dialog id="dialog" class="dialog" no-overlap horizontal-align="auto" vertical-align="auto" on-iron-overlay-closed="_dismiss">
       <div class="title">[[dialogTitle]]</div>
       <div class="actions">
-      <paper-button noink dialog-dismiss>[[dialogDismiss]]</paper-button>
-      <paper-button noink dialog-confirm class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
+        <paper-button noink dialog-dismiss>[[dialogDismiss]]</paper-button>
+        <paper-button noink dialog-confirm class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
       </div>
     </paper-dialog>
 
