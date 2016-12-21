@@ -34,141 +34,55 @@ Contributors:
       .flex-layout {
         display: flex;
         flex-wrap: wrap;
-        margin: 0 -1em;
       }
 
-      .flex-layout paper-card {
-        margin: 0 16px 32px;
-        flex-basis: calc(50% - 32px);
-      }
-
-      paper-card .card-content {
-        height: 40px;
-      }
-
-      paper-button {
-        margin: 0;
-      }
-
-      paper-button:hover {
-        @apply(--nx-button-hover);
-      }
-
-      .thumbnailContainer {
-        background-color: #fafafa;
-        width: 100%;
-        height: 250px;
-      }
-
-      .name {
-        font-weight: bold;
-        padding: 8px;
-      }
-
-      .selected {
-        @apply(--nx-button-primary);
-        border-radius: .1em;
-        color: #fff;
-        font-size: .9em;
-        font-weight: bold;
-        padding: .7em 1.2em;
-        text-transform: uppercase;
-        vertical-align: baseline;
-        white-space: nowrap;
+      paper-card {
+        margin: 0 8px 16px 8px;
+        flex-basis: calc(50% - 16px);
       }
 
       @media (max-width: 1024px) {
-        .flex-layout paper-card {
-          flex: 1 0 calc(100% - 2em);
+        paper-card {
+          flex: 1 0 calc(100% - 16px);
         }
+      }
+
+      iron-image {
+        width: 100%;
+        height: 250px;
+        margin-bottom: 8px;
+        background: var(--nuxeo-light-background);
+      }
+
+      paper-button[disabled] {
+        color: white;
+        background: var(--nuxeo-button-primary);
+      }
+
+      .name {
+        font-size: 18px;
+        font-weight: 500;
       }
     </style>
 
     <nuxeo-page>
       <div class="header">[[i18n('app.themes.heading')]]</div>
       <div class="content flex-layout">
-
-        <paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/light-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.light')]]</span>
-            <template is="dom-if" if="[[_selected('light')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('light')]]">
-              <paper-button data-theme="light" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card>
-
-        <paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/default-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.nuxeo')]]</span>
-            <template is="dom-if" if="[[_selected('default')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('default')]]">
-              <paper-button data-theme="default" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card>
-
-        <paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/dark-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.dark')]]</span>
-            <template is="dom-if" if="[[_selected('dark')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('dark')]]">
-              <paper-button data-theme="dark" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card>
-
-        <paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/garden-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.garden')]]</span>
-            <template is="dom-if" if="[[_selected('garden')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('garden')]]">
-              <paper-button data-theme="garden" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card>
-
-        <paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/kawaii-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.kawaii')]]</span>
-            <template is="dom-if" if="[[_selected('kawaii')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('kawaii')]]">
-              <paper-button data-theme="kawaii" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card>
-
-        <!--paper-card elevation="0">
-          <iron-image src="[[baseUrl]]images/themes/ocean-theme.jpg" sizing="contain" class="thumbnailContainer"></iron-image>
-          <div class="card-content layout horizontal center">
-            <span class="name flex">[[i18n('themes.ocean')]]</span>
-            <template is="dom-if" if="[[_selected('ocean')]]">
-              <span class="selected">[[i18n('themes.current')]]</span>
-            </template>
-            <template is="dom-if" if="[[!_selected('ocean')]]">
-              <paper-button data-theme="ocean" on-tap="_apply">[[i18n('themes.apply')]]</paper-button>
-            </template>
-          </div>
-        </paper-card-->
-
-        <paper-toast id="toast" text="[[i18n('themes.applying')]]"></paper-toast>
+        <template is="dom-repeat" items="[[themes]]" as="theme">
+          <paper-card>
+            <iron-image src="[[_image(theme)]]" sizing="contain"></iron-image>
+            <div class="layout horizontal center justified">
+              <div class="name">[[_name(theme)]]</div>
+              <paper-button data-theme="[[theme]]" on-tap="_apply" noink disabled$="[[_selected(theme)]]">
+                [[_button(theme)]]
+              </paper-button>
+            </div>
+          </paper-card>
+        </template>
       </div>
     </nuxeo-page>
+
+    <paper-toast id="toast" text="[[i18n('themes.applying')]]"></paper-toast>
 
   </template>
   <script>
@@ -177,19 +91,36 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-themes',
-
         behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          themes: {
+            type: Array,
+            value: ["default", "dark", "garden", "kawaii", "light"] // "ocean" theme is disabled
+          }
+        },
 
-        _apply: function(event) {
-          localStorage.setItem('theme', event.target.dataset.theme);
-          this.$.toast.open();
-          location.reload();
+        _image: function(theme) {
+          return 'images/themes/' + theme + '-theme.jpg';
+        },
+
+        _name: function(theme) {
+          return this.i18n('themes.' + theme);
+        },
+
+        _button: function(theme) {
+          return this.i18n('themes.' + (this._selected(theme) ? 'current' : 'apply'));
         },
 
         _selected: function(theme) {
-          var selectedTheme = localStorage.getItem('theme') || 'default';
-          return selectedTheme === theme;
+          return localStorage.getItem('theme') === theme;
+        },
+
+        _apply: function(event) {
+          localStorage.setItem('theme', event.target.dataTheme);
+          this.$.toast.open();
+          location.reload();
         }
+
       });
     })();
   </script>
