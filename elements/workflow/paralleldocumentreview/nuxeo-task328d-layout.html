@@ -25,18 +25,13 @@ Contributors:
 -->
 <dom-module id="nuxeo-task328d-layout">
   <template>
-    <paper-card>
-      <div class="card-content">
-        <div role="widget">
-          <label>[[i18n('wf.parallelDocumentReview.initiatorComment')]]</label>
-          <div>[[task.variables.initiatorComment]]</div>
-        </div>
-
-        <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
-                        value="{{task.variables.comment}}" always-float-label>
-        </paper-textarea>
-      </div>
-    </paper-card>
+    <div role="widget">
+      <label>[[i18n('wf.parallelDocumentReview.initiatorComment')]]</label>
+      <div>[[task.variables.initiatorComment]]</div>
+    </div>
+    <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" always-float-label>
+    </paper-textarea>
   </template>
 
   <script>

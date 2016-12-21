@@ -27,25 +27,21 @@ Contributors:
   <template>
     <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-user-suggestion role="widget" label="[[i18n('wf.serialDocumentReview.participants')]]"
-                               search-type="USER_GROUP_TYPE"
-                               multiple="true"
-                               value="{{task.variables.participants}}">
-        </nuxeo-user-suggestion>
+    <nuxeo-user-suggestion role="widget" label="[[i18n('wf.serialDocumentReview.participants')]]"
+                           search-type="USER_GROUP_TYPE"
+                           multiple="true"
+                           value="{{task.variables.participants}}">
+    </nuxeo-user-suggestion>
 
-        <nuxeo-select role="widget"
-                      label="[[i18n('wf.serialDocumentReview.review.type')]]"
-                      options="[[types]]"
-                      selected="{{ask.variables.validationOrReview}}">
-        </nuxeo-select>
+    <nuxeo-select role="widget"
+                  label="[[i18n('wf.serialDocumentReview.review.type')]]"
+                  options="[[types]]"
+                  selected="{{ask.variables.validationOrReview}}">
+    </nuxeo-select>
 
-        <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
-                        value="{{task.variables.comment}}" always-float-label>
-        </paper-textarea>
-      </div>
-    </paper-card>
+    <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" always-float-label>
+    </paper-textarea>
   </template>
 
   <script>

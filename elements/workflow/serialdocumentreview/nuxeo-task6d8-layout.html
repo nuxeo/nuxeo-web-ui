@@ -25,23 +25,19 @@ Contributors:
 -->
 <dom-module id="nuxeo-task6d8-layout">
   <template>
-    <paper-card>
-      <div class="card-content">
-        <div role="widget">
-          <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
-          <nuxeo-tags type="user" items="[[task.variables.participants]]"></nuxeo-tags>
-        </div>
+    <div role="widget">
+      <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
+      <nuxeo-tags type="user" items="[[task.variables.participants]]"></nuxeo-tags>
+    </div>
 
-        <div role="widget">
-          <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
-          <div>[[task.variables.initiatorComment]]</div>
-        </div>
+    <div role="widget">
+      <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
+      <div>[[task.variables.initiatorComment]]</div>
+    </div>
 
-        <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
-                        value="{{task.variables.comment}}" always-float-label>
-        </paper-textarea>
-      </div>
-    </paper-card>
+    <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" always-float-label>
+    </paper-textarea>
   </template>
 
   <script>

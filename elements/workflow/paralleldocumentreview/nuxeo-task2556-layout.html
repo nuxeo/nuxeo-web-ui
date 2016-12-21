@@ -27,23 +27,19 @@ Contributors:
   <template>
     <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
-    <paper-card>
-      <div class="card-content">
-        <nuxeo-user-suggestion role="widget" label="[[i18n('wf.parallelDocumentReview.participants')]]"
-                               search-type="USER_GROUP_TYPE"
-                               multiple="true"
-                               value="{{task.variables.participants}}">
-        </nuxeo-user-suggestion>
+    <nuxeo-user-suggestion role="widget" label="[[i18n('wf.parallelDocumentReview.participants')]]"
+                           search-type="USER_GROUP_TYPE"
+                           multiple="true"
+                           value="{{task.variables.participants}}">
+    </nuxeo-user-suggestion>
 
-        <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
-                        value="{{task.variables.comment}}" always-float-label>
-        </paper-textarea>
+    <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" always-float-label>
+    </paper-textarea>
 
-        <paper-input role="widget" label="[[i18n('wf.parallelDocumentReview.endDate')]]"
-                     value="{{task.variables.end_date}}" always-float-label required type="date">
-        </paper-input>
-      </div>
-    </paper-card>
+    <paper-input role="widget" label="[[i18n('wf.parallelDocumentReview.endDate')]]"
+                 value="{{task.variables.end_date}}" always-float-label required type="date">
+    </paper-input>
   </template>
 
   <script>
