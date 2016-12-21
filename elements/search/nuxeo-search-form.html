@@ -34,23 +34,6 @@ Contributors:
         display: block;
       }
 
-      paper-button:hover {
-        @apply(--nx-button-hover);
-      }
-
-      paper-button.primary {
-        @apply(--nx-button-primary);
-      }
-
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
-      }
-
-      paper-button[disabled] {
-        @apply(--nx-button-disabled);
-      }
-
       .buttons {
         @apply(--buttons-bar);
       }
@@ -291,10 +274,8 @@ Contributors:
             <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
           </div>
           <div class="layout vertical row" hidden$="[[!_displayAutoControl]]">
-            <paper-toggle-button id="autoToogle" checked="{{_auto}}">
-              [[i18n('searchForm.auto')]]
-            </paper-toggle-button>
-            <paper-tooltip for="autoToogle">[[i18n('searchForm.auto.description')]]</paper-tooltip>
+            <paper-toggle-button checked="{{_auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
+            <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
           </div>
           <div class="row actions">
             <paper-button noink class="reset" disabled$="[[!dirty]]" on-click="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
@@ -343,7 +324,7 @@ Contributors:
       </paper-input>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+          <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         </div>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
@@ -358,7 +339,7 @@ Contributors:
           </paper-input>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
           </div>
           <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
         </div>
