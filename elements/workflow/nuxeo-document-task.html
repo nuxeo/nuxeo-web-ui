@@ -32,101 +32,53 @@ Contributors:
       :host {
         display: block;
       }
-
-      paper-tabs {
-        --paper-tabs-selection-bar-color: var(--dark-primary-color);
-      }
-
-      iron-icon {
-        --iron-icon-height: .9rem;
-        --iron-icon-width: .9rem;
-      }
-
-      paper-button:hover {
-        @apply(--nx-button-hover);
-      }
-
-      paper-button.primary {
-        @apply(--nx-button-primary);
-      }
-
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
-      }
-
-      paper-button[disabled] {
-        @apply(--nx-button-disabled);
-      }
-
-      h3 {
-        margin: 16px 0 8px 0;
-      }
-
-      h4 {
-        margin: 0 0 8px 0;
-      }
-
-      .task-body {
-        margin: 0;
-        padding: 0;
-      }
-
-      ::content label {
-        @apply(--nuxeo-label);
-      }
-
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
     <nuxeo-error id="error"></nuxeo-error>
 
-    <div id="task-body" class="action-container layout vertical task-body">
-
-      <h3>[[i18n('documentTask.taskResolution')]]</h3>
+    <div id="task-body" class="layout vertical">
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
-          <paper-card>
-            <div class="card-content">
-              <div>
-                <label>[[i18n('documentTask.dueDate')]]</label>
-                <div>[[formatDate(task.dueDate)]]</div>
-              </div>
-              <div>
-                <label>[[i18n('documentTask.assigned')]]</label>
-                <div>
-                  <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                    <template is="dom-if" if="[[_isUser(actor)]]">
-                      <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
-                    </template>
-                    <template is="dom-if" if="[[_isGroup(actor)]]">
-                      <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
-                    </template>
-                    <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
-                      <nuxeo-tag>[[actor]]</nuxeo-tag>
-                    </template>
-                  </template>
-                </div>
-              </div>
+          <h3>[[i18n('documentTask.taskResolution')]]</h3>
+
+          <div>
+            <label>[[i18n('documentTask.dueDate')]]</label>
+            <div>[[formatDate(task.dueDate)]]</div>
+          </div>
+          <div>
+            <label>[[i18n('documentTask.assigned')]]</label>
+            <div>
+              <template is="dom-repeat" items="[[task.actors]]" as="actor">
+                <template is="dom-if" if="[[_isUser(actor)]]">
+                  <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
+                </template>
+                <template is="dom-if" if="[[_isGroup(actor)]]">
+                  <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
+                </template>
+                <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
+                  <nuxeo-tag>[[actor]]</nuxeo-tag>
+                </template>
+              </template>
             </div>
-          </paper-card>
+          </div>
 
-          <h4 class="task-directive">[[i18n(task.directive)]]</h4>
-
+          <h4>[[i18n(task.directive)]]</h4>
           <form id="task-container" is="iron-form">
             <!--dynamically loaded via _taskChanged-->
           </form>
 
-          <div class="task-buttons layout horizontal center">
+          <div class="layout horizontal center">
             <content select=".buttons"></content>
-            <div class="flex horizontal layout end-justified">
+            <div class="layout horizontal end-justified flex">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
                 <paper-button noink dialog-confirm on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
               </template>
             </div>
           </div>
+
         </div>
       </iron-pages>
     </div>

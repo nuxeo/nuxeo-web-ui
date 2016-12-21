@@ -152,7 +152,7 @@ element.
     },
 
     ready: function() {
-      this.$.nxResource.addEventListener('loading-changed', function(e) {
+      this.$.nxResource.addEventListener('loading-changed', function() {
         this._setLoading(this.$.nxResource.loading);
       }.bind(this));
     }

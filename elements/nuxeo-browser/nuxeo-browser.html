@@ -35,22 +35,7 @@ Contributors:
   <template>
     <style>
 
-      ::content paper-input-container .input-content iron-icon {
-        margin-right: .3em;
-        color: var(--nuxeo-link-hover-color);
-      }
-
-      .content {
-        @apply(--layout-flex);
-      }
-
-      paper-card {
-        display: block;
-        margin: auto;
-        padding: 2em;
-        @apply(--layout-flex);
-      }
-
+      /* document actions */
       .document-actions {
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
@@ -67,12 +52,13 @@ Contributors:
         color: var(--nuxeo-header-actions-hover);
       }
 
-      ::content #documentViews {
+      /* document views items (pills) */
+      ::content #documentViewsItems {
         @apply(--layout-horizontal);
         --paper-listbox-background-color: transparent;
       }
 
-      ::content #documentViews paper-item {
+      ::content #documentViewsItems paper-item {
         user-select: none;
         border: 1px solid var(--nuxeo-pill-color);
         border-radius: 16px;
@@ -97,9 +83,9 @@ Contributors:
         };
       }
 
-      ::content #documentViews paper-item.iron-selected,
-      ::content #documentViews paper-item:hover,
-      ::content #documentViews paper-item:focus {
+      ::content #documentViewsItems paper-item.iron-selected,
+      ::content #documentViewsItems paper-item:hover,
+      ::content #documentViewsItems paper-item:focus {
         background: var(--nuxeo-pill-color-hover);
         border-color: var(--nuxeo-pill-color-hover);
         color: var(--nuxeo-pill-text-hover);
@@ -113,7 +99,7 @@ Contributors:
       <div class="header">
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
-          <paper-listbox id="documentViews" selected="{{selectedTab}}" attr-for-selected="name">
+          <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
             <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>

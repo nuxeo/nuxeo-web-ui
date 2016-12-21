@@ -32,16 +32,9 @@ Contributors:
         display: block;
       }
 
-      .title {
-        display: block;
-        font-size: 1.4rem;
-        padding: 0.5em;
-      }
-
       .suggestion-wrapper {
-        border: 1px solid var(--divider-color);
-        border-radius: 8px;
-        border-width: 2px;
+        border-radius: 2px;
+        border: 1px solid var(--nuxeo-border);
         padding: 0 8px;
       }
 
@@ -70,33 +63,27 @@ Contributors:
 
     <div class="flex-layout">
 
-      <paper-card elevation="0" class="block">
-        <div class="card-content">
-            <div class="suggestion-wrapper horizontal layout center">
-              <div>
-                <iron-icon icon="icons:folder"></iron-icon>
-              </div>
-              <div class="flex">
-                <nuxeo-path-suggestion id="pathSuggester" label="Select a path"
-                   value="{{path}}"
-                   no-label-float></nuxeo-path-suggestion>
-              </div>
-            </div>
+      <paper-card>
+        <div class="suggestion-wrapper horizontal layout center">
+          <iron-icon icon="icons:folder"></iron-icon>
+          <div class="flex">
+            <nuxeo-path-suggestion id="pathSuggester" label="Select a path" value="{{path}}" no-label-float></nuxeo-path-suggestion>
+          </div>
+        </div>
 
-            <nuxeo-document-distribution-chart id="chart" index="_all"
-             path="/default-domain/" mode="count"
-             include-version include-hidden
-             include-deleted>
-            </nuxeo-document-distribution-chart>
+        <nuxeo-document-distribution-chart id="chart" index="_all"
+         path="/default-domain/" mode="count"
+         include-version include-hidden
+         include-deleted>
+        </nuxeo-document-distribution-chart>
 
-            <div class="horizontal layout center">
-              <div>
-                <iron-icon icon="icons:track-changes"></iron-icon>
-              </div>
-              <div class="flex">
-                <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
-              </div>
-            </div>
+        <div class="horizontal layout center">
+          <div>
+            <iron-icon icon="icons:track-changes"></iron-icon>
+          </div>
+          <div class="flex">
+            <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
+          </div>
         </div>
       </paper-card>
 

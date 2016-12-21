@@ -25,22 +25,6 @@ Contributors:
 -->
 <dom-module id="nuxeo-user-group-management-page">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-
-      paper-card {
-        @apply(--paper-card);
-      }
-
-      paper-card.card {
-        margin: 0 22px 22px 0;
-        min-width: 560px;
-        width: 100%;
-        height: 100%;
-      }
-    </style>
 
     <nuxeo-page>
       <div class="header">
@@ -48,14 +32,12 @@ Contributors:
       </div>
       <div class="content">
         <paper-card class="card">
-          <div class="card-content vertical layout">
-            <template is="dom-if" if="visible">
-              <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
-              <template is="dom-if" if="[[_displayLatest(page)]]">
-                <nuxeo-user-group-latest></nuxeo-user-group-latest>
-              </template>
+          <template is="dom-if" if="visible">
+            <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
+            <template is="dom-if" if="[[_displayLatest(page)]]">
+              <nuxeo-user-group-latest></nuxeo-user-group-latest>
             </template>
-          </div>
+          </template>
         </paper-card>
       </div>
     </nuxeo-page>

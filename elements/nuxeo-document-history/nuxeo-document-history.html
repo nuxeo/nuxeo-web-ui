@@ -28,51 +28,28 @@ Contributors:
 <dom-module id="nuxeo-document-history">
   <template>
     <style>
-      :host {
-        display: block;
-      }
-
-      nuxeo-data-table {
-        width: 100%;
-        height: calc(100vh - 22em);
-        background: white;
-        border: 1px solid var(--nuxeo-border);
-      }
-
-      nuxeo-tag {
-        text-transform: uppercase;
-      }
-
-      paper-card.dates {
-        width: 100%;
-        margin: 0 0 1em;
-      }
-
-      paper-card .card-content {
-        padding: .2em 1em;
-      }
-
-      .dates paper-input {
+      paper-input {
         margin-left: 1em;
       }
 
+      nuxeo-data-table {
+        @apply(--paper-card);
+        height: calc(100vh - 24em);
+      }
     </style>
 
     <nuxeo-document-history-page-provider id="provider" page-size="40" current-page="{{entries}}">
     </nuxeo-document-history-page-provider>
 
-    <paper-card elevation="0" class="dates">
-      <div class="card-content horizontal flex end-justified layout">
+    <paper-card class="layout horizontal end-justified flex">
       <paper-input role="widget" label="[[i18n('documentHistory.filter.after')]]"
                    value="{{startDate::change}}"
                    type="date">
       </paper-input>
-
       <paper-input role="widget" label="[[i18n('documentHistory.filter.before')]]"
                    value="{{endDate::change}}"
                    type="date">
       </paper-input>
-      </div>
     </paper-card>
 
     <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
@@ -96,7 +73,7 @@ Contributors:
         <template>[[item.comment]]</template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-        <template><nuxeo-tag>[[item.docLifeCycle]]</nuxeo-tag></template>
+        <template><nuxeo-tag uppercase>[[item.docLifeCycle]]</nuxeo-tag></template>
       </nuxeo-data-table-column>
     </nuxeo-data-table>
 

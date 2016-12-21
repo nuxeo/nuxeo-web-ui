@@ -119,19 +119,19 @@ Contributors:
       <div class="header layout horizontal">
         <span>[[i18n('vocabularyManagement.heading')]]</span>
       </div>
+
       <div class="content">
         <paper-card elevation="0" class="block">
-          <div class="card-content">
-            <span>[[i18n('vocabularyManagement.vocabulary')]]</span>
-            <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select')]]">
-              <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
-                <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
-                  <paper-item name="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
-                </template>
-              </paper-menu>
-            </paper-dropdown-menu>
-          </div>
+          <span>[[i18n('vocabularyManagement.vocabulary')]]</span>
+          <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select')]]">
+            <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
+              <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
+                <paper-item name="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
         </paper-card>
+
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
             <paper-button class="primary" on-tap="_createEntry">

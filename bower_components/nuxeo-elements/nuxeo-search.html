@@ -230,7 +230,7 @@ element.
         },
 
         ready: function() {
-          this.$.resource.addEventListener('loading-changed', function(e) {
+          this.$.resource.addEventListener('loading-changed', function() {
             this._setLoading(this.$.resource.loading);
           }.bind(this));
         }

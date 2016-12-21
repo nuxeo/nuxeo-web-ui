@@ -33,11 +33,6 @@ Contributors:
         display: block;
       }
 
-      h3 {
-        margin: 0;
-        padding: 0;
-      }
-
       .task-list {
         background: #fff;
       }
@@ -120,24 +115,6 @@ Contributors:
         margin-left: 1em;
       }
 
-      paper-button:hover,
-      paper-icon-button:hover {
-        @apply(--nx-button-hover);
-      }
-
-      paper-button.primary {
-        @apply(--nx-button-primary);
-      }
-
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
-      }
-
-      paper-button[disabled] {
-        @apply(--nx-button-disabled);
-      }
-
       .buttons {
         @apply(--buttons-bar);
       }
@@ -197,9 +174,7 @@ Contributors:
               </div>
               <div class="flex task-view">
                 <paper-card>
-                  <div class="card-content">
-                    <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
-                  </div>
+                  <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
                 </paper-card>
               </div>
             </div>

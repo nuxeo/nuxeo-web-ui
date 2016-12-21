@@ -25,17 +25,13 @@ Contributors:
 -->
 <dom-module id="nuxeo-task2169-layout">
   <template>
-    <paper-card>
-      <div class="card-content">
-        <div role="widget">
-          <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
-          <nuxeo-document-task-review-result class="review-result" result="[[task.variables.review_result]]"></nuxeo-document-task-review-result>
-        </div>
-        <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
-                        value="{{task.variables.comment}}" always-float-label>
-        </paper-textarea>
-      </div>
-    </paper-card>
+    <div role="widget">
+      <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
+      <nuxeo-document-task-review-result class="review-result" result="[[task.variables.review_result]]"></nuxeo-document-task-review-result>
+    </div>
+    <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" always-float-label>
+    </paper-textarea>
   </template>
 
   <script>

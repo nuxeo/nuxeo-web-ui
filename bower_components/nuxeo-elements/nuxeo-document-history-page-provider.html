@@ -263,7 +263,7 @@ limitations under the License.
       },
 
       ready: function() {
-        this.$.auditOp.addEventListener('loading-changed', function(e) {
+        this.$.auditOp.addEventListener('loading-changed', function() {
           this._setLoading(this.$.auditOp.loading);
         }.bind(this));
       }
