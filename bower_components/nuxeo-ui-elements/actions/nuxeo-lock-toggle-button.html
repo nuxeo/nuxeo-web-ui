@@ -47,8 +47,8 @@ Example:
       }
     </style>
 
-    <nuxeo-operation id="opLock" op="Document.Lock" input="[[document.uid]]"></nuxeo-operation>
-    <nuxeo-operation id="opUnlock" op="Document.Unlock" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="opLock" op="Document.Lock" input="[[document.uid]]" headers='{"X-NXfetch.document": "lock"}'></nuxeo-operation>
+    <nuxeo-operation id="opUnlock" op="Document.Unlock" input="[[document.uid]]" headers='{"X-NXfetch.document": "lock"}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
@@ -103,14 +103,14 @@ Example:
 
         _toggle: function() {
           if (!this.locked) {
-            this.$.opLock.execute().then(function() {
+            this.$.opLock.execute().then(function(doc) {
               this.locked = true;
-              this.fire('document-locked', {doc: this.document});
+              this.fire('document-locked', {doc: doc});
             }.bind(this));
           } else {
-            this.$.opUnlock.execute().then(function() {
+            this.$.opUnlock.execute().then(function(doc) {
               this.locked = false;
-              this.fire('document-unlocked', {doc: this.document});
+              this.fire('document-unlocked', {doc: doc});
             }.bind(this));
           }
         },
