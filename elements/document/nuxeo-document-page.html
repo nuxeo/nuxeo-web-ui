@@ -32,6 +32,7 @@ Contributors:
         display: block;
       }
 
+      /* info bar */
       .info-bar {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -42,121 +43,45 @@ Contributors:
         margin-bottom: 16px;
       }
 
-      paper-button:hover {
-        @apply(--nx-button-hover);
+      /* page */
+      .page {
+        @apply(--layout-horizontal);
       }
 
-      paper-button.primary {
-        @apply(--nx-button-primary);
+      .page .main {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-2);
+        padding-right: 16px;
       }
 
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
+      .page .side {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
       }
 
-      paper-card {
-        @apply(--paper-card);
-        min-width: 22em;
+      .page .side .details {
+        @apply(--layout-vertical);
       }
 
-      paper-tooltip {
-        --paper-tooltip: {
-          width: 250px;
-        };
+      .page .side .details .item {
+        @apply(--layout-horizontal);
       }
 
-      .sideinfo {
-        box-sizing: border-box;
+      .page .side .details .item label {
+        width: 100px;
+        min-width: 100px;
       }
 
-      .sideinfo paper-card {
-        padding: 1em;
-        margin-right: 0;
-      }
-
-      .sideinfo paper-card .document-task {
-        padding: 0;
-      }
-
-      .start-workflow {
-        position: relative;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #f68500;
-        color: #fff;
-        padding: 0.75rem 1.5rem;
-        vertical-align: middle;
-        border-radius: 2px;
-      }
-
-      .ctn {
-        width: 100%;
-        margin-bottom: 1em;
-      }
-
-      .ctn:last-child {
-        margin-bottom: 0;
-      }
-
-      .docinfo {
-        padding: 0 16px;
-        box-sizing: border-box;
-      }
-
-      .details > div {
-        display: flex;
-        align-items: stretch;
-        margin-bottom: .5em;
-      }
-
-      .details > div span {
-        width: 70%;
-      }
-
-      label {
-        color: var(--nuxeo-text-light);
-        width: 30%;
-        display: inline-block;
-        line-height: 1.9em;
-      }
-
-      .details {
-        vertical-align: top;
+      @media (max-width: 1024px) {
+        .page {
+          flex-direction: column;
+        }
+        .page .main {
+          padding: 0;
+        }
       }
 
       /* Tasks */
-      .process.ctn {
-        border-top: 1px solid var(--nuxeo-border);
-        padding-top: 1em;
-      }
-
-      .wf-running {
-        display: block;
-        padding: 0 2em;
-        border: 0;
-        border-radius: 0;
-        min-height: 3.2em;
-        background-color: #333;
-        color: #fff;
-      }
-
-      .process-task {
-        @apply(--nuxeo-document-task-button-theme);
-        position: absolute;
-        display: inline-block;
-        text-transform: uppercase;
-        background-color: #f68500;
-        color: #fff;
-        padding: 0.3rem .8rem;
-        vertical-align: baseline;
-        border-radius: 2px;
-        font-size: .9em;
-        font-weight: 700;
-        right: .5em;
-        top: .8em;
-      }
-
       .process-running {
         background-color: #f68500;
         color: #fff;
@@ -164,16 +89,16 @@ Contributors:
 
       .task-header {
         background-color: #fafcfd;
-        border-bottom: 1px solid #e5e5e5;
         color: var(--dark-primary-color);
         padding: 1em;
+        margin-bottom: 1em;
       }
 
       .task-name {
         font-weight: bold;
       }
 
-      iron-icon.task-name-icon {
+      .task-name-icon {
         --iron-icon-height: .9rem;
         --iron-icon-width: .9rem;
         border-radius: 50px;
@@ -187,35 +112,6 @@ Contributors:
         font-size: .8em;
         font-weight: 300;
         margin-top: .5em;
-      }
-
-      #graphDialog paper-button {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-      }
-
-      .graph-container {
-        padding: 0.5rem 2rem;
-        position: relative;
-      }
-
-      .open-graph {
-        font-size: 0.8rem;
-      }
-
-      nuxeo-workflow-graph {
-        position: relative;
-      }
-
-      @media (max-width: 1024px) {
-        .horizontal.layout {
-          flex-direction: column;
-        }
-
-        .horizontal.layout > div {
-          padding: 0;
-        }
       }
 
       #edit {
@@ -253,18 +149,18 @@ Contributors:
     </template>
 
     <!-- page -->
-    <div class="horizontal layout">
+    <div class="page">
 
-      <div class="docinfo vertical layout flex-2">
+      <div class="main">
         <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
       </div>
 
-      <div class="sideinfo vertical layout flex">
+      <div class="side">
 
         <template is="dom-if" if="[[isProcessingTask]]" restamp>
           <template is="dom-repeat" items="[[workflows]]" as="workflow">
             <template is="dom-repeat" items="[[tasks]]" as="task">
-              <paper-card class="document-task">
+              <paper-card>
                 <div class="layout horizontal center task-header">
                   <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
                   <div class="layout vertical flex">
@@ -272,12 +168,12 @@ Contributors:
                     <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
                   </div>
                   <paper-dialog id="graphDialog" with-backdrop>
-                    <div class="graph-container">
-                      <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+                    <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+                    <div class="buttons">
+                      <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
                     </div>
-                    <paper-button noink dialog-dismiss>[[i18n('command.close')]]</paper-button>
                   </paper-dialog>
-                  <paper-button noink class="open-graph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
+                  <paper-button noink on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
                 </div>
                 <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
                   <div class="buttons">
@@ -292,33 +188,32 @@ Contributors:
         <template is="dom-if" if="[[!isProcessingTask]]">
           <!-- details -->
           <paper-card>
-            <div class="horizontal layout wrap">
-              <div class="details ctn">
-                <div>
-                  <label class="col">[[i18n('documentPage.added.on')]]</label>
-                  <span>[[formatDate(document.properties.dc:created)]]</span>
+            <div class="details">
+              <div class="item">
+                <label>[[i18n('documentPage.added.on')]]</label>
+                <div>[[formatDate(document.properties.dc:created)]]</div>
+              </div>
+              <div class="item">
+                <label>[[i18n('documentPage.added.by')]]</label>
+                <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
+              </div>
+              <div class="item">
+                <label>[[i18n('label.dublincore.state')]]</label>
+                <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
+              </div>
+              <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
+                <div class="item">
+                  <label>[[i18n('label.dublincore.version')]]</label>
+                  <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
                 </div>
-                <div>
-                  <label class="col">[[i18n('documentPage.added.by')]]</label>
-                  <span><nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag></span>
-                </div>
-                <div>
-                  <label class="col">[[i18n('label.dublincore.state')]]</label>
-                  <span><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></span>
-                </div>
-                <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
-                  <div>
-                    <label class="col">[[i18n('label.dublincore.version')]]</label>
-                    <span><nuxeo-document-versions document="[[document]]"></nuxeo-document-versions></span>
-                  </div>
-                </template>
-                <div>
-                  <label class="col">[[i18n('label.dublincore.contributors')]]</label>
-                  <span><nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags></span>
-                </div>
+              </template>
+              <div class="item">
+                <label>[[i18n('label.dublincore.contributors')]]</label>
+                <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
               </div>
               <template is="dom-if" if="[[hasWorkflowRunning]]">
-                <div class="process ctn">
+                <div class="item">
+                  <label>[[i18n('documentPage.process.title')]]</label>
                   <nuxeo-tag uppercase class="process-running">[[i18n('documentPage.process.running')]]</nuxeo-tag>
                 </div>
               </template>
@@ -336,7 +231,7 @@ Contributors:
 
           <!-- process -->
           <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
-            <paper-card class="layout vertical">
+            <paper-card >
               <h3>[[i18n('documentPage.process.title')]]</h3>
               <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]" no-animations horizontal-align="left">
                 <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">

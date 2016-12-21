@@ -32,11 +32,6 @@ Contributors:
         display: block;
       }
 
-      paper-card.dates {
-        width: 100%;
-        margin-bottom: 1.5em;
-      }
-
       .dates input {
         background-color: #fff;
         border: 1px solid #c6c6c6;
@@ -50,11 +45,12 @@ Contributors:
         display: flex;
         flex-wrap: wrap;
         margin: 0 -1em;
+        padding: 0 8px;
       }
 
       .flex-layout paper-card {
         flex: 1 0 calc(33% - 2em);
-        margin: 0 1em 1.5em;
+        margin: 0 8px 16px;
         text-align: center;
       }
 
@@ -68,7 +64,6 @@ Contributors:
       ::content #canvas.chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
-        height: 100% !important;
         display: block;
         font-size: .8em;
       }
@@ -81,8 +76,8 @@ Contributors:
 
     </style>
 
-    <paper-card elevation="0" class="dates">
-      <div class="card-content horizontal flex end-justified layout">
+    <paper-card class="dates">
+      <div class="horizontal flex end-justified layout">
         <input type="date" value="{{startDate::change}}">
         <input type="date" value="{{endDate::change}}">
       </div>
@@ -97,34 +92,30 @@ Contributors:
       </nuxeo-search-data>
 
       <paper-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]" elevation="0">
-        <div class="card-content">
-          <chart-pie values="[[_values(callsPerProvider)]]"
-                     labels="[[_labels(callsPerProvider)]]"
-                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
-          </chart-pie>
-        </div>
+        <chart-pie values="[[_values(callsPerProvider)]]"
+                   labels="[[_labels(callsPerProvider)]]"
+                   options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        </chart-pie>
       </paper-card>
 
       <!-- Number of calls per hour -->
-     <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                         with-date-intervals="hour"
                         without-extended-bounds
                         date-format="HH"
                         data="{{callsPerHour}}"
                         index="[[index]]">
-     </nuxeo-search-data>
+      </nuxeo-search-data>
 
-     <paper-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]" elevation="0">
-       <div class="card-content">
-         <chart-bar labels="[[_range(0,23)]]"
-                    values="[[_aggregatePerHourOfDay(callsPerHour)]]"
-                    series="[[_range(0,23)]]"
-                    options='{ "legend": { "display": false }, "animation": false }'>
-         </chart-bar>
-       </div>
-     </paper-card>
+      <paper-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]" elevation="0">
+        <chart-bar labels="[[_range(0,23)]]"
+                  values="[[_aggregatePerHourOfDay(callsPerHour)]]"
+                  series="[[_range(0,23)]]"
+                  options='{ "legend": { "display": false }, "animation": false }'>
+        </chart-bar>
+      </paper-card>
 
-     <!-- Result ranges -->
+      <!-- Result ranges -->
       <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                          with-ranges='{"resultsCount":[
                        {"key": "no result", "to": 1 },
@@ -137,16 +128,14 @@ Contributors:
       </nuxeo-search-data>
 
       <paper-card heading="[[i18n('searchAnalytics.numberOfResults.heading')]]" elevation="0">
-        <div class="card-content">
-          <nuxeo-data-table items="[[callPerNumberOfResults]]">
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
-              <template>[[item.key]]</template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.calls')]]">
-              <template>[[item.value]]</template>
-            </nuxeo-data-table-column>
-          </nuxeo-data-table>
-        </div>
+        <nuxeo-data-table items="[[callPerNumberOfResults]]">
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
+            <template>[[item.key]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.calls')]]">
+            <template>[[item.value]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
       </paper-card>
 
       <!-- Most used expressions for full text search  -->
@@ -158,16 +147,14 @@ Contributors:
       </nuxeo-search-data>
 
       <paper-card heading="[[i18n('searchAnalytics.mostPopularSearches.heading')]]" elevation="0">
-        <div class="card-content">
-          <nuxeo-data-table items="[[callsPerFT]]">
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
-              <template>[[item.key]]</template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfCalls')]]">
-              <template>[[item.value]]</template>
-            </nuxeo-data-table-column>
-          </nuxeo-data-table>
-        </div>
+        <nuxeo-data-table items="[[callsPerFT]]">
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
+            <template>[[item.key]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfCalls')]]">
+            <template>[[item.value]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
       </paper-card>
 
       <!-- Searches by number of pages displayed -->
@@ -183,16 +170,14 @@ Contributors:
       </nuxeo-search-data>
 
       <paper-card heading="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.heading')]]" elevation="0">
-        <div class="card-content">
-          <nuxeo-data-table items="[[callPerNumberOfPages]]">
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]">
-              <template>[[item.key]]</template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.numberOfCalls')]]">
-              <template>[[item.value]]</template>
-            </nuxeo-data-table-column>
-          </nuxeo-data-table>
-        </div>
+        <nuxeo-data-table items="[[callPerNumberOfPages]]">
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]">
+            <template>[[item.key]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.numberOfCalls')]]">
+            <template>[[item.value]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
       </paper-card>
 
       <!-- Searches by filters used -->
@@ -203,19 +188,16 @@ Contributors:
       </nuxeo-search-data>
 
       <paper-card heading="[[i18n('searchAnalytics.filtersUsed.heading')]]" elevation="0">
-        <div class="card-content">
-          <nuxeo-data-table items="[[callByFilters]]">
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
-              <template>[[item.key]]</template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfCalls')]]">
-              <template>[[item.value]]</template>
-            </nuxeo-data-table-column>
-          </nuxeo-data-table>
-        </div>
+        <nuxeo-data-table items="[[callByFilters]]">
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
+            <template>[[item.key]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfCalls')]]">
+            <template>[[item.value]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
       </paper-card>
 
-      <!-- End of paper-cards -->
     </div>
   </template>
 

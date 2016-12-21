@@ -33,22 +33,10 @@ Contributors:
         justify-content: space-between;
       }
 
-      .title {
-        color: var(--nuxeo-title-color);
-        font-size: 1.2rem;
-        margin: 0 0 .4em;
-        padding-bottom: 8px;
-      }
-
-      .title iron-icon {
-        width: .8em;
-        vertical-align: bottom;
-        margin-right: .4rem;
-      }
-
       paper-card {
         min-width: 25em;
         width: 49%;
+        height: 420px;
       }
 
       @media (max-width: 1024px) {
@@ -57,12 +45,13 @@ Contributors:
         }
       }
 
-      nuxeo-data-table, nuxeo-tasks-list ::content nuxeo-data-list {
-        height: 350px;
+      h3 iron-icon {
+        width: 1.3em;
+        margin-right: 0.4em;
       }
 
-      .capitalize {
-        text-transform: capitalize;
+      nuxeo-data-table, nuxeo-tasks-list, nuxeo-tasks-list ::content nuxeo-data-list {
+        height: 350px !important;
       }
 
       .queue-thumbnail,
@@ -93,125 +82,104 @@ Contributors:
 
           <!-- recently edited -->
           <paper-card>
-            <div class="card-content vertical layout">
-              <span class="title">
-                <iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>
-                [[i18n('home.latestDocumentsEdited')]]
-              </span>
-
-              <nuxeo-page-provider auto
-                id="latestQuery"
-                page-size="20"
-                query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
-                schemas="dublincore,common,uid"
-                enrichers="thumbnail"
-                headers='{"X-NXfetch.document": "properties"}'>
-              </nuxeo-page-provider>
-
-              <nuxeo-data-table
-                nx-provider="latestQuery"
-                empty-label="[[i18n('queryWidget.noDocuments')]]"
-                on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
-                  <template>
-                    <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                    <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
-                  <template>
-                    [[formatDate(item.properties.dc:modified)]]
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
-                  <template>
-                    <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
-                  </template>
-                </nuxeo-data-table-column>
-              </nuxeo-data-table>
-
-            </div>
+            <h3><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
+            <nuxeo-page-provider auto
+              id="latestQuery"
+              page-size="20"
+              query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
+              schemas="dublincore,common,uid"
+              enrichers="thumbnail"
+              headers='{"X-NXfetch.document": "properties"}'>
+            </nuxeo-page-provider>
+            <nuxeo-data-table
+              nx-provider="latestQuery"
+              empty-label="[[i18n('queryWidget.noDocuments')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
+                <template>
+                  [[formatDate(item.properties.dc:modified)]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+                <template>
+                  <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
           </paper-card>
 
           <!-- tasks -->
           <paper-card>
-            <div class="card-content vertical layout">
-              <span class="title"><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</span>
-              <nuxeo-tasks-list tasks="[[tasks]]" class="flex"></nuxeo-tasks-list>
-            </div>
+            <h3><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
+            <nuxeo-tasks-list tasks="[[tasks]]"></nuxeo-tasks-list>
           </paper-card>
 
           <!-- recently viewed -->
           <paper-card>
-            <div class="card-content vertical layout">
-              <span class="title">
-                <iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]
-              </span>
-              <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}">
-              </nuxeo-document-storage>
-              <nuxeo-data-table id="datatable"
-                items="[[recentDocuments]]"
-                empty-label="[[i18n('recentDocuments.empty')]]"
-                empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
-                on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
-                  <template>
-                    <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                    <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
-                  <template>
-                    [[item.type]]
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">
-                  <template>
-                    [[formatDate(item.lastViewed)]]
-                  </template>
-                </nuxeo-data-table-column>
-              </nuxeo-data-table>
-            </div>
+            <h3><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
+            <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
+            <nuxeo-data-table id="datatable"
+              items="[[recentDocuments]]"
+              empty-label="[[i18n('recentDocuments.empty')]]"
+              empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
+                <template>
+                  [[item.type]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">
+                <template>
+                  [[formatDate(item.lastViewed)]]
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
           </paper-card>
 
           <!-- favorites -->
           <paper-card>
-            <div class="card-content vertical layout">
-              <span class="title">
-                <iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]
-              </span>
-              <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
-
-              <nuxeo-page-provider id="favoritesProvider"
-                 provider="default_content_collection"
-                 page-size="20"
-                 schemas="dublincore,common,uid"
-                 headers='{"X-NXfetch.document": "properties"}'
-                 enrichers="thumbnail">
-              </nuxeo-page-provider>
-
-              <nuxeo-data-table
-                nx-provider="favoritesProvider"
-                empty-label="[[i18n('favorites.empty')]]"
-                on-row-clicked="_navigate">
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
-                  <template>
-                    <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                    <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
-                  <template>
-                    [[formatDate(item.properties.dc:modified)]]
-                  </template>
-                </nuxeo-data-table-column>
-                <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
-                  <template>
-                    <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
-                  </template>
-                </nuxeo-data-table-column>
-              </nuxeo-data-table>
-            </div>
+            <h3><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
+            <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
+            <nuxeo-page-provider id="favoritesProvider"
+               provider="default_content_collection"
+               page-size="20"
+               schemas="dublincore,common,uid"
+               headers='{"X-NXfetch.document": "properties"}'
+               enrichers="thumbnail">
+            </nuxeo-page-provider>
+            <nuxeo-data-table
+              nx-provider="favoritesProvider"
+              empty-label="[[i18n('favorites.empty')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
+                <template>
+                  [[formatDate(item.properties.dc:modified)]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+                <template>
+                  <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
           </paper-card>
         </section>
       </div>
@@ -234,12 +202,12 @@ Contributors:
           var detail;
           if (e.detail.item) {
             detail = {
-              doc: e.detail.item,
+              doc: e.detail.item
             };
             page('/browse' + detail.doc.path);
           } else {
             detail = {
-              doc: e.model.item,
+              doc: e.model.item
             };
           }
           this.fire('navigate', detail);

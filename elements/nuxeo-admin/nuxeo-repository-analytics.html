@@ -33,11 +33,6 @@ Contributors:
         display: block;
       }
 
-      paper-card.dates {
-        width: 100%;
-        margin-bottom: 1.5em;
-      }
-
       .dates input {
         background-color: #fff;
         border: 1px solid #c6c6c6;
@@ -51,11 +46,12 @@ Contributors:
         display: flex;
         flex-wrap: wrap;
         margin: 0 -1em;
+        padding: 0 8px;
       }
 
       .flex-layout paper-card {
         flex: 1 0 calc(33% - 2em);
-        margin: 0 1em 1.5em;
+        margin: 0 8px 16px;
         text-align: center;
       }
 
@@ -81,7 +77,6 @@ Contributors:
         margin: 25px auto 0 auto;
         width: 100% !important;
         min-width: 30em;
-        height: 100% !important;
         display: block;
         font-size: .8em;
       }
@@ -94,8 +89,8 @@ Contributors:
 
     </style>
 
-    <paper-card elevation="0" class="dates">
-      <div class="card-content horizontal flex end-justified layout">
+    <paper-card class="dates">
+      <div class="horizontal flex end-justified layout">
         <input type="date" value="{{startDate::change}}">
         <input type="date" value="{{endDate::change}}">
       </div>
@@ -119,21 +114,19 @@ Contributors:
       </nuxeo-page-provider>
 
       <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]" elevation="0">
-        <div class="card-content downloads">
-          <template is="dom-if" if="[[!_isEmpty(downloads)]]">
-            <nuxeo-data-table items="[[downloadedDocs]]">
-              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
-                <template>[[item.title]]</template>
-              </nuxeo-data-table-column>
-              <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads')]]">
-                <template>[[_numberOfDownloads(item)]]</template>
-              </nuxeo-data-table-column>
-            </nuxeo-data-table>
-          </template>
-          <template is="dom-if" if="[[_isEmpty(downloads)]]">
-            <div class="message">[[i18n('repositoryAnalytics.noResults')]]</div>
-          </template>
-        </div>
+        <template is="dom-if" if="[[!_isEmpty(downloads)]]">
+          <nuxeo-data-table items="[[downloadedDocs]]">
+            <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
+              <template>[[item.title]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads')]]">
+              <template>[[_numberOfDownloads(item)]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </template>
+        <template is="dom-if" if="[[_isEmpty(downloads)]]">
+          <div class="message">[[i18n('repositoryAnalytics.noResults')]]</div>
+        </template>
       </paper-card>
 
       <!-- Number of documents -->
@@ -143,10 +136,8 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.documents.heading')]]" elevation="0">
-        <div class="card-content">
-          <iron-icon icon="icons:description"></iron-icon>
-          <h1>[[totalCount]]</h1>
-        </div>
+        <iron-icon icon="icons:description"></iron-icon>
+        <h1>[[totalCount]]</h1>
       </paper-card>
 
       <!-- Document count per type -->
@@ -158,12 +149,10 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]" elevation="0">
-        <div class="card-content">
-          <chart-pie values="[[_values(typeCount)]]"
-                     labels="[[_labels(typeCount)]]"
-                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
-          </chart-pie>
-        </div>
+        <chart-pie values="[[_values(typeCount)]]"
+                   labels="[[_labels(typeCount)]]"
+                   options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        </chart-pie>
       </paper-card>
 
       <!-- Top 10 creators -->
@@ -175,12 +164,10 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]" elevation="0">
-        <div class="card-content">
-          <chart-pie values="[[_values(topCreators)]]"
-                     labels="[[_labels(topCreators)]]"
-                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
-          </chart-pie>
-        </div>
+        <chart-pie values="[[_values(topCreators)]]"
+                   labels="[[_labels(topCreators)]]"
+                   options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        </chart-pie>
       </paper-card>
 
       <!-- Documents created per week -->
@@ -192,12 +179,10 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]" elevation="0">
-        <div class="card-content">
-          <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
-                      values="[[_values(docsCreatedPerWeek)]]"
-                      options='{ "legend": { "display": false }, "animation": false }'>
-          </chart-line>
-        </div>
+        <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
+                    values="[[_values(docsCreatedPerWeek)]]"
+                    options='{ "legend": { "display": false }, "animation": false }'>
+        </chart-line>
       </paper-card>
 
       <!-- Documents modified per week -->
@@ -209,12 +194,10 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]" elevation="0">
-        <div class="card-content">
-          <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
-                      values="[[_values(docsModifiedPerWeek)]]"
-                      options='{ "legend": { "display": false }, "animation": false }'>
-          </chart-line>
-        </div>
+        <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
+                    values="[[_values(docsModifiedPerWeek)]]"
+                    options='{ "legend": { "display": false }, "animation": false }'>
+        </chart-line>
       </paper-card>
 
       <!-- Files by mime-type -->
@@ -225,16 +208,12 @@ Contributors:
       </nuxeo-repository-data>
 
       <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]" elevation="0">
-        <div class="card-content">
-          <chart-pie values="[[_values(filesByMimeType)]]"
-                     labels="[[_types(filesByMimeType)]]"
-                     options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
-          </chart-pie>
-          <div></div>
-        </div>
+        <chart-pie values="[[_values(filesByMimeType)]]"
+                   labels="[[_types(filesByMimeType)]]"
+                   options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        </chart-pie>
       </paper-card>
 
-      <!-- End of paper-cards -->
     </div>
 
   </template>
