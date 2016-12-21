@@ -105,10 +105,12 @@ Example:
           if (!this.locked) {
             this.$.opLock.execute().then(function() {
               this.locked = true;
+              this.fire('document-locked', {doc: this.document});
             }.bind(this));
           } else {
             this.$.opUnlock.execute().then(function() {
               this.locked = false;
+              this.fire('document-unlocked', {doc: this.document});
             }.bind(this));
           }
         },
