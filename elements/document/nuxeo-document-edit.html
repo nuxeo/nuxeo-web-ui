@@ -26,24 +26,14 @@ Contributors:
   <template>
     <style>
       .actions {
-        @apply(--nx-actions);
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+        margin-top: 16px;
       }
 
       .actions paper-button {
-        @apply(--nx-actions-button);
-        max-width: 15em;
-      }
-
-      ::content label {
-        display: block;
-        color: var(--secondary-text-color);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 12px;
-        font-weight: 400;
-        letter-spacing: 0.011em;
-        line-height: 20px;
+        @apply(--layout-flex);
+        max-width: 18em;
       }
 
       ::content nuxeo-directory-suggestion,
@@ -100,9 +90,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-edit',
-
         behaviors: [Polymer.IronResizableBehavior, Nuxeo.I18nBehavior],
-
         properties: {
           document: {
             type: Object,
