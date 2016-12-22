@@ -517,7 +517,9 @@ Contributors:
           'added-to-favorites': '_documentAddedToFavorites',
           'removed-from-favorites': '_documentRemovedFromFavorites',
           'document-subscribed': '_documentSubscribed',
-          'document-unsubscribed': '_documentUnsubscribed'
+          'document-unsubscribed': '_documentUnsubscribed',
+          'document-locked': '_documentLocked',
+          'document-unlocked': '_documentUnlocked'
         },
 
         ready: function() {
@@ -805,6 +807,16 @@ Contributors:
 
         _documentUnsubscribed: function() {
           this.$.toast.text = this.i18n('app.document.unsubscribed');
+          this.$.toast.open();
+        },
+
+        _documentLocked: function() {
+          this.$.toast.text = this.i18n('app.document.locked');
+          this.$.toast.open();
+        },
+
+        _documentUnlocked: function() {
+          this.$.toast.text = this.i18n('app.document.unlocked');
           this.$.toast.open();
         },
 
