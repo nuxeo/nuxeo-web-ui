@@ -776,64 +776,58 @@ Contributors:
           return this.$.nxcon.url;
         },
 
-        _documentAddedToCollection: function(e) {
-          if (e.detail.docIds) {
-            this.$.toast.text = this.i18n('app.documents.addedToCollection');
-          } else {
-            this.$.toast.text = this.i18n('app.document.addedToCollection');
-          }
+        _toast: function(text) {
+          this.$.toast.hide();
+          this.$.toast.text = text;
           this.$.toast.open();
+        },
+
+        _documentAddedToCollection: function(e) {
+          this._toast(
+            this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection')
+          );
         },
 
         _documentRemovedFromCollection: function() {
-          this.$.toast.text = this.i18n('app.document.removedFromCollection');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.removedFromCollection'));
         },
 
         _documentAddedToFavorites: function() {
-          this.$.toast.text = this.i18n('app.document.addedToFavorites');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.addedToFavorites'));
         },
 
         _documentRemovedFromFavorites: function() {
-          this.$.toast.text = this.i18n('app.document.removedFromFavorites');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.removedFromFavorites'));
         },
 
         _documentSubscribed: function() {
-          this.$.toast.text = this.i18n('app.document.subscribed');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.subscribed'));
         },
 
         _documentUnsubscribed: function() {
-          this.$.toast.text = this.i18n('app.document.unsubscribed');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.unsubscribed'));
         },
 
         _documentLocked: function() {
-          this.$.toast.text = this.i18n('app.document.locked');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.locked'));
         },
 
         _documentUnlocked: function() {
-          this.$.toast.text = this.i18n('app.document.unlocked');
-          this.$.toast.open();
+          this._toast(this.i18n('app.document.unlocked'));
         },
 
         _documentFileDeleted: function() {
+          this._toast(this.i18n('app.document.fileDeleted'));
           this.fire('document-updated');
-          this.$.toast.text = this.i18n('app.document.fileDeleted');
-          this.$.toast.open();
         },
 
         _handleDocumentCreated: function(e) {
           if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
             var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-            this.$.toast.text = this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title);
+            this._toast(this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title));
           } else {
-            this.$.toast.text = this.i18n('app.createdDocuments', e.detail.response.entries.length);
+            this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
           }
-          this.$.toast.open();
         },
 
         _hasAdministrationPermissions: function(user) {
