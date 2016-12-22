@@ -90,7 +90,8 @@ limitations under the License.
             return this.i18n('label.ui.aggregate.' + item.key);
           }
         } else {
-          return this.i18n('label.ui.aggregate.' + item.key);
+          var i18nKey = this.i18n('label.ui.aggregate.' + item.key);
+          return i18nKey === 'label.ui.aggregate.' + item.key ? item.key : i18nKey;
         }
      },
 
