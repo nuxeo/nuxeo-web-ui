@@ -187,7 +187,6 @@ Example:
         return op.execute().then(function() {
           this.fire('added-to-collection', {docId: this.document.uid, collectionId: this.collection});
           this._resetPopup();
-          this._toggleDialog();
         }.bind(this));
       },
 
