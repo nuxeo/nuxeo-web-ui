@@ -380,7 +380,6 @@ Contributors:
         </div>
     </paper-dialog>
 
-    <nuxeo-keys keys="enter" on-pressed="_search" invasive></nuxeo-keys>
   </template>
   <script>
     (function() {
@@ -806,6 +805,9 @@ Contributors:
                 this._navigateToResults();
               }
             }
+          }.bind(this));
+          el.addEventListener('trigger-search', function() {
+            this._search();
           }.bind(this));
         }
 
