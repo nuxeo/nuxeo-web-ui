@@ -88,6 +88,50 @@ Contributors:
         margin-left: 8px;
       }
 
+      /* app */
+      paper-header-panel ::content .content {
+        position: relative;
+        padding: 16px;
+      }
+
+      paper-header-panel ::content paper-toolbar {
+        color: var(--nuxeo-title-color);
+        width: 100%;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      paper-header-panel, iron-pages::content paper-header-panel {
+        --paper-header-panel-body: {
+          background-color: var(--nuxeo-page-background);
+        };
+        --paper-header-panel-shadow: {
+          box-shadow: none;
+        };
+        --paper-header-panel-waterfall-container: {
+          display: -webkit-flex;
+          display: flex;
+        };
+        height: 100vh;
+      }
+
+      paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          border-right: 1px solid var(--nuxeo-border);
+        };
+      }
+
+      #loading {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        height: 3px;
+        z-index: 104;
+        --paper-progress-active-color: rgba(0, 128, 255, 0.4);
+        --paper-progress-container-color: transparent;
+        --paper-progress-indeterminate-cycle-duration: 3s;
+      }
+
       /* logo */
       #logo {
         position: fixed;
@@ -142,58 +186,25 @@ Contributors:
         bottom: 44px;
       }
 
-      /* Header page and Header subview */
-      paper-header-panel, iron-pages::content paper-header-panel {
-        --paper-header-panel-body: {
-          background-color: var(--nuxeo-page-background);
-        };
-        --paper-header-panel-shadow: {
-          box-shadow: none;
-        };
-        --paper-header-panel-waterfall-container: {
-          display: -webkit-flex;
-          display: flex;
-        };
-        height: 100vh;
-      }
-
-      paper-header-panel ::content .content {
-        position: relative;
-        padding: 16px;
-      }
-
-      paper-header-panel ::content #mainContainer {
-        background-color: var(--nuxeo-page-background);
-      }
-
-      paper-header-panel ::content paper-toolbar {
-        color: var(--nuxeo-title-color);
-        width: 100%;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      paper-badge {
-        --paper-badge-background: var(--nuxeo-badge-background);
-        --paper-badge-margin-left: -24px;
-        --paper-badge-margin-bottom: -24px;
-        --paper-badge-width: 18px;
-        --paper-badge-height: 18px;
-      }
-
-      paper-drawer-panel {
-        --paper-drawer-panel-left-drawer-container: {
-          border-right: 1px solid var(--nuxeo-border);
-        };
-      }
-
-      /* sidebar */
-      #sidebar {
+      /* drawer */
+      #drawer {
         overflow: auto;
         width: 100%;
       }
 
-      #sidebar iron-pages {
+      #drawer .title {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        font-size: 1rem;
+        font-weight: 400;
+        height: 58px;
+        padding: 0 16px;
+        text-transform: uppercase;
+        text-overflow: ellipsis;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      #drawer iron-pages {
         @apply(--layout-vertical);
         width: 293px;
         height: 100vh;
@@ -201,70 +212,34 @@ Contributors:
         background-color: var(--nuxeo-light-background);
       }
 
-      #sidebar .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        height: 58px;
-        color: var(--nuxeo-tag-text);
-        text-transform: uppercase;
-        font-size: 1rem;
-        font-weight: 400;
-        padding: 0 16px;
-        text-overflow: ellipsis;
-        border-bottom: 1px solid var(--nuxeo-border);
-      }
-
-      #sidebar ::content nuxeo-menu-item:hover,
-      #sidebar ::content .list-item:hover {
+      #drawer ::content nuxeo-menu-item:hover,
+      #drawer ::content .list-item:hover {
         @apply(--nuxeo-block-hover);
       }
 
-      #sidebar ::content .list-item.selected,
-      #sidebar ::content .list-item:focus,
-      #sidebar ::content .list-item.selected:focus {
+      #drawer ::content .list-item.selected,
+      #drawer ::content .list-item:focus,
+      #drawer ::content .list-item.selected:focus {
         @apply(--nuxeo-block-selected);
       }
 
-      #sidebar ::content nuxeo-menu-item {
+      #drawer ::content nuxeo-menu-item {
         @apply(--nuxeo-sidebar-item-theme);
       }
 
-      #sidebar ::content nuxeo-menu-item a {
+      #drawer ::content nuxeo-menu-item a {
         @apply(--nuxeo-sidebar-item-link);
         line-height: 2em;
       }
 
-      #sidebar .profile nuxeo-menu-item:last-of-type {
+      #drawer .profile nuxeo-menu-item:last-of-type {
         @apply(--layout-vertical);
         border: none;
         justify-content: flex-end;
       }
 
-      nuxeo-tasks-list {
-        font-size: .9em;
-      }
-
-      #loading {
-        position: absolute;
-        width: 100%;
-        top: 0;
-        height: 3px;
-        z-index: 104;
-        --paper-progress-active-color: rgba(0, 128, 255, 0.4);
-        --paper-progress-container-color: transparent;
-        --paper-progress-indeterminate-cycle-duration: 3s;
-      }
-
       nuxeo-document-create-button.admin {
         display: none;
-      }
-
-      .experimental {
-        position: absolute;
-        color: var(--nuxeo-button-primary);
-        right: 5px;
-        bottom: 5px;
-        font-size: .7em;
       }
 
     </style>
@@ -281,8 +256,7 @@ Contributors:
 
     <nuxeo-document auto doc-id="[[selectedSearch.id]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
 
-    <paper-toast id="toast"></paper-toast>
-
+    <!-- app layout -->
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
 
@@ -293,13 +267,12 @@ Contributors:
 
         <!-- menu -->
         <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
-          <paper-badge label="[[taskCount]]" for="menuTasks"></paper-badge>
           <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="expiredSearch" route="search:expired" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
@@ -308,20 +281,18 @@ Contributors:
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
-        <!-- sidebar -->
-        <iron-collapse id="sidebar" horizontal opened>
+        <!-- drawer -->
+        <iron-collapse id="drawer" horizontal opened>
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
 
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-            <nuxeo-document-tree name="browser" id="navTree" label="app.browse" class="card browse" current-document="[[currentDocument]]"></nuxeo-document-tree>
+            <nuxeo-document-tree name="browser" id="navTree" label="app.browse" current-document="[[currentDocument]]"></nuxeo-document-tree>
 
             <nuxeo-recent-documents name="recents" max-size="10" id="recent"></nuxeo-recent-documents>
 
             <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
-              on-display-filters="_resetSearchResults"
-              on-show-results="_showSearchResults"
-              dirty="{{dirty}}"
+              on-display-filters="_resetSearchResults" on-show-results="_showSearchResults" dirty="{{dirty}}"
               is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
             </nuxeo-search-form>
 
@@ -355,7 +326,7 @@ Contributors:
               <div class="title">[[_displayUser(currentUser)]]</div>
               <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
               <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
-              <nuxeo-menu-item label="app.user.signOut" link="[[_connectionUrl()]]/logout"></nuxeo-menu-item>
+              <nuxeo-menu-item label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
             </div>
 
           </iron-pages>
@@ -403,10 +374,11 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <paper-progress id="loading" indeterminate></paper-progress>
-
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
+
+    <paper-progress id="loading" indeterminate></paper-progress>
+    <paper-toast id="toast"></paper-toast>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
@@ -540,12 +512,7 @@ Contributors:
           this.$.searchResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.searchForm;
           // XXX: end of review this
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
-          if (this.shadowRoot) {
-            var experimental = document.createElement('div');
-            experimental.innerHTML = 'shadow dom enabled';
-            experimental.className = 'experimental';
-            Polymer.dom(this.root).appendChild(experimental);
-          }
+
           this.$.nxcon.connect().then(function(res) {
             this.currentUser = res;
           }.bind(this));
@@ -588,8 +555,7 @@ Contributors:
           this.importHref(url,
             // success
             function() {
-              var el = document.createElement('nuxeo-home'),
-                  parent = this.$['home'];
+              var el = document.createElement('nuxeo-home'), parent = this.$['home'];
               parent.innerHTML = '';
               parent.appendChild(el);
               el.tasks = this.tasks;
@@ -718,7 +684,7 @@ Contributors:
             this.$.tasks.get().then(function(response) {
               this.tasks = this._tmpTasks.concat(response.entries);
               this.taskCount = this.tasks.length;
-              var nxHomeEl = this.$.home.querySelector('nuxeo-home')
+              var nxHomeEl = this.$.home.querySelector('nuxeo-home');
               if (nxHomeEl) {
                 nxHomeEl.tasks = this.tasks;
               }
@@ -773,10 +739,6 @@ Contributors:
             }
             return result;
           }
-        },
-
-        _connectionUrl: function() {
-          return this.$.nxcon.url;
         },
 
         _toast: function(text) {
@@ -846,6 +808,10 @@ Contributors:
             this.$.error.show('404', e.reason.message, '');
             this.show('error');
           }
+        },
+
+        _logout: function() {
+          return this.$.nxcon.url + '/logout';
         }
 
       });

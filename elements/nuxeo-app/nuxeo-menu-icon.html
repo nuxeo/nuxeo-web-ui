@@ -27,12 +27,24 @@ Contributors:
     <style>
       :host {
         display: block;
+        position: relative;
+      }
+
+      paper-badge {
+        --paper-badge-background: var(--nuxeo-badge-background);
+        --paper-badge-margin-left: -24px;
+        --paper-badge-margin-bottom: -24px;
+        --paper-badge-width: 16px;
+        --paper-badge-height: 16px;
       }
    </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" icon="[[icon]]" name="[[name]]"></paper-icon-button>
       <paper-tooltip id="tooltip" for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</paper-tooltip>
+      <template is="dom-if" if="[[badge]]">
+        <paper-badge label="[[badge]]" for="button"></paper-badge>
+      </template>
     </a>
 
   </template>
@@ -65,6 +77,13 @@ Contributors:
           link: {
             type: String,
             value: ''
+          },
+
+          /**
+           * A badge associated with the icon
+           */
+          badge: {
+            type: String
           }
         },
 
