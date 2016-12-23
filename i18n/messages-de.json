@@ -47,6 +47,8 @@
   "app.document.removedFromFavorites":"Aus Favoriten entfernt",
   "app.document.subscribed":"Sie überwachen nun dieses Dokument.",
   "app.document.unsubscribed":"Sie überwachen dieses Dokument nun nicht mehr.",
+  "app.document.locked":"Document locked",
+  "app.document.unlocked":"Document unlocked",
   "app.document.fileDeleted":"File deleted",
   "app.documents.addedToCollection":"Dokumente zur Sammlung hinzugefügt.",
   "app.expiredSearch":"Abgelaufen",
