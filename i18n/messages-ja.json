@@ -243,6 +243,8 @@
 	"app.document.removedFromFavorites": "お気に入りから削除しました",
 	"app.document.subscribed": "このドキュメントを今フォローしています。",
 	"app.document.unsubscribed": "この文書をもうフォローしていません。",
+	"app.document.locked": "Document locked",
+	"app.document.unlocked": "Document unlocked",
 	"app.document.fileDeleted": "File deleted",
 	"app.documents.addedToCollection": "コレクションに追加された文書。",
 	"app.expiredSearch": "期限切れ",

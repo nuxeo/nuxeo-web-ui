@@ -243,6 +243,8 @@
 	"app.document.removedFromFavorites": "Document enlevé des favoris.",
 	"app.document.subscribed": "Vous suivez maintenant ce document.",
 	"app.document.unsubscribed": "Vous ne suivez plus ce document.",
+	"app.document.locked": "Document locked",
+	"app.document.unlocked": "Document unlocked",
 	"app.document.fileDeleted": "File deleted",
 	"app.documents.addedToCollection": "Documents ajoutés à la collection.",
 	"app.expiredSearch": "Documents expirés",
