@@ -91,7 +91,7 @@ Contributors:
               enrichers="thumbnail"
               headers='{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
-            <nuxeo-data-table
+            <nuxeo-data-table id="latestEditedDocs"
               nx-provider="latestQuery"
               empty-label="[[i18n('queryWidget.noDocuments')]]"
               on-row-clicked="_navigate">
@@ -117,14 +117,14 @@ Contributors:
           <!-- tasks -->
           <paper-card>
             <h3><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
-            <nuxeo-tasks-list tasks="[[tasks]]"></nuxeo-tasks-list>
+            <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
           </paper-card>
 
           <!-- recently viewed -->
           <paper-card>
             <h3><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
-            <nuxeo-data-table id="datatable"
+            <nuxeo-data-table id="latestViewedDocs"
               items="[[recentDocuments]]"
               empty-label="[[i18n('recentDocuments.empty')]]"
               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
@@ -160,6 +160,7 @@ Contributors:
                enrichers="thumbnail">
             </nuxeo-page-provider>
             <nuxeo-data-table
+              id="favoriteDocs"
               nx-provider="favoritesProvider"
               empty-label="[[i18n('favorites.empty')]]"
               on-row-clicked="_navigate">
