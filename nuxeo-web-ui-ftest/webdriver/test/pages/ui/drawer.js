@@ -6,7 +6,7 @@ export default class Drawer {
     const drawer = driver.element(selector);
     this.menu = drawer.element('#menu');
     this.pages = drawer.element('iron-pages');
-    this.logo =  drawer.element('paper-icon-button.logo');
+    this.logo =  drawer.element('#logo');
   }
 
   get browser() {
