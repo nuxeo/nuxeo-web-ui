@@ -5,11 +5,10 @@ Feature: Home
   Background:
     Given I login as "Administrator"
 
-  @ignore
   Scenario: My dashboard
     When I click the Nuxeo logo
     Then I can see my home
-    And I have a "Recently Edited" card
-    And I have a "Recently Viewed" card
-    And I have a "Tasks" card
-    And I have a "Favorite Items" card
+    And I have a "latestEditedDocs" card
+    And I have a "latestViewedDocs" card
+    And I have a "taskLists" card
+    And I have a "favoriteDocs" card
