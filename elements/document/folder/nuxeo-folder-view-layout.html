@@ -17,17 +17,13 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
 -->
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-results/nuxeo-result-behavior.html">
 
 <!--
-`nuxeo-document-content-view`
+`nuxeo-folder-view-layout`
 @group Nuxeo UI
-@element nuxeo-document-content-view
+@element nuxeo-folder-view-layout
 -->
-<dom-module id="nuxeo-document-content-view">
+<dom-module id="nuxeo-folder-view-layout">
   <template>
 
     <style>
@@ -304,7 +300,7 @@ Contributors:
       'use strict';
 
       Polymer({
-        is: 'nuxeo-document-content-view',
+        is: 'nuxeo-folder-view-layout',
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.ResultBehavior],
         properties: {
           params: {

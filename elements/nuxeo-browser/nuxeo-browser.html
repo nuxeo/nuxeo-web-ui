@@ -121,18 +121,25 @@ Contributors:
 
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
+
             <template is="dom-if" if="[[_canView(document)]]" restamp>
               <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
             </template>
 
+
             <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
-              <nuxeo-document-content-view name="view" id="browseContent" provider="advanced_document_content"
-                                           params="[[cvParams]]" selected-items="{{selectedItems}}"
-                                           document="[[document]]">
-                <div class="actions">
-                  <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
-                </div>
-              </nuxeo-document-content-view>
+              <div id="browseContent" name="view">
+                <!-- Dynamic layout element will be inserted here for folderish documents -->
+                <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
+                <nuxeo-folder-view-layout provider="advanced_document_content"
+                                             params="[[cvParams]]" selected-items="{{selectedItems}}"
+                                             document="[[document]]">
+                  <div class="actions">
+                    <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+                  </div>
+                </nuxeo-folder-view-layout>
+              </div>
+
             </template>
 
             <div name="edit">
