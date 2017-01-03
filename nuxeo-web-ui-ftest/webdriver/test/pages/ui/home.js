@@ -12,7 +12,6 @@ export default class Home {
   }
 
   card(contentId) {
-    debugger;
     return this.dashboard.element(`#${contentId}`);
   }
 }
