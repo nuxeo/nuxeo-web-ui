@@ -121,34 +121,7 @@ Contributors:
 
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
-
-            <template is="dom-if" if="[[_canView(document)]]" restamp>
-              <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
-            </template>
-
-
-            <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
-              <div id="browseContent" name="view">
-                <!-- Dynamic layout element will be inserted here for folderish documents -->
-                <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
-                <nuxeo-folder-view-layout provider="advanced_document_content"
-                                             params="[[cvParams]]" selected-items="{{selectedItems}}"
-                                             document="[[document]]">
-                  <div class="actions">
-                    <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
-                  </div>
-                </nuxeo-folder-view-layout>
-              </div>
-
-            </template>
-
-            <div name="edit">
-              <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
-                <paper-card>
-                  <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
-                </paper-card>
-              </template>
-            </div>
+            <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
 
             <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
 
@@ -189,10 +162,7 @@ Contributors:
             type: Object,
             computed: '_actionContext(document)'
           },
-          browseActionContext: {
-            type: Object,
-            computed: '_browseActionContext(document, selectedItems)'
-          },
+
           viewsContext: {
             type: Object,
             computed: '_viewsContext(document)'
@@ -205,10 +175,6 @@ Contributors:
           'added-to-collection': '_documentUpdated',
           'removed-from-collection': '_documentUpdated'
         },
-
-        observers: [
-          '_updateCvParams(document)'
-        ],
 
         _documentUpdated: function() {
           this.fire('document-updated');
@@ -232,10 +198,6 @@ Contributors:
           return {document: this.document, clipboard: this.clipboard};
         },
 
-        _browseActionContext: function() {
-          return {document: this.document, selectedItems: this.selectedItems};
-        },
-
         _viewsContext: function() {
           return {document: this.document};
         },
@@ -254,12 +216,6 @@ Contributors:
 
         _navigateToView: function() {
           page('/browse' + this.document.path + '@view');
-        },
-
-        _updateCvParams: function() {
-          if (this._canViewContent(this.document)) {
-            this.cvParams = {'ecm_parentId': this.document.uid};
-          }
         },
 
         _toast: function(msg) {
