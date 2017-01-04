@@ -1,7 +1,5 @@
 'use strict';
 
-import DocumentTree from '../../pages/ui/tree';
-
 module.exports = function () {
   this.Then('I can see the $tab tree', (tab) => {
     this.ui.drawer._section(tab).isVisible().should.be.true;

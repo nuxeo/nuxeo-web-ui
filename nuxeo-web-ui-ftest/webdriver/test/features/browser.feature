@@ -1,4 +1,3 @@
-@focus
 Feature: Browser
 
   I can browse the repository
