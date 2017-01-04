@@ -173,7 +173,9 @@ Contributors:
         on-refresh="_refreshAndFetch"
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
-        <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+        <div class="actions">
+           <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
+        </div>
       </nuxeo-selection-toolbar>
 
       <nuxeo-content-view-actions context="[[actionContext]]"></nuxeo-content-view-actions>
