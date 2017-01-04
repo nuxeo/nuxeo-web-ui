@@ -101,7 +101,6 @@ Contributors:
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
-            <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
             <paper-item name="history">[[i18n('browser.history')]]</paper-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
@@ -200,18 +199,6 @@ Contributors:
 
         _viewsContext: function() {
           return {document: this.document};
-        },
-
-        _canDownload: function(document) {
-          return this._canView(document) && this.hasContent(document);
-        },
-
-        _canView: function(document) {
-          return document && !this.hasFacet(document, 'Folderish');
-        },
-
-        _canViewContent: function(document) {
-          return this.hasFacet(document, 'Folderish'); // && this._canReadChildren;
         },
 
         _navigateToView: function() {
