@@ -15,4 +15,4 @@ Feature: Browser
 
     # XXX - missing href in tree nodes
     When I click "Workspaces" in the browser tree
-    Then I can see the "Workspaces" document content
+    Then I can see the "Workspaces" document

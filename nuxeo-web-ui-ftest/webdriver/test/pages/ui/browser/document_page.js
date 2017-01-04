@@ -10,11 +10,11 @@ export default class DocumentPage {
   }
 
   get view() {
-    return driver.element(`nuxeo-${this.docType.toLowerCase()}-view`);
+    return driver.element(`nuxeo-${this.docType.toLowerCase()}-view-layout`);
   }
 
   get edit() {
-    return new DocumentEdit(this.metadata.element(`nuxeo-${this.docType.toLowerCase()}-edit`));
+    return new DocumentEdit(this.metadata.element(`nuxeo-${this.docType.toLowerCase()}-edit-layout`));
   }
 
   get metadata() {

@@ -13,10 +13,6 @@ export default class Browser {
     return new DocumentPage('nuxeo-document-page', docType);
   }
 
-  get documentContent() {
-    return new DocumentContent('nuxeo-document-content-view');
-  }
-
   get view() {
     return this._section('view');
   }
