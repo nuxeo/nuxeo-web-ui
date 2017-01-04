@@ -101,7 +101,6 @@ Contributors:
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
             <paper-item name="view">[[i18n('browser.view')]]</paper-item>
-            <paper-item name="edit" hidden$="[[!_canViewContent(document)]]">[[i18n('browser.edit')]]</paper-item>
             <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
             <paper-item name="history">[[i18n('browser.history')]]</paper-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
@@ -121,27 +120,7 @@ Contributors:
 
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
 
-            <template is="dom-if" if="[[_canView(document)]]" restamp>
-              <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
-            </template>
-
-            <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
-              <nuxeo-document-content-view name="view" id="browseContent" provider="advanced_document_content"
-                                           params="[[cvParams]]" selected-items="{{selectedItems}}"
-                                           document="[[document]]">
-                <div class="actions">
-                  <nuxeo-slot class="actions" slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
-                </div>
-              </nuxeo-document-content-view>
-            </template>
-
-            <div name="edit">
-              <template is="dom-if" if="[[_canViewContent(document)]]" restamp>
-                <paper-card>
-                  <nuxeo-document-edit document="[[document]]" on-document-updated="_navigateToView"></nuxeo-document-edit>
-                </paper-card>
-              </template>
-            </div>
+            <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
 
             <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
 
@@ -182,10 +161,7 @@ Contributors:
             type: Object,
             computed: '_actionContext(document)'
           },
-          browseActionContext: {
-            type: Object,
-            computed: '_browseActionContext(document, selectedItems)'
-          },
+
           viewsContext: {
             type: Object,
             computed: '_viewsContext(document)'
@@ -198,10 +174,6 @@ Contributors:
           'added-to-collection': '_documentUpdated',
           'removed-from-collection': '_documentUpdated'
         },
-
-        observers: [
-          '_updateCvParams(document)'
-        ],
 
         _documentUpdated: function() {
           this.fire('document-updated');
@@ -225,34 +197,12 @@ Contributors:
           return {document: this.document, clipboard: this.clipboard};
         },
 
-        _browseActionContext: function() {
-          return {document: this.document, selectedItems: this.selectedItems};
-        },
-
         _viewsContext: function() {
           return {document: this.document};
         },
 
-        _canDownload: function(document) {
-          return this._canView(document) && this.hasContent(document);
-        },
-
-        _canView: function(document) {
-          return document && !this.hasFacet(document, 'Folderish');
-        },
-
-        _canViewContent: function(document) {
-          return this.hasFacet(document, 'Folderish'); // && this._canReadChildren;
-        },
-
         _navigateToView: function() {
           page('/browse' + this.document.path + '@view');
-        },
-
-        _updateCvParams: function() {
-          if (this._canViewContent(this.document)) {
-            this.cvParams = {'ecm_parentId': this.document.uid};
-          }
         },
 
         _toast: function(msg) {
