@@ -159,6 +159,11 @@
     if (false === options.dispatch) dispatch = false;
     if (false === options.decodeURLComponents) decodeURLComponents = false;
     if (false !== options.popstate) window.addEventListener('popstate', onpopstate, false);
+    if (false !== options.hashchange && !(window.ActiveXObject) && "ActiveXObject" in window) window.addEventListener('hashchange', function (e) {
+      // let's trigger onpopstate for IE11 only, since it won't fire popstate when the
+      // hash changes: https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/3740423/
+      onpopstate(e);
+    }, false);
     if (false !== options.click) {
       document.addEventListener(clickEvent, onclick, false);
     }

@@ -97,20 +97,22 @@ Contributors:
          * Retrieves and creates the view layout for the current document
          */
         _updateLayout: function() {
-          this.$['document-view'].hidden = false;
-          this.$.error.hide();
-          var layout = this._layoutFor(this.document);
-          if (!this._isRegistered(layout)) {
-            var folder = this.document.type.toLowerCase() + '/';
-            var url = this.resolveUrl(folder + layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                this.$['document-view'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentView.layoutNotFound', this.document.type));
-              });
-          } else {
-            this._createLayout();
+          if (this.document) {
+            this.$['document-view'].hidden = false;
+            this.$.error.hide();
+            var layout = this._layoutFor(this.document);
+            if (!this._isRegistered(layout)) {
+              var folder = this.document.type.toLowerCase() + '/';
+              var url = this.resolveUrl(folder + layout + '.html');
+              this.importHref(url, this._createLayout.bind(this),
+                // error handling
+                function() {
+                  this.$['document-view'].hidden = true;
+                  this.$.error.show('404', url, this.i18n('documentView.layoutNotFound', this.document.type));
+                });
+            } else {
+              this._createLayout();
+            }
           }
         }
       });
