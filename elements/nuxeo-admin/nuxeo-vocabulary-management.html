@@ -113,7 +113,7 @@ Contributors:
           <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select')]]">
             <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
               <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
-                <paper-item name="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+                <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
               </template>
             </paper-menu>
           </paper-dropdown-menu>
@@ -121,7 +121,7 @@ Contributors:
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button class="primary" on-tap="_createEntry">
+            <paper-button id="addEntry" class="primary" on-tap="_createEntry">
               <span>+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
