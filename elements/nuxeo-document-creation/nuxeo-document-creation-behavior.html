@@ -76,7 +76,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
 
   _parentChanged: function() {
     if (this.parent) {
-      if (this.targetPath.replace(/(.+)\/$/, "$1") !== this.parent.path) {
+      if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, "$1") !== this.parent.path) {
         this.set('targetPath', this.parent.path);
       }
       var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?

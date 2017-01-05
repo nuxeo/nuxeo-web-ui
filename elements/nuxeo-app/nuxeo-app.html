@@ -626,7 +626,7 @@ Contributors:
           }
           this._selected = e.detail.selected;
 
-          document.querySelectorAll('nuxeo-menu-icon').forEach(function(element) {
+          [].forEach.call(document.querySelectorAll('nuxeo-menu-icon'), function(element) {
             this.toggleClass('selected', false, element);
           }.bind(this));
           this.toggleClass('selected', true, e.detail.item);
