@@ -11,4 +11,7 @@ module.exports = function () {
 
   this.Then('I can see the users and groups page', () =>
     this.ui.administration.element('nuxeo-user-group-management').isVisible().should.be.true);
+
+  this.Then('I can see the vocabulary page', () =>
+    this.ui.administration.element('nuxeo-vocabulary-management').isVisible().should.be.true);
 };

@@ -4,6 +4,7 @@ import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
+import Vocabulary from './ui/admin/vocabulary';
 
 export default class UI {
 
@@ -17,6 +18,15 @@ export default class UI {
 
   goHome() {
     this.drawer.logo.click();
+  }
+
+  get vocabularyAdmin() {
+    if (!this.administration.isVisible()) {
+      this.drawer.open("administration")
+    }
+    driver.click(`a=Vocabularies`);
+    driver.waitForVisible('nuxeo-vocabulary-management');
+    return new Vocabulary('nuxeo-vocabulary-management');
   }
 
   get createDialog() {
