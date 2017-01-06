@@ -18,12 +18,8 @@ module.exports = function () {
     this.ui.vocabularyAdmin.vocabulary(name);
   });
 
-  this.When('I click on add new vocabulary entry', () => {
-    this.ui.vocabularyAdmin.addNewEntry();
-  });
-
-  this.Then('I can add new vocabulary entry', () => {
-    this.ui.vocabularyAdmin.isAddNewEntryVisible.should.be.true;
+  this.Then('I can add "$name" entry', (name) => {
+    this.ui.vocabularyAdmin.addNewL10nEntry(name, name);
   });
 
   this.Then('I can see the vocabulary table', () => {
@@ -32,10 +28,6 @@ module.exports = function () {
 
   this.Then('I have a non empty table', () => {
     this.ui.vocabularyAdmin.isVocabularyTableFilled.should.be.true;
-  });
-
-  this.Then('I can see the create entry dialog', () => {
-    this.ui.vocabularyAdmin.isDialogVisible.should.be.true;
   });
 
 };
