@@ -26,7 +26,12 @@ export default class Vocabulary {
   }
 
   get entryCount() {
-    return this.page.element();
+    var res = this.page.elements(`#table #items nuxeo-data-table-row`);
+    if (res && res.value) {
+      return res.value.length;
+    } else {
+      return 0;
+    }
   }
 
   table() {
@@ -35,11 +40,10 @@ export default class Vocabulary {
   }
 
   get isVocabularyTableFilled() {
-    var hasEmptyRow = false;
-    this.page.getText(`#table #items nuxeo-data-table-row`, function(err, res) {
-        hasEmptyRow = res.some(function(rowText) {
-            return rowText.trim().length === 0;
-        });
+    var hasEmptyRow = true;
+    var res = this.page.getText(`#table #items nuxeo-data-table-row`);
+    hasEmptyRow = res.some(function(rowText) {
+        return rowText.trim().length === 0;
     });
     return !hasEmptyRow;
   }
