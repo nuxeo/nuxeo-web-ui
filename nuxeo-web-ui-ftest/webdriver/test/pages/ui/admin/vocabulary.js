@@ -20,6 +20,16 @@ export default class Vocabulary {
     return this.page.element(`#addEntry`).isVisible();
   }
 
+  get isDialogVisible() {
+    driver.waitForVisible(`#dialog`, 5000);
+    return this.page.element(`#dialog`).isVisible();
+  }
+
+  addNewEntry() {
+    driver.waitForVisible(`#addEntry`, 5000);
+    this.page.element(`#addEntry`).click();
+  }
+
   get isVocabularyTableVisible() {
     driver.waitForVisible(`#table`, 5000);
     return this.page.element(`#table`).isVisible();
@@ -40,12 +50,7 @@ export default class Vocabulary {
   }
 
   get isVocabularyTableFilled() {
-    var hasEmptyRow = true;
-    var res = this.page.getText(`#table #items nuxeo-data-table-row`);
-    hasEmptyRow = res.some(function(rowText) {
-        return rowText.trim().length === 0;
-    });
-    return !hasEmptyRow;
+    return !this.page.getText(`#table #items nuxeo-data-table-row`).some((txt) => txt.trim().length === 0);
   }
 
 }

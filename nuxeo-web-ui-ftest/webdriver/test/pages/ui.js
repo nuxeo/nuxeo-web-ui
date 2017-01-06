@@ -21,11 +21,9 @@ export default class UI {
   }
 
   get vocabularyAdmin() {
-    if (!this.administration.isVisible()) {
-      this.drawer.open("administration")
+    if (!browser.getUrl().endsWith('vocabulary-management')) {
+      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
     }
-    driver.click(`a=Vocabularies`);
-    driver.waitForVisible('nuxeo-vocabulary-management');
     return new Vocabulary('nuxeo-vocabulary-management');
   }
 
