@@ -17,6 +17,4 @@ Feature: Vocabularies
       When I select "l10ncoverage" vocabulary
       Then I can see the vocabulary table
       And I have a non empty table
-      And I can add new vocabulary entry
-      When I click on add new vocabulary entry
-      Then I can see the create entry dialog
+      And I can add "brittany" entry

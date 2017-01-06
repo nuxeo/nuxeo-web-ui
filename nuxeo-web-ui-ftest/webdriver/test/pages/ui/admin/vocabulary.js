@@ -25,9 +25,13 @@ export default class Vocabulary {
     return this.page.element(`#dialog`).isVisible();
   }
 
-  addNewEntry() {
+  addNewL10nEntry(id, label) {
     driver.waitForVisible(`#addEntry`, 5000);
     this.page.element(`#addEntry`).click();
+    driver.waitForVisible(`#dialog`, 2000);
+    this.page.element(`#dialog input[name="id"]`).setValue(id);
+    this.page.element(`#dialog input[name="label"]`).setValue(label);
+    this.page.click('#dialog paper-button[name="save"]');
   }
 
   get isVocabularyTableVisible() {
