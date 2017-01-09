@@ -1,6 +1,6 @@
 'use strict';
 
-export default class DocumentEdit {
+export default class DocumentMetadata {
   constructor(el, docType) {
     this.el = el;
     this.docType = docType;
@@ -12,9 +12,5 @@ export default class DocumentEdit {
 
   waitForVisible() {
     return this.el.waitForVisible();
-  }
-
-  set title(title) {
-    return this.el.element('#input').setValue(title);
   }
 }

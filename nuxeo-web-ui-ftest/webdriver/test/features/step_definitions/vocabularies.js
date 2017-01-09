@@ -1,13 +1,5 @@
 'use strict';
 
-import Login from '../../pages/login';
-import UI from '../../pages/ui';
-var Nuxeo = require('nuxeo');
-
-const USERS = {
-  Administrator: 'Administrator',
-};
-
 module.exports = function () {
 
   this.Given('I am on vocabulary page', () => {

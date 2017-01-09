@@ -1,111 +1,97 @@
 'use strict';
 
-let teardownCbs = [];
-
-let doc = {
-  'entity-type': 'document',
-  name: 'doc',
-  properties: {
-    'dc:title': 'document'
-  }
-};
-
 module.exports = function() {
 
-  this.Given(/^I have a (.*) document$/, (docType) => {
+  this.Given(/^I have a (.*)document$/, (docType) => {
     docType = docType || 'File';
-    doc.type = docType.trim();
+    let doc = fixtures.documents.init(docType);
     // create the document
-    return this.client.repository().create('/default-domain/', doc).then((doc) => {
-      // add a callback to teardown the document
-      teardownCbs.push(((path) => {
-        return () => this.client.repository().delete(path);
-      })(doc.path));
-    })
+    return fixtures.documents.create(this.doc.path, doc).then((doc) => {
+      this.doc = doc;
+    });
+  });
+
+  this.Given(/^I have a (.*)document with permission (\w+)$/, (docType, permission) => {
+    docType = docType || 'File';
+
+    let doc = fixtures.documents.init(docType);
+    // create the document
+    return fixtures.documents.create(this.doc.path, doc)
+        .then((doc) => fixtures.documents.setPermissions(doc, permission, this.username))
+        .then((doc) => {
+          this.doc = doc;
+        });
   });
 
   this.When('I browse to the document', () => {
-    driver.url('/#!/browse' + doc.path);
-    //driver.waitForExist('p.title', 5000);
+    driver.url('/#!/browse' + this.doc.path);
+    this.ui.browser.breadcrumb.waitForVisible();
+  });
+
+  this.Then('I can see the document\'s title', () => {
+    this.ui.browser.title.waitForVisible();
   });
 
   this.Then(/^I can edit the (.*) metadata$/, (docType) => {
     const page = this.ui.browser.documentPage(docType);
-    page.metadata.isVisible().should.be.true;
+    page.metadata.waitForVisible();
     page.edit.isVisible().should.be.false;
-    page.editButton.isVisible().should.be.true;
+    page.editButton.waitForVisible();
     page.editButton.click();
-    page.edit.isVisible().should.be.true;
+    page.edit.waitForVisible();
+    page.metadata.isVisible().should.be.false;
     page.edit.title = docType;
     page.saveButton.isVisible().should.be.true;
     page.saveButton.click();
-    page.view.isVisible().should.be.true;
+    page.metadata.waitForVisible();
   });
 
-  this.Given(/^I have a (.*) Note$/, (format) => {
-
-    // create workspace (Note documents needs to be in a workspace in Web UI)
-    let workspace = {
-      'entity-type': 'document',
-      name: 'workspace',
-      type: 'Workspace',
-      properties: {
-        'dc:title': 'workspace',
-      }
-    };
-    return this.client.repository().create('/default-domain/workspaces/', workspace).then((result) => {
-      workspace = result;
-      // add a callback to teardown the workspace document
-      teardownCbs.push(((path) => {
-        return () => this.client.repository().delete(path);
-      })(workspace.path));
-
-      // create the Note document
-      let formats = {
-        'HTML': { mimetype: 'text/html', content: '<h1>HTML CONTENT</h1>'},
-        'XML': { mimetype: 'text/xml', content: '<tag>XML CONTENT</tag>'},
-        'Markdown': { mimetype: 'text/x-web-markdown', content: 'MARKDOWN CONTENT'},
-        'Text': { mimetype: 'text/plain', content: 'TEXT CONTENT'},
-      };
-      doc.type = 'Note';
-      doc.properties['note:mime_type'] = formats[format].mimetype;
-      doc.properties['note:note'] = formats[format].content;
-      return this.client.repository().create(workspace.path, doc).then((result) => {
-        doc = result;
-        // add a callback to teardown the note document
-        teardownCbs.push(((path) => {
-          return () => this.client.repository().delete(path);
-        })(doc.path));
-      });
-
+  this.Given(/^I have a (.+) Note$/, (format) => {
+    let doc = fixtures.documents.init('Note');
+    doc.properties['note:mime_type'] = fixtures.notes.formats[format].mimetype;
+    doc.properties['note:note'] = fixtures.notes.formats[format].content;
+    return fixtures.documents.create(this.doc.path, doc).then((result) => {
+      this.doc = result;
     });
   });
 
   this.Then(/^I can edit the (.*) Note$/, (format) => {
-    let page = this.ui.browser.documentPage(doc.type);
+    let page = this.ui.browser.documentPage(this.doc.type);
     page.view.isVisible().should.be.true;
     switch (format) {
       case 'HTML':
+      case 'XML':
         let newContent = '<h2>NEW HTML CONTENT</h2>';
-        let editor = page.view.element('#editor');
+        let editor = page.view.el.element('#editor');
         editor.isVisible().should.be.true;
         editor.setValue(newContent);
-        let save = page.view.element('paper-button[name="editorSave"]');
+        let save = page.view.el.element('paper-button[name="editorSave"]');
         save.isVisible().should.be.true;
         save.click();
         driver.waitForExist('#editor');
-        editor = page.view.element('#editor');
+        editor = page.view.el.element('#editor');
         editor.isVisible().should.be.true;
         (editor.getText() === newContent).should.be.true;
         break;
     }
   });
 
+  this.When(/^I have a document with content of mime-type ([-\w.]+\/[-\w.]+)$/, (mimeType) => {
+    return fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType])
+        .then((doc) => { this.doc = doc; });
+  });
+
+  this.When(/^I upload a ([-\w.]+\/[-\w.]+) file as main blob$/, (mimeType) => {
+    return fixtures.documents.attach(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType]);
+  });
+
+  this.When(/^I upload a ([-\w.]+\/[-\w.]+) file as attachment$/, (mimeType) => {
+    return fixtures.documents.attach(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType], true);
+  });
+
   this.Then('I add it to the "$name" collection', (name) => {
     this.ui.browser.addToCollection(name);
-    teardownCbs.push(((path) => {
-      return () => this.client.repository().delete(path);
-    })(`/default-domain/UserWorkspaces/Administrator/Collections/` + name));
+    liveCollections.push(name);
     // TOOD do not hardcode Administrator but use real user id
   });
 
@@ -120,7 +106,4 @@ module.exports = function() {
   this.Then('I can see the document does not belong to the "$name" collection', (name) => {
     this.ui.browser.doNotHaveCollection(name).should.be.true;
   });
-
-  this.After((scenario) => Promise.all(teardownCbs.map((cb) => cb())).then(() => { teardownCbs = []; }));
-
 };
