@@ -210,9 +210,10 @@ element.
         .repositoryName(this._request._baseOptions.repositoryName === 'default' ? undefined : this._request._baseOptions.repositoryName)
         .execute(options)
         .then(function(response) {
-          return response.json();
-        })
-        .then(function(data) {
+          return response.text().then(function(text) {
+            return text ? JSON.parse(text) : {}
+          })
+        }).then(function(data) {
           this.fire('response', {response: data});
           this.response = data;
           this.success = true;

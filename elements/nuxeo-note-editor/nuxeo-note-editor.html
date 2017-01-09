@@ -52,7 +52,7 @@ Contributors:
         <div class="html-editor-container">
           <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]] hide-toolbars="[[_isXML(document)]]"></nuxeo-html-editor>
           <div class="layout horizontal end-justified">
-            <paper-button noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+            <paper-button id="editorSave" noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
         </div>
       </template>
