@@ -21,17 +21,20 @@ export default class Browser {
     return this._section('permissions').element('nuxeo-document-permissions');
   }
 
-  get breadcumb() {
-    this.page.element('nuxeo-breadcrumb');
+  get breadcrumb() {
+    return this.page.element('nuxeo-breadcrumb');
   }
 
   get title() {
-    // XXX: this.breadcrumb.getText('a span'); not working with waitUntil
-    return this.page.getText('nuxeo-breadcrumb .current');
+    return this.breadcrumb.element('.breadcrumb-item-current');
   }
 
   _section(name) {
     return this.page.element(`iron-pages section[name='${name}']`);
+  }
+
+  waitForVisible() {
+    return this.page.waitForVisible();
   }
 
   addToCollection(name) {

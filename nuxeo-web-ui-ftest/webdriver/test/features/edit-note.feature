@@ -4,16 +4,17 @@ Feature: Edit Note
 
   Background:
     Given I login as "Administrator"
+    And I have a Workspace document
 
   Scenario Outline: Edit <format> Note
     Given I have a <format> Note
     When I browse to the document
     Then I can edit the Note metadata
-    Then I can edit the <format> Note
+    And I can edit the <format> Note
 
   Examples:
   | format    |
   |  HTML     |
-#  |  XML      |
+  |  XML      |
 #  |  Markdown |
 #  |  Text     |

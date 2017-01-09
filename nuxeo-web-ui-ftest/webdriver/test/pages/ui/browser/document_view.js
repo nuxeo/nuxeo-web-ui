@@ -1,6 +1,7 @@
 'use strict';
 
-export default class DocumentEdit {
+
+export default class DocumentView {
   constructor(el, docType) {
     this.el = el;
     this.docType = docType;
@@ -14,7 +15,11 @@ export default class DocumentEdit {
     return this.el.waitForVisible();
   }
 
-  set title(title) {
-    return this.el.element('#input').setValue(title);
+  get preview() {
+    return this.el.element('nuxeo-document-preview');
+  }
+
+  get layout() {
+    return this.el.element(`nuxeo-${this.docType.toLowerCase()}-view-layout`);
   }
 }

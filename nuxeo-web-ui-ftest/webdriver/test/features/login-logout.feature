@@ -1,4 +1,3 @@
-@focus
 Feature: Login / Logout
 
   As an user I can login and logout
