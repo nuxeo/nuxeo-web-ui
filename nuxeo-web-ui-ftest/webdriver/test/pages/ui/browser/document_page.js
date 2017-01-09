@@ -14,10 +14,14 @@ export default class DocumentPage {
   }
 
   get edit() {
-    return new DocumentEdit(this.metadata.element(`nuxeo-${this.docType.toLowerCase()}-edit-layout`));
+    return new DocumentEdit(this.page.element(`nuxeo-document-edit`));
   }
 
   get metadata() {
     return this.page.element('nuxeo-document-metadata');
+  }
+
+  get editButton() {
+    return this.page.element('#edit');
   }
 }
