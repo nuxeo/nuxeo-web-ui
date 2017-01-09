@@ -15,6 +15,6 @@ export default class DocumentEdit {
   }
 
   submit() {
-    this.el.click('///paper-button[text()="Save"]');
+    this.el.click('#save');
   }
 }
