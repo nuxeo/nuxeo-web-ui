@@ -18,8 +18,8 @@ module.exports = function () {
     this.ui.vocabularyAdmin.vocabulary(name);
   });
 
-  this.Then('I can add "$name" entry', (name) => {
-    this.ui.vocabularyAdmin.addNewL10nEntry(name, name);
+  this.Then('I can add "$childId" entry', (id) => {
+    this.ui.vocabularyAdmin.addNewEntry(id, id);
   });
 
   this.Then('I can see the vocabulary table', () => {
@@ -28,6 +28,19 @@ module.exports = function () {
 
   this.Then('I have a non empty table', () => {
     this.ui.vocabularyAdmin.isVocabularyTableFilled.should.be.true;
+  });
+
+  this.Then('I can see "$name" entry', (name) => {
+    this.ui.vocabularyAdmin.hasEntry(name).should.be.true;
+  });
+
+  this.Then('I cannot see "$name" entry', (name) => {
+    this.ui.vocabularyAdmin.hasEntry(name).should.be.false;
+  });
+
+  this.Then('I can delete "$name" entry', (name) => {
+    this.ui.vocabularyAdmin.deleteEntry(name);
+    this.ui.vocabularyAdmin.hasEntry(name).should.be.false;
   });
 
 };

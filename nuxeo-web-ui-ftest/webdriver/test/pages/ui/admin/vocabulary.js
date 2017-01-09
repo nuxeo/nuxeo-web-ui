@@ -25,13 +25,45 @@ export default class Vocabulary {
     return this.page.element(`#dialog`).isVisible();
   }
 
-  addNewL10nEntry(id, label) {
+  addNewEntry(id, label) {
     driver.waitForVisible(`#addEntry`, 5000);
     this.page.element(`#addEntry`).click();
     driver.waitForVisible(`#dialog`, 2000);
     this.page.element(`#dialog input[name="id"]`).setValue(id);
     this.page.element(`#dialog input[name="label"]`).setValue(label);
     this.page.click('#dialog paper-button[name="save"]');
+  }
+
+  addNewL10nEntry(id, label, parentIds) {
+    driver.waitForVisible(`#addEntry`, 5000);
+    this.page.element(`#addEntry`).click();
+    driver.waitForVisible(`#dialog`, 2000);
+    this.page.element(`#selectParent`).click();
+    driver.waitForVisible(`#parentDialog`, 2000);
+    for (var i = 0; i < parentIds.length - 1; i++) {
+      this.page.click('#parentDialog nuxeo-tree-node div[name="' + parentIds[i].trim() + '"] iron-icon');
+    }
+    this.page.click('#parentDialog nuxeo-tree-node div[name="' + parentIds[parentIds.length - 1].trim() + '"] a');
+    this.page.element(`#dialog input[name="id"]`).setValue(id);
+    this.page.element(`#dialog input[name="label"]`).setValue(label);
+
+    this.page.click('#dialog paper-button[name="save"]');
+  }
+
+  hasEntry(id) {
+    return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
+  }
+
+  deleteEntry(id) {
+    var rows = this.page.elements(`#table #items nuxeo-data-table-row`).value;
+    console.log(rows);
+    var row = rows.find(
+      function(el) {
+        console.log(el.Element);
+        return el.Element.element(`nuxeo-data-table-cell`).getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
+      }
+    );
+    row.element(`paper-icon-button[name="delete"]`).click()
   }
 
   get isVocabularyTableVisible() {
