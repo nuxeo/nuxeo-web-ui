@@ -103,7 +103,7 @@ export default class Vocabulary {
       allFieldVisible = visibleLabels
     }
     allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
-    this.page.element(`dialog paper-button[name="cancel"]`).click();
+    this.page.element(`#dialog paper-button[name="cancel"]`).click();
     return allFieldVisible;
   }
 
