@@ -131,18 +131,20 @@ Contributors:
           <div>
             <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
               <template>
-                <template is="dom-if" if="[[!isLeaf]]">
-                  <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
-                </template>
-                <span class="flex node-name" select>
-                  <a class="parent">[[item.properties.id]]</a>
-                </span>
+                <div name$="[[item.properties.id]]">
+                  <template is="dom-if" if="[[!isLeaf]]">
+                    <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+                  </template>
+                  <span class="flex node-name" select>
+                    <a class="parent">[[item.properties.id]]</a>
+                  </span>
+                </div>
               </template>
             </nuxeo-tree>
           </div>
           <div class="card-actions">
             <div class="buttons sep">
-             <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+             <paper-button name="close" dialog-dismiss>[[i18n('command.close')]]</paper-button>
             </div>
           </div>
         </form>
@@ -153,7 +155,7 @@ Contributors:
       <div class="label-container">
         <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
       </div>
-      <paper-button on-tap="_toggleParent">
+      <paper-button id="selectParent" on-tap="_toggleParent">
         [[_parentLabel]]
       </paper-button>
     </div>
