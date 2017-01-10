@@ -52,7 +52,7 @@ Contributors:
         <div class="html-editor-container">
           <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]] hide-toolbars="[[_isXML(document)]]"></nuxeo-html-editor>
           <div class="layout horizontal end-justified">
-            <paper-button id="editorSave" noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+            <paper-button name="editorSave" noink class="primary" on-click="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
         </div>
       </template>
@@ -66,7 +66,7 @@ Contributors:
           <paper-textarea value="{{_value}}" no-label-float></paper-textarea>
           <div class="layout horizontal end-justified">
             <paper-button noink on-click="_cancel">[[i18n('command.cancel')]]</paper-button>
-            <paper-button noink class="primary" on-click="_editorSave">[[i18n('command.save')]]</paper-button>
+            <paper-button name="editorSave" noink class="primary" on-click="_editorSave">[[i18n('command.save')]]</paper-button>
           </div>
         </template>
       </template>
