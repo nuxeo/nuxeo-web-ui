@@ -54,16 +54,18 @@ export default class Vocabulary {
     return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
   }
 
-  deleteEntry(id) {
-    var rows = this.page.elements(`#table #items nuxeo-data-table-row`).value;
-    console.log(rows);
-    var row = rows.find(
-      function(el) {
-        console.log(el.Element);
-        return el.Element.element(`nuxeo-data-table-cell`).getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
-      }
-    );
-    row.element(`paper-icon-button[name="delete"]`).click()
+  deleteEntry(index) {
+    var selector = "#delete-button-" + (index - 1);
+    this.page.element(selector).click();
+    driver.alertAccept();
+  }
+
+  editEntry(index, label) {
+    var selector = "#edit-button-" + (index - 1);
+    this.page.element(selector).click();
+    driver.waitForVisible(`#dialog`, 2000);
+    this.page.element(`#dialog input[name="label"]`).setValue(label);
+    this.page.click('#dialog paper-button[name="save"]');
   }
 
   get isVocabularyTableVisible() {
@@ -87,6 +89,41 @@ export default class Vocabulary {
 
   get isVocabularyTableFilled() {
     return !this.page.getText(`#table #items nuxeo-data-table-row`).some((txt) => txt.trim().length === 0);
+  }
+
+  get hasEditDialog() {
+    driver.waitForVisible(`#edit-button-0`, 5000);
+    this.page.element(`#edit-button-0`).click();
+    driver.waitForVisible(`#dialog`);
+    var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    var allFieldVisible = false;
+    if (visibleLabels.length) {
+      allFieldVisible = visibleLabels.every((el) => el);
+    } else {
+      allFieldVisible = visibleLabels
+    }
+    allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
+    this.page.element(`dialog paper-button[name="cancel"]`).click();
+    return allFieldVisible;
+  }
+
+  get hasCreateDialog() {
+    driver.waitForVisible(`#addEntry`, 5000);
+    this.page.element(`#addEntry`).click();
+    driver.waitForVisible(`#dialog`);
+    var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    var allFieldVisible = false;
+    if (visibleLabels.length) {
+      allFieldVisible = visibleLabels.every((el) => el);
+    } else {
+      allFieldVisible = visibleLabels
+    }
+    allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
+    this.page.element(`#selectParent`).click();
+    driver.waitForVisible(`#parentDialog nuxeo-tree-node:first-child`);
+    this.page.element(`#parentDialog paper-button[name="close"]`).click();
+    this.page.element(`#dialog paper-button[name="cancel"]`).click();
+    return allFieldVisible;
   }
 
 }

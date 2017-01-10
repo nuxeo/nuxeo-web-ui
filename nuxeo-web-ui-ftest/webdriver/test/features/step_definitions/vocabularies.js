@@ -38,9 +38,20 @@ module.exports = function () {
     this.ui.vocabularyAdmin.hasEntry(name).should.be.false;
   });
 
-  this.Then('I can delete "$name" entry', (name) => {
-    this.ui.vocabularyAdmin.deleteEntry(name);
-    this.ui.vocabularyAdmin.hasEntry(name).should.be.false;
+  this.Then('I can delete entry with index "$index"', (index) => {
+    this.ui.vocabularyAdmin.deleteEntry(index);
+  });
+
+  this.Then('I can edit entry with index "$index" and new label "$label"', (index, label) => {
+    this.ui.vocabularyAdmin.editEntry(index, label);
+  });
+
+  this.Then('I can see edit dialog', () => {
+    this.ui.vocabularyAdmin.hasEditDialog.should.be.true;
+  });
+
+  this.Then('I can see create dialog', () => {
+    this.ui.vocabularyAdmin.hasCreateDialog.should.be.true;
   });
 
 };
