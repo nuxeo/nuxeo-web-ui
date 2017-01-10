@@ -26,7 +26,6 @@ Feature: Vocabularies
     And I cannot see "Breizh" entry
     And I cannot see "Brittany" entry
 
-  @watch
   Scenario: l10n vocabulary check
     Given I am on vocabulary page
     When I select "l10ncoverage" vocabulary
