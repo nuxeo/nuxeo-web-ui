@@ -24,4 +24,8 @@ export default class DocumentPage {
   get editButton() {
     return this.page.element('#edit');
   }
+
+  get saveButton() {
+    return this.page.element('#save');
+  }
 }

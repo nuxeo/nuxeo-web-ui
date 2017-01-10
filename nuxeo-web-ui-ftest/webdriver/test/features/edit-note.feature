@@ -1,12 +1,20 @@
+@focus
 Feature: Edit Note
 
-  HTML Note is editable
+  Note is editable in all supported formats
 
   Background:
     Given I login as "Administrator"
-    And I have a HTML Note
 
-  Scenario: Note HTML editor
+  Scenario Outline: Edit <format> Note
+    Given I have a <format> Note
     When I browse to the document
     Then I can edit the Note metadata
-    Then I can edit the Note content
+    Then I can edit the <format> Note
+
+  Examples:
+  | format    |
+  |  HTML     |
+#  |  XML      |
+#  |  Markdown |
+#  |  Text     |
