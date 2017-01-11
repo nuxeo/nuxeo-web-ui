@@ -4,13 +4,13 @@
   "scripts": {
     "lint": "eslint scripts test",
     "test": "scripts/test.js",
-    "test:dev": "NUXEO_URL=http://localhost:8080/nuxeo chimp config/chimp.js --webdriverio.baseUrl=http://localhost:5000 --watch",
+    "test:dev": "NUXEO_URL=http://localhost:8080/nuxeo chimp config/chimp.js --watch",
     "test:watch": "chimp config/chimp.js --watch"
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "chai": "^3.5.0",
-    "chimp": "^0.41.1",
+    "chimp": "^0.46.0",
     "cucumber-junit": "^1.6.0",
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^5.0.1",

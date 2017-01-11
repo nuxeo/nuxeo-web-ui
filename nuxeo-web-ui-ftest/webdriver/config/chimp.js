@@ -6,6 +6,8 @@ module.exports = {
   chai: true,
   // - - - - WEBDRIVER-IO  - - - -
   webdriverio: {
-    baseUrl: 'http://localhost:8080/nuxeo',
+    baseUrl: process.env.NUXEO_URL ? 'http://localhost:5000' : 'http://localhost:8080/nuxeo',
+    waitforTimeout: 3000,
+    waitforInterval: 250,
   },
 };
