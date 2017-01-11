@@ -1,12 +1,9 @@
-<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link rel="import" href="base.html">
-
 <style is="custom-style">
 
   :root {
     /* -- Nuxeo Branding colors -- */
     --nuxeo-app-font: 'Roboto', Arial, sans-serif;
-    --nuxeo-primary-color: #00adff;
+    --nuxeo-primary-color: #ae006a;
 
     /* Badges & tags */
     --nuxeo-tag-background: transparent;
@@ -15,63 +12,63 @@
     --nuxeo-validated: #99d749;
 
     /* Titles & text */
-    --nuxeo-title-color: #213f7d;
+    --nuxeo-title-color: #6d0043;
     --nuxeo-text-default: #243238;
     --nuxeo-text-light: #939caa;
 
     /* Global layout */
-    --nuxeo-page-background: none #f5f9fb;
-    --nuxeo-header-background: #fff;
-    --nuxeo-header-title-color: #213f7d;
-    --nuxeo-header-text-color: #213f7d;
-    --nuxeo-header-actions: #243238;
-    --nuxeo-header-actions-hover: #00adff;
-    --nuxeo-sidebar-background: #213f7d;
-    --nuxeo-sidebar-actions: #009de8;
-    --nuxeo-sidebar-actions-hover: #ffffff;
+    --nuxeo-page-background: url(/themes/kawaii/background.png) repeat #f8d3e0;
+    --nuxeo-header-background: rgba(255,255,255,0.95);
+    --nuxeo-header-title-color: #6d0043;
+    --nuxeo-header-text-color: #6d0043;
+    --nuxeo-header-actions: #6d0043;
+    --nuxeo-header-actions-hover: #ae006a;
+    --nuxeo-sidebar-background: #6d0043;
+    --nuxeo-sidebar-actions: rgba(255,255,255,0.9);
+    --nuxeo-sidebar-actions-hover: rgba(255,255,255,1);
     --nuxeo-light-background: #fafcfd;
-    --nuxeo-table-header-background: #d9e6f0;
+    --nuxeo-table-header-background: #f6d1ec;
     --nuxeo-table-header-titles: #243238;
 
     /* Buttons & Links */
     --nuxeo-button: #f5f9fb;
-    --nuxeo-button-primary: #00adff;
-    --nuxeo-button-primary-focus: #0079b3;
+    --nuxeo-button-primary: #ae006a;
+    --nuxeo-button-primary-focus: #6d0043;
     --nuxeo-button-primary-text: #ffffff;
     --nuxeo-button-disabled: #f5f9fb;
     --nuxeo-button-disabled-text: #a8a8a8;
-    --nuxeo-link-color: #213f7d;
-    --nuxeo-link-hover-color: #00adff;
+    --nuxeo-link-color: #6d0043;
+    --nuxeo-link-hover-color: #ae006a;
 
     /* Actions in toolbar, e.g. document view */
-    --nuxeo-pill-color: #ecf3f7;
-    --nuxeo-pill-text-color: #243238;
-    --nuxeo-pill-color-hover: #ecf3f7;
-    --nuxeo-pill-text-hover: #243238;
+    --nuxeo-pill-color: #f6d1ec;
+    --nuxeo-pill-text-color: #b44593;
+    --nuxeo-pill-color-hover: #f6d1ec;
+    --nuxeo-pill-text-hover: #b44593;
     --nuxeo-action-color: #243238;
     --nuxeo-action-color-activated: #f68500;
-    --nuxeo-container-hover: #ecf3f7;
-    --nuxeo-dialog-buttons-bar: #d9e6f0;
+    --nuxeo-container-hover: #f3f7f9;
+    --nuxeo-dialog-buttons-bar: #eff2f4;
 
     /* Warn, Info, Error */
     --nuxeo-warn-text: #d5652c;
 
-    --default-primary-color: #00adff;
-    --dark-primary-color: #213f7d;
-    --light-primary-color: #eff2f4;
+    --default-primary-color: #ae006a;
+    --dark-primary-color: #6d0043;
+    --light-primary-color: #f3f7f9;
     --text-primary-color: #ffffff;
-    --accent-color: #00adff;
-    --primary-background-color: #eff2f4;
+    --accent-color: #ae006a;
+    --primary-background-color: #f8fafc;
     --primary-text-color: #243238;
     --secondary-text-color: #243238;
     --disabled-text-color: #bdbdbd;
-    --divider-color: #e8edee;
+    --divider-color: #e5e5e5;
 
-    --nuxeo-border: #e8edee;
+    --nuxeo-border: #e0e4e6;
 
     /* Tabs, Toolbars & Menus */
-    --paper-tabs-selection-bar-color: #00adff;
-    --paper-tab-ink: #00adff;
+    --paper-tabs-selection-bar-color: #ae006a;
+    --paper-tab-ink: #ae006a;
 
     --paper-toolbar-background: #ffffff;
     --paper-toolbar-color: #243238;
@@ -81,46 +78,46 @@
     --paper-menu-disabled-color: #e9eff3;
 
     /* Forms & Buttons */
-    --paper-checkbox-checked-color: #00adff;
-    --paper-checkbox-checked-ink-color: #213f7d;
+    --paper-checkbox-checked-color: #ae006a;
+    --paper-checkbox-checked-ink-color: #6d0043;
     --paper-checkbox-unchecked-color: #243238;
     --paper-checkbox-unchecked-ink-color: #6c6f7c;
     --paper-checkbox-label-color: #243238;
 
-    --paper-radio-button-checked-color: #00adff;
+    --paper-radio-button-checked-color: #ae006a;
     --paper-radio-button-checked-ink-color: #ffffff;
     --paper-radio-button-unchecked-color: #243238;
     --paper-radio-button-unchecked-ink-color: #6c6f7c;
     --paper-radio-button-label-color: #243238;
 
     --paper-input-container-color: #6c6f7c;
-    --paper-input-container-focus-color: #00adff;
+    --paper-input-container-focus-color: #ae006a;
     --paper-input-container-invalid-color: #ff003c;
     --paper-input-container-input-color: #6c6f7c;
 
-    --paper-slider-knob-color: #00adff;
-    --paper-slider-active-color: #00adff;
-    --paper-slider-pin-color: #00adff;
+    --paper-slider-knob-color: #ae006a;
+    --paper-slider-active-color: #ae006a;
+    --paper-slider-pin-color: #ae006a;
 
-    --paper-toggle-button-checked-bar-color: #00adff;
-    --paper-toggle-button-checked-button-color: #00adff;
-    --paper-toggle-button-checked-ink-color: #00adff;
+    --paper-toggle-button-checked-bar-color: #ae006a;
+    --paper-toggle-button-checked-button-color: #ae006a;
+    --paper-toggle-button-checked-ink-color: #ae006a;
     --paper-toggle-button-unchecked-bar-color: #6c6f7c;
     --paper-toggle-button-unchecked-button-color: #6c6f7c;
     --paper-toggle-button-unchecked-ink-color: #6c6f7c;
 
-    --paper-fab-background: #00adff;
+    --paper-fab-background: #ae006a;
     --paper-fab-disabled-background: #e9eff3;
     --paper-fab-disabled-text: #2f2b16;
     --paper-icon-button-disabled-text: #e9eff3;
 
     /* Loaders */
-    --paper-progress-active-color: #00adff;
-    --paper-progress-secondary-color: #00adff;
+    --paper-progress-active-color: #ae006a;
+    --paper-progress-secondary-color: #ae006a;
 
-    --paper-spinner-layer-1-color: #00adff;
-    --paper-spinner-layer-2-color: #0075b0;
-    --paper-spinner-layer-3-color: #213f7d;
-    --paper-spinner-layer-4-color: #0d9ad6;
+    --paper-spinner-layer-1-color: #ae006a;
+    --paper-spinner-layer-2-color: #6d0043;
+    --paper-spinner-layer-3-color: #6d0043;
+    --paper-spinner-layer-4-color: #ae006a;
   }
 </style>

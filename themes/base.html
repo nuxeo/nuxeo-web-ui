@@ -1,3 +1,15 @@
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+<script>
+  (function () {
+    // apply theme
+    var link = document.createElement('link');
+    link.setAttribute('rel', 'import');
+    link.setAttribute('href', 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html');
+    document.getElementsByTagName('head')[0].appendChild(link);
+  })();
+</script>
+
 <style is="custom-style">
 
   html {

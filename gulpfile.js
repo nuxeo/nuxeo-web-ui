@@ -143,7 +143,7 @@ gulp.task('copy', function() {
     '*.{html,ico}',
     'manifest.json',
     'i18n/**/*',
-    'styles/**/*'
+    'themes/**/*'
   ], {
     dot: true,
     base: '.'
