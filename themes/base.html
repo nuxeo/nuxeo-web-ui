@@ -2,11 +2,10 @@
 
 <script>
   (function () {
-    // apply theme
     var link = document.createElement('link');
     link.setAttribute('rel', 'import');
     link.setAttribute('href', 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html');
-    document.getElementsByTagName('head')[0].appendChild(link);
+    document.head.appendChild(link);
   })();
 </script>
 
@@ -22,7 +21,6 @@
     margin: 0;
     min-height: 100%;
     color: var(--nuxeo-text-default);
-    background: var(--nuxeo-page-background);
     font-family: var(--nuxeo-app-font);
     font-weight: 400;
   }
