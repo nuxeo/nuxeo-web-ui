@@ -63,13 +63,6 @@ limitations under the License.
     window.Polymer = {
       lazyRegister: true
     };
-
-    // append theme file
-    var theme = localStorage.getItem('theme') || 'default';
-    var link = document.createElement('link');
-    link.setAttribute('rel', 'import');
-    link.setAttribute('href', 'styles/' + theme + '-theme.html');
-    document.getElementsByTagName('head')[0].appendChild(link);
   </script>
 
   <script src="vendor/jquery.js"></script>
