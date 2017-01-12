@@ -48,7 +48,7 @@ var dist = function(subpath) {
   return !subpath ? DIST : path.join(DIST, subpath);
 };
 
-var APP = dist('bower_components/nuxeo-web-ui')
+var APP = dist('bower_components/nuxeo-web-ui');
 
 var app = function(subpath) {
   return !subpath ? APP : path.join(APP, subpath);
@@ -117,7 +117,8 @@ gulp.task('copy', function() {
     app('manifest.json'),
     app('elements/**/*'),
     app('i18n/**/*'),
-    app('styles/**/*')
+    app('styles/**/*'),
+    app('themes/**/*')
   ], {
     base: app()
   }).pipe(gulp.dest(dist()));
