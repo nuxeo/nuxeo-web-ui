@@ -103,7 +103,7 @@ Contributors:
 
       paper-header-panel, iron-pages::content paper-header-panel {
         --paper-header-panel-body: {
-          background-color: var(--nuxeo-page-background);
+          background: var(--nuxeo-page-background);
         };
         --paper-header-panel-shadow: {
           box-shadow: none;
@@ -494,7 +494,8 @@ Contributors:
           'document-subscribed': '_documentSubscribed',
           'document-unsubscribed': '_documentUnsubscribed',
           'document-locked': '_documentLocked',
-          'document-unlocked': '_documentUnlocked'
+          'document-unlocked': '_documentUnlocked',
+          'theme-changed': '_themeChanged'
         },
 
         ready: function() {
@@ -784,6 +785,11 @@ Contributors:
         _documentFileDeleted: function() {
           this._toast(this.i18n('app.document.fileDeleted'));
           this.fire('document-updated');
+        },
+
+        _themeChanged: function() {
+          this._toast(this.i18n('themes.applying'));
+          location.reload();
         },
 
         _handleDocumentCreated: function(e) {

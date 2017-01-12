@@ -11,10 +11,4 @@
     if (getQueryParam('dom') == 'shadow') {
       window.Polymer.dom = 'shadow';
     }
-
-    // apply theme
-    var link = document.createElement('link');
-    link.setAttribute('rel', 'import');
-    link.setAttribute('href', 'styles/' + (localStorage.getItem('theme') || 'default') + '-theme.html');
-    document.getElementsByTagName('head')[0].appendChild(link);
   </script><script src="vendor/jquery.js"></script><script src="vendor/select2.js"></script><script src="vendor/moment-with-locales.js"></script><script src="vendor/alloy-editor.js"></script><link rel="import" href="elements/elements.vulcanized.html"></head><body unresolved=""><span id="browser-sync-binding"></span><nuxeo-connection url="https://nightly.nuxeo.com/nuxeo/"></nuxeo-connection><nuxeo-app base-url="/nuxeo-web-ui/"></nuxeo-app></body></html>
