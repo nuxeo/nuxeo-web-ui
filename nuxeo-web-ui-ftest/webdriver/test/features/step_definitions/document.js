@@ -101,5 +101,26 @@ module.exports = function() {
     }
   });
 
+  this.Then('I add it to the "$name" collection', (name) => {
+    this.ui.browser.addToCollection(name);
+    teardownCbs.push(((path) => {
+      return () => this.client.repository().delete(path);
+    })(`/default-domain/UserWorkspaces/Administrator/Collections/` + name));
+    // TOOD do not hardcode Administrator but use real user id
+  });
+
+  this.Then('I can see the document belongs to the "$name" collection', (name) => {
+    this.ui.browser.hasCollection(name).should.be.true;
+  });
+
+  this.Then('I can delete the document from the "$name" collection', (name) => {
+    this.ui.browser.removeFromCollection(name).should.be.true;
+  });
+
+  this.Then('I can see the document does not belong to the "$name" collection', (name) => {
+    this.ui.browser.doNotHaveCollection(name).should.be.true;
+  });
+
   this.After((scenario) => Promise.all(teardownCbs.map((cb) => cb())).then(() => { teardownCbs = []; }));
+
 };
