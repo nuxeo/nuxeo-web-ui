@@ -44,19 +44,6 @@ export default class Browser {
     driver.element(`#select2-drop li.select2-result`).click();
     this.page.element(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`).click();
     this.page.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
-  /*  driver.waitUntil(function () {
-      var toasts = driver.elements(`paper-toast`);
-      console.log(toasts);
-      if (toasts.value && Array.isArray(toasts.value)) {
-        console.log(`array`);
-        return toasts.value.every((toast) => {  console.log(toast + ` - ` + toast.isVisible());
-          return true;
-        });
-      } else {
-        console.log(`single`);
-        return !toasts.isVisible();
-      }
-    }, 5000);*/
   }
 
   hasCollection(name) {
