@@ -3,6 +3,7 @@ Feature: Collections
   Background:
     Given I login as "Administrator"
 
+  @watch
   Scenario: From browser, add document to a collection and remove it
     Given I have a HTML Note
     When I browse to the document
