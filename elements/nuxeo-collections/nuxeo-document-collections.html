@@ -49,7 +49,7 @@ Contributors:
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <nuxeo-tag>
         [[item.title]]
-        <iron-icon icon="icons:clear" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
+        <iron-icon icon="icons:clear" name="remove" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
       </nuxeo-tag>
     </template>
 
