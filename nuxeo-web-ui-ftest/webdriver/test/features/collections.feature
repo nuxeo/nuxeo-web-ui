@@ -11,8 +11,7 @@ Feature: Collections
     And I can delete the document from the "MyCollection" collection
     And I can see the document does not belong to the "MyCollection" collection
 
-  @watch
   Scenario: Browse collections
     Given I have a document added to "MyCollection" collection
-    When I browse to the document
-    Then I can see the document belongs to the "MyCollection" collection
+    When I click the "collections" button
+    Then I can see the "MyCollection" collection

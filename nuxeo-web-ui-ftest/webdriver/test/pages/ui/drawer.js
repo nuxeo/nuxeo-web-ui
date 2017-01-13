@@ -1,5 +1,7 @@
 'use strict';
 
+import Collections from './collections';
+
 export default class Drawer {
 
   constructor(selector) {
@@ -34,7 +36,7 @@ export default class Drawer {
   }
 
   get collections() {
-    return this._section('collections');
+    return new Collections(`nuxeo-collections`);
   }
 
   get personal() {
