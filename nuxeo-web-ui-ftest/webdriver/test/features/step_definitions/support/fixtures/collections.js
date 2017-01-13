@@ -3,7 +3,16 @@ import nuxeo from '../services/client'
 global.liveCollections = [];
 
 fixtures.collections = {
-
+  addToNewCollection: (document, colName) => {
+    return nuxeo.operation('Collection.Create').params({
+      'name': colName
+    }).execute().then((col) => {
+      liveCollections.push(colName);
+      return nuxeo.operation('Document.AddToCollection').input(document).params({
+        'collection': col
+      }).execute();
+    });
+  },
 };
 
 module.exports = function () {
