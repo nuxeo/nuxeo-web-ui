@@ -2,7 +2,7 @@
 
 module.exports = function() {
 
-  this.Given(/^I have a (.*)document$/, (docType) => {
+  this.Given(/^I have a (.*) document$/, (docType) => {
     docType = docType || 'File';
     let doc = fixtures.documents.init(docType);
     // create the document
@@ -11,7 +11,16 @@ module.exports = function() {
     });
   });
 
-  this.Given(/^I have a (.*)document with permission (\w+)$/, (docType, permission) => {
+  this.Given(/^I have a document added to "([^"]*)" collection$/, (colName) => {
+    let doc = fixtures.documents.init('File');
+    // create the document
+    return fixtures.documents.create(this.doc.path, doc)
+      .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((doc) => {
+        this.doc = doc;
+      });
+  });
+
+  this.Given(/^I have a (.*) document with permission (\w+)$/, (docType, permission) => {
     docType = docType || 'File';
 
     let doc = fixtures.documents.init(docType);
@@ -92,7 +101,6 @@ module.exports = function() {
   this.Then('I add it to the "$name" collection', (name) => {
     this.ui.browser.addToCollection(name);
     liveCollections.push(name);
-    // TOOD do not hardcode Administrator but use real user id
   });
 
   this.Then('I can see the document belongs to the "$name" collection', (name) => {
