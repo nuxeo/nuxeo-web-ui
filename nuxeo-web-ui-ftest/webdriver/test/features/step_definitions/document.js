@@ -73,21 +73,51 @@ module.exports = function() {
 
   this.Then(/^I can edit the (.*) Note$/, (format) => {
     let page = this.ui.browser.documentPage(this.doc.type);
-    page.view.isVisible().should.be.true;
+    page.view.waitForVisible();
+
+    let newContent = 'NEW ' + format + ' CONTENT';
     switch (format) {
+
       case 'HTML':
       case 'XML':
-        let newContent = '<h2>NEW HTML CONTENT</h2>';
         let editor = page.view.el.element('#editor');
-        editor.isVisible().should.be.true;
+        editor.waitForVisible();
         editor.setValue(newContent);
         let save = page.view.el.element('paper-button[name="editorSave"]');
-        save.isVisible().should.be.true;
+        save.waitForVisible();
         save.click();
         driver.waitForExist('#editor');
         editor = page.view.el.element('#editor');
-        editor.isVisible().should.be.true;
-        (editor.getText() === newContent).should.be.true;
+        editor.waitForVisible();
+        (editor.getAttribute('innerHTML') === ('<p>' + newContent + '</p>')).should.be.true;
+        break;
+
+      case 'Markdown':
+      case 'Text':
+        let edit = page.view.el.element('#editNote');
+        edit.waitForVisible();
+        edit.click();
+        let textarea = page.view.el.element('nuxeo-note-editor #textarea');
+        textarea.waitForVisible();
+        textarea.setValue(newContent);
+        let saveNote = page.view.el.element('paper-button[name="editorSave"]');
+        saveNote.waitForVisible();
+        saveNote.click();
+        const preview = page.view.preview;
+        preview.waitForVisible();
+        if (format == 'Markdown') {
+          let markedElement = preview.element('marked-element');
+          markedElement.waitForVisible();
+          let markedContent = markedElement.element('div.markdown-html');
+          markedContent.waitForVisible();
+          (markedContent.getText() === newContent).should.be.true;
+        } else if (format == 'Text') {
+          let iframe = preview.element('iframe');
+          iframe.waitForVisible();
+          // TODO: ELEMENTS-213: add preview in nuxeo-document-preview
+          // check new Text previewer content here
+          // for now just checking that the default iframe previewer exists
+        }
         break;
     }
   });

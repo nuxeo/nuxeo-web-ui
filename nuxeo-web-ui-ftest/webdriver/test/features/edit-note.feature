@@ -16,5 +16,5 @@ Feature: Edit Note
   | format    |
   |  HTML     |
   |  XML      |
-#  |  Markdown |
-#  |  Text     |
+  |  Markdown |
+  |  Text     |
