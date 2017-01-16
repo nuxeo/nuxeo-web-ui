@@ -5,6 +5,7 @@ Feature: Browser
   Background:
     Given I login as "Administrator"
 
+  @watch
   Scenario: Browse
     When I click the "browser" button
     Then I can see the browser tree
