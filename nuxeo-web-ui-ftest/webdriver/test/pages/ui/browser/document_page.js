@@ -30,4 +30,12 @@ export default class DocumentPage {
   get saveButton() {
     return this.page.element('#save');
   }
+
+  get previewButton() {
+    return this.page.element('nuxeo-preview-button');
+  }
+
+  waitForVisible() {
+    return this.page.waitForVisible();
+  }
 }

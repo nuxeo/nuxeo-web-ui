@@ -11,25 +11,32 @@ module.exports = function() {
     });
   });
 
+  this.Given(/^I have a document imported from file "(.+)"$/, (mimeType) => {
+    return fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType])
+        .then((doc) => { this.doc = doc; });
+  });
+
+  this.Given(/^I have permission (\w+) for this document$/, (permission) => {
+    return fixtures.documents.setPermissions(this.doc, permission, this.username).then((doc) => {
+      this.doc = doc;
+    })
+  });
+
   this.Given(/^I have a document added to "([^"]*)" collection$/, (colName) => {
     let doc = fixtures.documents.init('File');
     // create the document
     return fixtures.documents.create(this.doc.path, doc)
-      .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((doc) => {
-        this.doc = doc;
-      });
-  });
-
-  this.Given(/^I have a (.*) document with permission (\w+)$/, (docType, permission) => {
-    docType = docType || 'File';
-
-    let doc = fixtures.documents.init(docType);
-    // create the document
-    return fixtures.documents.create(this.doc.path, doc)
-        .then((doc) => fixtures.documents.setPermissions(doc, permission, this.username))
-        .then((doc) => {
+        .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((doc) => {
           this.doc = doc;
         });
+  });
+
+  this.Given(/^this document has file "(.+)" for content$/, (file) => {
+    return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+  });
+
+  this.Given(/^this document has file "(.+)" for attachment/, (file) => {
+    return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
   });
 
   this.When('I browse to the document', () => {
@@ -83,19 +90,6 @@ module.exports = function() {
         (editor.getText() === newContent).should.be.true;
         break;
     }
-  });
-
-  this.When(/^I have a document with content of mime-type ([-\w.]+\/[-\w.]+)$/, (mimeType) => {
-    return fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType])
-        .then((doc) => { this.doc = doc; });
-  });
-
-  this.When(/^I upload a ([-\w.]+\/[-\w.]+) file as main blob$/, (mimeType) => {
-    return fixtures.documents.attach(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType]);
-  });
-
-  this.When(/^I upload a ([-\w.]+\/[-\w.]+) file as attachment$/, (mimeType) => {
-    return fixtures.documents.attach(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType], true);
   });
 
   this.Then('I add it to the "$name" collection', (name) => {

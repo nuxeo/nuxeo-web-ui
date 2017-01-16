@@ -6,7 +6,7 @@ var Nuxeo = require('nuxeo');
 
 module.exports = function () {
 
-  this.Given('there is a user "$username" in group "$group"', (username, group) => {
+  this.Given('user "$username" exists in group "$group"', (username, group) => {
     return fixtures.users.create({
       'entity-type': 'user',
       properties: {

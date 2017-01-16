@@ -3,19 +3,68 @@ Feature: Content Preview
   Document and attachment previews are well displayed on document view and actions
 
   Background:
-    Given there is a user "John" in group "members"
+    Given user "John" exists in group "members"
     And I login as "John"
-    And I have a Folder document with permission ReadWrite
+    And I have a Folder document
+    And I have permission ReadWrite for this document
 
-  Scenario Outline:
-    When I have a document with content of mime-type <mimetype>
+  Scenario Outline: Inline previewer for File document with different types of blobs as content
+    When I have a File document
+    And this document has file "<file>" for content
     And I browse to the document
+    Then I can see the inline <viewer> previewer
+
+    Examples:
+      | file       | viewer             |
+      | sample.png | nuxeo-image-viewer |
+      | sample.mp4 | nuxeo-video-viewer |
+      | sample.mp3 | audio              |
+      | sample.pdf | nuxeo-pdf-viewer   |
+      | sample.odt | iframe             |
+      | sample.txt | iframe             |
+
+  Scenario Outline: Previewer for File document with different types of blobs as content
+    When I have a File document
+    And this document has file "<file>" for content
+    And I browse to the document
+    And I click the preview button
     Then I can see a <viewer> previewer
 
     Examples:
-      | mimetype                                | viewer             |
-      | image/png                               | nuxeo-image-viewer |
-      | video/mp4                               | nuxeo-video-viewer |
-      | audio/mpeg3                             | audio              |
-      | application/pdf                         | nuxeo-pdf-viewer   |
-      | application/vnd.oasis.opendocument.text | iframe             |
+      | file       | viewer             |
+      | sample.png | nuxeo-image-viewer |
+      | sample.mp4 | nuxeo-video-viewer |
+      | sample.mp3 | audio              |
+      | sample.pdf | nuxeo-pdf-viewer   |
+      | sample.odt | iframe             |
+      | sample.txt | iframe             |
+
+  Scenario Outline: Previewer for File document with different types of blobs as attachment
+    When I have a File document
+    And this document has file "<file>" for attachment
+    And I browse to the document
+    And I click the preview button for the attachment
+    Then I can see a <viewer> previewer for the attachment
+
+    Examples:
+      | file       | viewer             |
+      | sample.png | nuxeo-image-viewer |
+      | sample.mp4 | nuxeo-video-viewer |
+      | sample.mp3 | audio              |
+      | sample.pdf | nuxeo-pdf-viewer   |
+      | sample.odt | iframe             |
+      | sample.txt | iframe             |
+
+  Scenario Outline: Previewer for different types document with content
+    When I have a <type> document
+    And this document has file "<file>" for content
+    And I browse to the document
+    And I click the preview button
+    Then I can see a <viewer> previewer
+
+
+    Examples:
+      | type    | file       | viewer             |
+      | Picture | sample.png | nuxeo-image-viewer |
+      | Video   | sample.mp4 | nuxeo-video-viewer |
+      | Audio   | sample.mp3 | audio              |
