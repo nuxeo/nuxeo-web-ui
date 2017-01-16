@@ -35,60 +35,6 @@ Contributors:
   <template>
     <style>
 
-      /* links */
-      ::content a, ::content a:active, ::content a:visited, ::content a:focus {
-        @apply(--nuxeo-link);
-      }
-      ::content a:hover {
-        @apply(--nuxeo-link-hover);
-      }
-
-      /* scrollbars */
-      ::content ::-webkit-scrollbar-track {
-        width: 8px;
-        height: 8px;
-      }
-      ::content ::-webkit-scrollbar {
-        background-color: rgba(0, 0, 0, 0.05);
-        width: 8px;
-        height: 8px;
-      }
-      ::content ::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.4);
-        border-radius: 2px;
-      }
-
-      /* headings */
-      ::content h3 {
-        font-size: 18px;
-        font-weight: 500;
-        margin: 0 0 0.5em;
-      }
-
-      /* label */
-      ::content label {
-        @apply(--nuxeo-label);
-      }
-
-      /* paper-button */
-      ::content paper-button:hover {
-        @apply(--nx-button-hover);
-      }
-      ::content paper-button.primary {
-        @apply(--nx-button-primary);
-      }
-      ::content paper-button.primary:hover,
-      ::content paper-button.primary:focus {
-        @apply(--nx-button-primary-hover);
-      }
-      ::content paper-button[disabled] {
-        @apply(--nx-button-disabled);
-      }
-      ::content paper-button + paper-button {
-        margin-left: 8px;
-      }
-
-      /* app */
       paper-header-panel ::content .content {
         position: relative;
         padding: 16px;
