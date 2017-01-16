@@ -99,7 +99,7 @@ Example:
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('addToCollectionButton.dialog.cancel')]]</paper-button>
-        <paper-button dialog-confirm class="primary" on-tap="_add" disabled$="[[!_isValid(collection)]]">
+        <paper-button dialog-confirm class="primary" name="add" on-tap="_add" disabled$="[[!_isValid(collection)]]">
           [[i18n('addToCollectionButton.dialog.add')]]
         </paper-button>
       </div>
