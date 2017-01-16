@@ -3,6 +3,7 @@
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Collections from './ui/collections';
+import CollectionBrowser from './ui/collectionBrowser';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Vocabulary from './ui/admin/vocabulary';
@@ -49,8 +50,8 @@ export default class UI {
     return this.pages.element('nuxeo-search-results');
   }
 
-  get collection() {
-    return this.pages.element('nuxeo-collection-results');
+  get collectionBrowser() {
+    return new CollectionBrowser('nuxeo-collection-results');
   }
 
   get administration() {

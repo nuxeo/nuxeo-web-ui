@@ -15,3 +15,10 @@ Feature: Collections
     Given I have a document added to "MyCollection" collection
     When I click the "collections" button
     Then I can see the "MyCollection" collection
+    And I can click on the "MyCollection" collection
+    And I can see that the document belongs to the collection
+    And I can click the document in the collection
+    And I can see the collection is in queue mode
+    And I can see the collection queue has the document
+    And I can remove the document from the collection queue
+    And I can see the collection queue does not have the document
