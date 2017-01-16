@@ -26,7 +26,7 @@ export default class Browser {
   }
 
   get title() {
-    return this.breadcrumb.element('.breadcrumb-item-current');
+    return this.breadcrumb.getText('.breadcrumb-item-current');
   }
 
   _section(name) {
@@ -45,7 +45,7 @@ export default class Browser {
     driver.element(`#s2id_autogen1_search`).setValue(name);
     driver.waitForVisible(`#select2-drop li.select2-result`);
     driver.element(`#select2-drop li.select2-result`).click();
-    this.page.waitForVisible(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`);
+    this.page.waitForEnabled(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`);
     this.page.element(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`).click();
     this.page.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
