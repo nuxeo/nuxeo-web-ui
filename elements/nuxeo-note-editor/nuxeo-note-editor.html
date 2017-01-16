@@ -59,7 +59,7 @@ Contributors:
 
       <template is="dom-if" if="[[!_isHTMLorXML(document)]]">
         <template is="dom-if" if="[[_viewMode]]">
-          <paper-icon-button class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <paper-icon-button id="editNote" class="edit" icon="editor:mode-edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>
         <template is="dom-if" if="[[!_viewMode]]">
