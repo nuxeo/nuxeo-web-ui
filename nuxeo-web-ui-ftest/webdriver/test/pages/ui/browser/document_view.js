@@ -1,5 +1,5 @@
 'use strict';
-
+import DocumentAttachments from './document_attachments'
 
 export default class DocumentView {
   constructor(el, docType) {
@@ -21,5 +21,9 @@ export default class DocumentView {
 
   get layout() {
     return this.el.element(`nuxeo-${this.docType.toLowerCase()}-view-layout`);
+  }
+
+  get attachments() {
+    return new DocumentAttachments(this.el.element('nuxeo-document-attachments'), this.docType);
   }
 }
