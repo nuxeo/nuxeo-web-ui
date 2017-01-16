@@ -220,7 +220,7 @@ Contributors:
                       <div class="vertical layout center">
                         <iron-icon class="collection-name-icon" icon="icons:book"></iron-icon>
                       </div>
-                      <span class="collection-name">[[collection.title]]</span>
+                      <span class="collection-name title">[[collection.title]]</span>
                     </div>
                     <div class="collection-detail">
                       <div class="date horizontal layout center">
@@ -311,14 +311,6 @@ Contributors:
             type: Boolean,
             value: false,
             observer: '_observeIsDisplayMembers'
-          },
-          collections: {
-            type: Object,
-            value: []
-          },
-          members: {
-            type: Object,
-            value: []
           },
           selectedCollection: {
             type: Object,
@@ -431,6 +423,8 @@ Contributors:
 
         displayCollections: function() {
           this._isDisplayMembers = false;
+          this._resetMemberResults();
+          this.$.memberProvider.fetch();
           this.fire('browseCollection', {
             collection: this.selectedCollection,
           });
@@ -445,7 +439,7 @@ Contributors:
           };
           op.execute().then(function() {
             var memberIndex;
-            this.members = this.members.filter(function(el, index) {
+            this.$.membersList.$.list.items = this.$.membersList.$.list.items.filter(function(el, index) {
               if (el.uid === evt.target.dataset.uid) {
                 memberIndex = index;
                 return false;

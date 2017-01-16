@@ -1,14 +1,5 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
-<script>
-  (function () {
-    var link = document.createElement('link');
-    link.setAttribute('rel', 'import');
-    link.setAttribute('href', 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html');
-    document.head.appendChild(link);
-  })();
-</script>
-
 <style is="custom-style">
 
   html {
@@ -25,19 +16,65 @@
     font-weight: 400;
   }
 
-  h1,h2,h3, h4,h5,h6 {
+  /* scrollbars */
+  body ::content ::-webkit-scrollbar-track {
+    width: 8px;
+    height: 8px;
+  }
+  body ::content ::-webkit-scrollbar {
+    background-color: rgba(0, 0, 0, 0.05);
+    width: 8px;
+    height: 8px;
+  }
+  body ::content ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+  }
+
+  /* headings */
+  body ::content h1, body ::content h2, body ::content h3,
+  body ::content h4, body ::content h5, body ::content h6 {
     font-weight: 400;
     line-height: 1em;
   }
-
-  a, a:active, a:visited, a:focus {
-    color: var(--nuxeo-link-color);
-    text-decoration: none;
+  body ::content h3 {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 0.5em;
   }
 
-  a:hover {
-    color: var(--nuxeo-link-hover-color);
+  /* links */
+  body ::content a, body ::content a:active, body ::content a:visited, body ::content a:focus {
+    @apply(--nuxeo-link);
   }
+  body ::content a:hover {
+    @apply(--nuxeo-link-hover);
+  }
+
+  /* label */
+  body ::content label {
+    @apply(--nuxeo-label);
+  }
+
+  /* paper-button */
+  body ::content paper-button:hover {
+    @apply(--nx-button-hover);
+  }
+  body ::content paper-button.primary {
+    @apply(--nx-button-primary);
+  }
+  body ::content paper-button.primary:hover,
+  body ::content paper-button.primary:focus {
+    @apply(--nx-button-primary-hover);
+  }
+  body ::content paper-button[disabled] {
+    @apply(--nx-button-disabled);
+  }
+  body ::content paper-button + paper-button {
+    margin-left: 8px;
+  }
+
+
 
   :root {
 
