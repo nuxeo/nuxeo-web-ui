@@ -54,17 +54,3 @@ Feature: Content Preview
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
       | sample.txt | iframe             |
-
-  Scenario Outline: Previewer for different types document with content
-    When I have a <type> document
-    And this document has file "<file>" for content
-    And I browse to the document
-    And I click the preview button
-    Then I can see a <viewer> previewer
-
-
-    Examples:
-      | type    | file       | viewer             |
-      | Picture | sample.png | nuxeo-image-viewer |
-      | Video   | sample.mp4 | nuxeo-video-viewer |
-      | Audio   | sample.mp3 | audio              |
