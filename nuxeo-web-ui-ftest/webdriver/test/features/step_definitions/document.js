@@ -74,10 +74,8 @@ module.exports = function() {
   this.Then(/^I can edit the (.*) Note$/, (format) => {
     let page = this.ui.browser.documentPage(this.doc.type);
     page.view.waitForVisible();
-
     let newContent = 'NEW ' + format + ' CONTENT';
     switch (format) {
-
       case 'HTML':
       case 'XML':
         let editor = page.view.el.element('#editor');
@@ -86,12 +84,10 @@ module.exports = function() {
         let save = page.view.el.element('paper-button[name="editorSave"]');
         save.waitForVisible();
         save.click();
-        driver.waitForExist('#editor');
         editor = page.view.el.element('#editor');
         editor.waitForVisible();
         (editor.getAttribute('innerHTML') === ('<p>' + newContent + '</p>')).should.be.true;
         break;
-
       case 'Markdown':
       case 'Text':
         let edit = page.view.el.element('#editNote');
@@ -112,11 +108,7 @@ module.exports = function() {
           markedContent.waitForVisible();
           (markedContent.getText() === newContent).should.be.true;
         } else if (format == 'Text') {
-          let iframe = preview.element('iframe');
-          iframe.waitForVisible();
-          // TODO: ELEMENTS-213: add preview in nuxeo-document-preview
-          // check new Text previewer content here
-          // for now just checking that the default iframe previewer exists
+          preview.element('iframe').waitForVisible();
         }
         break;
     }
