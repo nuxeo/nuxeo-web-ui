@@ -3,6 +3,7 @@ Feature: Favorites
   Background:
     Given I login as "Administrator"
 
+  @watch
   Scenario: Favorites
     Given I have a HTML Note
     When I browse to the document
