@@ -23,11 +23,11 @@ module.exports = function () {
   });
 
   this.Then('I can see "$name" entry', (name) => {
-    this.ui.vocabularyAdmin.hasEntry(name).should.be.true;
+    this.ui.vocabularyAdmin.waitForHasEntry(name).should.be.true;
   });
 
   this.Then('I cannot see "$name" entry', (name) => {
-    this.ui.vocabularyAdmin.hasEntry(name).should.be.false;
+    this.ui.vocabularyAdmin.waitForHasEntry(name, true).should.be.true;
   });
 
   this.Then('I can delete entry with index "$index"', (index) => {
