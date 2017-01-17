@@ -1,6 +1,7 @@
 'use strict';
 
 import Collections from './collections';
+import Favorites from './favorites';
 
 export default class Drawer {
 
@@ -32,7 +33,7 @@ export default class Drawer {
   }
 
   get favorites() {
-    return this._section('favorites');
+    return new Favorites('nuxeo-favorites');
   }
 
   get collections() {

@@ -4,6 +4,7 @@ import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Collections from './ui/collections';
 import CollectionBrowser from './ui/collectionBrowser';
+import Favorites from './ui/favorites';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Vocabulary from './ui/admin/vocabulary';

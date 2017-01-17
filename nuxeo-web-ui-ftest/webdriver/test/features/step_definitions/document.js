@@ -122,7 +122,7 @@ module.exports = function() {
     }
   });
 
-  this.Then('I add it to the "$name" collection', (name) => {
+  this.Then('I add the document to the "$name" collection', (name) => {
     this.ui.browser.addToCollection(name);
     liveCollections.push(name);
   });
@@ -137,5 +137,9 @@ module.exports = function() {
 
   this.Then('I can see the document does not belong to the "$name" collection', (name) => {
     this.ui.browser.doNotHaveCollection(name).should.be.true;
+  });
+
+  this.Then('I add the document to the favorites', () => {
+    this.ui.browser.addToFavorites();
   });
 };
