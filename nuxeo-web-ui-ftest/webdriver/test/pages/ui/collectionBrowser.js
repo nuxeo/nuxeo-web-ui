@@ -8,8 +8,11 @@ export default class CollectionBrowser {
   }
 
   hasDocument(doc) {
-    let rows = this.page.elements('#datatable #list nuxeo-data-table-row');
-    return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
+    driver.waitUntil(function() {
+      let rows = this.page.elements('#datatable #list nuxeo-data-table-row');
+      return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
+    }.bind(this), 5000, 'The document does not appear in the collection');
+    return true;
   }
 
   clickDocument(doc) {
