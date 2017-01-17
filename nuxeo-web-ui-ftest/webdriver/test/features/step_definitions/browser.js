@@ -10,6 +10,7 @@ module.exports = function () {
   });
 
   this.When('I click "$title" in the $tab tree', (title, tab) => {
+    this.ui.drawer._section(tab).element(`///nuxeo-tree-node//a[text()="${title}"]`).waitForVisible();
     this.ui.drawer._section(tab).click(`///nuxeo-tree-node//a[text()="${title}"]`);
   });
 
