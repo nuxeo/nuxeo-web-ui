@@ -50,8 +50,15 @@ export default class Vocabulary {
     this.page.click('#dialog paper-button[name="save"]');
   }
 
-  hasEntry(id) {
-    return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
+  waitForHasEntry(id, reverse) {
+    driver.waitUntil(function() {
+      if (reverse) {
+        return this.page.getText(`#table #items nuxeo-data-table-cell`).every((txt) => txt.trim() !== id);
+      } else {
+        return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
+      }
+    }.bind(this), 5000, reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`)
+    return true;
   }
 
   deleteEntry(index) {
