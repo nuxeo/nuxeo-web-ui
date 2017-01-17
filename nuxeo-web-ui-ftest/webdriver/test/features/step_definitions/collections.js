@@ -9,5 +9,4 @@ module.exports = function () {
   this.Then('I can see the collection queue has the document', () => this.ui.drawer.collections.hasDocument(this.doc).should.be.true);
   this.Then('I can remove the document from the collection queue', () => this.ui.drawer.collections.removeDocument(this.doc).should.be.true);
   this.Then('I can see the collection queue does not have the document', () => this.ui.drawer.collections.hasDocument(this.doc).should.be.false);
-  this.Then('I can see the document belongs to the favorites', () => this.ui.drawer.favorites.hasDocument(this.doc).should.be.true);
 };

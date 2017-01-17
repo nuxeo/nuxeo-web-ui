@@ -3,6 +3,11 @@ Feature: Favorites
   Background:
     Given I login as "Administrator"
 
+  @watch
   Scenario: Favorites
-    When I click the "favorites" button
-    Then I can see the list of favorites
+    Given I have a HTML Note
+    When I browse to the document
+    Then I add the document to the favorites
+    And I click the "favorites" button
+    And I can see the document belongs to the favorites
+    And I can remove the document from the favorites

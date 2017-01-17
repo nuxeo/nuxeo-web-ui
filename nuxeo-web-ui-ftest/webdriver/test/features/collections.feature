@@ -22,11 +22,3 @@ Feature: Collections
     And I can see the collection queue has the document
     And I can remove the document from the collection queue
     And I can see the collection queue does not have the document
-
-  @watch
-  Scenario: Add and Remove to/from Favorites
-    Given I have a HTML Note
-    When I browse to the document
-    Then I add the document to the favorites
-    And I click the "favorites" button
-    And I can see the document belongs to the favorites
