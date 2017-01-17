@@ -6,14 +6,19 @@ import Favorites from './favorites';
 export default class Drawer {
 
   constructor(selector) {
-    const drawer = driver.element(selector);
     this._selector = selector;
-    this.pages = drawer.element('iron-pages');
-    this.logo = drawer.element('#logo');
   }
 
   get menu() {
     return driver.element(this._selector).element('#menu');
+  }
+
+  get pages() {
+    return driver.element(this._selector).element('iron-pages');
+  }
+
+  get logo() {
+    return driver.element(this._selector).element('#logo');
   }
 
   get browser() {
