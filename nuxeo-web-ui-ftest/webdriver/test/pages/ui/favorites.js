@@ -8,13 +8,23 @@ export default class Favorites {
   }
 
   hasDocument(doc) {
-    /*let members = this.page.elements(`#membersList #items div`).value;
-    return members.some((member) => member.isExisting(`span.list-item-title`) && member.getText(`span.list-item-title`).trim() === doc.title);*/
-    return true;
+    let favorites = this.page.elements(`#favoritesList #items div`).value;
+    return favorites.some((favorite) => favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title);
   }
 
   removeDocument(doc) {
-    return true;
+    let favorites = this.page.elements(`#favoritesList #items div`).value;
+    return favorites.some((favorite) => {
+      if (favorite.getText(`span.list-item-title`).trim() === doc.title) {
+        favorite.element(`iron-icon.remove`).click();
+        driver.waitUntil(function() {
+          return !this.hasDocument(doc);
+        }.bind(this));
+        return true;
+      } else {
+        return false;
+      }
+    });
   }
 
 }
