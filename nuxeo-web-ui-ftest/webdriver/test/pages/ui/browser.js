@@ -127,4 +127,15 @@ export default class Browser {
     }
   }
 
+  get isFavorite() {
+    return this.page.isExisting(`nuxeo-favorites-toggle-button[favorite]`);
+  }
+
+  addToFavorites(doc) {
+    this.page.click(`nuxeo-favorites-toggle-button`);
+    driver.waitUntil(function() {
+      return this.isFavorite;
+    }.bind(this), 5000);
+  }
+
 }
