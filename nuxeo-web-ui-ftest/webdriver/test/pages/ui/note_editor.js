@@ -10,12 +10,22 @@ export default class NoteEditor {
     return this.el.element('#editor');
   }
 
+  get textarea() {
+    return this.el.element('#textarea');
+  }
+
   alloyHasContent(content) {
     let editor = this.alloy;
     driver.waitUntil(function() {
       return editor.getAttribute('innerHTML') === content;
     }.bind(this), 5000, 'The editor does not have such content');
     return true;
+  }
+
+  edit() {
+    let button = this.el.element('#editNote');
+    button.waitForVisible();
+    button.click();
   }
 
   save() {

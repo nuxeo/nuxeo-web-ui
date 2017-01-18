@@ -88,15 +88,10 @@ module.exports = function() {
         break;
       case 'Markdown':
       case 'Text':
-        let edit = page.view.el.element('#editNote');
-        edit.waitForVisible();
-        edit.click();
-        let textarea = page.view.el.element('nuxeo-note-editor #textarea');
-        textarea.waitForVisible();
-        textarea.setValue(newContent);
-        let saveNote = page.view.el.element('paper-button[name="editorSave"]');
-        saveNote.waitForVisible();
-        saveNote.click();
+        page.view.noteEditor.edit();
+        page.view.noteEditor.textarea.waitForVisible();
+        page.view.noteEditor.textarea.setValue(newContent);
+        page.view.noteEditor.save();
         const preview = page.view.preview;
         preview.waitForVisible();
         if (format == 'Markdown') {
