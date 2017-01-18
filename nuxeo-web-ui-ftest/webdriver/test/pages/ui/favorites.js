@@ -3,7 +3,7 @@
 export default class Favorites {
 
   constructor(selector) {
-    driver.waitForVisible(selector, 5000);
+    driver.waitForVisible(selector);
     this.page = driver.element(selector);
   }
 

@@ -3,7 +3,7 @@
 export default class Collections {
 
   constructor(selector) {
-    driver.waitForVisible(selector, 5000);
+    driver.waitForVisible(selector);
     this.page = driver.element(selector);
   }
 
@@ -15,7 +15,7 @@ export default class Collections {
       } else {
         return collections.some((collection) => collection.getText().trim() === name);
       }
-    }.bind(this), 5000, reverse ? `There is such collection` : `There is no such collection`);
+    }.bind(this), reverse ? `There is such collection` : `There is no such collection`);
     return true;
   }
 
@@ -45,7 +45,7 @@ export default class Collections {
       } else {
         return members.some((member) => member.getText().trim() === doc.title);
       }
-    }.bind(this), 5000, reverse ? `There is such member in the collection` : `There is no such member in the collection`);
+    }.bind(this), reverse ? `There is such member in the collection` : `There is no such member in the collection`);
     return true;
   }
 

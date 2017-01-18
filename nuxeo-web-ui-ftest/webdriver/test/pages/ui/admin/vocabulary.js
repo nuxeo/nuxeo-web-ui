@@ -3,7 +3,7 @@
 export default class Vocabulary {
 
   constructor(selector) {
-    driver.waitForVisible(selector, 5000);
+    driver.waitForVisible(selector);
     this.page = driver.element(selector);
   }
 
@@ -16,17 +16,17 @@ export default class Vocabulary {
   }
 
   get isAddNewEntryVisible() {
-    driver.waitForVisible(`#addEntry`, 5000);
+    driver.waitForVisible(`#addEntry`);
     return this.page.element(`#addEntry`).isVisible();
   }
 
   get isDialogVisible() {
-    driver.waitForVisible(`#dialog`, 5000);
+    driver.waitForVisible(`#dialog`);
     return this.page.element(`#dialog`).isVisible();
   }
 
   addNewEntry(id, label) {
-    driver.waitForVisible(`#addEntry`, 5000);
+    driver.waitForVisible(`#addEntry`);
     this.page.element(`#addEntry`).click();
     driver.waitForVisible(`#dialog`, 2000);
     this.page.element(`#dialog input[name="id"]`).setValue(id);
@@ -35,7 +35,7 @@ export default class Vocabulary {
   }
 
   addNewL10nEntry(id, label, parentIds) {
-    driver.waitForVisible(`#addEntry`, 5000);
+    driver.waitForVisible(`#addEntry`);
     this.page.element(`#addEntry`).click();
     driver.waitForVisible(`#dialog`, 2000);
     this.page.element(`#selectParent`).click();
@@ -57,7 +57,7 @@ export default class Vocabulary {
       } else {
         return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
       }
-    }.bind(this), 5000, reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`)
+    }.bind(this), reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`)
     return true;
   }
 
@@ -70,13 +70,13 @@ export default class Vocabulary {
   editEntry(index, label) {
     var selector = "#edit-button-" + (index - 1);
     this.page.element(selector).click();
-    driver.waitForVisible(`#dialog`, 2000);
+    driver.waitForVisible(`#dialog`);
     this.page.element(`#dialog input[name="label"]`).setValue(label);
     this.page.click('#dialog paper-button[name="save"]');
   }
 
   get isVocabularyTableVisible() {
-    driver.waitForVisible(`#table`, 5000);
+    driver.waitForVisible(`#table`);
     return this.page.element(`#table`).isVisible();
   }
 
@@ -90,7 +90,7 @@ export default class Vocabulary {
   }
 
   table() {
-    driver.waitForVisible(`#table`, 5000);
+    driver.waitForVisible(`#table`);
     return this.page.element(`#table`);
   }
 
@@ -99,7 +99,7 @@ export default class Vocabulary {
   }
 
   get hasEditDialog() {
-    driver.waitForVisible(`#edit-button-0`, 5000);
+    driver.waitForVisible(`#edit-button-0`);
     this.page.element(`#edit-button-0`).click();
     driver.waitForVisible(`#dialog`);
     var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
@@ -115,7 +115,7 @@ export default class Vocabulary {
   }
 
   get hasCreateDialog() {
-    driver.waitForVisible(`#addEntry`, 5000);
+    driver.waitForVisible(`#addEntry`);
     this.page.element(`#addEntry`).click();
     driver.waitForVisible(`#dialog`);
     var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);

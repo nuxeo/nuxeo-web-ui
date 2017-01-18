@@ -92,16 +92,15 @@ module.exports = function() {
         page.view.noteEditor.textarea.waitForVisible();
         page.view.noteEditor.textarea.setValue(newContent);
         page.view.noteEditor.save();
-        const preview = page.view.preview;
-        preview.waitForVisible();
+        page.view.preview.waitForVisible();
         if (format == 'Markdown') {
-          let markedElement = preview.element('marked-element');
+          let markedElement = page.view.preview.element('marked-element');
           markedElement.waitForVisible();
           let markedContent = markedElement.element('div.markdown-html');
           markedContent.waitForVisible();
           markedContent.getText().should.equal(newContent);
         } else if (format == 'Text') {
-          preview.element('iframe').waitForVisible();
+          page.view.preview.element('iframe').waitForVisible();
         }
         break;
     }
@@ -117,11 +116,11 @@ module.exports = function() {
   });
 
   this.Then('I can delete the document from the "$name" collection', (name) => {
-    this.ui.browser.removeFromCollection(name).should.be.true;
+    this.ui.browser.removeFromCollection(name);
   });
 
   this.Then('I can see the document does not belong to the "$name" collection', (name) => {
-    this.ui.browser.doNotHaveCollection(name).should.be.true;
+    this.ui.browser.hasCollection(name, true).should.be.true;
   });
 
   this.Then('I add the document to the favorites', () => {

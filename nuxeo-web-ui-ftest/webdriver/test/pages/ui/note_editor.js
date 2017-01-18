@@ -15,10 +15,9 @@ export default class NoteEditor {
   }
 
   alloyHasContent(content) {
-    let editor = this.alloy;
     driver.waitUntil(function() {
-      return editor.getAttribute('innerHTML') === content;
-    }.bind(this), 5000, 'The editor does not have such content');
+      return this.alloy.getAttribute('innerHTML') === content
+    }.bind(this), 'The editor does not have such content');
     return true;
   }
 
