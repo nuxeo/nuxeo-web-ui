@@ -84,6 +84,9 @@ module.exports = function() {
         noteEditor.alloy.waitForVisible();
         noteEditor.alloy.setValue(newContent);
         noteEditor.save();
+        page = this.ui.browser.documentPage(this.doc.type);
+        page.view.waitForVisible();
+        noteEditor = page.view.noteEditor;
         noteEditor.alloy.waitForVisible();
         noteEditor.alloyHasContent('<p>' + newContent + '</p>');
         break;
