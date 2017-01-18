@@ -3,7 +3,7 @@
 export default class Home {
 
   constructor(selector) {
-    driver.waitForVisible(selector, 5000);
+    driver.waitForVisible(selector);
     this.dashboard = driver.element(selector);
   }
 

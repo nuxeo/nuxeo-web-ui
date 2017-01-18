@@ -17,7 +17,7 @@ export default class CreateDialog {
   set docType(docType) {
     this._docType = docType;
     this.dialog.click(`///paper-button[normalize-space(text())="${this.docType}"]`);
-    this.form.waitForVisible(5000);
+    this.form.waitForVisible();
   }
 
   set title(title) {

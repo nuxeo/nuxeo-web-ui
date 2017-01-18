@@ -54,92 +54,46 @@ export default class Browser {
     this.page.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
 
-  hasCollection(name) {
+  hasCollection(name, reverse) {
+    let page = this.page;
     driver.waitUntil(function () {
-      try {
-        let collections = this.page.getText(`nuxeo-document-collections nuxeo-tag`);
-        if (Array.isArray(collections)) {
-          return collections.some((txt) => txt.trim() === name);
-        } else {
-         return collections.trim() === name;
-        }
-        return true;
-      } catch(e) {
-        return false;
+      let collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+      if (reverse) {
+        return collections.every((collection) => collection.getText().trim() !== name);
+      } else {
+        return collections.some((collection) => collection.getText().trim() === name);
       }
-    }.bind(this), 5000, `The document does not belong to the collection`);
-    return true;
-  }
-
-  doNotHaveCollection(name) {
-    driver.waitUntil(function () {
-      try {
-        try {
-          if (!this.page.isExisting(`nuxeo-document-collections nuxeo-tag`)) {
-            return true;
-          }
-        } catch(e) {
-          if (e instanceof NoSuchElement) {
-            return true;
-          }
-          console.warn(e);
-          return false;
-        }
-        let collections = this.page.getText(`nuxeo-document-collections nuxeo-tag`);
-        if (Array.isArray(collections)) {
-          return collections.every((txt) => txt.trim() !== name);
-        } else if (collections) {
-          return collections.trim() !== name;
-        } else {
-          return true;
-        }
-        return true;
-      } catch(e) {
-        return false;
-      }
-    }.bind(this), 5000, `The document does belong to the collection`);
+    }.bind(this), `The document does not belong to the collection`);
     return true;
   }
 
   removeFromCollection(name) {
-    let collections = this.page.getText(`nuxeo-document-collections nuxeo-tag`);
-    if (Array.isArray(collections)) {
-      return collections.some((txt, index) => {
-        if (txt.trim() === name) {
-          this.page.waitForVisible(`nuxeo-document-collections nuxeo-tag iron-icon[name="remove"]`);
-          this.page.element(`nuxeo-document-collections nuxeo-tag iron-icon[name="remove"]`)[index].click();
-          driver.waitUntil(function () {
+    let page = this.page;
+    let collections = this.page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+    collections.some((collection) => {
+      if (collection.getText().trim() === name) {
+        driver.waitUntil(function() {
+          try {
+            collection.click(`nuxeo-tag iron-icon[name="remove"]`);
+            return true;
+          } catch(e) {
             return this.doNotHaveCollection(name);
-          });
-          return true;
-        }
-        return false;
-      });
-    } else {
-       driver.waitUntil(function () {
-         try {
-           this.page.click(`nuxeo-document-collections nuxeo-tag iron-icon[name="remove"]`)
-           return true;
-         } catch(e) {
-           return false;
-         }
-       }.bind(this), 5000);
-       driver.waitUntil(function () {
-         return this.doNotHaveCollection(name);
-       }.bind(this));
-       return true;
-    }
+          }
+        }.bind(this), 'Could not remove collection.');
+        return true;
+      }
+      return false;
+    });
   }
 
   get isFavorite() {
-    return this.page.isExisting(`nuxeo-favorites-toggle-button[favorite]`);
+    this.page.waitForExist(`nuxeo-favorites-toggle-button[favorite]`);
+    return true;
   }
 
   addToFavorites(doc) {
     this.page.click(`nuxeo-favorites-toggle-button`);
-    driver.waitUntil(function() {
-      return this.isFavorite;
-    }.bind(this), 5000);
+    return this.isFavorite;
   }
 
 }
