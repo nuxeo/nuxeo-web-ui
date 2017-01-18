@@ -75,17 +75,16 @@ module.exports = function() {
     let page = this.ui.browser.documentPage(this.doc.type);
     page.view.waitForVisible();
 
-    let noteEditor = page.view.noteEditor;
     let newContent = 'NEW ' + format + ' CONTENT';
 
     switch (format) {
       case 'HTML':
       case 'XML':
-        noteEditor.alloy.waitForVisible();
-        noteEditor.alloy.setValue(newContent);
-        noteEditor.save();
-        noteEditor.alloy.waitForVisible();
-        noteEditor.alloyHasContent('<p>' + newContent + '</p>');
+        page.view.noteEditor.alloy.waitForVisible();
+        page.view.noteEditor.alloy.setValue(newContent);
+        page.view.noteEditor.save();
+        page.view.noteEditor.alloy.waitForVisible();
+        page.view.noteEditor.alloyHasContent('<p>' + newContent + '</p>');
         break;
       case 'Markdown':
       case 'Text':
