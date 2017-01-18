@@ -8,7 +8,11 @@ export default class DocumentPage {
 
   constructor(selector, docType) {
     this.docType = docType;
-    this.page = driver.element(selector);
+    this._selector = selector;
+  }
+
+  get page() {
+    return driver.element(this._selector);
   }
 
   get view() {

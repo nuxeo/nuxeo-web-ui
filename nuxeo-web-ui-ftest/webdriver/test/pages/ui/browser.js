@@ -6,7 +6,11 @@ import DocumentPage from './browser/document_page';
 export default class Browser {
 
   constructor(selector) {
-    this.page = driver.element(selector);
+    this._selector = selector;
+  }
+
+  get page() {
+    return driver.element(this._selector);
   }
 
   documentPage(docType) {
