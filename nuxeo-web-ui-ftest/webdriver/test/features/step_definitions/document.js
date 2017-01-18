@@ -74,19 +74,18 @@ module.exports = function() {
   this.Then(/^I can edit the (.*) Note$/, (format) => {
     let page = this.ui.browser.documentPage(this.doc.type);
     page.view.waitForVisible();
+
+    let noteEditor = page.view.noteEditor;
     let newContent = 'NEW ' + format + ' CONTENT';
+
     switch (format) {
       case 'HTML':
       case 'XML':
-        let editor = page.view.el.element('#editor');
-        editor.waitForVisible();
-        editor.setValue(newContent);
-        let save = page.view.el.element('paper-button[name="editorSave"]');
-        save.waitForVisible();
-        save.click();
-        editor = page.view.el.element('#editor');
-        editor.waitForVisible();
-        (editor.getAttribute('innerHTML') === ('<p>' + newContent + '</p>')).should.be.true;
+        noteEditor.alloy.waitForVisible();
+        noteEditor.alloy.setValue(newContent);
+        noteEditor.save();
+        noteEditor.alloy.waitForVisible();
+        noteEditor.alloyHasContent('<p>' + newContent + '</p>');
         break;
       case 'Markdown':
       case 'Text':
@@ -106,7 +105,7 @@ module.exports = function() {
           markedElement.waitForVisible();
           let markedContent = markedElement.element('div.markdown-html');
           markedContent.waitForVisible();
-          (markedContent.getText() === newContent).should.be.true;
+          markedContent.getText().should.equal(newContent);
         } else if (format == 'Text') {
           preview.element('iframe').waitForVisible();
         }

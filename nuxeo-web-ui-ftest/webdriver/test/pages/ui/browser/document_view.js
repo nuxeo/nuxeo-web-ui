@@ -1,5 +1,6 @@
 'use strict';
 import DocumentAttachments from './document_attachments'
+import NoteEditor from '../note_editor'
 
 export default class DocumentView {
   constructor(el, docType) {
@@ -25,5 +26,9 @@ export default class DocumentView {
 
   get attachments() {
     return new DocumentAttachments(this.el.element('nuxeo-document-attachments'), this.docType);
+  }
+
+  get noteEditor() {
+    return new NoteEditor(this.el.element('nuxeo-note-editor'));
   }
 }
