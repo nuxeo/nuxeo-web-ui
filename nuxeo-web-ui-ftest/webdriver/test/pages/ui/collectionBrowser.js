@@ -7,7 +7,7 @@ export default class CollectionBrowser {
     this.page = driver.element(selector);
   }
 
-  hasMemeber(doc) {
+  waitForHasMember(doc) {
     driver.waitUntil(function() {
       let rows = this.page.elements('#datatable #list nuxeo-data-table-row');
       return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
