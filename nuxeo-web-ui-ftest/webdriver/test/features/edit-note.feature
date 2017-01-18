@@ -1,4 +1,3 @@
-@watch
 Feature: Edit Note
 
   Note is editable in all supported formats
