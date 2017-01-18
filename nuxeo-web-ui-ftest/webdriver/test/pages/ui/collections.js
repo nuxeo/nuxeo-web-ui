@@ -7,20 +7,15 @@ export default class Collections {
     this.page = driver.element(selector);
   }
 
-  hasCollection(name) {
-    driver.waitUntil(function () {
-      try {
-        let collections = this.page.getText(`span.collection-name`);
-        if (Array.isArray(collections)) {
-          return collections.some((txt) => txt.trim() === name);
-        } else {
-         return collections.trim() === name;
-        }
-        return true;
-      } catch(e) {
-        return false;
+  waitForHasCollection(name, reverse) {
+    driver.waitUntil(function() {
+      let collections = this.page.elements(`span.collection-name`).value;
+      if (reverse) {
+        return collections.every((collection) => collection.getText().trim() !== name);
+      } else {
+        return collections.some((collection) => collection.getText().trim() === name);
       }
-    }.bind(this), 5000, `There is no such collection`);
+    }.bind(this), 5000, reverse ? `There is such collection` : `There is no such collection`);
     return true;
   }
 
@@ -42,12 +37,19 @@ export default class Collections {
     return this.page.elements(`#membersList #items div`).value.length;
   }
 
-  hasDocument(doc) {
-    let members = this.page.elements(`#membersList #items div`).value;
-    return members.some((member) => member.isExisting(`span.list-item-title`) && member.getText(`span.list-item-title`).trim() === doc.title);
+  waitForHasMember(doc, reverse) {
+    driver.waitUntil(function() {
+      let members = this.page.elements(`#membersList #items div`).value;
+      if (reverse) {
+        return members.every((member) => member.getText().trim() !== doc.title);
+      } else {
+        return members.some((member) => member.getText().trim() === doc.title);
+      }
+    }.bind(this), 5000, reverse ? `There is such member in the collection` : `There is no such member in the collection`);
+    return true;
   }
 
-  removeDocument(doc) {
+  removeMember(doc) {
     let members = this.page.elements(`#membersList #items div`).value;
     return members.some((member) => {
       if (member.getText(`span.list-item-title`).trim() === doc.title) {
