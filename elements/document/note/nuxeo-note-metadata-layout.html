@@ -28,12 +28,12 @@ Contributors:
 
     <div role="widget">
       <label>[[i18n('label.dublincore.title')]]</label>
-      <div>[[document.properties.dc:title]]</div>
+      <div name="title">[[document.properties.dc:title]]</div>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.dc:description]]">
       <label>[[i18n('label.dublincore.description')]]</label>
-      <div class="multiline">[[document.properties.dc:description]]</div>
+      <div name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.dc:nature]]">
