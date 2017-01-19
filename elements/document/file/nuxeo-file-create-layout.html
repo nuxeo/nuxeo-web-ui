@@ -25,8 +25,8 @@ Contributors:
 <dom-module id="nuxeo-file-create-layout">
   <template>
 
-    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
-    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+    <paper-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
+    <paper-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-dropzone role="widget" label="[[i18n('file.content')]]" document="[[document]]"></nuxeo-dropzone>
 

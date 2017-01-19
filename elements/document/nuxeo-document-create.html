@@ -159,9 +159,13 @@ Contributors:
                                    always-float-label></nuxeo-path-suggestion>
             <span class="error">&#8203;[[targetLocationError]]</span>
           </div>
-          <div class="typeSelection">
+          <div name="typeSelection" class="typeSelection">
             <template is="dom-repeat" items="[[subtypes]]" as="type">
-              <paper-button noink class="docTypeButton vertical layout" on-tap="_selectType" data-args="[[type]]">
+              <paper-button noink
+                            name$="[[type.type]]"
+                            class="docTypeButton vertical layout"
+                            on-tap="_selectType"
+                            data-args="[[type]]">
                 <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
                 <span>[[_getTypeLabel(type)]]</span>
               </paper-button>
