@@ -24,7 +24,7 @@ export default class DocumentPage {
   }
 
   get metadata() {
-    return new DocumentMetadata(this.page.element('nuxeo-document-metadata'));
+    return new DocumentMetadata('nuxeo-document-metadata', this.docType);
   }
 
   get editButton() {

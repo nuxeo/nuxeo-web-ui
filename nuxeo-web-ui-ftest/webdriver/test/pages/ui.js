@@ -16,7 +16,6 @@ export default class UI {
     this.drawer = new Drawer('#drawer');
     this.pages = this.app.element('#mainContainer iron-pages');
     this.suggester = this.app.element('#mainContainer nuxeo-suggester');
-    this.createButton = this.app.element('#createBtn');
   }
 
   goHome() {
@@ -32,6 +31,10 @@ export default class UI {
 
   get createDialog() {
     return this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
+  }
+
+  get createButton() {
+    return this.app.element('#createBtn');
   }
 
   static get() {
