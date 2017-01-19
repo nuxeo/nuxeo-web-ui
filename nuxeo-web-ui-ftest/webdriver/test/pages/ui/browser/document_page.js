@@ -20,7 +20,7 @@ export default class DocumentPage {
   }
 
   get edit() {
-    return new DocumentEdit(this.page.element(`nuxeo-document-edit`), this.docType);
+    return new DocumentEdit(`nuxeo-document-edit`, this.docType);
   }
 
   get metadata() {
