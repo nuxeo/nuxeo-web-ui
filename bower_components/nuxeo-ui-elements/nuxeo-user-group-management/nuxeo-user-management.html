@@ -530,7 +530,7 @@ Used by `nuxeo-user-group-management`
 
         _groupSelected: function() {
           if (this.selectedGroup) {
-            if (!this.user.isAdministrator && this.selectedGroup.groupname === 'administrators') {
+            if (!this.isAdministrator && this.selectedGroup.groupname === 'administrators') {
               this.errors = this.i18n('userManagement.errorAdministratorsGroup');
               this.selectedGroup = null;
               return;
@@ -556,7 +556,15 @@ Used by `nuxeo-user-group-management`
             this._removeRecent(group.name);
             this._removeFromGroup(group.name);
             this._toast(this.i18n('userManagement.removedUserFromGroup', this.user.id, group.name));
+          }.bind(this))
+
+          //* TODO: remove this workaround when API endpoint is fixed and returns a valid JSON
+          .catch(function() {
+            this._removeRecent(group.name);
+            this._removeFromGroup(group.name);
+            this._toast(this.i18n('userManagement.removedUserFromGroup', this.user.id, group.name));
           }.bind(this));
+          //*/
         },
 
         _removeRecent: function(group) {
