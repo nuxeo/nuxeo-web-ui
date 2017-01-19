@@ -1,3 +1,3 @@
 fixtures.blobs = {
-  get: (file) => `test/resources/${file}`
+  get: (file) => `test/resources/${file}`,
 };

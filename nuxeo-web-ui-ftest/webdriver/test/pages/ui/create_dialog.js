@@ -1,35 +1,16 @@
 'use strict';
 
-export default class CreateDialog {
+import BasePage from './base'
+import DocumentCreate from './browser/document_create'
 
-  constructor(selector) {
-    this.dialog = driver.element(selector);
+export default class CreateDialog extends BasePage {
+
+  get documentCreate() {
+    return new DocumentCreate('nuxeo-document-create');
   }
 
-  get isVisible() {
-    return this.dialog.isVisible();
+  get createButton() {
+    return this.el.element('///paper-button[text()="Create"]');
   }
 
-  get docType() {
-    return this._docType;
-  }
-
-  set docType(docType) {
-    this._docType = docType;
-    this.dialog.click(`///paper-button[normalize-space(text())="${this.docType}"]`);
-    this.form.waitForVisible();
-  }
-
-  set title(title) {
-    // XXX this.form.setValue('input[name="title"]', title)
-    this.form.setValue(`input.nuxeo-${this.docType.toLowerCase()}-edit`, title);
-  }
-
-  get form() {
-    return new DocumentEdit(this.dialog.element(`nuxeo-${this.docType.toLowerCase()}-edit`));
-  }
-
-  submit() {
-    this.dialog.click('///paper-button[text()="Create"]');
-  }
 }

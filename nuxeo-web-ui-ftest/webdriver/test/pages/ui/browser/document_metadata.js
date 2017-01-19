@@ -1,16 +1,16 @@
 'use strict';
 
-export default class DocumentMetadata {
-  constructor(el, docType) {
-    this.el = el;
-    this.docType = docType;
+import BasePage from '../base'
+import DocumentLayout from './document_layout'
+
+export default class DocumentMetadata extends BasePage {
+
+  constructor(selector, docType) {
+    super(selector);
+    this._docType = docType;
   }
 
-  isVisible() {
-    return this.el.isVisible();
-  }
-
-  waitForVisible() {
-    return this.el.waitForVisible();
+  layout() {
+    return new DocumentLayout(`nuxeo-${this._docType.toLowerCase()}-metadata-layout`);
   }
 }

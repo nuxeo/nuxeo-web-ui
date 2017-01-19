@@ -48,6 +48,15 @@ module.exports = function() {
     this.ui.browser.title.waitForVisible();
   });
 
+  this.Then(/I can see (.+) metadata with the following properties:/, (docType, table) => {
+    let page = this.ui.browser.documentPage(docType);
+    page.waitForVisible();
+    page.metadata.waitForVisible();
+    table.rows().forEach((row) => {
+      page.metadata.layout().getFieldValue(docType, row[0], row[1]);
+    });
+  });
+
   this.Then(/^I can edit the (.*) metadata$/, (docType) => {
     const page = this.ui.browser.documentPage(docType);
     page.metadata.waitForVisible();
