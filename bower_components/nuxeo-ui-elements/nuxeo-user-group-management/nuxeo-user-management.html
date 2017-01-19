@@ -557,14 +557,6 @@ Used by `nuxeo-user-group-management`
             this._removeFromGroup(group.name);
             this._toast(this.i18n('userManagement.removedUserFromGroup', this.user.id, group.name));
           }.bind(this))
-
-          //* TODO: remove this workaround when API endpoint is fixed and returns a valid JSON
-          .catch(function() {
-            this._removeRecent(group.name);
-            this._removeFromGroup(group.name);
-            this._toast(this.i18n('userManagement.removedUserFromGroup', this.user.id, group.name));
-          }.bind(this));
-          //*/
         },
 
         _removeRecent: function(group) {

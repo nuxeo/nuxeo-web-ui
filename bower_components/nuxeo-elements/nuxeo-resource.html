@@ -211,7 +211,11 @@ element.
         .execute(options)
         .then(function(response) {
           return response.text().then(function(text) {
-            return text ? JSON.parse(text) : {}
+            try {
+              return text ? JSON.parse(text) : {};
+            } catch (e) {
+              return { error: 'Invalid json' };
+            }
           })
         }).then(function(data) {
           this.fire('response', {response: data});
