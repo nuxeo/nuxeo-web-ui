@@ -5,7 +5,7 @@ global.liveDocuments = [];
 
 fixtures.documents = {
   init: (type = 'File', title = 'my document') => {
-    return {
+    let doc = {
       'entity-type': 'document',
       name: title.replace(/[^a-z0-9.]/gi, '_'),
       type: type.trim(),
@@ -13,6 +13,11 @@ fixtures.documents = {
         'dc:title': title,
       }
     };
+    if (type === 'Note') {
+      doc.properties['note:mime_type'] = 'text/html';
+      doc.properties['note:note'] = '';
+    }
+    return doc;
   },
   create: (parent, document) => {
     return nuxeo.repository().create(parent, document).then((doc) => {

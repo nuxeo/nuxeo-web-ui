@@ -10,7 +10,7 @@ export default class DocumentLayout extends BasePage {
     return form.element(`[name="${field}"]`);
   }
 
-  getFieldValue(docType, field) {
+  getFieldValue(field) {
     let fieldEl = this.getField(field);
     fieldEl.waitForVisible();
     return fixtures.layouts.getValue(fieldEl);

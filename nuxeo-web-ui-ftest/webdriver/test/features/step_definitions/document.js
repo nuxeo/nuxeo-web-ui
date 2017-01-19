@@ -53,7 +53,7 @@ module.exports = function() {
     page.waitForVisible();
     page.metadata.waitForVisible();
     table.rows().forEach((row) => {
-      page.metadata.layout().getFieldValue(docType, row[0], row[1]);
+      page.metadata.layout().getFieldValue(row[0], row[1]);
     });
   });
 
@@ -69,6 +69,23 @@ module.exports = function() {
     page.saveButton.isVisible().should.be.true;
     page.saveButton.click();
     page.metadata.waitForVisible();
+  });
+
+  this.Then(/^I can edit the following properties in the (.+) metadata:$/, (docType, table) => {
+    let page = this.ui.browser.documentPage(docType);
+    page.waitForVisible();
+    page.editButton.waitForVisible();
+    page.editButton.click();
+    page.edit.waitForVisible();
+    table.rows().forEach((row) => {
+      page.edit.layout().setFieldValue(row[0], row[1]);
+    });
+    page.saveButton.waitForVisible();
+    page.saveButton.click();
+    page.metadata.waitForVisible();
+    table.rows().forEach((row) => {
+      page.metadata.layout().getFieldValue(row[0], row[1]);
+    });
   });
 
   this.Given(/^I have a (.+) Note$/, (format) => {
