@@ -29,18 +29,8 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    let nextMinor = v1 + '.' + v2;
-    page.versions.checkDialogVersion('minor', nextMinor);
-    let nextMajor = v3 + '.' + v4;
-    page.versions.checkDialogVersion('major', nextMajor);
-  });
-
-  this.When('I can cancel the dialog', () => {
-    const page = this.ui.browser.documentPage(this.doc.type);
-    page.waitForVisible();
-    page.versions.waitForVisible();
-    page.versions.dialog.waitForVisible();
-
+    page.versions.dialogNextMinor().should.equal(v1 + '.' + v2);
+    page.versions.dialogNextMajor().should.equal(v3 + '.' + v4);
   });
 
   this.When('Dialog dismiss and confirm buttons are available', () => {
@@ -48,7 +38,8 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.checkDialogButtons().should.be.true;
+    page.versions.dialogDismissButton().waitForVisible();
+    page.versions.dialogConfirmButton().waitForVisible();
   });
 
 };
