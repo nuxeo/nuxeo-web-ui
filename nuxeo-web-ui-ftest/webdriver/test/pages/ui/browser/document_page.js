@@ -3,6 +3,7 @@
 import DocumentEdit from './document_edit';
 import DocumentMetadata from './document_metadata';
 import DocumentView from './document_view';
+import DocumentVersions from './document_versions';
 
 export default class DocumentPage {
 
@@ -25,6 +26,10 @@ export default class DocumentPage {
 
   get metadata() {
     return new DocumentMetadata('nuxeo-document-metadata', this.docType);
+  }
+
+  get versions() {
+    return new DocumentVersions('nuxeo-document-versions');
   }
 
   get editButton() {
