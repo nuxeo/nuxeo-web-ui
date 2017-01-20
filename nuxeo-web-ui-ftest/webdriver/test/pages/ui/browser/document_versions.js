@@ -12,20 +12,32 @@ export default class DocumentVersions extends BasePage {
     return this.el.element('nuxeo-document-create-version #dialog');
   }
 
-  dialogNextMajor() {
-    return this.el.element('#nextMajor').getText();
+  get dialogNextMajor() {
+    return this.el.element('#nextMajor');
   }
 
-  dialogNextMinor() {
-    return this.el.element('#nextMinor').getText();
+  get dialogNextMinor() {
+    return this.el.element('#nextMinor');
   }
 
-  dialogDismissButton() {
+  get dialogDismissButton() {
     return this.dialog.element('paper-button[dialog-dismiss]');
   }
 
-  dialogConfirmButton() {
+  get dialogConfirmButton() {
     return this.dialog.element('paper-button[dialog-confirm]');
+  }
+
+  get listToggle() {
+    return this.el.element('nuxeo-tag.toggle');
+  }
+
+  listLatest() {
+    return this.el.element('nuxeo-document-versions-list #version-latest');
+  }
+
+  listItemTitle(index) {
+    return this.el.element('nuxeo-document-versions-list #version-id-' + index + ' .title');
   }
 
 }

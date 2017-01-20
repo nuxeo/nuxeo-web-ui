@@ -22,6 +22,12 @@ module.exports = function() {
     })
   });
 
+  this.Given(/^This document has a (major|minor) version$/, (versionType) => {
+    return fixtures.documents.createVersion(this.doc, versionType).then((doc) => {
+      this.doc = doc;
+    })
+  });
+
   this.Given(/^I have a document added to "([^"]*)" collection$/, (colName) => {
     let doc = fixtures.documents.init('File');
     // create the document
