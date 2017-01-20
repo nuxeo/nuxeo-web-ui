@@ -29,8 +29,8 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.dialogNextMinor().should.equal(v1 + '.' + v2);
-    page.versions.dialogNextMajor().should.equal(v3 + '.' + v4);
+    page.versions.dialogNextMinor.getText().should.equal(v1 + '.' + v2);
+    page.versions.dialogNextMajor.getText().should.equal(v3 + '.' + v4);
   });
 
   this.When('Dialog dismiss and confirm buttons are available', () => {
@@ -38,8 +38,18 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.dialogDismissButton().waitForVisible();
-    page.versions.dialogConfirmButton().waitForVisible();
+    page.versions.dialogDismissButton.waitForVisible();
+    page.versions.dialogConfirmButton.waitForVisible();
+  });
+
+  this.When(/^Document version is "([^"]*)"$/, (label) => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.createVersionButton.isVisible().should.be.false;
+    page.versions.listToggle.waitForVisible();
+    page.versions.listToggle.click();
+    page.versions.listItemTitle(0).getText().should.equals(label);
   });
 
 };
