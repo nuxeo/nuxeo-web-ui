@@ -1,6 +1,6 @@
 'use strict';
 
-import BasePage from '../base'
+import BasePage from '../../base'
 import DocumentLayout from './document_layout'
 
 export default class DocumentCreate extends BasePage {
