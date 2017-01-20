@@ -8,15 +8,9 @@ import Favorites from './ui/favorites';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Vocabulary from './ui/admin/vocabulary';
+import BasePage from './base'
 
-export default class UI {
-
-  constructor(selector) {
-    this.app = driver.element(selector);
-    this.drawer = new Drawer('#drawer');
-    this.pages = this.app.element('#mainContainer iron-pages');
-    this.suggester = this.app.element('#mainContainer nuxeo-suggester');
-  }
+export default class UI extends BasePage {
 
   goHome() {
     this.drawer.logo.click();
@@ -34,7 +28,11 @@ export default class UI {
   }
 
   get createButton() {
-    return this.app.element('#createBtn');
+    return this.el.element('#createBtn');
+  }
+
+  get drawer() {
+    return new Drawer('#drawer');
   }
 
   static get() {
@@ -50,8 +48,16 @@ export default class UI {
     return new Browser('nuxeo-browser');
   }
 
+  get pages() {
+    return this.el.element('#mainContainer iron-pages');
+  }
+
   get search() {
     return this.pages.element('nuxeo-search-results');
+  }
+
+  get suggester() {
+   return this.el.element('#mainContainer nuxeo-suggester'); 
   }
 
   get collectionBrowser() {

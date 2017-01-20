@@ -1,6 +1,6 @@
 'use strict';
 
-import BasePage from '../base'
+import BasePage from '../../base'
 
 export default class DocumentLayout extends BasePage {
 
