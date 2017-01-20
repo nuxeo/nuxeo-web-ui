@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../paper-input/paper-input.html">
+<link rel="import" href="../../iron-form-element-behavior/iron-form-element-behavior.html">
 <link rel="import" href="../moment-import.html">
 
 <!--
@@ -34,7 +35,7 @@ Example:
     <style>
     </style>
 
-    <paper-input id="date" label="[[label]]"
+    <paper-input id="date" label="[[label]]" required="[[required]]" name="[[name]]"
                  type="date" on-change="_onChange">
     </paper-input>
 
@@ -45,7 +46,7 @@ Example:
   (function () {
     Polymer({
       is: 'nuxeo-date-picker',
-
+      behaviors: [Polymer.IronFormElementBehavior],
       properties: {
         label: String,
         value: {
