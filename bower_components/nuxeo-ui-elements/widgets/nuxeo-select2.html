@@ -17,6 +17,8 @@ limitations under the License.
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="nuxeo-select2-behavior.html">
 <link rel="import" href="nuxeo-select2-theme.html">
+<link rel="import" href="../../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="../../iron-validatable-behavior/iron-validatable-behavior.html">
 
 <!--
 An element wrapping Select2 and relying on an operation for suggestions
@@ -36,7 +38,17 @@ An element wrapping Select2 and relying on an operation for suggestions
      :host {
        display: block;
      }
+     :host([invalid]) .label {
+       color: red;
+     }
+     :host([invalid]) .select2-container {
+       border-bottom: 2px solid red;
+     }
    </style>
+
+   <template is="dom-if" if="[[label]]">
+     <label class="label">[[label]]</label>
+   </template>
 
    <nuxeo-operation id="op" op="[[operation]]"></nuxeo-operation>
 
@@ -48,32 +60,39 @@ An element wrapping Select2 and relying on an operation for suggestions
      'use strict';
 
      Polymer({
-       is: 'nuxeo-select2',
-       behaviors: [Nuxeo.Select2Behavior],
+      is: 'nuxeo-select2',
+      behaviors: [Nuxeo.Select2Behavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
 
-       properties: {
+      properties: {
 
-         /**
-          * Operation to call for suggestions.
-          */
-         operation: String,
+       /**
+        * Operation to call for suggestions.
+        */
+       operation: String,
 
-         /**
-          * Parameters to use in the operation call (will include `searchTerm`).
-          */
-         params: {
-           type: Object
-         },
-
-         /**
-          * Results filtering function (optional).
-          */
-         queryResultsFilter: Function
+       /**
+        * Parameters to use in the operation call (will include `searchTerm`).
+        */
+       params: {
+         type: Object
        },
 
-       ready: function() {
-         this._initSelect2(this.$.select2);
-       },
+       /**
+        * Results filtering function (optional).
+        */
+       queryResultsFilter: Function
+      },
+
+      ready: function() {
+        this._initSelect2(this.$.select2);
+      },
+
+      _getValidity: function() {
+        if (!this.required) {
+          return true;
+        }
+        return this.multiple ? this.value.length > 0 : !!this.value;
+      },
 
       // Implements abstract Nuxeo.Select2 methods
       _query: function(query) {

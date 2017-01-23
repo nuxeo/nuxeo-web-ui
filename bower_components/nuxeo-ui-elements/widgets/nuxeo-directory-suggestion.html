@@ -16,6 +16,8 @@ limitations under the License.
 -->
 <link rel="import" href="nuxeo-select2.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
+<link rel="import" href="../../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="../../iron-validatable-behavior/iron-validatable-behavior.html">
 
 <!--
 An element for selecting one or more entries from a given directory.
@@ -39,11 +41,8 @@ An element for selecting one or more entries from a given directory.
     }
   </style>
 
-  <template is="dom-if" if="[[label]]">
-    <label>[[label]]</label>
-  </template>
-
-  <nuxeo-select2 operation="Directory.SuggestEntries"
+  <nuxeo-select2 id="s2" operation="Directory.SuggestEntries"
+                 label="[[label]]"
                  min-chars="[[minChars]]"
                  multiple="[[multiple]]"
                  params="[[params]]"
@@ -52,6 +51,8 @@ An element for selecting one or more entries from a given directory.
                  value="{{value}}"
                  selected-items="{{selectedItems}}"
                  selection-formatter="[[selectionFormatter]]"
+                 required="[[required]]"
+                 invalid="[[invalid]]"
                  init-selection="[[initSelection]]">
   </nuxeo-select2>
 
@@ -59,7 +60,7 @@ An element for selecting one or more entries from a given directory.
 <script>
 Polymer({
   is: 'nuxeo-directory-suggestion',
-  behaviors: [Nuxeo.I18nBehavior],
+  behaviors: [Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
   properties: {
 
     /**
@@ -153,6 +154,17 @@ Polymer({
         return this._initSelection.bind(this);
       }
     }
+  },
+
+  /* Override method from Polymer.IronValidatableBehavior. */
+  _getValidity: function() {
+    return this.$.s2._getValidity();
+  },
+
+  /* Override method from Polymer.IronValidatableBehavior. */
+  validate: function(value) {
+    this.invalid = !this.$.s2.validate();
+    return !this.invalid;
   },
 
   _computeParams: function() {

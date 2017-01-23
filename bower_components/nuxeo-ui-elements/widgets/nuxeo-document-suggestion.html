@@ -28,22 +28,30 @@ An element for selecting one or more documents.
 -->
 <dom-module id="nuxeo-document-suggestion">
 <template>
-  <nuxeo-select2 operation="Repository.PageProvider"
+
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
+
+  <nuxeo-select2 id="s2" operation="Repository.PageProvider"
+                 label="[[label]]"
                  min-chars="[[minChars]]"
                  multiple="[[multiple]]"
                  params="[[params]]"
                  placeholder="[[placeholder]]"
                  readonly="[[readonly]]"
-                 value="{{value}}"
+                 required="[[required]]"
+                 invalid="[[invalid]]"
                  selected-items="{{selectedItems}}">
   </nuxeo-select2>
-
-  <template is="dom-if" if="[[label]]"><span>[[label]]</span> : </template>
 
 </template>
 <script>
 Polymer({
   is: 'nuxeo-document-suggestion',
+  behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
   properties: {
 
     /**
@@ -127,6 +135,17 @@ Polymer({
       type: Object,
       notify: true
     }
+  },
+
+  /* Override method from Polymer.IronValidatableBehavior. */
+  _getValidity: function() {
+    return this.$.s2._getValidity();
+  },
+
+  /* Override method from Polymer.IronValidatableBehavior. */
+  validate: function(value) {
+    this.invalid = !this.$.s2.validate();
+    return !this.invalid;
   },
 
   _computeParams: function() {
