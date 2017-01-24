@@ -9,7 +9,11 @@ export default class DocumentVersions extends BasePage {
   }
 
   get dialog() {
-    return this.el.element('nuxeo-document-create-version #dialog');
+    if (this.list.isVisible()) {
+      return this.el.element('nuxeo-document-versions-list nuxeo-document-create-version #dialog');
+    } else {
+      return this.el.element('nuxeo-document-create-version #dialog');
+    }
   }
 
   get dialogMajorOption() {
@@ -21,11 +25,11 @@ export default class DocumentVersions extends BasePage {
   }
 
   get dialogNextMajor() {
-    return this.el.element('#nextMajor');
+    return this.dialog.element('#nextMajor');
   }
 
   get dialogNextMinor() {
-    return this.el.element('#nextMinor');
+    return this.dialog.element('#nextMinor');
   }
 
   get dialogDismissButton() {
@@ -36,16 +40,32 @@ export default class DocumentVersions extends BasePage {
     return this.dialog.element('paper-button[dialog-confirm]');
   }
 
-  get listToggle() {
+  get toggle() {
     return this.el.element('nuxeo-tag.toggle');
   }
 
+  get list() {
+    return this.el.element('nuxeo-document-versions-list');
+  }
+
+  get listCreateVersionButton() {
+    return this.list.element('nuxeo-document-create-version');
+  }
+
+  get listItems() {
+    return this.list.element('#list-items');
+  }
+
+  listItem(index) {
+    return this.list.element('#version-id-' + index);
+  }
+
   listLatest() {
-    return this.el.element('nuxeo-document-versions-list #version-latest');
+    return this.list.element('#version-latest');
   }
 
   listItemTitle(index) {
-    return this.el.element('nuxeo-document-versions-list #version-id-' + index + ' .title');
+    return this.list.element('#version-id-' + index + ' .title');
   }
 
 }

@@ -44,6 +44,18 @@ export default class DocumentPage {
     return this.page.element('nuxeo-preview-button');
   }
 
+  get versionInfoBar() {
+    return this.page.element('#versionInfoBar');
+  }
+
+  get restoreVersionButton() {
+    return this.versionInfoBar.element('nuxeo-restore-version-button');
+  }
+
+  get restoreVersionButtonConfirm() {
+    return this.versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
+  }
+
   waitForVisible() {
     return this.page.waitForVisible();
   }

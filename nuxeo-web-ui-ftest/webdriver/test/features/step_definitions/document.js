@@ -22,11 +22,8 @@ module.exports = function() {
     })
   });
 
-  this.Given(/^This document has a version (\d+).(\d+)(\+?)$/, (major, minor, plus) => {
-    // only ONE (major or minor) version creation is supported
-    let versionType = (major === '1') ? 'major' : 'minor';
-    let save = plus !== '+';
-    return fixtures.documents.createVersion(this.doc, versionType, save).then((doc) => {
+  this.Given(/^This document has a (major|minor) version$/, (versionType) => {
+    return fixtures.documents.createVersion(this.doc, versionType).then((doc) => {
       this.doc = doc;
     })
   });
@@ -48,7 +45,7 @@ module.exports = function() {
     return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
   });
 
-  this.When('I browse to the document', () => {
+  this.When(/^I browse to the document$/, () => {
     driver.url('/#!/browse' + this.doc.path);
     this.ui.browser.breadcrumb.waitForVisible();
   });
