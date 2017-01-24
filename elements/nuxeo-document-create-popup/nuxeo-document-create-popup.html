@@ -66,8 +66,10 @@ Contributors:
         <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
           <paper-tab name="create">[[i18n('documentCreatePopup.create')]]</paper-tab>
           <paper-tab name="import">[[i18n('documentCreatePopup.import')]]</paper-tab>
+          <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
         </paper-tabs>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex" selected-attribute="visible">
+          <nuxeo-slot slot="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
           <nuxeo-document-create id="simpleCreation"
                                  name="create"
                                  parent="[[parent]]"
@@ -118,6 +120,10 @@ Contributors:
             type: Boolean,
             value: false,
             observer: '_openedChanged'
+          },
+          importContext: {
+            type: Object,
+            computed: '_importContext(parent)'
           }
         },
 
@@ -194,6 +200,10 @@ Contributors:
           } else {
             this.selectedTab = '';
           }
+        },
+
+        _importContext: function() {
+          return {parent: this.parent};
         }
 
       });
