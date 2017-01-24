@@ -8,7 +8,7 @@ Feature: Versioning
     And I have a Workspace document
     And I have permission ReadWrite for this document
 
-  Scenario: New version dialog
+  Scenario Outline: Create version
     Given I have a File document
     And I have permission ReadWrite for this document
     When I browse to the document
@@ -16,11 +16,19 @@ Feature: Versioning
     And I click the Create Version button
     Then The create version dialog appears
     And Version options 0.1 and 1.0 are presented
-    And Dialog dismiss and confirm buttons are available
+    When I create a <versionType> version
+    Then The document version is <createdVersion>
+
+    Examples:
+      |versionType  | createdVersion  |
+      |major        | 1.0             |
+      |minor        | 0.1             |
 
   Scenario: Check in version
     Given I have a File document
     And I have permission ReadWrite for this document
-    And This document has a major version
+    And This document has a version 1.0
     When I browse to the document
-    And Document version is "1.0"
+    And The document version is 1.0
+    Then I can edit the Note metadata
+    And The document version is 1.0+

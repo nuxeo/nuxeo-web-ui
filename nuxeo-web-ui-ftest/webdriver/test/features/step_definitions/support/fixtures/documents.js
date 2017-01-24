@@ -25,10 +25,10 @@ fixtures.documents = {
       return doc;
     });
   },
-  createVersion: (document, versionType) => {
+  createVersion: (document, versionType, save) => {
     return nuxeo.operation('Document.CreateVersion').input(document.uid).params({
       increment: versionType,
-      saveDocument: true
+      saveDocument: save
     }).execute();
   },
   setPermissions: (document, permission, username) => {

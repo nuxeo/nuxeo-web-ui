@@ -22,6 +22,8 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
+    page.versions.dialogDismissButton.waitForVisible();
+    page.versions.dialogConfirmButton.waitForVisible();
   });
 
   this.When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, (v1, v2, v3, v4) => {
@@ -33,23 +35,31 @@ module.exports = function() {
     page.versions.dialogNextMajor.getText().should.equal(v3 + '.' + v4);
   });
 
-  this.When('Dialog dismiss and confirm buttons are available', () => {
+  this.When(/^I create a (major|minor) version$/, (versionType) => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.dialogDismissButton.waitForVisible();
+    switch (versionType) {
+      case 'major':
+        page.versions.dialogMajorOption.click();
+        break;
+      case 'minor':
+        page.versions.dialogMinorOption.click();
+        break;
+    }
     page.versions.dialogConfirmButton.waitForVisible();
+    page.versions.dialogConfirmButton.click();
   });
 
-  this.When(/^Document version is "([^"]*)"$/, (label) => {
+  this.When(/^The document version is ([^"]*)$/, (label) => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.createVersionButton.isVisible().should.be.false;
     page.versions.listToggle.waitForVisible();
     page.versions.listToggle.click();
-    page.versions.listItemTitle(0).getText().should.equals(label);
+    page.versions.listToggle.getText().should.equals(label);
   });
 
 };

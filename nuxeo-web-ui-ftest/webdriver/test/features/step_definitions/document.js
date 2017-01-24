@@ -22,8 +22,11 @@ module.exports = function() {
     })
   });
 
-  this.Given(/^This document has a (major|minor) version$/, (versionType) => {
-    return fixtures.documents.createVersion(this.doc, versionType).then((doc) => {
+  this.Given(/^This document has a version (\d+).(\d+)(\+?)$/, (major, minor, plus) => {
+    // only ONE (major or minor) version creation is supported
+    let versionType = (major === '1') ? 'major' : 'minor';
+    let save = plus !== '+';
+    return fixtures.documents.createVersion(this.doc, versionType, save).then((doc) => {
       this.doc = doc;
     })
   });
