@@ -139,7 +139,7 @@ Contributors:
 
     <!-- infoBar - version -->
     <template is="dom-if" if="[[document.isVersion]]">
-      <div class="info-bar">
+      <div id="versionInfoBar" class="info-bar">
         <div>
           <iron-icon icon="icons:info"></iron-icon>
           <span>[[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
