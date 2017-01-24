@@ -2,14 +2,21 @@
 
 module.exports = function() {
 
-  this.When('The document is unversioned', () => {
+  this.When(/^I can see the version info bar with text "(.*)"$/, (text) => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versionInfoBar.waitForVisible();
+    page.versionInfoBar.getText().should.equal(text);
+  });
+
+  this.When(/^The document is unversioned$/, () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.createVersionButton.waitForVisible();
   });
 
-  this.When('I click the Create Version button', () => {
+  this.When(/^I click the Create Version button$/, () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
@@ -17,7 +24,7 @@ module.exports = function() {
     page.versions.createVersionButton.click();
   });
 
-  this.When('The create version dialog appears', () => {
+  this.When(/^The create version dialog appears$/, () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
@@ -57,9 +64,51 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.createVersionButton.isVisible().should.be.false;
-    page.versions.listToggle.waitForVisible();
-    page.versions.listToggle.click();
-    page.versions.listToggle.getText().should.equals(label);
+    page.versions.toggle.waitForVisible();
+    page.versions.toggle.getText().should.equals(label);
+  });
+
+  this.When(/^I click the versions list$/, () => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.toggle.waitForVisible();
+    page.versions.toggle.click();
+    page.versions.listItems.waitForVisible();
+  });
+
+  this.When(/^I click the versions list at index (\d+)$/, (index) => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.listItems.waitForVisible();
+    page.versions.listItem(index).waitForVisible();
+    page.versions.listItem(index).click();
+  });
+
+  this.When(/^Versions item index at (\d+) is ([^"]*)$/, (index, text) => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.listItemTitle(index).getText().should.equals(text);
+  });
+
+  this.When(/^I click the Create Version button in versions list$/, () => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.listItems.waitForVisible();
+    page.versions.listCreateVersionButton.waitForVisible();
+    page.versions.listCreateVersionButton.click();
+  });
+
+  this.When(/^I can restore version$/, () => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.restoreVersionButton.waitForVisible();
+    page.restoreVersionButton.click();
+    page.restoreVersionButtonConfirm.waitForVisible();
+    page.restoreVersionButtonConfirm.click();
   });
 
 };
