@@ -12,6 +12,14 @@ export default class DocumentVersions extends BasePage {
     return this.el.element('nuxeo-document-create-version #dialog');
   }
 
+  get dialogMajorOption() {
+    return this.dialog.element('paper-radio-button[name="major"]');
+  }
+
+  get dialogMinorOption() {
+    return this.dialog.element('paper-radio-button[name="minor"]');
+  }
+
   get dialogNextMajor() {
     return this.el.element('#nextMajor');
   }
