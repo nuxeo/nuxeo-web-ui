@@ -52,16 +52,16 @@ export default class DocumentVersions extends BasePage {
     return this.list.element('nuxeo-document-create-version');
   }
 
+  get listCount() {
+    return this.list.elements('div[name="version-item"]').value.length;
+  }
+
   get listItems() {
     return this.list.element('#list-items');
   }
 
   listItem(index) {
     return this.list.element('#version-id-' + index);
-  }
-
-  listLatest() {
-    return this.list.element('#version-latest');
   }
 
   listItemTitle(index) {

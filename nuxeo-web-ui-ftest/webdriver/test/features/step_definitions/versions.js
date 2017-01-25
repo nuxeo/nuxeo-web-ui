@@ -93,6 +93,13 @@ module.exports = function() {
     page.versions.listItemTitle(index).getText().should.equals(text);
   });
 
+  this.When(/^Versions count is (\d+)$/, (count) => {
+    const page = this.ui.browser.documentPage(this.doc.type);
+    page.waitForVisible();
+    page.versions.waitForVisible();
+    page.versions.listCount.should.equal(parseInt(count));
+  });
+
   this.When(/^I click the Create Version button in versions list$/, () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
