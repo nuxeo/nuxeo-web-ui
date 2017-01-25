@@ -137,7 +137,7 @@ Contributors:
             </div>
           </template>
           <template is="dom-repeat" items="[[versions]]" as="item">
-            <div id="version-id-[[index]]" class="version" on-tap="_showVersion">
+            <div id="version-id-[[index]]" name="version-item" class="version" on-tap="_showVersion">
               <div class="row title">[[_labelTitle(item)]]</div>
               <div class="row modified">[[_labelModified(item)]]</div>
             </div>
