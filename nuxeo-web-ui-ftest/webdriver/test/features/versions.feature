@@ -42,7 +42,7 @@ Feature: Versioning
     Then I can edit the Note metadata
     And The document version is 1.0+
 
-  Scenario: Switch and restore version
+  Scenario: Restore and list versions
     Given I have a File document
     And I have permission ReadWrite for this document
     And This document has a minor version
@@ -50,15 +50,16 @@ Feature: Versioning
     And The document version is 0.1
     Then I can edit the Note metadata
     And The document version is 0.1+
-    And I click the versions list
+    Then I click the versions list
     And I click the Create Version button in versions list
     Then The create version dialog appears
     And Version options 0.2 and 1.0 are presented
-    When I create a major version
-    Then The document version is 1.0
-    And I click the versions list
+    Then I create a major version
+    And The document version is 1.0
+    Then I click the versions list
     And Versions item index at 0 is 1.0
     And Versions item index at 1 is 0.1
-    When I click the versions list at index 1
+    Then I click the versions list at index 1
     And I can restore version
     And The document version is 1.0+
+    And Versions count is 2
