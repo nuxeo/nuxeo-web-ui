@@ -43,7 +43,7 @@ limitations under the License.
         } else {
           registry.nodes.push(node);
         }
-        registry.nodes.sort(function(a, b) { return a.order > b.order; });
+        registry.nodes.sort(function(a, b) { return a.order - b.order; });
         registry.slots.forEach(function(c) { c._updateContent(); });
       }
 
