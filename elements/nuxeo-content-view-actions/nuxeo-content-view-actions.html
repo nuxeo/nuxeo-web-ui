@@ -17,7 +17,6 @@ Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 -->
 
-<link rel="import" href="nuxeo-spreadsheet-button.html">
 <link rel="import" href="nuxeo-display-mode-button.html">
 
 <!--
@@ -34,22 +33,17 @@ Contributors:
         @apply(--layout-end-justified);
       }
 
-      .action {
-        margin-left: 4px;
-      }
-
       ::content paper-icon-button {
         width: 2em;
         height: 2em;
         padding: .3em;
+        margin-left: 4px;
       }
     </style>
 
     <div class="main">
-      <nuxeo-spreadsheet-button class="action" base-url="[[content.baseUrl]]" mode="[[context.displayMode]]"
-                                nx-provider="[[context.nxProvider]]">
-      </nuxeo-spreadsheet-button>
-      <nuxeo-display-mode-button class="action" mode="[[context.displayMode]]"></nuxeo-display-mode-button>
+      <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[context]]"></nuxeo-slot>
+      <nuxeo-display-mode-button mode="[[context.displayMode]]"></nuxeo-display-mode-button>
     </div>
 
   </template>
