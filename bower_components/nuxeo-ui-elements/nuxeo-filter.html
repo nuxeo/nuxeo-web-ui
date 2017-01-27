@@ -244,6 +244,43 @@ limitations under the License.
       if (this._instance) {
         this._instance._notifyPath(path, value, true);
       }
+    },
+
+    // https://jira.nuxeo.com/browse/ELEMENTS-215
+    // overrides stamp() to fix missing initial bindings on subsequent stamps
+    // https://github.com/Polymer/polymer/issues/3755
+    stamp: function(model) {
+      model = model || {};
+
+      if (this._parentProps) {
+        var templatized = this._templatized;
+        for (var prop in this._parentProps) {
+          if (model[prop] === undefined) {
+            model[prop] = templatized[this._parentPropPrefix + prop];
+
+            // fix
+            if (model[prop] === undefined) {
+              model[prop] = this._getBinding(prop, this.dataHost);
+            }
+          }
+        }
+      }
+
+      return new this.ctor(model, this);
+    },
+
+    _getBinding: function(prop, dataHost) {
+      var data = dataHost && dataHost.__data__;
+
+      if (!data) {
+        return undefined;
+      }
+
+      if (prop in data) {
+        return data[prop];
+      }
+
+      return this._getBinding(prop, dataHost.dataHost);
     }
   });
 </script>
