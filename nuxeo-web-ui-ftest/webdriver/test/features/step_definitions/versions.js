@@ -1,7 +1,6 @@
 'use strict';
 
-module.exports = function() {
-
+module.exports = function () {
   this.When(/^I can see the version info bar with text "(.*)"$/, (text) => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
@@ -38,8 +37,8 @@ module.exports = function() {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.dialogNextMinor.getText().should.equal(v1 + '.' + v2);
-    page.versions.dialogNextMajor.getText().should.equal(v3 + '.' + v4);
+    page.versions.dialogNextMinor.getText().should.equal(`${v1}.${v2}`);
+    page.versions.dialogNextMajor.getText().should.equal(`${v3}.${v4}`);
   });
 
   this.When(/^I create a (major|minor) version$/, (versionType) => {
@@ -54,6 +53,8 @@ module.exports = function() {
       case 'minor':
         page.versions.dialogMinorOption.click();
         break;
+      default:
+        // do nothing
     }
     page.versions.dialogConfirmButton.waitForVisible();
     page.versions.dialogConfirmButton.click();
@@ -117,5 +118,4 @@ module.exports = function() {
     page.restoreVersionButtonConfirm.waitForVisible();
     page.restoreVersionButtonConfirm.click();
   });
-
 };

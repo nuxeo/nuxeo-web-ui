@@ -1,11 +1,11 @@
 'use strict';
 
-import BasePage from '../../base'
-import DocumentLayout from './document_layout'
+import BasePage from '../../base';
+import DocumentLayout from './document_layout';
 
 export default class DocumentEdit extends BasePage {
   constructor(selector, docType) {
-    super(selector)
+    super(selector);
     this._docType = docType;
   }
 

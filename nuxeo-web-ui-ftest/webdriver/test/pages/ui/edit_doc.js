@@ -21,8 +21,8 @@ export default class EditDoc {
       this.dialog.waitForVisible('input.nuxeo-file-edit');
       this.dialog.setValue('input.nuxeo-file-edit', `New_Test_${docType}`);
     } else {
-    this.dialog.waitForVisible(`input.nuxeo-${doctype}-edit`);
-    this.dialog.setValue(`input.nuxeo-${doctype}-edit`, `New_Test_${docType}`);
+      this.dialog.waitForVisible(`input.nuxeo-${doctype}-edit`);
+      this.dialog.setValue(`input.nuxeo-${doctype}-edit`, `New_Test_${docType}`);
     }
   }
 

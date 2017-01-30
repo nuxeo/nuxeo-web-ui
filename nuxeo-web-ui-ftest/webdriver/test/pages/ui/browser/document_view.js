@@ -1,6 +1,6 @@
 'use strict';
-import DocumentAttachments from './document_attachments'
-import NoteEditor from '../note_editor'
+import DocumentAttachments from './document_attachments';
+import NoteEditor from '../note_editor';
 
 export default class DocumentView {
   constructor(el, docType) {

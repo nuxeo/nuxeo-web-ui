@@ -1,52 +1,41 @@
 'use strict';
 
-module.exports = function() {
-
+module.exports = function () {
   this.Given(/^I have a (.*) document$/, (docType) => {
     docType = docType || 'File';
-    let doc = fixtures.documents.init(docType);
+    const doc = fixtures.documents.init(docType);
     // create the document
-    return fixtures.documents.create(this.doc.path, doc).then((doc) => {
-      this.doc = doc;
+    return fixtures.documents.create(this.doc.path, doc).then((d) => {
+      this.doc = d;
     });
   });
 
-  this.Given(/^I have a document imported from file "(.+)"$/, (mimeType) => {
-    return fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType])
-        .then((doc) => { this.doc = doc; });
-  });
+  this.Given(/^I have a document imported from file "(.+)"$/, (mimeType) =>
+      fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType]).then((d) => { this.doc = d; }));
 
-  this.Given(/^I have permission (\w+) for this document$/, (permission) => {
-    return fixtures.documents.setPermissions(this.doc, permission, this.username).then((doc) => {
-      this.doc = doc;
-    })
-  });
+  this.Given(/^I have permission (\w+) for this document$/, (permission) =>
+      fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => { this.doc = d; }));
 
-  this.Given(/^This document has a (major|minor) version$/, (versionType) => {
-    return fixtures.documents.createVersion(this.doc, versionType).then((doc) => {
-      this.doc = doc;
-    })
-  });
+  this.Given(/^This document has a (major|minor) version$/, (versionType) =>
+      fixtures.documents.createVersion(this.doc, versionType).then((d) => { this.doc = d; }));
 
   this.Given(/^I have a document added to "([^"]*)" collection$/, (colName) => {
-    let doc = fixtures.documents.init('File');
+    const docFile = fixtures.documents.init('File');
     // create the document
-    return fixtures.documents.create(this.doc.path, doc)
-        .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((doc) => {
-          this.doc = doc;
+    return fixtures.documents.create(this.doc.path, docFile)
+        .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((d) => {
+          this.doc = d;
         });
   });
 
-  this.Given(/^this document has file "(.+)" for content$/, (file) => {
-    return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
-  });
+  this.Given(/^this document has file "(.+)" for content$/, (file) =>
+      fixtures.documents.attach(this.doc, fixtures.blobs.get(file)));
 
-  this.Given(/^this document has file "(.+)" for attachment/, (file) => {
-    return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
-  });
+  this.Given(/^this document has file "(.+)" for attachment/, (file) =>
+      fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true));
 
   this.When(/^I browse to the document$/, () => {
-    driver.url('/#!/browse' + this.doc.path);
+    driver.url(`/#!/browse${this.doc.path}`);
     this.ui.browser.breadcrumb.waitForVisible();
   });
 
@@ -77,7 +66,7 @@ module.exports = function() {
   });
 
   this.Then(/^I can edit the following properties in the (.+) metadata:$/, (docType, table) => {
-    let page = this.ui.browser.documentPage(docType);
+    const page = this.ui.browser.documentPage(docType);
     page.waitForVisible();
     page.editButton.waitForVisible();
     page.editButton.click();
@@ -94,7 +83,7 @@ module.exports = function() {
   });
 
   this.Given(/^I have a (.+) Note$/, (format) => {
-    let doc = fixtures.documents.init('Note');
+    const doc = fixtures.documents.init('Note');
     doc.properties['note:mime_type'] = fixtures.notes.formats[format].mimetype;
     doc.properties['note:note'] = fixtures.notes.formats[format].content;
     return fixtures.documents.create(this.doc.path, doc).then((result) => {
@@ -103,10 +92,10 @@ module.exports = function() {
   });
 
   this.Then(/^I can edit the (.*) Note$/, (format) => {
-    let page = this.ui.browser.documentPage(this.doc.type);
+    const page = this.ui.browser.documentPage(this.doc.type);
     page.view.waitForVisible();
 
-    let newContent = 'NEW ' + format + ' CONTENT';
+    const newContent = `NEW ${format} CONTENT`;
 
     switch (format) {
       case 'HTML':
@@ -115,7 +104,7 @@ module.exports = function() {
         page.view.noteEditor.alloy.setValue(newContent);
         page.view.noteEditor.save();
         page.view.noteEditor.alloy.waitForVisible();
-        page.view.noteEditor.alloyHasContent('<p>' + newContent + '</p>');
+        page.view.noteEditor.alloyHasContent(`<p>${newContent}</p>`);
         break;
       case 'Markdown':
       case 'Text':
@@ -124,16 +113,18 @@ module.exports = function() {
         page.view.noteEditor.textarea.setValue(newContent);
         page.view.noteEditor.save();
         page.view.preview.waitForVisible();
-        if (format == 'Markdown') {
-          let markedElement = page.view.preview.element('marked-element');
+        if (format === 'Markdown') {
+          const markedElement = page.view.preview.element('marked-element');
           markedElement.waitForVisible();
-          let markedContent = markedElement.element('div.markdown-html');
+          const markedContent = markedElement.element('div.markdown-html');
           markedContent.waitForVisible();
           markedContent.getText().should.equal(newContent);
-        } else if (format == 'Text') {
+        } else if (format === 'Text') {
           page.view.preview.element('iframe').waitForVisible();
         }
         break;
+      default:
+        // do nothing
     }
   });
 
@@ -142,17 +133,15 @@ module.exports = function() {
     liveCollections.push(name);
   });
 
-  this.Then('I can see the document belongs to the "$name" collection', (name) => {
-    this.ui.browser.hasCollection(name).should.be.true;
-  });
+  this.Then('I can see the document belongs to the "$name" collection', (name) =>
+      this.ui.browser.hasCollection(name).should.be.true);
 
   this.Then('I can delete the document from the "$name" collection', (name) => {
     this.ui.browser.removeFromCollection(name);
   });
 
-  this.Then('I can see the document does not belong to the "$name" collection', (name) => {
-    this.ui.browser.hasCollection(name, true).should.be.true;
-  });
+  this.Then('I can see the document does not belong to the "$name" collection', (name) =>
+      this.ui.browser.hasCollection(name, true).should.be.true);
 
   this.Then('I add the document to the favorites', () => {
     this.ui.browser.addToFavorites();

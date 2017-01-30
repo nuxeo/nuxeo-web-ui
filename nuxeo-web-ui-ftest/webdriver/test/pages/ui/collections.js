@@ -8,19 +8,19 @@ export default class Collections {
   }
 
   waitForHasCollection(name, reverse) {
-    driver.waitUntil(function() {
-      let collections = this.page.elements(`span.collection-name`).value;
+    driver.waitUntil(() => {
+      const collections = this.page.elements(`span.collection-name`).value;
       if (reverse) {
         return collections.every((collection) => collection.getText().trim() !== name);
       } else {
         return collections.some((collection) => collection.getText().trim() === name);
       }
-    }.bind(this), reverse ? `There is such collection` : `There is no such collection`);
+    }, reverse ? `There is such collection` : `There is no such collection`);
     return true;
   }
 
   select(name) {
-    let el = this.page.element(`nuxeo-collections #collectionsList #items span.title`);
+    const el = this.page.element(`nuxeo-collections #collectionsList #items span.title`);
     if (el.getText().trim() === name) {
       el.click();
       return true;
@@ -38,19 +38,19 @@ export default class Collections {
   }
 
   waitForHasMember(doc, reverse) {
-    driver.waitUntil(function() {
-      let members = this.page.elements(`#membersList #items div`).value;
+    driver.waitUntil(() => {
+      const members = this.page.elements(`#membersList #items div`).value;
       if (reverse) {
         return members.every((member) => member.getText().trim() !== doc.title);
       } else {
         return members.some((member) => member.getText().trim() === doc.title);
       }
-    }.bind(this), reverse ? `There is such member in the collection` : `There is no such member in the collection`);
+    }, reverse ? `There is such member in the collection` : `There is no such member in the collection`);
     return true;
   }
 
   removeMember(doc) {
-    let members = this.page.elements(`#membersList #items div`).value;
+    const members = this.page.elements(`#membersList #items div`).value;
     return members.some((member) => {
       if (member.getText(`span.list-item-title`).trim() === doc.title) {
         member.element(`iron-icon.remove`).click();

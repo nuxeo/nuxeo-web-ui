@@ -15,21 +15,19 @@ export default class NoteEditor {
   }
 
   alloyHasContent(content) {
-    let editor = this.alloy;
-    driver.waitUntil(function() {
-      return editor.getAttribute('innerHTML') === content;
-    }.bind(this), 'The editor does not have such content');
+    const editor = this.alloy;
+    driver.waitUntil(() => editor.getAttribute('innerHTML') === content, 'The editor does not have such content');
     return true;
   }
 
   edit() {
-    let button = this.el.element('#editNote');
+    const button = this.el.element('#editNote');
     button.waitForVisible();
     button.click();
   }
 
   save() {
-    let button = this.el.element('paper-button[name="editorSave"]');
+    const button = this.el.element('paper-button[name="editorSave"]');
     button.waitForVisible();
     button.click();
   }

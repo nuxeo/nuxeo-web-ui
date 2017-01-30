@@ -2,13 +2,11 @@
 
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
-import Collections from './ui/collections';
 import CollectionBrowser from './ui/collectionBrowser';
-import Favorites from './ui/favorites';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Vocabulary from './ui/admin/vocabulary';
-import BasePage from './base'
+import BasePage from './base';
 
 export default class UI extends BasePage {
 
@@ -24,7 +22,8 @@ export default class UI extends BasePage {
   }
 
   get createDialog() {
-    return this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
+    this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
+    return this._createDialog;
   }
 
   get createButton() {
@@ -57,7 +56,7 @@ export default class UI extends BasePage {
   }
 
   get suggester() {
-   return this.el.element('#mainContainer nuxeo-suggester'); 
+    return this.el.element('#mainContainer nuxeo-suggester');
   }
 
   get collectionBrowser() {
