@@ -47,7 +47,9 @@ module.exports = function () {
     this.ui.browser.documentPage(docType).waitForVisible();
     this.ui.browser.documentPage(docType).metadata.waitForVisible();
     table.rows().forEach((row) => {
-      this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0], row[1]);
+      const layout = this.ui.browser.documentPage(docType).metadata.layout();
+      layout.waitForVisible();
+      layout.getFieldValue(row[0]).should.equal(row[1]);
     });
   });
 
@@ -72,13 +74,17 @@ module.exports = function () {
     page.editButton.click();
     page.edit.waitForVisible();
     table.rows().forEach((row) => {
-      page.edit.layout().setFieldValue(row[0], row[1]);
+      const layout = page.edit.layout();
+      layout.waitForVisible();
+      layout.setFieldValue(row[0], row[1]);
     });
     page.saveButton.waitForVisible();
     page.saveButton.click();
     page.metadata.waitForVisible();
     table.rows().forEach((row) => {
-      page.metadata.layout().getFieldValue(row[0], row[1]);
+      const layout = page.metadata.layout();
+      layout.waitForVisible();
+      layout.getFieldValue(row[0]).should.equal(row[1]);
     });
   });
 

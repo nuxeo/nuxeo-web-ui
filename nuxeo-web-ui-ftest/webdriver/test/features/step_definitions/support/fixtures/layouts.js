@@ -8,7 +8,7 @@ global.fieldRegistry.register('paper-textarea',
                               (element) => element.element('#textarea').getValue(),
                               (element, value) => { element.element('#textarea').setValue(value); });
 global.fieldRegistry.register('generic',
-                              (element) => element.getValue(),
+                              (element) => element.getText(),
                               (element, value) => element.setValue(value));
 
 fixtures.layouts = {
