@@ -8,18 +8,18 @@ export default class Favorites {
   }
 
   hasDocument(doc) {
-    let favorites = this.page.elements(`#favoritesList #items div`).value;
-    return favorites.some((favorite) => favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title);
+    const favorites = this.page.elements(`#favoritesList #items div`).value;
+    return favorites.some((favorite) =>
+      favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title
+    );
   }
 
   removeDocument(doc) {
-    let favorites = this.page.elements(`#favoritesList #items div`).value;
+    const favorites = this.page.elements(`#favoritesList #items div`).value;
     return favorites.some((favorite) => {
       if (favorite.getText(`span.list-item-title`).trim() === doc.title) {
         favorite.element(`iron-icon.remove`).click();
-        driver.waitUntil(function() {
-          return !this.hasDocument(doc);
-        }.bind(this));
+        driver.waitUntil(() => !this.hasDocument(doc));
         return true;
       } else {
         return false;

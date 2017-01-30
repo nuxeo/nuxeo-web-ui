@@ -1,13 +1,13 @@
-import nuxeo from '../services/client'
+import nuxeo from '../services/client';
 
 global.users = {
-  Administrator: 'Administrator'
+  Administrator: 'Administrator',
 };
 
 fixtures.users = {
   DEFAULT_PASSWORD: 'password',
   create: (user) => {
-    let username = user.properties.username;
+    const username = user.properties.username;
     if (username in users) {
       return users[username];
     } else {
@@ -17,17 +17,13 @@ fixtures.users = {
             if (response.response && response.response.status && response.response.status === 404) {
               return nuxeo.users().create(user);
             }
-          }).then((user) => {
-            users[user.id] = 'password';
-            return user;
+          }).then((_user) => {
+            users[_user.id] = 'password';
+            return _user;
           });
     }
   },
-  delete: (username) => {
-    return nuxeo.users().delete(username).then(() => {
-      delete users[username];
-    })
-  }
+  delete: (username) => nuxeo.users().delete(username).then(() => delete users[username]),
 };
 
 module.exports = function () {

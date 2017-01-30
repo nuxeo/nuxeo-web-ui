@@ -1,4 +1,4 @@
-import {FieldRegistry} from '../services/field_registry'
+import { FieldRegistry } from '../services/field_registry';
 
 global.fieldRegistry = new FieldRegistry();
 global.fieldRegistry.register('paper-input',
@@ -21,5 +21,5 @@ fixtures.layouts = {
     const fieldType = element.getTagName();
     (global.fieldRegistry.contains(fieldType) ? global.fieldRegistry.setValFunc(fieldType) :
                                                 global.fieldRegistry.setValFunc('generic'))(element, value);
-  }
+  },
 };

@@ -1,7 +1,6 @@
 'use strict';
 
-module.exports = function() {
-
+module.exports = function () {
   this.When('I click the preview button', () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();

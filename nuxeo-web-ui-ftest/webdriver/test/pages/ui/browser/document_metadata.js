@@ -1,7 +1,7 @@
 'use strict';
 
-import BasePage from '../../base'
-import DocumentLayout from './document_layout'
+import BasePage from '../../base';
+import DocumentLayout from './document_layout';
 
 export default class DocumentMetadata extends BasePage {
 

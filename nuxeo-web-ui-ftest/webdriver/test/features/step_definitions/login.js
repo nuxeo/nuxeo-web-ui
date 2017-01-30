@@ -2,21 +2,18 @@
 
 import Login from '../../pages/login';
 import UI from '../../pages/ui';
-var Nuxeo = require('nuxeo');
 
 module.exports = function () {
-
-  this.Given('user "$username" exists in group "$group"', (username, group) => {
-    return fixtures.users.create({
+  this.Given('user "$username" exists in group "$group"', (username, group) => fixtures.users.create(
+    {
       'entity-type': 'user',
       properties: {
-        username: username,
+        username,
         firstName: username,
         password: fixtures.users.DEFAULT_PASSWORD,
         groups: [group],
       },
-    });
-  });
+    }));
 
   this.When('I login as "$username"', (username) => {
     const login = Login.get();

@@ -1,6 +1,6 @@
 'use strict';
 
-import BasePage from '../../base'
+import BasePage from '../../base';
 
 export default class DocumentVersions extends BasePage {
 
@@ -61,11 +61,10 @@ export default class DocumentVersions extends BasePage {
   }
 
   listItem(index) {
-    return this.list.element('#version-id-' + index);
+    return this.list.element(`#version-id-${index}`);
   }
 
   listItemTitle(index) {
-    return this.list.element('#version-id-' + index + ' .title');
+    return this.list.element(`#version-id-${index} .title`);
   }
-
 }

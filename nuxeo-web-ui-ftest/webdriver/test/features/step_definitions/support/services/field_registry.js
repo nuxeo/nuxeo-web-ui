@@ -18,8 +18,8 @@ export class FieldRegistry {
   register(fieldType, getValFunc, setValFunc) {
     this._registry[fieldType] = {
       getValue: getValFunc,
-      setValue: setValFunc
-    }
+      setValue: setValFunc,
+    };
   }
 
   unregister(fieldType) {

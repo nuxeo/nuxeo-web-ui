@@ -1,10 +1,7 @@
 'use strict';
 
 module.exports = function () {
-
-  this.Given('I am on vocabulary page', () => {
-    return this.ui.vocabularyAdmin;
-  });
+  this.Given('I am on vocabulary page', () => this.ui.vocabularyAdmin);
 
   this.When('I select "$name" vocabulary', (name) => {
     this.ui.vocabularyAdmin.vocabulary(name);
@@ -45,5 +42,4 @@ module.exports = function () {
   this.Then('I can see create dialog', () => {
     this.ui.vocabularyAdmin.hasCreateDialog.should.be.true;
   });
-
 };

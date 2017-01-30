@@ -1,7 +1,7 @@
 'use strict';
 
-import BasePage from '../base'
-import DocumentCreate from './browser/document_create'
+import BasePage from '../base';
+import DocumentCreate from './browser/document_create';
 
 export default class CreateDialog extends BasePage {
 

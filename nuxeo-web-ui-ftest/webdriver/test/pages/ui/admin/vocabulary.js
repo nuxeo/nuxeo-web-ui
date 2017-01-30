@@ -40,10 +40,10 @@ export default class Vocabulary {
     driver.waitForVisible(`#dialog`, 2000);
     this.page.element(`#selectParent`).click();
     driver.waitForVisible(`#parentDialog`, 2000);
-    for (var i = 0; i < parentIds.length - 1; i++) {
-      this.page.click('#parentDialog nuxeo-tree-node div[name="' + parentIds[i].trim() + '"] iron-icon');
+    for (let i = 0; i < parentIds.length - 1; i++) {
+      this.page.click(`#parentDialog nuxeo-tree-node div[name="${parentIds[i].trim()}"] iron-icon`);
     }
-    this.page.click('#parentDialog nuxeo-tree-node div[name="' + parentIds[parentIds.length - 1].trim() + '"] a');
+    this.page.click(`#parentDialog nuxeo-tree-node div[name="${parentIds[parentIds.length - 1].trim()}"] a`);
     this.page.element(`#dialog input[name="id"]`).setValue(id);
     this.page.element(`#dialog input[name="label"]`).setValue(label);
 
@@ -51,24 +51,24 @@ export default class Vocabulary {
   }
 
   waitForHasEntry(id, reverse) {
-    driver.waitUntil(function() {
+    driver.waitUntil(() => {
       if (reverse) {
         return this.page.getText(`#table #items nuxeo-data-table-cell`).every((txt) => txt.trim() !== id);
       } else {
         return this.page.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
       }
-    }.bind(this), reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`)
+    }, reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`);
     return true;
   }
 
   deleteEntry(index) {
-    var selector = "#delete-button-" + (index - 1);
+    const selector = `#delete-button-${(index - 1)}`;
     this.page.element(selector).click();
     driver.alertAccept();
   }
 
   editEntry(index, label) {
-    var selector = "#edit-button-" + (index - 1);
+    const selector = `#edit-button-${(index - 1)}`;
     this.page.element(selector).click();
     driver.waitForVisible(`#dialog`);
     this.page.element(`#dialog input[name="label"]`).setValue(label);
@@ -81,7 +81,7 @@ export default class Vocabulary {
   }
 
   get entryCount() {
-    var res = this.page.elements(`#table #items nuxeo-data-table-row`);
+    const res = this.page.elements(`#table #items nuxeo-data-table-row`);
     if (res && res.value) {
       return res.value.length;
     } else {
@@ -102,12 +102,12 @@ export default class Vocabulary {
     driver.waitForVisible(`#edit-button-0`);
     this.page.element(`#edit-button-0`).click();
     driver.waitForVisible(`#dialog`);
-    var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
-    var allFieldVisible = false;
+    const visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    let allFieldVisible = false;
     if (visibleLabels.length) {
       allFieldVisible = visibleLabels.every((el) => el);
     } else {
-      allFieldVisible = visibleLabels
+      allFieldVisible = visibleLabels;
     }
     allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
     this.page.element(`#dialog paper-button[name="cancel"]`).click();
@@ -118,12 +118,12 @@ export default class Vocabulary {
     driver.waitForVisible(`#addEntry`);
     this.page.element(`#addEntry`).click();
     driver.waitForVisible(`#dialog`);
-    var visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
-    var allFieldVisible = false;
+    const visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    let allFieldVisible = false;
     if (visibleLabels.length) {
       allFieldVisible = visibleLabels.every((el) => el);
     } else {
-      allFieldVisible = visibleLabels
+      allFieldVisible = visibleLabels;
     }
     allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
     this.page.element(`#selectParent`).click();

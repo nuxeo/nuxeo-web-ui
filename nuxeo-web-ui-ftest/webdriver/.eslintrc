@@ -10,11 +10,22 @@
       'capIsNewExceptions': [
         'Given',
         'When',
-        'Then'
+        'Then',
+        'After',
+        'Before',
       ]
-    }]
+    }],
+    'no-unused-expressions': 0,
+    'no-param-reassign': 0,
+    'no-else-return': 0,
+    'radix': 0
   },
   'globals': {
-    'driver': true
+    'driver': true,
+    'fixtures': true,
+    'liveCollections': true,
+    'liveDocuments': true,
+    'users': true,
+    'browser': true,
   }
 }

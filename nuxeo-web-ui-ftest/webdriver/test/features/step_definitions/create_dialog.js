@@ -1,9 +1,8 @@
 'use strict';
 
-var currentDocType;
+let currentDocType;
 
 module.exports = function () {
-
   this.When('I click the Create Document button', () => {
     this.ui.createButton.waitForVisible();
     this.ui.createButton.click();
@@ -11,7 +10,7 @@ module.exports = function () {
 
   this.When(/^I select (.+) from the Document Type menu$/, (docType) => {
     this.ui.createDialog.waitForVisible();
-    let button = this.ui.createDialog.documentCreate.getDoctypeButton(docType);
+    const button = this.ui.createDialog.documentCreate.getDoctypeButton(docType);
     button.waitForVisible();
     button.click();
     currentDocType = docType;
