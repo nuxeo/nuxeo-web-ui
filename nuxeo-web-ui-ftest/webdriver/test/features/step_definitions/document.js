@@ -55,11 +55,10 @@ module.exports = function() {
   });
 
   this.Then(/I can see (.+) metadata with the following properties:/, (docType, table) => {
-    let page = this.ui.browser.documentPage(docType);
-    page.waitForVisible();
-    page.metadata.waitForVisible();
+    this.ui.browser.documentPage(docType).waitForVisible();
+    this.ui.browser.documentPage(docType).metadata.waitForVisible();
     table.rows().forEach((row) => {
-      page.metadata.layout().getFieldValue(row[0], row[1]);
+      this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0], row[1]);
     });
   });
 
