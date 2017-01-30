@@ -18,13 +18,19 @@ module.exports = function () {
   });
 
   this.When(/^I create a document with the following properties:$/, (table) => {
-    let documentCreate = this.ui.createDialog.documentCreate;
+    const documentCreate = this.ui.createDialog.documentCreate;
     documentCreate.waitForVisible();
+    let title = '';
     table.rows().forEach((row) => {
       documentCreate.layout(currentDocType).setFieldValue(row[0], row[1]);
+      if (row[0] === 'title') {
+        title = row[1];
+      }
     });
+    expect(title).to.not.be.empty;
     this.ui.createDialog.createButton.waitForVisible();
     this.ui.createDialog.createButton.click();
+    this.ui.browser.hasTitle(title).should.be.true;
   });
 
   this.Then(/^I see the (.*) page$/, (docType) => {
