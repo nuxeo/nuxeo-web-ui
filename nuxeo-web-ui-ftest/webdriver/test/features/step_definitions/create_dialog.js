@@ -25,7 +25,7 @@ module.exports = function () {
         title = row[1];
       }
     });
-    expect(title).to.not.be.empty;
+    title.should.not.be.empty;
     this.ui.createDialog.createButton.waitForVisible();
     this.ui.createDialog.createButton.click();
     this.ui.browser.hasTitle(title).should.be.true;
