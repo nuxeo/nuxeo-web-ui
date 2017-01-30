@@ -15,7 +15,7 @@ module.exports = function () {
   });
 
   this.Then('I can see the "$title" document', (title) => {
-    this.ui.browser.title.should.equal(title);
+    this.ui.browser.hasTitle(title).should.be.true;
   });
 
 };
