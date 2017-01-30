@@ -1,6 +1,5 @@
 'use strict';
 
-import DocumentContent from './browser/document_content';
 import DocumentPage from './browser/document_page';
 
 export default class Browser {
@@ -55,31 +54,27 @@ export default class Browser {
   }
 
   hasCollection(name, reverse) {
-    let page = this.page;
-    driver.waitUntil(function () {
-      let collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
-      if (reverse) {
-        return collections.every((collection) => collection.getText().trim() !== name);
-      } else {
-        return collections.some((collection) => collection.getText().trim() === name);
-      }
-    }.bind(this), `The document does not belong to the collection`);
+    const page = this.page;
+    driver.waitUntil(() => {
+      const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+      return reverse ? collections.every((collection) => collection.getText().trim() !== name)
+        : collections.some((collection) => collection.getText().trim() === name);
+    }, `The document does not belong to the collection`);
     return true;
   }
 
   removeFromCollection(name) {
-    let page = this.page;
-    let collections = this.page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+    const collections = this.page.elements(`nuxeo-document-collections nuxeo-tag`).value;
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
-        driver.waitUntil(function() {
+        driver.waitUntil(() => {
           try {
             collection.click(`nuxeo-tag iron-icon[name="remove"]`);
             return true;
-          } catch(e) {
+          } catch (e) {
             return this.doNotHaveCollection(name);
           }
-        }.bind(this), 'Could not remove collection.');
+        }, 'Could not remove collection.');
         return true;
       }
       return false;
@@ -91,7 +86,7 @@ export default class Browser {
     return true;
   }
 
-  addToFavorites(doc) {
+  addToFavorites() {
     this.page.click(`nuxeo-favorites-toggle-button`);
     return this.isFavorite;
   }
