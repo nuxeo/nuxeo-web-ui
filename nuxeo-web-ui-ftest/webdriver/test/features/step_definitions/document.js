@@ -47,9 +47,8 @@ module.exports = function () {
     this.ui.browser.documentPage(docType).waitForVisible();
     this.ui.browser.documentPage(docType).metadata.waitForVisible();
     table.rows().forEach((row) => {
-      const layout = this.ui.browser.documentPage(docType).metadata.layout();
-      layout.waitForVisible();
-      layout.getFieldValue(row[0]).should.equal(row[1]);
+      this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
+      this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
     });
   });
 
@@ -74,17 +73,15 @@ module.exports = function () {
     page.editButton.click();
     page.edit.waitForVisible();
     table.rows().forEach((row) => {
-      const layout = page.edit.layout();
-      layout.waitForVisible();
-      layout.setFieldValue(row[0], row[1]);
+      page.edit.layout().waitForVisible();
+      page.edit.layout().setFieldValue(row[0], row[1]);
     });
     page.saveButton.waitForVisible();
     page.saveButton.click();
     page.metadata.waitForVisible();
     table.rows().forEach((row) => {
-      const layout = page.metadata.layout();
-      layout.waitForVisible();
-      layout.getFieldValue(row[0]).should.equal(row[1]);
+      page.metadata.layout().waitForVisible();
+      page.metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
     });
   });
 
