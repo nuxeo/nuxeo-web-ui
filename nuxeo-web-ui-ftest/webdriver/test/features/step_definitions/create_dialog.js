@@ -18,11 +18,10 @@ module.exports = function () {
   });
 
   this.When(/^I create a document with the following properties:$/, (table) => {
-    const documentCreate = this.ui.createDialog.documentCreate;
-    documentCreate.waitForVisible();
+    this.ui.createDialog.documentCreate.waitForVisible();
     let title = '';
     table.rows().forEach((row) => {
-      documentCreate.layout(currentDocType).setFieldValue(row[0], row[1]);
+      this.ui.createDialog.documentCreate.layout(currentDocType).setFieldValue(row[0], row[1]);
       if (row[0] === 'title') {
         title = row[1];
       }
