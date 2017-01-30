@@ -97,10 +97,10 @@ export default class Browser {
   }
 
   hasTitle(title) {
-    driver.waitUntil(function () {
-      let currentTitle = driver.getText('.breadcrumb-item-current').trim();
-      return currentTitle === title;
-    }.bind(this), `The document does not have such title`);
+    driver.waitUntil(
+      () => driver.getText('.breadcrumb-item-current').trim() === title,
+      `The document does not have such title`
+    );
     return true;
   }
 
