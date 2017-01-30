@@ -12,7 +12,7 @@
     "metrics"
   ],
   "main": "nuxeo-dataviz-elements.html",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/nuxeo/nuxeo-dataviz-elements/",
   "ignore": [
     "/.*",
