@@ -63,6 +63,7 @@ Custom property | Description | Default
     <nuxeo-page-provider id="provider"
                          query="[[query]]"
                          params="[[params]]"
+                         enrichers="[[enrichers]]"
                          page-size="20"
                          current-page="{{children}}"></nuxeo-page-provider>
     <nuxeo-document id="parent"></nuxeo-document>
@@ -90,6 +91,14 @@ Custom property | Description | Default
         query: String,
 
         params: Object,
+
+        /**
+         * List of content enrichers to use.
+         */
+        enrichers: {
+          type: String,
+          value: ''
+        },
 
         value: {
           type: String,
