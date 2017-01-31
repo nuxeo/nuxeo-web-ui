@@ -12,8 +12,8 @@
   <production-state>proto</production-state>
   <supported>false</supported>
   <platforms>
-    <platform>server-@DISTRIB_VERSION@</platform>
-    <platform>server-@DISTRIB_VERSION@-*</platform>
+    <platform>server-8.10</platform>
+    <platform>server-8.10-*</platform>
     <platform>server-9.1</platform>
     <platform>server-9.1-*</platform>
   </platforms>
