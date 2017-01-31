@@ -103,11 +103,9 @@ module.exports = function () {
     switch (format) {
       case 'HTML':
       case 'XML':
-        page.view.noteEditor.alloy.waitForVisible();
-        page.view.noteEditor.alloy.setValue(newContent);
+        page.view.noteEditor.setContent(newContent);
         page.view.noteEditor.save();
-        page.view.noteEditor.alloy.waitForVisible();
-        page.view.noteEditor.alloyHasContent(`<p>${newContent}</p>`);
+        page.view.noteEditor.hasContent(`<p>${newContent}</p>`);
         break;
       case 'Markdown':
       case 'Text':

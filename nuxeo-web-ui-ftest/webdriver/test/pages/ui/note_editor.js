@@ -6,16 +6,17 @@ export default class NoteEditor {
     this.el = el;
   }
 
-  get alloy() {
-    return this.el.element('#editor');
+  setContent(content) {
+    this.el.element('#editor').waitForVisible();
+    this.el.element('#editor').setValue(content);
   }
 
   get textarea() {
     return this.el.element('#textarea');
   }
 
-  alloyHasContent(content) {
-    const editor = this.alloy;
+  hasContent(content) {
+    const editor = this.el.element('#editor');
     driver.waitUntil(() => editor.getAttribute('innerHTML') === content, 'The editor does not have such content');
     return true;
   }
