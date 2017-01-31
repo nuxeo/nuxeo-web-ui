@@ -63,10 +63,9 @@ Custom property | Description | Default
     <nuxeo-page-provider id="provider"
                          query="[[query]]"
                          params="[[params]]"
-                         enrichers="[[enrichers]]"
                          page-size="20"
                          current-page="{{children}}"></nuxeo-page-provider>
-    <nuxeo-document id="parent"></nuxeo-document>
+    <nuxeo-document id="parent" enrichers="[[enrichers]]"></nuxeo-document>
     <paper-typeahead id="typeahead"
                      label="[[label]]"
                      value="{{value}}"
