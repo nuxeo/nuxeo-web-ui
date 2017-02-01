@@ -1,20 +1,17 @@
 <!--
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
-Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-		http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
+distributed under the License is distributed on an 'AS IS' BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-	Gabriel Barata <gbarata@nuxeo.com>
 -->
 
 <!--
@@ -23,12 +20,15 @@ Contributors:
 @element nuxeo-folder-create-layout
 -->
 <dom-module id="nuxeo-folder-create-layout">
-  <template>
 
+  <template>
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <paper-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}" always-float-label required></paper-input>
-    <paper-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label value="{{document.properties.dc:description::change}}"></paper-textarea>
+    <paper-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"
+                 always-float-label required></paper-input>
+
+    <paper-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label
+                    value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 directory-name="nature"
@@ -55,21 +55,21 @@ Contributors:
     </nuxeo-directory-suggestion>
 
     <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
-                 value="{{document.properties.dc:expired}}">
+                       value="{{document.properties.dc:expired}}">
     </nuxeo-date-picker>
-
   </template>
-  <script>
-    (function() {
-      'use strict';
 
-      Polymer({
-        is: 'nuxeo-folder-create-layout',
-        behaviors: [Nuxeo.LayoutBehavior],
-        properties: {
-          document: Object
-        }
-      });
-    })();
+  <script>
+    Polymer({
+      is: 'nuxeo-folder-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype Folder
+         */
+        document: Object
+      }
+    });
   </script>
+
 </dom-module>
