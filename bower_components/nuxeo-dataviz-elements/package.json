@@ -11,6 +11,12 @@
   ],
   "license": "Apache 2.0",
   "private": true,
+  "scripts": {
+    "eslint": "eslint *.html demo/**/*.html test/**/*.html",
+    "polylint": "polymer lint nuxeo-dataviz-elements.html --follow-dependencies",
+    "lint": "npm run eslint && npm run polylint",
+    "test": "polymer test --simpleOutput --expanded -l chrome"
+  },
   "dependencies": {
     "@polymer/polymer": "^1.2.5-npm-test.2",
     "nuxeo-elements": "nuxeo/nuxeo-elements"
@@ -18,6 +24,9 @@
   "devDependencies": {
     "@polymer/iron-component-page": "0.0.3",
     "web-component-tester": "*",
-    "moment": "^2.10.6"
+    "moment": "^2.10.6",
+    "eslint": "^3.4.0",
+    "eslint-plugin-html": "^1.5.2",
+    "polymer-cli": "^0.16.0"
   }
 }
