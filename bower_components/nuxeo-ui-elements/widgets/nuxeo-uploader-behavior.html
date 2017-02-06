@@ -74,6 +74,10 @@ limitations under the License.
     },
 
     uploadFiles: function(files) {
+      if (!this.accepts(files)) {
+        console.warn('Can only upload ' + this.accept +' files.');
+        return;
+      }
       if (!this.connection) {
         throw 'Missing connection';
       }
@@ -146,11 +150,26 @@ limitations under the License.
       }.bind(this));
     },
 
+    accepts: function(files) {
+      if (files.length) {
+        for (var i = 0; i < files.length; i++) {
+          if (!this._accepts(files[i])) {
+            return false;
+          }
+        }
+        return true;
+      } else {
+        return this._accepts(files);
+      }
+    },
+
     _accepts: function(file) {
       var mimeType = ((file.type !== '') ? file.type.match(/^[^\/]*\//)[0] : null);
       var fileType = file.name.match(/\.[^\.]*$/)[0];
       if (this.accept && !(this.accept.indexOf(mimeType) > -1 || this.accept.indexOf(fileType) > -1)) {
-        return;
+        return false;
+      } else {
+        return true;
       }
     },
 
