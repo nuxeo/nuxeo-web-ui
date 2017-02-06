@@ -51,13 +51,6 @@ Contributors:
         --paper-header-panel-body: {
           background: var(--nuxeo-page-background);
         };
-        --paper-header-panel-shadow: {
-          box-shadow: none;
-        };
-        --paper-header-panel-waterfall-container: {
-          display: -webkit-flex;
-          display: flex;
-        };
         height: 100vh;
       }
 
@@ -281,7 +274,7 @@ Contributors:
       </div>
 
       <!-- pages -->
-      <paper-header-panel main>
+      <paper-header-panel main mode="seamed">
         <iron-pages id="pages" selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible">
 
           <nuxeo-page name="error" hidden$="[[!currentDocument]]">
