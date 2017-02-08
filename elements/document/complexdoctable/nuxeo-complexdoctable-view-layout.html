@@ -1,0 +1,92 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-complexdoctable-view-layout`
+@group Nuxeo UI
+@element nuxeo-complexdoctable-view-layout
+-->
+<dom-module id="nuxeo-complexdoctable-view-layout">
+
+  <style>
+    nuxeo-data-table {
+      height: 500px
+    }
+
+    .languages {
+      margin: 0 10px
+    }
+
+  </style>
+
+  <template>
+    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"></paper-input>
+
+    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label
+                    value="{{document.properties.dc:description::change}}"></paper-textarea>
+
+    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
+                       value="{{document.properties.dc:expired}}">
+    </nuxeo-date-picker>
+
+    <nuxeo-data-table items="{{document.properties.foxGroup:person}}" editable>
+      <nuxeo-data-table-column name="Name" flex="100">
+        <template>
+          [[item.name]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="Size" flex="50" >
+        <template>
+          [[item.size]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="Languages" flex="100" >
+        <template>
+          <template is="dom-repeat" items="[[item.spokenLanguages]]" as="lang">
+           <nuxeo-tag>[[lang.properties.label]]</nuxeo-tag>
+          </template>
+        </template>
+      </nuxeo-data-table-column>
+      <template is="row-form">
+        <paper-input role="widget" name="name" label="Name" value="{{item.name}}"
+                     always-float-label required></paper-input>
+        <paper-input role="widget" name="number" label="Number" value="{{item.size}}" type="number"></paper-input>
+        <nuxeo-directory-suggestion role="widget" label="Languages"
+                                    multiple
+                                    directory-name="language"
+                                    value="{{item.spokenLanguages}}"
+                                    placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                    min-chars="0">
+        </nuxeo-directory-suggestion>
+      </template>
+
+    </nuxeo-data-table>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-complexdoctable-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype File
+         */
+        document: Object
+      }
+    });
+  </script>
+
+</dom-module>
