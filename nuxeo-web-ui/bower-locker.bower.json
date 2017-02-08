@@ -1,9 +1,0 @@
-{
-  "name": "nuxeo-web-ui-addon",
-  "private": true,
-  "dependencies": {
-    "nuxeo-elements": "nuxeo/nuxeo-elements#0.9.0",
-    "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#0.9.0",
-    "nuxeo-web-ui": "nuxeo/nuxeo-web-ui#0.9.0"
-  }
-}
