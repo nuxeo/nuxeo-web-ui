@@ -16,8 +16,13 @@ export default class NoteEditor {
   }
 
   hasContent(content) {
-    const editor = this.el.element('#editor');
-    driver.waitUntil(() => editor.getAttribute('innerHTML') === content, 'The editor does not have such content');
+    driver.waitUntil(() => {
+      try {
+        return this.el.element('#editor').getAttribute('innerHTML') === content;
+      } catch (e) {
+        return false;
+      }
+    }, 'The editor does not have such content');
     return true;
   }
 
