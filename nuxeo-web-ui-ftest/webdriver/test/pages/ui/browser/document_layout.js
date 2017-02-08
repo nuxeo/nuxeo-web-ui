@@ -4,9 +4,9 @@ import BasePage from '../../base';
 
 export default class DocumentLayout extends BasePage {
   getField(field) {
-    const form = this.el;
-    form.waitForVisible();
-    return form.element(`[name="${field}"]`);
+    driver.waitForExist(this._selector);
+    driver.waitForVisible(this._selector);
+    return this.el.element(`[name="${field}"]`);
   }
 
   getFieldValue(field) {
