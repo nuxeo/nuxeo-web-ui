@@ -45,6 +45,8 @@ export default class DocumentPage {
   }
 
   get versionInfoBar() {
+    this.page.waitForExist('#versionInfoBar');
+    this.page.waitForVisible('#versionInfoBar');
     return this.page.element('#versionInfoBar');
   }
 
