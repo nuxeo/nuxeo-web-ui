@@ -82,7 +82,9 @@ module.exports = function () {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
+    page.versions.listItem(index).waitForExist();
     page.versions.listItems.waitForVisible();
+    page.versions.listItem(index).waitForExist();
     page.versions.listItem(index).waitForVisible();
     page.versions.listItem(index).click();
   });
