@@ -68,20 +68,13 @@ Contributors:
                     headers="[[headers]]">
     </nuxeo-document>
 
-    <nuxeo-error id="error"></nuxeo-error>
-
-    <div id="container">
-      <form id="form" is="iron-form">
-        <div id="document-edit">
-          <!-- Dynamic layout element will be inserted here -->
-          <!-- <nuxeo-{{this.document.type}}-edit-layout document="{{document}}"> -->
-        </div>
-        <div class="actions">
-          <paper-button on-click="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
-          <paper-button id="save" on-click="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
-        </div>
-      </form>
-    </div>
+    <form id="form" is="iron-form">
+      <nuxeo-document-layout id="document-edit" document="[[document]]" layout="edit"></nuxeo-document-layout>
+      <div class="actions">
+        <paper-button on-click="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
+        <paper-button id="save" on-click="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
+      </div>
+    </form>
 
   </template>
   <script>
@@ -94,7 +87,6 @@ Contributors:
         properties: {
           document: {
             type: Object,
-            observer: '_documentChanged',
             notify: true
           },
 
@@ -115,73 +107,9 @@ Contributors:
           };
         },
 
-        _documentChanged: function() {
-          if (this.document) {
-            this._updateLayout();
-          }
-        },
-
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function(document) {
-          return ['nuxeo', document.type.toLowerCase(), 'edit-layout'].join('-');
-        },
-
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(this.document),
-              el = document.createElement(layout),
-              parent = this.$['document-edit'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          // setup data binding
-          el.document = this.document;
-
-          // hack to force resize event and correctly display <nuxeo-helper> elements
-          this.notifyResize();
-        },
-
-        /**
-         * Retrieves and creates the edit layout for the current document
-         */
-        _updateLayout: function() {
-          this.$.container.hidden = false;
-          this.$.error.hide();
-          var layout = this._layoutFor(this.document);
-          if (!this._isRegistered(layout)) {
-            var folder = this.document.type.toLowerCase() + '/';
-            var url = this.resolveUrl(folder + layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                this.$.container.hidden = true;
-                this.$.error.show('404', url, this.i18n('documentEdit.layoutNotFound', this.document.type));
-              });
-          } else {
-            this._createLayout();
-          }
-        },
-
         _validate: function() {
-          var valid = true;
           // run our custom validation function first to allow setting custom native validity
-          var layout = this.$['document-edit'].firstChild;
-          if (layout && ('function' === typeof layout.validate)) {
-            valid = layout.validate();
-          }
+          var valid = this.$['document-edit'].validate();
 
           // fake submit to trigger native validation checks and UI
           if (valid) {

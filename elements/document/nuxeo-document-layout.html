@@ -1,0 +1,67 @@
+<!--
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
+<!--
+`nuxeo-document-layout`
+@group Nuxeo UI
+@element nuxeo-document-layout
+-->
+<dom-module id="nuxeo-document-layout">
+  <template>
+    <nuxeo-layout id="layout" href="[[_href(document, layout)]]" model="[[_model(document)]]" error="[[i18n('documentView.layoutNotFound', document.type)]]"></nuxeo-layout>
+  </template>
+  <script>
+    (function () {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-document-layout',
+        behaviors: [Nuxeo.I18nBehavior],
+        properties: {
+          document: {
+            type: Object
+          },
+          layout: {
+            type: String,
+            value: 'view'
+          }
+        },
+
+        get element() {
+          return this.$.layout.element;
+        },
+
+        validate: function() {
+          return this.$.layout.validate();
+        },
+
+        _href: function (document, layout) {
+          if (document) {
+            var doctype = document.type.toLowerCase();
+            var name = ['nuxeo', doctype, layout, 'layout'].join('-');
+            return this.resolveUrl(doctype + '/' + name + '.html');
+          }
+        },
+
+        _model: function (document) {
+          return { document: document };
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

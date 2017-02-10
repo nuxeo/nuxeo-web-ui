@@ -17,6 +17,8 @@ Contributors:
   Andre Justo <ajusto@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="inport" href="nuxeo-document-layout.html">
+
 <!--
 `nuxeo-document-view`
 @group Nuxeo UI
@@ -37,11 +39,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-error id="error"></nuxeo-error>
-    <div id="document-view">
-      <!-- Dynamic layout element will be inserted here -->
-      <!-- <nuxeo-{{this.document.type}}-view document="{{document}}"> -->
-    </div>
+    <nuxeo-document-layout document="[[document]]" layout="view"></nuxeo-document-layout>
   </template>
   <script>
     (function() {
@@ -49,71 +47,8 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-view',
-        behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          }
-        },
-
-        _documentChanged: function() {
-          this._updateLayout();
-        },
-
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function(document) {
-          if (document) {
-            return ['nuxeo', document.type.toLowerCase(), 'view-layout'].join('-');
-          }
-        },
-
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document and mode
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(this.document),
-              el = document.createElement(layout),
-              parent = this.$['document-view'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          // setup data binding
-          el.document = this.document;
-        },
-
-        /**
-         * Retrieves and creates the view layout for the current document
-         */
-        _updateLayout: function() {
-          if (this.document) {
-            this.$['document-view'].hidden = false;
-            this.$.error.hide();
-            var layout = this._layoutFor(this.document);
-            if (!this._isRegistered(layout)) {
-              var folder = this.document.type.toLowerCase() + '/';
-              var url = this.resolveUrl(folder + layout + '.html');
-              this.importHref(url, this._createLayout.bind(this),
-                // error handling
-                function() {
-                  this.$['document-view'].hidden = true;
-                  this.$.error.show('404', url, this.i18n('documentView.layoutNotFound', this.document.type));
-                });
-            } else {
-              this._createLayout();
-            }
-          }
+          document: Object
         }
       });
     })();
