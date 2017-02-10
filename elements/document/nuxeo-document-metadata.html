@@ -15,13 +15,16 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="inport" href="nuxeo-document-layout.html">
 
 <!--
 `nuxeo-document-metadata`
 @group Nuxeo UI
 @element nuxeo-document-metadata
 -->
-
 <dom-module id="nuxeo-document-metadata">
   <template>
     <style>
@@ -34,14 +37,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-error id="error"></nuxeo-error>
-
-    <div id="metadata">
-      <div id="metadata-view">
-        <!-- Dynamic layout element will be inserted here -->
-        <!-- <nuxeo-{{this.document.type}}-metadata-layout document="{{document}}"> -->
-      </div>
-    </div>
+    <nuxeo-document-layout document="[[document]]" layout="metadata"></nuxeo-document-layout>
 
   </template>
 
@@ -51,71 +47,9 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-document-metadata',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          }
-        },
-
-        _documentChanged: function() {
-          if (this.document) {
-            this._updateLayout();
-          }
-        },
-
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function(document) {
-          return ['nuxeo', document.type.toLowerCase(), 'metadata-layout'].join('-');
-        },
-
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(this.document),
-            el = document.createElement(layout),
-            parent = this.$['metadata-view'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          // setup data binding
-          el.document = this.document;
-        },
-
-        /**
-         * Retrieves and creates the edit layout for the current document
-         */
-        _updateLayout: function() {
-          this.$['metadata'].hidden = false;
-          this.$.error.hide();
-          var layout = this._layoutFor(this.document);
-          if (!this._isRegistered(layout)) {
-            var folder = this.document.type.toLowerCase() + '/';
-            var url = this.resolveUrl(folder + layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                this.$['metadata'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentMetadata.layoutNotFound', this.document.type));
-              });
-          } else {
-            this._createLayout();
-          }
+          document: Object
         }
-
       });
     })();
   </script>
