@@ -1,0 +1,123 @@
+<!--
+@license
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="nuxeo-error.html">
+<!--
+An element to import and stamp layout elements.
+
+Example:
+
+    <nuxeo-layout href="nuxeo-note-view-layout.html" model='{"document": {...}}'></nuxeo-layout>
+
+@group Nuxeo UI
+@element nuxeo-layout
+-->
+<dom-module id="nuxeo-layout">
+  <template>
+    <nuxeo-error hidden$="[[element]]" code="404" url="[[href]]" message="[[error]]"></nuxeo-error>
+    <div id="container"></div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-layout',
+
+      behaviors: [Polymer.IronResizableBehavior],
+
+      properties: {
+
+        /**
+         * The href of the element to import.
+         * The name of the element is infered from the filename.
+         **/
+        href: String,
+
+        /**
+         * Model object with properties to set on the instantiated element.
+         **/
+        model: {
+          type: Object,
+          value: {}
+        },
+
+        /**
+         * Error message to display if layout is not found.
+         **/
+        error: {
+          type: String,
+          value: 'Failed to find layout'
+        },
+
+        /**
+         * The stamped element.
+         **/
+        element: {
+          type: Object,
+          readOnly: true,
+          notify: true
+        }
+      },
+
+      observers: [
+        '_update(href, model)'
+      ],
+
+      // Trigger the layout validation if it exists.
+      validate: function() {
+        if (this.element && ('function' === typeof this.element.validate)) {
+          return this.element.validate();
+        }
+        return true;
+      },
+
+      _update: function(href, model) {
+        var file = href.split('/').pop(),
+            name = file.split('.')[0];
+
+        this.$.container.hidden = false;
+
+        this.importHref(href,
+            function() {
+              var element = document.createElement(name);
+
+              if (this.$.container.hasChildNodes()) {
+                this.$.container.replaceChild(element, this.$.container.firstChild);
+              } else {
+                this.$.container.appendChild(element);
+              }
+
+              // setup data binding
+              // Object.assign(element, model);
+              if (model) {
+                for (var prop in model) {
+                  element[prop] = model[prop];
+                }
+              }
+
+              this.element = element;
+
+              this.notifyResize();
+            },
+            // error handling
+            function() {
+              this.element = undefined;
+              this.$.container.hidden = true;
+            });
+      }
+    });
+  </script>
+</dom-module>
