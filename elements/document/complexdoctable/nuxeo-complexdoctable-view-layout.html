@@ -48,11 +48,13 @@ limitations under the License.
           [[item.name]]
         </template>
       </nuxeo-data-table-column>
+
       <nuxeo-data-table-column name="Size" flex="50" >
         <template>
           [[item.size]]
         </template>
       </nuxeo-data-table-column>
+
       <nuxeo-data-table-column name="Languages" flex="100" >
         <template>
           <template is="dom-repeat" items="[[item.spokenLanguages]]" as="lang">
@@ -60,7 +62,8 @@ limitations under the License.
           </template>
         </template>
       </nuxeo-data-table-column>
-      <template is="row-form">
+
+      <nuxeo-data-table-form>
         <paper-input role="widget" name="name" label="Name" value="{{item.name}}"
                      always-float-label required></paper-input>
         <paper-input role="widget" name="number" label="Number" value="{{item.size}}" type="number"></paper-input>
@@ -70,7 +73,7 @@ limitations under the License.
                                     value="{{item.spokenLanguages}}"
                                     placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
                                     min-chars="0">
-        </nuxeo-directory-suggestion>
+        </nuxeo-data-table-form>
       </template>
 
     </nuxeo-data-table>
