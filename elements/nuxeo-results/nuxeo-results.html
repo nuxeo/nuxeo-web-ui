@@ -278,14 +278,17 @@ Contributors:
             value: false,
             reflectToAttribute: true
           },
+          nxProvider: {
+            type: Object,
+            observer: '_refresh'
+          },
           _localStorageName: {
             type: String
           }
         },
 
         observers: [
-          '_updateActionContext(displayMode, nxProvider.*)',
-          '_observeName(name)'
+          '_updateStorage(name)'
         ],
 
         ready: function() {
@@ -294,9 +297,13 @@ Contributors:
           }.bind(this));
         },
 
+        _refresh: function() {
+          this.$.datatable._updateResults();
+        },
+
         _refreshAndFetch: function() {
           var pn = this.nxProvider.page;
-          this._refresh();
+          this._rewind();
           if (pn === 1) {
             // normally the page provider is on auto mode
             // so the fetch should be triggered when changing page
@@ -304,7 +311,7 @@ Contributors:
           }
         },
 
-        _refresh: function() {
+        _rewind: function() {
           this.nxProvider.page = 1;
         },
 
@@ -325,7 +332,7 @@ Contributors:
           }
         },
 
-        _observeName: function() {
+        _updateStorage: function() {
           if (this.$.nxcon.user) {
             this._localStorageName =  this.$.nxcon.user.id + '-nxrs-' + this.name;
           }

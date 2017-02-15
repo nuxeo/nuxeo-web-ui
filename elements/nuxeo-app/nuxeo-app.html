@@ -193,8 +193,6 @@ Contributors:
 
     <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
 
-    <nuxeo-document auto doc-id="[[selectedSearch.id]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
-
     <!-- app layout -->
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
       <div drawer>
@@ -205,11 +203,11 @@ Contributors:
         </a>
 
         <!-- menu -->
-        <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" on-iron-activate="_toggleDrawer">
+        <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
           <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="defaultSearch" route="search:default" icon="icons:search" label="app.search"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="expiredSearch" route="search:expired" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="defaultSearch" icon="icons:search" label="app.search"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="expiredSearch" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
@@ -230,10 +228,12 @@ Contributors:
 
             <nuxeo-recent-documents name="recents" max-size="10" id="recent"></nuxeo-recent-documents>
 
-            <nuxeo-search-form name="search" id="searchForm" search-name="[[searchName]]"
-              on-display-filters="_resetSearchResults" on-show-results="_showSearchResults" dirty="{{dirty}}"
-              is-saved-search="{{searchLoaded}}" selected-search="{{selectedSearch}}">
-            </nuxeo-search-form>
+            <nuxeo-search-form name="defaultSearch" search-name="default" auto display-auto-control
+                               provider="default_search" schemas="dublincore,common,uid"></nuxeo-search-form>
+
+            <nuxeo-search-form name="expiredSearch" search-name="expired" queue auto
+                               provider="expired_search" schemas="dublincore,common,uid"
+                               label="expiredSearch.expiredDocuments"></nuxeo-search-form>
 
             <div name="tasks">
               <div class="title">[[i18n('app.tasks')]]</div>
@@ -294,9 +294,7 @@ Contributors:
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
-          <nuxeo-search-results name="search" id="searchResults" on-navigate="_navigateFromSearch">
-            <nuxeo-saved-search-actions class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
-          </nuxeo-search-results>
+          <nuxeo-search-results name="search" id="searchResults"></nuxeo-search-results>
 
           <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
 
@@ -373,7 +371,8 @@ Contributors:
           entity: Object,
 
           searchName: {
-            type: String
+            type: String,
+            observer: '_updateSearch'
           },
 
           tasks: Array,
@@ -434,7 +433,8 @@ Contributors:
           'document-unsubscribed': '_documentUnsubscribed',
           'document-locked': '_documentLocked',
           'document-unlocked': '_documentUnlocked',
-          'theme-changed': '_themeChanged'
+          'theme-changed': '_themeChanged',
+          'search-results': '_showSearchResults'
         },
 
         ready: function() {
@@ -447,10 +447,7 @@ Contributors:
           }.bind(this));
 
           this.clipboard = this.$.clipboard;
-          this.$.searchResults.nxProvider = this.$.searchForm.nxProvider;
-          // XXX: review this
-          this.$.searchResults.querySelector('nuxeo-saved-search-actions').searchForm = this.$.searchForm;
-          // XXX: end of review this
+
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
 
           this.$.nxcon.connect().then(function(res) {
@@ -535,21 +532,18 @@ Contributors:
           }
         },
 
-        _navigateFromSearch: function(e) {
-          this.$.searchForm.displayQueue(e.detail.doc);
-        },
-
         _navigateFromCollection: function(e) {
           page('/browse' + e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
         },
 
-        _resetSearchResults: function() {
-          this.selectedTab = 'search';
+        _updateSearch: function(searchName) {
+          var searchForm = this.$$("nuxeo-search-form[search-name='" + searchName + "']");
+          this.$.searchResults.searchForm = searchForm;
         },
 
-        _showSearchResults: function() {
-          this.show('search');
+        _showSearchResults: function(e) {
+          page('/search/' + e.target.searchName);
         },
 
         _navigateToCollection: function(e) {
@@ -565,11 +559,6 @@ Contributors:
             this._openDrawer();
           }
           this._selected = e.detail.selected;
-
-          [].forEach.call(document.querySelectorAll('nuxeo-menu-icon'), function(element) {
-            this.toggleClass('selected', false, element);
-          }.bind(this));
-          this.toggleClass('selected', true, e.detail.item);
         },
 
         _openDrawer: function() {

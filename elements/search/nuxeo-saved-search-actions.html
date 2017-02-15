@@ -29,14 +29,16 @@ Contributors:
 <dom-module id="nuxeo-saved-search-actions">
   <template>
 
+    <nuxeo-document auto doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
+
     <div class="horizontal layout center">
-      <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, searchLoaded,dirty)]]">
+      <paper-button on-click="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, searchForm.dirty)]]">
          <iron-icon icon="add"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchDoc,searchLoaded,dirty)]]">
+      <paper-button on-click="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, searchFrom.dirty)]]">
          <iron-icon icon="check"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
-      <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc,searchLoaded,dirty)]]">
+      <paper-menu-button horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, searchForm.dirty)]]">
         <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-menu class="dropdown-content layout vertical">
           <paper-item class="layout horizontal center" on-tap="_renameSearch">
@@ -61,13 +63,15 @@ Contributors:
         is: 'nuxeo-saved-search-actions',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
+          searchId: String,
           searchDoc: Object,
-          searchLoaded: Boolean,
-          dirty: Boolean
+          searchForm: Object
         },
 
         set searchForm(form) {
-          this._searchForm = form;
+          this.searchForm = form;
+          this.searchId = this._searchForm.selectedSearch.id;
+          this.isSavedSearch = !!this.searchId; //this._searchForm.isSavedSearch;
         },
 
         get searchForm() {
@@ -75,35 +79,35 @@ Contributors:
         },
 
         _saveSearch: function() {
-          this._searchForm.save();
+          this.searchForm.save();
         },
 
         _saveSearchAs: function() {
-          this._searchForm.saveAs();
+          this.searchForm.saveAs();
         },
 
         _renameSearch: function() {
-          this._searchForm.rename();
+          this.searchForm.rename();
         },
 
         _shareSearch: function() {
-          this._searchForm.share();
+          this.searchForm.share();
         },
 
         _deleteSearch: function() {
-          this._searchForm.delete();
+          this.searchForm.delete();
         },
 
         _showSaveAs: function() {
-          return this.searchLoaded || (!this.searchLoaded && this.dirty);
+          return this.isSavedSearch || (!this.isSavedSearch && this.searchForm.dirty);
         },
 
         _showSave: function() {
-          return this.searchLoaded && this.dirty && this._hasPermissions();
+          return this.isSavedSearch && this.searchForm.dirty && this._hasPermissions();
         },
 
         _showOtherSearchActions: function() {
-          return this.searchLoaded && this._hasPermissions();
+          return this.isSavedSearch && this._hasPermissions();
         },
 
         _hasPermissions: function() {
