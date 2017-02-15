@@ -87,14 +87,15 @@ Contributors:
         is: 'nuxeo-expired-search',
 
         properties: {
-          provider: {
-            type: String,
-            value: 'expired_search',
-            reflectToAttribute: true
-          },
           params: {
             type: Object,
-            value: {},
+            value: function() {
+              var oneWeekAgo = new Date();
+              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+              return {
+                "expired_max" : oneWeekAgo.toJSON()
+              }
+            },
             notify: true
           },
           aggregations: {
@@ -106,31 +107,10 @@ Contributors:
             type: String,
             notify: true,
             observer: '_addFullTextSearch'
-          },
-          schemas: {
-            type: String,
-            value: 'dublincore,common,uid',
-            reflectToAttribute: true
-          },
-          label: {
-            type: String,
-            value: 'expiredSearch.expiredDocuments'
-          },
-          displayQueue: {
-            type: Boolean,
-            value: true
           }
         },
 
         behaviors: [Nuxeo.I18nBehavior],
-
-        getDefaultParams: function() {
-          var oneWeekAgo = new Date();
-          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-          return {
-            "expired_max" : oneWeekAgo.toJSON()
-          }
-        },
 
         _addFullTextSearch: function() {
           if (this.searchTerm) {
