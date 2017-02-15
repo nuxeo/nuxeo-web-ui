@@ -52,6 +52,8 @@ Contributors:
 
       .container {
         overflow: auto;
+        -webkit-flex: 1 1 auto;
+        height: 0px;
       }
 
       .container .suggester {
@@ -185,7 +187,7 @@ Contributors:
           <iron-icon src="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
-        <div id="editor" class="flex">
+        <div id="editor" class="flex container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
