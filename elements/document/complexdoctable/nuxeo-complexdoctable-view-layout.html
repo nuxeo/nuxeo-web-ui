@@ -42,39 +42,31 @@ limitations under the License.
                        value="{{document.properties.dc:expired}}">
     </nuxeo-date-picker>
 
-    <nuxeo-data-table items="{{document.properties.foxGroup:person}}" editable>
+    <nuxeo-data-table items="{{document.properties.foxGroup:person}}" editable orderable>
       <nuxeo-data-table-column name="Name" flex="100">
         <template>
-          [[item.name]]
+          <paper-input role="widget" name="name" label="Name" value="{{item.name}}"
+                                     always-float-label>
+          </paper-input>
         </template>
       </nuxeo-data-table-column>
-
       <nuxeo-data-table-column name="Size" flex="50" >
         <template>
-          [[item.size]]
+          <paper-input role="widget" name="number" label="Size" value="{{item.size}}" type="number"
+                                     always-float-label>
+          </paper-input>
         </template>
       </nuxeo-data-table-column>
-
-      <nuxeo-data-table-column name="Languages" flex="100" >
+      <nuxeo-data-table-column name="Languages" flex="150" >
         <template>
-          <template is="dom-repeat" items="[[item.spokenLanguages]]" as="lang">
-           <nuxeo-tag>[[lang.properties.label]]</nuxeo-tag>
-          </template>
+          <nuxeo-directory-suggestion role="widget"
+                                      multiple
+                                      directory-name="language"
+                                      value="{{item.spokenLanguages}}"
+                                      placeholder="Languages"
+                                      min-chars="0">
         </template>
       </nuxeo-data-table-column>
-
-      <nuxeo-data-table-form>
-        <paper-input role="widget" name="name" label="Name" value="{{item.name}}"
-                     always-float-label required></paper-input>
-        <paper-input role="widget" name="number" label="Number" value="{{item.size}}" type="number"></paper-input>
-        <nuxeo-directory-suggestion role="widget" label="Languages"
-                                    multiple
-                                    directory-name="language"
-                                    value="{{item.spokenLanguages}}"
-                                    placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                    min-chars="0">
-        </nuxeo-data-table-form>
-      </template>
 
     </nuxeo-data-table>
   </template>

@@ -20,41 +20,44 @@ limitations under the License.
 @element nuxeo-complexdoctable-edit-layout
 -->
 <dom-module id="nuxeo-complexdoctable-edit-layout">
+<style>
+  nuxeo-data-table {
+    height: 500px
+  }
+
+
+</style>
 
   <template>
     <paper-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"
                  always-float-label required></paper-input>
 
-    <paper-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label
-                    value="{{document.properties.dc:description::change}}"></paper-textarea>
+     <nuxeo-data-table items="{{document.properties.foxGroup:person}}" editable orderable>
+       <nuxeo-data-table-column name="Name" flex="100">
+         <template>
+           <paper-input role="widget" name="name" label="Name" value="{{item.name}}"
+                        always-float-label required></paper-input>
+         </template>
+       </nuxeo-data-table-column>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
-                                directory-name="nature"
-                                value="{{document.properties.dc:nature}}"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
-    </nuxeo-directory-suggestion>
+       <nuxeo-data-table-column name="Size" flex="50" >
+         <template>
+           <paper-input role="widget" name="number" label="Size" value="{{item.size}}" type="number"></paper-input>
+         </template>
+       </nuxeo-data-table-column>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                value="{{document.properties.dc:subjects}}"
-                                multiple="true"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
-    </nuxeo-directory-suggestion>
+       <nuxeo-data-table-column name="Languages" flex="150" >
+         <template>
+           <nuxeo-directory-suggestion role="widget"
+                                       multiple
+                                       directory-name="language"
+                                       value="{{item.spokenLanguages}}"
+                                       placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+                                       min-chars="0">
+         </template>
+       </nuxeo-data-table-column>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
-                                directory-name="l10ncoverage"
-                                value="{{document.properties.dc:coverage}}"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
-    </nuxeo-directory-suggestion>
-
-    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
-                       value="{{document.properties.dc:expired}}">
-    </nuxeo-date-picker>
+     </nuxeo-data-table>
   </template>
 
   <script>
