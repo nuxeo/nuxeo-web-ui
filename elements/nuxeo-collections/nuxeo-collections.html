@@ -205,6 +205,7 @@ Contributors:
                params='{"searchTerm":"%","user":"$currentUser"}'
                sort='{"dc:modified":"desc"}'
                schemas="dublincore,common"
+               enrichers="permissions"
                headers='{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
 
@@ -267,7 +268,7 @@ Contributors:
                       <div class="layout center">
                         <span class="list-item-property ellipsis">
                           [[member.type]]
-                          <iron-icon  id="removeFromCollection" class="remove"
+                          <iron-icon  id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]"
                             icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
                           </iron-icon>
                         </span>
@@ -537,6 +538,15 @@ Contributors:
 
         _formatDate: function(date) {
           return moment(date).format('MMMM D, YYYY');
+        },
+
+        _canRemove: function(collection) {
+          if (collection && collection.contextParameters && collection.contextParameters.permissions) {
+            // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
+            // Action will therefore not be available
+            return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
+          }
+          return false;
         }
 
       });

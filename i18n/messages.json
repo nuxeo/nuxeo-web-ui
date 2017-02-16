@@ -106,6 +106,7 @@
   "collections.moveDown": "Move down",
   "collections.moveTop": "Move top",
   "collections.moveUp": "Move up",
+  "collections.remove": "Remove from collection",
   "collections.noDocument": "There are no documents in this collection. You can add documents from the document view or in bulk from a list view.",
   "collections.noDocumentWhenFiltered": "There are no documents in this collection with these criteria.",
   "collections.ownedBy": "Owned by",
