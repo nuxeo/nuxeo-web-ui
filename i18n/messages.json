@@ -111,6 +111,8 @@
   "collections.ownedBy": "Owned by",
   "command.add": "Add",
   "command.back": "Back",
+  "command.moveUpward": "Move Upward",
+  "command.moveDownward": "Move Downward",
   "command.cancel": "Cancel",
   "command.clear": "Clear",
   "command.close": "Close",
