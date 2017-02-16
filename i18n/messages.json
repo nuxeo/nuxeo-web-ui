@@ -461,6 +461,7 @@
   "ui.label.quickFilters.mostRecent" : "Most Recent",
   "ui.label.quickFilters.noFolder" : "No Containers",
   "ui.label.quickFilters.onlyValidated" : "Validated",
+  "ui.label.quickFilters.approved" : "Approved",
   "versions.confirm.title": "Are you sure?",
   "versions.create": "Create Version",
   "versions.info": "You're viewing the {0}.{1} version.",
