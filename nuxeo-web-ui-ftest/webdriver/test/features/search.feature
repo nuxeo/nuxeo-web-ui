@@ -4,6 +4,6 @@ Feature: Search
     Given I login as "Administrator"
 
   Scenario: Search
-    When I click the "default" search button
-    Then I can see the Search panel
-    And I cannot see the Search results
+    When I click the "defaultSearch" button
+    Then I can see the "default" search panel
+    And I cannot see the search results
