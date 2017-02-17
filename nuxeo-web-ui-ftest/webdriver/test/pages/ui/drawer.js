@@ -57,11 +57,6 @@ export default class Drawer {
     return this._section('profile');
   }
 
-  openSearch(name) {
-    this.menu.click(`nuxeo-menu-icon[name='${name}Search']`);
-    this._section('search').waitForVisible(2000);
-  }
-
   open(name) {
     this.menu.click(`nuxeo-menu-icon[name='${name}']`);
     const section = this._section(name);
@@ -71,5 +66,9 @@ export default class Drawer {
 
   _section(name) {
     return this.pages.element(`[name='${name}']`);
+  }
+
+  _search(name) {
+    return this.pages.element(`[search-name='${name}']`);
   }
 }
