@@ -34,9 +34,7 @@ Contributors:
         },
         actionContext: {
           type: Object,
-          value: function() {
-            return {};
-          },
+          computed: '_computeActionContext(displayMode, nxProvider.*, nxProvider.sort.*, columns)',
           notify: true
         },
         _settings: {
@@ -47,6 +45,10 @@ Contributors:
         selectedItems: {
           type: Object,
           notify: true
+        },
+        columns: {
+          type: Array,
+          value: []
         }
       },
 
@@ -85,10 +87,13 @@ Contributors:
         }
       },
 
-      _updateActionContext: function() {
-        this.set('actionContext.baseUrl', this.$.nxcon.url);
-        this.set('actionContext.displayMode', this.displayMode);
-        this.set('actionContext.nxProvider', this.nxProvider);
+      _computeActionContext: function() {
+        return {
+          baseUrl: this.$.nxcon.url,
+          displayMode: this.displayMode,
+          nxProvider: this.nxProvider,
+          columns: this.$.datatable.columns
+        }
       },
 
       _clearSelectedItems: function() {
