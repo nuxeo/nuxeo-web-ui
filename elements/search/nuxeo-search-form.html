@@ -221,8 +221,7 @@ Contributors:
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-page-provider id="provider"
-       auto="[[_auto]]"
+    <nuxeo-page-provider id="provider" auto$="[[_isAuto(auto, visible)]]"
        provider="[[provider]]"
        page-size="[[pageSize]]"
        aggregations="{{aggregations}}"
@@ -242,7 +241,7 @@ Contributors:
     <div id="search-container">
       <div class="header ellipsis search-header">
         <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
-        <template is="dom-if" if="[[!_onlyQueue]]">
+        <template is="dom-if" if="[[!onlyQueue]]">
           <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
             <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
               <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
@@ -251,30 +250,30 @@ Contributors:
               </template>
             </paper-menu>
           </paper-dropdown-menu>
-          <template is="dom-if" if="[[_isQueue]]">
+          <template is="dom-if" if="[[queue]]">
             <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
             <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</paper-tooltip>
           </template>
-          <template is="dom-if" if="[[!_isQueue]]">
+          <template is="dom-if" if="[[!queue]]">
             <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
             <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</paper-tooltip>
           </template>
         </template>
-        <template is="dom-if" if="[[_onlyQueue]]">
+        <template is="dom-if" if="[[onlyQueue]]">
           <h1>[[i18n(label)]]</h1>
         </template>
       </div>
 
       <div class="content">
-        <div id="filters" class="filters loadable" hidden$="{{_isQueue}}">
+        <div id="filters" class="filters loadable" hidden$="{{queue}}">
           <div id="search-form-container">
             <!-- Dynamic search form element will be inserted here -->
             <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
           </div>
-          <div class="layout vertical row" hidden$="[[!_displayAutoControl]]">
-            <paper-toggle-button checked="{{_auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
+          <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
+            <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
           </div>
           <div class="row actions">
@@ -284,14 +283,14 @@ Contributors:
             <paper-button noink class="primary clear" on-click="_clear">
               [[i18n('command.clear')]]
             </paper-button>
-            <paper-button noink class="primary search" on-click="_search" hidden$="[[_auto]]">
+            <paper-button noink class="primary search" on-click="_search" hidden$="[[auto]]">
               [[i18n('command.search')]]
             </paper-button>
           </div>
           <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
         </div>
 
-        <div id="queue" hidden$="{{!_isQueue}}">
+        <div id="queue" hidden$="{{!queue}}">
           <nuxeo-data-list nx-provider="provider" id="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
@@ -399,7 +398,7 @@ Contributors:
             type: Number,
             notify: true
           },
-          _isQueue: {
+          queue: {
             type: Boolean,
             value: false
           },
@@ -426,7 +425,7 @@ Contributors:
             value: false,
             notify: true
           },
-          _onlyQueue: {
+          onlyQueue: {
             type: Boolean,
             value: false
           },
@@ -462,11 +461,18 @@ Contributors:
             type: Object,
             observer: '_aggregationsChanged'
           },
-          _auto: {
+          visible: Boolean,
+          /**
+           * If true, automatically execute the search each time a param is changed.
+           */
+          auto: {
             type: Boolean,
-            value: true
+            value: false
           },
-          _displayAutoControl: {
+          /**
+           * If true, display a toggle control to enable or disable auto mode.
+           */
+          displayAutoControl: {
             type: Boolean,
             value: false
           }
@@ -492,18 +498,22 @@ Contributors:
 
         displayQueue: function(doc) {
           var doDisplay = function() {
-            this._isQueue = true;
+            this.queue = true;
             this.$.list.notifyResize();
             if (doc && doc.uid) {
               this.$.list.$.list.selectItem(doc);
               this.$.list.$.list.scrollToItem(doc);
             }
           }.bind(this);
-          if (!this._auto) {
+          if (!this.auto) {
             this.$.provider.fetch().then(doDisplay);
           } else {
             doDisplay();
           }
+        },
+
+        _isAuto: function() {
+          return this.visible && this.auto;
         },
 
         _resetResults: function() {
@@ -516,12 +526,12 @@ Contributors:
         },
 
         displayFilters: function() {
-          this._isQueue = false;
+          this.queue = false;
           this.fire('display-filters');
         },
 
         _navigateToResults: function() {
-          this.fire('show-results');
+          this.fire('search-results');
         },
 
         _computedClass: function(isSelected) {
@@ -593,13 +603,13 @@ Contributors:
           }
           this.selectedSearchIdx = 0;
           this._resetResults();
-          if (!this._auto) {
+          if (!this.auto) {
             this.aggregations = {};
           }
         },
 
         _search: function() {
-          if (!this._auto) {
+          if (!this.auto) {
             this.$.provider.fetch().then(function() {
               this._navigateToResults();
             }.bind(this));
@@ -747,34 +757,22 @@ Contributors:
               el = document.createElement(layout),
               parent = this.$['search-form-container'];
           parent.innerHTML = '';
-          this._auto = typeof el.auto !== "undefined" ? el.auto === true : true;
+          this.auto = typeof el.auto !== "undefined" ? el.auto === true : true;
           this._clear();
           parent.appendChild(el);
           el.id = 'search-form';
           this._form = el;
           this._form.aggregations = this.aggregations;
-          this._displayAutoControl =
-            typeof this._form.displayAutoControl !== "undefined" ? this._form.displayAutoControl === true : false;
-          if (this._form.provider !== undefined) {
-            this.provider = this._form.provider;
-            this.$.provider.query = null;
-          } else {
-            this.provider = null;
-            this.$.provider.query = this._form.query;
-          }
-          if (this._form.schemas !== undefined) {
-            this.schemas = this._form.schemas;
-          }
-          this.label = this._form.label;
-          if (this._form.displayQueue === true) {
+
+          if (this.queue) {
             this.displayQueue();
           } else {
             this.displayFilters();
           }
-          this.label = this._form.label;
+
           this.$['saved-searches'].get();
-          if (this._form.getDefaultParams !== undefined) {
-            this.params = this._form.getDefaultParams();
+          if (this._form.params !== undefined) {
+            this.params = this._form.params;
           }
           // setup data binding
           el.addEventListener('params-changed', function(e) {
@@ -782,7 +780,7 @@ Contributors:
             if (e.detail.path) {
               var param = e.detail.path.split('.')[1];
               this.set('params.' + param, e.detail.value);
-              if (this._auto) {
+              if (this.auto) {
                 this._navigateToResults();
               }
             }

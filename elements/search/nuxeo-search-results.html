@@ -31,15 +31,15 @@ Contributors:
     <nuxeo-page>
       <div class="header">
         <span>[[i18n('searchResults.results')]]</span>
-        <content select=".actions"></content>
+        <nuxeo-saved-search-actions id="actions" class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
         <nuxeo-results id="results"
-                       name="[[name]]"
                        display-mode="[[displayMode]]"
                        selected-items="{{selectedItems}}"
                        empty-label="[[i18n('searchResults.noResults')]]"
-                       empty-label-when-filtered="[[i18n('searchResults.noResults')]]">
+                       empty-label-when-filtered="[[i18n('searchResults.noResults')]]"
+                       on-navigate="_navigateFromSearch">
           <div class="actions">
             <nuxeo-slot slot="SEARCH_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </div>
@@ -64,12 +64,18 @@ Contributors:
           }
         },
 
-        set nxProvider(nxProvider) {
-          this.$.results.nxProvider = nxProvider;
+        set searchForm(searchForm) {
+          this._searchForm = searchForm;
+          this.$.results.searchName = searchForm.name;
+          this.$.results.nxProvider = searchForm.nxProvider;
+          this.$.actions.searchForm = searchForm;
         },
 
-        get nxProvider() {
-          return this.$.results.nxProvider;
+
+        _navigateFromSearch: function(e) {
+          if (this._searchForm) {
+            this._searchForm.displayQueue(e.detail.doc);
+          }
         },
 
         _actionContext: function() {

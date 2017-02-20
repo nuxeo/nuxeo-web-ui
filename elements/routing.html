@@ -59,13 +59,8 @@ Contributors:
     });
 
     page('/search/:searchName', function(data) {
-      var firstNav = !app.selectedTab || app.selectedTab.length === 0;
-      app.selectedTab = 'search';
       app.searchName = data.params.searchName;
-      if (firstNav) {
-        app._openDrawer();
-        app.show('search');
-      }
+      app.show('search');
     });
 
     page('/doc/:repo?/:id/', function(data) {

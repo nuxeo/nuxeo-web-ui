@@ -145,11 +145,6 @@ Contributors:
         is: 'nuxeo-default-search',
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
-          provider: {
-            type: String,
-            value: 'default_search',
-            reflectToAttribute: true
-          },
           params: {
             type: Object,
             value: {},
@@ -164,25 +159,6 @@ Contributors:
             type: String,
             notify: true,
             observer: '_addFullTextSearch'
-          },
-          schemas: {
-            type: String,
-            value: 'dublincore,common,uid',
-            reflectToAttribute: true
-          },
-          /**
-           * If true, automatically execute the search each time a param is changed.
-           */
-          auto: {
-            type: Boolean,
-            value: true
-          },
-          /**
-           * If true, display a toggle control to enable or disable auto mode.
-           */
-          displayAutoControl: {
-            type: Boolean,
-            value: true
           }
         },
 
