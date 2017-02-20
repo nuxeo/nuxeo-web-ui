@@ -1,0 +1,86 @@
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+
+<!-- Part of `nuxeo-data-table` -->
+<dom-module id="nuxeo-data-table-row-actions">
+  <template>
+    <template is="dom-if" if="[[isUpVisible(index)]]">
+      <paper-icon-button noink id="upButton" icon="icons:arrow-upward" on-tap="moveUp" ></paper-icon-button>
+      <paper-tooltip for="upButton" position="left">[[i18n('command.moveUpward')]]</paper-tooltip>
+    </template>
+    <template is="dom-if" if="[[isDownVisible(index, size)]]">
+      <paper-icon-button noink id="downButton" icon="icons:arrow-downward" on-tap="moveDown"></paper-icon-button>
+      <paper-tooltip for="downButton" position="left">[[i18n('command.moveDownward')]]</paper-tooltip>
+    </template>
+    <template is="dom-if" if="[[editable]]">
+      <paper-icon-button id="edit-button" icon="icons:create" on-tap="_editEntry" noink></paper-icon-button>
+      <paper-tooltip for="edit-button" position="left">[[i18n('command.edit')]]</paper-tooltip>
+      <paper-icon-button id="delete-button" name="delete" icon="icons:delete" on-tap="_deleteEntry" noink></paper-icon-button>
+      <paper-tooltip for="delete-button" position="left">[[i18n('command.remove')]]</paper-tooltip>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-data-table-row-actions',
+
+      behaviors: [
+        saulis.DataTableTemplatizerBehavior,
+        Nuxeo.I18nBehavior
+      ],
+
+      properties: {
+        beforeBind: Object,
+        size: Number,
+        editable: Boolean,
+        orderable: Boolean
+      },
+
+      observers: ['_beforeBind(beforeBind, item.*, index, size)'],
+
+      attached: function() {
+        if (!Polymer.Settings.useNativeShadow) {
+          // details is supposed to be placed outside the local dom of iron-data-table.
+          Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+          if (this.domHost) {
+            Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
+          }
+        }
+      },
+
+      _beforeBind: function(beforeBind, item, index, selected, expanded) {
+        var data = {
+          index: index,
+          item: item.base,
+          size: size
+        };
+
+        beforeBind(data, this);
+      },
+
+      _editEntry: function() {
+        this.fire('editEntry', {item: this.item, index: this.index});
+      },
+
+      _deleteEntry: function() {
+        this.fire('deleteEntry', {item: this.item, index: this.index});
+      },
+
+      moveUp: function() {
+        this.fire('moveUpward', {item: this.item, index: this.index});
+      },
+
+      moveDown: function() {
+        this.fire('moveDownward', {item: this.item, index: this.index});
+      },
+
+      isUpVisible: function(index) {
+        return this.orderable && index > 0;
+      },
+
+      isDownVisible: function(index) {
+        return this.orderable && index < this.size - 1;
+      }
+    });
+  </script>
+</dom-module>

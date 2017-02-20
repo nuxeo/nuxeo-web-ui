@@ -19,6 +19,8 @@ Contributors:
 
 <nuxeo-slot-content name="defaultCollectionActions" slot="COLLECTION_ACTIONS">
   <template>
+    <nuxeo-collection-remove-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
+    </nuxeo-collection-remove-action>
     <nuxeo-collection-move-top-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">
     </nuxeo-collection-move-top-action>
     <nuxeo-collection-move-up-action members="[[selectedItems]]" all-members="{{items}}" collection="[[collection]]">

@@ -166,7 +166,7 @@ limitations under the License.
         '_updateFlags(size, loading)',
         '_nxProviderChanged(nxProvider)',
         '_selectionEnabledChanged(selectionEnabled, selectOnTap)',
-        '_onItemsChanged(items)',
+        '_onItemsChanged(items.splices)',
       ],
 
       listeners: {
@@ -318,7 +318,7 @@ limitations under the License.
       },
 
       _onItemsChanged: function() {
-        this.size = this.items.length;
+        this.size = this.items ? this.items.length : 0;
         this.$.list.notifyResize();
         this.notifyResize();
       },

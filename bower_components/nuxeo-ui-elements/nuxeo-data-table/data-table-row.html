@@ -46,6 +46,16 @@
         flex-direction: row;
         width: 100%;
       }
+
+      .actions {
+        position: absolute;
+        right: 5px;
+      }
+
+      :host:hover .actions {
+        display: block;
+      }
+
     </style>
     <div class="cells">
       <content select="nuxeo-data-table-checkbox"></content>
@@ -54,6 +64,9 @@
     </div>
     <div class="details">
       <content select="nuxeo-data-table-row-detail"></content>
+    </div>
+    <div class="actions">
+      <content select="nuxeo-data-table-row-actions"></content>
     </div>
   </template>
   <script>

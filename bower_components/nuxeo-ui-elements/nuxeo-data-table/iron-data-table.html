@@ -38,6 +38,9 @@ limitations under the License.
 <link rel="import" href="default-styles.html">
 <link rel="import" href="data-table-icons.html">
 
+<link rel="import" href="nuxeo-data-table-row-actions.html">
+<link rel="import" href="nuxeo-data-table-form.html">
+
 <link rel="import" href="../nuxeo-page-provider-display-behavior.html">
 
 <!--
@@ -158,9 +161,34 @@ Example:
         font-size: 1.5em;
       }
 
+      .top.actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-end-justified);
+        margin: 1em 0 1em 0;
+      }
+
+      paper-dialog .buttons {
+        @apply(--layout-justified);
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        margin-top: 2em;
+      }
+
+      paper-dialog {
+        min-width: 480px;
+      }
+
     </style>
 
     <div id="container">
+
+      <template is="dom-if" if="[[editable]]">
+        <div class="top actions">
+          <paper-button id="addEntry" class="primary" on-tap="_createEntry">
+            <span>+ [[i18n('command.add')]]</span>
+          </paper-button>
+        </div>
+      </template>
 
       <content select="nuxeo-selection-toolbar"></content>
 
@@ -234,6 +262,14 @@ Example:
                                        table="[[_this]]"
                                        template="[[rowDetail]]"></nuxeo-data-table-row-detail>
                 </template>
+                  <nuxeo-data-table-row-actions index="[[index]]"
+                                       editable="[[editable]]"
+                                       orderable="[[editable]]"
+                                       template="[[rowForm]]"
+                                       item="[[item]]"
+                                       size="[[items.length]]"
+                                       table="[[_this]]">
+                  </nuxeo-data-table-row-actions>
               </nuxeo-data-table-row>
             </div>
           </template>
@@ -246,6 +282,17 @@ Example:
     <paper-spinner-lite active></paper-spinner-lite>
     <content select="nuxeo-data-table-column"></content>
     <content select="template[is=row-detail]"></content>
+
+    <paper-dialog id="dialog">
+        <h1>[[i18n('command.add')]]</h1>
+        <form is="iron-form">
+          <content id="form" select="nuxeo-data-table-form"></content>
+        </form>
+        <div class="buttons">
+            <div></div>
+            <paper-button noink dialog-confirm>[[i18n('command.ok')]]</paper-button>
+        </div>
+    </paper-dialog>
 
   </template>
 
@@ -262,7 +309,11 @@ Example:
       listeners: {
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
-        'scroll': '_onHorizontalScroll'
+        'scroll': '_onHorizontalScroll',
+        'editEntry': '_editEntry',
+        'deleteEntry': '_deleteEntry',
+        'moveUpward': '_moveItemUpward',
+        'moveDownward': '_moveItemDownward',
       },
 
       properties: {
@@ -346,8 +397,27 @@ Example:
         multiSelection: {
           type: Boolean,
           value: true,
+        },
+
+        editable: {
+          type: Boolean,
+          value: false
+        },
+
+        orderable: {
+          type: Boolean,
+          value: false
         }
 
+      },
+
+      _itemChanged: function(e) {
+        if (this.items) {
+          var index = this.items.indexOf(e.detail.item);
+          if (index >= 0) {
+            this.set('items.' + index + '.' + e.detail.path, e.detail.value);
+          }
+        }
       },
 
       created: function() {
@@ -377,7 +447,6 @@ Example:
             var parent = Polymer.dom(this.rowDetail).parentNode;
             this.rowDetail._rootDataHost = parent.dataHost ? (parent.dataHost._rootDataHost || parent.dataHost) : parent;
           }
-
         }.bind(this));
       },
 
@@ -607,6 +676,47 @@ Example:
           var target = e.target || e.srcElement;
           target.fire('selected');
           this._updateFlags();
+        }
+      },
+
+      _editEntry: function(e) {
+        var editForm = this.getContentChildren('#form')[0];
+        var items = this.items; // TODO: add support for editing when using a page provider
+        editForm.item = items[e.detail.index];
+        this.$.dialog.toggle();
+      },
+
+      _deleteEntry: function(e) {
+        this.splice('items', e.detail.index, 1);
+        this.notifyResize();
+      },
+
+      _createEntry: function() {
+        this.push('items', {});
+        this.notifyResize();
+      },
+
+      _moveItemUpward: function(e) {
+        if (e.detail.index > 0) {
+          var item = this.items[e.detail.index];
+          this.splice('items', e.detail.index, 1);
+          this.splice('items', e.detail.index - 1, 0, item);
+          this.notifyResize();
+        }
+      },
+
+      _moveItemDownward: function(e) {
+        if ((this.items.length - 1) > e.detail.index) {
+          var item = this.items[e.detail.index];
+          this.splice('items', e.detail.index, 1);
+          this.splice('items', e.detail.index + 1, 0, item);
+          this.notifyResize();
+        }
+      },
+
+      _patchOverlay: function (e) {
+        if (e.target.withBackdrop) {
+          e.target.parentNode.insertBefore(e.target.backdropElement, e.target);
         }
       }
 

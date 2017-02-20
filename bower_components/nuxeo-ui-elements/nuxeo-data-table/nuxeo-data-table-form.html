@@ -1,0 +1,47 @@
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+
+<!-- Part of `nuxeo-data-table` -->
+<dom-module id="nuxeo-data-table-form">
+  <style>
+
+  </style>
+  <template>
+    <div id="container"></div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-data-table-form',
+
+      behaviors: [Polymer.Templatizer, Nuxeo.I18nBehavior],
+
+      properties: {
+        item: {
+          type: Object,
+          notify: true,
+          observer: '_itemChanged'
+        }
+      },
+
+      ready: function() {
+        var template = this.queryEffectiveChildren('template');
+        this.templatize(template);
+        this.instance = this.stamp({item: this.item});
+        Polymer.dom(this.$.container).appendChild(this.instance.root);
+      },
+
+      _itemChanged: function() {
+        if (this.instance) {
+          this.instance.item = this.item;
+        }
+      },
+
+      _forwardParentProp: function(prop, value) {},
+
+      _forwardInstancePath: function(inst, path, value) {
+        // strip "item."
+        this.fire('item-changed', {item: this.item, path: path.substring(5), value: value});
+      }
+    });
+  </script>
+</dom-module>

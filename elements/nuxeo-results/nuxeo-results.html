@@ -186,6 +186,7 @@ Contributors:
         <div id="table" hidden$="[[_isGrid(displayMode)]]">
           <nuxeo-data-table id="datatable"
             nx-provider="[[nxProvider]]"
+            columns="{{columns}}"
             settings-enabled filters="{{filters}}"
             empty-label="[[emptyLabel]]"
             empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
@@ -284,7 +285,6 @@ Contributors:
         },
 
         observers: [
-          '_updateActionContext(displayMode, nxProvider.*)',
           '_observeName(name)'
         ],
 
