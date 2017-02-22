@@ -246,11 +246,11 @@ Contributors:
           var rootDoc = this.rootDocument;
 
           if (doc && !this.user) {
-            if (doc.path == this.rootPath && rootDoc && rootDoc.title != doc.title ){
+            if (this.rootPath === doc.path && rootDoc && rootDoc.title !== doc.title) {
               //If document is the same as before but its name changed, get the document again
               this.$.root.get();
             }
-            
+
             if (this.rootPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
               this.$.tree.style.display = 'none';
               this.parents = [];
