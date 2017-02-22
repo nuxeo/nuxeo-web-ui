@@ -42,9 +42,12 @@ Example:
 
         /**
          * The href of the element to import.
-         * The name of the element is infered from the filename.
+         * The name of the element is inferred from the filename.
          **/
-        href: String,
+        href: {
+          type: String,
+          observer: '_stamp'
+        },
 
         /**
          * Model object with properties to set on the instantiated element.
@@ -73,7 +76,7 @@ Example:
       },
 
       observers: [
-        '_update(href, model)'
+        '_update(model.*)'
       ],
 
       // Trigger the layout validation if it exists.
@@ -84,7 +87,7 @@ Example:
         return true;
       },
 
-      _update: function(href, model) {
+      _stamp: function(href) {
         var file = href.split('/').pop(),
             name = file.split('.')[0];
 
@@ -100,23 +103,25 @@ Example:
                 this.$.container.appendChild(element);
               }
 
-              // setup data binding
-              // Object.assign(element, model);
-              if (model) {
-                for (var prop in model) {
-                  element[prop] = model[prop];
-                }
-              }
-
-              this.element = element;
-
+              this._setElement(element);
+              this._update();
               this.notifyResize();
             },
             // error handling
             function() {
-              this.element = undefined;
+              this._setElement(undefined);
               this.$.container.hidden = true;
             });
+      },
+
+      // setup data binding
+      _update: function() {
+        // Object.assign(element, model);
+        if (this.element && this.model) {
+          for (var prop in this.model) {
+            this.element[prop] = this.model[prop];
+          }
+        }
       }
     });
   </script>

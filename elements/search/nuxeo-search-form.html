@@ -236,8 +236,6 @@ Contributors:
 
     <nuxeo-search id="saved-search"></nuxeo-search>
 
-    <nuxeo-error id="error"></nuxeo-error>
-
     <div id="search-container">
       <div class="header ellipsis search-header">
         <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
@@ -268,10 +266,9 @@ Contributors:
 
       <div class="content">
         <div id="filters" class="filters loadable" hidden$="{{queue}}">
-          <div id="search-form-container">
-            <!-- Dynamic search form element will be inserted here -->
-            <!-- <nuxeo-{{searchName}}-search provider="{{provider}}" aggregations="[[aggregations]]" params="{{params}}"> -->
-          </div>
+          <nuxeo-layout id="layout" href="[[_formHref(searchName)]]" model="[[_formModel(provider, aggregations, params)]]"
+                        error="[[i18n(documentSearchForm.layoutNotFound', searchName)]]"
+                        on-element-changed="_formChanged"></nuxeo-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
@@ -480,12 +477,15 @@ Contributors:
 
         observers: [
          '_resetResults(provider, params.*, quickFilters.*, query)',
-         '_paramsChanged(params.*)',
-         '_updateLayout(searchName)'
+         '_paramsChanged(params.*)'
         ],
 
         get nxProvider() {
           return this.$.provider;
+        },
+
+        get form() {
+          return this.$.layout.element;
         },
 
         displayQueueAndNavigateToFirst: function() {
@@ -560,8 +560,8 @@ Contributors:
         _paramsChanged: function() {
           this.$.provider.page = 1;
           this.dirty = true;
-          if (this._form) {
-            this._form.params = this.params;
+          if (this.form) {
+            this.form.params = this.params;
           }
         },
 
@@ -581,7 +581,7 @@ Contributors:
             this.params = this._mutateParams(this.selectedSearch.params);
             if (this.params && this.params.ecm_fulltext) {
               this.searchTerm = this.params.ecm_fulltext.replace('*', '');
-              this._form.searchTerm = this.searchTerm;
+              this.form.searchTerm = this.searchTerm;
             }
           }
         },
@@ -594,8 +594,8 @@ Contributors:
           this.searchTerm = '';
           this.isSavedSearch = false;
           this.selectedSearch = {};
-          if (this._form && this._form.clear != undefined && typeof this._form.clear == 'function') {
-            this._form.clear();
+          if (this.form && this.form.clear != undefined && typeof this.form.clear == 'function') {
+            this.form.clear();
           }
           this.params = {};
           if (!this._isSavedSearch()) {
@@ -622,7 +622,7 @@ Contributors:
           _el.get().then(function(response) {
             this.params = this._mutateParams(response.params);
             this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
-            this._form.searchTerm = this.searchTerm;
+            this.form.searchTerm = this.searchTerm;
             this.dirty = false;
           }.bind(this));
         },
@@ -726,43 +726,23 @@ Contributors:
         },
 
         _aggregationsChanged: function() {
-          if (this._form) {
-            this._form.aggregations = this.aggregations;
+          if (this.form) {
+            this.form.aggregations = this.aggregations;
           }
         },
 
-        /**
-         * Retrieves and creates the search form for the current search type
-         */
-        _updateLayout: function() {
-          this.$['search-container'].hidden = false;
-          this.$.error.hide();
-          if (this.searchName && this.searchName.length > 0) {
-            var layout = ['nuxeo', this.searchName, 'search'].join('-');
-            var url = this.resolveUrl(layout + '.html');
-            this.importHref(url, this._createLayout.bind(this),
-              // error handling
-              function() {
-                this.$['search-container'].hidden = true;
-                this.$.error.show('404', url, this.i18n('documentSearchForm.layoutNotFound', this.searchName));
-              });
+        _formHref: function (searchName) {
+          if (searchName) {
+            return this.resolveUrl(['nuxeo', searchName, 'search'].join('-') + '.html');
           }
         },
 
-        /**
-         * Creates the layout for the current search type
-         */
-        _createLayout: function() {
-          var layout = ['nuxeo', this.searchName, 'search'].join('-'),
-              el = document.createElement(layout),
-              parent = this.$['search-form-container'];
-          parent.innerHTML = '';
-          this.auto = typeof el.auto !== "undefined" ? el.auto === true : true;
+        _formModel: function () {
+          return { provider: this.provider, params: this.params, aggregations: this.aggregations };
+        },
+
+        _formChanged: function() {
           this._clear();
-          parent.appendChild(el);
-          el.id = 'search-form';
-          this._form = el;
-          this._form.aggregations = this.aggregations;
 
           if (this.queue) {
             this.displayQueue();
@@ -771,11 +751,11 @@ Contributors:
           }
 
           this.$['saved-searches'].get();
-          if (this._form.params !== undefined) {
-            this.params = this._form.params;
+          if (this.form.params !== undefined) {
+            this.params = this.form.params;
           }
           // setup data binding
-          el.addEventListener('params-changed', function(e) {
+          this.form.addEventListener('params-changed', function(e) {
             // e.detail.path is params.prop_name eg: params.ecm_fulltext
             if (e.detail.path) {
               var param = e.detail.path.split('.')[1];
@@ -785,9 +765,7 @@ Contributors:
               }
             }
           }.bind(this));
-          el.addEventListener('trigger-search', function() {
-            this._search();
-          }.bind(this));
+          this.form.addEventListener('trigger-search', this._search.bind(this));
         }
 
       });

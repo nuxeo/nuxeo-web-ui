@@ -475,9 +475,7 @@ Contributors:
               </div>
             </div>
             <form is="iron-form" action="/" id="form" on-submit="_importWithProperties" class="form vertical layout flex">
-              <div id="document-import">
-                <!--dynamically loaded via _updateLayout-->
-              </div>
+              <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
               <button id="submitButton"></button>
             </form>
           </div>
@@ -858,7 +856,7 @@ Contributors:
             properties['dc:title'] = title;
           }
           this._docProperties = properties;
-          this._updateLayout();
+          this._updateDocument();
         },
 
         _nextFile: function() {
@@ -1193,47 +1191,16 @@ Contributors:
         },
 
         /**
-         * Returns the name for the current layout element
-         */
-        _layoutFor: function() {
-          return ['nuxeo', this.selectedDocType.type.toLowerCase(), 'import-layout'].join('-');
-        },
-
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
-        },
-
-        /**
-         * Creates the layout for the current document type
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(),
-            el = document.createElement(layout),
-            parent = this.$['document-import'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          if (Object.keys(this.document.properties).length === 0 ||
-            Object.keys(this.document.properties).every(function(prop) {
-              return !this.document.properties[prop];
-            }.bind(this))) {
-            el.uploadEnabled = true;
-          }
-          el.document = this.document;
-          this.notifyResize();
-        },
-
-        /**
          * Retrieves and creates the layout for the current document type
          */
-        _updateLayout: function() {
-          this.$['document-import'].hidden = false;
-          this.document = this._isValidType(this.selectedDocType) ? {
+        _updateDocument: function() {
+          
+          if (!this._isValidType(this.selectedDocType)) {
+            this.document = null;
+            return;
+          } 
+
+          var document = {
             'entity-type': 'document',
             'type': this.selectedDocType.type,
             'name': '',
@@ -1241,30 +1208,17 @@ Contributors:
               'dc:title': '',
               'dc:description': ''
             }
-          } : null;
+          };
 
-          if (this.document) {
-            var properties = this._getDocumentProperties();
-            if (properties) {
-              for (var prop in properties) {
-                this.document.properties[prop] = properties[prop];
-              }
+          // Object.assign(document.properties, this._getDocumentProperties());
+          var properties = this._getDocumentProperties();
+          if (properties) {
+            for (var prop in properties) {
+              document.properties[prop] = properties[prop];
             }
-            var layout = this._layoutFor();
-            if (!this._isRegistered(layout)) {
-              var folder = this.selectedDocType.type.toLowerCase() + '/';
-              var url = this.resolveUrl('../document/' + folder + layout + '.html');
-              this.importHref(url, this._createLayout.bind(this),
-                // error handling
-                function() {
-                  console.error('Failed to find create layout for ' + this.document.type);
-                  this.$['document-import'].hidden = true;
-                });
-            } else {
-              this._createLayout();
-            }
-            this.fire('nx-document-layout-changed');
           }
+          
+          this.document = document;
         }
       });
     })();

@@ -19,6 +19,7 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
@@ -288,9 +289,7 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <div id="home" name="home">
-            <!-- dynamic home element loading -->
-          </div>
+          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]"></nuxeo-layout>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
@@ -487,26 +486,6 @@ Contributors:
           this.$.loading.style.display = 'none';
         },
 
-        showHome: function() {
-          var url = this.resolveUrl('../nuxeo-home.html');
-          this.importHref(url,
-            // success
-            function() {
-              var el = document.createElement('nuxeo-home'), parent = this.$['home'];
-              parent.innerHTML = '';
-              parent.appendChild(el);
-              el.tasks = this.tasks;
-            }.bind(this),
-            // error handling
-            function() {
-              this.$.error.show('404',url, this.i18n('app.homeNotFound'));
-              this.show('error');
-            }.bind(this)
-          );
-
-          this.show('home');
-        },
-
         _actionContext: function() {
           return {document: this.currentDocument, user: this.currentUser};
         },
@@ -615,7 +594,7 @@ Contributors:
             this.$.tasks.get().then(function(response) {
               this.tasks = this._tmpTasks.concat(response.entries);
               this.taskCount = this.tasks.length;
-              var nxHomeEl = this.$.home.querySelector('nuxeo-home');
+              var nxHomeEl = this.$.home.element;
               if (nxHomeEl) {
                 nxHomeEl.tasks = this.tasks;
               }
