@@ -89,7 +89,8 @@ Contributors:
         },
 
         _selected: function(name) {
-          return localStorage.getItem('theme') === name;
+          var theme = localStorage.getItem('theme');
+          return (theme) ? theme === name : name === 'default';
         },
 
         _apply: function() {
