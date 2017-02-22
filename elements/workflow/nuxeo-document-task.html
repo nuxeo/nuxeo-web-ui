@@ -36,14 +36,11 @@ Contributors:
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
-    <nuxeo-error id="error"></nuxeo-error>
-
     <div id="task-body" class="layout vertical">
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
           <h3>[[i18n('documentTask.taskResolution')]]</h3>
-
           <div>
             <label>[[i18n('documentTask.dueDate')]]</label>
             <div>[[formatDate(task.dueDate)]]</div>
@@ -67,7 +64,8 @@ Contributors:
 
           <h4>[[i18n(task.directive)]]</h4>
           <form id="task-container" is="iron-form">
-            <!--dynamically loaded via _taskChanged-->
+            <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]"
+                          error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
           </form>
 
           <div class="layout horizontal center">
@@ -94,11 +92,8 @@ Contributors:
         properties: {
 
           task: {
-            type: Object,
-            observer: '_taskChanged'
+            type: Object
           },
-
-          _currentTaskElement: Object,
 
           _selectedTab: {
             type: String,
@@ -109,66 +104,39 @@ Contributors:
         /**
          * Returns the name for the current layout element
          */
-        _layoutFor: function(task) {
+        _layoutHref: function(task) {
           if (task) {
-            return ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
+            var layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
+            return this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
           }
         },
 
-        /**
-         * Determines whether a custom element is registered
-         */
-        _isRegistered: function(tag) {
-          return document.createElement(tag).constructor !== HTMLElement;
+        _layoutModel: function(task) {
+          return { document: task.targetDocumentIds[0], task: task };
         },
 
-        /**
-         * Creates the layout for the current task node
-         */
-        _createLayout: function() {
-          var layout = this._layoutFor(this.task),
-              el = document.createElement(layout),
-              parent = this.$['task-container'];
-          if (parent.hasChildNodes()) {
-            parent.replaceChild(el, parent.firstChild);
-          } else {
-            parent.appendChild(el);
-          }
-          // setup data binding
-          el.document = this.task.targetDocumentIds[0];
-          el.task = this.task;
-          this._currentTaskElement = el;
-        },
+        validate: function() {
+          // run our custom validation function first to allow setting custom native validity
+          var valid = this.$.layout.validate();
 
-        /**
-         * Retrieves and creates the layout for the current task node
-         */
-        _taskChanged: function() {
-          this.$['task-body'].hidden = false;
-          this.$.error.hide();
-          if (this.task) {
-            var layout = this._layoutFor(this.task);
-            if (!this._isRegistered(layout)) {
-              var url = this.resolveUrl(this.task.workflowModelName.toLowerCase() + '/' + layout + '.html');
-              this.importHref(url, this._createLayout.bind(this),
-                  // error handling
-                  function() {
-                    this.$['task-body'].hidden = true;
-                    this.$.error.show('404', url, this.i18n('documentTask.layoutNotFound', this.task.nodeName));
-                  });
-            } else {
-              this._createLayout();
-            }
+          var form = this.$['task-container'];
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            form._doFakeSubmitForValidation();
           }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return valid && form.validate() && form.checkValidity();
         },
 
         _processTask: function(e) {
-          if (this.$['task-container'].validate()) {
+          if (this.validate()) {
             this.action = e.target.dataset.args;
             this.taskData = {
               'entity-type': 'task',
-              id: this._currentTaskElement.task.id,
-              variables: this._currentTaskElement.task.variables
+              id: this.$.layout.element.task.id,
+              variables: this.$.layout.element.task.variables
             };
             this.$.taskRequest.put().then(function() {
               this.fire('workflowTaskProcessed');
