@@ -178,6 +178,10 @@ Contributors:
         justify-content: flex-end;
       }
 
+      #drawer .tasks-dashboard {
+        padding-left: 32px;
+      }
+
       nuxeo-document-create-button.admin {
         display: none;
       }
@@ -239,7 +243,7 @@ Contributors:
             <div name="tasks">
               <div class="title">[[i18n('app.tasks')]]</div>
               <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
-              <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTaskDashboard')]]</a>
+              <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
             </div>
 
             <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
