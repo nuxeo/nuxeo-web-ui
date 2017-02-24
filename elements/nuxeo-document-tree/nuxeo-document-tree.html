@@ -243,7 +243,14 @@ Contributors:
 
         _currentDocumentChanged: function() {
           var doc = this.currentDocument;
+          var rootDoc = this.rootDocument;
+
           if (doc && !this.user) {
+            if (this.rootPath === doc.path && rootDoc && rootDoc.title !== doc.title) {
+              //If document is the same as before but its name changed, get the document again
+              this.$.root.get();
+            }
+
             if (this.rootPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
               this.$.tree.style.display = 'none';
               this.parents = [];
