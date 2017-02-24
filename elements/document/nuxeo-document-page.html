@@ -27,10 +27,6 @@ Contributors:
 <dom-module id="nuxeo-document-page">
   <template>
     <style>
-      :host {
-        @apply(--layout-flex);
-        display: block;
-      }
 
       /* info bar */
       .info-bar {
@@ -59,19 +55,6 @@ Contributors:
         @apply(--layout-flex);
       }
 
-      .page .side .details {
-        @apply(--layout-vertical);
-      }
-
-      .page .side .details .item {
-        @apply(--layout-horizontal);
-      }
-
-      .page .side .details .item label {
-        width: 100px;
-        min-width: 100px;
-      }
-
       @media (max-width: 1024px) {
         .page {
           flex-direction: column;
@@ -82,11 +65,6 @@ Contributors:
       }
 
       /* Tasks */
-      .process-running {
-        background-color: #f68500;
-        color: #fff;
-      }
-
       .task-header {
         background-color: #fafcfd;
         color: var(--dark-primary-color);
@@ -157,6 +135,7 @@ Contributors:
 
       <div class="side">
 
+        <!-- process -->
         <template is="dom-if" if="[[isProcessingTask]]" restamp>
           <template is="dom-repeat" items="[[workflows]]" as="workflow">
             <template is="dom-repeat" items="[[tasks]]" as="task">
@@ -186,38 +165,10 @@ Contributors:
         </template>
 
         <template is="dom-if" if="[[!isProcessingTask]]">
-          <!-- details -->
+
+          <!-- info -->
           <paper-card>
-            <div class="details">
-              <div class="item">
-                <label>[[i18n('documentPage.added.on')]]</label>
-                <div>[[formatDate(document.properties.dc:created)]]</div>
-              </div>
-              <div class="item">
-                <label>[[i18n('documentPage.added.by')]]</label>
-                <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
-              </div>
-              <div class="item">
-                <label>[[i18n('label.dublincore.state')]]</label>
-                <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
-              </div>
-              <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
-                <div class="item">
-                  <label>[[i18n('label.dublincore.version')]]</label>
-                  <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
-                </div>
-              </template>
-              <div class="item">
-                <label>[[i18n('label.dublincore.contributors')]]</label>
-                <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
-              </div>
-              <template is="dom-if" if="[[hasWorkflowRunning]]">
-                <div class="item">
-                  <label>[[i18n('documentPage.process.title')]]</label>
-                  <nuxeo-tag uppercase class="process-running">[[i18n('documentPage.process.running')]]</nuxeo-tag>
-                </div>
-              </template>
-            </div>
+            <nuxeo-document-info document="[[document]]" show-process="[[hasWorkflowRunning]]"></nuxeo-document-info>
           </paper-card>
 
           <!-- metadata -->
@@ -257,7 +208,7 @@ Contributors:
           <!-- activity -->
           <paper-card>
             <h3>[[i18n('documentPage.activity')]]</h3>
-            <nuxeo-document-activity class="activity" document="[[document]]"></nuxeo-document-activity>
+            <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
           </paper-card>
 
         </template>
@@ -266,123 +217,119 @@ Contributors:
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-page',
-        behaviors: [Nuxeo.LayoutBehavior],
-        properties: {
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          },
-
-          /* Running workflows on the document */
-          workflows: {
-            type: Object,
-            observer: '_workflowsChanged'
-          },
-
-          /* Tasks of the workflows running on the document whom actor is the current user */
-          tasks: {
-            type: Array,
-            observer: '_tasksChanged'
-          },
-
-          selectedProcess: {
-            type: String
-          },
-
-          processes: {
-            type: Array
-          },
-
-          /* Whether are running workflows on the document or not */
-          hasWorkflowRunning: {
-            type: Boolean,
-            notify: true
-          },
-
-          /* Whether the user has any task to process or not */
-          hasTaskToProcess: {
-            type: Boolean
-          },
-
-          /* Whether the user is processing a task or not */
-          isProcessingTask: {
-            type: Boolean,
-            value: false
-          },
-
-          edit: {
-            type: Boolean,
-            value: false
-          }
+    Polymer({
+      is: 'nuxeo-document-page',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object,
+          observer: '_documentChanged'
         },
 
-        _documentChanged: function() {
-          if (this.document) {
-            this.workflows = this.document.contextParameters.runningWorkflows;
-            this.tasks = this.document.contextParameters.pendingTasks;
-            this.processes = this.document.contextParameters.runnableWorkflows;
-            this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
-            this.isProcessingTask = false;
-            this.edit = false;
-          }
+        /* Running workflows on the document */
+        workflows: {
+          type: Object,
+          observer: '_workflowsChanged'
         },
 
-        _canStartProcess: function() {
-          return !this.hasWorkflowRunning && this.processes && this.processes.length > 0;
+        /* Tasks of the workflows running on the document whom actor is the current user */
+        tasks: {
+          type: Array,
+          observer: '_tasksChanged'
         },
 
-        _workflowsChanged: function() {
-          this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
+        selectedProcess: {
+          type: String
         },
 
-        _tasksChanged: function() {
-          this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
+        processes: {
+          type: Array
         },
 
-        _startWorkflow: function() {
-          var workflows = this.$.workflows;
-          this.$.workflows.data = {
-            'entity-type': 'workflow',
-            'workflowModelName': this.selectedProcess,
-            'attachedDocumentIds': [this.document.uid]
-          };
-          workflows.post().then(function() {
-            this.fire('workflowStarted');
-          }.bind(this));
+        /* Whether are running workflows on the document or not */
+        hasWorkflowRunning: {
+          type: Boolean,
+          notify: true
         },
 
-        _processTask: function() {
-          this.isProcessingTask = true;
+        /* Whether the user has any task to process or not */
+        hasTaskToProcess: {
+          type: Boolean
         },
 
-        _cancelProcessTask: function() {
-          this.isProcessingTask = false;
+        /* Whether the user is processing a task or not */
+        isProcessingTask: {
+          type: Boolean,
+          value: false
         },
 
-        _toggleGraphDialog: function() {
-          this.$$('#graphDialog').toggle();
-        },
-
-        _isMutable: function(document) {
-          return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
-        },
-
-        _canEdit: function(document) {
-          return document && document.type !== 'Root' &&
-            this.hasPermission(document, 'Write') && this._isMutable(document);
-        },
-
-        _editMode: function() {
-          this.edit = true;
+        edit: {
+          type: Boolean,
+          value: false
         }
+      },
 
-      });
-    })();
+      _documentChanged: function() {
+        if (this.document) {
+          this.workflows = this.document.contextParameters.runningWorkflows;
+          this.tasks = this.document.contextParameters.pendingTasks;
+          this.processes = this.document.contextParameters.runnableWorkflows;
+          this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
+          this.isProcessingTask = false;
+          this.edit = false;
+        }
+      },
+
+      _canStartProcess: function() {
+        return !this.hasWorkflowRunning && this.processes && this.processes.length > 0;
+      },
+
+      _workflowsChanged: function() {
+        this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
+      },
+
+      _tasksChanged: function() {
+        this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
+      },
+
+      _startWorkflow: function() {
+        var workflows = this.$.workflows;
+        this.$.workflows.data = {
+          'entity-type': 'workflow',
+          'workflowModelName': this.selectedProcess,
+          'attachedDocumentIds': [this.document.uid]
+        };
+        workflows.post().then(function() {
+          this.fire('workflowStarted');
+        }.bind(this));
+      },
+
+      _processTask: function() {
+        this.isProcessingTask = true;
+      },
+
+      _cancelProcessTask: function() {
+        this.isProcessingTask = false;
+      },
+
+      _toggleGraphDialog: function() {
+        this.$$('#graphDialog').toggle();
+      },
+
+      _isMutable: function(document) {
+        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+      },
+
+      _canEdit: function(document) {
+        return document && document.type !== 'Root' &&
+          this.hasPermission(document, 'Write') && this._isMutable(document);
+      },
+
+      _editMode: function() {
+        this.edit = true;
+      }
+
+    });
   </script>
 
 </dom-module>
