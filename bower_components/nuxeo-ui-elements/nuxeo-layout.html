@@ -88,6 +88,11 @@ Example:
       },
 
       _stamp: function(href) {
+        if (!href) {
+          this.$.container.hidden = true;
+          return;
+        }
+
         var file = href.split('/').pop(),
             name = file.split('.')[0];
 
