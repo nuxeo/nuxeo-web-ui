@@ -147,7 +147,7 @@ Example:
     },
 
     _userHasName: function(user) {
-      return user.properties.firstName || user.properties.lastName;
+      return user.properties['user:firstName'] || user.properties['user:lastName'] ;
     },
 
     _isUser: function(docModel) {
