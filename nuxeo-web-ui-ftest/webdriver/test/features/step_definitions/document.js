@@ -105,7 +105,7 @@ module.exports = function () {
       case 'XML':
         page.view.noteEditor.setContent(newContent);
         page.view.noteEditor.save();
-        page.view.noteEditor.hasContent(`<p>${newContent}</p>`);
+        page.view.noteEditor.hasContent(`<p>${newContent}<br></p>`);
         break;
       case 'Markdown':
       case 'Text':

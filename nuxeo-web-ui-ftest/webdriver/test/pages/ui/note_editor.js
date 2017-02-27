@@ -16,9 +16,10 @@ export default class NoteEditor {
   }
 
   hasContent(content) {
+    let editor = this.el.element('#editor');
     driver.waitUntil(() => {
       try {
-        return this.el.element('#editor').getAttribute('innerHTML') === content;
+        return editor.getAttribute('innerHTML') === content;
       } catch (e) {
         return false;
       }
