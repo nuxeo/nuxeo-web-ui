@@ -169,9 +169,11 @@ Contributors:
               <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
-              <div class="vertical layout flex-2 document-view">
-                <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
-              </div>
+              <template is="dom-if" if="[[_docId(current)]]">
+                <div class="vertical layout flex-2 document-view">
+                  <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
+                </div>
+              </template>
               <div class="flex task-view">
                 <paper-card>
                   <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
@@ -315,7 +317,7 @@ Contributors:
         },
 
         _docId: function() {
-          if (this.current) {
+          if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
             return this.current.targetDocumentIds[0].uid;
           }
         },
