@@ -85,7 +85,7 @@ Example:
       },
 
       _id: function(user) {
-        return user.id ? user.id : user;
+        return user && user.id ? user.id : user;
       },
 
       _name: function(user) {
@@ -93,7 +93,7 @@ Example:
           var firstName = user.properties.firstName;
           var lastName = user.properties.lastName;
           return (firstName || lastName) ? firstName + ' ' + lastName : user.properties.email;
-        } else if(user.id) {
+        } else if(user && user.id) {
           return user.id;
         } else {
           return user;
