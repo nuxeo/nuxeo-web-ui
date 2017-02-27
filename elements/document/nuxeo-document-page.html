@@ -59,7 +59,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
+    <nuxeo-document-info-bar document="[[document]]" hidden$="[[isProcessingTask]]"></nuxeo-document-info-bar>
 
     <div class="page">
 
@@ -70,12 +70,12 @@ Contributors:
       <div class="side">
 
         <!-- info -->
-        <paper-card>
+        <paper-card hidden$="[[isProcessingTask]]">
           <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
         </paper-card>
 
         <!-- metadata / edit -->
-        <paper-card>
+        <paper-card hidden$="[[isProcessingTask]]">
           <div hidden$="[[edit]]">
             <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
@@ -84,16 +84,16 @@ Contributors:
         </paper-card>
 
         <!-- workflows -->
-        <nuxeo-document-workflows document="[[document]]"></nuxeo-document-workflows>
+        <nuxeo-document-workflows document="[[document]]" is-processing-task$="[[isProcessingTask]]"></nuxeo-document-workflows>
 
         <!-- collections -->
-        <paper-card hidden$="[[!hasCollections(document)]]">
+        <paper-card hidden$="[[!_showCollections(document)]]">
           <h3>[[i18n('documentPage.collections')]]</h3>
           <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
         </paper-card>
 
         <!-- activity -->
-        <paper-card>
+        <paper-card hidden$="[[isProcessingTask]]">
           <h3>[[i18n('documentPage.activity')]]</h3>
           <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
         </paper-card>
@@ -115,12 +115,25 @@ Contributors:
         edit: {
           type: Boolean,
           value: false
+        },
+
+        isProcessingTask: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true,
+          notify: true
         }
+      },
+
+      listeners: {
+        'workflowTaskProcess': '_workflowTaskProcess',
+        'workflowTaskCancelled': '_workflowTaskCancelled'
       },
 
       _documentChanged: function() {
         if (this.document) {
           this.edit = false;
+          this.isProcessingTask = false;
         }
       },
 
@@ -137,7 +150,15 @@ Contributors:
       },
 
       _showCollections: function (doc) {
-        return this.hasCollections(doc);
+        return this.hasCollections(doc) && !this.isProcessingTask;
+      },
+
+      _workflowTaskProcess: function() {
+        this.isProcessingTask = true;
+      },
+
+      _workflowTaskCancelled: function() {
+        this.isProcessingTask = false;
       }
 
     });

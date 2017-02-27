@@ -57,45 +57,49 @@ Contributors:
     <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
     <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
 
-    <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
-      <paper-card>
-        <h3>[[i18n('documentPage.process.title')]]</h3>
-        <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]" no-animations horizontal-align="left">
-          <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
-            <template is="dom-repeat" items="[[processes]]" as="process">
-              <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
-        <div class="buttons">
-          <paper-button class="primary" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
-        </div>
-      </paper-card>
+    <template is="dom-if" if="[[!isProcessingTask]]">
+      <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
+        <paper-card>
+          <h3>[[i18n('documentPage.process.title')]]</h3>
+          <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]" no-animations horizontal-align="left">
+            <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+              <template is="dom-repeat" items="[[processes]]" as="process">
+                <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
+          <div class="buttons">
+            <paper-button class="primary" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
+          </div>
+        </paper-card>
+      </template>
     </template>
 
-    <template is="dom-repeat" items="[[workflows]]" as="workflow">
-      <template is="dom-repeat" items="[[tasks]]" as="task">
-        <paper-card>
-          <div class="layout horizontal center task-header">
-            <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
-            <div class="layout vertical flex">
-              <span class="task-name">[[i18n(task.name)]]</span>
-              <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
-            </div>
-            <paper-dialog id="graphDialog" with-backdrop>
-              <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
-              <div class="buttons">
-                <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+    <template is="dom-if" if="[[isProcessingTask]]" restamp>
+      <template is="dom-repeat" items="[[workflows]]" as="workflow">
+        <template is="dom-repeat" items="[[tasks]]" as="task">
+          <paper-card>
+            <div class="layout horizontal center task-header">
+              <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+              <div class="layout vertical flex">
+                <span class="task-name">[[i18n(task.name)]]</span>
+                <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
               </div>
-            </paper-dialog>
-            <paper-button noink on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
-          </div>
-          <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
-            <div class="buttons">
-              <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later')]]</paper-button>
+              <paper-dialog id="graphDialog" with-backdrop>
+                <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+                <div class="buttons">
+                  <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+                </div>
+              </paper-dialog>
+              <paper-button noink on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
             </div>
-          </nuxeo-document-task>
-        </paper-card>
+            <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
+              <div class="buttons">
+                <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later')]]</paper-button>
+              </div>
+            </nuxeo-document-task>
+          </paper-card>
+        </template>
       </template>
     </template>
 
@@ -142,6 +146,12 @@ Contributors:
       /* Whether the user has any task to process or not */
       hasTaskToProcess: {
         type: Boolean
+      },
+
+      /* Whether the user is processing a task or not */
+      isProcessingTask: {
+        type: Boolean,
+        value: false
       }
     },
 
@@ -179,7 +189,7 @@ Contributors:
     },
 
     _cancelProcessTask: function() {
-      // TODO: fire event
+      this.fire('workflowTaskCancelled');
     },
 
     _toggleGraphDialog: function() {
