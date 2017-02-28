@@ -44,8 +44,8 @@ export default class Browser {
     this.page.element(`nuxeo-add-to-collection-button paper-icon-button`).click();
     driver.waitForVisible(`nuxeo-add-to-collection-button #dialog`);
     this.page.element(`nuxeo-add-to-collection-button #dialog nuxeo-select2 a.select2-choice`).click();
-    driver.waitForVisible(`#s2id_autogen1_search`);
-    driver.element(`#s2id_autogen1_search`).setValue(name);
+    driver.waitForVisible(`#select2-drop .select2-search input`);
+    driver.element(`#select2-drop .select2-search input`).setValue(name);
     driver.waitForVisible(`#select2-drop li.select2-result`);
     driver.element(`#select2-drop li.select2-result`).click();
     this.page.waitForEnabled(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`);
