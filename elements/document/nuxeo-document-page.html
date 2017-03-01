@@ -28,18 +28,6 @@ Contributors:
   <template>
     <style>
 
-      /* info bar */
-      .info-bar {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-justified);
-        background: black;
-        color: white;
-        padding: 8px;
-        margin-bottom: 16px;
-      }
-
-      /* page */
       .page {
         @apply(--layout-horizontal);
       }
@@ -64,34 +52,6 @@ Contributors:
         }
       }
 
-      /* Tasks */
-      .task-header {
-        background-color: #fafcfd;
-        color: var(--dark-primary-color);
-        padding: 1em;
-        margin-bottom: 1em;
-      }
-
-      .task-name {
-        font-weight: bold;
-      }
-
-      .task-name-icon {
-        --iron-icon-height: .9rem;
-        --iron-icon-width: .9rem;
-        border-radius: 50px;
-        background-color: var(--dark-primary-color);
-        color: white;
-        padding: .4em;
-        margin-right: .5em;
-      }
-
-      .workflow-name {
-        font-size: .8em;
-        font-weight: 300;
-        margin-top: .5em;
-      }
-
       #edit {
         position: absolute;
         top: 8px;
@@ -99,34 +59,8 @@ Contributors:
       }
     </style>
 
-    <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
-    <nuxeo-resource id="tasks" path="/id/[[document.uid]]/@task"></nuxeo-resource>
+    <nuxeo-document-info-bar document="[[document]]" hidden$="[[isProcessingTask]]"></nuxeo-document-info-bar>
 
-    <!-- infoBar - tasks -->
-    <template is="dom-if" if="[[hasTaskToProcess]]">
-      <template is="dom-repeat" items="[[tasks]]" as="task">
-        <div class="info-bar">
-          <div>
-            <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-            <span>[[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]</span>
-          </div>
-          <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
-        </div>
-      </template>
-    </template>
-
-    <!-- infoBar - version -->
-    <template is="dom-if" if="[[isVersion(document)]]">
-      <div id="versionInfoBar" class="info-bar">
-        <div>
-          <iron-icon icon="icons:info"></iron-icon>
-          <span>[[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
-        </div>
-        <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
-      </div>
-    </template>
-
-    <!-- page -->
     <div class="page">
 
       <div class="main">
@@ -135,83 +69,35 @@ Contributors:
 
       <div class="side">
 
-        <!-- process -->
-        <template is="dom-if" if="[[isProcessingTask]]" restamp>
-          <template is="dom-repeat" items="[[workflows]]" as="workflow">
-            <template is="dom-repeat" items="[[tasks]]" as="task">
-              <paper-card>
-                <div class="layout horizontal center task-header">
-                  <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
-                  <div class="layout vertical flex">
-                    <span class="task-name">[[i18n(task.name)]]</span>
-                    <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
-                  </div>
-                  <paper-dialog id="graphDialog" with-backdrop>
-                    <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
-                    <div class="buttons">
-                      <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
-                    </div>
-                  </paper-dialog>
-                  <paper-button noink on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</paper-button>
-                </div>
-                <nuxeo-document-task workflow="[[workflow]]" task="[[task]]">
-                  <div class="buttons">
-                    <paper-button noink on-tap="_cancelProcessTask">[[i18n('documentPage.process.task.later')]]</paper-button>
-                  </div>
-                </nuxeo-document-task>
-              </paper-card>
-            </template>
-          </template>
-        </template>
+        <!-- info -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
+        </paper-card>
 
-        <template is="dom-if" if="[[!isProcessingTask]]">
+        <!-- metadata / edit -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <div hidden$="[[edit]]">
+            <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          </div>
+          <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
+        </paper-card>
 
-          <!-- info -->
-          <paper-card>
-            <nuxeo-document-info document="[[document]]" show-process="[[hasWorkflowRunning]]"></nuxeo-document-info>
-          </paper-card>
+        <!-- workflows -->
+        <nuxeo-document-workflows document="[[document]]" is-processing-task$="[[isProcessingTask]]"></nuxeo-document-workflows>
 
-          <!-- metadata -->
-          <paper-card>
-            <div hidden$="[[edit]]">
-              <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-              <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
-            </div>
-            <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
-          </paper-card>
+        <!-- collections -->
+        <paper-card hidden$="[[!_showCollections(document)]]">
+          <h3>[[i18n('documentPage.collections')]]</h3>
+          <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
+        </paper-card>
 
-          <!-- process -->
-          <template is="dom-if" if="[[_canStartProcess(hasWorkflowRunning, processes)]]">
-            <paper-card >
-              <h3>[[i18n('documentPage.process.title')]]</h3>
-              <paper-dropdown-menu label="[[i18n('documentPage.process.start.placeholder')]]" no-animations horizontal-align="left">
-                <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
-                  <template is="dom-repeat" items="[[processes]]" as="process">
-                    <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
-                  </template>
-                </paper-menu>
-              </paper-dropdown-menu>
-              <div class="buttons">
-                <paper-button class="primary" on-tap="_startWorkflow">[[i18n('documentPage.process.start')]]</paper-button>
-              </div>
-            </paper-card>
-          </template>
+        <!-- activity -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <h3>[[i18n('documentPage.activity')]]</h3>
+          <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
+        </paper-card>
 
-          <!-- collections -->
-          <template is="dom-if" if="[[hasCollections(document)]]">
-            <paper-card>
-              <h3>[[i18n('documentPage.collections')]]</h3>
-              <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
-            </paper-card>
-          </template>
-
-          <!-- activity -->
-          <paper-card>
-            <h3>[[i18n('documentPage.activity')]]</h3>
-            <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
-          </paper-card>
-
-        </template>
       </div>
     </div>
 
@@ -226,107 +112,53 @@ Contributors:
           observer: '_documentChanged'
         },
 
-        /* Running workflows on the document */
-        workflows: {
-          type: Object,
-          observer: '_workflowsChanged'
-        },
-
-        /* Tasks of the workflows running on the document whom actor is the current user */
-        tasks: {
-          type: Array,
-          observer: '_tasksChanged'
-        },
-
-        selectedProcess: {
-          type: String
-        },
-
-        processes: {
-          type: Array
-        },
-
-        /* Whether are running workflows on the document or not */
-        hasWorkflowRunning: {
-          type: Boolean,
-          notify: true
-        },
-
-        /* Whether the user has any task to process or not */
-        hasTaskToProcess: {
-          type: Boolean
-        },
-
-        /* Whether the user is processing a task or not */
-        isProcessingTask: {
-          type: Boolean,
-          value: false
-        },
-
         edit: {
           type: Boolean,
           value: false
+        },
+
+        isProcessingTask: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true,
+          notify: true
         }
+      },
+
+      listeners: {
+        'workflowTaskProcess': '_workflowTaskProcess',
+        'workflowTaskCancelled': '_workflowTaskCancelled'
       },
 
       _documentChanged: function() {
         if (this.document) {
-          this.workflows = this.document.contextParameters.runningWorkflows;
-          this.tasks = this.document.contextParameters.pendingTasks;
-          this.processes = this.document.contextParameters.runnableWorkflows;
-          this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
-          this.isProcessingTask = false;
           this.edit = false;
+          this.isProcessingTask = false;
         }
       },
 
-      _canStartProcess: function() {
-        return !this.hasWorkflowRunning && this.processes && this.processes.length > 0;
+      _isMutable: function(doc) {
+        return !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && doc.state !== 'deleted';
       },
 
-      _workflowsChanged: function() {
-        this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
-      },
-
-      _tasksChanged: function() {
-        this.hasTaskToProcess = this.tasks && this.tasks.length > 0;
-      },
-
-      _startWorkflow: function() {
-        var workflows = this.$.workflows;
-        this.$.workflows.data = {
-          'entity-type': 'workflow',
-          'workflowModelName': this.selectedProcess,
-          'attachedDocumentIds': [this.document.uid]
-        };
-        workflows.post().then(function() {
-          this.fire('workflowStarted');
-        }.bind(this));
-      },
-
-      _processTask: function() {
-        this.isProcessingTask = true;
-      },
-
-      _cancelProcessTask: function() {
-        this.isProcessingTask = false;
-      },
-
-      _toggleGraphDialog: function() {
-        this.$$('#graphDialog').toggle();
-      },
-
-      _isMutable: function(document) {
-        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
-      },
-
-      _canEdit: function(document) {
-        return document && document.type !== 'Root' &&
-          this.hasPermission(document, 'Write') && this._isMutable(document);
+      _canEdit: function(doc) {
+        return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
       },
 
       _editMode: function() {
         this.edit = true;
+      },
+
+      _showCollections: function (doc) {
+        return this.hasCollections(doc) && !this.isProcessingTask;
+      },
+
+      _workflowTaskProcess: function() {
+        this.isProcessingTask = true;
+      },
+
+      _workflowTaskCancelled: function() {
+        this.isProcessingTask = false;
       }
 
     });

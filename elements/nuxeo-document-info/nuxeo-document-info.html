@@ -57,7 +57,7 @@ Contributors:
       <label>[[i18n('documentInfo.contributors')]]</label>
       <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
     </div>
-    <div class="item" hidden$="[[!showProcess]]">
+    <div class="item" hidden$="[[!_showProcess]]">
       <label>[[i18n('documentInfo.process')]]</label>
       <nuxeo-tag uppercase>[[i18n('documentInfo.process.running')]]</nuxeo-tag>
     </div>
@@ -70,12 +70,20 @@ Contributors:
     is: 'nuxeo-document-info',
     behaviors: [Nuxeo.LayoutBehavior],
     properties: {
-      document: Object,
-      showProcess: {
+      document: {
+        type: Object,
+        observer: '_documentChanged'
+      },
+      _showProcess: {
         type: Boolean,
         value: false,
         reflectToAttribute: true
       }
+    },
+
+    _documentChanged: function() {
+      this._showProcess = this.document && this.document.contextParameters &&
+        this.document.contextParameters.runningWorkflows && this.document.contextParameters.runningWorkflows.length > 0;
     }
   });
 </script>

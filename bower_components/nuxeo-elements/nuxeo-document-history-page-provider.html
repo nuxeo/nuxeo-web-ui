@@ -251,7 +251,7 @@ limitations under the License.
 
       _autoFetch: function () {
         if (this.docId && this.docId.length > 0
-            && (this.docId !== this.$.auditOp.queryParams)) {
+            && (this.docId !== this.$.auditOp.params.queryParams)) {
           this.page = 1;
         }
         if (this.auto) {
