@@ -23,6 +23,10 @@ export default class UI extends BasePage {
     return this.el.element('#createBtn');
   }
 
+  get adminButton() {
+    return this.el.element('nuxeo-menu-icon[name="administration"]');
+  }
+
   get drawer() {
     return new Drawer('#drawer');
   }
