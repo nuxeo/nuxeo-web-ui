@@ -1,7 +1,8 @@
 Feature: Search
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: Search
     When I click the "defaultSearch" button

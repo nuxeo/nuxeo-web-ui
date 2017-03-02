@@ -3,7 +3,8 @@ Feature: Browser
   I can browse the repository
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: Browse
     When I click the "browser" button

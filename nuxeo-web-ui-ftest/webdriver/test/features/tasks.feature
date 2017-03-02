@@ -1,7 +1,8 @@
 Feature: Tasks
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: Tasks
     When I click the "tasks" button
