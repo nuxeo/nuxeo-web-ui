@@ -3,7 +3,8 @@ Feature: Home
   I have a home page
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: My dashboard
     When I click the Nuxeo logo

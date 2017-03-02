@@ -1,7 +1,8 @@
 Feature: Favorites
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: Favorites
     Given I have a HTML Note

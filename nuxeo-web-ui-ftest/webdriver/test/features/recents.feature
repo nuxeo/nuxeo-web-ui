@@ -3,7 +3,8 @@ Feature: Recents
   I can view recent documents
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
 
   Scenario: Recents
     When I click the "recents" button
