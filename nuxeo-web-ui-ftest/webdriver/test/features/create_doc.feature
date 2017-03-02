@@ -23,8 +23,9 @@ Feature: Create Document
       | description  | my description  |
 
   Examples:
-    |doctype  |
-    |Note     |
-    |File     |
-    |Folder   |
-    |Workspace|
+    |doctype   |
+    |Note      |
+    |File      |
+    |Folder    |
+    |Workspace |
+    |Collection|
