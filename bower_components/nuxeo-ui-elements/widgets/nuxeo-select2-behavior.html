@@ -74,6 +74,7 @@ limitations under the License.
        */
       placeholder: {
         type: String,
+        value: ' ',
         observer: '_placeholderChanged'
       },
 
@@ -233,7 +234,7 @@ limitations under the License.
         params.multiple = true;
       }
 
-      if (this.placeholder && !this.readonly) {
+      if (!this.readonly) {
         params.placeholder = this.placeholder;
         params.allowClear = !this.required;
       }
@@ -277,7 +278,7 @@ limitations under the License.
       var value = e.target.value;
       this._inUpdateSelection = true;
       if (!this.multiple) {
-        this.value = value;
+        this.value = value ? value : null;
       } else {
         this.value = value.length > 0 ? value.split(this.separator) : [];
       }
