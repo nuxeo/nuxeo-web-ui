@@ -73,7 +73,11 @@ limitations under the License.
       properties: {
         document: Object,
 
-        isMobile: Boolean,
+        isMobile: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
 
         isAndroid: Boolean,
         isIOS: Boolean,

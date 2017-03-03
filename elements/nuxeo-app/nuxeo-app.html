@@ -322,7 +322,7 @@ Contributors:
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]" hidden$="[[isMobile]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
     <paper-progress id="loading" indeterminate></paper-progress>
@@ -333,7 +333,7 @@ Contributors:
     <nuxeo-keys keys="c" on-pressed="_showDocumentCreationWizard"></nuxeo-keys>
     <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
 
-    <nuxeo-mobile-banner document="[[currentDocument]]"></nuxeo-mobile-banner>
+    <nuxeo-mobile-banner document="[[currentDocument]]" is-mobile="{{isMobile}}"></nuxeo-mobile-banner>
 
   </template>
 
