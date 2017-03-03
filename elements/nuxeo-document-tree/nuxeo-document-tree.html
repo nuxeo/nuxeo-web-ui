@@ -131,21 +131,19 @@ Contributors:
 
     </style>
 
-    <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
-
-    <nuxeo-document auto="[[rootAuto]]" id="root" doc-path="[[rootPath]]" response="{{rootDocument}}" enrichers="hasFolderishChild"></nuxeo-document>
+    <nuxeo-document id="doc" auto="[[auto]]" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
 
     <nuxeo-page-provider id="children"
-      provider="tree_children"
-      enrichers="hasFolderishChild"
-      schemas="dublincore,common">
+                         provider="tree_children"
+                         enrichers="hasFolderishChild"
+                         schemas="dublincore,common">
     </nuxeo-page-provider>
 
     <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
 
     <div class="content">
       <div class="parents">
-        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden="[[_isRoot(rootDocument)]]">
+        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
           <span class="root">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
@@ -155,7 +153,7 @@ Contributors:
           </a>
         </template>
       </div>
-      <nuxeo-tree id="tree" data="[[rootDocument]]" controller="[[controller]]" node-key="uid">
+      <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
             <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
@@ -168,140 +166,131 @@ Contributors:
     </div>
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-tree',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          controller: Object,
-          rootAuto: {
-            type: Boolean,
-            value: false
-          },
-          rootPath: {
-            type: String,
-            value: '/'
-          },
-          rootDocument: {
-            type: Object,
-            observer: '_rootDocumentChanged'
-          },
-          currentDocument: {
-            type: Object,
-            observer: '_currentDocumentChanged'
-          },
-          parents: {
-            type: Array,
-            value: []
-          },
-          user: {
-            type: Object,
-            observer: '_userChanged'
-          },
-          label: String,
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          }
+    Polymer({
+      is: 'nuxeo-document-tree',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        controller: Object,
+        auto: {
+          type: Boolean,
+          value: false
         },
-
-        ready: function() {
-          this.controller = {
-            getChildren: function(node) {
-              this.$.children.params = [node.uid];
-              return this.$.children.fetch().then(function(data) {
-                return data.entries;
-              }.bind(this));
-            }.bind(this),
-
-            isLeaf: function(node) {
-              var hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
-              return !hasFolderishChild;
-            }
-          };
+        rootPath: {
+          type: String,
+          value: '/',
+          observer: '_rootPathChanged'
         },
-
-        _visibleChanged: function() {
-          if (this.visible) {
-            this.rootAuto = true;
-          }
+        docPath: {
+          type: String,
+          value: '/'
         },
-
-        _isRoot: function(doc) {
-          return this.user || doc && doc.type && doc.type === 'Root';
+        document: {
+          type: Object,
+          observer: '_documentChanged'
         },
+        currentDocument: {
+          type: Object,
+          observer: '_currentDocumentChanged'
+        },
+        parents: {
+          type: Array,
+          value: []
+        },
+        label: String,
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      },
 
-        _userChanged: function() {
-          if (this.user) {
-            this.$.userWorkspace.execute().then(function(response) {
-              this.rootPath = response.path;
+      ready: function() {
+        this.controller = {
+          getChildren: function(node) {
+            this.$.children.params = [node.uid];
+            return this.$.children.fetch().then(function(data) {
+              return data.entries;
             }.bind(this));
+          }.bind(this),
+
+          isLeaf: function(node) {
+            var hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
+            return !hasFolderishChild;
           }
-        },
+        };
+      },
 
-        _currentDocumentChanged: function() {
-          var doc = this.currentDocument;
-          var rootDoc = this.rootDocument;
+      _visibleChanged: function() {
+        if (this.visible) {
+          this.auto = true;
+        }
+      },
 
-          if (doc && !this.user) {
-            if (this.rootPath === doc.path && rootDoc && rootDoc.title !== doc.title) {
-              //If document is the same as before but its name changed, get the document again
-              this.$.root.get();
+      _hideRoot: function(doc) {
+        return this.rootPath !== '/' || (doc && doc.type && doc.type === 'Root');
+      },
+
+      _currentDocumentChanged: function() {
+        var doc = this.currentDocument;
+        if (doc && doc.path.startsWith(this.rootPath)) {
+
+          if (this.docPath === doc.path && this.document && this.document.title !== doc.title) {
+            //If document is the same as before but its name changed, get the document again
+            this.$.doc.get();
+          }
+
+          if (this.docPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
+            this.$.tree.style.display = 'none';
+            this.parents = [];
+
+            if (doc.type === 'Root') {
+              this.docPath = doc.path;
+              return;
             }
 
-            if (this.rootPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
-              this.$.tree.style.display = 'none';
-              this.parents = [];
+            var entries = doc.contextParameters.breadcrumb.entries;
+            var lastEntry = entries[entries.length - 1];
+            if (this.hasFacet(lastEntry, 'Folderish')) {
+              this.docPath = lastEntry.path;
+            } else {
+              this.docPath = entries[entries.length - 2].path;
+            }
 
-              if (doc.type === 'Root') {
-                this.rootPath = doc.path;
-                return;
-              }
-
-              var entries = doc.contextParameters.breadcrumb.entries;
-              var lastEntry = entries[entries.length - 1];
-              if (this.hasFacet(lastEntry, 'Folderish')) {
-                this.rootPath = lastEntry.path;
-              } else {
-                this.rootPath = entries[entries.length - 2].path;
-              }
-
-              for (var i = 0; i < entries.length - 1; i++) {
-                var entry = entries[i];
-                if (this.hasFacet(entry, 'HiddenInNavigation')) {
-                  return;
-                }
+            for (var i = 0; i < entries.length - 1; i++) {
+              var entry = entries[i];
+              if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootPath)) {
                 this.push('parents', entry);
               }
-
             }
+
           }
-        },
-
-        _rootDocumentChanged: function() {
-          if (this.rootDocument) {
-            this.$.tree.style.display = 'block';
-          }
-        },
-
-        _expandIcon: function(opened) {
-          return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
-        },
-
-        _icon: function(opened) {
-          return opened ? 'icons:folder-open' : 'icons:folder';
-        },
-
-        _title: function(item) {
-          return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
-        },
-
-        removeDocuments: function(documentIds) {
-          this.$.tree.removeNodes(documentIds);
         }
-      });
-    })();
+      },
+
+      _documentChanged: function() {
+        if (this.document) {
+          this.$.tree.style.display = 'block';
+        }
+      },
+
+      _rootPathChanged: function() {
+        this.docPath = this.rootPath;
+      },
+
+      _expandIcon: function(opened) {
+        return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+      },
+
+      _icon: function(opened) {
+        return opened ? 'icons:folder-open' : 'icons:folder';
+      },
+
+      _title: function(item) {
+        return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
+      },
+
+      removeDocuments: function(documentIds) {
+        this.$.tree.removeNodes(documentIds);
+      }
+    });
   </script>
 </dom-module>
