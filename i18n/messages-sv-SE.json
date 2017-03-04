@@ -475,6 +475,7 @@
 	"label.dublincore.title": "Titel",
 	"label.dublincore.version": "Version",
 	"label.myCollections.title": "Mina samlingar",
+	"label.mobile.openInApp": "Open in app",
 	"label.permissions.addPermission": "Lägg till en behörighet",
 	"label.permissions.block": "Blockera",
 	"label.permissions.blockDescription": "Om du uttryckligen vill styra åtkomst till det här dokumentet kan du blockera behörighetsarvet. De eventuella ändringar som görs på överordnade dokumentet kommer inte påverka villkoren för åtkomst till dokumentet. Du och administratörerna kommer att läggas till i lokala behörigheter.",

@@ -475,6 +475,7 @@
 	"label.dublincore.title": "題名",
 	"label.dublincore.version": "バージョン",
 	"label.myCollections.title": "マイコレクション",
+	"label.mobile.openInApp": "Open in app",
 	"label.permissions.addPermission": "アクセス許可を追加",
 	"label.permissions.block": "ブロック",
 	"label.permissions.blockDescription": "この文書へのアクセスを明示的に制御する場合は、アクセス許可の継承をブロックできます。親文書に行った変更は、この文書へのアクセスの条件には影響を与えません。あなたと管理者が、ローカルのアクセス許可に追加されます。",

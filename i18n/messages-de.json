@@ -475,6 +475,7 @@
 	"label.dublincore.title": "Titel",
 	"label.dublincore.version": "Version",
 	"label.myCollections.title": "Meine Sammlungen",
+	"label.mobile.openInApp": "Open in app",
 	"label.permissions.addPermission": "Eine Berechtigung hinzufügen",
 	"label.permissions.block": "Blockieren",
 	"label.permissions.blockDescription": "Wenn Sie den Zugriff auf dieses Dokument explizit steuern möchten, können Sie die Vererbung von Berechtigungen blockieren.  Änderungen am übergeordneten Dokument beeinflussen die Bedingungen für den Zugang zu diesem Dokument nicht. Sie und die Administratoren werden zu den lokale Berechtigungen hinzugefügt.",
