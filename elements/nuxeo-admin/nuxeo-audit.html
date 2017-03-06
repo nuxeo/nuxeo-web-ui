@@ -1,0 +1,211 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+Nelson Silva <nsilva@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-user-group-management-page`
+@group Nuxeo UI
+@element nuxeo-user-group-management-page
+-->
+<dom-module id="nuxeo-audit">
+  <template>
+
+
+    <style>
+      nuxeo-data-table {
+        @apply(--paper-card);
+        height: calc(100vh - 27em);
+        min-height: 27em;
+      }
+
+      .flex-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .flex-row {
+        display: flex;
+        flex-flow: row wrap;
+        align-content: flex-end;
+      }
+      .item {
+        flex: 1 0 0;
+        max-width: 50%;
+        margin-right : 8px;
+      }
+      @media (max-width: 768px) {
+        .item {
+          min-width: 100%;
+          max-width: 100%;
+        }
+      }
+    </style>
+
+    <nuxeo-resource id="eventTypes" path="/directory/eventTypes" enrichers="name"></nuxeo-resource>
+    <nuxeo-resource id="eventCategories" path="/directory/eventCategories"></nuxeo-resource>
+    <nuxeo-audit-query-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
+                                     current-page="{{entries}}" auto></nuxeo-audit-query-page-provider>
+
+    <nuxeo-page>
+      <div class="header">
+        <span class="flex">[[i18n('audit.heading')]]</span>
+      </div>
+      <div class="content">
+        <paper-card class="flex-container">
+          <h2>[[i18n('audit.filters')]]</h2>
+
+          <div class="flex-row">
+            <nuxeo-user-suggestion class="item" value="{{principalName}}"label="[[i18n('audit.username')]]"
+                                   placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
+          </div>
+
+          <div class="flex-row">
+            <nuxeo-date-picker class="item" value="{{startDate}}" label="From"></nuxeo-date-picker>
+            <nuxeo-date-picker class="item" value="{{endDate}}" label="To"></nuxeo-date-picker>
+          </div>
+
+          <div class="flex-row">
+            <nuxeo-directory-suggestion class="item" role="widget" label="[[i18n('audit.eventTypes')]]"
+                                        directory-name="eventTypes"
+                                        value="{{selectedEventTypes}}"
+                                        multiple="true"
+                                        dbl10n="true"
+                                        placeholder="[[i18n('audit.selectEventTypes')]]"
+                                        min-chars="0">
+            </nuxeo-directory-suggestion>
+
+            <paper-dropdown-menu class="item" label="[[i18n('audit.selectEventCategory')]]">
+              <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
+                <paper-item>All</paper-item>
+                <template is="dom-repeat" items="[[eventCategories]]">
+                  <paper-item value="[[item.properties.id]]">[[_formati18n('audit.eventCategory.' , item.properties.id)]]</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </div>
+        </paper-card>
+
+        <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
+          <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
+            <template>[[_formati18n('audit.eventType.', item.eventId)]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
+            <template>[[formatDate(item.eventDate)]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
+            <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]" sort-by="category">
+            <template>[[_formati18n('audit.eventCategory.', item.category)]]</template>
+          </nuxeo-data-table-column>
+          <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
+            <template>[[item.comment]]</template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
+
+      </div>
+    </nuxeo-page>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'nuxeo-audit',
+        behaviors: [Nuxeo.FormatBehavior],
+        properties: {
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
+          entries: {
+            type: Array,
+            value: []
+          },
+          isAdministrator: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
+          selectedEventTypes: {
+            type: Array,
+            value : []
+          },
+          selectedEventCategory: {
+            type: Number,
+            value : 0
+          },
+          startDate: {
+            type: String,
+            value : ''
+          },
+          endDate: {
+            type: String,
+            value : ''
+          },
+          principalName: {
+            type: String,
+            value :  ''
+          }
+        },
+        observers: [
+          '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
+
+        ],
+
+        _visibleChanged: function() {
+          if (this.visible) {
+            this.$.eventCategories.get().then(function(response) {
+              this.eventCategories = response.entries;
+            }.bind(this));
+
+            this.$.eventTypes.get().then(function(response) {
+              this.eventTypes = response.entries;
+            }.bind(this));
+          }
+        },
+
+        _formati18n: function(path, key) {
+          return this.i18n(path + key);
+        },
+
+        /* Builds the parameters object to be used on the query */
+        _buildParams: function(){
+          var params = {};
+          params.endDate = this.endDate;
+          params.startDate = this.startDate;
+          params.principalName = this.principalName;
+          params.eventIds = (this.selectedEventTypes && this.selectedEventTypes.length > 0)
+            ? this.selectedEventTypes.join()
+            : undefined;
+
+          params.eventCategory = (this.selectedEventCategory && this.selectedEventCategory > 0)
+            ? this.eventCategories[this.selectedEventCategory-1].properties.id
+            : undefined;
+          return params;
+        },
+
+        _refresh: function() {
+          if (this.visible) {
+            this.$.provider.params = this._buildParams();
+          }
+        },
+      });
+    })();
+  </script>
+</dom-module>
