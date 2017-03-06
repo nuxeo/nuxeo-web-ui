@@ -64,18 +64,15 @@ Used by `nuxeo-user-group-management`
       #changePasswordButton,
       #editUserButton,
       #deleteUserButton {
-        padding: 0.2em 0.5em;
+        padding: .5em .7em;
+        margin: 0 0 0 .8em;
       }
 
       .card {
         background: none #fff;
-        border: 1px solid #e6e9ef;
+        border: 1px solid var(--nuxeo-border, #e6e9ef);
         margin: 2em 0;
         padding: 2em 1.5em;
-      }
-
-      .header {
-        margin-right: 16px;
       }
 
       .username {
@@ -118,7 +115,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .table {
-        border: 1px solid #e7e7e7;
+        border: 1px solid var(--nuxeo-border, #e6e9ef);
         margin-top: 1em;
       }
 
@@ -211,7 +208,7 @@ Used by `nuxeo-user-group-management`
       input[disabled] {
         border: none;
         box-shadow: none;
-        padding-left: 0;
+        opacity: .7;
       }
 
       #errors {
