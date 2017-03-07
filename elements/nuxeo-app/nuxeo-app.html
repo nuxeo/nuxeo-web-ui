@@ -162,8 +162,11 @@ Contributors:
       }
 
       #drawer ::content .list-item.selected,
+      #drawer ::content nuxeo-menu-item.iron-selected,
       #drawer ::content .list-item:focus,
-      #drawer ::content .list-item.selected:focus {
+      #drawer ::content nuxeo-menu-item:focus,
+      #drawer ::content .list-item.selected:focus,
+      #drawer ::content nuxeo-menu-item.iron-selected:focus {
         @apply(--nuxeo-block-selected);
       }
 
@@ -278,9 +281,11 @@ Contributors:
 
             <div name="profile" class="layout vertical">
               <div class="title">[[_displayUser(currentUser)]]</div>
-              <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
-              <nuxeo-menu-item label="app.user.themes" route="page:themes"></nuxeo-menu-item>
-              <nuxeo-menu-item label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
+              <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
+                <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
+                <nuxeo-menu-item name="themes" label="app.user.themes" route="page:themes"></nuxeo-menu-item>
+                <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
+              </iron-selector>
             </div>
 
           </iron-pages>
@@ -315,7 +320,7 @@ Contributors:
 
           <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
-          <nuxeo-themes name="themes"></nuxeo-themes>
+          <nuxeo-themes name="themes" selected="[[selectedProfileTab]]"></nuxeo-themes>
 
         </iron-pages>
 
