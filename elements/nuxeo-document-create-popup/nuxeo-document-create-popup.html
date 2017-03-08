@@ -84,8 +84,6 @@ Contributors:
       </div>
     </paper-dialog>
 
-    <paper-toast id="toast"></paper-toast>
-
   </template>
 
   <script>
@@ -130,7 +128,7 @@ Contributors:
         listeners: {
           'nx-creation-wizard-hide-tabs': '_hideTabs',
           'nx-creation-wizard-show-tabs': '_displayTabs',
-          'document-created': '_close',
+          'nx-document-creation-finished': '_close',
           'nx-document-creation-suggester-parent-changed': '_parentPathChanged'
         },
 

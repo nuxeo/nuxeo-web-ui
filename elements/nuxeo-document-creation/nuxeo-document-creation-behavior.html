@@ -119,22 +119,32 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   _validateLocation: function() {
     if (!this.isValidTargetPath) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.invalidLocation'));
+      this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidLocation'));
     } else if (!this._canCreateIn(this.parent)) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noPermission'));
+      this.set('errorMessage', this.i18n('documentCreationBehavior.error.noPermission'));
     } else if (this.subtypes && this.subtypes.length === 0) {
       this.set('canCreate', false);
-      this.set('targetLocationError', this.i18n('documentCreationBehavior.error.noSubtypes'));
+      this.set('errorMessage', this.i18n('documentCreationBehavior.error.noSubtypes'));
     } else {
       this.set('canCreate', true);
-      this.set('targetLocationError', '');
+      this.set('errorMessage', '');
     }
     this.fire('nx-document-creation-parent-validated');
   },
 
-  _notify: function(response) {
+  _notify: function(response, close) {
     this.fire('document-created', {response: response});
+    if (close === undefined) {
+      close = true;
+    }
+    if (close) {
+      this.fire('nx-document-creation-finished');
+    }
+  },
+
+  _formatErrorMessage: function() {
+    return this.errorMessage ? 'error' : '';
   },
 
   _canCreateIn: function(document) {

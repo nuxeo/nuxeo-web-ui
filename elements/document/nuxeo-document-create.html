@@ -136,7 +136,9 @@ Contributors:
       }
 
       .error {
-        color: var(--nuxeo-warn-text);
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--primary-text-color);
+        padding-left: 8px;
       }
     </style>
 
@@ -159,7 +161,7 @@ Contributors:
                                    children="{{suggesterChildren}}"
                                    disabled
                                    always-float-label></nuxeo-path-suggestion>
-            <span class="error">&#8203;[[targetLocationError]]</span>
+            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
           <div name="typeSelection" class="typeSelection">
             <template is="dom-repeat" items="[[subtypes]]" as="type">
@@ -195,7 +197,7 @@ Contributors:
                                    children="{{suggesterChildren}}"
                                    disabled
                                    always-float-label></nuxeo-path-suggestion>
-            <span class="error">&#8203;[[targetLocationError]]</span>
+            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
           <form is="iron-form" id="form" class="form vertical layout flex">
             <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
