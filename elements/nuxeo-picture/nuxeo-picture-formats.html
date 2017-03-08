@@ -86,7 +86,8 @@ Contributors:
       },
 
       _getAdditionalFormats: function(document) {
-        return document ? document.properties['picture:views'].map(function(view) {
+        return (document && document.properties['picture:views']) ? document.properties['picture:views']
+                                                                            .map(function(view) {
           return {
             name: view.description,
             dimensions: view.width + ' x ' + view.height,

@@ -127,9 +127,15 @@ Contributors:
         margin-top: 32px;
       }
 
+      #blobList .error {
+        margin: 8px;
+      }
+
       .sidePanel {
         overflow-y: scroll;
         background: var(--nuxeo-page-background);
+        width: 30%;
+        min-width: 200px;
       }
 
       .blobCheck {
@@ -235,18 +241,12 @@ Contributors:
 
       .clear {
         width: 3em;
-        visibility: hidden;
         background-color: #fff;
         text-align: right;
       }
 
       .clear paper-icon-button {
         padding: 0 0 1em .5em;
-      }
-
-      .file-to-import:hover .clear {
-        visibility: visible;
-        z-index: 1;
       }
 
       .file-to-import:last-of-type {
@@ -296,7 +296,9 @@ Contributors:
       }
 
       .error {
-        color: var(--nuxeo-warn-text);
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--primary-text-color);
+        padding-left: 8px;
       }
 
       .importing-label {
@@ -329,7 +331,7 @@ Contributors:
                                  children="{{suggesterChildren}}"
                                  disabled
                                  always-float-label></nuxeo-path-suggestion>
-          <span class="error">&#8203;[[targetLocationError]]</span>
+          <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
         </div>
 
         <div id="dropzone" class="vertical layout flex">
@@ -370,16 +372,11 @@ Contributors:
                             [[file.providerName]]
                           </div>
                         </template>
-                        <template is="dom-if" if="[[file.complete]]">
-                          <div class="complete">
-                            <iron-icon icon="icons:check"></iron-icon>
-                          </div>
-                        </template>
                         <template is="dom-if" if="[[!file.complete]]">
                           <paper-progress indeterminate></paper-progress>
                         </template>
                       </div>
-                      <div class="clear">
+                      <div class="clear" hidden$="[[!file.complete]]">
                         <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
                         <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
                       </div>
@@ -461,7 +458,7 @@ Contributors:
                                      children="{{suggesterChildren}}"
                                      disabled
                                      always-float-label></nuxeo-path-suggestion>
-              <span class="error">&#8203;[[targetLocationError]]</span>
+              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
             </div>
             <div class="typePicker horizontal layout center">
               <div class="flex">
@@ -482,9 +479,9 @@ Contributors:
           <div class="sidePanel horizontal layout">
             <div id="blobList" class="flex">
               <template is="dom-repeat" items="[[localFiles]]" as="file">
-                <paper-button noink class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                  <div class="horizontal layout">
-                    <div class="vertical layout">
+                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                  <div class="horizontal layout flex">
+                    <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
@@ -498,9 +495,9 @@ Contributors:
                 </paper-button>
               </template>
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button noink class$="file-overview vertical layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                  <div class="horizontal layout">
-                    <div class="vertical layout">
+                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                  <div class="horizontal layout flex">
+                    <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
@@ -513,6 +510,7 @@ Contributors:
                   </div>
                 </paper-button>
               </template>
+              <span class="horizontal layout error" hidden$="[[!_importWithPropertiesError]]">[[_importWithPropertiesError]]</span>
             </div>
           </div>
         </div>
@@ -653,7 +651,9 @@ Contributors:
           _creating: {
             type: Boolean,
             value: false
-          }
+          },
+
+          _importWithPropertiesError: String
 
         },
         listeners: {
@@ -840,8 +840,6 @@ Contributors:
             this.set([propName, pos, 'sanitizedName'].join('.'),
                       this._sanitizeName(this.document.properties['dc:title']));
             this.set([propName, pos, 'title'].join('.'), this.document.properties['dc:title']);
-          } else {
-            throw 'invalid file index: ' + index;
           }
         },
 
@@ -849,7 +847,9 @@ Contributors:
           var properties = {};
           if (docData && Object.keys(docData).length > 0) {
             this.targetPath = docData.parent;
-            this.selectedDocType = docData.type;
+            this.selectedDocType = this._importDocTypes.find(function(type) {
+              return type.id === docData.type.id;
+            });
             properties = JSON.parse(JSON.stringify(docData.document)).properties;
           }
           if (title) {
@@ -954,6 +954,7 @@ Contributors:
           this._doNotCreate = false;
           this._docProperties = {};
           this._creating = false;
+          this._importWithPropertiesError = '';
         },
 
         _submit: function(justValidate) {
@@ -998,15 +999,11 @@ Contributors:
           }
         },
 
-        _handleSuccess: function(response) {
-          if (this.customizing) {
-            this.cancelBatch();
-          } else {
-            this.batchId = null;
-            this.uploader = null;
+        _handleSuccess: function(response, close) {
+          if (close === undefined) {
+            close = true;
           }
-          this._clear();
-          this._notify(response);
+          this._notify(response, close);
           // store creation data
           if (response.entries && Array.isArray(response.entries)) {
             response.entries.forEach(function(f) {
@@ -1016,40 +1013,39 @@ Contributors:
           } else if (response.type) {
             this.$.creationStats.storeType(response.type);
           }
-          if (!response.entries || response.entries.length === 1) {
-            page('/browse' + (response.entries ? response.entries[0] : response).path);
-          } else {
-            this.fire('document-updated');
-            page('/browse' + this.targetPath);
+          if (close) {
+            this.cancelBatch();
+            this._clear();
+            if (!response.entries || response.entries.length === 1) {
+              page('/browse' + (response.entries ? response.entries[0] : response).path);
+            } else {
+              this.fire('document-updated');
+              page('/browse' + this.targetPath);
+            }
           }
         },
 
         _handleError: function(error) {
+          this.set('_creating', false);
+          this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
           this._toast('ERROR: ' + error.message);
         },
 
-        _mergeResponses: function(response1, response2) {
-          var response = {'entity-type': 'Documents'};
-          if (response1 && response1.entries && response2 && response2.entries) {
-            response.entries = response1.entries.concat(response2.entries);
-          } else if (response1 && response1.entries) {
-            response.entries = response2 ? response1.entries.concat(response2) : response1.entries;
-          } else if (response2 && response2.entries) {
-            response.entries = response1 ? [response1].entries.concat(response2) : response2.entries;
-          } else {
-            response.entries = [];
-            if (response1) {
-              response.entries.push(response1);
-            }
-            if (response2) {
-              response.entries.push(response2);
+        _mergeResponses: function() {
+          var response = {'entity-type': 'Documents', 'entries': []};
+          for (var i = 0; i < arguments.length; i++) {
+            var current = arguments[i];
+            if (current && current.entries) {
+              response.entries.concat(current.entries);
+            } else {
+              response.entries.push(current);
             }
           }
           return response;
         },
 
         _smartImportLocalFiles: function(params) {
-          return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true'});
+          return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true', 'X-Batch-No-Drop': 'true'});
         },
 
         _smartImportRemoteFiles: function(params) {
@@ -1063,26 +1059,48 @@ Contributors:
         },
 
         _processFilesWithMetadata: function() {
-          var count = 0;
+          this._importWithPropertiesError = '';
           var length = this._getTotalFileCount();
           var self = this;
-          function next(response1) {
-            if (count < length) {
-              var arr = self.localFiles, index = count;
-              if (count >= self.localFiles.length) {
-                arr = self.remoteFiles;
-                index = count - self.localFiles.length;
-              }
-              count++;
-              return ((arr[index].docData && arr[index].checked) ? self._processFileWithMetadata(arr[index]) :
-                                          Promise.resolve({'entity-type': 'Documents', 'entries': []}))
-                         .then(function(response2) {
-                            return next(self._mergeResponses(response1, response2));
-                          }, self._handleError.bind(self));
+          var promises = [];
+          var localIndexes = [];
+          var remoteIndexes = [];
+          for (var i = 0; i < length; i++) {
+            var arr = self.localFiles, index = i;
+            if (i >= self.localFiles.length) {
+              arr = self.remoteFiles;
+              index = i - self.localFiles.length;
             }
-            return Promise.resolve(self._handleSuccess(response1));
+            promises.push(
+              (function(indexesToRemove, index){
+                return ((arr[index].docData && arr[index].checked) ?
+                          self._processFileWithMetadata(arr[index]) :
+                          Promise.resolve({'entity-type': 'Documents', 'entries': []})).then(function(result) {
+                            indexesToRemove.push(index);
+                            return result;
+                          }.bind(this)).catch(function(error) {
+                            return error;
+                          }.bind(this))
+              }.bind(this))(i >= self.localFiles.length ? remoteIndexes : localIndexes, index));
           }
-          return next();
+          Promise.all(promises).then(function(results) {
+            var errorFree = results.filter(function(result) {
+              return !(result instanceof Error);
+            });
+            this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
+            if (errorFree.length < results.length) {
+              this.set('_creating', false);
+              this.set('_importWithPropertiesError', 'These documents could not be created.');
+              localIndexes.sort().reverse().forEach(function(index) {
+                this.splice('localFiles', index, 1);
+              }.bind(this));
+              remoteIndexes.sort().reverse().forEach(function(index) {
+                this.splice('remoteFiles', index, 1);
+              }.bind(this));
+              this._selectDoc(0);
+            }
+
+          }.bind(this));
         },
 
         _processFileWithMetadata: function(file) {
@@ -1181,7 +1199,7 @@ Contributors:
         _parentValidated: function() {
           if (this.canCreate && this._importDocTypes && this._importDocTypes.length === 0) {
             this.set('canCreate', false);
-            this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
+            this.set('errorMessage', this.i18n('documentImport.error.cannotImport'));
           }
         },
 
