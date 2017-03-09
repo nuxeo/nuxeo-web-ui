@@ -379,6 +379,7 @@
 	"documentHistory.state": "Tillstånd",
 	"documentHistory.username": "Användarnamn",
 	"documentImport.error.cannotImport": "Det går inte att importera dokument på denna plats",
+	"documentImport.error.importFailed": "These assets could not be created, either because the server could not be reached or some of the assets have problems. You can try to create them again, cancel or retry later.",
 	"documentImport.importing": "Importerar...",
 	"documentImportForm.addProperties.otherDocuments": "+ {0} andra dokument",
 	"documentImportForm.addProperties": "Lägg till egenskaper",
