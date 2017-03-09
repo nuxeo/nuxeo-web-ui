@@ -54,11 +54,9 @@ Pedro Costa <pcosta@nuxeo.com>
       }
     </style>
 
-    <nuxeo-resource id="eventTypes" path="/directory/eventTypes" enrichers="name"></nuxeo-resource>
     <nuxeo-resource id="eventCategories" path="/directory/eventCategories"></nuxeo-resource>
     <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
                                      current-page="{{entries}}" auto></nuxeo-audit-page-provider>
-
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('audit.heading')]]</span>
