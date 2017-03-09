@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-Nelson Silva <nsilva@nuxeo.com>
+Pedro Costa <pcosta@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!--
-`nuxeo-user-group-management-page`
+`nuxeo-audit`
 @group Nuxeo UI
-@element nuxeo-user-group-management-page
+@element nuxeo-audit
 -->
 <dom-module id="nuxeo-audit">
   <template>
-
-
     <style>
       nuxeo-data-table {
         @apply(--paper-card);
@@ -58,8 +56,8 @@ Nelson Silva <nsilva@nuxeo.com>
 
     <nuxeo-resource id="eventTypes" path="/directory/eventTypes" enrichers="name"></nuxeo-resource>
     <nuxeo-resource id="eventCategories" path="/directory/eventCategories"></nuxeo-resource>
-    <nuxeo-audit-query-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
-                                     current-page="{{entries}}" auto></nuxeo-audit-query-page-provider>
+    <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
+                                     current-page="{{entries}}" auto></nuxeo-audit-page-provider>
 
     <nuxeo-page>
       <div class="header">
@@ -91,7 +89,7 @@ Nelson Silva <nsilva@nuxeo.com>
 
             <paper-dropdown-menu class="item" label="[[i18n('audit.selectEventCategory')]]">
               <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
-                <paper-item>All</paper-item>
+                <paper-item>[[i18n('audit.all')]]</paper-item>
                 <template is="dom-repeat" items="[[eventCategories]]">
                   <paper-item value="[[item.properties.id]]">[[_formati18n('audit.eventCategory.' , item.properties.id)]]</paper-item>
                 </template>
@@ -101,19 +99,19 @@ Nelson Silva <nsilva@nuxeo.com>
         </paper-card>
 
         <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
-          <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
-            <template>[[_formati18n('audit.eventType.', item.eventId)]]</template>
+          <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
+            <template>[[_formati18n('eventType.', item.eventId)]]</template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
+          <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
             <template>[[formatDate(item.eventDate)]]</template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
+          <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
             <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]" sort-by="category">
-            <template>[[_formati18n('audit.eventCategory.', item.category)]]</template>
+          <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
+            <template>[[_formati18n('eventCategory.', item.category)]]</template>
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
+          <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
             <template>[[item.comment]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
@@ -122,8 +120,7 @@ Nelson Silva <nsilva@nuxeo.com>
     </nuxeo-page>
   </template>
   <script>
-    (function() {
-      'use strict';
+
 
       Polymer({
         is: 'nuxeo-audit',
@@ -136,11 +133,6 @@ Nelson Silva <nsilva@nuxeo.com>
           entries: {
             type: Array,
             value: []
-          },
-          isAdministrator: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
           },
           selectedEventTypes: {
             type: Array,
@@ -165,7 +157,6 @@ Nelson Silva <nsilva@nuxeo.com>
         },
         observers: [
           '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
-
         ],
 
         _visibleChanged: function() {
@@ -206,6 +197,5 @@ Nelson Silva <nsilva@nuxeo.com>
           }
         },
       });
-    })();
   </script>
 </dom-module>
