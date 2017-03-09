@@ -303,7 +303,8 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]"></nuxeo-layout>
+          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" on-element-changed="_homeLoaded">
+          </nuxeo-layout>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
@@ -605,21 +606,14 @@ Contributors:
         },
 
         _fetchTasks: function() {
-          // hack to fetch tasks with user prefix and without prefix
-          // some tasks are prefixed, to be reviewed later
-          this._tmpTasks = [];
           this.$.tasks.params = {'userId': this.currentUser.id};
           this.$.tasks.get().then(function(response) {
-            this._tmpTasks = response.entries;
-            this.$.tasks.params = {'userId': 'user:' + this.currentUser.id};
-            this.$.tasks.get().then(function(response) {
-              this.tasks = this._tmpTasks.concat(response.entries);
-              this.taskCount = this.tasks.length;
-              var nxHomeEl = this.$.home.element;
-              if (nxHomeEl) {
-                nxHomeEl.tasks = this.tasks;
-              }
-            }.bind(this));
+            this.tasks = response.entries;
+            this.taskCount = this.tasks.length;
+            var nxHomeEl = this.$.home.element;
+            if (nxHomeEl) {
+              nxHomeEl.tasks = this.tasks;
+            }
           }.bind(this));
         },
 
@@ -751,6 +745,10 @@ Contributors:
 
         _logout: function() {
           return this.$.nxcon.url + '/logout';
+        },
+
+        _homeLoaded: function() {
+          this.$.home.element.tasks = this.tasks;
         }
 
       });
