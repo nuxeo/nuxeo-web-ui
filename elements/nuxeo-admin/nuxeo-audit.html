@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and contributors.
+(C) Copyright 2017 Nuxeo (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,8 +65,6 @@ Pedro Costa <pcosta@nuxeo.com>
       </div>
       <div class="content">
         <paper-card class="flex-container">
-          <h2>[[i18n('audit.filters')]]</h2>
-
           <div class="flex-row">
             <nuxeo-user-suggestion class="item" value="{{principalName}}"label="[[i18n('audit.username')]]"
                                    placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
@@ -78,11 +76,11 @@ Pedro Costa <pcosta@nuxeo.com>
           </div>
 
           <div class="flex-row">
-            <nuxeo-directory-suggestion class="item" role="widget" label="[[i18n('audit.eventTypes')]]"
+            <nuxeo-directory-suggestion class="item" role="widget"
+                                        label="[[i18n('audit.eventTypes')]]"
                                         directory-name="eventTypes"
                                         value="{{selectedEventTypes}}"
                                         multiple="true"
-                                        dbl10n="true"
                                         placeholder="[[i18n('audit.selectEventTypes')]]"
                                         min-chars="0">
             </nuxeo-directory-suggestion>
@@ -91,7 +89,7 @@ Pedro Costa <pcosta@nuxeo.com>
               <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
                 <paper-item>[[i18n('audit.all')]]</paper-item>
                 <template is="dom-repeat" items="[[eventCategories]]">
-                  <paper-item value="[[item.properties.id]]">[[_formati18n('audit.eventCategory.' , item.properties.id)]]</paper-item>
+                  <paper-item value="[[item.properties.id]]">[[_formati18n('eventCategory.' , item.properties.id)]]</paper-item>
                 </template>
               </paper-listbox>
             </paper-dropdown-menu>
@@ -120,8 +118,6 @@ Pedro Costa <pcosta@nuxeo.com>
     </nuxeo-page>
   </template>
   <script>
-
-
       Polymer({
         is: 'nuxeo-audit',
         behaviors: [Nuxeo.FormatBehavior],
