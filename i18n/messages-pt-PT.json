@@ -184,6 +184,7 @@
   "documentHistory.state":"Estado",
   "documentHistory.username":"Nome de usuário",
   "documentImport.error.cannotImport":"Não é possível importar documentos neste local",
+  "documentImport.error.importFailed":"These assets could not be created, either because the server could not be reached or some of the assets have problems. You can try to create them again, cancel or retry later.",
   "documentImport.importing":"Importando...",
   "documentImportForm.addProperties.otherDocuments":"+ {0} outros documentos",
   "documentImportForm.addProperties":"Adicionar propriedades",
