@@ -321,7 +321,7 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" on-element-changed="_homeLoaded">
+          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" model="[[_homeModel(tasks)]]">
           </nuxeo-layout>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
@@ -628,10 +628,6 @@ Contributors:
           this.$.tasks.get().then(function(response) {
             this.tasks = response.entries;
             this.taskCount = this.tasks.length;
-            var nxHomeEl = this.$.home.element;
-            if (nxHomeEl) {
-              nxHomeEl.tasks = this.tasks;
-            }
           }.bind(this));
         },
 
@@ -765,8 +761,8 @@ Contributors:
           return this.$.nxcon.url + '/logout';
         },
 
-        _homeLoaded: function() {
-          this.$.home.element.tasks = this.tasks;
+        _homeModel: function() {
+          return {tasks: this.tasks};
         }
 
       });
