@@ -113,6 +113,7 @@ Contributors:
         width: 56px;
       }
 
+      #menu ::content nuxeo-menu-icon:hover ::content paper-icon-button,
       #menu ::content nuxeo-menu-icon.selected ::content paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-actions-hover);
@@ -128,6 +129,18 @@ Contributors:
 
       #menu .admin-icon {
         bottom: 44px;
+      }
+
+      @media (max-width: 1024px), (max-height: 700px) {
+        #menu .profile-icon,
+        #menu .admin-icon {
+          position: relative;
+          bottom: auto;
+        }
+
+        #menu .admin-icon {
+          border-top: 1px solid rgba(0,0,0,0.15);
+        }
       }
 
       /* drawer */
