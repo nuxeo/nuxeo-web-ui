@@ -53,10 +53,16 @@ Contributors:
         @apply(--nuxeo-sidebar-item-link);
       }
 
+      .item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
       .ellipsis {
         display: inline-block;
         width: 80%;
         vertical-align: middle;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
       .remove {
