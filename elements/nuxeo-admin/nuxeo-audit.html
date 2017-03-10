@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Contributors:
-Pedro Costa <pcosta@nuxeo.com>
+   Pedro Costa <pcosta@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
@@ -28,52 +28,52 @@ Pedro Costa <pcosta@nuxeo.com>
     <style>
       nuxeo-data-table {
         @apply(--paper-card);
-        height: calc(100vh - 27em);
-        min-height: 27em;
+        height: calc(100vh - 25em);
+        min-height: 15em;
       }
-
-      .flex-container {
-        display: flex;
-        flex-direction: column;
+      nuxeo-directory-suggestion {
+        padding-top:2px;
       }
-      .flex-row {
-        display: flex;
-        flex-flow: row wrap;
-        align-content: flex-end;
+      .container {
+        @apply(--layout-vertical);
+        @apply(--layout-wrap);
+      }
+      .row-container {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
       }
       .item {
         flex: 1 0 0;
-        max-width: 50%;
         margin-right : 8px;
       }
       @media (max-width: 768px) {
         .item {
           min-width: 100%;
-          max-width: 100%;
+        }
+        nuxeo-data-table {
+          height: calc(100vh - 33em);
         }
       }
     </style>
 
     <nuxeo-resource id="eventCategories" path="/directory/eventCategories"></nuxeo-resource>
     <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
-                                     current-page="{{entries}}" auto></nuxeo-audit-page-provider>
+                               current-page="{{entries}}" auto></nuxeo-audit-page-provider>
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('audit.heading')]]</span>
       </div>
       <div class="content">
-        <paper-card class="flex-container">
-          <div class="flex-row">
-            <nuxeo-user-suggestion class="item" value="{{principalName}}"label="[[i18n('audit.username')]]"
-                                   placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
-          </div>
+        <paper-card class="container">
+          <nuxeo-user-suggestion  value="{{principalName}}"label="[[i18n('audit.username')]]"
+                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
 
-          <div class="flex-row">
+          <div class="row-container">
             <nuxeo-date-picker class="item" value="{{startDate}}" label="From"></nuxeo-date-picker>
             <nuxeo-date-picker class="item" value="{{endDate}}" label="To"></nuxeo-date-picker>
           </div>
 
-          <div class="flex-row">
+          <div class="row-container">
             <nuxeo-directory-suggestion class="item" role="widget"
                                         label="[[i18n('audit.eventTypes')]]"
                                         directory-name="eventTypes"
@@ -82,8 +82,7 @@ Pedro Costa <pcosta@nuxeo.com>
                                         placeholder="[[i18n('audit.selectEventTypes')]]"
                                         min-chars="0">
             </nuxeo-directory-suggestion>
-
-            <paper-dropdown-menu class="item" label="[[i18n('audit.selectEventCategory')]]">
+            <paper-dropdown-menu class="item " label="[[i18n('audit.selectEventCategory')]]">
               <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
                 <paper-item>[[i18n('audit.all')]]</paper-item>
                 <template is="dom-repeat" items="[[eventCategories]]">
@@ -111,85 +110,80 @@ Pedro Costa <pcosta@nuxeo.com>
             <template>[[item.comment]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
-
       </div>
     </nuxeo-page>
   </template>
   <script>
-      Polymer({
-        is: 'nuxeo-audit',
-        behaviors: [Nuxeo.FormatBehavior],
-        properties: {
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          },
-          entries: {
-            type: Array,
-            value: []
-          },
-          selectedEventTypes: {
-            type: Array,
-            value : []
-          },
-          selectedEventCategory: {
-            type: Number,
-            value : 0
-          },
-          startDate: {
-            type: String,
-            value : ''
-          },
-          endDate: {
-            type: String,
-            value : ''
-          },
-          principalName: {
-            type: String,
-            value :  ''
-          }
+    Polymer({
+      is: 'nuxeo-audit',
+      behaviors: [Nuxeo.FormatBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
         },
-        observers: [
-          '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
-        ],
-
-        _visibleChanged: function() {
-          if (this.visible) {
-            this.$.eventCategories.get().then(function(response) {
-              this.eventCategories = response.entries;
-            }.bind(this));
-
-            this.$.eventTypes.get().then(function(response) {
-              this.eventTypes = response.entries;
-            }.bind(this));
-          }
+        entries: {
+          type: Array,
+          value: []
         },
-
-        _formati18n: function(path, key) {
-          return this.i18n(path + key);
+        selectedEventTypes: {
+          type: Array,
+          value : []
         },
-
-        /* Builds the parameters object to be used on the query */
-        _buildParams: function(){
-          var params = {};
-          params.endDate = this.endDate;
-          params.startDate = this.startDate;
-          params.principalName = this.principalName;
-          params.eventIds = (this.selectedEventTypes && this.selectedEventTypes.length > 0)
-            ? this.selectedEventTypes.join()
-            : undefined;
-
-          params.eventCategory = (this.selectedEventCategory && this.selectedEventCategory > 0)
-            ? this.eventCategories[this.selectedEventCategory-1].properties.id
-            : undefined;
-          return params;
+        selectedEventCategory: {
+          type: Number,
+          value : 0
         },
-
-        _refresh: function() {
-          if (this.visible) {
-            this.$.provider.params = this._buildParams();
-          }
+        startDate: {
+          type: String,
+          value : ''
         },
-      });
+        endDate: {
+          type: String,
+          value : ''
+        },
+        principalName: {
+          type: String,
+          value :  ''
+        }
+      },
+      observers: [
+        '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
+      ],
+
+      _visibleChanged: function() {
+        if (this.visible) {
+          this.$.eventCategories.get().then(function(response) {
+            this.eventCategories = response.entries;
+          }.bind(this));
+        }
+      },
+
+      _formati18n: function(path, key) {
+        return this.i18n(path + key);
+      },
+
+      /* Builds the parameters object to be used on the query */
+      _buildParams: function(){
+        var params = {
+          endDate : this.endDate,
+          startDate : this.startDate,
+          principalName : this.principalName
+        };
+        if (this.selectedEventTypes && this.selectedEventTypes.length > 0){
+          params.eventIds = this.selectedEventTypes.join();
+        }
+        if (this.selectedEventCategory && this.selectedEventCategory > 0){
+          params.eventCategory = this.eventCategories[this.selectedEventCategory-1].properties.id;
+        }
+        return params;
+      },
+
+      _refresh: function() {
+        if (this.visible) {
+          this.$.provider.params = this._buildParams();
+        }
+      },
+    });
   </script>
 </dom-module>
