@@ -13,9 +13,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-Pedro Costa <pcosta@nuxeo.com>
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -25,7 +22,7 @@ Pedro Costa <pcosta@nuxeo.com>
 `nuxeo-audit-page-provider` performs an audit query with the given page provider name against audit logs.
 
     <nuxeo-audit-page-provider provider-name="EVENTS_VIEW"
-        current-page="{{entries}}" params"..." page-size="4'">
+        current-page="{{entries}}" params="{...}" page-size="40'">
     </nuxeo-audit-page-provider>
 
 @group Nuxeo Elements
@@ -61,7 +58,7 @@ Pedro Costa <pcosta@nuxeo.com>
         },
 
         /**
-         * If true, automatically execute the operation when either `provider` or `params` changes.
+         * If true, automatically execute the operation when either `providerName`, `params` or `queryParams` change.
          */
         auto: {
           type: Boolean,
