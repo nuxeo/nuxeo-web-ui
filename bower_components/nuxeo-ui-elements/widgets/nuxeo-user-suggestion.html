@@ -51,7 +51,8 @@ limitations under the License.
                  selected-items="{{selectedItems}}"
                  required="[[required]]"
                  invalid="[[invalid]]"
-                 result-formatter="[[resultFormatter]]">
+                 result-formatter="[[resultFormatter]]"
+                 id-function="[[idFunction]]">
   </nuxeo-select2>
 
 </template>
@@ -133,6 +134,15 @@ Polymer({
       value: function () {
         return this._resultFormatter.bind(this);
       }
+    },
+
+    prefixed: Boolean,
+
+    idFunction: {
+      type: Function,
+      value: function () {
+        return this._idFunction.bind(this);
+      }
     }
   },
 
@@ -155,6 +165,10 @@ Polymer({
 
   _resultFormatter: function (item) {
     return (item.displayLabel || item.title) + ((item.type && item.type === 'USER_TYPE') ? '<br>' + item.email : '');
+  },
+
+  _idFunction: function (item) {
+    return this.prefixed ? item.prefixed_id : item.id;
   }
 
 });
