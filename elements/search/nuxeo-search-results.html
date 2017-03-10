@@ -28,9 +28,18 @@ Contributors:
 <dom-module id="nuxeo-search-results">
   <template>
 
+    <style>
+      .header {
+        @apply(--layout-horizontal);
+      }
+      nuxeo-saved-search-actions {
+        @apply(--layout-end-justified);
+      }
+    </style>
+
     <nuxeo-page>
       <div class="header">
-        <span>[[i18n('searchResults.results')]]</span>
+        <span class="flex">[[i18n('searchResults.results')]]</span>
         <nuxeo-saved-search-actions id="actions" class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
