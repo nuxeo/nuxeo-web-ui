@@ -406,7 +406,7 @@
   "renderTemplateButton.editParamsDialog.render":"Render",
   "renderTemplateButton.editParamsDialog.reset":"Reset",
   "renderTemplateButton.toast.noTemplates":"There are no templates available for this document",
-  "renderTemplateButton.toast.render.error":"Unable to redered document '{0}'",
+  "renderTemplateButton.toast.render.error":"Unable to render document '{0}'",
   "renderTemplateButton.toast.rendered":"Document rendered with '{0}' template",
   "renderTemplateButton.toast.rendering":"Rendering document...",
   "renderTemplateButton.tooltip":"Render with Template",
