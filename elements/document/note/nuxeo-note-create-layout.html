@@ -35,6 +35,7 @@ limitations under the License.
     </nuxeo-select>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
+                                name="nature"
                                 directory-name="nature"
                                 value="{{document.properties.dc:nature}}"
                                 placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
@@ -42,6 +43,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
+                                name="subjects"
                                 directory-name="l10nsubjects"
                                 value="{{document.properties.dc:subjects}}"
                                 multiple="true"
@@ -51,6 +53,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
+                                name="coverage"
                                 directory-name="l10ncoverage"
                                 value="{{document.properties.dc:coverage}}"
                                 dbl10n="true"
