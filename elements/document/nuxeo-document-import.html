@@ -179,10 +179,6 @@ Contributors:
         margin-top: 0.1em;
       }
 
-      .typePicker {
-        padding: 0 32px;
-      }
-
       .name {
         font-weight: bold;
         word-break: break-word;
@@ -460,19 +456,29 @@ Contributors:
                                      always-float-label></nuxeo-path-suggestion>
               <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
             </div>
-            <div class="typePicker horizontal layout center">
-              <div class="flex">
-                <paper-dropdown-menu label="[[i18n('documentImportForm.type.label')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
-                  <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-                    <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
-                      <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
-                    </template>
-                  </paper-menu>
-                </paper-dropdown-menu>
-              </div>
-            </div>
             <form is="iron-form" action="/" id="form" on-submit="_importWithProperties" class="form vertical layout flex">
-              <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+              <div class="horizontal layout center">
+                <div class="flex">
+                  <paper-dropdown-menu id="docTypeDropdown"
+                                       label="[[i18n('documentImportForm.type.label')]]"
+                                       class="typeDropdown"
+                                       horizontal-align="left"
+                                       error-message="[[i18n('documentImportForm.type.error')]]"
+                                       placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                                       on-value-changed="_validate"
+                                       noink always-float-label required>
+                    <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
+                      <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
+                        <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
+                      </template>
+                    </paper-menu>
+                  </paper-dropdown-menu>
+                </div>
+              </div>
+              <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
+              <template is="dom-if" if=[[document]] restamp>
+                <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+              </template>
               <button id="submitButton"></button>
             </form>
           </div>
@@ -741,7 +747,7 @@ Contributors:
             this.stage = 'customize';
             this.customizing = true;
             if (this._importDocTypes.length > 0) {
-              this.set('selectedDocType', this._importDocTypes[0]);
+              this.set('selectedDocType', null);
             }
             this.fire('nx-creation-wizard-hide-tabs');
             this._selectDoc(0);
@@ -1215,6 +1221,8 @@ Contributors:
           
           if (!this._isValidType(this.selectedDocType)) {
             this.document = null;
+            // prevent error message from being displayed the first time
+            this.$.docTypeDropdown.invalid = false;
             return;
           } 
 
