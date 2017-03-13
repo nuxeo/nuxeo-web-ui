@@ -32,7 +32,7 @@ Contributors:
         min-height: 15em;
       }
       nuxeo-directory-suggestion {
-        padding-top:2px;
+        padding-top: 1px;
       }
       .container {
         @apply(--layout-vertical);
@@ -82,7 +82,7 @@ Contributors:
                                         placeholder="[[i18n('audit.selectEventTypes')]]"
                                         min-chars="0">
             </nuxeo-directory-suggestion>
-            <paper-dropdown-menu class="item " label="[[i18n('audit.selectEventCategory')]]">
+            <paper-dropdown-menu class="item" label="[[i18n('audit.selectEventCategory')]]">
               <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
                 <paper-item>[[i18n('audit.all')]]</paper-item>
                 <template is="dom-repeat" items="[[eventCategories]]">
