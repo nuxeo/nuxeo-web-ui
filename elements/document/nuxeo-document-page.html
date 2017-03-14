@@ -92,6 +92,14 @@ Contributors:
           <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
         </paper-card>
 
+        <!-- tags -->
+        <paper-card>
+          <h3>[[i18n('documentPage.tags')]]</h3>
+          <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
+                                placeholder="[[i18n('documentPage.tags.placeholder')]]">
+          </nuxeo-tag-suggestion>
+        </paper-card>
+
         <!-- activity -->
         <paper-card hidden$="[[isProcessingTask]]">
           <h3>[[i18n('documentPage.activity')]]</h3>

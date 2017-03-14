@@ -25,8 +25,10 @@ limitations under the License.
   <link rel="import" href="../../../paper-icon-button/paper-icon-button.html">
   <link rel="import" href="../../../paper-tooltip/paper-tooltip.html">
   <link rel="import" href="../../../nuxeo-elements/nuxeo-connection.html">
+  <link rel="import" href="../../../nuxeo-elements/nuxeo-document.html"
   <link rel="import" href="../../widgets/nuxeo-directory-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-user-suggestion.html">
+  <link rel="import" href="../../widgets/nuxeo-tag-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-document-suggestion.html">
   <link rel="import" href="../../widgets/nuxeo-file.html">
   <link rel="import" href="../../widgets/nuxeo-tag.html">
@@ -115,6 +117,15 @@ limitations under the License.
         <td>nuxeo-document-suggestion (multiple)</td>
         <td><nuxeo-document-suggestion multiple="true" value="{{multipleDocumentSuggestion}}"></nuxeo-document-suggestion></td>
         <td>[[multipleDocumentSuggestion]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-tag-suggestion</td>
+        <td>
+          <nuxeo-document auto doc-path="/default-domain/workspaces/" response="{{tagDoc}}" enrichers="tags"></nuxeo-document>
+          <nuxeo-tag-suggestion value="{{tags}}" document="[[tagDoc]]" allow-new-tags></nuxeo-tags-suggestion>
+        </td>
+        <td>[[tags]]</td>
       </tr>
 
       <tr>

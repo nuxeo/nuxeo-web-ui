@@ -132,6 +132,20 @@ limitations under the License.
       },
 
       /**
+       * Functon called when an entry is selected.
+       */
+      addedEntryHandler: {
+        type: Function
+      },
+
+      /**
+       * Functon called when an entry is unselected.
+       */
+      removedEntryHandler: {
+        type: Function
+      },
+
+      /**
        * Formatter for initial selection.
        */
       initSelection: {
@@ -142,8 +156,7 @@ limitations under the License.
       },
 
       data: {
-        type: Object,
-        observer: '_dataChanged'
+        type: Object
       },
 
       /**
@@ -154,6 +167,10 @@ limitations under the License.
         notify: true
       }
     },
+
+    observers: [
+      '_dataChanged(data, tagging)'
+    ],
 
     /**
      * HTML escaping function to be used in formatters.
@@ -281,6 +298,15 @@ limitations under the License.
         this.value = value ? value : null;
       } else {
         this.value = value.length > 0 ? value.split(this.separator) : [];
+      }
+      if (e.added) {
+        if (this.addedEntryHandler) {
+          this.addedEntryHandler(e.added);
+        }
+      } else if (e.removed) {
+        if (this.removedEntryHandler) {
+          this.removedEntryHandler(e.removed);
+        }
       }
     },
 

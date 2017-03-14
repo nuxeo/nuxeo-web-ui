@@ -105,6 +105,15 @@ Contributors:
       </nuxeo-select2>
     </div>
 
+    <div class="row layout vertical">
+      <label>[[i18n('defaultSearch.tags')]]</label>
+      <nuxeo-tag-suggestion min-chars="1"
+                     placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
+                     value="{{params.ecm_tags}}"
+                     multiple="true">
+      </nuxeo-tag-suggestion>
+    </div>
+
     <div class="layout vertical row">
       <label>[[i18n('defaultSearch.nature')]]</label>
       <nuxeo-checkbox-aggregation
