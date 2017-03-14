@@ -228,7 +228,7 @@ Contributors:
 
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]">
-          <iron-icon src$="[[baseUrl]]images/touch/icon-128x128.png"></iron-icon>
+          <iron-icon src$="[[_logo(baseUrl)]]"></iron-icon>
         </a>
 
         <!-- menu -->
@@ -525,6 +525,10 @@ Contributors:
           this.page = page;
           this.loading = false;
           this.$.loading.style.display = 'none';
+        },
+
+        _logo: function(baseUrl) {
+          return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
         },
 
         _actionContext: function() {
