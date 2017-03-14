@@ -145,6 +145,8 @@
   "tableSettings.columnSettings":"Kolumninställningar",
   "tableSettings.columnSettings.close":"Stäng",
   "tableSettings.columnSettings.reset":"Återställ",
+  "tags.addedToDocument":"The tag {0} has been added to the document",
+  "tags.removedFromDocument":"The tag {0} has been removed from the document",
   "userGroupLatest.emptyRecentUserOrGroup":"Ingen nyligen skapad användare eller grupp.",
   "userGroupLatest.identifier":"Identifierare",
   "userGroupLatest.name":"Namn",

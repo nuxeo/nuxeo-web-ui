@@ -145,6 +145,8 @@
   "tableSettings.columnSettings":"Spalteneinstellungen",
   "tableSettings.columnSettings.close":"Schließen",
   "tableSettings.columnSettings.reset":"Zurücksetzen",
+  "tags.addedToDocument":"The tag {0} has been added to the document",
+  "tags.removedFromDocument":"The tag {0} has been removed from the document",
   "userGroupLatest.emptyRecentUserOrGroup":"Kein aktueller Benutzer oder Gruppe.",
   "userGroupLatest.identifier":"Kennung",
   "userGroupLatest.name":"Name",

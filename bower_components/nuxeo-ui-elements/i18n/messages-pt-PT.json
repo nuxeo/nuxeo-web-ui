@@ -145,6 +145,8 @@
   "tableSettings.columnSettings":"Definições de colunas",
   "tableSettings.columnSettings.close":"Fechar",
   "tableSettings.columnSettings.reset":"Redefinir",
+  "tags.addedToDocument":"The tag {0} has been added to the document",
+  "tags.removedFromDocument":"The tag {0} has been removed from the document",
   "userGroupLatest.emptyRecentUserOrGroup":"Nenhum usuário ou grupo recente.",
   "userGroupLatest.identifier":"Identificador",
   "userGroupLatest.name":"Nome",

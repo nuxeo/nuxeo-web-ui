@@ -145,6 +145,8 @@
   "tableSettings.columnSettings":"列の設定",
   "tableSettings.columnSettings.close":"閉じる",
   "tableSettings.columnSettings.reset":"リセット",
+  "tags.addedToDocument":"The tag {0} has been added to the document",
+  "tags.removedFromDocument":"The tag {0} has been removed from the document",
   "userGroupLatest.emptyRecentUserOrGroup":"最近のユーザまたはグループはいません。",
   "userGroupLatest.identifier":"識別子",
   "userGroupLatest.name":"名前",
