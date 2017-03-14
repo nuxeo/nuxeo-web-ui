@@ -115,8 +115,6 @@ Contributors:
       }
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-
     <nuxeo-operation id="removeFromFavOp"
       op="Document.RemoveFromFavorites"></nuxeo-operation>
 
@@ -207,11 +205,9 @@ Contributors:
       },
 
       _thumbnail: function(doc) {
-        if (doc.contextParameters.thumbnail.url) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
           return doc.contextParameters.thumbnail.url;
-        } else {
-          var baseUrl = this.$.nxcon.url;
-          return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
         }
       },
 

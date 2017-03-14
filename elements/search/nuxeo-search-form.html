@@ -213,7 +213,6 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-page-provider id="provider" auto$="[[_isAuto(auto, visible)]]"
        provider="[[provider]]"
        page-size="[[pageSize]]"
@@ -542,11 +541,9 @@ Contributors:
         },
 
         _thumbnail: function(doc) {
-          if (doc.contextParameters.thumbnail.url) {
+          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+            doc.contextParameters.thumbnail.url) {
             return doc.contextParameters.thumbnail.url;
-          } else {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
           }
         },
 

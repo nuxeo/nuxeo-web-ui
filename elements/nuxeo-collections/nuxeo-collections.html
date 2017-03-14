@@ -176,11 +176,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-
-    <nuxeo-operation op="Collection.RemoveFromCollection"
-                     id="removeFromCollectionOp">
-    </nuxeo-operation>
+    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
@@ -490,17 +486,10 @@ Contributors:
           }
         },
 
-        _icon: function(doc) {
-          var url = this.$.nxcon.url;
-          return url + doc.properties['common:icon'];
-        },
-
         _thumbnail: function(doc) {
-          if (doc.contextParameters.thumbnail.url) {
+          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+            doc.contextParameters.thumbnail.url) {
             return doc.contextParameters.thumbnail.url;
-          } else {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
           }
         },
 

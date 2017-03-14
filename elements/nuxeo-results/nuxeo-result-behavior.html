@@ -69,13 +69,9 @@ Contributors:
       },
 
       _thumbnail: function(doc) {
-        if (doc && doc.uid) {
-          if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
-          } else {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
-          }
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
         }
       },
 
