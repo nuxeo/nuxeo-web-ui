@@ -31,6 +31,7 @@ limitations under the License.
                     value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
+                                name="nature"
                                 directory-name="nature"
                                 value="{{document.properties.dc:nature}}"
                                 placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
@@ -39,6 +40,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
                                 directory-name="l10nsubjects"
+                                name="subjects"
                                 value="{{document.properties.dc:subjects}}"
                                 multiple="true"
                                 dbl10n="true"
