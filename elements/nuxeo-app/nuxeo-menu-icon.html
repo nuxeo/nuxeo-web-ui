@@ -37,13 +37,16 @@ Contributors:
         --paper-badge-width: 16px;
         --paper-badge-height: 16px;
       }
+      paper-badge[info] {
+        --paper-badge-background: #00BB00;
+      }
    </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" icon="[[icon]]" name="[[name]]"></paper-icon-button>
       <paper-tooltip id="tooltip" for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</paper-tooltip>
       <template is="dom-if" if="[[badge]]">
-        <paper-badge label="[[badge]]" for="button"></paper-badge>
+        <paper-badge label="[[badge]]" for="button" info$="[[info]]"></paper-badge>
       </template>
     </a>
 
@@ -61,6 +64,14 @@ Contributors:
            */
           label: {
             type: String
+          },
+
+          /*
+          * Sets the badge style to info
+          */
+          info : {
+            type: Boolean,
+            value: false
           },
 
           /**

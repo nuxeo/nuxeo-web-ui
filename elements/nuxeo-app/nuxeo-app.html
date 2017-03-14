@@ -242,7 +242,7 @@ Contributors:
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard" badge="[[clipboardCount]]" info></nuxeo-menu-icon>
           <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
@@ -414,6 +414,8 @@ Contributors:
 
           taskCount: Number,
 
+          clipboardCount: Number,
+
           drawerWidth: {
             type: String,
             value: '56px'
@@ -462,6 +464,7 @@ Contributors:
           'workflowTaskProcessed': '_refreshAndFetchTasks',
           'taskChanged': '_onTaskChanged',
           'tasksListSelectionChanged': '_onTasksListSelectionChanged',
+          'clipboard-changed': '_onClipboardChanged',
           'add-to-clipboard': '_onAddToClipboard',
           'added-to-collection': '_documentAddedToCollection',
           'removed-from-collection': '_documentRemovedFromCollection',
@@ -645,7 +648,9 @@ Contributors:
         _onTasksListSelectionChanged: function() {
           this.show('tasks');
         },
-
+        _onClipboardChanged: function(e){
+          this.clipboardCount = this.clipboard.documents.length;
+        } ,
         _onAddToClipboard: function(e) {
           if (e.detail.documents) {
             e.detail.documents.forEach(function(doc) {

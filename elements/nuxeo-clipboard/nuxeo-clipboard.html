@@ -129,8 +129,15 @@ Contributors:
           type: Object
         }
       },
+      observers: [
+        '_observeDocuments(documents.splices)'
+      ],
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+      _observeDocuments: function(){
+        this.fire('clipboard-changed');
+      },
 
       add: function(doc) {
         return this.$.storage.add(doc);
