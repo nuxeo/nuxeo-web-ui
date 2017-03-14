@@ -98,8 +98,6 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-
     <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
 
     <div class="header">[[i18n('app.recentlyViewed')]]</div>
@@ -151,8 +149,10 @@ Contributors:
       },
 
       _thumbnail: function(doc) {
-        var baseUrl = this.$.nxcon.url;
-        return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        }
       },
 
       _computedClass: function(isSelected) {

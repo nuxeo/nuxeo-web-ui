@@ -144,10 +144,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"> </nuxeo-connection>
-
     <div class="bubbleBox">
-
       <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
         on-tap="handleClick">
       </iron-image>
@@ -191,21 +188,10 @@ Contributors:
 
         behaviors: [Nuxeo.RoutingBehavior],
 
-        _icon: function() {
-          var url = this.$.nxcon.url;
-          return url + this.doc.properties['common:icon'];
-        },
-
-        _creator: function() {
-          return this.doc.properties['dc:creator'];
-        },
-
-        _thumbnail: function() {
-          if (this.doc.contextParameters.thumbnail.url) {
-            return this.doc.contextParameters.thumbnail.url;
-          } else {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + '/nxthumb/default/' + this.doc.uid + '/blobholder:0/';
+        _thumbnail: function(doc) {
+          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+            doc.contextParameters.thumbnail.url) {
+            return doc.contextParameters.thumbnail.url;
           }
         },
 

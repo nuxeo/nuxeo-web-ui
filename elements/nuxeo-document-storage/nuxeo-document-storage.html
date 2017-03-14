@@ -46,7 +46,7 @@ Contributors:
         documents: {
           type: Array,
           notify: true
-        },
+        }
       },
 
       initialize: function() {
@@ -57,13 +57,17 @@ Contributors:
         if (this.contains(doc)) {
           return;
         }
-        return this.unshift('documents', {
+        var document = {
           uid: doc.uid,
           title: doc.title,
           type: doc.type,
           path: doc.path,
           lastViewed: new Date()
-        });
+        };
+        if (doc.contextParameters && doc.contextParameters.thumbnail && doc.contextParameters.thumbnail.url) {
+          document.contextParameters = {thumbnail: {url: doc.contextParameters.thumbnail.url}}
+        }
+        return this.unshift('documents', document);
       },
 
       contains: function(doc) {
