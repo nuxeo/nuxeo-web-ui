@@ -43,7 +43,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects
+                                directory-name="l10nsubjects"
                                 name="subjects"
                                 value="{{document.properties.dc:subjects}}"
                                 multiple="true"
@@ -54,13 +54,14 @@ limitations under the License.
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
                                 directory-name="l10ncoverage"
+                                name="coverage"
                                 value="{{document.properties.dc:coverage}}"
                                 dbl10n="true"
                                 placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
                                 min-chars="0">
     </nuxeo-directory-suggestion>
 
-    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]"
+    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]" name="expired"
                        value="{{document.properties.dc:expired}}">
     </nuxeo-date-picker>
   </template>

@@ -22,10 +22,10 @@ limitations under the License.
 <dom-module id="nuxeo-templateroot-edit-layout">
 
   <template>
-    <paper-input role="widget" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"
+    <paper-input role="widget" label="[[i18n('title')]]" name="title" value="{{document.properties.dc:title::change}}"
                  always-float-label required></paper-input>
 
-    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label
+    <paper-textarea role="widget" label="[[i18n('label.description')]]" name="description" always-float-label
                     value="{{document.properties.dc:description::change}}"></paper-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
@@ -48,13 +48,14 @@ limitations under the License.
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
                                 directory-name="l10ncoverage"
+                                name="coverage"
                                 value="{{document.properties.dc:coverage}}"
                                 dbl10n="true"
                                 placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
                                 min-chars="0">
     </nuxeo-directory-suggestion>
 
-    <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]"
+    <paper-input role="widget" label="[[i18n('label.dublincore.expire')]]" name="expired"
                  type="date" value="{{document.properties.dc:expired}}">
     </paper-input>
   </template>
