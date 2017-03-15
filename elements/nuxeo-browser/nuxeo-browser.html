@@ -58,39 +58,6 @@ Contributors:
         --paper-listbox-background-color: transparent;
       }
 
-      ::content #documentViewsItems paper-item {
-        user-select: none;
-        border: 1px solid var(--nuxeo-pill-color);
-        border-radius: 16px;
-        text-transform: uppercase;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        margin: 0 0 0 8px;
-        color: var(--nuxeo-pill-text-color);
-        --paper-item-min-height: 32px;
-        --paper-item-selected-weight: 300;
-        --paper-item-selected: {
-          background: var(--nuxeo-pill-color-hover);
-          color: var(--nuxeo-pill-text-hover);
-        };
-        --paper-item-focused: {
-          background: var(--nuxeo-pill-color-hover);
-          color: var(--nuxeo-pill-text-hover);
-        };
-        --paper-item-focused-before: {
-          background: none;
-        };
-      }
-
-      ::content #documentViewsItems paper-item.iron-selected,
-      ::content #documentViewsItems paper-item:hover,
-      ::content #documentViewsItems paper-item:focus {
-        background: var(--nuxeo-pill-color-hover);
-        border-color: var(--nuxeo-pill-color-hover);
-        color: var(--nuxeo-pill-text-hover);
-      }
-
     </style>
 
     <!-- Main content -->
@@ -100,9 +67,9 @@ Contributors:
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-            <paper-item name="view">[[i18n('browser.view')]]</paper-item>
-            <paper-item name="permissions">[[i18n('browser.permissions')]]</paper-item>
-            <paper-item name="history">[[i18n('browser.history')]]</paper-item>
+            <nuxeo-page-item name="view" label="browser.view"></nuxeo-page-item>
+            <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
+            <nuxeo-page-item name="history" label="browser.history"></nuxeo-page-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
           </paper-listbox>
         </paper-toolbar>
@@ -117,15 +84,10 @@ Contributors:
         <div id="nxContent">
           <paper-toast id="toast"></paper-toast>
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
-
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
-
             <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
-
             <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
-
             <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
-
           </iron-pages>
         </div>
 
@@ -135,83 +97,79 @@ Contributors:
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-browser',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          document: {
-            type: Object
-          },
-          selectedTab: {
-            type: String,
-            value: 'view',
-            notify: true
-          },
-          cvParams: {
-            type: Object,
-            notify: true
-          },
-          clipboard: {
-            type: Object
-          },
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(document)'
-          },
-
-          viewsContext: {
-            type: Object,
-            computed: '_viewsContext(document)'
-          }
+    Polymer({
+      is: 'nuxeo-browser',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: {
+          type: Object
+        },
+        selectedTab: {
+          type: String,
+          value: 'view',
+          notify: true
+        },
+        cvParams: {
+          type: Object,
+          notify: true
+        },
+        clipboard: {
+          type: Object
+        },
+        actionContext: {
+          type: Object,
+          computed: '_actionContext(document)'
         },
 
-        listeners: {
-          'permissions.aceupdated': '_documentUpdated',
-          'permissions.acedeleted': '_documentUpdated',
-          'added-to-collection': '_documentUpdated',
-          'removed-from-collection': '_documentUpdated'
-        },
-
-        _documentUpdated: function() {
-          this.fire('document-updated');
-        },
-
-        download: function() {
-          location.href = this.document.properties['file:content'].data;
-        },
-
-        get _enrichers() {
-          if (this.document) {
-            return this.document.contextParameters;
-          }
-        },
-
-        get _canReadChildren() {
-          return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
-        },
-
-        _actionContext: function() {
-          return {document: this.document, clipboard: this.clipboard};
-        },
-
-        _viewsContext: function() {
-          return {document: this.document};
-        },
-
-        _navigateToView: function() {
-          page('/browse' + this.document.path + '@view');
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
+        viewsContext: {
+          type: Object,
+          computed: '_viewsContext(document)'
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'permissions.aceupdated': '_documentUpdated',
+        'permissions.acedeleted': '_documentUpdated',
+        'added-to-collection': '_documentUpdated',
+        'removed-from-collection': '_documentUpdated'
+      },
+
+      _documentUpdated: function() {
+        this.fire('document-updated');
+      },
+
+      download: function() {
+        location.href = this.document.properties['file:content'].data;
+      },
+
+      get _enrichers() {
+        if (this.document) {
+          return this.document.contextParameters;
+        }
+      },
+
+      get _canReadChildren() {
+        return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
+      },
+
+      _actionContext: function() {
+        return {document: this.document, clipboard: this.clipboard};
+      },
+
+      _viewsContext: function() {
+        return {document: this.document};
+      },
+
+      _navigateToView: function() {
+        page('/browse' + this.document.path + '@view');
+      },
+
+      _toast: function(msg) {
+        this.$.toast.text = msg;
+        this.$.toast.open();
+      }
+
+    });
   </script>
 
 </dom-module>
