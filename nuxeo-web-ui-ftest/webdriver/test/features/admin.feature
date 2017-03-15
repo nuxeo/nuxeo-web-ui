@@ -20,4 +20,3 @@ Feature: Admin center
     Given user "John" exists in group "members"
     And I login as "John"
     Then I cannot see the administration button
-    And I cannot see the administration menu

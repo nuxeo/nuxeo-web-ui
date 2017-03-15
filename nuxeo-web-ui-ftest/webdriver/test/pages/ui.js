@@ -68,10 +68,6 @@ export default class UI extends BasePage {
     return this.pages.element('nuxeo-tasks');
   }
 
-  get tasksLink() {
-      return this.el.element(`a.tasks-dashboard`);
-  }
-
   get tasksDashboard() {
     return this.pages.element('#tasks-dashboard');
   }

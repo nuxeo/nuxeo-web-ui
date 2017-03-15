@@ -5,8 +5,6 @@ module.exports = function () {
 
   this.Then('I cannot see the administration button', () => this.ui.adminButton.isVisible().should.be.false);
 
-  this.Then('I cannot see the administration menu', () => this.ui.drawer.administration.isVisible().should.be.false);
-
   // XXX: this.ui.drawer.administration.click()
   this.When('I click "$text" in the administration menu', (text) => driver.click(`a=${text}`));
 

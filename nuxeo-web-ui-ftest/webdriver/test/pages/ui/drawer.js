@@ -41,6 +41,10 @@ export default class Drawer {
     return this._section('tasks');
   }
 
+  get tasksLink() {
+      return this.pages.element(`a.tasks-dashboard`);
+  }
+
   get favorites() {
     return new Favorites('nuxeo-favorites');
   }
