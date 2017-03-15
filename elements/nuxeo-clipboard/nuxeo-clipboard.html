@@ -72,9 +72,19 @@ Contributors:
         height: 1.5em;
       }
 
+      .container {
+        height: 100vh;
+        @apply(--layout-vertical);
+      }
+
+      .items {
+        @apply(--layout-flex-auto)
+      }
+
       .toolbar {
         @apply(--layout-horizontal);
-        @apply(--layout-end-justified);
+        @apply(--layout-center-justified);
+        @apply(--nx-actions);
       }
 
       .emptyResult {
@@ -95,25 +105,32 @@ Contributors:
       <span class="emptyResult">[[i18n('clipboard.empty')]]</span>
     </template>
 
-    <template is="dom-repeat" items="[[documents]]" as="document">
-      <div class="item">
-        <span class="flex">
-          <iron-icon icon="receipt" item-icon></iron-icon>
-          <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-        </span>
-        <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+    <div class="container">
+      <div class="items">
+        <template is="dom-repeat" items="[[documents]]" as="document">
+          <div class="item">
+            <span class="flex">
+              <iron-icon icon="receipt" item-icon></iron-icon>
+              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
+            </span>
+            <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+          </div>
+        </template>
       </div>
-    </template>
 
-    <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
-      <div class="toolbar">
-          <paper-icon-button id="paste" icon="content-copy" on-tap="execute" data-op="Document.Copy"></paper-icon-button>
-          <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
-          <paper-icon-button id="move" icon="content-cut" on-tap="execute" data-op="Document.Move"></paper-icon-button>
-          <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
-      </div>
-    </template>
-
+      <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
+        <div class="toolbar">
+          <div class="actions">
+            <paper-button id="paste" on-tap="execute" data-op="Document.Copy" noink class="primary clear">
+              <iron-icon icon="content-copy"></iron-icon>[[i18n('clipboard.copy')]]</paper-button>
+            <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
+            <paper-button id="move" on-tap="execute" data-op="Document.Move" noink class="primary clear">
+              <iron-icon icon="content-cut"></iron-icon>[[i18n('clipboard.move')]]</paper-button>
+            <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
+          </div>
+        </div>
+      </template>
+    </div>
     <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
   </template>
   <script>
