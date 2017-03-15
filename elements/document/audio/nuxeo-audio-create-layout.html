@@ -24,11 +24,13 @@ limitations under the License.
   <template>
     <paper-input role="widget"
                  label="[[i18n('title')]]"
+                 name="title"
                  value="{{document.properties.dc:title::change}}"
                  always-float-label required></paper-input>
 
     <paper-textarea role="widget"
                     label="[[i18n('label.description')]]"
+                    name="description"
                     value="{{document.properties.dc:description::change}}"
                     always-float-label></paper-textarea>
 
@@ -56,6 +58,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
                                 directory-name="l10ncoverage"
+                                name="coverage"
                                 value="{{document.properties.dc:coverage}}"
                                 dbl10n="true"
                                 placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
@@ -64,6 +67,7 @@ limitations under the License.
 
     <nuxeo-date-picker role="widget"
                        label="[[i18n('label.dublincore.expire')]]"
+                       name="expired"
                        value="{{document.properties.dc:expired}}">
     </nuxeo-date-picker>
   </template>
