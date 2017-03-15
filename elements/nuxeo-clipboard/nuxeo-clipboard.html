@@ -127,7 +127,11 @@ Contributors:
         },
         targetDocument: {
           type: Object
-        }
+        },
+        docCount: {
+            type: Number,
+            notify: true
+         }
       },
       observers: [
         '_observeDocuments(documents.splices)'
@@ -135,8 +139,8 @@ Contributors:
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-      _observeDocuments: function(){
-        this.fire('clipboard-changed');
+      _observeDocuments: function() {
+        this.docCount = this.documents.length;
       },
 
       add: function(doc) {

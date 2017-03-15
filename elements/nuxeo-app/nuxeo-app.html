@@ -278,7 +278,7 @@ Contributors:
                                  current-document="[[currentDocument]]"
                                  root-path="[[userWorkspace]]"></nuxeo-document-tree>
 
-            <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+            <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]" doc-count="{{clipboardCount}}"></nuxeo-clipboard>
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
@@ -464,7 +464,6 @@ Contributors:
           'workflowTaskProcessed': '_refreshAndFetchTasks',
           'taskChanged': '_onTaskChanged',
           'tasksListSelectionChanged': '_onTasksListSelectionChanged',
-          'clipboard-changed': '_onClipboardChanged',
           'add-to-clipboard': '_onAddToClipboard',
           'added-to-collection': '_documentAddedToCollection',
           'removed-from-collection': '_documentRemovedFromCollection',
@@ -648,9 +647,7 @@ Contributors:
         _onTasksListSelectionChanged: function() {
           this.show('tasks');
         },
-        _onClipboardChanged: function(e){
-          this.clipboardCount = this.clipboard.documents.length;
-        } ,
+
         _onAddToClipboard: function(e) {
           if (e.detail.documents) {
             e.detail.documents.forEach(function(doc) {
