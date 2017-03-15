@@ -20,9 +20,15 @@ module.exports = function () {
     this.ui.createDialog.documentCreate.waitForVisible();
     let title = '';
     table.rows().forEach((row) => {
-      this.ui.createDialog.documentCreate.layout(currentDocType).setFieldValue(row[0], row[1]);
-      if (row[0] === 'title') {
-        title = row[1];
+      if (row[0] === 'expired') {
+        this.ui.createDialog.documentCreate.layout(currentDocType).el.element(`input[name="${row[0]}"]`).click();
+        var keys = row[1].split("-");
+        driver.keys(keys);
+      } else {
+        this.ui.createDialog.documentCreate.layout(currentDocType).setFieldValue(row[0], row[1]);
+        if (row[0] === 'title') {
+          title = row[1];
+        }
       }
     });
     title.should.not.be.empty;

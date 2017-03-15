@@ -48,7 +48,15 @@ module.exports = function () {
     this.ui.browser.documentPage(docType).metadata.waitForVisible();
     table.rows().forEach((row) => {
       this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
-      this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
+      if (row[0] == 'subjects') {
+        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.include(row[1]);
+      } else if (row[0] == 'expired') {
+        var date0 = Date.parse(this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]));
+        var date1 = Date.parse(row[1]);
+        date0.should.equal(date1);
+      } else {
+        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
+      }
     });
   });
 
