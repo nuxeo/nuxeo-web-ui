@@ -26,64 +26,24 @@ Contributors:
 <dom-module id="nuxeo-analytics">
   <template>
     <style>
-      :host {
-        display: block;
-      }
-
       .header .title {
         @apply(--layout-flex);
       }
 
       .header paper-listbox {
         @apply(--layout-horizontal);
-      }
-
-      ::content #analyticsViews {
         --paper-listbox-background-color: transparent;
       }
-
-      ::content #analyticsViews paper-item {
-        user-select: none;
-        border: 1px solid var(--nuxeo-pill-color);
-        border-radius: 16px;
-        text-transform: uppercase;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        margin: 0 4px;
-        color: var(--nuxeo-pill-text-color);
-        --paper-item-min-height: 32px;
-        --paper-item-selected: {
-          background: var(--nuxeo-pill-color-hover);
-          color: var(--nuxeo-pill-text-hover);
-        };
-        --paper-item-focused: {
-          background: var(--nuxeo-pill-color-hover);
-          color: var(--nuxeo-pill-text-hover);
-        };
-        --paper-item-focused-before: {
-          background: none;
-        };
-      }
-
-      ::content #analyticsViews paper-item.iron-selected,
-      ::content #analyticsViews paper-item:hover,
-      ::content #analyticsViews paper-item:focus {
-        background: var(--nuxeo-pill-color-hover);
-        border-color: var(--nuxeo-pill-color-hover);
-        color: var(--nuxeo-pill-text-hover);
-      }
-
     </style>
 
     <nuxeo-page>
       <div class="header">
         <div class="title">[[i18n('analytics.heading')]]</div>
-        <paper-listbox id="analyticsViews" selected="{{selected}}" attr-for-selected="name">
-          <paper-item name="document-distribution">[[i18n('admin.analytics.document.distribution')]]</paper-item>
-          <paper-item name="repository">[[i18n('analytics.repository')]]</paper-item>
-          <paper-item name="search">[[i18n('analytics.search')]]</paper-item>
-          <paper-item name="workflow">[[i18n('analytics.workflow')]]</paper-item>
+        <paper-listbox selected="{{selected}}" attr-for-selected="name">
+          <nuxeo-page-item name="document-distribution" label="analytics.document.distribution"></nuxeo-page-item>
+          <nuxeo-page-item name="repository" label="analytics.repository"></nuxeo-page-item>
+          <nuxeo-page-item name="search" label="analytics.search"></nuxeo-page-item>
+          <nuxeo-page-item name="workflow" label="analytics.workflow"></nuxeo-page-item>
           <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
@@ -102,16 +62,13 @@ Contributors:
 
   </template>
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-analytics',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          visible: Boolean,
-          selected: String
-        }
-      });
-    })();
+    Polymer({
+      is: 'nuxeo-analytics',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        visible: Boolean,
+        selected: String
+      }
+    });
   </script>
 </dom-module>
