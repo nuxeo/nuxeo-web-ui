@@ -88,17 +88,6 @@ Contributors:
       }
 
       .tip {
-        border: 1px solid #e6e9ef;
-        border-radius: 3px;
-        box-shadow: none;
-        color: #9a9a9a;
-        display: block;
-        margin: 8px 0;
-        padding: 8px;
-        text-align: center;
-      }
-
-      .emptyResult {
         color: var(--nuxeo-text-light, #939caa);
         display: block;
         font-weight: 300;
@@ -113,7 +102,7 @@ Contributors:
     <div class="header">[[i18n('app.clipboard')]]</div>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="emptyResult">[[i18n('clipboard.empty')]]</span>
+      <span class="tip">[[i18n('clipboard.empty')]]</span>
     </template>
 
     <div class="container">
