@@ -58,6 +58,10 @@ Contributors:
         @apply(--nuxeo-block-hover);
       }
 
+      .item.selected {
+        @apply(--nuxeo-block-selected);
+      }
+
       .ellipsis {
         display: inline-block;
         width: 80%;
@@ -103,6 +107,7 @@ Contributors:
         border-radius: 20px;
         box-sizing: border-box;
         margin-right: 8px;
+        vertical-align: middle
       }
 
     </style>
@@ -116,15 +121,17 @@ Contributors:
 
     <div class="container">
       <div class="items">
-        <template is="dom-repeat" items="[[documents]]" as="document">
-          <div class="item">
-            <span class="flex">
-                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
-              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-            </span>
-            <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
-          </div>q
-        </template>
+        <iron-list items="[[documents]]" as="document"  selection-enabled>
+          <template>
+            <div class$="[[_computedClass(selected)]]">
+          <span class="flex">
+            <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+            <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
+          </span>
+              <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+            </div>
+          </template>
+        </iron-list>
       </div>
 
       <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
@@ -213,7 +220,16 @@ Contributors:
           doc.contextParameters.thumbnail.url) {
           return doc.contextParameters.thumbnail.url;
         }
-      }
+      },
+      _computedClass: function(isSelected) {
+          console.log(isSelected);
+        var classes = 'item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        console.log(classes);
+        return classes;
+      },
 
     });
   </script>
