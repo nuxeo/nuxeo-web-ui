@@ -96,6 +96,15 @@ Contributors:
         font-size: 1em;
       }
 
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 24px;
+        width: 24px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+      }
+
     </style>
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
@@ -110,11 +119,11 @@ Contributors:
         <template is="dom-repeat" items="[[documents]]" as="document">
           <div class="item">
             <span class="flex">
-              <iron-icon icon="receipt" item-icon></iron-icon>
+                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
               <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
             </span>
             <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
-          </div>
+          </div>q
         </template>
       </div>
 
@@ -198,7 +207,14 @@ Contributors:
             target: this.targetDocument.uid
           };
         }
+      },
+      _thumbnail: function(doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        }
       }
+
     });
   </script>
 </dom-module>
