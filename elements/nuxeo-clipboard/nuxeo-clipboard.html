@@ -51,7 +51,7 @@ Contributors:
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
         @apply(--nuxeo-sidebar-item-link);
-        padding: 1em;
+        padding: 0;
       }
 
       .item:hover {
@@ -64,10 +64,11 @@ Contributors:
 
       .ellipsis {
         display: inline-block;
-        width: 80%;
+        width: 78%;
         vertical-align: middle;
         text-overflow: ellipsis;
         overflow: hidden;
+        padding: 1em;
       }
 
       .remove {
@@ -77,7 +78,7 @@ Contributors:
       }
 
       .container {
-        height: 100vh;
+        height: 92vh;
         @apply(--layout-vertical);
       }
 
@@ -124,10 +125,12 @@ Contributors:
         <iron-list items="[[documents]]" as="document"  selection-enabled>
           <template>
             <div class$="[[_computedClass(selected)]]">
-              <span class="flex">
-                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
-                <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-              </span>
+                <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">
+                  <div class="horizontal layout center" >
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]" />
+                  <span>[[document.title]]</span>
+                  </div>
+                </a>
               <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
             </div>
           </template>
