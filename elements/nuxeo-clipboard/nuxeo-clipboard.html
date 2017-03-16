@@ -124,10 +124,10 @@ Contributors:
         <iron-list items="[[documents]]" as="document"  selection-enabled>
           <template>
             <div class$="[[_computedClass(selected)]]">
-          <span class="flex">
-            <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
-            <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-          </span>
+              <span class="flex">
+                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
+              </span>
               <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
             </div>
           </template>
@@ -222,12 +222,10 @@ Contributors:
         }
       },
       _computedClass: function(isSelected) {
-          console.log(isSelected);
         var classes = 'item';
         if (isSelected) {
           classes += ' selected';
         }
-        console.log(classes);
         return classes;
       },
 
