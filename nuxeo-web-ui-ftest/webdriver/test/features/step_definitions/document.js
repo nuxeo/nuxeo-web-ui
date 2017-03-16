@@ -77,16 +77,17 @@ module.exports = function () {
     page.editButton.click();
     page.edit.waitForVisible();
     table.rows().forEach((row) => {
-      page.edit.layout().waitForVisible();
-      page.edit.layout().setFieldValue(row[0], row[1]);
+      if (row[0] === 'expired') {
+        page.edit.layout().el.element(`input[name="${row[0]}"]`).click();
+        var keys = row[1].split("-");
+        driver.keys(keys);
+      } else {
+        page.edit.layout().waitForVisible();
+        page.edit.layout().setFieldValue(row[0], row[1]);
+      }
     });
     page.saveButton.waitForVisible();
     page.saveButton.click();
-    page.metadata.waitForVisible();
-    table.rows().forEach((row) => {
-      page.metadata.layout().waitForVisible();
-      page.metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
-    });
   });
 
   this.Given(/^I have a (.+) Note$/, (format) => {
