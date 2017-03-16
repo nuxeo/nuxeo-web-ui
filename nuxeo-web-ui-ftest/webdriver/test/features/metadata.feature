@@ -11,9 +11,23 @@ Feature: Edit metadata
     Given I have a <doctype> document
     When I browse to the document
     Then I can edit the following properties in the <doctype> metadata:
-      | name         | value           |
-      | title        | my title        |
-      | description  | my description  |
+      | name         | value                |
+      | title        | my title             |
+      | description  | my description       |
+      | nature       | Internship report    |
+      | subjects     | Medicine,Video games |
+      | coverage     | Canada               |
+      | expired      | 04-12-2082           |
+
+    Then I see the <doctype> page
+    And I can see <doctype> metadata with the following properties:
+      | name         | value                |
+      | title        | my title             |
+      | description  | my description       |
+      | nature       | Internship report    |
+      | subjects     | Medicine,Video games |
+      | coverage     | Canada               |
+      | expired      | April 12, 2082       |
 
   Examples:
     | doctype  |
