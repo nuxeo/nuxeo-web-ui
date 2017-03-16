@@ -242,7 +242,7 @@ Contributors:
           <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard" badge="[[clipboardCount]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
@@ -278,7 +278,7 @@ Contributors:
                                  current-document="[[currentDocument]]"
                                  root-path="[[userWorkspace]]"></nuxeo-document-tree>
 
-            <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+            <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]" doc-count="{{clipboardCount}}"></nuxeo-clipboard>
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
@@ -413,6 +413,8 @@ Contributors:
           tasks: Array,
 
           taskCount: Number,
+
+          clipboardCount: Number,
 
           drawerWidth: {
             type: String,
