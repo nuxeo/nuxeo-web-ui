@@ -144,10 +144,21 @@ Contributors:
         },
         targetDocument: {
           type: Object
-        }
+        },
+        docCount: {
+            type: Number,
+            notify: true
+         }
       },
+      observers: [
+        '_observeDocuments(documents.splices)'
+      ],
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+
+      _observeDocuments: function() {
+        this.docCount = this.documents.length;
+      },
 
       add: function(doc) {
         return this.$.storage.add(doc);
