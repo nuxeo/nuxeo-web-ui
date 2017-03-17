@@ -109,6 +109,7 @@
   "clipboard.copy": "Copy",
   "clipboard.empty": "Your clipboard is empty.",
   "clipboard.move": "Move",
+  "clipboard.tip": "Browse to a container to paste or move clipboard content.",
   "clipboardDocumentsButton.addToClipboard": "Add to Clipboard",
   "clipboardToggleButton.tooltip.add": "Add to Clipboard",
   "clipboardToggleButton.tooltip.remove": "Remove from clipboard",

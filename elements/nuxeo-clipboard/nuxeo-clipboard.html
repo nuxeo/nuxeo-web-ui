@@ -87,7 +87,7 @@ Contributors:
         @apply(--nx-actions);
       }
 
-      .emptyResult {
+      .tip {
         color: var(--nuxeo-text-light, #939caa);
         display: block;
         font-weight: 300;
@@ -102,7 +102,7 @@ Contributors:
     <div class="header">[[i18n('app.clipboard')]]</div>
 
     <template is="dom-if" if="[[!documents.length]]">
-      <span class="emptyResult">[[i18n('clipboard.empty')]]</span>
+      <span class="tip">[[i18n('clipboard.empty')]]</span>
     </template>
 
     <div class="container">
@@ -118,18 +118,19 @@ Contributors:
         </template>
       </div>
 
-      <template is="dom-if" if="[[canPaste(documents, targetDocument)]]">
+        <div class="tip">
+          [[i18n('clipboard.tip')]]
+        </div>
         <div class="toolbar">
           <div class="actions">
-            <paper-button id="paste" on-tap="execute" data-op="Document.Copy" noink class="primary clear">
+            <paper-button id="paste" on-tap="execute" data-op="Document.Copy" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
               <iron-icon icon="content-copy"></iron-icon>[[i18n('clipboard.copy')]]</paper-button>
             <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
-            <paper-button id="move" on-tap="execute" data-op="Document.Move" noink class="primary clear">
+            <paper-button id="move" on-tap="execute" data-op="Document.Move" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
               <iron-icon icon="content-cut"></iron-icon>[[i18n('clipboard.move')]]</paper-button>
             <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
           </div>
         </div>
-      </template>
     </div>
     <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
   </template>
