@@ -115,6 +115,7 @@ Note: Elements that depend on a connectionId use `nx` as default.
 
         nxClients[id] = this.client = this.client || new Nuxeo(options);
         return this.client._promise = this.client.login()
+          .then(this.handleConnected.bind(this))
           .catch(function(error) {
             console.log("Nuxeo connection refused: " + error);
             throw error;
@@ -145,10 +146,11 @@ Note: Elements that depend on a connectionId use `nx` as default.
         return this.client.user;
       },
 
-      handleConnected: function() {
+      handleConnected: function(res) {
         if (this.client.connected) {
-          this.fire('connected');
+          this.fire('nuxeo-connected', {user: res});
         }
+        return res;
       },
 
       request: function() {
