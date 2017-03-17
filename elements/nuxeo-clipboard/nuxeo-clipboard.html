@@ -51,14 +51,14 @@ Contributors:
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
         @apply(--nuxeo-sidebar-item-link);
-        padding: 0em;
+        padding: 0;
       }
 
       .item:hover {
         @apply(--nuxeo-block-hover);
       }
 
-      .item.selected {
+      .item.iron-selected {
         @apply(--nuxeo-block-selected);
       }
 
@@ -122,9 +122,9 @@ Contributors:
 
     <div class="container">
       <div class="items">
-        <iron-list items="[[documents]]" as="document" selection-enabled>
-          <template>
-            <div class$="[[_computedClass(selected)]]">
+        <iron-selector>
+          <template id="list" is="dom-repeat" items="[[documents]]" as="document">
+            <div class="item">
               <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">
                 <div class="horizontal layout center">
                   <img class="queue-thumbnail" src="[[_thumbnail(document)]]"/>
@@ -134,7 +134,7 @@ Contributors:
               <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
             </div>
           </template>
-        </iron-list>
+        </iron-selector>
       </div>
 
       <div class="tip">
@@ -184,50 +184,50 @@ Contributors:
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-      add: function (doc) {
+      add: function(doc) {
         return this.$.storage.add(doc);
       },
 
-      contains: function (doc) {
+      contains: function(doc) {
         return this.$.storage.contains(doc);
       },
 
-      remove: function (doc) {
+      remove: function(doc) {
         return this.$.storage.remove(doc);
       },
 
-      canPaste: function (documents, doc) {
+      canPaste: function(documents, doc) {
         return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
       },
 
-      execute: function (evt) {
+      execute: function(evt) {
         this.$.op.op = evt.currentTarget.dataset.op;
-        this.$.op.execute().then(function () {
+        this.$.op.execute().then(function() {
           this.documents = [];
           this.fire('document-updated');
         }.bind(this));
       },
 
-      _remove: function (evt) {
+      _remove: function(evt) {
         this.remove(evt.model.document);
       },
 
-      _indexOf: function (doc) {
-        return this.documents.findIndex(function (e) {
+      _indexOf: function(doc) {
+        return this.documents.findIndex(function(e) {
           return e.uid === doc.uid;
         });
       },
 
-      _uids: function () {
+      _uids: function() {
         if (this.documents && this.documents !== null) {
-          return this.documents.map(function (doc) {
+          return this.documents.map(function(doc) {
             return doc.uid;
           }).join(',');
         }
         return '';
       },
 
-      _opParams: function () {
+      _opParams: function() {
         if (this.targetDocument) {
           return {
             target: this.targetDocument.uid
@@ -235,7 +235,7 @@ Contributors:
         }
       },
 
-      _observeDocuments: function () {
+      _observeDocuments: function() {
         if (this.documents) {
           this.docCount = this.documents.length;
         }
@@ -246,12 +246,7 @@ Contributors:
           doc.contextParameters.thumbnail.url) {
           return doc.contextParameters.thumbnail.url;
         }
-      },
-
-      _computedClass: function (isSelected) {
-        return isSelected ? 'item selected' : 'item';
       }
-
     });
   </script>
 </dom-module>
