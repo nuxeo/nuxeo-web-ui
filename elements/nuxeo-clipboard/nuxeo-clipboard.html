@@ -225,11 +225,7 @@ Contributors:
         }
       },
       _computedClass: function(isSelected) {
-        var classes = 'item';
-        if (isSelected) {
-          classes += ' selected';
-        }
-        return classes;
+        return isSelected ? 'item selected' : 'item';
       },
 
     });
