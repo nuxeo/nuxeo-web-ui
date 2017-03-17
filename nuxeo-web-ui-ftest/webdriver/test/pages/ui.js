@@ -14,6 +14,33 @@ export default class UI extends BasePage {
     this.drawer.logo.click();
   }
 
+  reload() {
+    driver.refresh();
+  }
+
+  get vocabularyAdmin() {
+    if (!browser.getUrl().endsWith('vocabulary-management')) {
+      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
+    }
+    return new Vocabulary('nuxeo-vocabulary-management');
+  }
+
+  get activityFeed() {
+    return this.el.element('nuxeo-document-activity');
+  }
+
+  getActivity(activity) {
+    return this.el.element(`///nuxeo-document-activity//*[text()="${activity}"]`);
+  }
+
+  get historyTable() {
+    return this.el.element('nuxeo-document-history');
+  }
+
+  getHistory() {
+    return this.el.elements(`///nuxeo-document-history//*[text()="created a version"]`);
+  }
+
   get createDialog() {
     this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
     return this._createDialog;
