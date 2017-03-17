@@ -18,6 +18,8 @@ Feature: Versioning
     And Version options 0.1 and 1.0 are presented
     When I create a <versionType> version
     Then The document version is <createdVersion>
+    When I reload the page
+    Then I can see "created a version" in the Activity feed
 
     Examples:
       |versionType  | createdVersion  |
@@ -41,6 +43,8 @@ Feature: Versioning
     And The document version is 1.0
     Then I can edit the Note metadata
     And The document version is 1.0+
+    When I reload the page
+    Then I can see "modified the document" in the Activity feed
 
   Scenario: Restore and list versions
     Given I have a File document
