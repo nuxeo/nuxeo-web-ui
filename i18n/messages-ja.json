@@ -312,6 +312,7 @@
 	"clipboard.copy": "コピー",
 	"clipboard.empty": "お使いのクリップボードは空です。",
 	"clipboard.move": "移動",
+	"clipboard.tip": "Browse to a container to paste or move clipboard content.",
 	"clipboardDocumentsButton.addToClipboard": "クリップボードに追加",
 	"clipboardToggleButton.tooltip.add": "Add to Clipboard",
 	"clipboardToggleButton.tooltip.remove": "Remove from clipboard",

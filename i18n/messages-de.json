@@ -312,6 +312,7 @@
 	"clipboard.copy": "Kopieren",
 	"clipboard.empty": "Ihre Zwischenablage ist leer.",
 	"clipboard.move": "Verschieben",
+	"clipboard.tip": "Browse to a container to paste or move clipboard content.",
 	"clipboardDocumentsButton.addToClipboard": "Zur Zwischenablage hinzufügen",
 	"clipboardToggleButton.tooltip.add": "Add to Clipboard",
 	"clipboardToggleButton.tooltip.remove": "Remove from clipboard",
