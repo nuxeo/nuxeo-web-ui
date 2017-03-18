@@ -109,6 +109,7 @@
   "clipboard.copy":"Copier",
   "clipboard.empty":"Le presse-papier est vide.",
   "clipboard.move":"Déplacer",
+  "clipboard.tip":"Browse to a container to paste or move clipboard content.",
   "clipboardDocumentsButton.addToClipboard":"Ajouter au presse-papier",
   "clipboardToggleButton.tooltip.add":"Add to Clipboard",
   "clipboardToggleButton.tooltip.remove":"Remove from clipboard",
