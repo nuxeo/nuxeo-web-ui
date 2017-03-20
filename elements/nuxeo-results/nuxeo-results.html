@@ -22,7 +22,20 @@ Contributors:
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
-`nuxeo-results`
+An element to display results from a page provider.
+
+It supports multiple display modes and handles toggling between them.
+Each display mode is associated to a display element which has to be declared as a children with `class="results"` and
+must also have a `name` and `icon` to be used as toggle button, ex:
+
+  <nuxeo-datatable class="results" name="table" icon="icon="icons:list">
+
+The current page provider will be injected in each view as `nxProvider` so a property with this name should be available in each results element.
+
+`<nuxeo-results>` handles also storing of settings for each view in local storage in which case result elements should expose a `settings` property.
+
+It will also handle refresh and selection actions so it expects elements to include `Polymer.IronResizableBehavior` and expose a small API (`clearSelection()`, `selectItems()`) part of `Nuxeo.PageProviderDisplayBehavior`.
+
 @group Nuxeo UI
 @element nuxeo-results
 -->
@@ -75,15 +88,17 @@ Contributors:
 
     <div class="main">
 
-      <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar"
+      <nuxeo-selection-toolbar id="toolbar" selected-items="[[selectedItems]]" class="toolbar"
         on-refresh="_refreshAndFetch"
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
+
         <content select=".selectionActions"></content>
+        <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
-        <content select=".actions"></content>
 
         <template is="dom-repeat" items="[[_displayModes]]">
           <paper-icon-button class="displayMode"
@@ -93,7 +108,13 @@ Contributors:
                              on-tap="_toggleDisplayMode"></paper-icon-button>
         </template>
 
+        <content select=".actions"></content>
+
+        <!-- 0.9 compatibility -->
         <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
+        <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
       </div>
 
       <iron-pages id="views" attr-for-selected="name"
@@ -164,7 +185,7 @@ Contributors:
 
         observers: [
           '_updateStorage(name)',
-          '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, columns)'
+          '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
         ],
 
         listeners: {
@@ -178,7 +199,11 @@ Contributors:
         },
 
         get items() {
-          return this.view ? this.view.items : [];
+          if (this.view && this.view.items) {
+            return this.view.items;
+          }
+          // XXX: this.view.items is not working
+          return (this.view && this.view.$.list) ? this.view.$.list.items : [];
         },
 
         _updateViews: function() {
@@ -220,23 +245,6 @@ Contributors:
           this.nxProvider.page = 1;
         },
 
-        _navigate: function(e) {
-          var detail;
-          if (e.detail.item) {
-            detail = {
-              doc: e.detail.item
-            };
-            page('/browse' + detail.doc.path);
-          } else {
-            detail = {
-              doc: e.model.item
-            };
-          }
-          if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
-            this.fire('navigate', detail);
-          }
-        },
-
         _updateStorage: function() {
           if (this.$.nxcon.user && this.name) {
             this._localStorageName =  this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
@@ -248,6 +256,7 @@ Contributors:
             baseUrl: this.$.nxcon.url,
             displayMode: this.displayMode,
             nxProvider: this.nxProvider,
+            selectedItems: this.selectedItems,
             columns: this.view ? this.view.columns : []
           };
         },
@@ -276,11 +285,8 @@ Contributors:
         },
 
         _selectedItemsChanged: function() {
-          this.selectedItems = this.view.selectedItems;
-          this.debounce('_observeSelectedItems', function() {
-            this.$.toolbar.selectedItems = [];
-            this.$.toolbar.set('selectedItems', this.view.selectedItems);
-          }.bind(this), 50);
+          this.selectedItems = [];
+          this.set('selectedItems', this.view.selectedItems);
         },
 
         _refreshDisplay: function(e) {
@@ -291,7 +297,7 @@ Contributors:
             if (e.detail.focusIndex || e.detail.focusIndex === 0) {
               this.selectedItems = this.view.selectedItems;
               if (e.detail.focusIndex > -1) {
-                this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
+                this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
               }
             }
           }
