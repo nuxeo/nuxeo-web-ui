@@ -57,6 +57,10 @@ Used by `nuxeo-user-group-management`
         @apply(--nx-button-primary-hover);
       }
 
+      h3 {
+        @apply(--layout-flex);
+      }
+
       .table-header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -131,13 +135,14 @@ Used by `nuxeo-user-group-management`
       }
     </style>
 
-    <nuxeo-operation id="permissions"
-                     op="Document.PageProvider"
-                     enrichers="acls">
-    </nuxeo-operation>
+    <nuxeo-operation id="permissions" op="Document.PageProvider" enrichers="acls"></nuxeo-operation>
     <nuxeo-operation id="rmPermission" op="Document.RemovePermission"></nuxeo-operation>
 
-    <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
+    <div class="layout horizontal center">
+      <h3>[[label]]</h3>
+      <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
+    </div>
+
     <div class="table">
       <div class="table-header">
         <div class="flex-3">[[i18n('userGroupPermissions.on')]]</div>
@@ -204,146 +209,143 @@ Used by `nuxeo-user-group-management`
       </div>
     </paper-dialog>
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-user-group-permissions-table',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        label: String,
 
-      Polymer({
-        is: 'nuxeo-user-group-permissions-table',
+        entity: String,
 
-        behaviors: [Nuxeo.I18nBehavior],
+        documents: Array,
 
-        properties: {
-          entity: String,
-
-          documents: Array,
-
-          /**
-           * If true, also displays inherited permissions. Otherwise, only displays local permissions.
-           */
-          displayInherited: {
-            type: Boolean,
-            value: false
-          },
-
-          empty: Boolean,
-
-          _deletedAce: Object,
-
-          _currentPage: {
-            type: Number,
-            value: 1
-          },
-
-          pageSize: {
-            type: Number,
-            value: 25
-          },
-
-          _numberOfPages: Number,
-
-          readonly: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          }
+        /**
+         * If true, also displays inherited permissions. Otherwise, only displays local permissions.
+         */
+        displayInherited: {
+          type: Boolean,
+          value: false
         },
 
-        observers: [
-          '_fetchPermissions(entity, _currentPage)'
-        ],
+        empty: Boolean,
 
-        _fetchPermissions: function() {
-          this.$.permissions.params = {
-            query: 'SELECT * FROM Document WHERE ecm:mixinType != "HiddenInNavigation"' +
-                   'AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 ' +
-                   'AND ecm:currentLifeCycleState != "deleted" ' +
-                   'AND ecm:acl/*1/principal = "' + this.entity + '"',
-            page: this._currentPage - 1,
-            pageSize: this.pageSize
-          };
-          // header for compat with 6.0
-          this.$.permissions.headers = {
-            'X-NXContext-Category': 'acls'
-          };
-          this.$.permissions.execute().then(function(response) {
-            this._numberOfPages = response.numberOfPages;
-            this._computePermissions(response.entries);
-          }.bind(this));
+        _deletedAce: Object,
+
+        _currentPage: {
+          type: Number,
+          value: 1
         },
 
-        _computePermissions: function(entries) {
-          entries.map(function(entry) {
-            entry.aces = [];
-            entry.contextParameters.acls.map(function(acl) {
-              // in 6.0 the ace object is called 'ace' while in > 7.10 its called 'aces'
-              var entryAces = acl.aces || acl.ace;
-              return entryAces.map(function(ace) {
-                if (!this.displayInherited && this._isInherited(acl)) {
-                  return;
-                }
-                if (this._aceBelongsToEntity(ace)) {
-                  ace.docId = entry.uid;
-                  ace.docTitle = entry.title;
-                  ace.docPath = entry.path;
-                  ace.timeFrame = this._formatTimeFrame(ace);
-                  entry.aces.push(ace);
-                }
-              }.bind(this));
+        pageSize: {
+          type: Number,
+          value: 25
+        },
+
+        _numberOfPages: Number,
+
+        readonly: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
+      },
+
+      observers: [
+        '_fetchPermissions(entity, _currentPage)'
+      ],
+
+      _fetchPermissions: function() {
+        this.$.permissions.params = {
+          query: 'SELECT * FROM Document WHERE ecm:mixinType != "HiddenInNavigation"' +
+                 'AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 ' +
+                 'AND ecm:currentLifeCycleState != "deleted" ' +
+                 'AND ecm:acl/*1/principal = "' + this.entity + '"',
+          page: this._currentPage - 1,
+          pageSize: this.pageSize
+        };
+        // header for compat with 6.0
+        this.$.permissions.headers = {
+          'X-NXContext-Category': 'acls'
+        };
+        this.$.permissions.execute().then(function(response) {
+          this._numberOfPages = response.numberOfPages;
+          this._computePermissions(response.entries);
+        }.bind(this));
+      },
+
+      _computePermissions: function(entries) {
+        entries.map(function(entry) {
+          entry.aces = [];
+          entry.contextParameters.acls.map(function(acl) {
+            // in 6.0 the ace object is called 'ace' while in > 7.10 its called 'aces'
+            var entryAces = acl.aces || acl.ace;
+            return entryAces.map(function(ace) {
+              if (!this.displayInherited && this._isInherited(acl)) {
+                return;
+              }
+              if (this._aceBelongsToEntity(ace)) {
+                ace.docId = entry.uid;
+                ace.docTitle = entry.title;
+                ace.docPath = entry.path;
+                ace.timeFrame = this._formatTimeFrame(ace);
+                entry.aces.push(ace);
+              }
             }.bind(this));
           }.bind(this));
-          this.documents = entries;
-          this.empty = this.documents.length === 0;
-        },
+        }.bind(this));
+        this.documents = entries;
+        this.empty = this.documents.length === 0;
+      },
 
-        _aceBelongsToEntity: function(ace) {
-          return ace.username === this.entity;
-        },
+      _aceBelongsToEntity: function(ace) {
+        return ace.username === this.entity;
+      },
 
-        _formatTimeFrame: function(ace) {
-          var now = moment();
-          var begin = ace.begin || null;
-          var end = ace.end || null;
-          var format = 'D MMM YYYY';
-          var sinceStr = this.i18n('userGroupPermissions.since') + ' ';
-          var fromStr = this.i18n('userGroupPermissions.from') + ' ';
-          var untilStr = this.i18n('userGroupPermissions.until') + ' ';
-          var untilMiddleStr = ' ' + this.i18n('userGroupPermissions.untilMiddle') + ' ';
-          if (begin !== null && end === null) {
-            return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
-          } else if (begin === null && end !== null) {
-            return untilStr + moment(end).format(format);
-          } else if (begin !== null && end !== null) {
-            return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
-          } else {
-            return this.i18n('userGroupPermissions.permanent');
-          }
-        },
-
-        _deleteAce: function() {
-          var ace = this._deletedAce;
-          this.$.rmPermission.input = ace.docId;
-          this.$.rmPermission.params = {
-            id: ace.id
-          };
-          this.$.rmPermission.execute().then(function() {
-            this._fetchPermissions();
-          }.bind(this));
-        },
-
-        _isInherited: function(acl) {
-          return acl.name === "inherited";
-        },
-
-        _toggleDialog: function(e) {
-          this._deletedAce = e.model.ace;
-          this.$.dialog.toggle();
-        },
-
-        _canDelete: function(ace) {
-          return ace.id ? true : false;
+      _formatTimeFrame: function(ace) {
+        var now = moment();
+        var begin = ace.begin || null;
+        var end = ace.end || null;
+        var format = 'D MMM YYYY';
+        var sinceStr = this.i18n('userGroupPermissions.since') + ' ';
+        var fromStr = this.i18n('userGroupPermissions.from') + ' ';
+        var untilStr = this.i18n('userGroupPermissions.until') + ' ';
+        var untilMiddleStr = ' ' + this.i18n('userGroupPermissions.untilMiddle') + ' ';
+        if (begin !== null && end === null) {
+          return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
+        } else if (begin === null && end !== null) {
+          return untilStr + moment(end).format(format);
+        } else if (begin !== null && end !== null) {
+          return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
+        } else {
+          return this.i18n('userGroupPermissions.permanent');
         }
-      });
-    })();
+      },
+
+      _deleteAce: function() {
+        var ace = this._deletedAce;
+        this.$.rmPermission.input = ace.docId;
+        this.$.rmPermission.params = {
+          id: ace.id
+        };
+        this.$.rmPermission.execute().then(function() {
+          this._fetchPermissions();
+        }.bind(this));
+      },
+
+      _isInherited: function(acl) {
+        return acl.name === "inherited";
+      },
+
+      _toggleDialog: function(e) {
+        this._deletedAce = e.model.ace;
+        this.$.dialog.toggle();
+      },
+
+      _canDelete: function(ace) {
+        return ace.id ? true : false;
+      }
+    });
   </script>
 </dom-module>

@@ -72,6 +72,7 @@
   "downloadButton.tooltip": "Download",
   "editPassword.password": "Password",
   "editPassword.verify": "Password (verify)",
+  "editPassword.noMatch": "Password does not match",
   "editUser.company": "Company",
   "editUser.email": "Email",
   "editUser.firstName": "First Name",

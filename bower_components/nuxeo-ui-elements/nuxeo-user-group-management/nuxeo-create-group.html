@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-input/paper-input.html">
 <link rel="import" href="../../paper-button/paper-button.html">
 <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
@@ -29,67 +30,21 @@ Used by `nuxeo-user-group-management`
 -->
 <dom-module id="nuxeo-create-group">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
-        @apply(--nuxeo-create-group-layout);
-      }
-
-      nuxeo-user-suggestion {
-        @apply(--layout-flex);
       }
 
       .backButton {
-        color: #00adff;
+        var(--nuxeo-button-primary, #00adff);
       }
 
       .header > iron-icon {
         padding: 8px;
       }
 
-      .footer {
-        margin: 2em 0 4em;
-      }
-
-      .label-container {
-        position: relative;
-        width: 150px;
-        font-weight: bold;
-      }
-
-      .required {
-        position: relative;
-      }
-
-      .required:before {
-        content:"*";
-        color: red;
-        display: block;
-        position: absolute;
-        left: -1em;
-        top: 0;
-      }
-
-      .row {
-        margin-bottom: 12px;
-      }
-
-      input,
-      textarea {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
       form {
-        padding: 8px;
-        margin-top: 24px;
+        margin: 24px 0;
       }
 
       paper-button.primary {
@@ -102,15 +57,6 @@ Used by `nuxeo-user-group-management`
         background-color: var(--nuxeo-button-primary-focus, #0079b3);
         font-weight: inherit;
         color: #fff !important;
-      }
-
-      .label-container > paper-checkbox#another {
-        margin-left: 8px;
-        margin-top: 12px;
-      }
-
-      .form-buttons > paper-button.primary {
-        margin-left: 0px;
       }
 
       .search-entry {
@@ -152,97 +98,78 @@ Used by `nuxeo-user-group-management`
         height: 32px;
       }
 
+      #another {
+        margin: 2em 0;
+      }
+
       #errors {
         color: red;
-        margin-top: 20px;
+        margin: 1em 0;
       }
     </style>
 
-    <nuxeo-resource id="request"
-                    path="/group">
-    </nuxeo-resource>
+    <nuxeo-resource id="request" path="/group"></nuxeo-resource>
 
     <div class="header horizontal layout center">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:people"></iron-icon>
       <h3>[[i18n('createGroup.heading')]]</h3>
     </div>
+
     <form is="iron-form" id="form" class="vertical layout">
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('createGroup.group.name')]]</label>
-        </div>
-        <div class="horizontal layout flex required">
-          <input id="groupName" value="{{groupName::input}}" class="flex" required>
-        </div>
-      </div>
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('createGroup.group.label')]]</label>
-        </div>
-        <input id="groupLabel" value="{{groupLabel::input}}" class="flex">
-      </div>
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('createGroup.members')]]</label>
-        </div>
-        <nuxeo-user-suggestion id="picker"
-                               search-type="USER_GROUP_TYPE"
-                               placeholder="[[i18n('createGroup.search.placeholder')]]"
-                               value="[[selectedUser]]"
-                               selected-items="{{selectedUser}}"
-                               result-formatter="[[resultFormatter]]">
-        </nuxeo-user-suggestion>
-      </div>
-      <div class="row layout horizontal">
-        <div class="label-container"></div>
-        <div class="vertical layout flex">
-          <template is="dom-repeat" items="[[selectedUsers]]">
-            <div class="search-entry">
-              <div class="user-info">
-                <div class="label">
-                  <iron-icon icon="social:person" hidden="[[item.groupname]]"></iron-icon>
-                  <iron-icon icon="social:people" hidden="[[item.username]]"></iron-icon>
-                  <span>[[item.displayLabel]]</span>
-                </div>
+
+      <paper-input label="[[i18n('createGroup.group.name')]]" value="{{groupName}}" required always-float-label></paper-input>
+      <paper-input label="[[i18n('createGroup.group.label')]]" value="{{groupLabel}}" always-float-label></paper-input>
+
+      <nuxeo-user-suggestion id="picker"
+                             label="[[i18n('createGroup.members')]]"
+                             search-type="USER_GROUP_TYPE"
+                             placeholder="[[i18n('createGroup.search.placeholder')]]"
+                             value="[[selectedUser]]"
+                             selected-items="{{selectedUser}}"
+                             result-formatter="[[resultFormatter]]">
+      </nuxeo-user-suggestion>
+
+      <!-- selected members -->
+      <div class="vertical layout flex">
+        <template is="dom-repeat" items="[[selectedUsers]]">
+          <div class="search-entry">
+            <div class="user-info">
+              <div class="label">
+                <iron-icon icon="social:person" hidden="[[item.groupname]]"></iron-icon>
+                <iron-icon icon="social:people" hidden="[[item.username]]"></iron-icon>
+                <span>[[item.displayLabel]]</span>
               </div>
-              <div class="user-info">
-                <span class="username" hidden="[[item.groupname]]">[[item.username]]</span>
-                <span class="username" hidden="[[item.username]]">[[item.groupname]]</span>
-              </div>
-              <div class="user-info">
-                <span class="email">[[item.email]]</span>
-              </div>
-              <paper-icon-button icon="icons:clear"
-                                 title="remove"
-                                 on-tap="_remove">
-              </paper-icon-button>
             </div>
-          </template>
-        </div>
-      </div>
-      <div class="footer horizontal layout">
-        <div class="label-container">
-          [[i18n('createGroup.createAnother.checkbox')]]
-          <paper-checkbox id="another"></paper-checkbox>
-        </div>
-        <div class="layout vertical">
-          <div class="form-buttons">
-            <paper-button noink id="createButton" class="primary" on-tap="_submit">[[i18n('command.create')]]</paper-button>
-            <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <div class="user-info">
+              <span class="username" hidden="[[item.groupname]]">[[item.username]]</span>
+              <span class="username" hidden="[[item.username]]">[[item.groupname]]</span>
+            </div>
+            <div class="user-info">
+              <span class="email">[[item.email]]</span>
+            </div>
+            <paper-icon-button icon="icons:clear" title="remove" on-tap="_remove"></paper-icon-button>
           </div>
-          <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
-        </div>
+        </template>
       </div>
+
+      <paper-checkbox id="another">[[i18n('createGroup.createAnother.checkbox')]]</paper-checkbox>
+
+      <div class="form-buttons">
+        <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+        <paper-button noink id="createButton" class="primary" on-tap="_submit">[[i18n('command.create')]]</paper-button>
+      </div>
+
+      <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
+
     </form>
   </template>
 </dom-module>
+
 <script>
   Polymer({
     is: 'nuxeo-create-group',
-
     behaviors: [Nuxeo.I18nBehavior],
-
     properties: {
       groupName: {
         type: String,
@@ -284,6 +211,7 @@ Used by `nuxeo-user-group-management`
         value: ''
       }
     },
+
     observers: [
       '_observeSelectedUser(selectedUser)'
     ],

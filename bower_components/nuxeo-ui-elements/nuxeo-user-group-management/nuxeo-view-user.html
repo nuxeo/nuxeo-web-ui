@@ -28,26 +28,12 @@ Used by `nuxeo-user-management`
 -->
 <dom-module id="nuxeo-view-user">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
-        @apply(--nuxeo-view-user-layout);
-      }
-
-      label {
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-
-      .card {
-        background: none #fff;
-        border: 1px solid #e6e9ef;
-        margin: 2em 0;
-        padding: 2em 1.5em;
       }
     </style>
-
-    <div class="card layout horizontal">
+    <div class="layout horizontal">
       <div class="layout vertical flex center">
         <label>[[i18n('viewUser.email')]]</label>
         <span>[[user.properties.email]]</span>
@@ -63,9 +49,7 @@ Used by `nuxeo-user-management`
 <script>
   Polymer({
     is: 'nuxeo-view-user',
-    
     behaviors: [Nuxeo.I18nBehavior],
-
     properties: {
       /**
        * The user object to be displayed.

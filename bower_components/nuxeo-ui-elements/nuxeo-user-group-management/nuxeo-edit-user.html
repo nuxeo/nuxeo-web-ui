@@ -28,98 +28,31 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
 -->
 <dom-module id="nuxeo-edit-user">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
         width: 100%;
-        @apply(--nuxeo-edit-user-layout);
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-        font-weight: bold;
-      }
-
-      .row {
-        margin-bottom: 12px;
-      }
-
-      input {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
-      form {
-        padding: 8px;
-        margin-top: 24px;
-      }
-
-      nuxeo-user-suggestion {
-        @apply(--layout-flex);
-      }
-
-      .required {
-        position: relative;
-      }
-
-      .required:before {
-        content:"*";
-        color: red;
-        display: block;
-        position: absolute;
-        left: -1em;
-        top: 0;
       }
     </style>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('editUser.firstName')]]</label>
-      </div>
-      <input value="{{user.firstName::input}}" class="flex">
+    <div class="layout vertical">
+      <paper-input label="[[i18n('editUser.firstName')]]" value="{{user.firstName}}" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.lastName')]]" value="{{user.lastName}}" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.company')]]" value="{{user.company}}" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.email')]]" value="{{user.email}}" always-float-label type="email" required></paper-input>
     </div>
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('editUser.lastName')]]</label>
-      </div>
-      <input value="{{user.lastName::input}}" class="flex">
-    </div>
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('editUser.company')]]</label>
-      </div>
-      <input value="{{user.company::input}}" class="flex">
-    </div>
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('editUser.email')]]</label>
-      </div>
-      <div class="horizontal layout flex required">
-        <input value="{{user.email::input}}" type="email" class="flex" required>
-      </div>
-    </div>
+
     <template is="dom-if" if="[[new]]">
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('editUser.groups')]]</label>
-        </div>
-        <nuxeo-user-suggestion id="picker"
-                               search-type="GROUP_TYPE"
-                               placeholder="[[i18n('editUser.searchGroups')]]"
-                               value="{{user.groups}}"
-                               multiple
-                               result-formatter="[[resultFormatter]]">
-        </nuxeo-user-suggestion>
-      </div>
+      <nuxeo-user-suggestion id="picker"
+                             search-type="GROUP_TYPE"
+                             label="[[i18n('editUser.groups')]]"
+                             placeholder="[[i18n('editUser.searchGroups')]]"
+                             value="{{user.groups}}"
+                             multiple
+                             result-formatter="[[resultFormatter]]">
+      </nuxeo-user-suggestion>
     </template>
+
   </template>
 </dom-module>
 

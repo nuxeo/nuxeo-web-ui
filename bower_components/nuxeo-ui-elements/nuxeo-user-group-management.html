@@ -40,6 +40,7 @@ limitations under the License.
 <link rel="import" href="nuxeo-user-group-management/nuxeo-create-group.html">
 <link rel="import" href="nuxeo-user-group-management/nuxeo-user-management.html">
 <link rel="import" href="nuxeo-user-group-management/nuxeo-group-management.html">
+<link rel="import" href="nuxeo-user-group-management/nuxeo-user-profile.html">
 
 <!--
 An element for managing users and groups in Nuxeo.
@@ -63,12 +64,11 @@ Custom property | Description | Default
 -->
 <dom-module id="nuxeo-user-group-management">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
         position: relative;
         @apply(--layout-flex);
-        @apply(--nuxeo-user-management-layout);
       }
 
       #createDropdown {
@@ -137,6 +137,7 @@ Custom property | Description | Default
     </iron-pages>
   </template>
 </dom-module>
+
 <script>
   Polymer({
     is: 'nuxeo-user-group-management',

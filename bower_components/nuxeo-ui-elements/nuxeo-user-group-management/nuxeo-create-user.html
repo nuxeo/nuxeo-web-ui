@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-input/paper-input.html">
 <link rel="import" href="../../paper-button/paper-button.html">
 <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
@@ -30,10 +31,13 @@ Used by `nuxeo-user-group-management`
 -->
 <dom-module id="nuxeo-create-user">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
-        @apply(--nuxeo-create-user-layout);
+      }
+
+      form {
+        margin: 24px 0;
       }
 
       nuxeo-user-suggestion {
@@ -41,63 +45,15 @@ Used by `nuxeo-user-group-management`
       }
 
       .backButton {
-        color: #00adff;
+        color: var(--nuxeo-button-primary, #00adff);
       }
 
       .header > iron-icon {
         padding: 8px;
       }
 
-      .footer {
-        margin: 2em 0 4em;
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-        font-weight: bold;
-      }
-
-      .row {
-        margin-bottom: 12px;
-      }
-
-      input {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1em;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
-      form {
-        padding: 8px;
-        margin-top: 24px;
-      }
-
-      paper-button.primary {
-        background-color: var(--nuxeo-button-primary, #00adff);
-        color: #fff;
-      }
-
-      paper-button.primary:hover,
-      paper-button.primary:focus {
-        background-color: var(--nuxeo-button-primary-focus, #0079b3);
-        font-weight: inherit;
-        color: #fff !important;
-      }
-
-      .label-container > paper-checkbox#another {
-        margin-left: 8px;
-        margin-top: 12px;
-      }
-
-      .form-buttons > paper-button.primary {
-        margin-left: 0px;
+      #another {
+        margin: 2em 0;
       }
 
       paper-radio-group {
@@ -109,29 +65,17 @@ Used by `nuxeo-user-group-management`
         padding: 0;
       }
 
+      .label-password {
+        margin-top: 16px;
+      }
+
       #errors {
         color: red;
-        margin-top: 20px;
-      }
-
-      .required {
-        position: relative;
-      }
-
-      .required:before {
-        content:"*";
-        color: red;
-        display: block;
-        position: absolute;
-        left: -1em;
-        top: 0;
+        margin: 1em 0;
       }
     </style>
 
-    <nuxeo-resource id="request"
-                     path="/user"
-                     headers='{"Content-Type":"application/json"}'>
-    </nuxeo-resource>
+    <nuxeo-resource id="request" path="/user" headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
     <nuxeo-operation id="invite" op="User.Invite"></nuxeo-operation>
 
@@ -140,51 +84,37 @@ Used by `nuxeo-user-group-management`
       <iron-icon icon="social:person"></iron-icon>
       <h3>[[i18n('createUser.heading')]]</h3>
     </div>
+
     <form is="iron-form" id="form" class="vertical layout">
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('createUser.username')]]</label>
-        </div>
-        <div class="horizontal layout flex required">
-          <input value="{{user.username::input}}" class="flex" required>
-        </div>
-      </div>
+      <paper-input label="[[i18n('createUser.username')]]" value="{{user.username}}"
+                   required always-float-label>
+      </paper-input>
+
       <nuxeo-edit-user id="propertyEditor" user="{{user}}" new></nuxeo-edit-user>
-      <div class="row layout horizontal">
-        <div class="label-container">
-          <label>[[i18n('createUser.setPassword')]]</label>
-        </div>
-        <div class="flex">
-          <div class="row layout horizontal">
-            <paper-toggle-button checked="{{usePassword}}"></paper-toggle-button>
-          </div>
-          <div hidden$="{{!usePassword}}">
-            <nuxeo-edit-password id="passwordEditor" password="{{user.password}}" required="{{usePassword}}"></nuxeo-edit-password>
-          </div>
-        </div>
+
+      <label class="label-password">[[i18n('createUser.setPassword')]]</label>
+      <paper-toggle-button checked="{{usePassword}}"></paper-toggle-button>
+      <nuxeo-edit-password id="passwordEditor" password="{{user.password}}"
+                           required$="[[usePassword]]" hidden$="[[!usePassword]]">
+      </nuxeo-edit-password>
+
+      <paper-checkbox id="another">[[i18n('createUser.createAnother.checkbox')]]</paper-checkbox>
+
+      <div class="form-buttons">
+        <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+        <paper-button noink id="createButton" class="primary" on-click="_submit">[[i18n('command.create')]]</paper-button>
       </div>
-      <div class="footer horizontal layout">
-        <div class="label-container">
-          [[i18n('createUser.createAnother.checkbox')]]
-          <paper-checkbox id="another"></paper-checkbox>
-        </div>
-        <div class="layout vertical">
-          <div class="form-buttons">
-            <paper-button noink id="createButton" class="primary" on-click="_submit">[[i18n('command.create')]]</paper-button>
-            <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
-          </div>
-          <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
-        </div>
-      </div>
+
+      <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>
+
     </form>
   </template>
 </dom-module>
+
 <script>
   Polymer({
     is: 'nuxeo-create-user',
-
     behaviors: [Nuxeo.I18nBehavior],
-
     properties: {
       user: {
         type: Object,
