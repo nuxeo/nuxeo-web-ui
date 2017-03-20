@@ -210,7 +210,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-connection id="nxcon" url="[[connectionUrl]]" repository-name="[[repositoryName]]" auto-sync></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
@@ -258,11 +258,13 @@ Contributors:
             <nuxeo-recent-documents name="recents" max-size="10" id="recent"></nuxeo-recent-documents>
 
             <nuxeo-search-form name="defaultSearch" search-name="default" auto display-auto-control
-                               provider="default_search" schemas="dublincore,common,uid"></nuxeo-search-form>
+                               provider="default_search" schemas="dublincore,common,uid"
+                               repository-name="[[repositoryName]]"></nuxeo-search-form>
 
             <nuxeo-search-form name="expiredSearch" search-name="expired" queue auto
                                provider="expired_search" schemas="dublincore,common,uid"
-                               label="expiredSearch.expiredDocuments"></nuxeo-search-form>
+                               label="expiredSearch.expiredDocuments"
+                               repository-name="[[repositoryName]]"></nuxeo-search-form>
 
             <div name="tasks">
               <div class="title">[[i18n('app.tasks')]]</div>
@@ -270,9 +272,9 @@ Contributors:
               <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
             </div>
 
-            <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
+            <nuxeo-favorites name="favorites" repository-name="[[repositoryName]]"></nuxeo-favorites>
 
-            <nuxeo-collections name="collections" id="collectionsForm"></nuxeo-collections>
+            <nuxeo-collections name="collections" id="collectionsForm" repository-name="[[repositoryName]]"></nuxeo-collections>
 
             <nuxeo-document-tree name="personalWorkspace" label="app.personalSpace"
                                  current-document="[[currentDocument]]"
@@ -322,7 +324,7 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" model="[[_homeModel(tasks)]]">
+          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" model="[[_homeModel(tasks,repositoryName)]]">
           </nuxeo-layout>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
@@ -448,8 +450,11 @@ Contributors:
 
           actionContext: {
             type: Object,
-            computed: '_actionContext(currentDocument, currentUser)'
-          }
+            computed: '_actionContext(currentDocument, currentUser, repositoryName)'
+          },
+
+          repositoryName: String
+
         },
 
         listeners: {
@@ -498,7 +503,7 @@ Contributors:
         },
 
         refresh: function() {
-          page('/browse' + this.docPath);
+          this.navigateTo('browse', this.docPath ? this.docPath : '');
         },
 
         load: function(page, id, path, action) {
@@ -512,7 +517,7 @@ Contributors:
             if (this.docId && !doc.isVersion) {
               this.docId = '';
               this.docPath = doc.path;
-              window.page('/browse' + doc.path);
+              this.navigateTo('browse', (this.repositoryName ? '/' + this.repositoryName : '') + doc.path);
             } else {
               this.$.recent.add(doc);
               this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
@@ -529,12 +534,19 @@ Contributors:
           this.$.loading.style.display = 'none';
         },
 
+        changeRepository: function(repository) {
+          if (typeof repository !== 'undefined' && this.repositoryName != repository) {
+            this.set('repositoryName', repository);
+            this._fetchTasks();
+          }
+        },
+
         _logo: function(baseUrl) {
           return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
         },
 
         _actionContext: function() {
-          return {document: this.currentDocument, user: this.currentUser};
+          return {document: this.currentDocument, user: this.currentUser, repositoryName: this.repositoryName};
         },
 
         _focusMenu: function() {
@@ -559,7 +571,7 @@ Contributors:
         },
 
         _navigateFromCollection: function(e) {
-          page('/browse' + e.detail.doc.path);
+          this.navigateTo('browse', e.detail.doc.path);
           this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
         },
 
@@ -571,7 +583,7 @@ Contributors:
         },
 
         _showSearchResults: function(e) {
-          page('/search/' + e.target.searchName);
+          this.navigateTo('search', e.target.searchName);
         },
 
         _navigateToCollection: function(e) {
@@ -601,7 +613,7 @@ Contributors:
 
         _handleUGMgoHome: function() {
           this.entity = {};
-          page('/admin/user-group-management');
+          this.navigateTo('admin', 'user-group-management');
         },
 
         _handleUGMmanageUser: function(e) {
@@ -614,7 +626,7 @@ Contributors:
               url += '/' + this.entity.type + '/' + this.entity.id;
             }
           }
-          page('/admin/' + url);
+          this.navigateTo('admin', url);
         },
 
         _handleUGMmanageGroup: function(e) {
@@ -627,15 +639,17 @@ Contributors:
               url += '/' + this.entity.type + '/' + this.entity.id;
             }
           }
-          page('/admin/' + url);
+          this.navigateTo('admin', url);
         },
 
         _fetchTasks: function() {
-          this.$.tasks.params = {'userId': this.currentUser.id};
-          this.$.tasks.get().then(function(response) {
-            this.tasks = response.entries;
-            this.taskCount = this.tasks.length;
-          }.bind(this));
+          if (this.currentUser) {
+            this.$.tasks.params = {'userId': this.currentUser.id};
+            this.$.tasks.get().then(function(response) {
+              this.set('tasks', response.entries);
+              this.set('taskCount', this.tasks.length);
+            }.bind(this));
+          }
         },
 
         _refreshAndFetchTasks: function() {
@@ -769,7 +783,7 @@ Contributors:
         },
 
         _homeModel: function() {
-          return {tasks: this.tasks};
+          return {tasks: this.tasks, repositoryName: this.repositoryName};
         }
 
       });
