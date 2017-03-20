@@ -464,8 +464,10 @@ Contributors:
           'workflowTaskProcessed': '_refreshAndFetchTasks',
           'taskChanged': '_onTaskChanged',
           'tasksListSelectionChanged': '_onTasksListSelectionChanged',
+          'added-to-clipboard': '_onAddedToClipboard',
           'add-to-clipboard': '_onAddToClipboard',
           'added-to-collection': '_documentAddedToCollection',
+          'removed-from-clipboard': '_documentRemovedFromClipboard',
           'removed-from-collection': '_documentRemovedFromCollection',
           'file-deleted': '_documentFileDeleted',
           'added-to-favorites': '_documentAddedToFavorites',
@@ -652,13 +654,16 @@ Contributors:
           this.show('tasks');
         },
 
+        _onAddedToClipboard: function(e){
+          this._toast(
+            this.i18n(e.detail.docIds && e.detail.docIds.length > 1
+              ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard')
+          );
+        },
+
         _onAddToClipboard: function(e) {
           if (e.detail.documents) {
-            e.detail.documents.forEach(function(doc) {
-              if (!this.clipboard.contains(doc)) {
-                this.clipboard.add(doc);
-              }
-            }.bind(this));
+            this.clipboard.add(e.detail.documents)
           }
         },
 
@@ -704,6 +709,10 @@ Contributors:
 
         _documentRemovedFromCollection: function() {
           this._toast(this.i18n('app.document.removedFromCollection'));
+        },
+
+        _documentRemovedFromClipboard: function() {
+          this._toast(this.i18n('app.document.removedFromClipboard'));
         },
 
         _documentAddedToFavorites: function() {
