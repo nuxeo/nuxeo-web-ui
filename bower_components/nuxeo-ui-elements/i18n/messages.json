@@ -117,6 +117,7 @@
   "label.yes": "Yes",
   "lockToggleButton.tooltip.lock": "Lock",
   "lockToggleButton.tooltip.unlock": "Unlock",
+  "lockToggleButton.tooltip.lockedBy": "Locked by {0} on {1}",
   "notificationsToggleButton.tooltip.doNotNotify": "Stop notifications",
   "notificationsToggleButton.tooltip.notify": "Notify Me",
   "popupPermission.addPermission": "Add a Permission",

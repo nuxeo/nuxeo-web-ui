@@ -67,7 +67,7 @@ function login(server, loginFixture) {
       [
         200,
         {'Content-Type': 'application/json'},
-        '{"entity-type":"user","username":"Administrator"}'
+        '{"entity-type":"user","username":"Administrator", "isAdministrator": true}'
       ]
   );
   return loginFixture.connect();

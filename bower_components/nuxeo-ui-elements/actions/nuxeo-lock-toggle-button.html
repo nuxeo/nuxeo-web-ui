@@ -21,8 +21,10 @@ limitations under the License.
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
+<link rel="import" href="../nuxeo-format-behavior.html">
 
 <!--
 A toggle button element for lock/unlock a document.
@@ -47,6 +49,8 @@ Example:
       }
     </style>
 
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
     <nuxeo-operation id="opLock" op="Document.Lock" input="[[document.uid]]" headers='{"X-NXfetch.document": "lock"}'></nuxeo-operation>
     <nuxeo-operation id="opUnlock" op="Document.Unlock" input="[[document.uid]]" headers='{"X-NXfetch.document": "lock"}'></nuxeo-operation>
 
@@ -62,7 +66,7 @@ Example:
       'use strict';
       Polymer({
         is: 'nuxeo-lock-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.FormatBehavior],
         properties: {
 
           /**
@@ -98,16 +102,19 @@ Example:
         },
 
         _isAvailable: function(doc) {
-          return doc && !doc.isVersion;
+          return doc && !doc.isVersion
+            && this.document.facets.indexOf('Folderish') === -1
+            && this.document.facets.indexOf('Immutable') === -1
+            && this.document.type !== 'Root';
         },
 
         _toggle: function() {
-          if (!this.locked) {
+          if (!this.locked && this._canLock()) {
             this.$.opLock.execute().then(function(doc) {
               this.locked = true;
               this.fire('document-locked', {doc: doc});
             }.bind(this));
-          } else {
+          } else if (this._canUnlock()) {
             this.$.opUnlock.execute().then(function(doc) {
               this.locked = false;
               this.fire('document-unlocked', {doc: doc});
@@ -116,7 +123,12 @@ Example:
         },
 
         _computeTooltip: function(locked) {
-          return this.i18n('lockToggleButton.tooltip.' + (locked ? 'unlock' : 'lock'));
+          if (locked && this.document.lockOwner && this.document.lockCreated) {
+            return this.i18n('lockToggleButton.tooltip.lockedBy', this.document.lockOwner, this.formatDate(this.document.lockCreated));
+          } else {
+            return this.i18n('lockToggleButton.tooltip.' + (locked ? 'unlock' : 'lock'));
+          }
+
         },
 
         _computeIcon: function(locked) {
@@ -125,7 +137,34 @@ Example:
 
         _documentChanged: function() {
           this.locked = !!(this.document && this.document.lockCreated);
+        },
+
+        _canLock: function() {
+          return this.$.nxcon.connect().then(function(currentUser) {
+            if (this.document.isProxy || this.document.isVersion) {
+              return false;
+            } else {
+              return currentUser.isAdministrator || this.document.contextParameters.permissions.indexOf('Everything') > -1
+                              || this.document.contextParameters.permissions.indexOf('Write') > -1;
+            }
+          }.bind(this));
+        },
+
+        _canUnlock: function() {
+          return this.$.nxcon.connect().then(function(currentUser) {
+            if (this.document.isProxy) {
+              return false;
+            } else {
+              return (currentUser.isAdministrator
+                        || this.document.contextParameters.permissions.indexOf('Everything') > -1
+                                ? true
+                                : (currentUser.id === this.document.lockOwner)
+                                        && this.document.contextParameters.permissions.indexOf('Write') > -1)
+                        && !document.isVersion;
+            }
+          }.bind(this));
         }
+
       });
     })();
   </script>
