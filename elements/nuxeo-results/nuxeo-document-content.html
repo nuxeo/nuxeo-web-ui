@@ -74,28 +74,9 @@ Contributors:
         height: 4em;
       }
 
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox:hover .select:hover {
-        border: 2px solid #99d749;
-        background-color: #99d749;
-        cursor: pointer;
-        display: block;
-      }
-
       nuxeo-document-grid-thumbnail.selected ::content div.title,
       nuxeo-data-table ::content nuxeo-data-table-row[selected] a.title {
         font-weight: bold;
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select paper-icon-button {
-        color: #fff;
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox {
-        filter: brightness(102%);
-        -webkit-filter: brightness(102%);
-        border-bottom: 3px solid #75b226;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
       }
 
       nuxeo-tag {
@@ -161,7 +142,6 @@ Contributors:
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
                                            tabindex$="{{tabIndex}}"
-                                           class$="[[_computedClass(selected)]]"
                                            doc="[[item]]" on-navigate="_navigate">
             </nuxeo-document-grid-thumbnail>
           </template>
@@ -183,13 +163,29 @@ Contributors:
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
-                                   field="dc:modified" sort-by="dc:modified" flex="50">
+                                   field="dc:modified" sort-by="dc:modified"
+                                   filter-by="dc_modified_agg"
+                                   flex="50">
+            <template is="header">
+              <nuxeo-dropdown-aggregation
+                placeholder="[[i18n('documentContentView.datatable.header.modified')]]"
+                data="[[aggregations.dc_modified_agg]]"
+                value="{{column.filterValue}}" multiple>
+              </nuxeo-dropdown-aggregation>
+            </template>
             <template>
               [[formatDate(item.properties.dc:modified)]]
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
-                                   field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+                                   filter-by="dc_last_contributor_agg" field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+            <template is="header">
+              <nuxeo-dropdown-aggregation
+                placeholder="[[i18n('documentContentView.datatable.header.lastContributor')]]"
+                data="[[aggregations.dc_last_contributor_agg]]"
+                value="{{column.filterValue}}" multiple>
+              </nuxeo-dropdown-aggregation>
+            </template>
             <template>
               <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
             </template>
@@ -319,10 +315,7 @@ Contributors:
         },
 
         _navigate: function(e) {
-          var detail = {
-            doc: e.detail.item
-          };
-          page('/browse' + detail.doc.path);
+          this.fire('navigate', {doc: (e.model || e.detail).item});
         },
 
         _computedClass: function(isSelected) {

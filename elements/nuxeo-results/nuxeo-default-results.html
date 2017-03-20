@@ -15,11 +15,11 @@ limitations under the License.
 -->
 
 <!--
-`nuxeo-default-search-results`
+`nuxeo-default-results`
 @group Nuxeo UI
-@element nuxeo-default-search-results
+@element nuxeo-default-results
 -->
-<dom-module id="nuxeo-default-search-results">
+<dom-module id="nuxeo-default-results">
   <template>
     <style>
 
@@ -46,8 +46,15 @@ limitations under the License.
       }
 
       nuxeo-data-table ::content *[checked] #container.nuxeo-data-table-checkbox {
-        border-color: var(--nuxeo-validated) !important;
-        background-color: var(--nuxeo-validated) !important;
+        border-color: #75b226 !important;
+        background-color: #75b226 !important;
+      }
+
+      nuxeo-data-table ::content #container iron-list#list::after {
+        background-color: transparent;
+        content:'';
+        display: block;
+        height: 4em;
       }
 
       nuxeo-data-table {
@@ -92,10 +99,12 @@ limitations under the License.
 
     </style>
 
-    <nuxeo-results name="default" nx-provider="[[nxProvider]]">
+    <nuxeo-results id="results" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+      <content></content>
 
       <nuxeo-data-grid class="results" name="grid" icon="icons:apps"
-                       empty-label="[[i18n('searchResults.noResults')]]"
+                       empty-label="[[emptyLabel]]"
+                       empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                        selection-enabled display-quick-filters>
         <template>
           <nuxeo-document-grid-thumbnail class="grid-box"
@@ -107,7 +116,8 @@ limitations under the License.
 
       <nuxeo-data-table class="results" name="table" icon="icons:list"
                         settings-enabled
-                        empty-label="[[i18n('searchResults.noResults')]]"
+                        empty-label="[[emptyLabel]]"
+                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                         selection-enabled
                         display-quick-filters
                         on-row-clicked="_navigate">
@@ -181,12 +191,24 @@ limitations under the License.
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-default-search-results',
-
+      is: 'nuxeo-default-results',
       behaviors: [Nuxeo.LayoutBehavior],
-
       properties: {
-        nxProvider: Object
+        nxProvider: Object,
+
+        name: String,
+
+        selectedItems: {
+          type: Array,
+          notify: true
+        },
+
+        emptyLabel: String,
+        emptyLabelWhenFiltered: String
+      },
+
+      get items() {
+        return this.$.results.items;
       },
 
       _navigate: function(e) {
