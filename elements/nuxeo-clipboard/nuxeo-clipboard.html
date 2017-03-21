@@ -51,19 +51,24 @@ Contributors:
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
         @apply(--nuxeo-sidebar-item-link);
-        padding: 1em;
+        padding: 0;
       }
 
       .item:hover {
         @apply(--nuxeo-block-hover);
       }
 
+      .item.iron-selected {
+        @apply(--nuxeo-block-selected);
+      }
+
       .ellipsis {
         display: inline-block;
-        width: 80%;
+        width: 78%;
         vertical-align: middle;
         text-overflow: ellipsis;
         overflow: hidden;
+        padding: 1em;
       }
 
       .remove {
@@ -73,7 +78,7 @@ Contributors:
       }
 
       .container {
-        height: 100vh;
+        height: 92vh;
         @apply(--layout-vertical);
       }
 
@@ -96,6 +101,16 @@ Contributors:
         font-size: 1em;
       }
 
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 24px;
+        width: 24px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+        vertical-align: middle
+      }
+
     </style>
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
@@ -107,32 +122,43 @@ Contributors:
 
     <div class="container">
       <div class="items">
-        <template is="dom-repeat" items="[[documents]]" as="document">
-          <div class="item">
-            <span class="flex">
-              <iron-icon icon="receipt" item-icon></iron-icon>
-              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-            </span>
-            <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
-          </div>
-        </template>
+        <iron-selector>
+          <template id="list" is="dom-repeat" items="[[documents]]" as="document">
+            <div class="item">
+              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">
+                <div class="horizontal layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]"/>
+                  <span>[[document.title]]</span>
+                </div>
+              </a>
+              <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+            </div>
+          </template>
+        </iron-selector>
       </div>
 
-        <div class="tip">
-          [[i18n('clipboard.tip')]]
+      <div class="tip">
+        [[i18n('clipboard.tip')]]
+      </div>
+      <div class="toolbar">
+        <div class="actions">
+          <paper-button id="paste" on-tap="execute" data-op="Document.Copy"
+                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+            <iron-icon icon="content-copy"></iron-icon>
+            [[i18n('clipboard.copy')]]
+          </paper-button>
+          <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
+          <paper-button id="move" on-tap="execute" data-op="Document.Move"
+                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+            <iron-icon icon="content-cut"></iron-icon>
+            [[i18n('clipboard.move')]]
+          </paper-button>
+          <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
         </div>
-        <div class="toolbar">
-          <div class="actions">
-            <paper-button id="paste" on-tap="execute" data-op="Document.Copy" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
-              <iron-icon icon="content-copy"></iron-icon>[[i18n('clipboard.copy')]]</paper-button>
-            <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
-            <paper-button id="move" on-tap="execute" data-op="Document.Move" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
-              <iron-icon icon="content-cut"></iron-icon>[[i18n('clipboard.move')]]</paper-button>
-            <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
-          </div>
-        </div>
+      </div>
     </div>
-    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
+    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
+                     params="[[_opParams(targetDocument)]]"></nuxeo-operation>
   </template>
   <script>
     Polymer({
@@ -147,19 +173,16 @@ Contributors:
           type: Object
         },
         docCount: {
-            type: Number,
-            notify: true
-         }
+          type: Number,
+          notify: true
+        }
       },
+
       observers: [
         '_observeDocuments(documents.splices)'
       ],
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-      _observeDocuments: function() {
-        this.docCount = this.documents.length;
-      },
 
       add: function(doc) {
         return this.$.storage.add(doc);
@@ -209,6 +232,19 @@ Contributors:
           return {
             target: this.targetDocument.uid
           };
+        }
+      },
+
+      _observeDocuments: function() {
+        if (this.documents) {
+          this.docCount = this.documents.length;
+        }
+      },
+
+      _thumbnail: function (doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
         }
       }
     });
