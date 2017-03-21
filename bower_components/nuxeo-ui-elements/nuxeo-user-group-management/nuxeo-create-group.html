@@ -118,8 +118,8 @@ Used by `nuxeo-user-group-management`
 
     <form is="iron-form" id="form" class="vertical layout">
 
-      <paper-input label="[[i18n('createGroup.group.name')]]" value="{{groupName}}" required always-float-label></paper-input>
-      <paper-input label="[[i18n('createGroup.group.label')]]" value="{{groupLabel}}" always-float-label></paper-input>
+      <paper-input id="groupName" label="[[i18n('createGroup.group.name')]]" value="{{groupName}}" required always-float-label></paper-input>
+      <paper-input id="groupLabel" label="[[i18n('createGroup.group.label')]]" value="{{groupLabel}}" always-float-label></paper-input>
 
       <nuxeo-user-suggestion id="picker"
                              label="[[i18n('createGroup.members')]]"
