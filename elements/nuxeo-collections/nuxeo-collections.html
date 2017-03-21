@@ -51,12 +51,6 @@ Contributors:
       overflow: auto;
     }
 
-    .remove {
-      width: 16px;
-      height: 16px;
-      border-radius: 8px;
-    }
-
     .switch {
       position: absolute;
       top: 0;
@@ -69,13 +63,11 @@ Contributors:
       background-color: var(--nuxeo-light-background);
     }
 
-    .switch:hover,
-    .remove:hover {
+    .switch:hover {
       background-color: var(--nuxeo-button-primary);
       color: var(--nuxeo-button-primary-text);
     }
 
-    /* TODO for Lise,need to factorize the following with nuxeo-app styles*/
     .content {
       font-size: .9rem;
       @apply(--layout-flex);
@@ -99,7 +91,6 @@ Contributors:
       margin: .1em .2em 0 1.1em;
       font-weight: 400;
     }
-    /* End TODO Lise :) */
 
     .collection-box {
       line-height: 155%;
@@ -133,8 +124,8 @@ Contributors:
     }
 
     .queue-thumbnail {
-      height: 32px;
-      width: 32px;
+      height: 24px;
+      width: 24px;
       border-radius: 20px;
       box-sizing: border-box;
       margin-right: 8px;
@@ -165,13 +156,20 @@ Contributors:
       @apply(--nuxeo-block-selected);
     }
 
-    .list-item-detail {
-      margin-left: 40px;
+    .remove {
+      width: 1.7em;
+      height: 1.7em;
+    }
+
+    .list-item-title {
+      font-size: 1.1em;
     }
 
     .list-item-property {
       color: var(--nuxeo-text-light);
-      margin-right: .2em;
+      display: block;
+      margin: .2em 0;
+      font-size: .8em;
     }
 
     </style>
@@ -253,24 +251,22 @@ Contributors:
               empty-label-when-filtered="[[i18n('collections.members.empty')]]">
               <template>
                 <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+
                   <div class="list-item-box vertical layout">
-                    <div class="list-item-info horizontal layout center">
+                    <div class="list-item-info horizontal layout center" >
                       <div class="vertical layout center">
                         <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
                       </div>
-                      <span class="list-item-title ellipsis">[[member.title]]</span>
-                    </div>
-                    <div class="list-item-detail">
-                      <div class="layout center">
-                        <span class="list-item-property ellipsis">
-                          [[member.type]]
-                          <iron-icon  id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]"
-                            icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
-                          </iron-icon>
-                        </span>
+                      <div class="flex">
+                        <span class="list-item-title ellipsis">[[member.title]]</span>
+                        <span class="list-item-property ellipsis">[[member.type]]</span>
                       </div>
+                      <iron-icon  id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]"
+                        icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
+                      </iron-icon>
                     </div>
                   </div>
+
                 </div>
               </template>
             </nuxeo-data-list>
