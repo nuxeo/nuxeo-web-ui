@@ -38,7 +38,7 @@ Contributors:
       }
     </style>
 
-    <nuxeo-audit-page-provider id="provider" provider-name="DOCUMENT_HISTORY_PROVIDER" page-size="40" current-page="{{entries}}">
+    <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
     </nuxeo-audit-page-provider>
 
     <paper-card class="layout horizontal end-justified flex">
@@ -142,7 +142,7 @@ Contributors:
       _refresh: function() {
         if (this.document && this.visible) {
           this.$.provider.page = 1;
-          this.$.provider.queryParams = this.document.uid;
+          this.$.provider.docId = this.document.uid;
           this.$.provider.fetch();
         }
       },
