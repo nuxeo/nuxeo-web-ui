@@ -40,7 +40,7 @@ Contributors:
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('searchResults.results')]]</span>
-        <nuxeo-saved-search-actions id="actions" class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
+        <nuxeo-saved-search-actions id="actions" class="actions"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
         <nuxeo-layout id="results" href="[[_resultsHref]]" model="[[_resultsModel]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]"></nuxeo-layout>
@@ -56,13 +56,6 @@ Contributors:
         is: 'nuxeo-search-results',
 
         behaviors: [Nuxeo.I18nBehavior],
-
-        properties: {
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(selectedItems)'
-          }
-        },
 
         listeners: {
           'results.navigate' : '_navigateFromSearch'
@@ -91,10 +84,6 @@ Contributors:
           if (this.searchForm) {
             this.searchForm.displayQueue(e.detail.doc);
           }
-        },
-
-        _actionContext: function() {
-          return {selectedItems: this.selectedItems, items: this.$.results.items};
         }
 
       });

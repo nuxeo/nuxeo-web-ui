@@ -30,11 +30,15 @@ must also have a `name` and `icon` to be used as toggle button, ex:
 
   <nuxeo-datatable class="results" name="table" icon="icon="icons:list">
 
-The current page provider will be injected in each view as `nxProvider` so a property with this name should be available in each results element.
+The current page provider will be injected in each view as `nxProvider` so a property with this name should be available
+in each results element.
 
-`<nuxeo-results>` handles also storing of settings for each view in local storage in which case result elements should expose a `settings` property.
+`<nuxeo-results>` handles also storing of settings for each view in local storage in which case result elements should
+expose a `settings` property.
 
-It will also handle refresh and selection actions so it expects elements to include `Polymer.IronResizableBehavior` and expose a small API (`clearSelection()`, `selectItems()`) part of `Nuxeo.PageProviderDisplayBehavior`.
+It will also handle refresh and selection actions so it expects elements to include `Polymer.IronResizableBehavior`,
+a `selectedItems` property and expose a small API (`clearSelection()`, `selectItems()`) part of
+`Nuxeo.PageProviderDisplayBehavior`.
 
 @group Nuxeo UI
 @element nuxeo-results
@@ -164,7 +168,8 @@ It will also handle refresh and selection actions so it expects elements to incl
             type: Object
           },
           selectedItems: {
-            type: Object,
+            type: Array,
+            value: [],
             notify: true
           },
           columns: {
@@ -207,6 +212,7 @@ It will also handle refresh and selection actions so it expects elements to incl
         },
 
         _updateViews: function() {
+          var hasDisplayMode;
           this._displayModes = [];
           this.$.views.items.forEach(function(view) {
             var name = view.getAttribute("name"),
@@ -215,8 +221,17 @@ It will also handle refresh and selection actions so it expects elements to incl
             if (this._settings && view.settings) {
               view.settings = this._settings[name];
             }
+            if (name === this.displayMode) {
+              hasDisplayMode = true;
+            }
             this.push('_displayModes', {name: name, icon: icon});
           }.bind(this));
+
+          // if current selected display mode is not available use the first one
+          if (!hasDisplayMode) {
+            this.displayMode = this._displayModes[0].name;
+          }
+
         },
 
         _displayModeTitle: function(item) {
@@ -347,7 +362,9 @@ It will also handle refresh and selection actions so it expects elements to incl
           }
 
           // restore selection
-          view.selectItems(this.selectedItems);
+          if (this.selectedItems) {
+            this.selectItems(this.selectedItems.slice());
+          }
 
           // listen for settings and selection changed
           this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
