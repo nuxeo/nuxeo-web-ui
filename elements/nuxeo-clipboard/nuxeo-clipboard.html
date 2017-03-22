@@ -46,6 +46,35 @@ Contributors:
         font-weight: 400;
       }
 
+      .content {
+        @apply(--layout-vertical);
+      }
+
+      .items {
+        @apply(--layout-flex-auto)
+      }
+
+      .scrollable {
+        overflow-y: scroll;
+        height: calc(100vh - 59px);
+      }
+
+      .toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+        @apply(--nx-actions);
+        padding-bottom: 8px;
+      }
+
+      .tip {
+        color: var(--nuxeo-text-light, #939caa);
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+        font-size: 1em;
+      }
+
       .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -77,35 +106,6 @@ Contributors:
         height: 1.5em;
       }
 
-      .content {
-        @apply(--layout-vertical);
-      }
-
-      .scrollable {
-        overflow-y:scroll;
-        height: calc(100vh - 59px);
-      }
-
-      .items {
-        @apply(--layout-flex-auto)
-      }
-
-      .toolbar {
-        @apply(--layout-horizontal);
-        @apply(--layout-center-justified);
-        @apply(--nx-actions);
-        padding-bottom: 8px;
-      }
-
-      .tip {
-        color: var(--nuxeo-text-light, #939caa);
-        display: block;
-        font-weight: 300;
-        padding: 1.5em .7em;
-        text-align: center;
-        font-size: 1em;
-      }
-
       .queue-thumbnail,
       .queue-thumbnail ::content img {
         height: 24px;
@@ -115,17 +115,19 @@ Contributors:
         margin-right: 8px;
         vertical-align: middle
       }
-
     </style>
+
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
+    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
+                     params="[[_opParams(targetDocument)]]"></nuxeo-operation>
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
-    <template is="dom-if" if="[[!documents.length]]">
-      <span class="tip">[[i18n('clipboard.empty')]]</span>
-    </template>
-
     <div class="content scrollable">
+      <template is="dom-if" if="[[!documents.length]]">
+        <span class="tip">[[i18n('clipboard.empty')]]</span>
+      </template>
+
       <div class="items">
         <iron-selector>
           <template id="list" is="dom-repeat" items="[[documents]]" as="document">
@@ -162,8 +164,7 @@ Contributors:
         </div>
       </div>
     </div>
-    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
-                     params="[[_opParams(targetDocument)]]"></nuxeo-operation>
+
   </template>
   <script>
     Polymer({
@@ -189,50 +190,50 @@ Contributors:
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-      add: function(doc) {
+      add: function (doc) {
         return this.$.storage.add(doc);
       },
 
-      contains: function(doc) {
+      contains: function (doc) {
         return this.$.storage.contains(doc);
       },
 
-      remove: function(doc) {
+      remove: function (doc) {
         return this.$.storage.remove(doc);
       },
 
-      canPaste: function(documents, doc) {
+      canPaste: function (documents, doc) {
         return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
       },
 
-      execute: function(evt) {
+      execute: function (evt) {
         this.$.op.op = evt.currentTarget.dataset.op;
-        this.$.op.execute().then(function() {
+        this.$.op.execute().then(function () {
           this.documents = [];
           this.fire('document-updated');
         }.bind(this));
       },
 
-      _remove: function(evt) {
+      _remove: function (evt) {
         this.remove(evt.model.document);
       },
 
-      _indexOf: function(doc) {
-        return this.documents.findIndex(function(e) {
+      _indexOf: function (doc) {
+        return this.documents.findIndex(function (e) {
           return e.uid === doc.uid;
         });
       },
 
-      _uids: function() {
+      _uids: function () {
         if (this.documents && this.documents !== null) {
-          return this.documents.map(function(doc) {
+          return this.documents.map(function (doc) {
             return doc.uid;
           }).join(',');
         }
         return '';
       },
 
-      _opParams: function() {
+      _opParams: function () {
         if (this.targetDocument) {
           return {
             target: this.targetDocument.uid
@@ -240,7 +241,7 @@ Contributors:
         }
       },
 
-      _observeDocuments: function() {
+      _observeDocuments: function () {
         if (this.documents) {
           this.docCount = this.documents.length;
         }
