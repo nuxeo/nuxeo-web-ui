@@ -297,6 +297,7 @@ Contributors:
               <div class="title">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
+                <nuxeo-menu-item name="profile" label="app.user.profile" route="page:profile"></nuxeo-menu-item>
                 <nuxeo-menu-item name="themes" label="app.user.themes" route="page:themes"></nuxeo-menu-item>
                 <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
               </iron-selector>
@@ -334,6 +335,8 @@ Contributors:
           <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
 
           <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+
+          <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
           <nuxeo-themes name="themes" selected="[[selectedProfileTab]]"></nuxeo-themes>
 
