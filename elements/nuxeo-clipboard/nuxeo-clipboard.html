@@ -29,7 +29,7 @@ Contributors:
   <template>
     <style>
       :host {
-        @apply(--layout-vertical);
+        overflow: hidden;
       }
 
       .header {
@@ -48,15 +48,40 @@ Contributors:
 
       .content {
         @apply(--layout-vertical);
+        height: calc(100vh - 61px);
       }
 
-      .items {
-        @apply(--layout-flex-auto)
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        height: 100%;
       }
 
-      .scrollable {
-        overflow-y: scroll;
-        height: calc(100vh - 59px);
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      .list-item:hover {
+        @apply(--nuxeo-block-hover);
+      }
+
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
+
+      .ellipsis {
+        vertical-align: middle;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
       .toolbar {
@@ -70,40 +95,9 @@ Contributors:
         color: var(--nuxeo-text-light, #939caa);
         display: block;
         font-weight: 300;
-        padding: 1.5em .7em;
+        padding: 8px;
         text-align: center;
         font-size: 1em;
-      }
-
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--nuxeo-sidebar-item-theme);
-        @apply(--nuxeo-sidebar-item-link);
-        padding: 0;
-      }
-
-      .item:hover {
-        @apply(--nuxeo-block-hover);
-      }
-
-      .item.iron-selected {
-        @apply(--nuxeo-block-selected);
-      }
-
-      .ellipsis {
-        display: inline-block;
-        width: 78%;
-        vertical-align: middle;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        padding: 1em;
-      }
-
-      .remove {
-        padding: 0;
-        width: 1.5em;
-        height: 1.5em;
       }
 
       .queue-thumbnail,
@@ -113,7 +107,12 @@ Contributors:
         border-radius: 20px;
         box-sizing: border-box;
         margin-right: 8px;
-        vertical-align: middle
+      }
+
+      .remove {
+        padding: 0;
+        width: 1.5em;
+        height: 1.5em;
       }
     </style>
 
@@ -123,30 +122,31 @@ Contributors:
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
-    <div class="content scrollable">
-      <template is="dom-if" if="[[!documents.length]]">
-        <span class="tip">[[i18n('clipboard.empty')]]</span>
-      </template>
-
-      <div class="items">
-        <iron-selector>
-          <template id="list" is="dom-repeat" items="[[documents]]" as="document">
-            <div class="item">
-              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">
-                <div class="horizontal layout center">
-                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]"/>
-                  <span>[[document.title]]</span>
+    <div class="content">
+      <nuxeo-data-list items="[[documents]]" id="list"
+                       selected-item="{{selectedDocument}}"
+                       selection-enabled as="document"
+                       empty-label="[[i18n('clipboard.empty')]]"
+                       empty-label-when-filtered="[[i18n('clipboard.empty')]]">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="list-item-box vertical layout">
+              <div class="list-item-info horizontal layout center">
+                <div class="vertical layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
                 </div>
-              </a>
-              <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+                <span class="list-item-title ellipsis flex">[[document.title]]</span>
+                <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+              </div>
             </div>
-          </template>
-        </iron-selector>
-      </div>
+          </div>
+        </template>
+      </nuxeo-data-list>
 
       <div class="tip">
         [[i18n('clipboard.tip')]]
       </div>
+
       <div class="toolbar">
         <div class="actions">
           <paper-button id="paste" on-tap="execute" data-op="Document.Copy"
@@ -164,7 +164,6 @@ Contributors:
         </div>
       </div>
     </div>
-
   </template>
   <script>
     Polymer({
@@ -181,59 +180,64 @@ Contributors:
         docCount: {
           type: Number,
           notify: true
+        },
+        selectedDocument: {
+          type: Object
         }
       },
 
       observers: [
-        '_observeDocuments(documents.splices)'
+        '_observeDocuments(documents.splices)',
+        '_observeSelectedDocument(selectedDocument)'
       ],
 
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-      add: function (doc) {
+      add: function(doc) {
         return this.$.storage.add(doc);
       },
 
-      contains: function (doc) {
+      contains: function(doc) {
         return this.$.storage.contains(doc);
       },
 
-      remove: function (doc) {
+      remove: function(doc) {
         return this.$.storage.remove(doc);
       },
 
-      canPaste: function (documents, doc) {
+      canPaste: function(documents, doc) {
         return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
       },
 
-      execute: function (evt) {
+      execute: function(evt) {
         this.$.op.op = evt.currentTarget.dataset.op;
-        this.$.op.execute().then(function () {
+        this.$.op.execute().then(function() {
           this.documents = [];
           this.fire('document-updated');
         }.bind(this));
       },
 
-      _remove: function (evt) {
+      _remove: function(evt) {
+        evt.stopImmediatePropagation();
         this.remove(evt.model.document);
       },
 
-      _indexOf: function (doc) {
-        return this.documents.findIndex(function (e) {
+      _indexOf: function(doc) {
+        return this.documents.findIndex(function(e) {
           return e.uid === doc.uid;
         });
       },
 
-      _uids: function () {
+      _uids: function() {
         if (this.documents && this.documents !== null) {
-          return this.documents.map(function (doc) {
+          return this.documents.map(function(doc) {
             return doc.uid;
           }).join(',');
         }
         return '';
       },
 
-      _opParams: function () {
+      _opParams: function() {
         if (this.targetDocument) {
           return {
             target: this.targetDocument.uid
@@ -241,13 +245,31 @@ Contributors:
         }
       },
 
-      _observeDocuments: function () {
+      _observeSelectedDocument: function(doc) {
+        if (doc) {
+          if (doc.isVersion) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
+        }
+      },
+
+      _observeDocuments: function() {
         if (this.documents) {
           this.docCount = this.documents.length;
         }
       },
 
-      _thumbnail: function (doc) {
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _thumbnail: function(doc) {
         if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
           doc.contextParameters.thumbnail.url) {
           return doc.contextParameters.thumbnail.url;
