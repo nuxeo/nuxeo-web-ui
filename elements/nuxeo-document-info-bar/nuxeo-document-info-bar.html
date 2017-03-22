@@ -30,16 +30,67 @@ Contributors:
         @apply(--layout-horizontal);
         @apply(--layout-center);
         @apply(--layout-justified);
-        background: black;
-        color: white;
         padding: 8px;
         margin-bottom: 16px;
       }
+
+      .bar.task {
+        background: black;
+        color: white;
+      }
+
+      .bar.workflow {
+        background: white;
+        border: 1px solid var(--nuxeo-border);
+      }
+
+      a.viewTasks {
+        text-decoration: underline;
+        margin-left: 1em;
+      }
+
+      nuxeo-tasks-list, nuxeo-tasks-list ::content nuxeo-data-list {
+        height: 350px !important;
+        min-width: 450px
+      }
     </style>
+
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+
+    <nuxeo-resource id="worfklow" path="/workflow"></nuxeo-resource>
+    <nuxeo-resource id="task" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-resource id="user" path="/user"></nuxeo-resource>
+
+    <!-- workflows -->
+    <template is="dom-repeat" items="[[workflows]]" as="workflow">
+      <div class="bar workflow">
+        <div class="flex">
+          <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
+          <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator)]]">
+            <nuxeo-user-tag user="[[workflow.initiator]]"></nuxeo-user-tag>
+          </template>
+          <span>[[_labelForInitiatedWf(workflow)]] <a class="viewTasks" on-tap="_viewTasks">[[i18n('documentPage.route.view.pendingTasks')]]</a></span>
+        </div>
+        <paper-button class="secondary" on-tap="_toggleGraphDialog" noink>[[i18n('documentPage.route.view.graph')]]</paper-button>
+        <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
+      </div>
+      <paper-dialog id="graphDialog-[[workflow.id]]" with-backdrop>
+        <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+        <div class="buttons">
+          <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="tasksDialog-[[workflow.id]]" with-backdrop>
+        <nuxeo-tasks-list id="taskLists" tasks="[[_wfTasks]]" no-navigation></nuxeo-tasks-list>
+        <div class="buttons">
+          <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        </div>
+      </paper-dialog>
+    </template>
 
     <!-- tasks -->
     <template is="dom-repeat" items="[[tasks]]" as="task">
-      <div class="bar">
+      <div class="bar task">
         <div>
           <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
           <span>[[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]</span>
@@ -73,7 +124,12 @@ Contributors:
       tasks: {
         type: Array,
         computed: '_tasks(document)'
-      }
+      },
+      workflows: {
+        type: Array,
+        computed: '_workflows(document)'
+      },
+      _wfTasks: Array
     },
 
     _tasks: function(doc) {
@@ -81,8 +137,48 @@ Contributors:
         ? doc.contextParameters.pendingTasks : [];
     },
 
+    _workflows: function(doc) {
+      return doc && doc.contextParameters && doc.contextParameters.pendingTasks
+        ? doc.contextParameters.runningWorkflows : [];
+    },
+
     _processTask: function() {
       this.fire('workflowTaskProcess');
+    },
+
+    _isCurrentUser: function(userId) {
+      return this.$.nxcon.user.id === userId;
+    },
+
+    _labelForInitiatedWf: function(workflow) {
+      console.log('pouet');
+      if (this._isCurrentUser(workflow.initiator)) {
+        return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
+      } else {
+        return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
+      }
+    },
+
+    _abandonWorkflow: function(e) {
+      if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
+        this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
+        this.$.worfklow.remove().then(function() {
+          this.fire('document-updated');
+        }.bind(this));
+      }
+    },
+
+    _toggleGraphDialog: function(e) {
+      this.$$('#graphDialog-' + e.model.workflow.id).toggle();
+    },
+
+    _viewTasks: function(e) {
+      this.$.task.path = "/task";
+      this.$.task.params = { "workflowInstanceId": e.model.workflow.id};
+      this.$.task.get().then(function(response) {
+        this._wfTasks = response.entries;
+        this.$$('#tasksDialog-' + e.model.workflow.id).toggle();
+      }.bind(this));
     }
   });
 </script>
