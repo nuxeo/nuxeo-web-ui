@@ -77,9 +77,13 @@ Contributors:
         height: 1.5em;
       }
 
-      .container {
-        height: 92vh;
+      .content {
         @apply(--layout-vertical);
+      }
+
+      .scrollable {
+        overflow-y:scroll;
+        height: calc(100vh - 59px);
       }
 
       .items {
@@ -90,6 +94,7 @@ Contributors:
         @apply(--layout-horizontal);
         @apply(--layout-center-justified);
         @apply(--nx-actions);
+        padding-bottom: 8px;
       }
 
       .tip {
@@ -120,7 +125,7 @@ Contributors:
       <span class="tip">[[i18n('clipboard.empty')]]</span>
     </template>
 
-    <div class="container">
+    <div class="content scrollable">
       <div class="items">
         <iron-selector>
           <template id="list" is="dom-repeat" items="[[documents]]" as="document">
