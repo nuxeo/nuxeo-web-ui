@@ -257,7 +257,9 @@ If the property docId is not set, the EVENTS_VIEW provider is used instead.
       },
 
       get _sortValues() {
-        return this._sortKeys.map(function(k) { return this.sort[k];}.bind(this));
+        return this._sortKeys.map(function (k) {
+          return this.sort[k];
+        }.bind(this));
       },
 
       _autoFetch: function () {
