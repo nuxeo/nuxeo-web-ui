@@ -39,7 +39,7 @@ export default class Collections {
 
   waitForHasMember(doc, reverse) {
     driver.waitUntil(() => {
-      const members = this.page.elements(`#membersList #items div`).value;
+      const members = this.page.elements(`#membersList #items div span.list-item-title`).value;
       if (reverse) {
         return members.every((member) => member.getText().trim() !== doc.title);
       } else {
