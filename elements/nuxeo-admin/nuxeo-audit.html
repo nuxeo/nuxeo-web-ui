@@ -31,32 +31,33 @@ Contributors:
         height: calc(100vh - 25em);
         min-height: 15em;
       }
-      nuxeo-directory-suggestion {
-        padding-top: 1px;
-      }
+
       .container {
         @apply(--layout-vertical);
         @apply(--layout-wrap);
       }
+
       .row-container {
         @apply(--layout-horizontal);
         @apply(--layout-wrap);
       }
+
       .item {
         flex: 1 0 0;
-        margin-right : 8px;
+        margin-right: 8px;
       }
+
       @media (max-width: 768px) {
         .item {
           min-width: 100%;
         }
+
         nuxeo-data-table {
           height: calc(100vh - 33em);
         }
       }
     </style>
 
-    <nuxeo-resource id="eventCategories" path="/directory/eventCategories"></nuxeo-resource>
     <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
                                current-page="{{entries}}" auto></nuxeo-audit-page-provider>
     <nuxeo-page>
@@ -65,8 +66,8 @@ Contributors:
       </div>
       <div class="content">
         <paper-card class="container">
-          <nuxeo-user-suggestion  value="{{principalName}}"label="[[i18n('audit.username')]]"
-                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
+          <nuxeo-user-suggestion value="{{principalName}}" label="[[i18n('audit.username')]]"
+                                 placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
 
           <div class="row-container">
             <nuxeo-date-picker class="item" value="{{startDate}}" label="From"></nuxeo-date-picker>
@@ -82,14 +83,14 @@ Contributors:
                                         placeholder="[[i18n('audit.selectEventTypes')]]"
                                         min-chars="0">
             </nuxeo-directory-suggestion>
-            <paper-dropdown-menu class="item" label="[[i18n('audit.selectEventCategory')]]">
-              <paper-listbox  class="dropdown-content" selected="{{selectedEventCategory}}">
-                <paper-item>[[i18n('audit.all')]]</paper-item>
-                <template is="dom-repeat" items="[[eventCategories]]">
-                  <paper-item value="[[item.properties.id]]">[[_formati18n('eventCategory.' , item.properties.id)]]</paper-item>
-                </template>
-              </paper-listbox>
-            </paper-dropdown-menu>
+
+            <nuxeo-directory-suggestion class="item" role="widget"
+                                        label="[[i18n('audit.eventCategory')]]"
+                                        directory-name="eventCategories"
+                                        value="{{selectedEventCategory}}"
+                                        placeholder="[[i18n('audit.selectEventCategory')]]"
+                                        min-chars="0">
+            </nuxeo-directory-suggestion>
           </div>
         </paper-card>
 
@@ -101,7 +102,9 @@ Contributors:
             <template>[[formatDate(item.eventDate)]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
-            <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+            <template>
+              <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
+            </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
             <template>[[_formati18n('eventCategory.', item.category)]]</template>
@@ -128,53 +131,45 @@ Contributors:
         },
         selectedEventTypes: {
           type: Array,
-          value : []
+          value: []
         },
         selectedEventCategory: {
-          type: Number,
-          value : 0
+          type: String,
+          value: ''
         },
         startDate: {
           type: String,
-          value : ''
+          value: ''
         },
         endDate: {
           type: String,
-          value : ''
+          value: ''
         },
         principalName: {
           type: String,
-          value :  ''
+          value: ''
         }
       },
       observers: [
         '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
       ],
 
-      _visibleChanged: function() {
-        if (this.visible) {
-          this.$.eventCategories.get().then(function(response) {
-            this.eventCategories = response.entries;
-          }.bind(this));
-        }
-      },
-
       _formati18n: function(path, key) {
         return this.i18n(path + key);
       },
 
       /* Builds the parameters object to be used on the query */
-      _buildParams: function(){
+      _buildParams: function() {
         var params = {
-          endDate : this.endDate,
-          startDate : this.startDate,
-          principalName : this.principalName
+          endDate: this.endDate,
+          startDate: this.startDate,
+          principalName: this.principalName
         };
-        if (this.selectedEventTypes && this.selectedEventTypes.length > 0){
+        if (this.selectedEventTypes && this.selectedEventTypes.length > 0) {
           params.eventIds = this.selectedEventTypes.join();
         }
-        if (this.selectedEventCategory && this.selectedEventCategory > 0){
-          params.eventCategory = this.eventCategories[this.selectedEventCategory-1].properties.id;
+        if (this.selectedEventCategory) {
+          params.eventCategory = this.selectedEventCategory;
         }
         return params;
       },
