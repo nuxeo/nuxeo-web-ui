@@ -19,10 +19,16 @@ limitations under the License.
 <link rel="import" href="nuxeo-operation.html">
 
 <!--
-`nuxeo-audit-page-provider` performs an audit query with the given page provider name against audit logs.
+`nuxeo-audit-page-provider` performs an audit query with the given parameters against audit logs.
+If the property docId is set, the provider DOCUMENT_HISTORY_PROVIDER is used with docId as queryParameter.
+If the property docId is not set, the EVENTS_VIEW provider is used instead.
 
-    <nuxeo-audit-page-provider provider-name="EVENTS_VIEW"
+    <nuxeo-audit-page-provider
         current-page="{{entries}}" params="{...}" page-size="40'">
+    </nuxeo-audit-page-provider>
+
+    <nuxeo-audit-page-provider
+        current-page="{{entries}}" docId="..." page-size="40'">
     </nuxeo-audit-page-provider>
 
 @group Nuxeo Elements
@@ -58,7 +64,7 @@ limitations under the License.
         },
 
         /**
-         * If true, automatically execute the operation when either `providerName`, `params` or `queryParams` change.
+         * If true, automatically execute the operation when either `docId` or `params` change.
          */
         auto: {
           type: Boolean,
@@ -66,16 +72,11 @@ limitations under the License.
         },
 
         /**
-         * The delay in milliseconds to debounce the auto fetch call when provider, params, etc. changes.
+         * The delay in milliseconds to debounce the auto fetch call when `docId`, `params`, etc. changes.
          */
         autoDelay: {
           type: Number,
           value: 300
-        },
-
-        queryParams : {
-          type: String,
-          value: ''
         },
 
         /**
@@ -87,9 +88,10 @@ limitations under the License.
         },
 
         /**
-         * The name of the page provider
+         * The document id to retrieve the history from.
+         * When set, the provider DOCUMENT_HISTORY_PROVIDER is used.
          */
-        providerName : {
+        docId: {
           type: String,
           value: ''
         },
@@ -194,13 +196,13 @@ limitations under the License.
       },
 
       observers: [
-        '_autoFetch(params.*, queryParams,  pageSize, page, sort, providerName)'
+        '_autoFetch(params.*, docId,  pageSize, page, sort)'
       ],
 
       /**
        * Stringifies the elements of a given object
        */
-      _stringifyJSONObject : function(input){
+      _stringifyJSONObject : function(input) {
         var result = input;
         if (input !== null) {
           Object.keys(input).forEach(function(key) {
@@ -220,14 +222,13 @@ limitations under the License.
        */
       fetch: function() {
 
-        if (typeof this.providerName === "undefined" || this.providerName.length === 0) {
-          return;
-        }
         var namedQueryParams = this._stringifyJSONObject(this.params);
+        var queryParams = this.docId && this.docId.length > 0 ? this.docId : '';
+        var providerName = this.docId && this.docId.length > 0 ? "DOCUMENT_HISTORY_PROVIDER" : "EVENTS_VIEW";
 
         var params = {
-          providerName: this.providerName,
-          queryParams : this.queryParams,
+          providerName: providerName,
+          queryParams: queryParams,
           namedQueryParams: namedQueryParams,
           currentPageIndex: this.page - 1,
           pageSize: this.pageSize
@@ -260,9 +261,9 @@ limitations under the License.
       },
 
       _autoFetch: function () {
-          // if parameters changed, go back to page 1
+        // if parameters changed, go back to page 1
         if ((this.params && this._stringifyJSONObject(this.params) !== this.$.auditOp.params.namedQueryParams)
-          || (this.queryParams && this.queryParams !== this.$.auditOp.params.queryParams)) {
+          || (this.docId && this.docId !== this.$.auditOp.params.queryParams)) {
           this.page = 1;
         }
         if (this.auto) {
