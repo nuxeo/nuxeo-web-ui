@@ -151,7 +151,6 @@ Contributors:
     },
 
     _labelForInitiatedWf: function(workflow) {
-      console.log('pouet');
       if (this._isCurrentUser(workflow.initiator)) {
         return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
       } else {
