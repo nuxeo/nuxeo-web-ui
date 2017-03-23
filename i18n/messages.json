@@ -288,6 +288,7 @@
 	"audit.date": "Date",
 	"audit.empty": "No Results",
 	"audit.eventTypes": "Performed Actions",
+	"audit.eventCategory": "Event Category",
 	"audit.filters": "Filters",
 	"audit.from": "From",
 	"audit.heading": "Audit",
