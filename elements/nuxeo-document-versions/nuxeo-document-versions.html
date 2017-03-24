@@ -185,6 +185,10 @@ Contributors:
           pageSize: {
             type: Number,
             value: 100
+          },
+          noRedirect: {
+            type: Boolean,
+            value: false
           }
         },
         observers: [
@@ -238,12 +242,16 @@ Contributors:
 
         _showLatest: function() {
           this._hideList();
-          page('/browse' + this.document.path + '@view');
+          if (!noRedirect) {
+            page('/browse' + this.document.path + '@view');
+          }
         },
 
         _showVersion: function(e) {
           this._hideList();
-          page('/doc/' + e.model.item.uid);
+          if (!noRedirect) {
+            page('/doc/' + e.model.item.uid);
+          }
         },
 
         _labelLatest: function(doc) {
