@@ -192,9 +192,10 @@ Contributors:
         '_observeSelectedDocument(selectedDocument)'
       ],
 
-     
       _observeDocuments: function() {
-        this.docCount = this.documents.length;
+        if (this.documents) {
+          this.docCount = this.documents.length;
+        }
       },
 
       add: function (docs) {
@@ -274,11 +275,7 @@ Contributors:
         }
       },
 
-      _observeDocuments: function() {
-        if (this.documents) {
-          this.docCount = this.documents.length;
-        }
-      },
+
 
       _computedClass: function(isSelected) {
         var classes = 'list-item';
