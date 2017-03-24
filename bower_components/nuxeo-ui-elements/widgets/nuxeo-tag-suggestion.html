@@ -198,7 +198,7 @@ Polymer({
   _resultFormatter: function (tag) {
     var escapeHTML = window.Select2.util.escapeMarkup;
     if (tag.newTag) {
-        return "<span class='s2newTag'>" + escapeHTML(tag.displayLabel) + "</span>"
+        return "<span class='s2newTag'>" + "+ " +escapeHTML(tag.displayLabel) + "</span>"
     } else {
         return "<span class='s2existingTag'>" + escapeHTML(tag.displayLabel) + "</span>"
     }
