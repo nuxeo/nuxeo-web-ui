@@ -168,6 +168,7 @@ Contributors:
   <script>
     Polymer({
       is: 'nuxeo-clipboard',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
 
       properties: {
         documents: {
@@ -191,8 +192,6 @@ Contributors:
         '_observeSelectedDocument(selectedDocument)'
       ],
 
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
       add: function(doc) {
         return this.$.storage.add(doc);
       },
@@ -206,7 +205,7 @@ Contributors:
       },
 
       canPaste: function(documents, doc) {
-        return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
+        return documents && documents.length && this.hasFacet(doc, 'Folderish');
       },
 
       execute: function(evt) {
