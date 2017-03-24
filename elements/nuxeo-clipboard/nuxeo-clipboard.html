@@ -51,19 +51,24 @@ Contributors:
         @apply(--layout-center);
         @apply(--nuxeo-sidebar-item-theme);
         @apply(--nuxeo-sidebar-item-link);
-        padding: 1em;
+        padding: 0;
       }
 
       .item:hover {
         @apply(--nuxeo-block-hover);
       }
 
+      .item.selected {
+        @apply(--nuxeo-block-selected);
+      }
+
       .ellipsis {
         display: inline-block;
-        width: 80%;
+        width: 78%;
         vertical-align: middle;
         text-overflow: ellipsis;
         overflow: hidden;
+        padding: 1em;
       }
 
       .remove {
@@ -73,7 +78,7 @@ Contributors:
       }
 
       .container {
-        height: 100vh;
+        height: 92vh;
         @apply(--layout-vertical);
       }
 
@@ -96,6 +101,16 @@ Contributors:
         font-size: 1em;
       }
 
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 24px;
+        width: 24px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
+        vertical-align: middle
+      }
+
     </style>
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
 
@@ -107,15 +122,19 @@ Contributors:
 
     <div class="container">
       <div class="items">
-        <template is="dom-repeat" items="[[documents]]" as="document">
-          <div class="item">
-            <span class="flex">
-              <iron-icon icon="receipt" item-icon></iron-icon>
-              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-            </span>
-            <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
-          </div>
-        </template>
+        <iron-list items="[[documents]]" as="document"  selection-enabled>
+          <template>
+            <div class$="[[_computedClass(selected)]]">
+                <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">
+                  <div class="horizontal layout center" >
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]" />
+                  <span>[[document.title]]</span>
+                  </div>
+                </a>
+              <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+            </div>
+          </template>
+        </iron-list>
       </div>
 
         <div class="tip">
@@ -225,7 +244,17 @@ Contributors:
             target: this.targetDocument.uid
           };
         }
-      }
+      },
+      _thumbnail: function(doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        }
+      },
+      _computedClass: function(isSelected) {
+        return isSelected ? 'item selected' : 'item';
+      },
+
     });
   </script>
 </dom-module>
