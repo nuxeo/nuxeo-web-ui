@@ -431,6 +431,7 @@
 	"documentInfo.by": "By",
 	"documentInfo.contributors": "Contributors",
 	"documentInfo.created": "Created",
+	"documentInfo.lastModified": "Last Modified",
 	"documentInfo.process.running": "Running",
 	"documentInfo.process": "Process",
 	"documentInfo.state": "State",
