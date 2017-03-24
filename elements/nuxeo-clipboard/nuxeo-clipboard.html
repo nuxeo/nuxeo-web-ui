@@ -192,8 +192,27 @@ Contributors:
         '_observeSelectedDocument(selectedDocument)'
       ],
 
-      add: function(doc) {
-        return this.$.storage.add(doc);
+     
+      _observeDocuments: function() {
+        this.docCount = this.documents.length;
+      },
+
+      add: function (docs) {
+        var uids = [];
+
+        if (docs instanceof Array) {
+          docs.forEach(function (doc) {
+            this.$.storage.add(doc);
+          }.bind(this));
+          uids = docs.map(function(doc) {
+            return doc.uid;
+          });
+        }
+        else {
+          this.$.storage.add(docs);
+          uids.push(docs.uid);
+        }
+        this.fire('added-to-clipboard', {docIds : uids});
       },
 
       contains: function(doc) {
@@ -201,7 +220,8 @@ Contributors:
       },
 
       remove: function(doc) {
-        return this.$.storage.remove(doc);
+        this.$.storage.remove(doc);
+        this.fire('removed-from-clipboard', {docId : doc.uid});
       },
 
       canPaste: function(documents, doc) {
