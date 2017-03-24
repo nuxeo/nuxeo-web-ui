@@ -29,7 +29,7 @@ Contributors:
   <template>
     <style>
       :host {
-        @apply(--layout-vertical);
+        overflow: hidden;
       }
 
       .header {
@@ -46,24 +46,67 @@ Contributors:
         font-weight: 400;
       }
 
-      .item {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--nuxeo-sidebar-item-theme);
-        @apply(--nuxeo-sidebar-item-link);
-        padding: 1em;
+      .content {
+        @apply(--layout-vertical);
+        height: calc(100vh - 61px);
       }
 
-      .item:hover {
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        height: 100%;
+      }
+
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      .list-item:hover {
         @apply(--nuxeo-block-hover);
       }
 
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply(--nuxeo-block-selected);
+      }
+
+      .list-item-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .2em;
+      }
+
       .ellipsis {
-        display: inline-block;
-        width: 80%;
         vertical-align: middle;
         text-overflow: ellipsis;
         overflow: hidden;
+      }
+
+      .toolbar {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+        @apply(--nx-actions);
+        padding-bottom: 8px;
+      }
+
+      .tip {
+        color: var(--nuxeo-text-light, #939caa);
+        display: block;
+        font-weight: 300;
+        padding: 8px;
+        text-align: center;
+        font-size: 1em;
+      }
+
+      .queue-thumbnail,
+      .queue-thumbnail ::content img {
+        height: 24px;
+        width: 24px;
+        border-radius: 20px;
+        box-sizing: border-box;
+        margin-right: 8px;
       }
 
       .remove {
@@ -71,72 +114,61 @@ Contributors:
         width: 1.5em;
         height: 1.5em;
       }
-
-      .container {
-        height: 100vh;
-        @apply(--layout-vertical);
-      }
-
-      .items {
-        @apply(--layout-flex-auto)
-      }
-
-      .toolbar {
-        @apply(--layout-horizontal);
-        @apply(--layout-center-justified);
-        @apply(--nx-actions);
-      }
-
-      .tip {
-        color: var(--nuxeo-text-light, #939caa);
-        display: block;
-        font-weight: 300;
-        padding: 1.5em .7em;
-        text-align: center;
-        font-size: 1em;
-      }
-
     </style>
+
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
+    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
+                     params="[[_opParams(targetDocument)]]"></nuxeo-operation>
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
-    <template is="dom-if" if="[[!documents.length]]">
-      <span class="tip">[[i18n('clipboard.empty')]]</span>
-    </template>
-
-    <div class="container">
-      <div class="items">
-        <template is="dom-repeat" items="[[documents]]" as="document">
-          <div class="item">
-            <span class="flex">
-              <iron-icon icon="receipt" item-icon></iron-icon>
-              <a href$="[[urlFor('document', document.uid)]]" class="ellipsis">[[document.title]]</a>
-            </span>
-            <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+    <div class="content">
+      <nuxeo-data-list items="[[documents]]" id="list"
+                       selected-item="{{selectedDocument}}"
+                       selection-enabled as="document"
+                       empty-label="[[i18n('clipboard.empty')]]"
+                       empty-label-when-filtered="[[i18n('clipboard.empty')]]">
+        <template>
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+            <div class="list-item-box vertical layout">
+              <div class="list-item-info horizontal layout center">
+                <div class="vertical layout center">
+                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                </div>
+                <span class="list-item-title ellipsis flex">[[document.title]]</span>
+                <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+              </div>
+            </div>
           </div>
         </template>
+      </nuxeo-data-list>
+
+      <div class="tip">
+        [[i18n('clipboard.tip')]]
       </div>
 
-        <div class="tip">
-          [[i18n('clipboard.tip')]]
+      <div class="toolbar">
+        <div class="actions">
+          <paper-button id="paste" on-tap="execute" data-op="Document.Copy"
+                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+            <iron-icon icon="content-copy"></iron-icon>
+            [[i18n('clipboard.copy')]]
+          </paper-button>
+          <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
+          <paper-button id="move" on-tap="execute" data-op="Document.Move"
+                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+            <iron-icon icon="content-cut"></iron-icon>
+            [[i18n('clipboard.move')]]
+          </paper-button>
+          <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
         </div>
-        <div class="toolbar">
-          <div class="actions">
-            <paper-button id="paste" on-tap="execute" data-op="Document.Copy" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
-              <iron-icon icon="content-copy"></iron-icon>[[i18n('clipboard.copy')]]</paper-button>
-            <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
-            <paper-button id="move" on-tap="execute" data-op="Document.Move" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
-              <iron-icon icon="content-cut"></iron-icon>[[i18n('clipboard.move')]]</paper-button>
-            <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
-          </div>
-        </div>
+      </div>
     </div>
-    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]"></nuxeo-operation>
   </template>
   <script>
     Polymer({
       is: 'nuxeo-clipboard',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
 
       properties: {
         documents: {
@@ -147,18 +179,23 @@ Contributors:
           type: Object
         },
         docCount: {
-            type: Number,
-            notify: true
-         }
+          type: Number,
+          notify: true
+        },
+        selectedDocument: {
+          type: Object
+        }
       },
+
       observers: [
-        '_observeDocuments(documents.splices)'
+        '_observeDocuments(documents.splices)',
+        '_observeSelectedDocument(selectedDocument)'
       ],
 
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
       _observeDocuments: function() {
-        this.docCount = this.documents.length;
+        if (this.documents) {
+          this.docCount = this.documents.length;
+        }
       },
 
       add: function (docs) {
@@ -189,7 +226,7 @@ Contributors:
       },
 
       canPaste: function(documents, doc) {
-        return documents && documents.length && doc && doc.facets.indexOf('Folderish') !== -1;
+        return documents && documents.length && this.hasFacet(doc, 'Folderish');
       },
 
       execute: function(evt) {
@@ -201,6 +238,7 @@ Contributors:
       },
 
       _remove: function(evt) {
+        evt.stopImmediatePropagation();
         this.remove(evt.model.document);
       },
 
@@ -224,6 +262,33 @@ Contributors:
           return {
             target: this.targetDocument.uid
           };
+        }
+      },
+
+      _observeSelectedDocument: function(doc) {
+        if (doc) {
+          if (doc.isVersion) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
+        }
+      },
+
+
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _thumbnail: function(doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
         }
       }
     });
