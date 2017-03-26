@@ -194,7 +194,19 @@ Contributors:
         is: 'nuxeo-home',
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
         properties: {
+          repositoryName: {
+            type: String,
+            observer: '_repositoryChanged'
+          }
+        },
 
+        _repositoryChanged: function() {
+          this.$.latestQuery.fetch();
+          this._fetchFavorite(true).then(function(favorite) {
+            this.$.favoritesProvider.params = [favorite.uid];
+            this.$.favoritesProvider.page = 1;
+            this.$.favoritesProvider.fetch();
+          }.bind(this));
         },
 
         _navigate: function(e) {
@@ -203,7 +215,7 @@ Contributors:
             detail = {
               doc: e.detail.item
             };
-            page('/browse' + detail.doc.path);
+            this.navigateTo('browse', detail.doc.path);
           } else {
             detail = {
               doc: e.model.item
@@ -227,8 +239,11 @@ Contributors:
           }.bind(this));
         },
 
-        _fetchFavorite: function() {
-          if (this.favorite) {
+        _fetchFavorite: function(override) {
+          if (typeof override === 'undefined') {
+            override = false;
+          }
+          if (!override && this.favorite) {
             return Promise.resolve(this.favorite);
           } else {
             return this.$.fetchFavOp.execute()

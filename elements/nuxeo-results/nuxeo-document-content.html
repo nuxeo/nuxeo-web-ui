@@ -385,7 +385,7 @@ Contributors:
           var detail = {
             doc: e.detail.item,
           };
-          page('/browse' + detail.doc.path);
+          this.navigateTo('browse', detail.doc.path);
         },
 
         _dragoverImport: function(e) {
@@ -411,7 +411,7 @@ Contributors:
         },
 
         _displayModeStorageName: function(document) {
-          return (document) ? this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid : '';
+          return (document && this.$.nxcon.user) ? this.$.nxcon.user.id + '-nx-browse-settings-' + document.uid : '';
         },
 
         _handleDocumentCreated: function() {

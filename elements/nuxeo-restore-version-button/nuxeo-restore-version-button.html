@@ -67,7 +67,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-restore-version-button',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
         properties: {
           document: Object,
           latest: Object
@@ -101,7 +101,7 @@ Contributors:
             this.$.opRestoreVersion.params = {checkout: true};
             this.$.opRestoreVersion.execute().then(function() {
               this.fire('document-updated');
-              page('/browse' + this.document.path + '@view');
+              this.navigateTo('browse', this.document.path + '@view');
             }.bind(this));
           }
         }

@@ -166,9 +166,9 @@ Contributors:
       _selectedRecentChanged: function(doc) {
         if (doc) {
           if (doc.isVersion) {
-            page('/doc/' + doc.uid);
+            this.navigateTo('document', doc.uid);
           } else {
-            page('/browse' + doc.path);
+            this.navigateTo('browse', doc.path);
           }
         }
       }

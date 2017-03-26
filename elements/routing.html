@@ -28,9 +28,84 @@ Contributors:
     // strip final /
     page.base(app.baseUrl.replace(/\/$/, ''));
 
+    page.url = function(path) {
+      return page.base() + '/' + (useHashbang ? '#!' : '') + path;
+    };
+
     // Middleware
     function scrollToTop(ctx, next) {
       next();
+    }
+
+    // repo switching
+    function handleRepo(repo) {
+      if (repo !== app.repositoryName) {
+        app.changeRepository(repo);
+        computeRouter();
+        document.dispatchEvent(new Event('router-changed'));
+      }
+    }
+
+    function computeRouter() {
+      var router = {
+        browse: function(path) {
+          return page.url('/browse/' + app.repositoryName + path);
+        },
+
+
+        document: function(id) {
+          return page.url('/doc/' + app.repositoryName + '/' + id);
+        },
+
+
+        home: function() {
+          return page.url('/home/' + app.repositoryName + '/' );
+        },
+
+
+        search: function(searchId) {
+          return page.url('/search/' + app.repositoryName + '/'  + searchId);
+        },
+
+
+        queue: function(searchId) {
+          return page.url('/queue/' + searchId);
+        },
+
+
+        tasks: function() {
+          return page.url('/tasks/' + app.repositoryName + '/');
+        },
+
+
+        administration: function(tab) {
+          return page.url('/admin/' + app.repositoryName + '/' + tab);
+        },
+
+
+        user: function(name) {
+          return page.url('/user/' + name);
+        },
+
+
+        group: function(name) {
+          return page.url('/group/' + name);
+        },
+
+
+        page: function(name) {
+          return page.url('/' + name + '/' + app.repositoryName + '/' );
+        }
+      };
+      if (!Polymer.Base.router) {
+        Polymer.Base._addFeature({
+          router: router,
+          baseUrl: page.base()
+        });
+      } else {
+        Polymer.Base.router = router;
+      }
+      document.dispatchEvent(new Event('router-changed'));
     }
 
     // Routes
@@ -43,117 +118,90 @@ Contributors:
     });
 
     page('/home', function() {
+      page.redirect('/home/' + app.repositoryName);
+    });
+
+    page('/home/:repo', function(data) {
+      handleRepo(data.params.repo);
       app.show('home');
     });
 
     page('/browse', function() {
+      page.redirect('/browse/' + app.repositoryName);
+    });
+
+    page('/browse/:repo', function(data) {
+      handleRepo(data.params.repo);
       app.load('browse', '', '/', 'view');
     });
 
-    // /browse/<path>@<action>
-    page(/^\/browse\/([^@]*)(?:@(.*))?/, function(data) {
+    // /browse/<repository>/<path>@<action>
+    page(/^\/browse\/([^@\/]+)\/([^@]*)(?:@(.*))?/, function(data) {
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
-      app.load('browse', '', '/' + data.params[0], data.params[1] || 'view');
+      handleRepo(data.params[0]);
+      app.load('browse', '', '/' + data.params[1], data.params[2] || 'view');
     });
 
-    page('/search/:searchName', function(data) {
+    page('/search/:repo/:searchName', function(data) {
       app.searchName = data.params.searchName;
+      handleRepo(data.params.repo);
       app.show('search');
     });
 
-    page('/doc/:repo?/:id/', function(data) {
+    page('/doc/:repo/:id/', function(data) {
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
+      handleRepo(data.params.repo);
       app.load('browse', data.params.id, '', 'view');
     });
 
-    page('/admin/:tab?', function(data) {
+    page('/admin/:repo/:tab?', function(data) {
       if (data.params.tab) {
         app.selectedAdminTab = data.params.tab;
       }
       app.entity = {};
+      handleRepo(data.params.repo);
       app.show('admin');
     });
 
-    page('/admin/user-group-management/:type/:id', function(data) {
+    page('/admin/:repo/user-group-management/:type/:id', function(data) {
       app.selectedAdminTab = 'user-group-management';
       app.entity = {type: data.params.type, id: data.params.id};
+      handleRepo(data.params.repo);
       app.show('admin');
     });
 
     page('/user/:id', function(data) {
-      page.redirect('/admin/user-group-management/user/' + data.params.id);
+      page.redirect('/admin/' + app.repositoryName + '/user-group-management/user/' + data.params.id);
     });
 
     page('/group/:id', function(data) {
       app.entity = {type: 'group', id: data.params.id};
-      page.redirect('/admin/user-group-management/group/' + data.params.id);
+      page.redirect('/admin/'+ app.repositoryName + '/user-group-management/group/' + data.params.id);
     });
 
-    page('/tasks', function() {
+    page('/tasks/:repo', function(data) {
       app.currentTask = null;
+      handleRepo(data.params.repo);
       app.show('tasks');
     });
 
-    page('/:page', function(ctx) {
-      app.show(ctx.params.page);
+    page('/:page', function(data) {
+      page.redirect('/' + data.params.page + '/' + app.repositoryName);
+    });
+
+    page('/:page/:repo', function(data) {
+      handleRepo(data.params.repo);
+      app.show(data.params.page);
     });
 
     // add #! before urls
     var useHashbang = true;
     page({hashbang: true, click: false});
-    page.url = function(path) {
-      return page.base() + '/' + (useHashbang ? '#!' : '') + path;
-    };
 
-    Polymer.Base._addFeature({
-      router: {
-        browse: function(path) {
-          return page.url('/browse' + path);
-        },
-
-        document: function(id) {
-          return page.url('/doc/' + id);
-        },
-
-        home: function() {
-          return page.url('/home');
-        },
-
-        search: function(searchId) {
-          return page.url('/search/' + searchId);
-        },
-
-        queue: function(searchId) {
-          return page.url('/queue/' + searchId);
-        },
-
-        tasks: function() {
-          return page.url('/tasks');
-        },
-
-        administration: function(tab) {
-          return page.url('/admin/' + tab);
-        },
-
-        user: function(name) {
-          return page.url('/user/' + name);
-        },
-
-        group: function(name) {
-          return page.url('/group/' + name);
-        },
-
-        page: function(name) {
-          return page.url('/' + name);
-        }
-
-      },
-      baseUrl: page.base()
-    });
-    document.dispatchEvent(new Event('router-changed'));
+    computeRouter();
   });
 </script>

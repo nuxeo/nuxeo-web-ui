@@ -334,6 +334,10 @@ Contributors:
           visible: {
             type: Boolean,
             observer: '_visibleChanged'
+          },
+          repositoryName: {
+            type: Boolean,
+            observer: '_repositoryChanged'
           }
         },
 
@@ -464,9 +468,9 @@ Contributors:
         _selectedMemberChanged: function(doc) {
           if (doc) {
             if (doc.isVersion) {
-              page('/doc/' + doc.uid);
+              this.navigateTo('document', doc.uid);
             } else {
-              page('/browse' + doc.path);
+              this.navigateTo('browse', doc.path);
             }
           }
         },
@@ -519,6 +523,10 @@ Contributors:
           if (this.$.collectionsProvider.resultsCount === undefined) {
             this.$.collectionsProvider.fetch();
           }
+        },
+
+        _repositoryChanged: function() {
+          this.$.collectionsProvider.fetch();
         },
 
         _formatDate: function(date) {

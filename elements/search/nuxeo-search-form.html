@@ -357,7 +357,7 @@ Contributors:
       Polymer({
         is: 'nuxeo-search-form',
 
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
 
         properties: {
           selectedSearch: {
@@ -464,6 +464,10 @@ Contributors:
           displayAutoControl: {
             type: Boolean,
             value: false
+          },
+          repositoryName: {
+            type: Boolean,
+            observer: '_repositoryChanged'
           }
         },
 
@@ -536,7 +540,7 @@ Contributors:
 
         _selectedDocChanged: function(doc) {
           if (doc) {
-            page('/browse' + doc.path);
+            this.navigateTo('browse', doc.path);
           }
         },
 
@@ -756,6 +760,12 @@ Contributors:
             }
           }.bind(this));
           this.form.addEventListener('trigger-search', this._search.bind(this));
+        },
+
+        _repositoryChanged: function() {
+          if (this.visible && this.queue) {
+            this.$.provider.fetch();
+          }
         }
 
       });

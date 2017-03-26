@@ -332,7 +332,7 @@ Contributors:
             detail = {
               doc: e.detail.item
             };
-            page('/browse' + detail.doc.path);
+            this.navigateTo('browse', detail.doc.path);
           } else {
             detail = {
               doc: e.model.item
