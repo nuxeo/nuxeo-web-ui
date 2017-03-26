@@ -1,5 +1,5 @@
 <!--
-(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+(C) Copyright 2017 Nuxeo (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,18 +12,24 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-  Guillaume Renard <grenard@nuxeo.com>
 -->
+<link rel="import" href="../default/nuxeo-default-search-results.html">
 
-<nuxeo-slot-content name="defaultBulkActions" slot="RESULTS_SELECTION_ACTIONS">
+<!--
+`nuxeo-expired-search-results`
+@group Nuxeo UI
+@element nuxeo-expired-search-results
+-->
+<dom-module id="nuxeo-expired-search-results">
   <template>
-    <nuxeo-add-to-collection-documents-button documents="{{selectedItems}}">
-    </nuxeo-add-to-collection-documents-button>
-    <nuxeo-clipboard-documents-button documents="{{selectedItems}}">
-    </nuxeo-clipboard-documents-button>
-    <nuxeo-delete-documents-button documents="{{selectedItems}}">
-    </nuxeo-delete-documents-button>
+    <nuxeo-default-search-results nx-provider="[[nxProvider]]"></nuxeo-default-search-results>
   </template>
-</nuxeo-slot-content>
+  <script>
+    Polymer({
+      is: 'nuxeo-expired-search-results',
+      properties: {
+        nxProvider: Object
+      }
+    });
+  </script>
+</dom-module>
