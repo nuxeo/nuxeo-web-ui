@@ -28,38 +28,16 @@ Contributors:
       :host {
         display: block;
       }
-
       .row {
+        @apply(--layout-vertical);
         box-sizing: border-box;
         margin-bottom: 1rem;
         padding: 0 1rem;
         width: 100%;
       }
-
-      label {
-        color: #434343;
-        font-size: 0.8em;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-
-      input {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: .2em;
-        box-sizing: border-box;
-        color: rgba(0,0,0,.75);
-        display: block;
-        font-size: 0.8em;
-        height: 2rem;
-        margin: 0;
-        padding: .5rem;
-        width: 100%;
-      }
-
     </style>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.fullText')]]</label>
       <paper-input id="searchInput" autofocus="true"
                    value="{{searchTerm}}" tabindex="0"
@@ -69,7 +47,7 @@ Contributors:
       </paper-input>
     </div>
 
-    <div class="row layout vertical">
+    <div class="row">
       <label>[[i18n('defaultSearch.authors')]]</label>
       <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
@@ -80,53 +58,47 @@ Contributors:
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-expired-search-form',
-
-        properties: {
-          params: {
-            type: Object,
-            value: function() {
-              var oneWeekAgo = new Date();
-              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-              return {
-                "expired_max" : oneWeekAgo.toJSON()
-              }
-            },
-            notify: true
-          },
-          aggregations: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          searchTerm: {
-            type: String,
-            notify: true,
-            observer: '_addFullTextSearch'
-          }
-        },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        _addFullTextSearch: function() {
-          if (this.searchTerm) {
-            this.set('params.title', this.searchTerm + '*');
-          } else {
-            if (this.params.ecm_fulltext) {
-              this.set('params.title', '');
-              delete this.params.title;
+    Polymer({
+      is: 'nuxeo-expired-search-form',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: function() {
+            var oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            return {
+              "expired_max" : oneWeekAgo.toJSON()
             }
-          }
+          },
+          notify: true
         },
-
-        clear: function() {
-          this.searchTerm = '';
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        searchTerm: {
+          type: String,
+          notify: true,
+          observer: '_addFullTextSearch'
         }
-      });
-    })();
+      },
+
+      _addFullTextSearch: function() {
+        if (this.searchTerm) {
+          this.set('params.title', this.searchTerm + '*');
+        } else {
+          if (this.params.ecm_fulltext) {
+            this.set('params.title', '');
+            delete this.params.title;
+          }
+        }
+      },
+
+      clear: function() {
+        this.searchTerm = '';
+      }
+    });
   </script>
 </dom-module>

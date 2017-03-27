@@ -23,51 +23,17 @@ limitations under the License.
   <template>
     <style>
 
-      nuxeo-data-grid {
-        display: block;
-        position: relative;
-      }
-
-      nuxeo-data-table ::content #items {
-        background-color: #fff;
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-row:not([header]):hover {
-        @apply(--nuxeo-block-hover);
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-checkbox {
-        flex-basis: 30px;
-        border-right: none;
-      }
-
-      nuxeo-data-table ::content #container.nuxeo-data-table-checkbox {
-        border: 1px solid var(--nuxeo-text-light);
-      }
-
-      nuxeo-data-table ::content *[checked] #container.nuxeo-data-table-checkbox {
-        border-color: #75b226 !important;
-        background-color: #75b226 !important;
-      }
-
-      nuxeo-data-table ::content #container iron-list#list::after {
-        background-color: transparent;
-        content:'';
-        display: block;
-        height: 4em;
-      }
-
       nuxeo-data-table {
         min-height: calc(100vh - 9.3em);
       }
 
       nuxeo-data-grid {
-        min-height: calc(100vh - 8em);
+        display: block;
+        position: relative;
       }
 
-      nuxeo-document-grid-thumbnail.selected ::content div.title,
-      nuxeo-data-table ::content nuxeo-data-table-row[selected] a.title {
-        font-weight: bold;
+      nuxeo-data-grid {
+        min-height: calc(100vh - 8em);
       }
 
       .ellipsis {
@@ -96,7 +62,6 @@ limitations under the License.
         box-sizing: border-box;
         margin-right: 8px;
       }
-
     </style>
 
     <nuxeo-results id="results" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">

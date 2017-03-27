@@ -28,38 +28,16 @@ Contributors:
       :host {
         display: block;
       }
-
       .row {
+        @apply(--layout-vertical);
         box-sizing: border-box;
         margin-bottom: 1rem;
         padding: 0 1rem;
         width: 100%;
       }
-
-      label {
-        color: #434343;
-        font-size: 0.8em;
-        font-weight: 700;
-        margin-bottom: 5px;
-      }
-
-      input {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: .2em;
-        box-sizing: border-box;
-        color: rgba(0,0,0,.75);
-        display: block;
-        font-size: 0.8em;
-        height: 2rem;
-        margin: 0;
-        padding: .5rem;
-        width: 100%;
-      }
-
     </style>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.fullText')]]</label>
       <paper-input id="searchInput" autofocus="true"
                    on-keydown="_checkForEnter"
@@ -70,7 +48,7 @@ Contributors:
       </paper-input>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.creationDate')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_created_agg]]"
@@ -78,7 +56,7 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.modifiedDate')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
@@ -86,7 +64,7 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div class="row layout vertical">
+    <div class="row">
       <label>[[i18n('defaultSearch.authors')]]</label>
       <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
@@ -95,7 +73,7 @@ Contributors:
       </nuxeo-dropdown-aggregation>
     </div>
 
-    <div class="row layout vertical">
+    <div class="row">
       <label>[[i18n('defaultSearch.collections')]]</label>
       <nuxeo-select2 operation="User.GetCollections"
                      min-chars="0"
@@ -105,7 +83,7 @@ Contributors:
       </nuxeo-select2>
     </div>
 
-    <div class="row layout vertical">
+    <div class="row">
       <label>[[i18n('defaultSearch.tags')]]</label>
       <nuxeo-tag-suggestion min-chars="1"
                      placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
@@ -114,7 +92,7 @@ Contributors:
       </nuxeo-tag-suggestion>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.nature')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_nature_agg]]"
@@ -122,7 +100,7 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.subject')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
@@ -130,7 +108,7 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.coverage')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
@@ -138,7 +116,7 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div class="layout vertical row">
+    <div class="row">
       <label>[[i18n('defaultSearch.size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
@@ -146,54 +124,51 @@ Contributors:
       </nuxeo-checkbox-aggregation>
     </div>
   </template>
+
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-default-search-form',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          params: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          aggregations: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          searchTerm: {
-            type: String,
-            notify: true,
-            observer: '_addFullTextSearch'
-          }
+    Polymer({
+      is: 'nuxeo-default-search-form',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true
         },
-
-        _addFullTextSearch: function() {
-          if (this.searchTerm) {
-            this.set('params.ecm_fulltext', this.searchTerm + '*');
-          } else {
-            if (this.params.ecm_fulltext) {
-              this.set('params.ecm_fulltext', '');
-              // dirty but needed, the above line for
-              // ecm_fulltext removal being observed
-              delete this.params.ecm_fulltext;
-            }
-          }
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
         },
-
-        _checkForEnter: function (e) {
-            if (e.keyCode === 13) {
-                this.fire('trigger-search');
-            }
-        },
-
-        clear: function() {
-          this.searchTerm = '';
+        searchTerm: {
+          type: String,
+          notify: true,
+          observer: '_addFullTextSearch'
         }
-      });
-    })();
+      },
+
+      _addFullTextSearch: function() {
+        if (this.searchTerm) {
+          this.set('params.ecm_fulltext', this.searchTerm + '*');
+        } else {
+          if (this.params.ecm_fulltext) {
+            this.set('params.ecm_fulltext', '');
+            // dirty but needed, the above line for
+            // ecm_fulltext removal being observed
+            delete this.params.ecm_fulltext;
+          }
+        }
+      },
+
+      _checkForEnter: function (e) {
+          if (e.keyCode === 13) {
+              this.fire('trigger-search');
+          }
+      },
+
+      clear: function() {
+        this.searchTerm = '';
+      }
+    });
   </script>
 </dom-module>
