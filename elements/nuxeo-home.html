@@ -182,7 +182,25 @@ Contributors:
       is: 'nuxeo-home',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
       properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      },
 
+      _visibleChanged: function(visible) {
+        if (visible) {
+          this._refresh();
+        }
+      },
+
+      _refresh: function() {
+        this.$.latestQuery.fetch();
+        this._fetchFavorite().then(function(favorite) {
+          this.$.favoritesProvider.params = [favorite.uid];
+          this.$.favoritesProvider.page = 1;
+          this.$.favoritesProvider.fetch();
+        }.bind(this));
       },
 
       _navigate: function(e) {
@@ -198,14 +216,6 @@ Contributors:
           };
         }
         this.fire('navigate', detail);
-      },
-
-      ready: function() {
-        this._fetchFavorite().then(function(favorite) {
-          this.$.favoritesProvider.params = [favorite.uid];
-          this.$.favoritesProvider.page = 1;
-          this.$.favoritesProvider.fetch();
-        }.bind(this));
       },
 
       _fetchFavorite: function() {

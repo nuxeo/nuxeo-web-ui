@@ -17,8 +17,6 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
   Guillaume Renard <grenard@nuxeo.com>
 -->
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
 `nuxeo-search-results`
@@ -54,7 +52,7 @@ Contributors:
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('searchResults.results')]]</span>
-        <nuxeo-saved-search-actions id="actions" class="actions"></nuxeo-saved-search-actions>
+        <nuxeo-saved-search-actions id="actions" class="actions" search-form="[[searchForm]]"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
         <nuxeo-layout id="results" href="[[_resultsHref]]" model="[[_resultsModel]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]"></nuxeo-layout>
@@ -69,6 +67,13 @@ Contributors:
 
       behaviors: [Nuxeo.I18nBehavior],
 
+      properties: {
+        searchForm: {
+          type: Object,
+          observer: '_searchFormChanged'
+        }
+      },
+
       listeners: {
         'results.navigate' : '_navigateFromSearch'
       },
@@ -77,19 +82,13 @@ Contributors:
         return this.$.results.element;
       },
 
-      set searchForm(searchForm) {
+      _searchFormChanged: function(searchForm) {
         this.nxProvider = searchForm.nxProvider;
         this.searchName = searchForm.searchName;
 
         var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-        this._resultsHref = this.resolveUrl(this.searchName.toLowerCase() + '/' + name + '.html');
+        this._resultsHref = this.resolveUrl(['search', this.searchName.toLowerCase(), name + '.html'].join('/'));
         this._resultsModel = { nxProvider: this.nxProvider, name: this.searchName };
-
-        this.$.actions.searchForm = searchForm;
-      },
-
-      get searchForm() {
-        return this.$.actions.searchForm;
       },
 
       _navigateFromSearch: function(e) {

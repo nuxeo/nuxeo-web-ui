@@ -82,7 +82,7 @@ var imageOptimizeTask = function(src, dest) {
 var optimizeHtmlTask = function(src, dest) {
   return gulp.src(src)
     // Replace path for vulcanized assets
-      .pipe($.if('*.html', $.replace('elements/elements.html', 'elements/elements.vulcanized.html')))
+      .pipe($.if('*.html', $.replace('elements/elements.html', 'elements.vulcanized.html')))
     // Concatenate and minify JavaScript
       .pipe($.if('*.js', $.uglify({
         preserveComments: 'some'
@@ -157,7 +157,7 @@ gulp.task('copy', function() {
     'elements/**/*.css',
     'elements/**/*.js'
   ])
-    .pipe(gulp.dest(dist('elements')));
+    .pipe(gulp.dest(dist()));
 
   var swBootstrap = gulp.src(['bower_components/platinum-sw/bootstrap/*.js'])
     .pipe(gulp.dest(dist('elements/bootstrap')));
@@ -167,7 +167,7 @@ gulp.task('copy', function() {
 
   var vulcanized = gulp.src(['elements/elements.html'])
     .pipe($.rename('elements.vulcanized.html'))
-    .pipe(gulp.dest(dist('elements')));
+    .pipe(gulp.dest(dist()));
 
   return merge(app, bower, elements, vulcanized, swBootstrap, swToolbox)
     .pipe($.size({
@@ -204,15 +204,14 @@ gulp.task('merge-message-files', function() {
 
 // Vulcanize granular configuration
 gulp.task('vulcanize', function() {
-  var DEST_DIR = dist('elements');
-  return gulp.src(dist('elements/elements.vulcanized.html'))
+  return gulp.src(dist('elements.vulcanized.html'))
       .pipe($.vulcanize({
         stripComments: true,
         inlineCss: true,
         inlineScripts: true
       }))
       //.pipe($.minifyInline())
-      .pipe(gulp.dest(DEST_DIR))
+      .pipe(gulp.dest(dist()))
       .pipe($.size({title: 'vulcanize'}));
 });
 

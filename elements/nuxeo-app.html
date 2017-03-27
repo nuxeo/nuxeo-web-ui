@@ -18,14 +18,14 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
   Gabriel Barata <gbarata@nuxeo.com>
 -->
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
-<link rel="import" href="nuxeo-menu-item.html">
-<link rel="import" href="nuxeo-menu-icon.html">
-<script src="nuxeo-doc-types.js"></script>
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="nuxeo-app/nuxeo-menu-item.html">
+<link rel="import" href="nuxeo-app/nuxeo-menu-icon.html">
+<script src="nuxeo-app/nuxeo-doc-types.js"></script>
 
 <!--
 `nuxeo-app`
@@ -323,12 +323,11 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-layout id="home" name="home" href="[[resolveUrl('../nuxeo-home.html')]]" error="[[i18n('app.homeNotFound')]]" model="[[_homeModel(tasks)]]">
-          </nuxeo-layout>
+          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
-          <nuxeo-search-results name="search" id="searchResults"></nuxeo-search-results>
+          <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
 
           <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
 
@@ -350,7 +349,7 @@ Contributors:
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]" hidden$="[[isMobile]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
-    <paper-progress id="loading" indeterminate></paper-progress>
+    <paper-progress id="loading" indeterminate hidden$="[[!loading]]"></paper-progress>
     <paper-toast id="toast"></paper-toast>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
@@ -380,7 +379,8 @@ Contributors:
 
           loading: {
             type: Boolean,
-            value: false
+            value: false,
+            observer: '_updateLoading'
           },
 
           animationConfig: {
@@ -396,7 +396,11 @@ Contributors:
             }
           },
 
-          page: String,
+          page: {
+            type: String,
+            observer: '_pageChanged'
+          },
+
           selectedTab: String,
           selectedAdminTab: String,
 
@@ -508,8 +512,6 @@ Contributors:
 
         load: function(page, id, path, action) {
           this.loading = true;
-          this.playAnimation('loading');
-          this.$.loading.style.display = 'block';
           this.docId = id;
           this.docPath = path;
           this.docAction = action;
@@ -523,6 +525,7 @@ Contributors:
               this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
                 doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
               this.set('currentDocument', doc);
+              this.loading = false;
               this.show(page);
             }
           }.bind(this));
@@ -530,8 +533,12 @@ Contributors:
 
         show: function(page) {
           this.page = page;
-          this.loading = false;
-          this.$.loading.style.display = 'none';
+        },
+
+        _updateLoading: function(loading) {
+          if (loading) {
+            this.playAnimation('loading');
+          }
         },
 
         _logo: function(baseUrl) {
@@ -573,10 +580,7 @@ Contributors:
         },
 
         _updateSearch: function() {
-          var searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
-          if (searchForm) {
-            this.$.searchResults.searchForm = searchForm;
-          }
+          this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
         },
 
         _showSearchResults: function(e) {
@@ -781,8 +785,25 @@ Contributors:
           return this.$.nxcon.url + '/logout';
         },
 
-        _homeModel: function() {
-          return {tasks: this.tasks};
+        _pageChanged: function(page) {
+          if (page !== null) {
+            var el = this.$.pages.selectedItem;
+            // selectItem might be undefined
+            // https://github.com/PolymerElements/iron-pages/issues/52
+            if (!el) {
+              el = Polymer.dom(this.$.pages).querySelector('[name=' + page + ']');
+            }
+            // check if page is already registered (vulcanized)
+            if (!Polymer.isInstance(el)) {
+              this.loading = true;
+              var tag = el.tagName.toLowerCase();
+              this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, null, true);
+            }
+          }
+        },
+
+        _pageLoaded: function() {
+          this.loading = false;
         }
 
       });
