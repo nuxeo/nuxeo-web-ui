@@ -23,33 +23,6 @@ limitations under the License.
   <template>
     <style>
 
-      nuxeo-data-grid {
-        display: block;
-        position: relative;
-      }
-
-      nuxeo-data-table ::content #items {
-        background-color: #fff;
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-row:not([header]):hover {
-        @apply(--nuxeo-block-hover);
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-checkbox {
-        flex-basis: 30px;
-        border-right: none;
-      }
-
-      nuxeo-data-table ::content #container.nuxeo-data-table-checkbox {
-        border: 1px solid var(--nuxeo-text-light);
-      }
-
-      nuxeo-data-table ::content *[checked] #container.nuxeo-data-table-checkbox {
-        border-color: var(--nuxeo-validated) !important;
-        background-color: var(--nuxeo-validated) !important;
-      }
-
       nuxeo-data-table {
         min-height: calc(100vh - 9.3em);
       }
@@ -58,9 +31,9 @@ limitations under the License.
         min-height: calc(100vh - 8em);
       }
 
-      nuxeo-document-grid-thumbnail.selected ::content div.title,
-      nuxeo-data-table ::content nuxeo-data-table-row[selected] a.title {
-        font-weight: bold;
+      nuxeo-data-grid {
+        display: block;
+        position: relative;
       }
 
       .ellipsis {
