@@ -7,11 +7,10 @@
         flex-basis: 48px;
         flex-grow: 0;
         flex-shrink: 0;
-        padding: 0 8px 0 12px;
+        padding: 0 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-right: 1px solid #e3e3e3;
       }
 
       :host([header]) {
@@ -31,8 +30,7 @@
         box-sizing: border-box;
         height: 18px;
         width: 18px;
-        border: solid 2px;
-        border-color: var(--primary-text-color);
+        border: 1px solid var(--primary-text-color);
         border-radius: 2px;
         pointer-events: none;
         -webkit-transition: background-color 140ms, border-color 140ms;
@@ -40,8 +38,8 @@
       }
 
       :host([checked]) #container {
-        border-color: var(--default-primary-color);
-        background-color: var(--default-primary-color);
+        border-color: var(--paper-checkbox-checked-color);
+        background-color: var(--paper-checkbox-checked-color);
       }
 
       :host([checked]) .checkmark {
