@@ -40,19 +40,10 @@ Contributors:
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('searchResults.results')]]</span>
-        <nuxeo-saved-search-actions id="actions" class="actions" search-doc="[[searchDoc]]" search-loaded="[[searchLoaded]]" dirty="[[dirty]]"></nuxeo-saved-search-actions>
+        <nuxeo-saved-search-actions id="actions" class="actions"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
-        <nuxeo-results id="results"
-                       display-mode="[[displayMode]]"
-                       selected-items="{{selectedItems}}"
-                       empty-label="[[i18n('searchResults.noResults')]]"
-                       empty-label-when-filtered="[[i18n('searchResults.noResults')]]"
-                       on-navigate="_navigateFromSearch">
-          <div class="actions">
-            <nuxeo-slot slot="SEARCH_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          </div>
-        </nuxeo-results>
+        <nuxeo-layout id="results" href="[[_resultsHref]]" model="[[_resultsModel]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]"></nuxeo-layout>
       </div>
     </nuxeo-page>
 
@@ -66,29 +57,33 @@ Contributors:
 
         behaviors: [Nuxeo.I18nBehavior],
 
-        properties: {
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(selectedItems)'
-          }
+        listeners: {
+          'results.navigate' : '_navigateFromSearch'
+        },
+
+        get element() {
+          return this.$.results.element;
         },
 
         set searchForm(searchForm) {
-          this._searchForm = searchForm;
-          this.$.results.searchName = searchForm.name;
-          this.$.results.nxProvider = searchForm.nxProvider;
+          this.nxProvider = searchForm.nxProvider;
+          this.searchName = searchForm.searchName;
+
+          var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
+          this._resultsHref = this.resolveUrl(this.searchName.toLowerCase() + '/' + name + '.html');
+          this._resultsModel = { nxProvider: this.nxProvider, name: this.searchName };
+
           this.$.actions.searchForm = searchForm;
         },
 
-
-        _navigateFromSearch: function(e) {
-          if (this._searchForm) {
-            this._searchForm.displayQueue(e.detail.doc);
-          }
+        get searchForm() {
+          return this.$.actions.searchForm;
         },
 
-        _actionContext: function() {
-          return {selectedItems: this.selectedItems, items: this.$.results.items};
+        _navigateFromSearch: function(e) {
+          if (this.searchForm) {
+            this.searchForm.displayQueue(e.detail.doc);
+          }
         }
 
       });

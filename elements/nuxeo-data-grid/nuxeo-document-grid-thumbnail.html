@@ -142,6 +142,25 @@ Contributors:
         cursor: pointer;
       }
 
+      :host[selected] .bubbleBox .select,
+      :host[selected] .bubbleBox:hover .select:hover {
+        border: 2px solid var(--nuxeo-validated);
+        background-color: var(--nuxeo-validated);
+        cursor: pointer;
+        display: block;
+      }
+
+      :host[selected] .select paper-icon-button {
+        color: #fff;
+      }
+
+      :host[selected] .bubbleBox {
+        filter: brightness(102%);
+        -webkit-filter: brightness(102%);
+        border-bottom: 3px solid var(--nuxeo-validated);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      }
+
     </style>
 
     <div class="bubbleBox">
@@ -182,7 +201,8 @@ Contributors:
           },
           selected: {
             type: Boolean,
-            value: false
+            value: false,
+            reflectToAttribute: true
           }
         },
 
@@ -206,6 +226,7 @@ Contributors:
         },
 
         _onCheckBoxTap: function() {
+          this.selected = !this.selected;
           this.fire('selected');
         }
       });

@@ -20,10 +20,26 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-results/nuxeo-result-behavior.html">
 
 <!--
-`nuxeo-results`
+An element to display results from a page provider.
+
+It supports multiple display modes and handles toggling between them.
+Each display mode is associated to a display element which has to be declared as a children with `class="results"` and
+must also have a `name` and `icon` to be used as toggle button, ex:
+
+  <nuxeo-datatable class="results" name="table" icon="icon="icons:list">
+
+The current page provider will be injected in each view as `nxProvider` so a property with this name should be available
+in each results element.
+
+`<nuxeo-results>` handles also storing of settings for each view in local storage in which case result elements should
+expose a `settings` property.
+
+It will also handle refresh and selection actions so it expects elements to include `Polymer.IronResizableBehavior`,
+a `selectedItems` property and expose a small API (`clearSelection()`, `selectItems()`) part of
+`Nuxeo.PageProviderDisplayBehavior`.
+
 @group Nuxeo UI
 @element nuxeo-results
 -->
@@ -32,10 +48,15 @@ Contributors:
 
     <style>
 
+      .displayMode {
+        background: white;
+        color: var(--nuxeo-action-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 4px;
+      }
+
       .main {
         @apply(--layout-vertical);
-        @apply(--layout-fit);
-        padding: 1.5em 2em 0;
       }
 
       @media (max-width: 1024px) {
@@ -51,103 +72,18 @@ Contributors:
         top: 0;
       }
 
-      .content-view  {
-        @apply(--layout-vertical);
-        @apply(--layout-flex);
-        margin-top: 8px;
-      }
-
-      nuxeo-data-grid {
+      .resultActions {
         display: block;
-        position: relative;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-end-justified);
       }
 
-      nuxeo-data-table ::content #items {
-        background-color: #fff;
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-row:not([header]):hover {
-        @apply(--nuxeo-block-hover);
-      }
-
-      nuxeo-data-table ::content nuxeo-data-table-checkbox {
-        flex-basis: 30px;
-        border-right: none;
-      }
-
-      nuxeo-data-table ::content #container.nuxeo-data-table-checkbox {
-        border: 1px solid var(--nuxeo-text-light);
-      }
-
-      nuxeo-data-table ::content *[checked] #container.nuxeo-data-table-checkbox {
-        border-color: #75b226 !important;
-        background-color: #75b226 !important;
-      }
-
-      nuxeo-data-table ::content #container iron-list#list::after {
-        background-color: transparent;
-        content:'';
-        display: block;
-        height: 4em;
-      }
-
-      nuxeo-data-table {
-        min-height: calc(100vh - 9.3em);
-      }
-
-      nuxeo-data-grid {
-        min-height: calc(100vh - 8em);
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select,
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox:hover .select:hover {
-        border: 2px solid #99d749;
-        background-color: #99d749;
-        cursor: pointer;
-        display: block;
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content div.title,
-      nuxeo-data-table ::content nuxeo-data-table-row[selected] a.title {
-        font-weight: bold;
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox .select paper-icon-button {
-        color: #fff;
-      }
-
-      nuxeo-document-grid-thumbnail.selected ::content .bubbleBox {
-        filter: brightness(102%);
-        -webkit-filter: brightness(102%);
-        border-bottom: 3px solid #75b226;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-      }
-
-      .ellipsis {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: block;
-      }
-
-      .capitalize {
-        text-transform: capitalize;
-      }
-
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
+      .resultActions ::content paper-icon-button {
+        width: 2em;
+        height: 2em;
+        padding: .3em;
+        margin-left: 4px;
       }
 
     </style>
@@ -156,120 +92,50 @@ Contributors:
 
     <div class="main">
 
-      <nuxeo-selection-toolbar id="toolbar" selected-items="{{selectedItems}}" class="toolbar"
+      <nuxeo-selection-toolbar id="toolbar" selected-items="[[selectedItems]]" class="toolbar"
         on-refresh="_refreshAndFetch"
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
-        <content select=".actions"></content>
+
+        <content select=".selectionActions"></content>
+        <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
       </nuxeo-selection-toolbar>
 
-      <nuxeo-content-view-actions context="[[actionContext]]" hidden$="[[hideContentViewActions]]"></nuxeo-content-view-actions>
+      <div class="resultActions" hidden$="[[hideContentViewActions]]">
 
-      <div id="container" class="content-view">
-        <div id="grid" hidden$="[[_isTable(displayMode)]]">
-          <nuxeo-data-grid id="datagrid" nx-provider="[[nxProvider]]"
-            filters="{{filters}}"
-            selected-items="{{gridSelectedItems}}"
-            empty-label="[[emptyLabel]]"
-            empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-            selection-enabled display-quick-filters>
-            <template>
-              <nuxeo-document-grid-thumbnail class="grid-box"
-                tabindex$="{{tabIndex}}"
-                class$="[[_computedClass(selected)]]"
-                doc="[[item]]" on-navigate="_navigate">
-              </nuxeo-document-grid-thumbnail>
-            </template>
-          </nuxeo-data-grid>
-        </div>
+        <template is="dom-repeat" items="[[_displayModes]]">
+          <paper-icon-button class="displayMode"
+                             icon="[[item.icon]]"
+                             title$="[[_displayModeTitle(item, i18n)]]"
+                             hidden$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                             on-tap="_toggleDisplayMode"></paper-icon-button>
+        </template>
 
-        <div id="table" hidden$="[[_isGrid(displayMode)]]">
-          <nuxeo-data-table id="datatable"
-            nx-provider="[[nxProvider]]"
-            columns="{{columns}}"
-            settings-enabled filters="{{filters}}"
-            empty-label="[[emptyLabel]]"
-            empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-            selected-items="{{tableSelectedItems}}"
-            selection-enabled
-            display-quick-filters
-            on-row-clicked="_navigate">
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
-                                     field="dc:title" sort-by="dc:title" flex="100">
-              <template>
-                <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
-                <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-click="_navigate">[[item.title]]</a>
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
-                                     field="dc:modified" sort-by="dc:modified" flex="50">
-              <template>
-                [[formatDate(item.properties.dc:modified)]]
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
-                                     field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
-              <template>
-                <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]"
-                                     field="currentLifeCycleState" hidden>
-              <template><span class="capitalize">[[item.state]]</span></template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]"
-                                     field="versionLabel" hidden>
-              <template>
-                [[formatVersion(item)]]
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]"
-                                     field="dc:created" flex="50" hidden>
-              <template>
-                [[formatDate(item.properties.dc:created)]]
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]"
-                                     field="dc:creator" hidden>
-              <template>
-                <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]"
-                                     field="dc:nature" hidden>
-              <template>
-                <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
-                  [[formatDirectory(item.properties.dc:nature)]]
-                </nuxeo-tag>
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]"
-                                     field="dc:coverage" hidden>
-              <template>
-                <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
-                  [[formatDirectory(item.properties.dc:coverage)]]
-                </nuxeo-tag>
-              </template>
-            </nuxeo-data-table-column>
-            <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects')]]"
-                                     field="dc:subjects" hidden flex="60">
-              <template>
-                <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
-                  <nuxeo-tag>[[formatDirectory(subject)]]</nuxeo-tag>
-                </template>
-              </template>
-            </nuxeo-data-table-column>
-          </nuxeo-data-table>
-        </div>
+        <content select=".actions"></content>
+
+        <!-- 0.9 compatibility -->
+        <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
+        <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
       </div>
+
+      <iron-pages id="views" attr-for-selected="name"
+                  selected="[[displayMode]]" selected-item="{{view}}">
+        <content id="results" select=".results"></content>
+      </iron-pages>
+
     </div>
 
     <paper-toast id="toast" duration="0"></paper-toast>
 
     <iron-localstorage id="prefStorage"
-      name="[[_localStorageName]]"
-      value="{{_settings}}"
-      auto-save-disabled>
+                       name="[[_localStorageName]]"
+                       value="{{_settings}}"
+                       on-iron-localstorage-load="restoreSettings"
+                       on-iron-localstorage-load-empty="initializeSettings"
+                       auto-save-disabled>
     </iron-localstorage>
 
   </template>
@@ -279,37 +145,105 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-results',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.ResultBehavior],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
         properties: {
-          name: {
-            type: String
+          // the page provider to display results for
+          nxProvider: Object,
+
+          // used as key for settings in local storage
+          name: String,
+
+          // display mode
+          displayMode: {
+            type: String,
+            value: 'table',
+            notify: true
+          },
+
+          actionContext: {
+            type: Object,
+            notify: true
+          },
+          _settings: {
+            type: Object
+          },
+          selectedItems: {
+            type: Array,
+            value: [],
+            notify: true
+          },
+          columns: {
+            type: Array,
+            value: []
           },
           hideContentViewActions: {
             type: Boolean,
             value: false,
             reflectToAttribute: true
           },
-          nxProvider: {
-            type: Object,
-            observer: '_refresh'
-          },
-          _localStorageName: {
-            type: String
-          }
+
+          _displayModes:  Array,
+
+          _localStorageName: String
+
         },
 
         observers: [
-          '_updateStorage(name)'
+          '_updateStorage(name)',
+          '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
         ],
 
-        ready: function() {
-          this.$.nxcon.connect().then(function(res) {
-            this._localStorageName =  res.id + '-nxrs-' + this.name;
-          }.bind(this));
+        listeners: {
+          'views.iron-items-changed': '_updateViews',
+          'views.iron-select': '_selectView',
+          'views.iron-deselect': '_deselectView'
         },
 
-        _refresh: function() {
-          this.$.datatable._updateResults();
+        ready: function() {
+          this.$.nxcon.connect().then(this._updateStorage.bind(this));
+        },
+
+        get items() {
+          if (this.view && this.view.items) {
+            return this.view.items;
+          }
+          // XXX: this.view.items is not working
+          return (this.view && this.view.$.list) ? this.view.$.list.items : [];
+        },
+
+        _updateViews: function() {
+          var hasDisplayMode;
+          this._displayModes = [];
+          this.$.views.items.forEach(function(view) {
+            var name = view.getAttribute("name"),
+                icon = view.getAttribute("icon");
+            view.nxProvider = this.nxProvider;
+            if (this._settings && view.settings) {
+              view.settings = this._settings[name];
+            }
+            if (name === this.displayMode) {
+              hasDisplayMode = true;
+            }
+            this.push('_displayModes', {name: name, icon: icon});
+          }.bind(this));
+
+          // if current selected display mode is not available use the first one
+          if (!hasDisplayMode) {
+            this.displayMode = this._displayModes[0].name;
+          }
+
+        },
+
+        _displayModeTitle: function(item) {
+          return this.i18n('displayModeButton.display.' + item.name);
+        },
+
+        _isCurrentDisplayMode: function(item) {
+          return item.name == this.displayMode;
+        },
+
+        _toggleDisplayMode: function(e) {
+          this.displayMode = e.model.item.name;
         },
 
         _refreshAndFetch: function() {
@@ -326,27 +260,115 @@ Contributors:
           this.nxProvider.page = 1;
         },
 
-        _navigate: function(e) {
-          var detail;
-          if (e.detail.item) {
-            detail = {
-              doc: e.detail.item
-            };
-            page('/browse' + detail.doc.path);
-          } else {
-            detail = {
-              doc: e.model.item
-            };
-          }
-          if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
-            this.fire('navigate', detail);
+        _updateStorage: function() {
+          if (this.$.nxcon.user && this.name) {
+            this._localStorageName =  this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
           }
         },
 
-        _updateStorage: function() {
-          if (this.$.nxcon.user) {
-            this._localStorageName =  this.$.nxcon.user.id + '-nxrs-' + this.name;
+        _updateActionContext: function() {
+          this.actionContext = {
+            baseUrl: this.$.nxcon.url,
+            displayMode: this.displayMode,
+            nxProvider: this.nxProvider,
+            selectedItems: this.selectedItems,
+            columns: this.view ? this.view.columns : []
+          };
+        },
+
+        _clearSelectedItems: function() {
+          this.view.clearSelection();
+        },
+
+        initializeSettings: function() {
+          this._settings = {displayMode: this.displayMode};
+        },
+
+        restoreSettings: function() {
+          if (this._settings) {
+            if (this._settings.displayMode && this._settings.displayMode.length > 0) {
+              this.displayMode = this._settings.displayMode;
+              if (this._settings[this.displayMode] && this.view) {
+                this.view.settings = this._settings[this.displayMode];
+              }
+            }
           }
+        },
+
+        saveSettings: function() {
+          this.$.prefStorage.save();
+        },
+
+        _selectedItemsChanged: function() {
+          this.selectedItems = [];
+          this.set('selectedItems', this.view.selectedItems);
+        },
+
+        _refreshDisplay: function(e) {
+          this.refresh();
+
+          if (this.selectedItems && this.selectedItems.length > 0) {
+            this.selectedItems = [];
+            if (e.detail.focusIndex || e.detail.focusIndex === 0) {
+              this.selectedItems = this.view.selectedItems;
+              if (e.detail.focusIndex > -1) {
+                this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
+              }
+            }
+          }
+        },
+
+        get size() {
+          return this.view.size;
+        },
+
+        clearSelection: function() {
+          this.view.clearSelection();
+        },
+
+        selectItems: function(items) {
+          this.clearSelection();
+          this.view.selectItems(items);
+          this.view.notifyResize();
+        },
+
+        refresh: function() {
+          this.view.notifyResize();
+        },
+
+        _saveViewSettings: function() {
+          if (this.view.settings) {
+            this.set('_settings.' + this.displayMode, this.view.settings);
+            this.saveSettings();
+          }
+        },
+
+        _deselectView: function(e) {
+          var view = e.detail.item;
+          this.unlisten(view, 'selected-items-changed', '_selectedItemsChanged');
+          this.unlisten(view, 'settings-changed', '_saveViewSettings');
+        },
+
+        _selectView: function(e) {
+          var view = e.detail.item;
+
+          if (this._settings) {
+            // restore display mode
+            this.set('_settings.displayMode', this.displayMode);
+            this.saveSettings();
+
+            // restore view settings
+            this.view.settings = this._settings[this.displayMode];
+          }
+
+          // restore selection
+          if (this.selectedItems) {
+            this.selectItems(this.selectedItems.slice());
+          }
+
+          // listen for settings and selection changed
+          this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
+          this.listen(view, 'settings-changed', '_saveViewSettings');
         }
 
       });

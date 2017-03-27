@@ -258,8 +258,8 @@ Contributors:
 
       <div class="content">
         <div id="filters" class="filters loadable" hidden$="{{queue}}">
-          <nuxeo-layout id="layout" href="[[_formHref(searchName)]]" model="[[_formModel(provider, aggregations, params)]]"
-                        error="[[i18n(documentSearchForm.layoutNotFound', searchName)]]"
+          <nuxeo-layout id="layout" href="[[_formHref(provider, searchName)]]" model="[[_formModel(provider, aggregations, params)]]"
+                        error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
                         on-element-changed="_formChanged"></nuxeo-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
@@ -599,11 +599,7 @@ Contributors:
         },
 
         _search: function() {
-          if (!this.auto) {
-            this.$.provider.fetch().then(function() {
-              this._navigateToResults();
-            }.bind(this));
-          }
+          return this.$.provider.fetch().then(this._navigateToResults.bind(this));
         },
 
         _reset: function() {
@@ -721,10 +717,9 @@ Contributors:
           }
         },
 
-        _formHref: function (searchName) {
-          if (searchName) {
-            return this.resolveUrl(['nuxeo', searchName, 'search'].join('-') + '.html');
-          }
+        _formHref: function (provider, searchName) {
+          var name = (searchName || provider).toLowerCase();
+          return this.resolveUrl(name + '/' + ['nuxeo', name, 'search-form'].join('-') + '.html');
         },
 
         _formModel: function () {
