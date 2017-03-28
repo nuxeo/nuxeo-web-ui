@@ -62,15 +62,6 @@ Contributors:
         overflow: hidden;
       }
 
-      .queue-thumbnail,
-      .queue-thumbnail ::content img {
-        height: 24px;
-        width: 24px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
       .list-item {
         cursor: pointer;
         padding: 1em;
@@ -111,7 +102,7 @@ Contributors:
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box vertical layout">
               <div class="list-item-info horizontal layout center" >
-                <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 <span class="list-item-title ellipsis">[[document.title]]</span>
               </div>
             </div>
@@ -145,13 +136,6 @@ Contributors:
         this.$.storage.add(doc);
         if (this.documents.length > this.maxSize) {
           this.splice('documents', -1, 1);
-        }
-      },
-
-      _thumbnail: function(doc) {
-        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-          doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
         }
       },
 

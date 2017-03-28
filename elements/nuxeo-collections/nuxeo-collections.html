@@ -123,22 +123,6 @@ Contributors:
       margin-right: .2em;
     }
 
-    .queue-thumbnail {
-      height: 24px;
-      width: 24px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      margin-right: 8px;
-    }
-
-    .queue-thumbnail ::content img {
-      height: 32px;
-      width: 32px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      margin-right: 8px;
-    }
-
     .list-item {
       cursor: pointer;
       padding: 1em;
@@ -255,7 +239,7 @@ Contributors:
                   <div class="list-item-box vertical layout">
                     <div class="list-item-info horizontal layout center" >
                       <div class="vertical layout center">
-                        <img class="queue-thumbnail" src="[[_thumbnail(member)]]">
+                        <nuxeo-document-thumbnail document="[[member]]"></nuxeo-document-thumbnail>
                       </div>
                       <div class="flex">
                         <span class="list-item-title ellipsis">[[member.title]]</span>
@@ -281,260 +265,250 @@ Contributors:
     <nuxeo-keys keys="up k" on-pressed="_navigateOnUp"></nuxeo-keys>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-collections',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
 
-      Polymer({
-        is: 'nuxeo-collections',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
 
-        properties: {
-
-          selectedSearch: {
-            type: String,
-            value: 'faceted'
-          },
-
-          currentIndex: {
-            type: Number,
-            notify: true
-          },
-          _isDisplayMembers: {
-            type: Boolean,
-            value: false,
-            observer: '_observeIsDisplayMembers'
-          },
-          selectedCollection: {
-            type: Object,
-            observer: '_selectedCollectionChanged',
-            notify: true
-          },
-          selectedMember: {
-            type: Object,
-            observer: '_selectedMemberChanged',
-            notify: true
-          },
-          hasCollection: {
-            type: Boolean,
-            value: true
-          },
-          hasMember: {
-            type: Boolean,
-            value: true
-          },
-          _entryAnimation: {
-            type: String,
-            value: 'slide-from-right-animation'
-          },
-          _exitAnimation: {
-            type: String,
-            value: 'slide-left-animation'
-          },
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          }
+        selectedSearch: {
+          type: String,
+          value: 'faceted'
         },
 
-        get nxProvider() {
-          return this.$.memberProvider;
+        currentIndex: {
+          type: Number,
+          notify: true
         },
-
-        _navigateOnRight: function() {
-          if (!this._isDisplayMembers) {
-            if (this.selectedCollection) {
-              this.displayMembers();
-              this.$.membersList.fire('iron-resize');
-              if (this.hasMember) {
-                this.$.membersList.selectItem(0);
-              }
-            }
-            this._tmpJustRight = true;
-          }
+        _isDisplayMembers: {
+          type: Boolean,
+          value: false,
+          observer: '_observeIsDisplayMembers'
         },
-
-        _navigateOnLeft: function() {
-          if (this._isDisplayMembers) {
-            this.displayCollections();
-            this.$.collectionsList.fire('iron-resize');
-          }
-          this._tmpJustLeft = true;
+        selectedCollection: {
+          type: Object,
+          observer: '_selectedCollectionChanged',
+          notify: true
         },
+        selectedMember: {
+          type: Object,
+          observer: '_selectedMemberChanged',
+          notify: true
+        },
+        hasCollection: {
+          type: Boolean,
+          value: true
+        },
+        hasMember: {
+          type: Boolean,
+          value: true
+        },
+        _entryAnimation: {
+          type: String,
+          value: 'slide-from-right-animation'
+        },
+        _exitAnimation: {
+          type: String,
+          value: 'slide-left-animation'
+        },
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      },
 
-        _navigateOnDown: function() {
-          if (this._isDisplayMembers) {
-            if (this._tmpJustRight) {
-              this.$.membersList.selectNext();
-              this._tmpJustRight = false;
-            }
-          } else {
-            if (this._tmpJustLeft) {
-              this.$.collectionsList.selectNext();
-              this._tmpJustLeft = false;
+      get nxProvider() {
+        return this.$.memberProvider;
+      },
+
+      _navigateOnRight: function() {
+        if (!this._isDisplayMembers) {
+          if (this.selectedCollection) {
+            this.displayMembers();
+            this.$.membersList.fire('iron-resize');
+            if (this.hasMember) {
+              this.$.membersList.selectItem(0);
             }
           }
-        },
+          this._tmpJustRight = true;
+        }
+      },
 
-        _navigateOnUp: function() {
-          if (this._isDisplayMembers) {
-            if (this._tmpJustRight) {
-              this.$.membersList.selectPrevious();
-              this._tmpJustRight = false;
+      _navigateOnLeft: function() {
+        if (this._isDisplayMembers) {
+          this.displayCollections();
+          this.$.collectionsList.fire('iron-resize');
+        }
+        this._tmpJustLeft = true;
+      },
+
+      _navigateOnDown: function() {
+        if (this._isDisplayMembers) {
+          if (this._tmpJustRight) {
+            this.$.membersList.selectNext();
+            this._tmpJustRight = false;
+          }
+        } else {
+          if (this._tmpJustLeft) {
+            this.$.collectionsList.selectNext();
+            this._tmpJustLeft = false;
+          }
+        }
+      },
+
+      _navigateOnUp: function() {
+        if (this._isDisplayMembers) {
+          if (this._tmpJustRight) {
+            this.$.membersList.selectPrevious();
+            this._tmpJustRight = false;
+          }
+        } else {
+          if (this._tmpJustLeft) {
+            this.$.collectionsList.selectPrevious();
+            this._tmpJustLeft = false;
+          }
+        }
+      },
+
+      _observeIsDisplayMembers: function() {
+        if (this._isDisplayMembers) {
+          this._entryAnimation = 'slide-from-right-animation';
+          this._exitAnimation = 'slide-left-animation';
+          this._selectedPage = 1;
+        } else {
+          this._entryAnimation = 'slide-from-left-animation';
+          this._exitAnimation = 'slide-right-animation';
+          this._selectedPage = 0;
+        }
+      },
+
+      _resetMemberResults: function() {
+        this.$.membersList._resetResults();
+      },
+
+      displayMembers: function(member, index) {
+        this._isDisplayMembers = true;
+        if (member && member.uid) {
+          this.$.membersList.selectItem(member);
+          this.$.membersList.scrollToIndex(Math.max(0, index - 5));
+        }
+      },
+
+      displayCollections: function() {
+        this._isDisplayMembers = false;
+        this._resetMemberResults();
+        this.$.memberProvider.fetch();
+        this.fire('browseCollection', {
+          collection: this.selectedCollection,
+        });
+      },
+
+      _removeFromCollection: function(evt) {
+        var op = this.$.removeFromCollectionOp;
+        var memberId = evt.currentTarget.dataset.uid;
+        op.input = memberId;
+        op.params = {
+          'collection': this.selectedCollection
+        };
+        op.execute().then(function() {
+          var memberIndex;
+          this.$.membersList.$.list.items = this.$.membersList.$.list.items.filter(function(el, index) {
+            if (el.uid === evt.target.dataset.uid) {
+              memberIndex = index;
+              return false;
             }
-          } else {
-            if (this._tmpJustLeft) {
-              this.$.collectionsList.selectPrevious();
-              this._tmpJustLeft = false;
-            }
-          }
-        },
-
-        _observeIsDisplayMembers: function() {
-          if (this._isDisplayMembers) {
-            this._entryAnimation = 'slide-from-right-animation';
-            this._exitAnimation = 'slide-left-animation';
-            this._selectedPage = 1;
-          } else {
-            this._entryAnimation = 'slide-from-left-animation';
-            this._exitAnimation = 'slide-right-animation';
-            this._selectedPage = 0;
-          }
-        },
-
-        _resetMemberResults: function() {
-          this.$.membersList._resetResults();
-        },
-
-        displayMembers: function(member, index) {
-          this._isDisplayMembers = true;
-          if (member && member.uid) {
-            this.$.membersList.selectItem(member);
-            this.$.membersList.scrollToIndex(Math.max(0, index - 5));
-          }
-        },
-
-        displayCollections: function() {
-          this._isDisplayMembers = false;
-          this._resetMemberResults();
-          this.$.memberProvider.fetch();
-          this.fire('browseCollection', {
-            collection: this.selectedCollection,
+            return true;
           });
-        },
-
-        _removeFromCollection: function(evt) {
-          var op = this.$.removeFromCollectionOp;
-          var memberId = evt.currentTarget.dataset.uid;
-          op.input = memberId;
-          op.params = {
-            'collection': this.selectedCollection
-          };
-          op.execute().then(function() {
-            var memberIndex;
-            this.$.membersList.$.list.items = this.$.membersList.$.list.items.filter(function(el, index) {
-              if (el.uid === evt.target.dataset.uid) {
-                memberIndex = index;
-                return false;
-              }
-              return true;
-            });
-            if (this.$.membersList.length > memberIndex) {
-              this.$.membersList.selectItem(memberIndex);
-            }
-            this.fire('removed-from-collection',
-              {
-                innerRemove: true,
-                docId: memberId,
-                collectionId: evt.target.dataset.uid
-
-              }
-            );
-          }.bind(this));
-        },
-
-        _computedClass: function(isSelected) {
-          var classes = 'list-item';
-          if (isSelected) {
-            classes += ' selected';
+          if (this.$.membersList.length > memberIndex) {
+            this.$.membersList.selectItem(memberIndex);
           }
-          return classes;
-        },
+          this.fire('removed-from-collection',
+            {
+              innerRemove: true,
+              docId: memberId,
+              collectionId: evt.target.dataset.uid
 
-        _selectedMemberChanged: function(doc) {
-          if (doc) {
-            if (doc.isVersion) {
-              page('/doc/' + doc.uid);
-            } else {
-              page('/browse' + doc.path);
             }
-          }
-        },
+          );
+        }.bind(this));
+      },
 
-        _selectedCollectionChanged: function(collection) {
-          if (collection) {
-            this._resetMemberResults();
-            this.fire('browseCollection', {
-              collection: collection,
-            });
-            this.$.memberProvider.params = [collection.uid];
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedMemberChanged: function(doc) {
+        if (doc) {
+          if (doc.isVersion) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
+        }
+      },
+
+      _selectedCollectionChanged: function(collection) {
+        if (collection) {
+          this._resetMemberResults();
+          this.fire('browseCollection', {
+            collection: collection,
+          });
+          this.$.memberProvider.params = [collection.uid];
+          this.$.memberProvider.fetch();
+        }
+      },
+
+      _isEmpty: function(items) {
+        return items && items.length === 0;
+      },
+
+      ready: function() {
+        window.addEventListener('added-to-collection', function(e) {
+          this.$.collectionsProvider.fetch();
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+            this.members = [];
             this.$.memberProvider.fetch();
           }
-        },
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-            doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
+        }.bind(this));
+        window.addEventListener('removed-from-collection', function(e) {
+          if (e.detail.innerRemove) {
+            return;
           }
-        },
-
-        _isEmpty: function(items) {
-          return items && items.length === 0;
-        },
-
-        ready: function() {
-          window.addEventListener('added-to-collection', function(e) {
-            this.$.collectionsProvider.fetch();
-            if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
-              this.members = [];
-              this.$.memberProvider.fetch();
-            }
-          }.bind(this));
-          window.addEventListener('removed-from-collection', function(e) {
-            if (e.detail.innerRemove) {
-              return;
-            }
-            if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
-              this.members = [];
-              this.$.memberProvider.fetch();
-            } else if (!this._isDisplayMembers) {
-              this.$.collectionsProvider.fetch();
-            }
-          }.bind(this));
-
-        },
-
-        _visibleChanged: function() {
-          if (this.$.collectionsProvider.resultsCount === undefined) {
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+            this.members = [];
+            this.$.memberProvider.fetch();
+          } else if (!this._isDisplayMembers) {
             this.$.collectionsProvider.fetch();
           }
-        },
+        }.bind(this));
 
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
-        },
+      },
 
-        _canRemove: function(collection) {
-          if (collection && collection.contextParameters && collection.contextParameters.permissions) {
-            // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
-            // Action will therefore not be available
-            return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
-          }
-          return false;
+      _visibleChanged: function() {
+        if (this.$.collectionsProvider.resultsCount === undefined) {
+          this.$.collectionsProvider.fetch();
         }
+      },
 
-      });
-    })();
+      _formatDate: function(date) {
+        return moment(date).format('MMMM D, YYYY');
+      },
+
+      _canRemove: function(collection) {
+        if (collection && collection.contextParameters && collection.contextParameters.permissions) {
+          // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
+          // Action will therefore not be available
+          return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
+        }
+        return false;
+      }
+
+    });
   </script>
 </dom-module>

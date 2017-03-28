@@ -60,23 +60,6 @@ Contributors:
       .capitalize {
         text-transform: capitalize;
       }
-
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -125,7 +108,7 @@ Contributors:
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
                                    field="dc:title" sort-by="dc:title" flex="100">
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
               <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-click="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
@@ -211,131 +194,122 @@ Contributors:
 
     <paper-toast id="toast" duration="0"></paper-toast>
   </template>
+
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-content',
-        behaviors: [Nuxeo.LayoutBehavior],
-        properties: {
-          document: {
-            type: Object
-          },
-          params: {
-            type: Object,
-            value: {},
-            notify: true
-          },
-          provider: {
-            type: String,
-            value: 'advanced_document_content'
-          },
-          pageSize: {
-            type: Number,
-            value: 40
-          },
-          currentIndex: {
-            type: Number,
-            notify: true
-          },
-          browseActionContext: {
-            type: Object,
-            computed: '_browseActionContext(document, selectedItems)'
-          }
+    Polymer({
+      is: 'nuxeo-document-content',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object
         },
-
-        listeners: {
-          'document-created': '_handleDocumentCreated',
-          'dropzone.dragover': '_dragoverImport',
-          'dropzone.dragleave': '_dragleaveImport',
-          'dropzone.drop': '_dropImport'
+        params: {
+          type: Object,
+          value: {},
+          notify: true
         },
-
-        observers: [
-          '_refresh(params)',
-          '_observeDocument(document)'
-        ],
-
-        ready: function() {
-          this.nxProvider = this.$.nxProvider;
+        provider: {
+          type: String,
+          value: 'advanced_document_content'
         },
-
-        _observeDocument: function() {
-          if (this.document) {
-            this.params = {'ecm_parentId': this.document.uid};
-          }
+        pageSize: {
+          type: Number,
+          value: 40
         },
-
-        _refreshAndFetch: function() {
-          var pn = this.nxProvider.page;
-          this._refresh();
-          if (pn === 1) {
-            // normally the page provider is on auto mode
-            // so the fetch should be triggered when changing page
-            this.nxProvider.fetch();
-          }
+        currentIndex: {
+          type: Number,
+          notify: true
         },
-
-        _refresh: function() {
-          this.$.nxProvider.page = 1;
-        },
-
-        _navigate: function(e) {
-          this.fire('navigate', {doc: (e.model || e.detail).item});
-        },
-
-        _computedClass: function(isSelected) {
-          var classes = 'grid-box';
-          if (isSelected) {
-            classes += ' selected';
-          }
-          return classes;
-        },
-
-        _dragoverImport: function(e) {
-          e.preventDefault();
-          this.$.toast.text = this.i18n('documentContentView.drag.import');
-          this.$.toast.open();
-          this._toggleDragging(true);
-        },
-
-        _dragleaveImport: function() {
-          this.$.toast.close();
-          this._toggleDragging(false);
-          this.toggleClass('dragging', false, this.$.grid);
-          this.toggleClass('dragging', false, this.$.table);
-        },
-
-        _dropImport: function(e) {
-          e.preventDefault();
-          this.$.toast.close();
-          this._toggleDragging(false);
-          this.fire('create-document', {files: e.dataTransfer.files});
-        },
-
-        _toggleDragging: function(flag) {
-          Polymer.dom(this.root).querySelectorAll('.results').forEach(function(e) {
-            this.toggleClass('dragging', flag, e);
-          }.bind(this));
-        },
-
-        _handleDocumentCreated: function() {
-          this.fire('document-updated');
-        },
-
-        _browseActionContext: function() {
-          return {document: this.document, selectedItems: this.selectedItems};
-        },
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid) {
-            return doc.contextParameters.thumbnail.url;
-          }
+        browseActionContext: {
+          type: Object,
+          computed: '_browseActionContext(document, selectedItems)'
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'document-created': '_handleDocumentCreated',
+        'dropzone.dragover': '_dragoverImport',
+        'dropzone.dragleave': '_dragleaveImport',
+        'dropzone.drop': '_dropImport'
+      },
+
+      observers: [
+        '_refresh(params)',
+        '_observeDocument(document)'
+      ],
+
+      ready: function() {
+        this.nxProvider = this.$.nxProvider;
+      },
+
+      _observeDocument: function() {
+        if (this.document) {
+          this.params = {'ecm_parentId': this.document.uid};
+        }
+      },
+
+      _refreshAndFetch: function() {
+        var pn = this.nxProvider.page;
+        this._refresh();
+        if (pn === 1) {
+          // normally the page provider is on auto mode
+          // so the fetch should be triggered when changing page
+          this.nxProvider.fetch();
+        }
+      },
+
+      _refresh: function() {
+        this.$.nxProvider.page = 1;
+      },
+
+      _navigate: function(e) {
+        this.fire('navigate', {doc: (e.model || e.detail).item});
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'grid-box';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _dragoverImport: function(e) {
+        e.preventDefault();
+        this.$.toast.text = this.i18n('documentContentView.drag.import');
+        this.$.toast.open();
+        this._toggleDragging(true);
+      },
+
+      _dragleaveImport: function() {
+        this.$.toast.close();
+        this._toggleDragging(false);
+        this.toggleClass('dragging', false, this.$.grid);
+        this.toggleClass('dragging', false, this.$.table);
+      },
+
+      _dropImport: function(e) {
+        e.preventDefault();
+        this.$.toast.close();
+        this._toggleDragging(false);
+        this.fire('create-document', {files: e.dataTransfer.files});
+      },
+
+      _toggleDragging: function(flag) {
+        Polymer.dom(this.root).querySelectorAll('.results').forEach(function(e) {
+          this.toggleClass('dragging', flag, e);
+        }.bind(this));
+      },
+
+      _handleDocumentCreated: function() {
+        this.fire('document-updated');
+      },
+
+      _browseActionContext: function() {
+        return {document: this.document, selectedItems: this.selectedItems};
+      }
+
+    });
   </script>
 
 </dom-module>
