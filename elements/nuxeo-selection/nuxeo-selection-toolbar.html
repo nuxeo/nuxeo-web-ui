@@ -92,23 +92,6 @@ Contributors:
       .sep {
         border-top: 1px solid var(--divider-color);
       }
-
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
     </style>
 
     <paper-dialog id="selectedItemsPopup"
@@ -121,7 +104,7 @@ Contributors:
               <template is="dom-repeat" items="[[selectedItems]]">
                 <div class="item">
                   <span class="flex">
-                    <iron-icon class="queue-thumbnail" src="[[_thumbnail(item)]]"></iron-icon>
+                    <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     <span class="title ellipsis">[[item.title]]</span>
                   </span>
                 </div>
@@ -156,52 +139,41 @@ Contributors:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
 
-      Polymer({
+      is: 'nuxeo-selection-toolbar',
 
-        is: 'nuxeo-selection-toolbar',
-
-        properties: {
-          selectedItems: {
-            type: Object,
-            value: [],
-            notify: true
-          },
-          _isDisplayToolbar: {
-            type: Boolean,
-            value: false
-          }
+      properties: {
+        selectedItems: {
+          type: Object,
+          value: [],
+          notify: true
         },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        observers: [
-          '_observeSelectedItems(selectedItems)'
-        ],
-
-        _observeSelectedItems: function() {
-          this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
-        },
-
-        toogleSelectedItemsPopup: function() {
-          this.$$('#selectedItemsPopup').toggle();
-        },
-
-        clearSelection: function() {
-          this.fire('clear-selected-items');
-        },
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-            doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
-          }
+        _isDisplayToolbar: {
+          type: Boolean,
+          value: false
         }
+      },
 
-      });
-    })();
+      behaviors: [Nuxeo.I18nBehavior],
+
+      observers: [
+        '_observeSelectedItems(selectedItems)'
+      ],
+
+      _observeSelectedItems: function() {
+        this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
+      },
+
+      toogleSelectedItemsPopup: function() {
+        this.$$('#selectedItemsPopup').toggle();
+      },
+
+      clearSelection: function() {
+        this.fire('clear-selected-items');
+      }
+
+    });
   </script>
 
 </dom-module>

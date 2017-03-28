@@ -73,15 +73,6 @@ Contributors:
         text-overflow: ellipsis;
       }
 
-      .queue-thumbnail,
-      .queue-thumbnail ::content img {
-        height: 24px;
-        width: 24px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
       .list-item {
         cursor: pointer;
         padding: 1em;
@@ -139,7 +130,7 @@ Contributors:
             <div class="list-item-box vertical layout">
               <div class="list-item-info horizontal layout center" >
                 <div class="vertical layout center">
-                  <img class="queue-thumbnail" src="[[_thumbnail(favorite)]]">
+                  <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
                 <span class="list-item-title ellipsis flex">[[favorite.title]]</span>
                 <iron-icon  id="removeFromFavorites" class="remove"
@@ -201,13 +192,6 @@ Contributors:
               this.favorite = resp;
               return resp;
             }.bind(this));
-        }
-      },
-
-      _thumbnail: function(doc) {
-        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-          doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
         }
       },
 

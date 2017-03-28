@@ -148,15 +148,6 @@ Contributors:
         white-space: nowrap;
       }
 
-      .queue-thumbnail,
-      .queue-thumbnail ::content img {
-        height: 24px;
-        width: 24px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
       #saveDialog,
       #renameDialog {
         width: 400px;
@@ -285,7 +276,7 @@ Contributors:
                 <div class="list-item-box vertical layout">
                   <div class="list-item-info horizontal layout center">
                     <div class="vertical layout center">
-                      <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                      <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     </div>
                     <span class="list-item-title ellipsis">[[item.title]]</span>
                   </div>
@@ -344,410 +335,400 @@ Contributors:
     </paper-dialog>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-search-form',
 
-      Polymer({
-        is: 'nuxeo-search-form',
+      behaviors: [Nuxeo.I18nBehavior],
 
-        behaviors: [Nuxeo.I18nBehavior],
-
-        properties: {
-          selectedSearch: {
-            type: Object,
-            notify: true,
-            observer: '_selectedSearchChanged'
-          },
-          selectedSearchIdx: {
-            type: Number,
-            value: 0,
-            observer: '_selectedSearchIdxChanged'
-          },
-          provider: {
-            type: String
-          },
-          pageSize: {
-            type: Number,
-            value: 40
-          },
-          params: {
-            type: Object
-          },
-          schemas: {
-            type: String
-          },
-          currentIndex: {
-            type: Number,
-            notify: true
-          },
-          queue: {
-            type: Boolean,
-            value: false
-          },
-          docItems: {
-            type: Array,
-            value: []
-          },
-          selectedDocument: {
-            type: Object,
-            observer: '_selectedDocChanged',
-            notify: true
-          },
-          hasResults: {
-            type: Boolean,
-            value: true
-          },
-          dirty: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-          isSavedSearch: {
-            type: Boolean,
-            value: false,
-            notify: true
-          },
-          onlyQueue: {
-            type: Boolean,
-            value: false
-          },
-          paramMutator: {
-            type: Function,
-            value: function() {
-              return function(params) {
-                var result = {};
-                if (params) {
-                  // filter null values
-                  for (var param in params) {
-                    var value = params[param];
-                    if (value && param !== 'dc:title') {
-                      result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
-                    }
-                  }
-                  // allow search to be visible on JSF UI
-                  if (!('cvd:contentViewName' in result)) {
-                    result['cvd:contentViewName'] = 'default_search';
+      properties: {
+        selectedSearch: {
+          type: Object,
+          notify: true,
+          observer: '_selectedSearchChanged'
+        },
+        selectedSearchIdx: {
+          type: Number,
+          value: 0,
+          observer: '_selectedSearchIdxChanged'
+        },
+        provider: {
+          type: String
+        },
+        pageSize: {
+          type: Number,
+          value: 40
+        },
+        params: {
+          type: Object
+        },
+        schemas: {
+          type: String
+        },
+        currentIndex: {
+          type: Number,
+          notify: true
+        },
+        queue: {
+          type: Boolean,
+          value: false
+        },
+        docItems: {
+          type: Array,
+          value: []
+        },
+        selectedDocument: {
+          type: Object,
+          observer: '_selectedDocChanged',
+          notify: true
+        },
+        hasResults: {
+          type: Boolean,
+          value: true
+        },
+        dirty: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        isSavedSearch: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        onlyQueue: {
+          type: Boolean,
+          value: false
+        },
+        paramMutator: {
+          type: Function,
+          value: function() {
+            return function(params) {
+              var result = {};
+              if (params) {
+                // filter null values
+                for (var param in params) {
+                  var value = params[param];
+                  if (value && param !== 'dc:title') {
+                    result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
                   }
                 }
-                return result;
-              };
-            }
-          },
-          loading: {
-            type: Boolean,
-            reflectToAttribute: true,
-            value: false
-          },
-          searchName: String,
-          aggregations: {
-            type: Object,
-            observer: '_aggregationsChanged'
-          },
-          visible: Boolean,
-          /**
-           * If true, automatically execute the search each time a param is changed.
-           */
-          auto: {
-            type: Boolean,
-            value: false
-          },
-          /**
-           * If true, display a toggle control to enable or disable auto mode.
-           */
-          displayAutoControl: {
-            type: Boolean,
-            value: false
-          }
-        },
-
-        observers: [
-         '_resetResults(provider, params.*, quickFilters.*, query)',
-         '_paramsChanged(params.*)'
-        ],
-
-        get nxProvider() {
-          return this.$.provider;
-        },
-
-        get form() {
-          return this.$.layout.element;
-        },
-
-        displayQueueAndNavigateToFirst: function() {
-          if (this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
-            this.displayQueue(this.$.list.$.list.items[0]);
-          } else {
-            this.displayQueue();
-          }
-        },
-
-        displayQueue: function(doc) {
-          var doDisplay = function() {
-            this.queue = true;
-            this.$.list.notifyResize();
-            if (doc && doc.uid) {
-              this.$.list.$.list.selectItem(doc);
-              this.$.list.$.list.scrollToItem(doc);
-            }
-          }.bind(this);
-          if (!this.auto) {
-            this.$.provider.fetch().then(doDisplay);
-          } else {
-            doDisplay();
-          }
-        },
-
-        _isAuto: function() {
-          return this.visible && this.auto;
-        },
-
-        _resetResults: function() {
-          this.$.list._resetResults();
-        },
-
-        _displayFiltersTapped: function() {
-          this.displayFilters();
-          this._navigateToResults();
-        },
-
-        displayFilters: function() {
-          this.queue = false;
-          this.fire('display-filters');
-        },
-
-        _navigateToResults: function() {
-          this.fire('search-results');
-        },
-
-        _computedClass: function(isSelected) {
-          var classes = 'list-item';
-          if (isSelected) {
-            classes += ' selected';
-          }
-          return classes;
-        },
-
-        _selectedDocChanged: function(doc) {
-          if (doc) {
-            page('/browse' + doc.path);
-          }
-        },
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-            doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
-          }
-        },
-
-        _paramsChanged: function() {
-          this.$.provider.page = 1;
-          this.dirty = true;
-          if (this.form) {
-            this.form.params = this.params;
-          }
-        },
-
-        _selectedSearchIdxChanged: function() {
-          if (this._isSavedSearch()) {
-            this.isSavedSearch = true;
-            this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
-            this.params = this._mutateParams(this.selectedSearch.params);
-          } else {
-            this._clear();
-          }
-          this.dirty = false;
-        },
-
-        _selectedSearchChanged: function() {
-          if (this.selectedSearch) {
-            this.params = this._mutateParams(this.selectedSearch.params);
-            if (this.params && this.params.ecm_fulltext) {
-              this.searchTerm = this.params.ecm_fulltext.replace('*', '');
-              this.form.searchTerm = this.searchTerm;
-            }
-          }
-        },
-
-        _isSavedSearch: function() {
-          return this.selectedSearchIdx > 0;
-        },
-
-        _clear: function() {
-          this.searchTerm = '';
-          this.isSavedSearch = false;
-          this.selectedSearch = {};
-          if (this.form && this.form.clear != undefined && typeof this.form.clear == 'function') {
-            this.form.clear();
-          }
-          this.params = {};
-          if (!this._isSavedSearch()) {
-            this.dirty = false;
-          }
-          this.selectedSearchIdx = 0;
-          this._resetResults();
-          if (!this.auto) {
-            this.aggregations = {};
-          }
-        },
-
-        _search: function() {
-          return this.$.provider.fetch().then(this._navigateToResults.bind(this));
-        },
-
-        _reset: function() {
-          var _el = this.$['saved-search'];
-          _el.searchId = this.selectedSearch.id;
-          _el.get().then(function(response) {
-            this.params = this._mutateParams(response.params);
-            this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
-            this.form.searchTerm = this.searchTerm;
-            this.dirty = false;
-          }.bind(this));
-        },
-
-        saveAs: function() {
-          this.$$('#actionsDropdown').close();
-          this.$.savedSearchTitle.value = '';
-          this.$.saveDialog.open();
-          this._saveAs = true;
-        },
-
-        save: function() {
-          if (this.selectedSearchIdx === 0) {
-            this.saveAs();
-          } else {
-            this._saveSearch();
-          }
-        },
-
-        rename: function() {
-          this._renaming = true;
-          this.$$('#actionsDropdown').close();
-          this.$.renameDialog.open();
-          this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
-        },
-
-        share: function() {
-          this.$$('#actionsDropdown').close();
-          this.$.shareDialog.open();
-        },
-
-        delete: function() {
-          this.$$('#actionsDropdown').close();
-          this.$.deleteDialog.open();
-        },
-
-        _saveSearch: function() {
-          var _el = this.$['saved-search'];
-          // save a new search
-          if (this.selectedSearchIdx === 0 || this._saveAs) {
-            _el.searchId = '';
-            _el.data = {
-              'entity-type': 'savedSearch',
-              'pageProviderName': this.provider,
-              'params': this.params,
-              'title': this.$$('#savedSearchTitle').value
-            };
-            _el.post().then(function(response) {
-              this.$.saveDialog.close();
-              this.selectedSearch = response;
-              this.$['saved-searches'].get().then(function() {
-                this.selectedSearchIdx = this.searches.length;
-              }.bind(this));
-            }.bind(this));
-          } else {
-            // update an existing search
-            _el.searchId = this.selectedSearch.id;
-            _el.data = this.selectedSearch;
-            if (this._renaming) {
-              _el.data.title = this.$.savedSearchRenameTitle.value;
-              _el.data.params = this._mutateParams(_el.data.params);
-            } else {
-              _el.data.params = this.params;
-            }
-            _el.put().then(function() {
-              if (this._renaming) {
-                this.$.renameDialog.close();
-
-                this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
-                // hack required to update the paper-input inside the paper-dropdown-menu
-                var idx = this.selectedSearchIdx;
-                this.selectedSearchIdx = 0;
-                this.selectedSearchIdx = idx;
-                this._renaming = false;
+                // allow search to be visible on JSF UI
+                if (!('cvd:contentViewName' in result)) {
+                  result['cvd:contentViewName'] = 'default_search';
+                }
               }
-              this.dirty = false;
-            }.bind(this));
+              return result;
+            };
           }
-          this._saveAs = false;
         },
+        loading: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+        searchName: String,
+        aggregations: {
+          type: Object,
+          observer: '_aggregationsChanged'
+        },
+        visible: Boolean,
+        /**
+         * If true, automatically execute the search each time a param is changed.
+         */
+        auto: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * If true, display a toggle control to enable or disable auto mode.
+         */
+        displayAutoControl: {
+          type: Boolean,
+          value: false
+        }
+      },
 
-        _deleteSearch: function() {
-          var _el = this.$['saved-search'];
-          _el.searchId = this.selectedSearch.id;
-          _el.remove().then(function() {
-            this.$.deleteDialog.close();
+      observers: [
+       '_resetResults(provider, params.*, quickFilters.*, query)',
+       '_paramsChanged(params.*)'
+      ],
+
+      get nxProvider() {
+        return this.$.provider;
+      },
+
+      get form() {
+        return this.$.layout.element;
+      },
+
+      displayQueueAndNavigateToFirst: function() {
+        if (this.$.list.$.list.items && this.$.list.$.list.items.length > 0) {
+          this.displayQueue(this.$.list.$.list.items[0]);
+        } else {
+          this.displayQueue();
+        }
+      },
+
+      displayQueue: function(doc) {
+        var doDisplay = function() {
+          this.queue = true;
+          this.$.list.notifyResize();
+          if (doc && doc.uid) {
+            this.$.list.$.list.selectItem(doc);
+            this.$.list.$.list.scrollToItem(doc);
+          }
+        }.bind(this);
+        if (!this.auto) {
+          this.$.provider.fetch().then(doDisplay);
+        } else {
+          doDisplay();
+        }
+      },
+
+      _isAuto: function() {
+        return this.visible && this.auto;
+      },
+
+      _resetResults: function() {
+        this.$.list._resetResults();
+      },
+
+      _displayFiltersTapped: function() {
+        this.displayFilters();
+        this._navigateToResults();
+      },
+
+      displayFilters: function() {
+        this.queue = false;
+        this.fire('display-filters');
+      },
+
+      _navigateToResults: function() {
+        this.fire('search-results');
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedDocChanged: function(doc) {
+        if (doc) {
+          page('/browse' + doc.path);
+        }
+      },
+
+      _paramsChanged: function() {
+        this.$.provider.page = 1;
+        this.dirty = true;
+        if (this.form) {
+          this.form.params = this.params;
+        }
+      },
+
+      _selectedSearchIdxChanged: function() {
+        if (this._isSavedSearch()) {
+          this.isSavedSearch = true;
+          this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
+          this.params = this._mutateParams(this.selectedSearch.params);
+        } else {
+          this._clear();
+        }
+        this.dirty = false;
+      },
+
+      _selectedSearchChanged: function() {
+        if (this.selectedSearch) {
+          this.params = this._mutateParams(this.selectedSearch.params);
+          if (this.params && this.params.ecm_fulltext) {
+            this.searchTerm = this.params.ecm_fulltext.replace('*', '');
+            this.form.searchTerm = this.searchTerm;
+          }
+        }
+      },
+
+      _isSavedSearch: function() {
+        return this.selectedSearchIdx > 0;
+      },
+
+      _clear: function() {
+        this.searchTerm = '';
+        this.isSavedSearch = false;
+        this.selectedSearch = {};
+        if (this.form && this.form.clear != undefined && typeof this.form.clear == 'function') {
+          this.form.clear();
+        }
+        this.params = {};
+        if (!this._isSavedSearch()) {
+          this.dirty = false;
+        }
+        this.selectedSearchIdx = 0;
+        this._resetResults();
+        if (!this.auto) {
+          this.aggregations = {};
+        }
+      },
+
+      _search: function() {
+        return this.$.provider.fetch().then(this._navigateToResults.bind(this));
+      },
+
+      _reset: function() {
+        var _el = this.$['saved-search'];
+        _el.searchId = this.selectedSearch.id;
+        _el.get().then(function(response) {
+          this.params = this._mutateParams(response.params);
+          this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+          this.form.searchTerm = this.searchTerm;
+          this.dirty = false;
+        }.bind(this));
+      },
+
+      saveAs: function() {
+        this.$$('#actionsDropdown').close();
+        this.$.savedSearchTitle.value = '';
+        this.$.saveDialog.open();
+        this._saveAs = true;
+      },
+
+      save: function() {
+        if (this.selectedSearchIdx === 0) {
+          this.saveAs();
+        } else {
+          this._saveSearch();
+        }
+      },
+
+      rename: function() {
+        this._renaming = true;
+        this.$$('#actionsDropdown').close();
+        this.$.renameDialog.open();
+        this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
+      },
+
+      share: function() {
+        this.$$('#actionsDropdown').close();
+        this.$.shareDialog.open();
+      },
+
+      delete: function() {
+        this.$$('#actionsDropdown').close();
+        this.$.deleteDialog.open();
+      },
+
+      _saveSearch: function() {
+        var _el = this.$['saved-search'];
+        // save a new search
+        if (this.selectedSearchIdx === 0 || this._saveAs) {
+          _el.searchId = '';
+          _el.data = {
+            'entity-type': 'savedSearch',
+            'pageProviderName': this.provider,
+            'params': this.params,
+            'title': this.$$('#savedSearchTitle').value
+          };
+          _el.post().then(function(response) {
+            this.$.saveDialog.close();
+            this.selectedSearch = response;
             this.$['saved-searches'].get().then(function() {
-              // hack required to update the paper-input inside the paper-dropdown-menu
-              this.selectedSearchIdx = 0;
               this.selectedSearchIdx = this.searches.length;
             }.bind(this));
           }.bind(this));
-        },
-
-        _mutateParams: function(params) {
-          return this.paramMutator ? this.paramMutator(params) : params;
-        },
-
-        _computeSavedSearchesParams: function() {
-          return {pageProvider: this.provider};
-        },
-
-        _aggregationsChanged: function() {
-          if (this.form) {
-            this.form.aggregations = this.aggregations;
-          }
-        },
-
-        _formHref: function (provider, searchName) {
-          var name = (searchName || provider).toLowerCase();
-          return this.resolveUrl(name + '/' + ['nuxeo', name, 'search-form'].join('-') + '.html');
-        },
-
-        _formModel: function () {
-          return { provider: this.provider, params: this.params, aggregations: this.aggregations };
-        },
-
-        _formChanged: function() {
-          this._clear();
-
-          if (this.queue) {
-            this.displayQueue();
+        } else {
+          // update an existing search
+          _el.searchId = this.selectedSearch.id;
+          _el.data = this.selectedSearch;
+          if (this._renaming) {
+            _el.data.title = this.$.savedSearchRenameTitle.value;
+            _el.data.params = this._mutateParams(_el.data.params);
           } else {
-            this.displayFilters();
+            _el.data.params = this.params;
           }
+          _el.put().then(function() {
+            if (this._renaming) {
+              this.$.renameDialog.close();
 
-          this.$['saved-searches'].get();
-          if (this.form.params !== undefined) {
-            this.params = this.form.params;
-          }
-          // setup data binding
-          this.form.addEventListener('params-changed', function(e) {
-            // e.detail.path is params.prop_name eg: params.ecm_fulltext
-            if (e.detail.path) {
-              var param = e.detail.path.split('.')[1];
-              this.set('params.' + param, e.detail.value);
-              if (this.auto) {
-                this._navigateToResults();
-              }
+              this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
+              // hack required to update the paper-input inside the paper-dropdown-menu
+              var idx = this.selectedSearchIdx;
+              this.selectedSearchIdx = 0;
+              this.selectedSearchIdx = idx;
+              this._renaming = false;
             }
+            this.dirty = false;
           }.bind(this));
-          this.form.addEventListener('trigger-search', this._search.bind(this));
+        }
+        this._saveAs = false;
+      },
+
+      _deleteSearch: function() {
+        var _el = this.$['saved-search'];
+        _el.searchId = this.selectedSearch.id;
+        _el.remove().then(function() {
+          this.$.deleteDialog.close();
+          this.$['saved-searches'].get().then(function() {
+            // hack required to update the paper-input inside the paper-dropdown-menu
+            this.selectedSearchIdx = 0;
+            this.selectedSearchIdx = this.searches.length;
+          }.bind(this));
+        }.bind(this));
+      },
+
+      _mutateParams: function(params) {
+        return this.paramMutator ? this.paramMutator(params) : params;
+      },
+
+      _computeSavedSearchesParams: function() {
+        return {pageProvider: this.provider};
+      },
+
+      _aggregationsChanged: function() {
+        if (this.form) {
+          this.form.aggregations = this.aggregations;
+        }
+      },
+
+      _formHref: function (provider, searchName) {
+        var name = (searchName || provider).toLowerCase();
+        return this.resolveUrl(name + '/' + ['nuxeo', name, 'search-form'].join('-') + '.html');
+      },
+
+      _formModel: function () {
+        return { provider: this.provider, params: this.params, aggregations: this.aggregations };
+      },
+
+      _formChanged: function() {
+        this._clear();
+
+        if (this.queue) {
+          this.displayQueue();
+        } else {
+          this.displayFilters();
         }
 
-      });
-    })();
+        this.$['saved-searches'].get();
+        if (this.form.params !== undefined) {
+          this.params = this.form.params;
+        }
+        // setup data binding
+        this.form.addEventListener('params-changed', function(e) {
+          // e.detail.path is params.prop_name eg: params.ecm_fulltext
+          if (e.detail.path) {
+            var param = e.detail.path.split('.')[1];
+            this.set('params.' + param, e.detail.value);
+            if (this.auto) {
+              this._navigateToResults();
+            }
+          }
+        }.bind(this));
+        this.form.addEventListener('trigger-search', this._search.bind(this));
+      }
+
+    });
   </script>
 </dom-module>

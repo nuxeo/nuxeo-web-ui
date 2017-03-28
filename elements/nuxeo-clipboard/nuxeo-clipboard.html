@@ -100,15 +100,6 @@ Contributors:
         font-size: 1em;
       }
 
-      .queue-thumbnail,
-      .queue-thumbnail ::content img {
-        height: 24px;
-        width: 24px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
       .remove {
         padding: 0;
         width: 1.5em;
@@ -133,7 +124,7 @@ Contributors:
             <div class="list-item-box vertical layout">
               <div class="list-item-info horizontal layout center">
                 <div class="vertical layout center">
-                  <img class="queue-thumbnail" src="[[_thumbnail(document)]]">
+                  <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 </div>
                 <span class="list-item-title ellipsis flex">[[document.title]]</span>
                 <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
@@ -283,13 +274,6 @@ Contributors:
           classes += ' selected';
         }
         return classes;
-      },
-
-      _thumbnail: function(doc) {
-        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-          doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
-        }
       }
     });
   </script>

@@ -54,15 +54,6 @@ Contributors:
         height: 350px !important;
       }
 
-      .queue-thumbnail,
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 3px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -95,7 +86,7 @@ Contributors:
               on-row-clicked="_navigate">
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                   <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
@@ -129,7 +120,7 @@ Contributors:
               on-row-clicked="_navigate">
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                   <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
@@ -164,7 +155,7 @@ Contributors:
               on-row-clicked="_navigate">
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                   <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
@@ -187,60 +178,49 @@ Contributors:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-home',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-home',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
-        properties: {
+      },
 
-        },
-
-        _navigate: function(e) {
-          var detail;
-          if (e.detail.item) {
-            detail = {
-              doc: e.detail.item
-            };
-            page('/browse' + detail.doc.path);
-          } else {
-            detail = {
-              doc: e.model.item
-            };
-          }
-          this.fire('navigate', detail);
-        },
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-            doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
-          }
-        },
-
-        ready: function() {
-          this._fetchFavorite().then(function(favorite) {
-            this.$.favoritesProvider.params = [favorite.uid];
-            this.$.favoritesProvider.page = 1;
-            this.$.favoritesProvider.fetch();
-          }.bind(this));
-        },
-
-        _fetchFavorite: function() {
-          if (this.favorite) {
-            return Promise.resolve(this.favorite);
-          } else {
-            return this.$.fetchFavOp.execute()
-              .then(function(resp) {
-                this.favorite = resp;
-                return resp;
-              }.bind(this));
-          }
+      _navigate: function(e) {
+        var detail;
+        if (e.detail.item) {
+          detail = {
+            doc: e.detail.item
+          };
+          page('/browse' + detail.doc.path);
+        } else {
+          detail = {
+            doc: e.model.item
+          };
         }
+        this.fire('navigate', detail);
+      },
 
-      });
-    })();
+      ready: function() {
+        this._fetchFavorite().then(function(favorite) {
+          this.$.favoritesProvider.params = [favorite.uid];
+          this.$.favoritesProvider.page = 1;
+          this.$.favoritesProvider.fetch();
+        }.bind(this));
+      },
+
+      _fetchFavorite: function() {
+        if (this.favorite) {
+          return Promise.resolve(this.favorite);
+        } else {
+          return this.$.fetchFavOp.execute()
+            .then(function(resp) {
+              this.favorite = resp;
+              return resp;
+            }.bind(this));
+        }
+      }
+
+    });
   </script>
 
 </dom-module>

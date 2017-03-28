@@ -46,22 +46,6 @@ limitations under the License.
       .capitalize {
         text-transform: capitalize;
       }
-
-      .queue-thumbnail {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
-
-      .queue-thumbnail ::content img {
-        height: 32px;
-        width: 32px;
-        border-radius: 20px;
-        box-sizing: border-box;
-        margin-right: 8px;
-      }
     </style>
 
     <nuxeo-results id="results" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
@@ -90,7 +74,7 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
                                  field="dc:title" sort-by="dc:title" flex="100">
           <template>
-            <img class="queue-thumbnail" src="[[item.contextParameters.thumbnail.url]]">
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
             <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-click="_navigate">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
