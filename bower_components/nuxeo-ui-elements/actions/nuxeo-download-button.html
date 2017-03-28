@@ -66,6 +66,16 @@ Example:
         icon: {
           type: String,
           value: 'icons:file-download'
+        },
+
+        /**
+         *
+         * Path of the file object to download.
+         * For example `xpath="files:files/0/file"`.
+         */
+        xpath: {
+          type: String,
+          value: 'file:content'
         }
       },
 
@@ -74,9 +84,21 @@ Example:
       },
 
       _download: function() {
-        location.href = this.document.properties['file:content'].data;
-      }
+        var blob = this.document && this._deepFind(this.document.properties, this.xpath);
+        if (blob){
+          location.href = blob.data;
+        }
+      },
 
+      _deepFind: function(obj, props) {
+        for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+          if(!obj || obj === []) {
+            break;
+          }
+          obj = obj[path[i]];
+        }
+        return obj;
+      }
     });
   </script>
 
