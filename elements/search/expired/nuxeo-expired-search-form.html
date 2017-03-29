@@ -24,20 +24,8 @@ Contributors:
 -->
 <dom-module id="nuxeo-expired-search-form">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-      .row {
-        @apply(--layout-vertical);
-        box-sizing: border-box;
-        margin-bottom: 1rem;
-        padding: 0 1rem;
-        width: 100%;
-      }
-    </style>
 
-    <div class="row">
+    <div role="widget">
       <label>[[i18n('defaultSearch.fullText')]]</label>
       <paper-input id="searchInput" autofocus="true"
                    value="{{searchTerm}}" tabindex="0"
@@ -47,7 +35,7 @@ Contributors:
       </paper-input>
     </div>
 
-    <div class="row">
+    <div role="widget">
       <label>[[i18n('defaultSearch.authors')]]</label>
       <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
@@ -57,6 +45,7 @@ Contributors:
     </div>
 
   </template>
+
   <script>
     Polymer({
       is: 'nuxeo-expired-search-form',
