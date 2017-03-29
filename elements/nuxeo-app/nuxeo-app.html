@@ -479,7 +479,8 @@ Contributors:
           'document-locked': '_documentLocked',
           'document-unlocked': '_documentUnlocked',
           'theme-changed': '_themeChanged',
-          'search-results': '_showSearchResults'
+          'search-results': '_showSearchResults',
+          'navigate': '_navigate'
         },
 
         ready: function() {
@@ -560,6 +561,10 @@ Contributors:
           } else {
             this.$.importPopup.toggleDialog();
           }
+        },
+
+        _navigate: function(e) {
+          page('/browse' + e.detail.doc.path);
         },
 
         _navigateFromCollection: function(e) {
