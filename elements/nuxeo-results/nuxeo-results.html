@@ -59,12 +59,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         @apply(--layout-vertical);
       }
 
-      @media (max-width: 1024px) {
-        .main {
-          padding: 1.5em .5em;
-        }
-      }
-
       .toolbar {
         left: 0;
         position: absolute;
@@ -121,8 +115,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       </div>
 
-      <iron-pages id="views" attr-for-selected="name"
-                  selected="[[displayMode]]" selected-item="{{view}}">
+      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}">
         <content id="results" select=".results"></content>
       </iron-pages>
 
@@ -139,240 +132,237 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
     </iron-localstorage>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-results',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      properties: {
+        // the page provider to display results for
+        nxProvider: Object,
 
-      Polymer({
-        is: 'nuxeo-results',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
-        properties: {
-          // the page provider to display results for
-          nxProvider: Object,
+        // used as key for settings in local storage
+        name: String,
 
-          // used as key for settings in local storage
-          name: String,
-
-          // display mode
-          displayMode: {
-            type: String,
-            value: 'table',
-            notify: true
-          },
-
-          actionContext: {
-            type: Object,
-            notify: true
-          },
-          _settings: {
-            type: Object
-          },
-          selectedItems: {
-            type: Array,
-            value: [],
-            notify: true
-          },
-          columns: {
-            type: Array,
-            value: []
-          },
-          hideContentViewActions: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          },
-
-          _displayModes:  Array,
-
-          _localStorageName: String
-
+        // display mode
+        displayMode: {
+          type: String,
+          value: 'table',
+          notify: true
         },
 
-        observers: [
-          '_updateStorage(name)',
-          '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
-        ],
-
-        listeners: {
-          'views.iron-items-changed': '_updateViews',
-          'views.iron-select': '_selectView',
-          'views.iron-deselect': '_deselectView'
+        actionContext: {
+          type: Object,
+          notify: true
+        },
+        _settings: {
+          type: Object
+        },
+        selectedItems: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+        columns: {
+          type: Array,
+          value: []
+        },
+        hideContentViewActions: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         },
 
-        ready: function() {
-          this.$.nxcon.connect().then(this._updateStorage.bind(this));
-        },
+        _displayModes:  Array,
 
-        get items() {
-          if (this.view && this.view.items) {
-            return this.view.items;
+        _localStorageName: String
+
+      },
+
+      observers: [
+        '_updateStorage(name)',
+        '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
+      ],
+
+      listeners: {
+        'views.iron-items-changed': '_updateViews',
+        'views.iron-select': '_selectView',
+        'views.iron-deselect': '_deselectView'
+      },
+
+      ready: function() {
+        this.$.nxcon.connect().then(this._updateStorage.bind(this));
+      },
+
+      get items() {
+        if (this.view && this.view.items) {
+          return this.view.items;
+        }
+        // XXX: this.view.items is not working
+        return (this.view && this.view.$.list) ? this.view.$.list.items : [];
+      },
+
+      _updateViews: function() {
+        var hasDisplayMode;
+        this._displayModes = [];
+        this.$.views.items.forEach(function(view) {
+          var name = view.getAttribute("name"),
+              icon = view.getAttribute("icon");
+          view.nxProvider = this.nxProvider;
+          if (this._settings && view.settings) {
+            view.settings = this._settings[name];
           }
-          // XXX: this.view.items is not working
-          return (this.view && this.view.$.list) ? this.view.$.list.items : [];
-        },
-
-        _updateViews: function() {
-          var hasDisplayMode;
-          this._displayModes = [];
-          this.$.views.items.forEach(function(view) {
-            var name = view.getAttribute("name"),
-                icon = view.getAttribute("icon");
-            view.nxProvider = this.nxProvider;
-            if (this._settings && view.settings) {
-              view.settings = this._settings[name];
-            }
-            if (name === this.displayMode) {
-              hasDisplayMode = true;
-            }
-            this.push('_displayModes', {name: name, icon: icon});
-          }.bind(this));
-
-          // if current selected display mode is not available use the first one
-          if (!hasDisplayMode) {
-            this.displayMode = this._displayModes[0].name;
+          if (name === this.displayMode) {
+            hasDisplayMode = true;
           }
+          this.push('_displayModes', {name: name, icon: icon});
+        }.bind(this));
 
-        },
-
-        _displayModeTitle: function(item) {
-          return this.i18n('displayModeButton.display.' + item.name);
-        },
-
-        _isCurrentDisplayMode: function(item) {
-          return item.name == this.displayMode;
-        },
-
-        _toggleDisplayMode: function(e) {
-          this.displayMode = e.model.item.name;
-        },
-
-        _refreshAndFetch: function() {
-          var pn = this.nxProvider.page;
-          this._rewind();
-          if (pn === 1) {
-            // normally the page provider is on auto mode
-            // so the fetch should be triggered when changing page
-            this.nxProvider.fetch();
-          }
-        },
-
-        _rewind: function() {
-          this.nxProvider.page = 1;
-        },
-
-        _updateStorage: function() {
-          if (this.$.nxcon.user && this.name) {
-            this._localStorageName =  this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
-          }
-        },
-
-        _updateActionContext: function() {
-          this.actionContext = {
-            baseUrl: this.$.nxcon.url,
-            displayMode: this.displayMode,
-            nxProvider: this.nxProvider,
-            selectedItems: this.selectedItems,
-            columns: this.view ? this.view.columns : []
-          };
-        },
-
-        _clearSelectedItems: function() {
-          this.view.clearSelection();
-        },
-
-        initializeSettings: function() {
-          this._settings = {displayMode: this.displayMode};
-        },
-
-        restoreSettings: function() {
-          if (this._settings) {
-            if (this._settings.displayMode && this._settings.displayMode.length > 0) {
-              this.displayMode = this._settings.displayMode;
-              if (this._settings[this.displayMode] && this.view) {
-                this.view.settings = this._settings[this.displayMode];
-              }
-            }
-          }
-        },
-
-        saveSettings: function() {
-          this.$.prefStorage.save();
-        },
-
-        _selectedItemsChanged: function() {
-          this.selectedItems = [];
-          this.set('selectedItems', this.view.selectedItems);
-        },
-
-        _refreshDisplay: function(e) {
-          this.refresh();
-
-          if (this.selectedItems && this.selectedItems.length > 0) {
-            this.selectedItems = [];
-            if (e.detail.focusIndex || e.detail.focusIndex === 0) {
-              this.selectedItems = this.view.selectedItems;
-              if (e.detail.focusIndex > -1) {
-                this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
-              }
-            }
-          }
-        },
-
-        get size() {
-          return this.view.size;
-        },
-
-        clearSelection: function() {
-          this.view.clearSelection();
-        },
-
-        selectItems: function(items) {
-          this.clearSelection();
-          this.view.selectItems(items);
-          this.view.notifyResize();
-        },
-
-        refresh: function() {
-          this.view.notifyResize();
-        },
-
-        _saveViewSettings: function() {
-          if (this.view.settings) {
-            this.set('_settings.' + this.displayMode, this.view.settings);
-            this.saveSettings();
-          }
-        },
-
-        _deselectView: function(e) {
-          var view = e.detail.item;
-          this.unlisten(view, 'selected-items-changed', '_selectedItemsChanged');
-          this.unlisten(view, 'settings-changed', '_saveViewSettings');
-        },
-
-        _selectView: function(e) {
-          var view = e.detail.item;
-
-          if (this._settings) {
-            // restore display mode
-            this.set('_settings.displayMode', this.displayMode);
-            this.saveSettings();
-
-            // restore view settings
-            this.view.settings = this._settings[this.displayMode];
-          }
-
-          // restore selection
-          if (this.selectedItems) {
-            this.selectItems(this.selectedItems.slice());
-          }
-
-          // listen for settings and selection changed
-          this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
-          this.listen(view, 'settings-changed', '_saveViewSettings');
+        // if current selected display mode is not available use the first one
+        if (!hasDisplayMode) {
+          this.displayMode = this._displayModes[0].name;
         }
 
-      });
-    })();
+      },
+
+      _displayModeTitle: function(item) {
+        return this.i18n('displayModeButton.display.' + item.name);
+      },
+
+      _isCurrentDisplayMode: function(item) {
+        return item.name == this.displayMode;
+      },
+
+      _toggleDisplayMode: function(e) {
+        this.displayMode = e.model.item.name;
+      },
+
+      _refreshAndFetch: function() {
+        var pn = this.nxProvider.page;
+        this._rewind();
+        if (pn === 1) {
+          // normally the page provider is on auto mode
+          // so the fetch should be triggered when changing page
+          this.nxProvider.fetch();
+        }
+      },
+
+      _rewind: function() {
+        this.nxProvider.page = 1;
+      },
+
+      _updateStorage: function() {
+        if (this.$.nxcon.user && this.name) {
+          this._localStorageName =  this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
+        }
+      },
+
+      _updateActionContext: function() {
+        this.actionContext = {
+          baseUrl: this.$.nxcon.url,
+          displayMode: this.displayMode,
+          nxProvider: this.nxProvider,
+          selectedItems: this.selectedItems,
+          columns: this.view ? this.view.columns : []
+        };
+      },
+
+      _clearSelectedItems: function() {
+        this.view.clearSelection();
+      },
+
+      initializeSettings: function() {
+        this._settings = {displayMode: this.displayMode};
+      },
+
+      restoreSettings: function() {
+        if (this._settings) {
+          if (this._settings.displayMode && this._settings.displayMode.length > 0) {
+            this.displayMode = this._settings.displayMode;
+            if (this._settings[this.displayMode] && this.view) {
+              this.view.settings = this._settings[this.displayMode];
+            }
+          }
+        }
+      },
+
+      saveSettings: function() {
+        this.$.prefStorage.save();
+      },
+
+      _selectedItemsChanged: function() {
+        this.selectedItems = [];
+        this.set('selectedItems', this.view.selectedItems);
+      },
+
+      _refreshDisplay: function(e) {
+        this.refresh();
+
+        if (this.selectedItems && this.selectedItems.length > 0) {
+          this.selectedItems = [];
+          if (e.detail.focusIndex || e.detail.focusIndex === 0) {
+            this.selectedItems = this.view.selectedItems;
+            if (e.detail.focusIndex > -1) {
+              this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
+            }
+          }
+        }
+      },
+
+      get size() {
+        return this.view.size;
+      },
+
+      clearSelection: function() {
+        this.view.clearSelection();
+      },
+
+      selectItems: function(items) {
+        this.clearSelection();
+        this.view.selectItems(items);
+        this.view.notifyResize();
+      },
+
+      refresh: function() {
+        this.view.notifyResize();
+      },
+
+      _saveViewSettings: function() {
+        if (this.view.settings) {
+          this.set('_settings.' + this.displayMode, this.view.settings);
+          this.saveSettings();
+        }
+      },
+
+      _deselectView: function(e) {
+        var view = e.detail.item;
+        this.unlisten(view, 'selected-items-changed', '_selectedItemsChanged');
+        this.unlisten(view, 'settings-changed', '_saveViewSettings');
+      },
+
+      _selectView: function(e) {
+        var view = e.detail.item;
+
+        if (this._settings) {
+          // restore display mode
+          this.set('_settings.displayMode', this.displayMode);
+          this.saveSettings();
+
+          // restore view settings
+          this.view.settings = this._settings[this.displayMode];
+        }
+
+        // restore selection
+        if (this.selectedItems) {
+          this.selectItems(this.selectedItems.slice());
+        }
+
+        // listen for settings and selection changed
+        this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
+        this.listen(view, 'settings-changed', '_saveViewSettings');
+      }
+
+    });
   </script>
 
 </dom-module>

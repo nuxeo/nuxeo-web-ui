@@ -29,11 +29,25 @@ Contributors:
   <template>
 
     <style>
-      .header {
-        @apply(--layout-horizontal);
-      }
       nuxeo-saved-search-actions {
         @apply(--layout-end-justified);
+      }
+
+      ::content nuxeo-data-table, ::content nuxeo-data-grid {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 130px);
+      }
+
+      ::content .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+      }
+
+      ::content .capitalize {
+        text-transform: capitalize;
       }
     </style>
 
@@ -48,46 +62,43 @@ Contributors:
     </nuxeo-page>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-search-results',
 
-      Polymer({
-        is: 'nuxeo-search-results',
+      behaviors: [Nuxeo.I18nBehavior],
 
-        behaviors: [Nuxeo.I18nBehavior],
+      listeners: {
+        'results.navigate' : '_navigateFromSearch'
+      },
 
-        listeners: {
-          'results.navigate' : '_navigateFromSearch'
-        },
+      get element() {
+        return this.$.results.element;
+      },
 
-        get element() {
-          return this.$.results.element;
-        },
+      set searchForm(searchForm) {
+        this.nxProvider = searchForm.nxProvider;
+        this.searchName = searchForm.searchName;
 
-        set searchForm(searchForm) {
-          this.nxProvider = searchForm.nxProvider;
-          this.searchName = searchForm.searchName;
+        var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
+        this._resultsHref = this.resolveUrl(this.searchName.toLowerCase() + '/' + name + '.html');
+        this._resultsModel = { nxProvider: this.nxProvider, name: this.searchName };
 
-          var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-          this._resultsHref = this.resolveUrl(this.searchName.toLowerCase() + '/' + name + '.html');
-          this._resultsModel = { nxProvider: this.nxProvider, name: this.searchName };
+        this.$.actions.searchForm = searchForm;
+      },
 
-          this.$.actions.searchForm = searchForm;
-        },
+      get searchForm() {
+        return this.$.actions.searchForm;
+      },
 
-        get searchForm() {
-          return this.$.actions.searchForm;
-        },
-
-        _navigateFromSearch: function(e) {
-          if (this.searchForm) {
-            this.searchForm.displayQueue(e.detail.doc);
-          }
+      _navigateFromSearch: function(e) {
+        if (this.searchForm) {
+          this.searchForm.displayQueue(e.detail.doc);
         }
+      }
 
-      });
-    })();
+    });
   </script>
 
 </dom-module>
