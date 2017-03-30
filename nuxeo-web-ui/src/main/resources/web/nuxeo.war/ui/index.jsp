@@ -19,6 +19,8 @@ limitations under the License.
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
 
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
+<% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
+
 <!DOCTYPE html>
 <html lang="">
 
@@ -78,7 +80,8 @@ limitations under the License.
 </head>
 
 <body unresolved class="fullbleed layout vertical">
-  <nuxeo-connection url="<%= request.getContextPath() %>"></nuxeo-connection>
+  <nuxeo-connection url="<%= request.getContextPath() %>"
+                    repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= request.getRequestURI() %>"></nuxeo-app>
 </body>
 
