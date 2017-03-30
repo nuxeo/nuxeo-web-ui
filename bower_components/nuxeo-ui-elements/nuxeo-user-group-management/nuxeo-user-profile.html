@@ -24,7 +24,6 @@ limitations under the License.
 <link rel="import" href="../../paper-toast/paper-toast.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../widgets/nuxeo-tag.html">
-<link rel="import" href="nuxeo-edit-password.html">
 <link rel="import" href="nuxeo-user-group-permissions-table.html">
 
 <!--
@@ -109,10 +108,9 @@ Example:
       }
     </style>
 
-    <nuxeo-resource id="request" path="user/[[username]]" enrichers="userprofile" enrichers-entity="user">
-    </nuxeo-resource>
-
-    <nuxeo-resource id="editRequest" path="user/[[username]]"></nuxeo-resource>
+    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-resource id="request" path="me/"></nuxeo-resource>
+    <nuxeo-resource id="changePassword" path="me/changepassword"></nuxeo-resource>
 
     <paper-toast id="toast"></paper-toast>
 
@@ -128,15 +126,29 @@ Example:
 
         <!-- change password -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="changePasswordButton" class="horizontal layout center" on-tap="_toggleChangePassword">
-            <iron-icon icon="icons:lock"></iron-icon> [[i18n('command.change.password')]]
+          <paper-button noink id="changePasswordButton" class="horizontal layout center" on-tap="_openChangePasswordDialog">
+            <iron-icon icon="icons:lock"></iron-icon> [[i18n('userProfile.password.change')]]
           </paper-button>
         </template>
-        <paper-dialog id="changePasswordDialog" modal>
-          <h3>[[i18n('command.change.password')]]</h3>
+        <paper-dialog id="changePasswordDialog" with-backdrop>
+          <h3>[[i18n('userProfile.password.change')]]</h3>
+
           <form is="iron-form" id="changePasswordForm" class="vertical layout">
-            <nuxeo-edit-password required id="passwordEditor"></nuxeo-edit-password>
+            <paper-input id="passwordOld" type="password" label="[[i18n('userProfile.password.old')]]"
+                         required always-float-label>
+            </paper-input>
+
+            <paper-input id="passwordNew" type="password" label="[[i18n('userProfile.password.new')]]"
+                         required always-float-label
+                         value="{{passwordNew}}">
+            </paper-input>
+
+            <paper-input id="passwordConfirm" type="password" label="[[i18n('userProfile.password.confirm')]]"
+                         required always-float-label
+                         pattern="[[passwordNew]]">
+            </paper-input>
           </form>
+
           <div class="buttons horizontal end-justified layout">
             <div class="flex start-justified">
               <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
@@ -146,30 +158,6 @@ Example:
             </paper-button>
           </div>
         </paper-dialog>
-
-        <!-- edit -->
-        <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="editUserButton" class="horizontal layout center" on-tap="_toggleEditUser">
-            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('userManagement.editUser.button')]]
-          </paper-button>
-        </template>
-        <paper-dialog id="editUserDialog" modal>
-          <h3>[[i18n('userManagement.editUser.heading')]]</h3>
-          <form is="iron-form" id="editUserForm" class="vertical layout">
-            <paper-input label="[[i18n('userManagement.username')]]" value="[[user.properties.username]]"
-                         always-float-label readonly required></paper-input>
-            <nuxeo-edit-user id="userEditor"></nuxeo-edit-user>
-          </form>
-          <div class="buttons horizontal end-justified layout">
-            <div class="flex start-justified">
-              <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-            </div>
-            <paper-button noink class="primary" on-tap="_submitEditUser">
-              [[i18n('command.save.changes')]]
-            </paper-button>
-          </div>
-        </paper-dialog>
-
       </div>
     </div>
 
@@ -193,12 +181,14 @@ Example:
 
     <!-- local permissions -->
     <nuxeo-user-group-permissions-table label="[[i18n('userManagement.localPermissions.heading')]]"
-                                        entity="[[username]]" readonly></nuxeo-user-group-permissions-table>
+                                        entity="[[username]]" readonly>
+    </nuxeo-user-group-permissions-table>
 
     <!-- group permissions -->
     <template is="dom-repeat" items="[[groups]]">
       <nuxeo-user-group-permissions-table label="[[i18n('userManagement.entityPermissions', item.name)]]"
-                                          entity="[[item.name]]" readonly></nuxeo-user-group-permissions-table>
+                                          entity="[[item.name]]" readonly>
+      </nuxeo-user-group-permissions-table>
     </template>
 
   </template>
@@ -231,13 +221,7 @@ Example:
         if (!this._isRegistered('nuxeo-view-user')) {
           Polymer.Base.importHref(this.resolveUrl('nuxeo-view-user.html'));
         }
-        if (!this._isRegistered('nuxeo-edit-user')) {
-          Polymer.Base.importHref(this.resolveUrl('nuxeo-edit-user.html'));
-        }
-        this.$.editUserForm.addEventListener('iron-form-presubmit', function(event) {
-          event.preventDefault();
-          this._saveUser();
-        }.bind(this));
+
         this.$.changePasswordForm.addEventListener('iron-form-presubmit', function(event) {
           event.preventDefault();
           this._savePassword();
@@ -265,8 +249,9 @@ Example:
         }.bind(this));
       },
 
-      _toggleChangePassword: function() {
-        this.$.changePasswordDialog.toggle();
+      _openChangePasswordDialog: function() {
+        this.$.passwordOld.value = this.$.passwordNew.value = this.$.passwordConfirm.value = '';
+        this.$.changePasswordDialog.open();
       },
 
       _submitChangePassword: function() {
@@ -274,35 +259,26 @@ Example:
       },
 
       _savePassword: function() {
-        this.$.changePasswordDialog.toggle();
-        this.$.editRequest.data = JSON.parse(JSON.stringify(this.user));
-        this.$.editRequest.data.properties.password = this.$.passwordEditor.password;
-        this.$.editRequest.put().then(function(response) {
+        this.$.changePasswordDialog.close();
+        this.$.changePassword.data = {
+          "oldPassword" : this.$.passwordOld.value,
+          "newPassword" : this.$.passwordNew.value
+        };
+        this.$.changePassword.put().then(function(response) {
           this.user = response;
-          this._toast(this.i18n('userManagement.password.changed'));
-          if (!!this.$.passwordEditor.resetFields) {
-            this.$.passwordEditor.resetFields();
+          this._toast(this.i18n('userProfile.password.changed'));
+
+          // update connection
+          this.$.nxcon.username = this.user.id;
+          this.$.nxcon.password = this.$.passwordNew.value;
+          this.$.nxcon.connect();
+
+        }.bind(this)).catch(function(error) {
+          if (error.status === 401) {
+            this._toast(this.i18n('userProfile.password.wrong'), true);
+          } else {
+            this._toast(this.i18n('userProfile.password.error'), true);
           }
-        }.bind(this));
-      },
-
-      _toggleEditUser: function() {
-        this.$.userEditor.user = JSON.parse(JSON.stringify(this.user.properties));
-        this.$.editUserDialog.toggle();
-      },
-
-      _submitEditUser: function() {
-        this.$.editUserForm.submit();
-      },
-
-      _saveUser: function() {
-        this.$.editUserDialog.toggle();
-        var editedUser = JSON.parse(JSON.stringify(this.user));
-        editedUser.properties = this.$.userEditor.user;
-        this.$.editRequest.data = editedUser;
-        this.$.editRequest.put().then(function(response) {
-          this.user = response;
-          this._toast(this.i18n('userManagement.user.updated'));
         }.bind(this));
       },
 
