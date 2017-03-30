@@ -1,0 +1,166 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+-->
+
+<!--
+`nuxeo-browser`
+@group Nuxeo UI
+@element nuxeo-browser
+-->
+<dom-module id="nuxeo-browser">
+  <template>
+    <style>
+
+      /* document actions */
+      .document-actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+        color: var(--nuxeo-header-actions);
+        padding: 0 0 16px;
+      }
+
+      .document-actions::content paper-icon-button {
+        width: 2.25rem;
+        color: var(--nuxeo-header-actions);
+      }
+
+      .document-actions::content paper-icon-button:hover {
+        color: var(--nuxeo-header-actions-hover);
+      }
+
+      /* document views items (pills) */
+      ::content #documentViewsItems {
+        @apply(--layout-horizontal);
+        --paper-listbox-background-color: transparent;
+      }
+
+    </style>
+
+    <!-- Main content -->
+    <nuxeo-page class="main">
+
+      <div class="header">
+        <paper-toolbar>
+          <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
+          <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+            <nuxeo-page-item name="view" label="browser.view"></nuxeo-page-item>
+            <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
+            <nuxeo-page-item name="history" label="browser.history"></nuxeo-page-item>
+            <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+          </paper-listbox>
+        </paper-toolbar>
+      </div>
+
+      <div class="content">
+
+        <div class="document-actions">
+          <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        </div>
+
+        <div id="nxContent">
+          <paper-toast id="toast"></paper-toast>
+          <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+            <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
+            <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
+            <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
+            <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
+          </iron-pages>
+        </div>
+
+      </div>
+    </nuxeo-page>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-browser',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: {
+          type: Object
+        },
+        selectedTab: {
+          type: String,
+          value: 'view',
+          notify: true
+        },
+        cvParams: {
+          type: Object,
+          notify: true
+        },
+        clipboard: {
+          type: Object
+        },
+        actionContext: {
+          type: Object,
+          computed: '_actionContext(document)'
+        },
+
+        viewsContext: {
+          type: Object,
+          computed: '_viewsContext(document)'
+        }
+      },
+
+      listeners: {
+        'permissions.aceupdated': '_documentUpdated',
+        'permissions.acedeleted': '_documentUpdated',
+        'added-to-collection': '_documentUpdated',
+        'removed-from-collection': '_documentUpdated'
+      },
+
+      _documentUpdated: function() {
+        this.fire('document-updated');
+      },
+
+      download: function() {
+        location.href = this.document.properties['file:content'].data;
+      },
+
+      get _enrichers() {
+        if (this.document) {
+          return this.document.contextParameters;
+        }
+      },
+
+      get _canReadChildren() {
+        return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
+      },
+
+      _actionContext: function() {
+        return {document: this.document, clipboard: this.clipboard};
+      },
+
+      _viewsContext: function() {
+        return {document: this.document};
+      },
+
+      _navigateToView: function() {
+        page('/browse' + this.document.path + '@view');
+      },
+
+      _toast: function(msg) {
+        this.$.toast.text = msg;
+        this.$.toast.open();
+      }
+
+    });
+  </script>
+
+</dom-module>

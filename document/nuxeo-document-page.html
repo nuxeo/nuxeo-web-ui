@@ -1,0 +1,175 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+    Nelson Silva <nsilva@nuxeo.com>
+    Gabriel Barata <gbarata@nuxeo.com>
+    Andre Justo <ajusto@nuxeo.com>
+-->
+
+<!--
+`nuxeo-document-page`
+@group Nuxeo UI
+@element nuxeo-document-page
+-->
+<dom-module id="nuxeo-document-page">
+  <template>
+    <style>
+
+      .page {
+        @apply(--layout-horizontal);
+      }
+
+      .page .main {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-2);
+        padding-right: 16px;
+      }
+
+      .page .side {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+      }
+
+      @media (max-width: 1024px) {
+        .page {
+          flex-direction: column;
+        }
+        .page .main {
+          padding: 0;
+        }
+      }
+
+      #edit {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
+    </style>
+
+    <nuxeo-document-info-bar document="[[document]]" hidden$="[[isProcessingTask]]"></nuxeo-document-info-bar>
+
+    <div class="page">
+
+      <div class="main">
+        <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
+      </div>
+
+      <div class="side">
+
+        <!-- info -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
+        </paper-card>
+
+        <!-- metadata / edit -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <div hidden$="[[edit]]">
+            <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          </div>
+          <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
+        </paper-card>
+
+        <!-- workflows -->
+        <nuxeo-document-workflows document="[[document]]" is-processing-task$="[[isProcessingTask]]"></nuxeo-document-workflows>
+
+        <!-- collections -->
+        <paper-card hidden$="[[!_showCollections(document)]]">
+          <h3>[[i18n('documentPage.collections')]]</h3>
+          <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
+        </paper-card>
+
+        <!-- tags -->
+        <paper-card>
+          <h3>[[i18n('documentPage.tags')]]</h3>
+          <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
+                                placeholder="[[i18n('documentPage.tags.placeholder')]]">
+          </nuxeo-tag-suggestion>
+        </paper-card>
+
+        <!-- activity -->
+        <paper-card hidden$="[[isProcessingTask]]">
+          <h3>[[i18n('documentPage.activity')]]</h3>
+          <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
+        </paper-card>
+
+      </div>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-document-page',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object,
+          observer: '_documentChanged'
+        },
+
+        edit: {
+          type: Boolean,
+          value: false
+        },
+
+        isProcessingTask: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true,
+          notify: true
+        }
+      },
+
+      listeners: {
+        'workflowTaskProcess': '_workflowTaskProcess',
+        'workflowTaskCancelled': '_workflowTaskCancelled'
+      },
+
+      _documentChanged: function() {
+        if (this.document) {
+          this.edit = false;
+          this.isProcessingTask = false;
+        }
+      },
+
+      _isMutable: function(doc) {
+        return !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && doc.state !== 'deleted';
+      },
+
+      _canEdit: function(doc) {
+        return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
+      },
+
+      _editMode: function() {
+        this.edit = true;
+      },
+
+      _showCollections: function (doc) {
+        return this.hasCollections(doc) && !this.isProcessingTask;
+      },
+
+      _workflowTaskProcess: function() {
+        this.isProcessingTask = true;
+      },
+
+      _workflowTaskCancelled: function() {
+        this.isProcessingTask = false;
+      }
+
+    });
+  </script>
+
+</dom-module>

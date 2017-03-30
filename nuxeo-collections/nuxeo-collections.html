@@ -1,0 +1,514 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Nelson Silva <nsilva@nuxeo.com>
+  Andre Justo <ajusto@nuxeo.com>
+  Guillaume Renard <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+ `nuxeo-collections`
+ @group Nuxeo UI
+ @element nuxeo-collections
+ -->
+<dom-module id="nuxeo-collections">
+  <template>
+    <style>
+    :host {
+      @apply(--layout-vertical);
+      @apply(--layout-flex);
+      display: block;
+    }
+
+    nuxeo-data-list {
+      height: calc(100vh - 61px);
+    }
+
+    nuxeo-data-list {
+      display: block;
+      position: relative;
+    }
+
+    .collections {
+      height: calc(100vh - 61px);
+      overflow: auto;
+    }
+
+    .switch {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 58px;
+      padding: 16px;
+      z-index: 101;
+      border-left: 1px solid var(--divider-color);
+      background-color: var(--nuxeo-light-background);
+    }
+
+    .switch:hover {
+      background-color: var(--nuxeo-button-primary);
+      color: var(--nuxeo-button-primary-text);
+    }
+
+    .content {
+      font-size: .9rem;
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      height: calc(100vh - 61px);
+      width: 293px;
+    }
+
+    .header {
+      height: 59px;
+      background-color: var(--nuxeo-light-background);
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .header h1 {
+      color: var(--nuxeo-tag-text);
+      text-transform: uppercase;
+      font-size: 1rem;
+      margin: .1em .2em 0 1.1em;
+      font-weight: 400;
+    }
+
+    .collection-box {
+      line-height: 155%;
+    }
+
+    .collection-box + .collection-box {
+      border-top: 1px solid var(--divider-color);
+    }
+
+    iron-icon.collection-name-icon {
+      height: .9em;
+      width: .9em;
+      border-radius: 50px;
+      background-color: var(--dark-primary-color);
+      color: white;
+      padding: .4em;
+    }
+
+    .collection-name {
+      font-weight: 700;
+      margin-left: .5em;
+    }
+
+    .collection-detail {
+      margin-left: 2.2em;
+    }
+
+    .collection-property {
+      color: var(--nuxeo-text-light);
+      margin-right: .2em;
+    }
+
+    .list-item {
+      cursor: pointer;
+      padding: 1em;
+      border-bottom: 1px solid var(--nuxeo-border);
+      font-size: .9em;
+    }
+
+    .list-item:hover {
+      @apply(--nuxeo-block-hover);
+    }
+
+    .list-item.selected,
+    .list-item:focus,
+    .list-item.selected:focus {
+      @apply(--nuxeo-block-selected);
+    }
+
+    .remove {
+      width: 1.7em;
+      height: 1.7em;
+    }
+
+    .list-item-title {
+      font-size: 1.1em;
+    }
+
+    .list-item-property {
+      color: var(--nuxeo-text-light);
+      display: block;
+      margin: .2em 0;
+      font-size: .8em;
+    }
+
+    </style>
+
+    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
+
+    <div class="header ellipsis search-header">
+      <template is="dom-if" if="[[_isDisplayMembers]]">
+        <h1>[[selectedCollection.title]]</h1>
+        <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
+        </paper-icon-button>
+        <paper-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</paper-tooltip>
+      </template>
+      <template is="dom-if" if="[[!_isDisplayMembers]]">
+        <h1>[[i18n('collections.heading')]]</h1>
+      </template>
+    </div>
+
+
+      <neon-animated-pages class="content" id="queues" selected="[[_selectedPage]]" entry-animation="[[_entryAnimation]]" exit-animation="[[_exitAnimation]]">
+        <neon-animatable>
+
+          <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
+            <nuxeo-page-provider id="collectionsProvider"
+               provider="user_collections"
+               page-size="40"
+               params='{"searchTerm":"%","user":"$currentUser"}'
+               sort='{"dc:modified":"desc"}'
+               schemas="dublincore,common"
+               enrichers="permissions"
+               headers='{"X-NXfetch.document": "properties"}'>
+            </nuxeo-page-provider>
+
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList"
+              selected-item="{{selectedCollection}}"
+              selection-enabled as="collection"
+              empty-label="[[i18n('collections.empty')]]"
+              empty-label-when-filtered="[[i18n('collections.empty')]]">
+              <template>
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                  <div class="collection-box vertical layout">
+                    <div class="collection-info horizontal layout center">
+                      <div class="vertical layout center">
+                        <iron-icon class="collection-name-icon" icon="icons:book"></iron-icon>
+                      </div>
+                      <span class="collection-name title">[[collection.title]]</span>
+                    </div>
+                    <div class="collection-detail">
+                      <div class="date horizontal layout center">
+                        <span class="collection-property">[[i18n('collections.lastModified')]] </span>
+                        <span>[[_formatDate(collection.properties.dc:modified)]]</span>
+                      </div>
+                      <div class="layout center">
+                        <span class="collection-property">[[i18n('collections.ownedBy')]]</span>
+                        <nuxeo-user-tag user="[[collection.properties.dc:creator]]"></nuxeo-user-tag>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </nuxeo-data-list>
+          </div>
+
+        </neon-animatable>
+
+        <neon-animatable>
+
+          <div id="queue" hidden$="{{!_isDisplayMembers}}">
+            <nuxeo-page-provider id="memberProvider"
+               provider="ordered_content_collection"
+               schemas="dublincore,common"
+               enrichers="thumbnail">
+            </nuxeo-page-provider>
+
+            <nuxeo-data-list nx-provider="memberProvider" id="membersList"
+              selected-item="{{selectedMember}}"
+              selection-enabled as="member"
+              empty-label="[[i18n('collections.members.empty')]]"
+              empty-label-when-filtered="[[i18n('collections.members.empty')]]">
+              <template>
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+
+                  <div class="list-item-box vertical layout">
+                    <div class="list-item-info horizontal layout center" >
+                      <div class="vertical layout center">
+                        <nuxeo-document-thumbnail document="[[member]]"></nuxeo-document-thumbnail>
+                      </div>
+                      <div class="flex">
+                        <span class="list-item-title ellipsis">[[member.title]]</span>
+                        <span class="list-item-property ellipsis">[[member.type]]</span>
+                      </div>
+                      <iron-icon  id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]"
+                        icon="icons:clear" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
+                      </iron-icon>
+                    </div>
+                  </div>
+
+                </div>
+              </template>
+            </nuxeo-data-list>
+          </div>
+
+        </neon-animatable>
+      </neon-animated-pages>
+
+    <nuxeo-keys keys="right l" on-pressed="_navigateOnRight"></nuxeo-keys>
+    <nuxeo-keys keys="left h" on-pressed="_navigateOnLeft"></nuxeo-keys>
+    <nuxeo-keys keys="down j" on-pressed="_navigateOnDown"></nuxeo-keys>
+    <nuxeo-keys keys="up k" on-pressed="_navigateOnUp"></nuxeo-keys>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-collections',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+
+      properties: {
+
+        selectedSearch: {
+          type: String,
+          value: 'faceted'
+        },
+
+        currentIndex: {
+          type: Number,
+          notify: true
+        },
+        _isDisplayMembers: {
+          type: Boolean,
+          value: false,
+          observer: '_observeIsDisplayMembers'
+        },
+        selectedCollection: {
+          type: Object,
+          observer: '_selectedCollectionChanged',
+          notify: true
+        },
+        selectedMember: {
+          type: Object,
+          observer: '_selectedMemberChanged',
+          notify: true
+        },
+        hasCollection: {
+          type: Boolean,
+          value: true
+        },
+        hasMember: {
+          type: Boolean,
+          value: true
+        },
+        _entryAnimation: {
+          type: String,
+          value: 'slide-from-right-animation'
+        },
+        _exitAnimation: {
+          type: String,
+          value: 'slide-left-animation'
+        },
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      },
+
+      get nxProvider() {
+        return this.$.memberProvider;
+      },
+
+      _navigateOnRight: function() {
+        if (!this._isDisplayMembers) {
+          if (this.selectedCollection) {
+            this.displayMembers();
+            this.$.membersList.fire('iron-resize');
+            if (this.hasMember) {
+              this.$.membersList.selectItem(0);
+            }
+          }
+          this._tmpJustRight = true;
+        }
+      },
+
+      _navigateOnLeft: function() {
+        if (this._isDisplayMembers) {
+          this.displayCollections();
+          this.$.collectionsList.fire('iron-resize');
+        }
+        this._tmpJustLeft = true;
+      },
+
+      _navigateOnDown: function() {
+        if (this._isDisplayMembers) {
+          if (this._tmpJustRight) {
+            this.$.membersList.selectNext();
+            this._tmpJustRight = false;
+          }
+        } else {
+          if (this._tmpJustLeft) {
+            this.$.collectionsList.selectNext();
+            this._tmpJustLeft = false;
+          }
+        }
+      },
+
+      _navigateOnUp: function() {
+        if (this._isDisplayMembers) {
+          if (this._tmpJustRight) {
+            this.$.membersList.selectPrevious();
+            this._tmpJustRight = false;
+          }
+        } else {
+          if (this._tmpJustLeft) {
+            this.$.collectionsList.selectPrevious();
+            this._tmpJustLeft = false;
+          }
+        }
+      },
+
+      _observeIsDisplayMembers: function() {
+        if (this._isDisplayMembers) {
+          this._entryAnimation = 'slide-from-right-animation';
+          this._exitAnimation = 'slide-left-animation';
+          this._selectedPage = 1;
+        } else {
+          this._entryAnimation = 'slide-from-left-animation';
+          this._exitAnimation = 'slide-right-animation';
+          this._selectedPage = 0;
+        }
+      },
+
+      _resetMemberResults: function() {
+        this.$.membersList._resetResults();
+      },
+
+      displayMembers: function(member, index) {
+        this._isDisplayMembers = true;
+        if (member && member.uid) {
+          this.$.membersList.selectItem(member);
+          this.$.membersList.scrollToIndex(Math.max(0, index - 5));
+        }
+      },
+
+      displayCollections: function() {
+        this._isDisplayMembers = false;
+        this._resetMemberResults();
+        this.$.memberProvider.fetch();
+        this.fire('browseCollection', {
+          collection: this.selectedCollection,
+        });
+      },
+
+      _removeFromCollection: function(evt) {
+        var op = this.$.removeFromCollectionOp;
+        var memberId = evt.currentTarget.dataset.uid;
+        op.input = memberId;
+        op.params = {
+          'collection': this.selectedCollection
+        };
+        op.execute().then(function() {
+          var memberIndex;
+          this.$.membersList.$.list.items = this.$.membersList.$.list.items.filter(function(el, index) {
+            if (el.uid === evt.target.dataset.uid) {
+              memberIndex = index;
+              return false;
+            }
+            return true;
+          });
+          if (this.$.membersList.length > memberIndex) {
+            this.$.membersList.selectItem(memberIndex);
+          }
+          this.fire('removed-from-collection',
+            {
+              innerRemove: true,
+              docId: memberId,
+              collectionId: evt.target.dataset.uid
+
+            }
+          );
+        }.bind(this));
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _selectedMemberChanged: function(doc) {
+        if (doc) {
+          if (doc.isVersion) {
+            page('/doc/' + doc.uid);
+          } else {
+            page('/browse' + doc.path);
+          }
+        }
+      },
+
+      _selectedCollectionChanged: function(collection) {
+        if (collection) {
+          this._resetMemberResults();
+          this.fire('browseCollection', {
+            collection: collection,
+          });
+          this.$.memberProvider.params = [collection.uid];
+          this.$.memberProvider.fetch();
+        }
+      },
+
+      _isEmpty: function(items) {
+        return items && items.length === 0;
+      },
+
+      ready: function() {
+        window.addEventListener('added-to-collection', function(e) {
+          this.$.collectionsProvider.fetch();
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+            this.members = [];
+            this.$.memberProvider.fetch();
+          }
+        }.bind(this));
+        window.addEventListener('removed-from-collection', function(e) {
+          if (e.detail.innerRemove) {
+            return;
+          }
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+            this.members = [];
+            this.$.memberProvider.fetch();
+          } else if (!this._isDisplayMembers) {
+            this.$.collectionsProvider.fetch();
+          }
+        }.bind(this));
+
+      },
+
+      _visibleChanged: function() {
+        if (this.$.collectionsProvider.resultsCount === undefined) {
+          this.$.collectionsProvider.fetch();
+        }
+      },
+
+      _formatDate: function(date) {
+        return moment(date).format('MMMM D, YYYY');
+      },
+
+      _canRemove: function(collection) {
+        if (collection && collection.contextParameters && collection.contextParameters.permissions) {
+          // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
+          // Action will therefore not be available
+          return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
+        }
+        return false;
+      }
+
+    });
+  </script>
+</dom-module>

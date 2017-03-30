@@ -1,0 +1,236 @@
+<!--
+(C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Gabriel Barata <gbarata@nuxeo.com>
+-->
+
+<!--
+`nuxeo-home`
+@group Nuxeo UI
+@element nuxeo-home
+-->
+<dom-module id="nuxeo-home">
+  <template>
+    <style>
+
+      .flex-layout {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      paper-card {
+        min-width: 25em;
+        width: 49%;
+        height: 420px;
+      }
+
+      @media (max-width: 1024px) {
+        paper-card {
+          width: 100%;
+        }
+      }
+
+      h3 iron-icon {
+        width: 1.3em;
+        margin-right: 0.4em;
+      }
+
+      nuxeo-data-table, nuxeo-tasks-list, nuxeo-tasks-list ::content nuxeo-data-list {
+        height: 350px !important;
+      }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        width: calc(100% - 38px);
+      }
+
+    </style>
+
+    <nuxeo-page>
+      <div class="header">[[i18n('home.dashboard')]]</div>
+      <div class="content">
+        <section name="dashboard" class="flex-layout">
+
+          <!-- recently edited -->
+          <paper-card>
+            <h3><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
+            <nuxeo-page-provider auto
+              id="latestQuery"
+              page-size="20"
+              query="SELECT * FROM Document WHERE ecm:mixinType = 'Versionable' AND ecm:isCheckedInVersion = 0 AND ecm:mixinType != 'HiddenInNavigation' AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC"
+              schemas="dublincore,common,uid"
+              enrichers="thumbnail"
+              headers='{"X-NXfetch.document": "properties"}'>
+            </nuxeo-page-provider>
+            <nuxeo-data-table id="latestEditedDocs"
+              nx-provider="latestQuery"
+              empty-label="[[i18n('queryWidget.noDocuments')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
+                <template>
+                  [[formatDate(item.properties.dc:modified)]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+                <template>
+                  <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </paper-card>
+
+          <!-- tasks -->
+          <paper-card>
+            <h3><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
+            <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
+          </paper-card>
+
+          <!-- recently viewed -->
+          <paper-card>
+            <h3><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
+            <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
+            <nuxeo-data-table id="latestViewedDocs"
+              items="[[recentDocuments]]"
+              empty-label="[[i18n('recentDocuments.empty')]]"
+              empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
+                <template>
+                  [[item.type]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">
+                <template>
+                  [[formatDate(item.lastViewed)]]
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </paper-card>
+
+          <!-- favorites -->
+          <paper-card>
+            <h3><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
+            <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
+            <nuxeo-page-provider id="favoritesProvider"
+               provider="default_content_collection"
+               page-size="20"
+               schemas="dublincore,common,uid"
+               headers='{"X-NXfetch.document": "properties"}'
+               enrichers="thumbnail">
+            </nuxeo-page-provider>
+            <nuxeo-data-table
+              id="favoriteDocs"
+              nx-provider="favoritesProvider"
+              empty-label="[[i18n('favorites.empty')]]"
+              on-row-clicked="_navigate">
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
+                <template>
+                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
+                <template>
+                  [[formatDate(item.properties.dc:modified)]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+                <template>
+                  <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </paper-card>
+        </section>
+      </div>
+    </nuxeo-page>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-home',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      },
+
+      _visibleChanged: function(visible) {
+        if (visible) {
+          this._refresh();
+        }
+      },
+
+      _refresh: function() {
+        this.$.latestQuery.fetch();
+        this._fetchFavorite().then(function(favorite) {
+          this.$.favoritesProvider.params = [favorite.uid];
+          this.$.favoritesProvider.page = 1;
+          this.$.favoritesProvider.fetch();
+        }.bind(this));
+      },
+
+      _navigate: function(e) {
+        var detail;
+        if (e.detail.item) {
+          detail = {
+            doc: e.detail.item
+          };
+          page('/browse' + detail.doc.path);
+        } else {
+          detail = {
+            doc: e.model.item
+          };
+        }
+        this.fire('navigate', detail);
+      },
+
+      _fetchFavorite: function() {
+        if (this.favorite) {
+          return Promise.resolve(this.favorite);
+        } else {
+          return this.$.fetchFavOp.execute()
+            .then(function(resp) {
+              this.favorite = resp;
+              return resp;
+            }.bind(this));
+        }
+      }
+
+    });
+  </script>
+
+</dom-module>

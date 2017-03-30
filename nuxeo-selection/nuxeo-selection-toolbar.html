@@ -1,0 +1,179 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Guillaume RENARD <grenard@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-selection-toolbar`
+@group Nuxeo UI
+@element nuxeo-selection-toolbar
+-->
+<dom-module id="nuxeo-selection-toolbar">
+  <template>
+
+    <style is="custom-style">
+      :host {
+        display: block;
+        font-family: var(--nuxeo-app-font);
+      }
+
+      .toolbar {
+        height: 60px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 110;
+        background: #404040;
+        padding: 0 3em;
+        font-weight: 300;
+        font-size: .9rem;
+        color: #fff;
+        box-shadow: 0 0 3px rgba(0,0,0,0.4);
+      }
+
+      @media (min-width: 1280px) {
+        .toolbar {
+          padding-left: 7em;
+        }
+      }
+
+      .count {
+        font-weight: 600;
+      }
+
+      a.selectionLink {
+        display: inline-block;
+        vertical-align: bottom;
+        text-decoration: underline;
+        margin-left: 1em;
+        color: #fff;
+      }
+
+      a.selectionLink:hover {
+        cursor: pointer;
+        color: var(--nuxeo-header-actions-hover);
+      }
+
+      .list {
+        @apply(--layout-vertical);
+        max-height: 60vh;
+        overflow: auto;
+      }
+
+      .item {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--nuxeo-sidebar-item-theme);
+      }
+
+      .title.ellipsis {
+        display: inline-block;
+        width: 80%;
+        vertical-align: middle;
+      }
+
+      .sep {
+        border-top: 1px solid var(--divider-color);
+      }
+    </style>
+
+    <paper-dialog id="selectedItemsPopup"
+      no-auto-focus>
+      <h1>[[i18n('selectionToolbar.dialog.heading')]]</h1>
+      <div class="paper-content layout horizontal">
+        <div class="layout vertical">
+          <div class="row layout horizontal">
+            <div class="list">
+              <template is="dom-repeat" items="[[selectedItems]]">
+                <div class="item">
+                  <span class="flex">
+                    <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+                    <span class="title ellipsis">[[item.title]]</span>
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="buttons sep">
+       <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+      </div>
+    </paper-dialog>
+
+    <div class="horizontal center layout" id="content">
+      <div id="selectionToolbar" class="horizontal center layout fit toolbar" hidden$="[[!_isDisplayToolbar]]">
+          <div class="selection">
+            <span class="count">
+              [[i18n('selectionToolbar.selected.items', selectedItems.length)]]
+            </span>
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
+              <span>[[i18n('selectionToolbar.display.selection')]]</span>
+            </a>
+          </div>
+          <div class="horizontal center flex layout end-justified actions">
+            <content></content>
+            <a class="selectionLink" on-tap="clearSelection">
+              <span>[[i18n('command.clear')]]</span>
+            </a>
+          </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'nuxeo-selection-toolbar',
+
+      properties: {
+        selectedItems: {
+          type: Object,
+          value: [],
+          notify: true
+        },
+        _isDisplayToolbar: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      behaviors: [Nuxeo.I18nBehavior],
+
+      observers: [
+        '_observeSelectedItems(selectedItems)'
+      ],
+
+      _observeSelectedItems: function() {
+        this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
+      },
+
+      toogleSelectedItemsPopup: function() {
+        this.$$('#selectedItemsPopup').toggle();
+      },
+
+      clearSelection: function() {
+        this.fire('clear-selected-items');
+      }
+
+    });
+  </script>
+
+</dom-module>

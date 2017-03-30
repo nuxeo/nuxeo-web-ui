@@ -1,0 +1,76 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+	Andre Justo <ajusto@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`nuxeo-document-collections`
+@group Nuxeo UI
+@element nuxeo-document-collections
+-->
+<dom-module id="nuxeo-document-collections">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      iron-icon {
+        height: 16px;
+        width: 16px;
+      }
+
+      iron-icon:hover {
+        cursor: pointer;
+      }
+
+    </style>
+
+    <nuxeo-operation op="Collection.RemoveFromCollection"
+                     input="[[document.uid]]"
+                     id="op">
+    </nuxeo-operation>
+
+    <template is="dom-repeat" items="[[document.contextParameters.collections]]">
+      <nuxeo-tag>
+        [[item.title]]
+        <iron-icon icon="icons:clear" name="remove" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
+      </nuxeo-tag>
+    </template>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-document-collections',
+      properties: {
+        document: Object
+      },
+
+      remove: function(evt) {
+        var op = this.$.op;
+        op.params = {
+          'collection': evt.currentTarget.dataset.uid
+        };
+        op.execute().then(function() {
+          this.fire('removed-from-collection', {docId: this.document.uid, collectionId: evt.target.dataset.uid});
+        }.bind(this));
+      }
+
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,191 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Adilio Araujo <aaraujo@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+`nuxeo-document-create-version`
+@group Nuxeo UI
+@element nuxeo-document-create-version
+-->
+<dom-module id="nuxeo-document-create-version">
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+
+      .dialog .title {
+        font-weight: 500;
+        font-size: 24px;
+        margin: 24px 24px 16px 24px;
+        padding: 0;
+      }
+
+      .dialog .content {
+        @apply(--layout-vertical);
+        margin: 16px;
+      }
+
+      nuxeo-tag {
+        @apply(--nx-button-primary);
+      }
+
+      nuxeo-tag:hover {
+        @apply(--nx-button-primary-hover);
+      }
+
+      .buttons {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+        @apply(--buttons-bar);
+      }
+
+      paper-radio-group {
+        margin: 16px;
+      }
+
+      paper-radio-button {
+        display: block;
+      }
+
+      paper-radio-button .version {
+        background-color: var(--nuxeo-primary-color);
+        color: var(--nuxeo-button-primary-text);
+        padding: 4px 8px;
+        margin-right: 8px;
+        font-weight: 500;
+        border-radius: 2px;
+      }
+
+      paper-button {
+        margin: 0;
+        padding: 8px 16px;
+      }
+
+      .create {
+        cursor: pointer;
+      }
+
+    </style>
+
+    <nuxeo-document id="doc" headers="[[headers]]" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}">
+    </nuxeo-document>
+
+    <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]"
+                     response="{{version}}"></nuxeo-operation>
+
+    <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('versions.create')]]</nuxeo-tag>
+
+    <paper-dialog id="dialog" class="dialog" with-backdrop
+                  on-iron-overlay-opened="_dialogOpened"
+                  on-iron-overlay-closed="_dialogClosed">
+      <div class="title">[[i18n('documentCreateVersion.title',
+        document.properties.dc:title, document.properties.uid:major_version, document.properties.uid:minor_version)]]
+      </div>
+      <div class="content">
+        <paper-radio-group selected="{{versionType}}">
+          <paper-radio-button name="minor">
+            <span id="nextMinor" class="version">[[_nextMinor(document)]]</span>
+            <span>[[i18n('documentCreateVersion.minor')]]</span>
+          </paper-radio-button>
+          <paper-radio-button name="major">
+            <span id="nextMajor" class="version">[[_nextMajor(document)]]</span>
+            <span>[[i18n('documentCreateVersion.major')]]</span>
+          </paper-radio-button>
+        </paper-radio-group>
+      </div>
+      <div class="buttons">
+        <paper-button noink dialog-dismiss>[[i18n('documentCreateVersion.dismiss')]]</paper-button>
+        <paper-button noink dialog-confirm class="primary" on-tap="_create">
+          [[i18n('documentCreateVersion.confirm')]]
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document-create-version',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: Object,
+        version: Object,
+        headers: {
+          type: Object,
+          computed: '_computeHeaders(versionType)'
+        },
+        versionType: {
+          type: String,
+          value: 'major'
+        },
+        response: Object
+      },
+
+      _dialogOpened: function(e) {
+        e.target.parentNode.insertBefore(e.target.backdropElement, e.target);
+      },
+
+      _dialogClosed: function() {
+        this.fire('dialog-closed');
+      },
+
+      _computeHeaders: function(versionType) {
+        return {
+          'X-Versioning-Option': versionType
+        };
+      },
+
+      _isAvailable: function(doc) {
+        return this.hasFacet(doc, 'Versionable') && !doc.isVersion;
+      },
+
+      _isDisabled: function(doc) {
+        return !doc || !doc.isCheckedOut;
+      },
+
+      _nextMinor: function(doc) {
+        return (doc) ? doc.properties['uid:major_version'] + '.' + (doc.properties['uid:minor_version'] + 1) : '';
+      },
+
+      _nextMajor: function(doc) {
+        return (doc) ? (doc.properties['uid:major_version'] + 1) + '.0' : '';
+      },
+
+      _toggleDialog: function() {
+        this.$.dialog.open();
+      },
+
+      _create: function() {
+        this.$.opCreateVersion.params = {increment: this.versionType, saveDocument: true};
+        this.$.opCreateVersion.execute().then(function() {
+          this.fire('document-updated');
+        }.bind(this));
+      }
+
+    });
+  </script>
+
+</dom-module>
