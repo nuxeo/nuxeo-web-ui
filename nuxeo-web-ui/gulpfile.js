@@ -161,11 +161,11 @@ gulp.task('vulcanize', function() {
 // Move dynamic layouts to root
 gulp.task('move-layouts', function() {
   return gulp.src([
-    dist('elements/document/**'),
-    dist('elements/search/**'),
-    dist('elements/nuxeo-admin/**'),
-    dist('elements/workflow/**'),
-    dist('elements/nuxeo-home.html')
+    dist('elements/document/**'), '!' + dist('elements/document/*.html'),
+    dist('elements/search/**'), '!' + dist('elements/search/*.html'),
+    dist('elements/nuxeo-admin/nuxeo-*-edit.html'), // vocabulary
+    dist('elements/workflow/**'), '!' + dist('elements/workflow/*.html'),
+    dist('elements/nuxeo-*.html')
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 });
 
