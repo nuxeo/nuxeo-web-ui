@@ -216,7 +216,7 @@ element.
             } catch (e) {
               return { error: 'Invalid json' };
             }
-          })
+          });
         }).then(function(data) {
           this.fire('response', {response: data});
           this.response = data;
@@ -227,10 +227,19 @@ element.
         .catch(function(error) {
           this.success = false;
           this._setActiveRequests(this.activeRequests - 1);
-          return error.response.json().then(function(e) {
-            this.error = e;
-            console.log("Resource request failed: " + e.message);
-            throw e;
+          return error.response.text().then(function(text) {
+            if (text) {
+              try {
+                this.error = JSON.parse(text);
+                this.error.status = error.response.status;
+                console.log("Resource request failed: " + this.error.message);
+              } catch(e) {
+                this.error =  { message: 'Invalid json', status: error.response.status };
+              }
+            } else {
+              this.error =  { message: 'No message', status: error.response.status };
+            }
+            throw this.error;
           }.bind(this));
         }.bind(this));
     },
