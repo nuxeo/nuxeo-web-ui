@@ -507,7 +507,11 @@ Contributors:
         },
 
         refresh: function() {
-          page('/browse' + this.docPath);
+          if (this.docPath && this.docPath.length > 0) {
+            page('/browse' + this.docPath);
+          } else {
+            page('/');
+          }
         },
 
         load: function(page, id, path, action) {
