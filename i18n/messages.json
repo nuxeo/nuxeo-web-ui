@@ -166,6 +166,8 @@
   "defaultSearch.tags.placeholder": "e.g. events, boston",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Permanently delete selected document(s)?",
   "deleteDocumentsButton.tooltip": "Delete selected items",
+  "deleteDocuments.error.403": "Error deleting documents. User not allowed",
+  "deleteDocuments.error.default": "Error deleting documents",
   "deleteTemplateButton.dialog.confirm": "Delete Template",
   "deleteTemplateButton.dialog.heading": "Delete Template?",
   "deleteTemplateButton.dialog.message": "Users will not be able to use this template anymore.",

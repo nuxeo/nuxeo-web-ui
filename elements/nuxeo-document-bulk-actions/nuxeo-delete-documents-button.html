@@ -44,12 +44,12 @@ Contributors:
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
       [[i18n('deleteDocumentsButton.tooltip')]]
     </paper-tooltip>
+    <paper-toast id="toast"></paper-toast>
 
   </template>
 
   <script>
-    (function() {
-      'use strict';
+
       Polymer({
         is: 'nuxeo-delete-documents-button',
         properties: {
@@ -80,13 +80,29 @@ Contributors:
                 this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
                 this.documents = [];
                 this.fire('refresh');
+              }.bind(this),
+
+              function(err){
+                var errorMessage = this._getErrorMessage(err.response);
+                this._showToast(errorMessage);
               }.bind(this));
             }
           }
-        }
+        },
 
+        _showToast : function(message){
+          this.$.toast.hide();
+          this.$.toast.text = message;
+          this.$.toast.open();
+        },
+
+        _getErrorMessage :function(err){
+          switch(err.status) {
+            case 403: return this.i18n("deleteDocuments.error.403");
+            default: return this.i18n("deleteDocuments.error.default");
+          }
+        }
       });
-    })();
   </script>
 
 </dom-module>
