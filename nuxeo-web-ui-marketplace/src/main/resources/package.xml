@@ -16,6 +16,8 @@
     <platform>server-8.10-*</platform>
     <platform>server-9.1</platform>
     <platform>server-9.1-*</platform>
+    <platform>server-9.2</platform>
+    <platform>server-9.2-*</platform>
   </platforms>
   <license>Apache License, Version 2.0</license>
   <license-url>http://www.apache.org/licenses/LICENSE-2.0.html</license-url>
