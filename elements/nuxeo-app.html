@@ -221,6 +221,7 @@ Contributors:
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
 
     <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
 
     <!-- app layout -->
     <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
@@ -469,7 +470,6 @@ Contributors:
           'browseCollection': '_navigateToCollection',
           'workflowStarted': '_refreshAndFetchTasks',
           'workflowTaskProcessed': '_refreshAndFetchTasks',
-          'taskChanged': '_onTaskChanged',
           'added-to-clipboard': '_onAddedToClipboard',
           'add-to-clipboard': '_onAddToClipboard',
           'added-to-collection': '_documentAddedToCollection',
@@ -511,6 +511,23 @@ Contributors:
             page('/browse' + this.docPath);
           } else {
             page('/');
+          }
+        },
+
+        loadTask: function(id) {
+          if (id && id.length > 0){
+            if (id !== this.currentTaskId) {
+              this.loading = true;
+              this.currentTaskId = id;
+              this.$.task.get().then(function(task) {
+                this.currentTask = task;
+                this.show('tasks');
+                this.loading = false;
+              }.bind(this));
+            }
+          } else {
+            this.currentTask = null;
+            this.show('tasks');
           }
         },
 
@@ -659,11 +676,6 @@ Contributors:
           // let's refresh the current document since it might have been changed (ex: state and version)
           this.refresh();
           this._fetchTasks();
-        },
-
-        _onTaskChanged: function(e) {
-          this.currentTask = e.detail.task;
-          this.show('tasks');
         },
 
         _onAddedToClipboard: function(e){

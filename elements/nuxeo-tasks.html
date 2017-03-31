@@ -146,7 +146,7 @@ Contributors:
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout vertical">
             <div class="layout horizontal center task-header">
-              <paper-icon-button noink icon="icons:chevron-left" class="prev-button" on-tap="_prev" disabled$="[[_isFirst(_currentIdx, tasks)]]"></paper-icon-button>
+              <paper-icon-button noink icon="icons:chevron-left" class="prev-button" on-tap="_prev" disabled$="[[_isFirst(current, tasks)]]"></paper-icon-button>
               <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
               <div class="layout horizontal center flex">
                 <h3 class="task-name">[[i18n(current.name)]]</h3>
@@ -163,7 +163,7 @@ Contributors:
                 </div>
               </paper-dialog>
               <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph')]]</paper-button>
-              <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(_currentIdx, tasks)]]"></paper-icon-button>
+              <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(current, tasks)]]"></paper-icon-button>
             </div>
             <div class="layout horizontal">
               <template is="dom-if" if="[[_docId(current)]]">
@@ -240,8 +240,7 @@ Contributors:
 
         properties: {
           tasks: {
-            type: Array,
-            observer: '_tasksChanged'
+            type: Array
           },
 
           current: {
@@ -250,32 +249,18 @@ Contributors:
             observer: '_currentChanged'
           },
 
-          currentTaskDocument: Object,
-
-          _currentIdx: Number,
+          currentTaskDocument: Object
         },
 
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
-        _tasksChanged: function() {
-          if (this.current) {
-            if (this._currentIdx > (this.tasks.length - 1)) {
-              this._currentIdx = this.tasks.length - 1;
-            }
-            this.fire('taskChanged', {task: this.tasks[this._currentIdx]});
-          }
-        },
-
         _process: function(e) {
-          this.fire('taskChanged', {task: e.model.task});
+          page('/tasks/' + e.model.task.id);
         },
 
         _currentChanged: function() {
           if (this.current) {
             this.$.currentTaskDoc.get();
-            if (this.tasks) {
-              this._currentIdx = this.tasks.indexOf(this.current);
-            }
           }
         },
 
@@ -322,26 +307,36 @@ Contributors:
         },
 
         _prev: function() {
-          this._currentIdx--;
-          this.fire('taskChanged', {task: this.tasks[this._currentIdx]});
+          page('/tasks/' + this.tasks[this.currenIndex - 1].id);
         },
 
         _next: function() {
-          this._currentIdx++;
-          this.fire('taskChanged', {task: this.tasks[this._currentIdx]});
+          page('/tasks/' + this.tasks[this.currenIndex + 1].id);
         },
 
-        _isFirst: function(currentIdx) {
-          return currentIdx === 0;
+        _isFirst: function() {
+          return this.currenIndex <= 0;
         },
 
-        _isLast: function(currentIdx) {
-          return currentIdx === this.tasks.length - 1;
+        _isLast: function() {
+          return this.currenIndex === this.tasks.length - 1 || this.currenIndex < 0;
         },
 
         _empty: function(tasks) {
           return tasks && tasks.length === 0;
+        },
+
+        get currenIndex() {
+          if (this.tasks && this.current) {
+            for (var i = 0; i < this.tasks.length; i++) {
+              if (this.tasks[i].id === this.current.id) {
+                return i;
+              }
+            }
+          }
+          return -1;
         }
+
       });
     })();
   </script>
