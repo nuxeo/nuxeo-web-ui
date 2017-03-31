@@ -202,6 +202,13 @@
   "userManagement.search.groups":"Sök efter grupper",
   "userManagement.user.updated":"Användare uppdaterad",
   "userManagement.username":"Användarnamn",
+  "userProfile.password.change":"Change password",
+  "userProfile.password.changed":"Password changed",
+  "userProfile.password.confirm":"New password (confirmation)",
+  "userProfile.password.error":"An error occurred while changing password",
+  "userProfile.password.new":"New password",
+  "userProfile.password.old":"Old password",
+  "userProfile.password.wrong":"Wrong password",
   "viewUser.company":"Företag",
   "viewUser.email":"E-post"
 }

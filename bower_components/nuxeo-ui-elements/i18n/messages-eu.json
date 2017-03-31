@@ -202,6 +202,13 @@
   "userManagement.search.groups":"Bilatu taldeak",
   "userManagement.user.updated":"Erabiltzailea eguneratuta",
   "userManagement.username":"Erabiltzaile-izena",
+  "userProfile.password.change":"Change password",
+  "userProfile.password.changed":"Password changed",
+  "userProfile.password.confirm":"New password (confirmation)",
+  "userProfile.password.error":"An error occurred while changing password",
+  "userProfile.password.new":"New password",
+  "userProfile.password.old":"Old password",
+  "userProfile.password.wrong":"Wrong password",
   "viewUser.company":"Enpresa",
   "viewUser.email":"Helbide elektronikoa"
 }
