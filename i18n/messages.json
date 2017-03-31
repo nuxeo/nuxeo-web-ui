@@ -166,7 +166,7 @@
   "defaultSearch.tags.placeholder": "e.g. events, boston",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Permanently delete selected document(s)?",
   "deleteDocumentsButton.tooltip": "Delete selected items",
-  "deleteDocuments.error.403": "Error deleting documents. User not allowed",
+  "deleteDocuments.error.403": "Error deleting documents. Permission denied",
   "deleteDocuments.error.default": "Error deleting documents",
   "deleteTemplateButton.dialog.confirm": "Delete Template",
   "deleteTemplateButton.dialog.heading": "Delete Template?",
