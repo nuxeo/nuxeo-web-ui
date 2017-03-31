@@ -112,7 +112,9 @@ Contributors:
         },
 
         _layoutModel: function(task) {
-          return { document: task.targetDocumentIds[0], task: task };
+          if (task) {
+            return { document: task.targetDocumentIds[0], task: task };
+          }
         },
 
         validate: function() {

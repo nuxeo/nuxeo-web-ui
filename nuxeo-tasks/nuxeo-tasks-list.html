@@ -170,13 +170,21 @@ Contributors:
 
         _selectionChanged: function() {
           if (this._selection && !this.noNavigation) {
-            this.fire('taskChanged', {task: this._selection});
+            page('/tasks/' + this._selection.id);
           }
         },
 
         _currentChanged: function(newVal, oldVal) {
-          if (newVal) {
-            this.$.list.selectItem(newVal);
+          if (newVal && oldVal && newVal.id === oldVal.id) {
+            return;
+          }
+          if (newVal && this.tasks) {
+            for (var i = 0; i < this.tasks.length; i++) {
+              if (this.tasks[i].id === newVal.id) {
+                this.$.list.selectItem(this.tasks[i]);
+                break;
+              }
+            }
           } else {
             var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
             // make sure this task still exists to avoid iron-list exceptions

@@ -93,9 +93,12 @@ Contributors:
       page.redirect('/admin/user-group-management/group/' + data.params.id);
     });
 
+    page('/tasks/:repo?/:id/', function(data) {
+      app.loadTask(data.params.id);
+    });
+
     page('/tasks', function() {
-      app.currentTask = null;
-      app.show('tasks');
+      app.loadTask();
     });
 
     page('/:page', function(ctx) {
