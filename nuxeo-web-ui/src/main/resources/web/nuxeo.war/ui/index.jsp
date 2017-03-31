@@ -17,6 +17,7 @@ limitations under the License.
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
+<%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
