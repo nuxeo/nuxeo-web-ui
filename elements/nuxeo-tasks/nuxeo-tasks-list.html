@@ -96,6 +96,15 @@ Contributors:
         position: relative;
         height: calc(100vh - 7em);
       }
+
+      /* fix IE11 tap selection not working for task list items (NXP-21833) */
+      .task-box {
+        pointer-events: none;
+      }
+      /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
+      .task-box nuxeo-user-tag {
+        pointer-events: all;
+      }
     </style>
 
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
