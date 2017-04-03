@@ -39,7 +39,7 @@ Contributors:
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
-    <paper-icon-button icon="delete" id="deleteAllButtons">
+    <paper-icon-button icon="delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
     </paper-icon-button>
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
       [[i18n('deleteDocumentsButton.tooltip')]]
@@ -62,12 +62,14 @@ Contributors:
 
         behaviors: [Nuxeo.I18nBehavior],
 
+        observers : ['_docsHavePermissions(documents.splices)'],
+
         listeners: {
           'tap': 'deleteDocuments',
         },
 
         deleteDocuments: function() {
-          if (confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
+          if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
             if (this.documents && this.documents.length) {
               var uids = this.documents.map(function(doc) {
                 return doc.uid;
@@ -86,8 +88,29 @@ Contributors:
               }.bind(this));
             }
           }
-        }
+        },
 
+        /*
+         * Checks if all files in the selected documents have write permission.
+         */
+        _docsHavePermissions: function() {
+          var docsHavePermissions = true;
+          this.documents.some(function(document) {
+            docsHavePermissions = docsHavePermissions && this._docHasPermissions(document);
+            return docsHavePermissions === false;
+          }.bind(this));
+
+          this.docsHavePermissions = docsHavePermissions;
+        },
+
+        /*
+         * Checks if a single given document has write permissions
+         */
+        _docHasPermissions: function(document) {
+          return document && document.contextParameters && document.contextParameters.permissions
+            ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
+            document.contextParameters.permissions.indexOf('Everything') > -1) : false;
+        }
       });
     })();
   </script>

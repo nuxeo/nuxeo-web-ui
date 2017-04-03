@@ -498,7 +498,7 @@ Contributors:
           }.bind(this));
 
           window.addEventListener('nuxeo-documents-deleted-error', function(e) {
-            this._documentsDeleteError(e.detail.response, e.detail.documents);
+            this._documentsDeletedError(e.detail.response, e.detail.documents);
           }.bind(this));
 
           this.clipboard = this.$.clipboard;
@@ -767,7 +767,7 @@ Contributors:
           this._toast(this.i18n('app.document.unlocked'));
         },
 
-        _documentsDeleteError: function(err, documents){
+        _documentsDeletedError: function(err, documents){
           var errorMessage = this.i18n(documents && documents.length > 1
             ? 'app.documents.deleted.error' : 'app.document.deleted.error');
 
