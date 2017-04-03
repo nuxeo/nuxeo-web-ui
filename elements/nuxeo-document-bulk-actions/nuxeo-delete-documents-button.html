@@ -73,13 +73,16 @@ Contributors:
                 return doc.uid;
               }).join(',');
               this.$.deleteOp.input = 'docs:' + uids;
+              var uidsArray = this.documents.map(function(doc) {
+                return doc.uid;
+              });
               this.$.deleteOp.execute().then(function() {
-                var uidsArray = this.documents.map(function(doc) {
-                  return doc.uid;
-                })
                 this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
                 this.documents = [];
                 this.fire('refresh');
+              }.bind(this),
+              function(err){
+                this.fire('nuxeo-documents-deleted-error', {response: err.response,  documents: uidsArray});
               }.bind(this));
             }
           }
