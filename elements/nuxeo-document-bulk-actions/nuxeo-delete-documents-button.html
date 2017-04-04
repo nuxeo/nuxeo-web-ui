@@ -39,54 +39,96 @@ Contributors:
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
-    <paper-icon-button icon="delete" id="deleteAllButtons">
+    <paper-icon-button icon="delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
     </paper-icon-button>
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
       [[i18n('deleteDocumentsButton.tooltip')]]
     </paper-tooltip>
+    <paper-toast id="toast"></paper-toast>
 
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-delete-documents-button',
-        properties: {
-          documents: {
-            type: Array,
-            notify: true,
-            value: []
-          }
-        },
+    Polymer({
+      is: 'nuxeo-delete-documents-button',
+      properties: {
+        documents: {
+          type: Array,
+          notify: true,
+          value: []
+        }
+      },
 
-        behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior],
 
-        listeners: {
-          'tap': 'deleteDocuments',
-        },
+      observers: [
+        '_docsHavePermissions(documents.splices)'
+      ],
 
-        deleteDocuments: function() {
-          if (confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
-            if (this.documents && this.documents.length) {
-              var uids = this.documents.map(function(doc) {
-                return doc.uid;
-              }).join(',');
-              this.$.deleteOp.input = 'docs:' + uids;
-              this.$.deleteOp.execute().then(function() {
+      listeners: {
+        'tap': 'deleteDocuments'
+      },
+
+      deleteDocuments: function() {
+        if(this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
+          if(this.documents && this.documents.length) {
+            var uids = this.documents.map(function(doc) {
+              return doc.uid;
+            }).join(',');
+            this.$.deleteOp.input = 'docs:' + uids;
+            this.$.deleteOp.execute().then(function() {
                 var uidsArray = this.documents.map(function(doc) {
                   return doc.uid;
                 })
                 this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
                 this.documents = [];
                 this.fire('refresh');
+              }.bind(this),
+
+              function(err) {
+                var errorMessage = this._getErrorMessage(err.response);
+                this._showToast(errorMessage);
               }.bind(this));
-            }
           }
         }
+      },
 
-      });
-    })();
+      _showToast: function(message) {
+        this.$.toast.hide();
+        this.$.toast.text = message;
+        this.$.toast.open();
+      },
+
+      _getErrorMessage: function(err) {
+        switch (err.status) {
+          case 403:
+            return this.i18n("deleteDocuments.error.403");
+          default:
+            return this.i18n("deleteDocuments.error.default");
+        }
+      },
+
+      /*
+       * Checks all files in documents have write permission.
+       */
+      _docsHavePermissions: function() {
+        var docsHavePermissions = true;
+        this.documents.some(function(document) {
+          docsHavePermissions = docsHavePermissions && this._docHasPermissions(document);
+          return docsHavePermissions == false;
+        }.bind(this));
+
+        this.docsHavePermissions = docsHavePermissions;
+      },
+
+      /*
+       * Checks a single document has write permissions
+       */
+      _docHasPermissions: function(document) {
+        return document && document.contextParameters && document.contextParameters.permissions
+          ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
+          document.contextParameters.permissions.indexOf('Everything') > -1) : false;
+      }
+    });
   </script>
-
 </dom-module>
