@@ -148,9 +148,10 @@ Contributors:
         white-space: nowrap;
       }
 
-      #saveDialog,
-      #renameDialog {
-        width: 400px;
+      paper-dialog {
+        --paper-dialog: {
+          min-width: 360px;
+        };
       }
 
       :host[loading] .loadable {
@@ -462,6 +463,14 @@ Contributors:
        '_resetResults(provider, params.*, quickFilters.*, query)',
        '_paramsChanged(params.*)'
       ],
+
+      ready: function() {
+        var body = document.querySelector('body');
+        body.appendChild(this.$.saveDialog);
+        body.appendChild(this.$.renameDialog);
+        body.appendChild(this.$.shareDialog);
+        body.appendChild(this.$.deleteDialog);
+      },
 
       get nxProvider() {
         return this.$.provider;
