@@ -20,11 +20,14 @@
           type: Object,
           notify: true,
           observer: '_itemChanged'
-        }
+        },
+        index: Number
       },
 
       ready: function() {
         var template = this.queryEffectiveChildren('template');
+        // custom notification for the `item` property
+        this._instanceProps = {item: true};
         this.templatize(template);
         this.instance = this.stamp({item: this.item});
         Polymer.dom(this.$.container).appendChild(this.instance.root);
@@ -41,6 +44,10 @@
       _forwardInstancePath: function(inst, path, value) {
         // strip "item."
         this.fire('item-changed', {item: this.item, path: path.substring(5), value: value});
+      },
+
+      _forwardInstanceProp: function(inst, prop, value) {
+        this.fire('item-changed', {item: this.item, value: value});
       }
     });
   </script>
