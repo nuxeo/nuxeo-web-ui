@@ -100,8 +100,8 @@ Example:
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-        /* Default height just to help users get started in making stuff visible.  */
-        /* height: 400px; */
+        width: 100%;
+        min-height: 120px;
         @apply(--iron-data-table);
       }
 
@@ -122,6 +122,7 @@ Example:
         -webkit-transition: box-shadow 200ms;
         z-index: 1;
         @apply(--iron-data-table-header);
+        background: var(--nuxeo-table-header-background, #efefef);
       }
 
       #header.scrolled {
@@ -180,7 +181,6 @@ Example:
       paper-dialog {
         min-width: 480px;
       }
-
     </style>
 
     <div id="container">
@@ -217,6 +217,7 @@ Example:
               <nuxeo-data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></nuxeo-data-table-column-sort>
             </nuxeo-data-table-cell>
           </template>
+          <nuxeo-data-table-cell flex="0"></nuxeo-data-table-cell>
           <nuxeo-data-table-settings columns="{{columns}}" hidden$="[[!settingsEnabled]]"
             on-settings-changed="_settingsChanged">
           </nuxeo-data-table-settings>

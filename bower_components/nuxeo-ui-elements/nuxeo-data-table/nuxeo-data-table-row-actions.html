@@ -5,20 +5,43 @@
 <!-- Part of `nuxeo-data-table` -->
 <dom-module id="nuxeo-data-table-row-actions">
   <template>
-    <template is="dom-if" if="[[isUpVisible(index)]]">
-      <paper-icon-button noink id="upButton" icon="icons:arrow-upward" on-tap="moveUp" ></paper-icon-button>
-      <paper-tooltip for="upButton" position="left">[[i18n('command.moveUpward')]]</paper-tooltip>
-    </template>
-    <template is="dom-if" if="[[isDownVisible(index, size)]]">
-      <paper-icon-button noink id="downButton" icon="icons:arrow-downward" on-tap="moveDown"></paper-icon-button>
-      <paper-tooltip for="downButton" position="left">[[i18n('command.moveDownward')]]</paper-tooltip>
-    </template>
-    <template is="dom-if" if="[[editable]]">
-      <paper-icon-button id="edit-button" icon="icons:create" on-tap="_editEntry" noink></paper-icon-button>
-      <paper-tooltip for="edit-button" position="left">[[i18n('command.edit')]]</paper-tooltip>
-      <paper-icon-button id="delete-button" name="delete" icon="icons:delete" on-tap="_deleteEntry" noink></paper-icon-button>
-      <paper-tooltip for="delete-button" position="left">[[i18n('command.remove')]]</paper-tooltip>
-    </template>
+
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .actions {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+      .actions .orderable {
+        min-width: 80px;
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+    </style>
+
+    <div class="actions">
+      <template is="dom-if" if="[[orderable]]">
+        <div class="orderable">
+          <template is="dom-if" if="[[isUpVisible(index)]]">
+            <paper-icon-button noink id="upButton" icon="icons:arrow-upward" on-tap="moveUp"></paper-icon-button>
+            <paper-tooltip for="upButton" position="left">[[i18n('command.moveUpward')]]</paper-tooltip>
+          </template>
+          <template is="dom-if" if="[[isDownVisible(index, size)]]">
+            <paper-icon-button noink id="downButton" icon="icons:arrow-downward" on-tap="moveDown"></paper-icon-button>
+            <paper-tooltip for="downButton" position="left">[[i18n('command.moveDownward')]]</paper-tooltip>
+          </template>
+        </div>
+      </template>
+      <template is="dom-if" if="[[editable]]">
+        <paper-icon-button id="edit-button" icon="icons:create" on-tap="_editEntry" noink></paper-icon-button>
+        <paper-tooltip for="edit-button" position="left">[[i18n('command.edit')]]</paper-tooltip>
+        <paper-icon-button id="delete-button" name="delete" icon="icons:delete" on-tap="_deleteEntry" noink></paper-icon-button>
+        <paper-tooltip for="delete-button" position="left">[[i18n('command.remove')]]</paper-tooltip>
+      </template>
+    </div>
   </template>
   <script>
     Polymer({

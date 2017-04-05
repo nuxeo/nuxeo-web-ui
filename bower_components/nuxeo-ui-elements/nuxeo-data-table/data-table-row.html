@@ -7,9 +7,10 @@
         flex-direction: column;
         opacity: 1;
         cursor: pointer;
-
+        border-bottom: 1px solid var(--nuxeo-border, #e3e3e3);
         @apply(--iron-data-table-row);
-        border-bottom: 1px solid var(--nuxeo-border, #e3e3e3)
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
       }
 
       :host([selected]) .cells {
@@ -48,16 +49,8 @@
         width: 100%;
       }
 
-      .actions {
-        position: absolute;
-        right: 5px;
-      }
-
-      :host:hover .actions {
-        display: block;
-      }
-
     </style>
+
     <div class="cells">
       <content select="nuxeo-data-table-checkbox"></content>
       <content select="nuxeo-data-table-cell"></content>
@@ -86,8 +79,6 @@
           type: Boolean,
           reflectToAttribute: true
         },
-
-
         _static: {
           type: Object,
           value: { id: 0 }
