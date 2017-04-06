@@ -520,6 +520,7 @@
   "searchAnalytics.numberOfResults.range":"Intervalo",
   "searchForm.auto.description":"Habilite para que a busca seja atualizada a cada mudança de parâmetro",
   "searchForm.auto":"Auto busca",
+  "searchForm.delete.heading":"Delete search?",
   "searchForm.displayFilterView":"Alternar para a visualização de filtro",
   "searchForm.displayQueueView":"Alterne para o modo de fila",
   "searchForm.queue.noResults":"Nenhum resultado",

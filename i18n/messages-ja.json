@@ -520,6 +520,7 @@
   "searchAnalytics.numberOfResults.range":"範囲",
   "searchForm.auto.description":"パラメータが変更されるたびに検索をリフレッシュできます",
   "searchForm.auto":"自動検索",
+  "searchForm.delete.heading":"Delete search?",
   "searchForm.displayFilterView":"フィルタビューに切り替える",
   "searchForm.displayQueueView":"キュービューに切り替える",
   "searchForm.queue.noResults":"結果がありません",

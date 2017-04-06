@@ -520,6 +520,7 @@
   "searchAnalytics.numberOfResults.range":"Range",
   "searchForm.auto.description":"Enable to refresh the search each time a parameter changes",
   "searchForm.auto":"Auto search",
+  "searchForm.delete.heading":"Delete search?",
   "searchForm.displayFilterView":"Switch to filter view",
   "searchForm.displayQueueView":"Switch to queue view",
   "searchForm.queue.noResults":"No Results",

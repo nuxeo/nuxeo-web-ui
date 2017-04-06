@@ -520,6 +520,7 @@
   "searchAnalytics.numberOfResults.range":"Intervall",
   "searchForm.auto.description":"Aktivera för att uppdatera sökningen varje gång en parameter ändras",
   "searchForm.auto":"Automatisk sökning",
+  "searchForm.delete.heading":"Delete search?",
   "searchForm.displayFilterView":"Växla till filtervy",
   "searchForm.displayQueueView":"Växla till kövy",
   "searchForm.queue.noResults":"Inga resultat",
