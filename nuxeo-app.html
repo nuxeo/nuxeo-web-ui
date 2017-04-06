@@ -497,6 +497,10 @@ Contributors:
             this.$.navTree.removeDocuments(e.detail.documentIds);
           }.bind(this));
 
+          window.addEventListener('nuxeo-documents-deleted-error', function(e) {
+            this._documentsDeletedError(e.detail.response, e.detail.documents);
+          }.bind(this));
+
           this.clipboard = this.$.clipboard;
 
           this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
@@ -761,6 +765,17 @@ Contributors:
 
         _documentUnlocked: function() {
           this._toast(this.i18n('app.document.unlocked'));
+        },
+
+        _documentsDeletedError: function(err, documents){
+          var errorMessage = this.i18n(documents && documents.length > 1
+            ? 'app.documents.deleted.error' : 'app.document.deleted.error');
+
+          switch (err.status){
+            case 403: errorMessage = errorMessage + " " +  this.i18n('error.403'); break;
+            default: break;
+          }
+          this._toast(errorMessage);
         },
 
         _documentFileDeleted: function() {
