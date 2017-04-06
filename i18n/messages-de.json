@@ -724,6 +724,7 @@
 	"searchAnalytics.numberOfResults.range": "Bereich",
 	"searchForm.auto.description": "Aktiveren, um die Suchergebnisse nach jeder Änderung der Parameter zu aktualisieren",
 	"searchForm.auto": "Automatische Suche",
+	"searchForm.delete.heading": "Delete search?",
 	"searchForm.displayFilterView": "Zu Filteransicht wechseln",
 	"searchForm.displayQueueView": "Zu Warteschlangenansicht wechseln",
 	"searchForm.queue.noResults": "Keine Ergebnisse",
