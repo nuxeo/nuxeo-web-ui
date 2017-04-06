@@ -187,7 +187,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       listeners: {
         'views.iron-items-changed': '_updateViews',
         'views.iron-select': '_selectView',
-        'views.iron-deselect': '_deselectView'
+        'views.iron-deselect': '_deselectView',
+        'settings-changed': '_updateActionContext'
       },
 
       ready: function() {
