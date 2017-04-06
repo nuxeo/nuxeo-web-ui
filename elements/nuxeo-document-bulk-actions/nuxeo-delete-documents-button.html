@@ -62,7 +62,7 @@ Contributors:
 
         behaviors: [Nuxeo.I18nBehavior],
 
-        observers : ['_docsHavePermissions(documents.splices)'],
+        observers : ['_checkDocsPermissions(documents.splices)'],
 
         listeners: {
           'tap': 'deleteDocuments',
@@ -93,14 +93,11 @@ Contributors:
         /*
          * Checks if all files in the selected documents have write permission.
          */
-        _docsHavePermissions: function() {
-          var docsHavePermissions = true;
-          this.documents.some(function(document) {
-            docsHavePermissions = docsHavePermissions && this._docHasPermissions(document);
-            return docsHavePermissions === false;
-          }.bind(this));
-
-          this.docsHavePermissions = docsHavePermissions;
+        _checkDocsPermissions: function() {
+          this.docsHavePermissions = !(this.documents.some(
+            function (document) {
+              return !this._docHasPermissions(document);
+          }.bind(this)));
         },
 
         /*
