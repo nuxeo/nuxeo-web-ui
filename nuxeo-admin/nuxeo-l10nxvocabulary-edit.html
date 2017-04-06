@@ -207,7 +207,8 @@ Contributors:
 
         properties: {
           entry: {
-            type: Object
+            type: Object,
+            observer: '_entryChanged'
           },
 
           new: {
@@ -235,6 +236,11 @@ Contributors:
         behaviors: [Nuxeo.I18nBehavior],
 
         observers: ['_inputChanged(entry, entries)'],
+
+        _entryChanged: function() {
+          // initialize obsolete
+          this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+        },
 
         _isObsolete: function(obsolete) {
           return obsolete !== null && obsolete !== 0;
