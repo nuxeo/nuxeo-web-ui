@@ -356,7 +356,7 @@ Contributors:
           var emptyEntry = JSON.parse(JSON.stringify(this.entries[0]));
           for (var property in this.entries[0].properties) {
             if (this.entries[0].properties.hasOwnProperty(property)) {
-              emptyEntry.properties[property] = null;
+              emptyEntry.properties[property] = undefined;
             }
           }
           this._new = true;
