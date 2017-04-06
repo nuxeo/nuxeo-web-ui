@@ -217,10 +217,8 @@ Example:
               <nuxeo-data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></nuxeo-data-table-column-sort>
             </nuxeo-data-table-cell>
           </template>
-          <nuxeo-data-table-cell flex="0"></nuxeo-data-table-cell>
-          <nuxeo-data-table-settings columns="{{columns}}" hidden$="[[!settingsEnabled]]"
-            on-settings-changed="_settingsChanged">
-          </nuxeo-data-table-settings>
+          <nuxeo-data-table-cell flex="0" hidden$="[[!editable]]"></nuxeo-data-table-cell>
+          <nuxeo-data-table-settings columns="{{columns}}" hidden$="[[!settingsEnabled]]"></nuxeo-data-table-settings>
         </nuxeo-data-table-row>
       </div>
 
