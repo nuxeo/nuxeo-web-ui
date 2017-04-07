@@ -176,6 +176,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
+      test('tracking', function(done) {
+        var sliderWidth = slider.$.sliderBar.getBoundingClientRect().width;
+        slider.min = 0;
+        slider.max = 2;
+        slider.step = 1;
+        slider.value = 0;
+
+        MockInteractions.track(slider.$.sliderBar, sliderWidth * 0.9, 0);
+
+        flush(function() {
+          assert.equal(slider.value, slider.max);
+          done();
+        });
+      });
+
       test('value should notify', function(done) {
         var targetValue = 10;
 
