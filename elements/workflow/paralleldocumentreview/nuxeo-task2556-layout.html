@@ -36,9 +36,10 @@ limitations under the License.
                     value="{{task.variables.comment}}" always-float-label>
     </paper-textarea>
 
-    <paper-input role="widget" label="[[i18n('wf.parallelDocumentReview.endDate')]]"
-                 value="{{task.variables.end_date}}" always-float-label required type="date">
-    </paper-input>
+    <nuxeo-date-picker role="widget"
+                       label="[[i18n('wf.parallelDocumentReview.endDate')]]"
+                       value="{{task.variables.end_date::change}}" required>
+    </nuxeo-date-picker>
   </template>
 
   <script>
