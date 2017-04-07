@@ -61,6 +61,10 @@ Contributors:
     page('/search/:searchName', function(data) {
       app.searchName = data.params.searchName;
       app.show('search');
+      // trigger search when navigating to it directly
+      if (page.len === 0) {
+        app.searchForm._search();
+      }
     });
 
     page('/doc/:repo?/:id/', function(data) {
