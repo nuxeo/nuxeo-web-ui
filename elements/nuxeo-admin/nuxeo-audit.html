@@ -70,8 +70,12 @@ Contributors:
                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
 
           <div class="row-container">
-            <nuxeo-date-picker class="item" value="{{startDate}}" label="From"></nuxeo-date-picker>
-            <nuxeo-date-picker class="item" value="{{endDate}}" label="To"></nuxeo-date-picker>
+            <nuxeo-date-picker role="widget" class="item"
+                               value="{{startDate::change}}" label="[[i18n('audit.from')]]">
+            </nuxeo-date-picker>
+            <nuxeo-date-picker role="widget" class="item"
+                               value="{{endDate::change}}" label="[[i18n('audit.to')]]">
+            </nuxeo-date-picker>
           </div>
 
           <div class="row-container">
