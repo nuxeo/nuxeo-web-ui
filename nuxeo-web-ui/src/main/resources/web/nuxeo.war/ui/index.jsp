@@ -57,7 +57,7 @@ limitations under the License.
 
   <link rel="stylesheet" href="vendor/select2.css">
 
-  <script src="webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="webcomponentsjs/webcomponents.min.js"></script>
 
   <script>
     window.Polymer = {
