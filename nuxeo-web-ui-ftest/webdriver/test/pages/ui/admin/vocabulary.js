@@ -133,4 +133,8 @@ export default class Vocabulary {
     return allFieldVisible;
   }
 
+  isVisible() {
+    return this.page.isVisible();
+  }
+
 }
