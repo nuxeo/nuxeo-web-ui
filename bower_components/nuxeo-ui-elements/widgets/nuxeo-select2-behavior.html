@@ -283,11 +283,6 @@ limitations under the License.
 
       jQuery(el).on('change', this._updateSelection.bind(this));
 
-      // fix for IE11 crash
-      document.addEventListener('click', function() {
-        jQuery(this._el).select2('close');
-      }.bind(this));
-
       // view or edit mode
       if (this.readonly) {
         jQuery(el).select2('readonly', true);
