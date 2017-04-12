@@ -5,20 +5,13 @@ import CreateDialog from './ui/create_dialog';
 import CollectionBrowser from './ui/collectionBrowser';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
-import Vocabulary from './ui/admin/vocabulary';
+import Administration from './ui/administration.js';
 import BasePage from './base';
 
 export default class UI extends BasePage {
 
   goHome() {
     this.drawer.logo.click();
-  }
-
-  get vocabularyAdmin() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
-    }
-    return new Vocabulary('nuxeo-vocabulary-management');
   }
 
   get createDialog() {
@@ -64,7 +57,7 @@ export default class UI extends BasePage {
   }
 
   get administration() {
-    return this.pages.element('nuxeo-admin');
+    return new Administration('nuxeo-admin');
   }
 
   get tasks() {
