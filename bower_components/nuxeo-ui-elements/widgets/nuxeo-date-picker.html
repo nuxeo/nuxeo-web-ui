@@ -65,7 +65,7 @@ Example:
       },
 
       _valueChanged: function() {
-        if (this.$.date.value.length === 0 && this.value && this.value.indexOf('T') === 10) {
+        if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
            this.$.date.value = moment(this.value).format('YYYY-MM-DD');
         }
       },
