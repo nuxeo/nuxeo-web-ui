@@ -72,7 +72,7 @@
 	"downloadButton.tooltip": "Ladda ned",
 	"editPassword.password": "Lösenord",
 	"editPassword.verify": "Lösenord (bekräfta)",
-	"editPassword.noMatch": "Password does not match",
+	"editPassword.noMatch": "Password does not match.",
 	"editUser.company": "Företag",
 	"editUser.email": "E-post",
 	"editUser.firstName": "Förnamn",
