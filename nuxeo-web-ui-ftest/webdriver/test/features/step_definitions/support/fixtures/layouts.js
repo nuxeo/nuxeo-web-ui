@@ -1,10 +1,10 @@
 import { FieldRegistry } from '../services/field_registry';
 
 global.fieldRegistry = new FieldRegistry();
-global.fieldRegistry.register('paper-input',
+global.fieldRegistry.register('nuxeo-input',
                               (element) => element.element('#input').getValue(),
                               (element, value) => { element.element('#input').setValue(value); });
-global.fieldRegistry.register('paper-textarea',
+global.fieldRegistry.register('nuxeo-textarea',
                               (element) => element.element('#textarea').getValue(),
                               (element, value) => { element.element('#textarea').setValue(value); });
 global.fieldRegistry.register('generic',
