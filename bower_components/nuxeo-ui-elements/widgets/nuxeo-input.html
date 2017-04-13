@@ -1,0 +1,114 @@
+<!--
+@license
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-input/paper-input.html">
+
+<!--
+An element for generic input in forms
+
+@group Nuxeo UI
+@element nuxeo-input
+@demo demo/widgets/index.html
+-->
+<dom-module id="nuxeo-input">
+  <template>
+
+    <paper-input label="[[label]]"
+                 type="[[type]]"
+                 name="[[name]]"
+                 value="{{value}}"
+                 placeholder$="[[placeholder]]"
+                 autofocus$="[[autofocus]]"
+                 readonly$="[[readonly]]"
+                 disabled$="[[disabled]]"
+                 required$="[[required]]"
+                 always-float-label>
+    </paper-input>
+
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'nuxeo-input',
+
+    properties: {
+      /**
+       * Label.
+       */
+      label: String,
+
+      /**
+       * Type.
+       */
+      type: String,
+
+      /**
+       * Name.
+       */
+      name: String,
+
+      /**
+       * Value.
+       */
+      value: String,
+
+      /**
+       * Placeholder.
+       */
+      placeholder: String,
+
+      /**
+       * Autofocus.
+       */
+      autofocus:  {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Read only.
+       */
+      readonly:  {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Disabled.
+       */
+      disabled:  {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Required.
+       */
+      required:  {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      }
+    }
+
+  });
+</script>
