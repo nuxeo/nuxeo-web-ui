@@ -31,12 +31,19 @@ Contributors:
       .row {
         padding: 4px;
       }
+
+      .datetime {
+        color: var(--nuxeo-text-light, #939caa);
+        font-size: 12px;
+      }
+
     </style>
 
     <template is="dom-repeat" items="[[document.contextParameters.audit]]">
       <div class="row">
         <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
         <span>[[_activity(item)]]</span>
+        <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
       </div>
     </template>
   </template>

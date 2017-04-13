@@ -92,7 +92,7 @@ Contributors:
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
                 <template>
-                  [[formatDate(item.properties.dc:modified)]]
+                  <nuxeo-date datetime="[[item.properties.dc:modified]]" format="relative"></nuxeo-date>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
@@ -131,7 +131,7 @@ Contributors:
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">
                 <template>
-                  [[formatDate(item.lastViewed)]]
+                  <nuxeo-date datetime="[[item.lastViewed]]"></nuxeo-date>
                 </template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>
@@ -161,7 +161,7 @@ Contributors:
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
                 <template>
-                  [[formatDate(item.properties.dc:modified)]]
+                  <nuxeo-date datetime="[[item.properties.dc:modified]]" format="relative"></nuxeo-date>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">

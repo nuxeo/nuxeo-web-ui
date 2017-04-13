@@ -141,7 +141,10 @@ Contributors:
               </div>
               <div class="horizontal layout center">
                 <span class="due-date task-property">[[i18n('tasksList.dueDate')]]
-                <span class="date">[[_formatDate(task.dueDate)]]</span></span>
+                  <span class="date">
+                    <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -201,10 +204,6 @@ Contributors:
               this.$.list.deselectItem(oldVal);
             }
           }
-        },
-
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
         },
 
         _computedClass: function(isSelected) {
