@@ -56,7 +56,7 @@ Contributors:
       top: 0;
       right: 0;
       width: 60px;
-      height: 58px;
+      height: 57px;
       padding: 16px;
       z-index: 101;
       border-left: 1px solid var(--divider-color);
@@ -74,22 +74,6 @@ Contributors:
       @apply(--layout-vertical);
       height: calc(100vh - 61px);
       width: 293px;
-    }
-
-    .header {
-      height: 59px;
-      background-color: var(--nuxeo-light-background);
-      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
-    }
-
-    .header h1 {
-      color: var(--nuxeo-tag-text);
-      text-transform: uppercase;
-      font-size: 1rem;
-      margin: .1em .2em 0 1.1em;
-      font-weight: 400;
     }
 
     .collection-box {
@@ -127,7 +111,7 @@ Contributors:
       cursor: pointer;
       padding: 1em;
       border-bottom: 1px solid var(--nuxeo-border);
-      font-size: .9em;
+      font-size: .9rem;
     }
 
     .list-item:hover {
@@ -146,14 +130,14 @@ Contributors:
     }
 
     .list-item-title {
-      font-size: 1.1em;
+      font-size: 1.1rem;
     }
 
     .list-item-property {
       color: var(--nuxeo-text-light);
       display: block;
       margin: .2em 0;
-      font-size: .8em;
+      font-size: .8rem;
     }
 
     </style>
@@ -162,13 +146,13 @@ Contributors:
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
-        <h1>[[selectedCollection.title]]</h1>
+        [[selectedCollection.title]]
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
         <paper-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</paper-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        <h1>[[i18n('collections.heading')]]</h1>
+        [[i18n('collections.heading')]]
       </template>
     </div>
 

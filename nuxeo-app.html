@@ -149,16 +149,17 @@ Contributors:
         width: 100%;
       }
 
-      #drawer .title {
+      #drawer .header,
+      #drawer ::content .header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         font-size: 1rem;
-        font-weight: 400;
         height: 58px;
         padding: 0 16px;
         text-transform: uppercase;
         text-overflow: ellipsis;
-        border-bottom: 1px solid var(--nuxeo-border);
+        color: var(--nuxeo-text-medium);
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
       }
 
       #drawer iron-pages {
@@ -166,7 +167,6 @@ Contributors:
         width: 293px;
         height: 100vh;
         margin-left: 56px;
-        font-size: .9em;
         background-color: var(--nuxeo-light-background);
       }
 
@@ -199,7 +199,7 @@ Contributors:
       }
 
       #drawer .tasks-dashboard {
-        padding: .7em 1.2em;
+        padding: .7em 1em;
         display: block;
         border-top: 1px solid var(--nuxeo-border);
       }
@@ -266,7 +266,7 @@ Contributors:
                                label="expiredSearch.expiredDocuments"></nuxeo-search-form>
 
             <div name="tasks">
-              <div class="title">[[i18n('app.tasks')]]</div>
+              <div class="header">[[i18n('app.tasks')]]</div>
               <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
               <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
             </div>
@@ -283,7 +283,7 @@ Contributors:
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
-                <div class="title">[[i18n('app.administration')]]</div>
+                <div class="header">[[i18n('app.administration')]]</div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                   <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
                   <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
@@ -295,7 +295,7 @@ Contributors:
             </template>
 
             <div name="profile" class="layout vertical">
-              <div class="title">[[_displayUser(currentUser)]]</div>
+              <div class="header">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
                 <nuxeo-menu-item name="profile" label="app.user.profile" route="page:profile"></nuxeo-menu-item>

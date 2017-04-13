@@ -32,20 +32,6 @@ Contributors:
         overflow: hidden;
       }
 
-      .header {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        height: 59px;
-        background-color: var(--nuxeo-light-background);
-        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
-        color: var(--nuxeo-tag-text);
-        text-transform: uppercase;
-        font-size: 1rem;
-        padding: 0 16px;
-        text-overflow: ellipsis;
-        font-weight: 400;
-      }
-
       .content {
         @apply(--layout-vertical);
         height: calc(100vh - 61px);
@@ -97,7 +83,7 @@ Contributors:
         font-weight: 300;
         padding: 8px;
         text-align: center;
-        font-size: 1em;
+        font-size: 1rem;
       }
 
       .remove {
@@ -111,7 +97,7 @@ Contributors:
     <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
                      params="[[_opParams(targetDocument)]]"></nuxeo-operation>
 
-    <div class="header">[[i18n('app.clipboard')]]</div>
+    <div class="header title">[[i18n('app.clipboard')]]</div>
 
     <div class="content">
       <nuxeo-data-list items="[[documents]]" id="list"

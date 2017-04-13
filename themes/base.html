@@ -5,7 +5,12 @@
   html {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
-    font-size: 15px;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  @media (max-width: 1024px) {
+	  html { font-size: 14px; }
   }
 
   html, body {
@@ -35,12 +40,13 @@
   body ::content h1, body ::content h2, body ::content h3,
   body ::content h4, body ::content h5, body ::content h6 {
     font-weight: 400;
-    line-height: 1em;
   }
   body ::content h3 {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0 0 0.5em;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 1em;
+    text-transform: uppercase;
+    letter-spacing: .04em;
   }
 
   /* links */
@@ -126,14 +132,11 @@
     --nuxeo-label: {
       display: block;
       color: var(--secondary-text-color);
-      padding-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 12px;
       font-weight: 400;
-      letter-spacing: 0.011em;
-      line-height: 20px;
+      margin-bottom: .4em;
     };
 
     --nuxeo-tag: {
@@ -141,12 +144,14 @@
       border: 1px solid var(--nuxeo-border);
       background-color: var(--nuxeo-tag-background);
       color: var(--nuxeo-tag-text);
-      padding: 4px 6px;
-      font-size: .8em;
+      padding: 3px 6px;
+      font-size: .8rem;
+      letter-spacing: 0.01em;
       margin-bottom: .3em;
       border-radius: 2em;
-      line-height: initial;
+      line-height: 1;
       text-decoration: none;
+      vertical-align: middle;
     };
 
     --nuxeo-user: {
@@ -268,7 +273,7 @@
 
     --paper-button: {
       font-family: var(--nuxeo-app-font);
-      font-size: .9em;
+      font-size: .8rem;
       color: var(--nuxeo-link-color);
       background-color: var(--nuxeo-button);
       border-radius: .1em;

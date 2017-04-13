@@ -36,13 +36,6 @@ Contributors:
         fill: var(--nuxeo-link-hover-color);
       }
 
-      .dialog .title {
-        font-weight: 500;
-        font-size: 24px;
-        margin: 24px 24px 16px 24px;
-        padding: 0;
-      }
-
       .dialog .content {
         @apply(--layout-vertical);
         margin: 16px;
@@ -101,9 +94,9 @@ Contributors:
     <paper-dialog id="dialog" class="dialog" with-backdrop
                   on-iron-overlay-opened="_dialogOpened"
                   on-iron-overlay-closed="_dialogClosed">
-      <div class="title">[[i18n('documentCreateVersion.title',
+      <h2>[[i18n('documentCreateVersion.title',
         document.properties.dc:title, document.properties.uid:major_version, document.properties.uid:minor_version)]]
-      </div>
+      </h2>
       <div class="content">
         <paper-radio-group selected="{{versionType}}">
           <paper-radio-button name="minor">
