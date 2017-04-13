@@ -87,7 +87,8 @@ limitations under the License.
           } else if (entry['entity-type'] === 'user') {
             return this.labelForUserEntry(entry);
           } else {
-            return this.i18n('label.ui.aggregate.' + item.key);
+            var i18nKey = this.i18n('label.ui.aggregate.' + item.key);
+            return i18nKey === 'label.ui.aggregate.' + item.key ? item.key : i18nKey;
           }
         } else {
           var i18nKey = this.i18n('label.ui.aggregate.' + item.key);
