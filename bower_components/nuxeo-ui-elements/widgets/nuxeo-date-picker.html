@@ -34,6 +34,15 @@ Example:
 <dom-module id="nuxeo-date-picker">
   <template>
     <style>
+      paper-input {
+        --paper-input-container-input-webkit-spinner: {
+          -webkit-appearance: none;
+        };
+      }
+
+      paper-input::-webkit-clear-button{
+        -webkit-appearance: none;
+      }
     </style>
 
     <paper-input id="date" label="[[label]]" name="[[name]]" required="[[required]]" invalid="[[invalid]]"
