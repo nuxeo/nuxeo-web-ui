@@ -102,11 +102,11 @@ Contributors:
         pointer-events: none;
       }
       /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
-      .task-box nuxeo-user-tag {
+      .task-box nuxeo-user-tag,
+      .task-box nuxeo-date {
         pointer-events: all;
       }
     </style>
-
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
       selected-item="{{_selection}}"
       empty-label="[[i18n('tasksList.noTasks')]]"
