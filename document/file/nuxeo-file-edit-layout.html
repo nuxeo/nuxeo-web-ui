@@ -22,12 +22,12 @@ limitations under the License.
 <dom-module id="nuxeo-file-edit-layout">
 
   <template>
-    <paper-input role="widget"
+    <nuxeo-input role="widget"
                  label="[[i18n('title')]]"
                  name="title"
                  value="{{document.properties.dc:title::change}}"
                  required>
-    </paper-input>
+    </nuxeo-input>
 
     <nuxeo-textarea role="widget"
                     label="[[i18n('label.description')]]"
