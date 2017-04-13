@@ -476,6 +476,7 @@ Contributors:
           'manageGroup': '_handleUGMmanageGroup',
           'browseCollection': '_navigateToCollection',
           'workflowStarted': '_refreshAndFetchTasks',
+          'workflowTaskProcess': '_workflowTaskProcess',
           'workflowTaskProcessed': '_refreshAndFetchTasks',
           'added-to-clipboard': '_onAddedToClipboard',
           'add-to-clipboard': '_onAddToClipboard',
@@ -527,7 +528,6 @@ Contributors:
 
         loadTask: function(id) {
           if (id && id.length > 0){
-            if (id !== this.currentTaskId) {
               this.loading = true;
               this.currentTaskId = id;
               this.$.task.get().then(function(task) {
@@ -535,7 +535,6 @@ Contributors:
                 this.show('tasks');
                 this.loading = false;
               }.bind(this));
-            }
           } else {
             this.currentTask = null;
             this.show('tasks');
@@ -687,6 +686,10 @@ Contributors:
           // let's refresh the current document since it might have been changed (ex: state and version)
           this.refresh();
           this._fetchTasks();
+        },
+
+        _workflowTaskProcess: function(e) {
+          page("/tasks/" + e.detail.id);
         },
 
         _onAddedToClipboard: function(e){
