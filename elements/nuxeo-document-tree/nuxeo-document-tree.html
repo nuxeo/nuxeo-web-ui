@@ -45,11 +45,7 @@ Contributors:
       .content {
         padding: 5px 0;
         overflow: auto;
-        height: calc(100vh - 69px);
-      }
-
-      nuxeo-tree {
-        padding: .4em .5em;
+        height: calc(100vh - 72px);
       }
 
       .node-name {
@@ -57,16 +53,15 @@ Contributors:
         display: inline-block;
         vertical-align: text-top;
         margin-left: 1.3em;
+        word-break: break-word;
       }
 
       #root a, a:active, a:visited, a:focus {
         @apply(--nuxeo-link-hover);
-        font-weight: 500;
       }
 
       #root iron-collapse a, a:active, a:visited, a:focus {
         @apply(--nuxeo-link);
-        font-weight: normal;
       }
 
       #root iron-collapse a:hover {
@@ -77,6 +72,7 @@ Contributors:
         color: var(--nuxeo-text-light);
         width: 1.3rem;
         margin-right: -1.6em;
+        margin-top: -0.07rem;
       }
 
       [toggle] {
@@ -85,12 +81,19 @@ Contributors:
 
       .parents {
         display: block;
-        font-weight: 100;
         line-height: 1.5em;
       }
 
+      .parents + nuxeo-tree {
+        padding: 6px 5px;
+      }
+
+      .parents > nuxeo-tree {
+        padding: 4px 5px;
+      }
+
       .parents a {
-        padding: .5em .4em;
+        padding: .35em;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       }
 
@@ -110,10 +113,6 @@ Contributors:
         padding: .12em 0 0;
       }
 
-      .root {
-        padding: 2px 0 0 20px;
-      }
-
     </style>
 
     <nuxeo-document id="doc" auto="[[auto]]" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
@@ -129,11 +128,12 @@ Contributors:
     <div class="content">
       <div class="parents">
         <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span class="root">[[i18n('browse.root')]]</span>
+          <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
+          <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
-            <span><iron-icon icon="icons:chevron-left" class="flex"></iron-icon></span>
+            <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
         </template>
