@@ -25,16 +25,15 @@ Contributors:
 <dom-module id="nuxeo-default-search-form">
   <template>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.fullText')]]</label>
-      <paper-input id="searchInput" autofocus="true"
-                   on-keydown="_checkForEnter"
-                   value="{{searchTerm}}" tabindex="0"
-                   type="search"
-                   placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                   no-label-float>
-      </paper-input>
-    </div>
+    <paper-input role="widget"
+                 id="searchInput"
+                 type="search"
+                 label="[[i18n('defaultSearch.fullText')]]"
+                 value="{{searchTerm}}"
+                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+                 autofocus
+                 on-keydown="_checkForEnter">
+    </paper-input>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.creationDate')]]</label>

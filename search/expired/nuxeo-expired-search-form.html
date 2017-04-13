@@ -25,15 +25,13 @@ Contributors:
 <dom-module id="nuxeo-expired-search-form">
   <template>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.fullText')]]</label>
-      <paper-input id="searchInput" autofocus="true"
-                   value="{{searchTerm}}" tabindex="0"
-                   type="search"
-                   placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                   no-label-float>
-      </paper-input>
-    </div>
+    <nuxeo-input role="widget"
+                 id="searchInput"
+                 label="[[i18n('defaultSearch.fullText')]]"
+                 value="{{searchTerm}}"
+                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+                 autofocus>
+    </nuxeo-input>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.authors')]]</label>

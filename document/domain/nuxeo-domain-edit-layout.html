@@ -22,11 +22,16 @@ limitations under the License.
 <dom-module id="nuxeo-domain-edit-layout">
 
   <template>
-    <paper-input role="widget" label="[[i18n('title')]]" name="title" value="{{document.properties.dc:title::change}}"></paper-input>
+    <nuxeo-input role="widget"
+                 label="[[i18n('title')]]"
+                 name="title"
+                 value="{{document.properties.dc:title::change}}"
+                 required>
+    </nuxeo-input>
 
-    <paper-textarea role="widget" label="[[i18n('label.description')]]" always-float-label
+    <nuxeo-textarea role="widget" label="[[i18n('label.description')]]"
                     value="{{document.properties.dc:description::change}}"
-                    name="description"></paper-textarea>
+                    name="description"></nuxeo-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 name="nature"
