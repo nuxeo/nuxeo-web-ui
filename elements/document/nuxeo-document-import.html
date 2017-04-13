@@ -182,11 +182,10 @@ Contributors:
       .name {
         font-weight: bold;
         word-break: break-word;
-        font-size: 1.1em;
       }
 
       .size {
-        font-size: .75em;
+        font-size: .8rem;
         color: var(--nuxeo-text-light, #aaa);
         padding: .1em .5em;
         white-space: nowrap;
@@ -231,7 +230,7 @@ Contributors:
       .disclaimer {
         display: block;
         font-weight: normal;
-        font-size: .7em;
+        font-size: .75rem;
         color: var(--nuxeo-text-light);
       }
 
@@ -1218,13 +1217,13 @@ Contributors:
          * Retrieves and creates the layout for the current document type
          */
         _updateDocument: function() {
-          
+
           if (!this._isValidType(this.selectedDocType)) {
             this.document = null;
             // prevent error message from being displayed the first time
             this.$.docTypeDropdown.invalid = false;
             return;
-          } 
+          }
 
           var document = {
             'entity-type': 'document',
@@ -1243,7 +1242,7 @@ Contributors:
               document.properties[prop] = properties[prop];
             }
           }
-          
+
           this.document = document;
         }
       });
