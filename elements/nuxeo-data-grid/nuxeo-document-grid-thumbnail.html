@@ -33,11 +33,11 @@ Contributors:
         margin: 0 .4em .8em;
         position: relative;
         background-color: #fff;
-        box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);;
         padding: 0;
         filter: 0.1s ease-out, filter 0.1s ease-out;
         -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
-        border-bottom: 3px solid transparent;
+        border: 2px solid transparent;
       }
 
       .bubbleBox:hover,
@@ -46,8 +46,8 @@ Contributors:
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
         z-index: 500;
-        border-bottom: 3px solid var(--nuxeo-link-hover-color);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
 
       .bubbleBox .title {
@@ -77,8 +77,8 @@ Contributors:
       .bubbleBox .select {
         display: none;
         position: absolute;
-        top: 10.7em;
-        right: .5em;
+        top: 1rem;
+        left: 1rem;
         border: 2px solid #ddd;
         background-color: #fff;
         z-index: 2;
@@ -156,8 +156,8 @@ Contributors:
       :host[selected] .bubbleBox {
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
-        border-bottom: 3px solid var(--nuxeo-grid-selected);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        border: 2px solid var(--nuxeo-grid-selected);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
 
     </style>
@@ -177,7 +177,7 @@ Contributors:
         <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
       </div>
       <div class="select">
-        <paper-icon-button icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
+        <paper-icon-button noink icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
       </div>
     </div>
 
