@@ -45,7 +45,6 @@
     border-bottom: 1px solid var(--paper-input-container-color);
     white-space: nowrap;
     line-height: 26px;
-    color: var(--paper-input-container-input-color);
     text-decoration: none;
 
     border-radius: 0;
@@ -394,7 +393,6 @@
 
   /* disabled look for disabled choices in the results dropdown */
   .select2-results .select2-disabled.select2-highlighted {
-    color: #666;
     background: #f4f4f4;
     display: list-item;
     cursor: default;
@@ -498,8 +496,7 @@
   .select2-container-multi .select2-choices .select2-search-field input {
     padding: 5px;
     margin: 1px 0;
-    width: 100%;
-    color: #666;
+    width: 100% !important;
     font-family: inherit;
     outline: 0;
     border: 0;
@@ -519,7 +516,8 @@
 
   .select2-container-multi .select2-choices .select2-search-choice {
     @apply(--nuxeo-tag);
-    background: none;
+    background: none var(--nuxeo-tag-background, #fff);
+    border: none;
     padding-left: 16px;
     margin: 4px 4px 4px 0;
     position: relative;
