@@ -16,6 +16,7 @@
     "chart-elements": "nuxeo/chart-elements#3.1.0",
     "Chart.js": "2.1.6",
     "iron-list": "PolymerElements/iron-list#1.3.9",
+    "polymer": "git://github.com/Polymer/polymer.git#1.8.1",
     "web-animations-js": "git://github.com/web-animations/web-animations-js.git#2.2.2"
   },
   "devDependencies": {
