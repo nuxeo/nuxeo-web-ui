@@ -36,9 +36,14 @@ Contributors:
   <template>
     <style>
 
+      paper-header-panel {
+        box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+      }
+
       paper-header-panel ::content .content {
         position: relative;
         padding: 16px 16px 112px;
+        box-shadow: 3px 0 5px rgba(0,0,0,0.04) inset;
       }
 
       paper-header-panel ::content paper-toolbar {
@@ -46,6 +51,11 @@ Contributors:
         width: 100%;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
+      }
+
+      paper-header-panel ::content paper-toolbar paper-toolbar {
+        box-shadow: none;
       }
 
       paper-header-panel, iron-pages::content paper-header-panel {
@@ -57,7 +67,6 @@ Contributors:
 
       paper-drawer-panel {
         --paper-drawer-panel-left-drawer-container: {
-          border-right: 1px solid var(--nuxeo-border);
           z-index: 100;
         };
         --paper-drawer-panel-scrim: {
@@ -85,8 +94,6 @@ Contributors:
         left: 0;
         z-index: 102;
         padding: 18px;
-        background: var(--nuxeo-light-background);
-        border-right: 1px solid var(--divider-color);
         box-sizing: border-box;
       }
 
@@ -158,16 +165,15 @@ Contributors:
         padding: 0 16px;
         text-transform: uppercase;
         text-overflow: ellipsis;
-        color: var(--nuxeo-text-medium);
-        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
+        color: var(--nuxeo-title-color);
       }
 
       #drawer iron-pages {
         @apply(--layout-vertical);
-        width: 293px;
+        width: 294px;
         height: 100vh;
         margin-left: 56px;
-        background-color: var(--nuxeo-light-background);
+        background-color: var(--nuxeo-drawer-background);
       }
 
       #drawer ::content nuxeo-menu-item:hover,
