@@ -79,7 +79,6 @@ Contributors:
         width: 60px;
         height: 59px;
         padding: 16px;
-        background-color: rgba(0,0,0,0.05);
         color: var(--nuxeo-header-actions);
       }
 
@@ -186,7 +185,7 @@ Contributors:
       <div id="suggester" hidden$="[[!toggled]]">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar" on-tap="_focusSearch">
-          <paper-input id="searchInput"
+          <paper-input noink id="searchInput"
                        value="{{searchTerm}}"
                        type="search"
                        label="[[i18n('suggester.label')]]"
