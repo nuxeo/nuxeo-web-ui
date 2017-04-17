@@ -41,6 +41,9 @@ Contributors:
         width: 125px;
       }
 
+      nuxeo-date-picker {
+        padding-left: 8px;
+      }
       paper-dropdown-menu ::content paper-input-container {
         padding: 0;
       }
@@ -88,15 +91,18 @@ Contributors:
     </style>
 
     <paper-card class="dates">
-      <div class="horizontal flex end-justified layout">
-        <paper-dropdown-menu no-label-float>
+      <div class="horizontal flex end-justified layout center wrap">
+        <paper-dropdown-menu always-float-label>
           <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
             <paper-item key="ParallelDocumentReview">[[i18n('ParallelDocumentReview')]]</paper-item>
             <paper-item key="SerialDocumentReview">[[i18n('SerialDocumentReview')]]</paper-item>
           </paper-menu>
         </paper-dropdown-menu>
-        <input type="date" value="{{startDate::change}}">
-        <input type="date" value="{{endDate::change}}">
+
+        <nuxeo-date-picker value="{{startDate::change}}"
+                           label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
+        <nuxeo-date-picker value="{{endDate::change}}"
+                           label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
     </paper-card>
 

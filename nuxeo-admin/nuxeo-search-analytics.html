@@ -41,6 +41,10 @@ Contributors:
         width: 125px;
       }
 
+      nuxeo-date-picker {
+        padding-left: 8px;
+      }
+
       .flex-layout {
         display: flex;
         flex-wrap: wrap;
@@ -78,8 +82,8 @@ Contributors:
 
     <paper-card class="dates">
       <div class="horizontal flex end-justified layout">
-        <input type="date" value="{{startDate::change}}">
-        <input type="date" value="{{endDate::change}}">
+        <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
+        <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
     </paper-card>
 
