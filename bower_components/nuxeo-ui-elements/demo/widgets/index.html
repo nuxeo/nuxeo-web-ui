@@ -38,6 +38,7 @@ limitations under the License.
   <link rel="import" href="../../widgets/nuxeo-date-picker.html">
   <link rel="import" href="../../widgets/nuxeo-operation-button.html">
   <link rel="import" href="../../widgets/nuxeo-select.html">
+  <link rel="import" href="../../widgets/nuxeo-date.html">
   <link rel="stylesheet" href="../../../select2/select2.css">
   <style>
       body {
@@ -132,6 +133,18 @@ limitations under the License.
         <td>nuxeo-date-picker</td>
         <td><nuxeo-date-picker label="Date" value="{{dateValue}}"></nuxeo-date-picker></td>
         <td>[[dateValue]]</td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-date</td>
+        <td><nuxeo-date  datetime="{{nuxeoDateValue}}"></nuxeo-date></td>
+        <td><nuxeo-date-picker label="Pick a date" value="{{nuxeoDateValue}}"></nuxeo-date-picker></td>
+      </tr>
+
+      <tr>
+        <td>nuxeo-date (relative) </td>
+        <td><nuxeo-date datetime="{{nuxeoRelativeDate}}" format="relative"></nuxeo-date></td>
+        <td><nuxeo-date-picker label="Pick a date" value="{{nuxeoRelativeDate}}"></nuxeo-date-picker></td>
       </tr>
 
       <tr>

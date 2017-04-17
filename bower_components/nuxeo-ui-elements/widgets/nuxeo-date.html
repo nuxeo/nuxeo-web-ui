@@ -1,0 +1,81 @@
+<!--
+@license
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-format-behavior.html">
+
+<!--
+An element to show a datetime formatted with a tooltip. Format maybe relative to now
+or [moment Format](http://momentjs.com/docs/#/displaying/format/).
+
+Example:
+
+    <nuxeo-date datetime="2016-01-06T00:00:00.000Z"></nuxeo-date>
+    <nuxeo-date datetime="2016-01-06T00:00:00.000Z" format="relative"></nuxeo-date>
+
+@group Nuxeo UI
+@element nuxeo-date
+@demo demo/widgets/index.html
+-->
+<dom-module id="nuxeo-date">
+    <template>
+        <span id="datetime">[[formatDate(datetime, format)]]</span>
+        <paper-tooltip id="tooltip" for="datetime">[[formatDate(datetime, tooltipFormat)]]</paper-tooltip>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'nuxeo-date',
+
+            behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+
+            properties:{
+
+                /*
+                 * A string with the date and time to be shown
+                 */
+                datetime: {
+                    type: String
+                },
+
+                /*
+                 * The format of datetime output text representation. Options are "relative" or the
+                 * [moment Format](http://momentjs.com/docs/#/displaying/format/).
+                 */
+                format: {
+                    type: String,
+                    value: "MMMM D, YYYY"
+                },
+
+                /*
+                 * The format of datetime output text tooltip. Options are "relative" or the
+                 * [moment Format](http://momentjs.com/docs/#/displaying/format/).
+                 */
+                tooltipFormat: {
+                    type: String,
+                    value: "MMMM D, YYYY HH:mm"
+                }
+            },
+
+            ready: function() {
+                document.body.appendChild(this.$.tooltip);
+            }
+        });
+    </script>
+</dom-module>

@@ -43,8 +43,13 @@ limitations under the License.
 
     /**
      * Formats a date as a string. Default format is 'MMM D, YYYY'.
+     * Use format "relative" to show date relative to current time
      */
     formatDate: function(date, fmt) {
+        if (fmt && fmt === "relative"){
+            moment.locale(this._languageCode());
+            return moment().to(date) ;
+        }
       return moment(date).format(fmt || 'MMMM D, YYYY');
     },
 
@@ -75,12 +80,16 @@ limitations under the License.
         if (value.properties && value.properties.label) {
           return value.properties.label;
         } else {
-          var label = 'label_' + ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
+          var label = 'label_' + this._languageCode();
           return value.properties[label] || value.properties['label_en']
         }
       } else {
         return value;
       }
+    },
+
+    _languageCode: function (){
+      return ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
     }
 
   }];
