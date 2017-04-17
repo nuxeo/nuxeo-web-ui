@@ -37,11 +37,11 @@ Contributors:
 
     <div class="item">
       <label>[[i18n('documentInfo.lastModified')]]</label>
-      <div>[[formatDate(document.properties.dc:modified)]]</div>
+      <nuxeo-date datetime="[[document.properties.dc:modified]]"></nuxeo-date>
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.created')]]</label>
-      <div>[[formatDate(document.properties.dc:created)]]</div>
+      <nuxeo-date datetime="[[document.properties.dc:created]]"></nuxeo-date>
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.by')]]</label>

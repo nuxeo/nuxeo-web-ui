@@ -98,7 +98,9 @@ Contributors:
       <div class="bar task">
         <div>
           <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-          <span>[[i18n('documentPage.to.process')]] [[formatDate(task.dueDate)]]</span>
+          <span>[[i18n('documentPage.to.process')]]
+            <nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date>
+          </span>
         </div>
         <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
       </div>

@@ -84,11 +84,11 @@ Contributors:
         pointer-events: none;
       }
       /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
-      .task-box nuxeo-user-tag {
+      .task-box nuxeo-user-tag,
+      .task-box nuxeo-date {
         pointer-events: all;
       }
     </style>
-
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
       selected-item="{{_selection}}"
       empty-label="[[i18n('tasksList.noTasks')]]"
@@ -119,8 +119,9 @@ Contributors:
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
               <div class="horizontal layout center">
+
                 <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
-                <span class="date">[[_formatDate(task.dueDate)]]</span>
+                <span class="date"> <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
               </div>
             </div>
           </div>
@@ -180,10 +181,6 @@ Contributors:
               this.$.list.deselectItem(oldVal);
             }
           }
-        },
-
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
         },
 
         _computedClass: function(isSelected) {
