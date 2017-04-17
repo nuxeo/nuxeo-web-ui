@@ -63,9 +63,6 @@ Contributors:
         <paper-toolbar>
           <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
           <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-            <nuxeo-page-item name="view" label="browser.view"></nuxeo-page-item>
-            <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
-            <nuxeo-page-item name="history" label="browser.history"></nuxeo-page-item>
             <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
           </paper-listbox>
         </paper-toolbar>
@@ -80,9 +77,6 @@ Contributors:
         <div id="nxContent">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
-            <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
-            <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
-            <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
           </iron-pages>
         </div>
 
@@ -113,7 +107,7 @@ Contributors:
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(document)'
+          computed: '_actionContext(document, clipboard)'
         },
 
         viewsContext: {
@@ -123,8 +117,8 @@ Contributors:
       },
 
       listeners: {
-        'permissions.aceupdated': '_documentUpdated',
-        'permissions.acedeleted': '_documentUpdated',
+        'aceupdated': '_documentUpdated',
+        'acedeleted': '_documentUpdated',
         'added-to-collection': '_documentUpdated',
         'removed-from-collection': '_documentUpdated'
       },

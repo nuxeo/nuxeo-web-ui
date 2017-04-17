@@ -165,10 +165,6 @@ Contributors:
         targetDocument: {
           type: Object
         },
-        docCount: {
-          type: Number,
-          notify: true
-        },
         selectedDocument: {
           type: Object
         }
@@ -181,7 +177,7 @@ Contributors:
 
       _observeDocuments: function() {
         if (this.documents) {
-          this.docCount = this.documents.length;
+          this.fire('nx-clipboard-updated', {docCount: this.documents.length});
         }
       },
 
