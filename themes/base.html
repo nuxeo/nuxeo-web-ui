@@ -108,14 +108,27 @@
 
     --nuxeo-sidebar-item-theme: {
       border-bottom: 1px solid var(--nuxeo-border);
+      color: var(--nuxeo-drawer-text);
       display: block;
       margin: 0;
       white-space: nowrap;
     };
 
     --nuxeo-sidebar-item-link: {
+      color: var(--nuxeo-drawer-text);
       display: block;
       padding: 1.3em;
+    };
+
+    --nuxeo-action: {
+      border: 1px solid transparent;
+      padding: .3em;
+      border-radius: 5em;
+    };
+
+    --nuxeo-action-hover: {
+       border: 1px solid var(--nuxeo-primary-color);
+       color: var(--nuxeo-text-default);
     };
 
     --nuxeo-block-hover: {
@@ -123,14 +136,14 @@
     };
 
     --nuxeo-block-selected: {
-      background-color: #fff;
+      background-color: var(--nuxeo-box);
       outline: 0;
       box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
     };
 
     --nuxeo-label: {
       display: block;
-      color: var(--nuxeo-text-medium);
+      opacity: .5;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -142,11 +155,11 @@
       display: inline-block;
       background-color: var(--nuxeo-tag-background);
       padding: 3px 6px;
+      color: var(--nuxeo-tag-text);
       font-size: .8rem;
       letter-spacing: 0.01em;
       margin-bottom: .3em;
       border-radius: 2em;
-      line-height: 1;
       text-decoration: none;
       vertical-align: middle;
     };
@@ -154,7 +167,6 @@
     --nuxeo-user: {
       border-radius: 2.5em;
       text-transform: capitalize;
-      color: var(--nuxeo-link-color);
     };
 
     --nx-actions: {
@@ -209,7 +221,7 @@
       box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
       font-family: var(--nuxeo-app-font);
       border-radius: 0;
-      background-color: #fff;
+      background-color: var(--nuxeo-box) !important;
     };
 
     --paper-radio-button: {
@@ -258,8 +270,8 @@
     };
 
     --paper-dialog: {
-      color: var(--nuxeo-link-color);
-      background-color: #fff;
+      color: var(--nuxeo-text-default);
+      background: var(--nuxeo-box);
       font-family: var(--nuxeo-app-font);
     };
 
@@ -289,6 +301,11 @@
     --paper-button-raised-keyboard-focus: {
       background-color: var(--nuxeo-button-primary-focus);
       color: var(--nuxeo-button-primary-text);
+    };
+
+    --paper-transition-easing: {
+      -webkit-transition: none;
+      transition: none;
     };
   }
 </style>
