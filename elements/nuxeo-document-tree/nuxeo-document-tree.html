@@ -33,6 +33,7 @@ Contributors:
         display: block;
         --nuxeo-tree-theme: {
           padding: 1em;
+          color: var(--nuxeo-drawer-text);
         };
         --nuxeo-tree-node-theme: {
           min-height: 24px;
@@ -57,19 +58,15 @@ Contributors:
       }
 
       #root a, a:active, a:visited, a:focus {
-        @apply(--nuxeo-link-hover);
+        color: var(--nuxeo-drawer-text);
       }
 
-      #root iron-collapse a, a:active, a:visited, a:focus {
-        @apply(--nuxeo-link);
-      }
-
-      #root iron-collapse a:hover {
+      #root a:hover {
         @apply(--nuxeo-link-hover);
       }
 
       iron-icon {
-        color: var(--nuxeo-text-light);
+        opacity: .3;
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
@@ -94,7 +91,8 @@ Contributors:
 
       .parents a {
         padding: .35em;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        color: var(--nuxeo-drawer-text);
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .parents a:hover {

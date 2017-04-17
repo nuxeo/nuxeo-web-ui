@@ -37,7 +37,7 @@ Contributors:
       }
 
       .task-item:hover {
-        background-color: var(--nuxeo-light-background);
+        @apply(--nuxeo-block-hover);
       }
 
       .task-view paper-card {
@@ -46,7 +46,7 @@ Contributors:
 
       .task-box {
         padding: 1em;
-        border: 1px solid var(--divider-color);
+        border: 1px solid var(--nuxeo-border);
       }
 
       .task-info {
@@ -59,7 +59,7 @@ Contributors:
       }
 
       .task-property {
-        color: var(--nuxeo-text-light);
+        opacity: .5;
         margin-right: .5rem;
       }
 
@@ -88,7 +88,7 @@ Contributors:
       }
 
       .document-view {
-        margin-right: .5em;
+        margin-right: 1.3rem;
       }
 
       nuxeo-document-task,
@@ -97,10 +97,9 @@ Contributors:
       }
 
       .task-header {
-        background-color: #fff;
-        border: 1px solid var(--nuxeo-border);
-        color: var(--nuxeo-text-default);
-        margin-bottom: .5em;
+        background-color: var(--nuxeo-box);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+        margin-bottom: 16px;
         padding: .5em;
       }
 

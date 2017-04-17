@@ -27,29 +27,17 @@ Contributors:
 
     <style>
       .task-header {
-        background-color: #fafcfd;
-        color: var(--dark-primary-color);
+        margin: -1.2rem -1.2rem 1rem -1.25rem;
+        background-color: rgba(0,0,0,0.03);
         padding: 1em;
-        margin-bottom: 1em;
       }
 
       .task-name {
         font-weight: bold;
       }
 
-      .task-name-icon {
-        --iron-icon-height: .9rem;
-        --iron-icon-width: .9rem;
-        border-radius: 50px;
-        background-color: var(--dark-primary-color);
-        color: white;
-        padding: .4em;
-        margin-right: .5em;
-      }
-
       .workflow-name {
         font-size: .8rem;
-        font-weight: 300;
         margin-top: .5em;
       }
     </style>
@@ -80,7 +68,6 @@ Contributors:
         <template is="dom-repeat" items="[[tasks]]" as="task">
           <paper-card>
             <div class="layout horizontal center task-header">
-              <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
               <div class="layout vertical flex">
                 <span class="task-name">[[i18n(task.name)]]</span>
                 <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
