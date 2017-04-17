@@ -40,10 +40,6 @@ Contributors:
       <div class="header">
         <div class="title">[[i18n('analytics.heading')]]</div>
         <paper-listbox selected="{{selected}}" attr-for-selected="name">
-          <nuxeo-page-item name="document-distribution" label="analytics.document.distribution"></nuxeo-page-item>
-          <nuxeo-page-item name="repository" label="analytics.repository"></nuxeo-page-item>
-          <nuxeo-page-item name="search" label="analytics.search"></nuxeo-page-item>
-          <nuxeo-page-item name="workflow" label="analytics.workflow"></nuxeo-page-item>
           <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
@@ -51,10 +47,6 @@ Contributors:
         <template is="dom-if" if="[[visible]]">
           <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="ANALYTICS_PAGES"></nuxeo-slot>
-            <nuxeo-distribution-analytics name="document-distribution"></nuxeo-distribution-analytics>
-            <nuxeo-repository-analytics name="repository"></nuxeo-repository-analytics>
-            <nuxeo-search-analytics name="search"></nuxeo-search-analytics>
-            <nuxeo-workflow-analytics name="workflow"></nuxeo-workflow-analytics>
           </iron-pages>
         </template>
       </div>

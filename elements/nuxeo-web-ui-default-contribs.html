@@ -1,0 +1,293 @@
+<!-- ADMIN -->
+
+<nuxeo-slot-content name="adminAnalyticsMenuItem" slot="ADMINISTRATION_MENU" order="10">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics"></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAnalyticsPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-analytics name="analytics" selected="document-distribution"></nuxeo-analytics>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="adminUserManagementMenuItem" slot="ADMINISTRATION_MENU" order="20">
+  <template>
+    <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminUserManagementPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-user-group-management-page name="user-group-management" is-administrator$="[[user.isAdministrator]]" entity="[[entity]]"></nuxeo-user-group-management-page>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="adminVocabManagementMenuItem" slot="ADMINISTRATION_MENU" order="30">
+  <template>
+    <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminVocabManagementPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="adminAuditMenuItem" slot="ADMINISTRATION_MENU" order="40">
+  <template>
+    <nuxeo-menu-item name="audit" label="audit.heading" route="administration:audit"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAuditPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-audit name="audit" id="audit"></nuxeo-audit>
+  </template>
+</nuxeo-slot-content>
+
+<!-- ANALYTICS -->
+
+<nuxeo-slot-content name="analyticsDocumentDistributionItem" slot="ANALYTICS_ITEMS" order="10">
+  <template>
+    <nuxeo-page-item name="document-distribution" label="analytics.document.distribution"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="analyticsDocumentDistributionPage" slot="ANALYTICS_PAGES" order="10">
+  <template>
+    <nuxeo-distribution-analytics name="document-distribution"></nuxeo-distribution-analytics>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="analyticsRepositoryItem" slot="ANALYTICS_ITEMS" order="20">
+  <template>
+    <nuxeo-page-item name="repository" label="analytics.repository"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="analyticsRepositoryPage" slot="ANALYTICS_PAGES" order="20">
+  <template>
+    <nuxeo-repository-analytics name="repository"></nuxeo-repository-analytics>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="analyticsSearchItem" slot="ANALYTICS_ITEMS" order="30">
+  <template>
+    <nuxeo-page-item name="search" label="analytics.search"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="analyticsSearchPage" slot="ANALYTICS_PAGES" order="30">
+  <template>
+    <nuxeo-search-analytics name="search"></nuxeo-search-analytics>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="analyticsWorkflowItem" slot="ANALYTICS_ITEMS" order="40">
+  <template>
+    <nuxeo-page-item name="workflow" label="analytics.workflow"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="analyticsWorkflowPage" slot="ANALYTICS_PAGES" order="40">
+  <template>
+    <nuxeo-workflow-analytics name="workflow"></nuxeo-workflow-analytics>
+  </template>
+</nuxeo-slot-content>
+
+<!-- BLOB ACTIONS -->
+
+<nuxeo-slot-content name="deleteBlobAction" slot="BLOB_ACTIONS" order="10">
+  <template>
+    <nuxeo-delete-blob-button document="[[document]]" xpath="[[xpath]]"></nuxeo-delete-blob-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="previewBlobAction" slot="BLOB_ACTIONS" order="20">
+  <template>
+    <nuxeo-preview-button document="[[document]]" xpath="[[xpath]]"></nuxeo-preview-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="downloadBlobAction" slot="BLOB_ACTIONS" order="30">
+  <template>
+    <nuxeo-download-button document="[[document]]" xpath="[[xpath]]"></nuxeo-download-button>
+  </template>
+</nuxeo-slot-content>
+
+<!-- COLECTION ACTIONS -->
+
+<nuxeo-slot-content name="removeCollectionAction" slot="COLLECTION_ACTIONS" order="10">
+  <template>
+    <nuxeo-collection-remove-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    </nuxeo-collection-remove-action>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="moveTopCollectionAction" slot="COLLECTION_ACTIONS" order="20">
+  <template>
+    <nuxeo-collection-move-top-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    </nuxeo-collection-move-top-action>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="moveUpCollectionAction" slot="COLLECTION_ACTIONS" order="30">
+  <template>
+    <nuxeo-collection-move-up-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    </nuxeo-collection-move-up-action>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="moveDownCollectionAction" slot="COLLECTION_ACTIONS" order="40">
+  <template>
+    <nuxeo-collection-move-down-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    </nuxeo-collection-move-down-action>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="moveBottomCollectionAction" slot="COLLECTION_ACTIONS" order="50">
+  <template>
+    <nuxeo-collection-move-bottom-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    </nuxeo-collection-move-bottom-action>
+  </template>
+</nuxeo-slot-content>
+
+<!-- DOCUMENT ACTIONS -->
+
+<nuxeo-slot-content name="addToColDocumentAction" slot="DOCUMENT_ACTIONS" order="10">
+  <template>
+    <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="favoriteToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="20">
+  <template>
+    <nuxeo-favorites-toggle-button document="[[document]]"></nuxeo-favorites-toggle-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="shareDocumentAction" slot="DOCUMENT_ACTIONS" order="30">
+  <template>
+    <nuxeo-share-button document="[[document]]"></nuxeo-share-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="notificationDocumentAction" slot="DOCUMENT_ACTIONS" order="40">
+  <template>
+    <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="clipboardToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="50">
+  <template>
+    <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="lockToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="60">
+  <template>
+    <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="previewDocumentAction" slot="DOCUMENT_ACTIONS" order="70">
+  <template>
+    <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="exportDocumentAction" slot="DOCUMENT_ACTIONS" order="80">
+  <template>
+    <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="workflowDocumentAction" slot="DOCUMENT_ACTIONS" order="90">
+  <template>
+    <nuxeo-workflow-button document="[[document]]"></nuxeo-workflow-button>
+  </template>
+</nuxeo-slot-content>
+
+<!-- DOCUMENT CREATE ACTIONS -->
+
+<nuxeo-slot-content name="defaultDocumentCreateActions" slot="DOCUMENT_CREATE_ACTIONS" order="10">
+  <template>
+    <nuxeo-document-create-shortcuts host-visible$=[[hostVisible]]
+                                     subtypes="[[subtypes]]"></nuxeo-document-create-shortcuts>
+  </template>
+</nuxeo-slot-content>
+
+<!-- DOCUMENT CREATION WIZARD -->
+
+<nuxeo-slot-content name="documentCreateItem" slot="CREATE_POPUP_ITEMS" order="10">
+  <template>
+    <paper-tab name="create">[[i18n('documentCreatePopup.create')]]</paper-tab>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentImportItem" slot="CREATE_POPUP_ITEMS" order="20">
+  <template>
+    <paper-tab name="import">[[i18n('documentCreatePopup.import')]]</paper-tab>
+  </template>
+</nuxeo-slot-content>
+
+<!-- DOCUMENT VIEWS -->
+
+<nuxeo-slot-content name="documentViewItem" slot="DOCUMENT_VIEWS_ITEMS" order="10">
+  <template>
+    <nuxeo-page-item name="view" label="browser.view"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="documentViewPage" slot="DOCUMENT_VIEWS_PAGES" order="10">
+  <template>
+    <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentPermissionsItem" slot="DOCUMENT_VIEWS_ITEMS" order="20">
+  <template>
+    <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="documentPermissionsPage" slot="DOCUMENT_VIEWS_PAGES" order="20">
+  <template>
+    <nuxeo-document-permissions name="permissions" id="permissions" doc-id="[[document.uid]]"></nuxeo-document-permissions>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentHistoryItem" slot="DOCUMENT_VIEWS_ITEMS" order="30">
+  <template>
+    <nuxeo-page-item name="history" label="browser.history"></nuxeo-page-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="documentHistoryPage" slot="DOCUMENT_VIEWS_PAGES" order="30">
+  <template>
+    <nuxeo-document-history name="history" document="[[document]]"></nuxeo-document-history>
+  </template>
+</nuxeo-slot-content>
+
+<!-- RESULT SELECTION ACTIONS -->
+
+<nuxeo-slot-content name="addToCollectionSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
+  <template>
+    <nuxeo-add-to-collection-documents-button documents="[[selectedItems]]">
+    </nuxeo-add-to-collection-documents-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="addToClipboardSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="20">
+  <template>
+    <nuxeo-clipboard-documents-button documents="[[selectedItems]]">
+    </nuxeo-clipboard-documents-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
+  <template>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]">
+    </nuxeo-delete-documents-button>
+  </template>
+</nuxeo-slot-content>

@@ -18,8 +18,6 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../document/nuxeo-document-create.html">
-<link rel="import" href="../document/nuxeo-document-import.html">
 
 <!--
 `nuxeo-document-create-popup`
@@ -35,11 +33,11 @@ Contributors:
         display: block;
       }
 
-      paper-tabs {
+      ::content paper-tabs {
         border-bottom: 1px solid var(--divider-color);
       }
 
-      paper-tab {
+      ::content paper-tab {
         text-transform: uppercase;
       }
 
@@ -64,8 +62,6 @@ Contributors:
                   no-auto-focus>
       <div id="holder" class="vertical layout flex">
         <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
-          <paper-tab name="create">[[i18n('documentCreatePopup.create')]]</paper-tab>
-          <paper-tab name="import">[[i18n('documentCreatePopup.import')]]</paper-tab>
           <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
         </paper-tabs>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex" selected-attribute="visible">
@@ -121,7 +117,7 @@ Contributors:
           },
           importContext: {
             type: Object,
-            computed: '_importContext(parent)'
+            computed: '_importContext(parent, i18n)'
           }
         },
 
@@ -201,7 +197,7 @@ Contributors:
         },
 
         _importContext: function() {
-          return {parent: this.parent};
+          return {parent: this.parent, i18n: this.i18n};
         }
 
       });
