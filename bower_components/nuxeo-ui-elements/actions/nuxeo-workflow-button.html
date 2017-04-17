@@ -1,0 +1,165 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../iron-icons/social-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../paper-input/paper-input.html">
+<link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
+<link rel="import" href="../nuxeo-filters-behavior.html">
+
+<!--
+A button element to start an workflow on a document.
+
+Example:
+
+    <nuxeo-workflow-button document="[[document]]"></nuxeo-share-button>
+
+@group Nuxeo UI
+@element nuxeo-share-button
+@demo demo/actions/index.html
+-->
+<dom-module id="nuxeo-workflow-button">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      paper-dialog {
+        min-width: 480px;
+      }
+
+      paper-dropdown-menu {
+        width: 90%
+      }
+
+      paper-dialog .buttons {
+        @apply(--layout-start-justified);
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        margin-top: 2em;
+      }
+    </style>
+
+    <nuxeo-resource id="workflows" path="/id/[[document.uid]]/@workflow"></nuxeo-resource>
+
+    <template is="dom-if" if="[[_isAvailable(document)]]">
+      <paper-icon-button icon="[[icon]]" on-tap="_toggleDialog" noink></paper-icon-button>
+      <paper-tooltip>[[i18n('workflowButton.tooltip')]]</paper-tooltip>
+    </template>
+
+    <paper-dialog id="dialog" with-backdrop>
+      <h2>[[i18n('workflowButton.dialog.heading')]]</h2>
+
+      <paper-dropdown-menu label="[[i18n('workflowButton.dialog.placeholder')]]" noink no-animations horizontal-align="left">
+        <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+          <template is="dom-repeat" items="[[processes]]" as="process">
+            <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
+          </template>
+        </paper-menu>
+      </paper-dropdown-menu>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('workflowButton.dialog.close')]]</paper-button>
+        <paper-button class="primary" disabled="[[!selectedProcess]]" on-tap="_startWorkflow">[[i18n('workflowButton.dialog.start')]]</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-workflow-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+
+        /**
+         * Input document.
+         */
+        document: {
+          type: Object,
+          observer: '_documentChanged'
+        },
+
+        processes: {
+          type: Array
+        },
+
+        selectedProcess: {
+          type: String
+        },
+
+        /* Running workflows on the document */
+        workflows: {
+          type: Object,
+          observer: '_workflowsChanged'
+        },
+
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'icons:check-box'
+        }
+      },
+
+      _isAvailable: function(document) {
+        this.processes = this.document.contextParameters.runnableWorkflows;
+        this.workflows = this.document.contextParameters.runningWorkflows;
+        this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
+        return document && !this.hasWorkflowRunning && this.processes &&  this.processes.length > 0 ;
+      },
+
+      _toggleDialog: function() {
+        this.$.dialog.toggle();
+      },
+
+      _startWorkflow : function() {
+        this.workflows = this.$.workflows;
+        this.$.workflows.data = {
+          'entity-type': 'workflow',
+          'workflowModelName': this.selectedProcess,
+          'attachedDocumentIds': [this.document.uid]
+        };
+
+        this.workflows.post().then(function() {
+          this.fire('workflowStarted');
+          this.$.dialog.toggle();
+        }.bind(this));
+      },
+
+      _workflowsChanged: function() {
+        this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
+      },
+
+      _documentChanged: function() {
+        if (this.document) {
+          this.processes =  this.document.contextParameters.runnableWorkflows;
+          this.workflows = this.document.contextParameters.runningWorkflows;
+          this.selectedProcess = this.processes.length > 0 ? this.processes[0].workflowModelName : null;
+        }
+      }
+    });
+  </script>
+
+</dom-module>
