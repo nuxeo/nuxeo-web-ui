@@ -28,6 +28,8 @@
   "addToCollectionDocumentsButton.dialog.select": "Select a Collection...",
   "addToCollectionDocumentsButton.tooltip": "Add to collection",
   "admin.usersAndGroups.heading": "Users & Groups",
+  "analytics.after": "After",
+  "analytics.before": "Before",
   "analytics.document.distribution": "Document Distribution",
   "analytics.heading": "Analytics",
   "analytics.repository": "Repository Content",
