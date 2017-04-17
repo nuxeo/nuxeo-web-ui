@@ -36,9 +36,14 @@ Contributors:
   <template>
     <style>
 
+      paper-header-panel {
+        box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+      }
+
       paper-header-panel ::content .content {
         position: relative;
         padding: 16px 16px 112px;
+        box-shadow: 3px 0 5px rgba(0,0,0,0.04) inset;
       }
 
       paper-header-panel ::content paper-toolbar {
@@ -46,6 +51,11 @@ Contributors:
         width: 100%;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
+      }
+
+      paper-header-panel ::content paper-toolbar paper-toolbar {
+        box-shadow: none;
       }
 
       paper-header-panel, iron-pages::content paper-header-panel {
@@ -57,7 +67,6 @@ Contributors:
 
       paper-drawer-panel {
         --paper-drawer-panel-left-drawer-container: {
-          border-right: 1px solid var(--nuxeo-border);
           z-index: 100;
         };
         --paper-drawer-panel-scrim: {
@@ -85,8 +94,6 @@ Contributors:
         left: 0;
         z-index: 102;
         padding: 18px;
-        background: var(--nuxeo-light-background);
-        border-right: 1px solid var(--divider-color);
         box-sizing: border-box;
       }
 
@@ -149,25 +156,24 @@ Contributors:
         width: 100%;
       }
 
-      #drawer .title {
+      #drawer .header,
+      #drawer ::content .header {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         font-size: 1rem;
-        font-weight: 400;
         height: 58px;
         padding: 0 16px;
         text-transform: uppercase;
         text-overflow: ellipsis;
-        border-bottom: 1px solid var(--nuxeo-border);
+        color: var(--nuxeo-title-color);
       }
 
       #drawer iron-pages {
         @apply(--layout-vertical);
-        width: 293px;
+        width: 294px;
         height: 100vh;
         margin-left: 56px;
-        font-size: .9em;
-        background-color: var(--nuxeo-light-background);
+        background-color: var(--nuxeo-drawer-background);
       }
 
       #drawer ::content nuxeo-menu-item:hover,
@@ -199,7 +205,7 @@ Contributors:
       }
 
       #drawer .tasks-dashboard {
-        padding: .7em 1.2em;
+        padding: .7em 1em;
         display: block;
         border-top: 1px solid var(--nuxeo-border);
       }
@@ -266,7 +272,7 @@ Contributors:
                                label="expiredSearch.expiredDocuments"></nuxeo-search-form>
 
             <div name="tasks">
-              <div class="title">[[i18n('app.tasks')]]</div>
+              <div class="header">[[i18n('app.tasks')]]</div>
               <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
               <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
             </div>
@@ -283,7 +289,7 @@ Contributors:
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
-                <div class="title">[[i18n('app.administration')]]</div>
+                <div class="header">[[i18n('app.administration')]]</div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                   <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
                   <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
@@ -295,7 +301,7 @@ Contributors:
             </template>
 
             <div name="profile" class="layout vertical">
-              <div class="title">[[_displayUser(currentUser)]]</div>
+              <div class="header">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
                 <nuxeo-menu-item name="profile" label="app.user.profile" route="page:profile"></nuxeo-menu-item>

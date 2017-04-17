@@ -22,17 +22,18 @@ limitations under the License.
 <dom-module id="nuxeo-audio-create-layout">
 
   <template>
-    <paper-input role="widget"
+    <nuxeo-input role="widget"
                  label="[[i18n('title')]]"
                  name="title"
                  value="{{document.properties.dc:title::change}}"
-                 always-float-label required></paper-input>
+                 required>
+    </nuxeo-input>
 
-    <paper-textarea role="widget"
+    <nuxeo-textarea role="widget"
                     label="[[i18n('label.description')]]"
                     name="description"
-                    value="{{document.properties.dc:description::change}}"
-                    always-float-label></paper-textarea>
+                    value="{{document.properties.dc:description::change}}">
+    </nuxeo-textarea>
 
     <nuxeo-dropzone role="widget"
                     label="[[i18n('file.content')]]"

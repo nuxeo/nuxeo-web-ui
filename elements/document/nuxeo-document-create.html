@@ -56,19 +56,15 @@ Contributors:
         height: 0px;
       }
 
-      .container .suggester {
-        margin: 16px 32px;
-      }
-
       .typeSelection {
-        margin: var(--nuxeo-document-creation-form-margin, 1em);
         overflow-y: auto;
+        margin: 1rem 0;
         align-items: center;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         min-height: 20em;
-        justify-content: center;
+        justify-content: flex-start;
       }
 
       .typeSelection paper-button {
@@ -88,11 +84,11 @@ Contributors:
       }
 
       .typeSelection iron-icon {
-        width: var(--nuxeo-document-creation-form-icon-width, 64px);
-        height: var(--nuxeo-document-creation-form-icon-height, 64px);
+        width: var(--nuxeo-document-creation-form-icon-width, 42px);
+        height: var(--nuxeo-document-creation-form-icon-height, 42px);
       }
 
-      #editor {
+      .editor {
         margin: 0 32px;
         overflow-y: auto;
       }
@@ -103,19 +99,20 @@ Contributors:
 
       .heading {
         text-transform: uppercase;
-        font-size: 16px;
+        font-size: 1.1rem;
         color: var(--nuxeo-text-default);
-        padding: 32px;
+        padding: 1.7rem 2.5rem;
       }
 
       .heading iron-icon {
-        width: 32px;
-        height: 32px;
+        width: 1.2rem;
+        height: 1.2rem;
         margin-right: 8px;
       }
 
       .typeSelection span {
         margin-top: 1em;
+        word-break: break-word;
       }
 
       .docTypeButton {
@@ -153,7 +150,7 @@ Contributors:
 
       <!--Stage: allow user to choose a doc type-->
       <div name="choose" class="vertical layout flex">
-        <div class="flex container">
+        <div class="editor flex container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
@@ -189,7 +186,7 @@ Contributors:
           <iron-icon src="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
-        <div id="editor" class="flex container">
+        <div id="editor" class="editor flex container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
@@ -284,7 +281,7 @@ Contributors:
 
           this.document = document;
           this.stage = 'edit';
-          
+
         },
 
         _selectType: function(e) {

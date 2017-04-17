@@ -39,7 +39,7 @@ Contributors:
 
         --paper-input-container-input: {
           color: var(--nuxeo-title-color);
-          font-size: 28px;
+          font-size: 1rem;
           font-family: var(--nuxeo-app-font);
         };
 
@@ -53,7 +53,7 @@ Contributors:
 
         --paper-input-container-label: {
           color: #c6c6c6;
-          font-size: 28px;
+          font-size: 1rem;
           font-family: var(--nuxeo-app-font);
           line-height: unset;
           padding-left: 5px;
@@ -61,7 +61,7 @@ Contributors:
 
         --paper-input-container-label-focus: {
           color: #e8e8e8;
-          font-size: 28px;
+          font-size: 1rem;
           line-height: unset;
           padding-left: 5px;
         };
@@ -79,7 +79,6 @@ Contributors:
         width: 60px;
         height: 59px;
         padding: 16px;
-        background-color: rgba(0,0,0,0.05);
         color: var(--nuxeo-header-actions);
       }
 
@@ -186,7 +185,7 @@ Contributors:
       <div id="suggester" hidden$="[[!toggled]]">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar" on-tap="_focusSearch">
-          <paper-input id="searchInput"
+          <paper-input noink id="searchInput"
                        value="{{searchTerm}}"
                        type="search"
                        label="[[i18n('suggester.label')]]"

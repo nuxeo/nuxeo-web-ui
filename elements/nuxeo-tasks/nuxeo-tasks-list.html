@@ -41,37 +41,19 @@ Contributors:
         border-top: 1px solid var(--divider-color);
       }
 
-      iron-icon.task-name-icon {
-        height: .9em;
-        width: .9em;
-        border-radius: 3em;
-        background-color: var(--dark-primary-color);
-        color: white;
-        padding: .4em;
-      }
-
-      .task-name {
-        font-weight: 700;
-        margin-left: .5em;
-      }
-
-      .task-detail {
-        margin-left: 2.2em;
-      }
-
       .task-property {
-        color: var(--nuxeo-text-light);
+        color: var(--nuxeo-text-medium);
+        margin-right: .5rem;
       }
 
       .taskDoc .doc-title, .date {
-        margin: 0 4px;
         text-overflow: ellipsis;
         white-space: nowrap;
         max-width: 85%;
         overflow: hidden;
       }
 
-      .due-date .date {
+      .date {
         color: var(--nuxeo-warn-text);
       }
 
@@ -94,7 +76,7 @@ Contributors:
       nuxeo-data-list {
         display: block;
         position: relative;
-        height: calc(100vh - 7em);
+        height: calc(100vh - 7.7em);
       }
 
       /* fix IE11 tap selection not working for task list items (NXP-21833) */
@@ -115,9 +97,6 @@ Contributors:
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
           <div class="task-box vertical layout">
             <div class="task-info horizontal layout center">
-              <div class="vertical layout center">
-                <iron-icon class="task-name-icon" icon="icons:content-paste"></iron-icon>
-              </div>
               <span class="task-name">[[i18n(task.name)]]</span>
             </div>
             <div class="task-detail">
@@ -140,11 +119,9 @@ Contributors:
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
               <div class="horizontal layout center">
-                <span class="due-date task-property">[[i18n('tasksList.dueDate')]]
-                  <span class="date">
-                    <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
-                  </span>
-                </span>
+
+                <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
+                <span class="date"> <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
               </div>
             </div>
           </div>

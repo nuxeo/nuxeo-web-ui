@@ -30,12 +30,10 @@ Contributors:
         display: block;
       }
 
-      .task-list {
-        background: #fff;
-      }
-
       .task-item {
         cursor: pointer;
+        background: #fff;
+        margin-bottom: 1em;
       }
 
       .task-item:hover {
@@ -47,7 +45,6 @@ Contributors:
       }
 
       .task-box {
-        line-height: 130%;
         padding: 1em;
         border: 1px solid var(--divider-color);
       }
@@ -58,16 +55,16 @@ Contributors:
 
       .task-name {
         font-weight: bold;
+        margin-bottom: 0;
       }
 
-      .task-directive {
-        color: #9a9a9a;
-        font-size: .8em;
+      .task-property {
+        color: var(--nuxeo-text-light);
+        margin-right: .5rem;
       }
 
       .task-document {
         color: var(--primary-text-color);
-        font-size: .8em;
       }
 
       .task-document iron-icon {
@@ -83,7 +80,7 @@ Contributors:
         background-color: var(--dark-primary-color);
         color: white;
         padding: .4em;
-        margin-right: .5em;
+        margin-right: 1em;
       }
 
       .date {
@@ -184,24 +181,20 @@ Contributors:
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <div class="task-item task-box layout horizontal" on-tap="_process">
-                <div class="layout vertical flex-4">
-                  <div class="layout horizontal">
-                    <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
-                    <div class="task-info layout vertical">
-                      <div>
-                        <span class="task-name">[[i18n(task.name)]]</span>
-                      </div>
-                      <span class="task-directive">[[i18n(task.directive)]]</span>
-                      <span class="task-document">
-                        <iron-icon icon="icons:description"></iron-icon>
-                        <span class="docTitle">[[task.targetDocumentIds.0.title]]</span>
-                      </span>
-                    </div>
+                <div class="layout horizontal flex-1">
+                  <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+                  <div class="task-info layout vertical">
+                    <h3 class="task-name">[[i18n(task.name)]]</h3>
+                    <span class="task-directive">[[i18n(task.directive)]]</span>
                   </div>
                 </div>
-                <div class="flex-2">
-                  <template is="dom-repeat" items="[[task.actors]]" as="actor">
-
+                <div class="layout vertical flex-2">
+                  <div class="taskDoc">
+                   <span class="task-property">[[i18n('tasksList.on')]]</span>
+                   <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+                  </div>
+                  <div>
+                    <span class="task-property">[[i18n('documentTask.assigned')]]</span>
                     <template is="dom-repeat" items="[[task.actors]]" as="actor">
                       <template is="dom-if" if="[[_isUser(actor)]]">
                         <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
@@ -213,12 +206,13 @@ Contributors:
                         <nuxeo-tag>[[actor]]</nuxeo-tag>
                       </template>
                     </template>
-
-                  </template>
+                  </div>
                 </div>
-                <span class="date flex">
-                  <iron-icon icon="icons:today"></iron-icon> [[_date(task.dueDate)]]
-                </span>
+                <div>
+                <div class="vertical layout">
+                  <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
+                  <span class="date">[[_date(task.dueDate)]][[_formatDate(task.dueDate)]]</span>
+                </div>
               </div>
             </template>
             <template is="dom-if" if="[[_empty(tasks)]]">

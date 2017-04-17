@@ -26,9 +26,7 @@ Contributors:
   <template>
 
     <nuxeo-page>
-      <div class="header">
-        <span>[[collection.title]]</span>
-      </div>
+      <div class="header">[[collection.title]]</div>
       <div class="content">
         <nuxeo-default-results id="results" nx-provider="[[nxProvider]]" name$="[[_computeName(collection)]]"
                                selected-items="{{selectedItems}}" items="{{items}}"

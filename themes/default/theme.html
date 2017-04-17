@@ -3,75 +3,79 @@
   :root {
     /* -- Nuxeo Branding colors -- */
     --nuxeo-app-font: 'Open Sans', Arial, sans-serif;
-    --nuxeo-primary-color: #00adff;
+    --nuxeo-primary-color: #4ecdc4;
+    --nuxeo-secundary-color: #3a3a54;
 
     /* Badges & tags */
-    --nuxeo-tag-background: transparent;
+    --nuxeo-tag-background: #f2f2f4;
     --nuxeo-tag-text: #6d7684;
-    --nuxeo-badge-background: #f68500;
+    --nuxeo-badge-background: #fb6107;
     --nuxeo-validated: #99d749;
 
     /* Titles & text */
-    --nuxeo-title-color: #213f7d;
-    --nuxeo-text-default: #243238;
-    --nuxeo-text-light: #939caa;
+    --nuxeo-title-color: #3a3a54;
+    --nuxeo-text-strong: #191928;
+    --nuxeo-text-default: #3a3a54;
+    --nuxeo-text-medium: rgba(58, 58, 84, .5);
+    --nuxeo-text-light:rgba(58, 58, 84, .25);
 
     /* Global layout */
-    --nuxeo-page-background: none #f5f9fb;
+    --nuxeo-page-background: none #f5f5f6;
+    --nuxeo-drawer-background: #fff;
     --nuxeo-header-background: #fff;
-    --nuxeo-header-title-color: #213f7d;
-    --nuxeo-header-text-color: #213f7d;
+    --nuxeo-header-title-color: var(--nuxeo-title-color);
     --nuxeo-header-actions: #243238;
-    --nuxeo-header-actions-hover: #00adff;
-    --nuxeo-sidebar-background: #213f7d;
-    --nuxeo-sidebar-actions: #009de8;
-    --nuxeo-sidebar-actions-hover: #ffffff;
-    --nuxeo-light-background: #fafcfd;
-    --nuxeo-table-header-background: #d9e6f0;
-    --nuxeo-table-header-titles: #243238;
+    --nuxeo-header-actions-hover: #4de7de;
+    --nuxeo-sidebar-background: #3a3a54;
+    --nuxeo-sidebar-actions: rgba(255,255,255,.7);
+    --nuxeo-sidebar-actions-hover: rgba(255,255,255,1);
+    --nuxeo-light-background: #f2f2f4;
+    --nuxeo-table-header-background: #fff;
     --nuxeo-table-items-background: #ffffff;
-    --nuxeo-grid-selected: #99d749;
+    --nuxeo-grid-selected: #4de7de;
 
     /* Buttons & Links */
     --nuxeo-button: #f5f9fb;
-    --nuxeo-button-primary: #00adff;
-    --nuxeo-button-primary-focus: #0079b3;
+    --nuxeo-button-primary: var(--nuxeo-primary-color);
+    --nuxeo-button-primary-focus:var(--nuxeo-header-actions-hover);
     --nuxeo-button-primary-text: #ffffff;
     --nuxeo-button-disabled: #f5f9fb;
     --nuxeo-button-disabled-text: #a8a8a8;
-    --nuxeo-link-color: #213f7d;
-    --nuxeo-link-hover-color: #00adff;
+    --nuxeo-link-color: var(--nuxeo-text-default);
+    --nuxeo-link-hover-color: #00beb4;
+    --nuxeo-toolbar: #191928;
 
     /* Actions in toolbar, e.g. document view */
     --nuxeo-pill-color: #ecf3f7;
-    --nuxeo-pill-text-color: #243238;
-    --nuxeo-pill-color-hover: #ecf3f7;
-    --nuxeo-pill-text-hover: #243238;
+    --nuxeo-pill-color-hover: var(--nuxeo-primary-color);
+    --nuxeo-pill-color-active: var(--nuxeo-secundary-color);
+    --nuxeo-pill-filter-background: #f2f2f4;
+    --nuxeo-pill-filter-background-active: #191928;
     --nuxeo-action-color: #243238;
-    --nuxeo-action-hover: #00adff;
-    --nuxeo-action-color-activated: #f68500;
-    --nuxeo-container-hover: #ecf3f7;
-    --nuxeo-dialog-buttons-bar: #d9e6f0;
+    --nuxeo-action-hover: var(--nuxeo-primary-color);
+    --nuxeo-action-color-activated: #dd2eb5;
+    --nuxeo-container-hover: var(--nuxeo-light-background);
+    --nuxeo-dialog-buttons-bar: var(--nuxeo-light-background);
 
     /* Warn, Info, Error */
-    --nuxeo-warn-text: #d5652c;
+    --nuxeo-warn-text: #fb6107;
 
-    --default-primary-color: #00adff;
+    --default-primary-color: var(--nuxeo-primary-color);
     --dark-primary-color: #213f7d;
     --light-primary-color: #eff2f4;
     --text-primary-color: #ffffff;
-    --accent-color: #00adff;
+    --accent-color: var(--nuxeo-primary-color);
     --primary-background-color: #eff2f4;
     --primary-text-color: #243238;
-    --secondary-text-color: #243238;
+    --secondary-text-color: #939caa;
     --disabled-text-color: #bdbdbd;
     --divider-color: #e8edee;
 
-    --nuxeo-border: #e8edee;
+    --nuxeo-border: #dbdbdf;
 
     /* Tabs, Toolbars & Menus */
-    --paper-tabs-selection-bar-color: #00adff;
-    --paper-tab-ink: #00adff;
+    --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
+    --paper-tab-ink: var(--nuxeo-primary-color);
 
     --paper-toolbar-background: #ffffff;
     --paper-toolbar-color: #243238;
@@ -81,46 +85,46 @@
     --paper-menu-disabled-color: #e9eff3;
 
     /* Forms & Buttons */
-    --paper-checkbox-checked-color: #00adff;
+    --paper-checkbox-checked-color: var(--nuxeo-primary-color);
     --paper-checkbox-checked-ink-color: #213f7d;
     --paper-checkbox-unchecked-color: #243238;
     --paper-checkbox-unchecked-ink-color: #6c6f7c;
     --paper-checkbox-label-color: #243238;
 
-    --paper-radio-button-checked-color: #00adff;
+    --paper-radio-button-checked-color: var(--nuxeo-primary-color);
     --paper-radio-button-checked-ink-color: #ffffff;
     --paper-radio-button-unchecked-color: #243238;
     --paper-radio-button-unchecked-ink-color: #6c6f7c;
     --paper-radio-button-label-color: #243238;
 
     --paper-input-container-color: #6c6f7c;
-    --paper-input-container-focus-color: #00adff;
+    --paper-input-container-focus-color: var(--nuxeo-primary-color);
     --paper-input-container-invalid-color: #ff003c;
     --paper-input-container-input-color: #6c6f7c;
 
-    --paper-slider-knob-color: #00adff;
-    --paper-slider-active-color: #00adff;
-    --paper-slider-pin-color: #00adff;
+    --paper-slider-knob-color: var(--nuxeo-primary-color);
+    --paper-slider-active-color: var(--nuxeo-primary-color);
+    --paper-slider-pin-color: var(--nuxeo-primary-color);
 
-    --paper-toggle-button-checked-bar-color: #00adff;
-    --paper-toggle-button-checked-button-color: #00adff;
-    --paper-toggle-button-checked-ink-color: #00adff;
+    --paper-toggle-button-checked-bar-color: var(--nuxeo-primary-color);
+    --paper-toggle-button-checked-button-color: var(--nuxeo-primary-color);
+    --paper-toggle-button-checked-ink-color: var(--nuxeo-primary-color);
     --paper-toggle-button-unchecked-bar-color: #6c6f7c;
     --paper-toggle-button-unchecked-button-color: #6c6f7c;
     --paper-toggle-button-unchecked-ink-color: #6c6f7c;
 
-    --paper-fab-background: #00adff;
+    --paper-fab-background: var(--nuxeo-primary-color);
     --paper-fab-disabled-background: #e9eff3;
     --paper-fab-disabled-text: #2f2b16;
     --paper-icon-button-disabled-text: #e9eff3;
 
     /* Loaders */
-    --paper-progress-active-color: #00adff;
-    --paper-progress-secondary-color: #00adff;
+    --paper-progress-active-color: var(--nuxeo-primary-color);
+    --paper-progress-secondary-color: var(--nuxeo-primary-color);
 
-    --paper-spinner-layer-1-color: #00adff;
-    --paper-spinner-layer-2-color: #0075b0;
+    --paper-spinner-layer-1-color: var(--nuxeo-primary-color);
+    --paper-spinner-layer-2-color: rgba(79,230,221,.8);
     --paper-spinner-layer-3-color: #213f7d;
-    --paper-spinner-layer-4-color: #0d9ad6;
+    --paper-spinner-layer-4-color: var(--nuxeo-primary-color);
   }
 </style>
