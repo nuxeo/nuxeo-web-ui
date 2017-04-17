@@ -30,16 +30,16 @@ Contributors:
       .document-actions {
         @apply(--layout-horizontal);
         @apply(--layout-end-justified);
-        color: var(--nuxeo-header-actions);
         padding: 0 0 16px;
       }
 
-      .document-actions::content paper-icon-button {
-        color: var(--nuxeo-header-actions);
+      .document-actions ::content paper-icon-button ::content iron-icon {
+        width: 1.7rem;
+        @apply(--nuxeo-action);
       }
 
-      .document-actions::content paper-icon-button:hover {
-        color: var(--nuxeo-header-actions-hover);
+      .document-actions ::content paper-icon-button:hover ::content  iron-icon {
+        @apply(--nuxeo-action-hover);
       }
 
       /* document views items (pills) */

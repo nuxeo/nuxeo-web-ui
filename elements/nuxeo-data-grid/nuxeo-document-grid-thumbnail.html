@@ -43,15 +43,12 @@ Contributors:
       .bubbleBox:hover,
       .bubbleBox:focus {
         cursor: pointer;
-        filter: brightness(102%);
-        -webkit-filter: brightness(102%);
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
 
       .bubbleBox .title {
-        color: var(--nuxeo-link-color);
         margin-bottom: .4em;
       }
 
@@ -117,22 +114,18 @@ Contributors:
         right: 0;
         min-height: 2.5em;
       }
+
+      .actions ::content paper-icon-button ::content iron-icon {
+        @apply(--nuxeo-action);
+      }
+
+      .actions ::content paper-icon-button:hover ::content iron-icon {
+        @apply(--nuxeo-action-hover);
+      }
+
       .bubbleBox:hover .actions,
       .bubbleBox:hover .select {
         display: block;
-      }
-
-      .actions paper-icon-button {
-        color: var(--nuxeo-action-color);
-      }
-
-      .actions paper-icon-button:hover {
-        color: var(--nuxeo-link-hover-color);
-        fill: var(--nuxeo-link-hover-color);
-      }
-
-      .actions paper-icon-button[active] {
-        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
       }
 
       .bubbleBox:hover .select:hover {
@@ -154,8 +147,6 @@ Contributors:
       }
 
       :host[selected] .bubbleBox {
-        filter: brightness(102%);
-        -webkit-filter: brightness(102%);
         border: 2px solid var(--nuxeo-grid-selected);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }

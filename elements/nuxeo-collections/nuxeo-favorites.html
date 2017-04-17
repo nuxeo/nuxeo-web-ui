@@ -82,8 +82,18 @@ Contributors:
       }
 
       .list-item-property {
-        color: var(--nuxeo-text-light);
+        opacity: .5;
         margin-right: .2em;
+      }
+
+      .list-item iron-icon {
+        @apply(--nuxeo-action);
+        color: var(--nuxeo-drawer-text);
+      }
+
+      .list-item iron-icon:hover {
+        @apply(--nuxeo-action-hover);
+        color: var(--nuxeo-drawer-text);
       }
 
       .remove {
