@@ -123,7 +123,7 @@ Contributors:
               </nuxeo-dropdown-aggregation>
             </template>
             <template>
-              [[formatDate(item.properties.dc:modified)]]
+              <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
@@ -152,7 +152,7 @@ Contributors:
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]"
                                    field="dc:created" flex="50" hidden>
             <template>
-              [[formatDate(item.properties.dc:created)]]
+              <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]"
