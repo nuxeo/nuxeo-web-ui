@@ -35,7 +35,7 @@ Contributors:
       .page .main {
         @apply(--layout-vertical);
         @apply(--layout-flex-2);
-        padding-right: 16px;
+        padding-right: 1.3rem;
       }
 
       .page .side {
@@ -54,9 +54,19 @@ Contributors:
 
       #edit {
         position: absolute;
+        z-index: 1;
         top: 8px;
         right: 8px;
       }
+
+      paper-icon-button ::content iron-icon {
+        @apply(--nuxeo-action);
+      }
+
+      paper-icon-button:hover ::content iron-icon {
+        @apply(--nuxeo-action-hover);
+      }
+
     </style>
 
     <nuxeo-document-info-bar document="[[document]]" hidden$="[[isProcessingTask]]"></nuxeo-document-info-bar>
