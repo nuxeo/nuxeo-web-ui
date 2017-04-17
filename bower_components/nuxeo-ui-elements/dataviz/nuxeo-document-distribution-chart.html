@@ -45,6 +45,10 @@ Example:
   <template>
 
     <style is="custom-style">
+      :host {
+        color: var(--nuxeo-text-default, #000);
+      }
+
       #du {
         font-size: 1rem;
         font-weight: 400;
@@ -82,7 +86,6 @@ Example:
         left: 305px;
         width: 140px;
         text-align: center;
-        color: #666;
         z-index: 10;
       }
 

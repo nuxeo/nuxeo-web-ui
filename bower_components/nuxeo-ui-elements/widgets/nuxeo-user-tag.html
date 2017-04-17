@@ -16,8 +16,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
-<link rel="import" href="../../iron-icon/iron-icon.html">
-<link rel="import" href="../../iron-icons/social-icons.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../nuxeo-routing-behavior.html">
 <link rel="import" href="nuxeo-tag.html">
@@ -36,7 +34,7 @@ Example:
 <dom-module id="nuxeo-user-tag">
   <template>
 
-    <nuxeo-tag icon="icons:perm-identity">
+    <nuxeo-tag>
       <template is="dom-if" if="[[_hasLink(user)]]">
         <a href$="[[_href(user)]]">[[_name(user)]]</a>
       </template>

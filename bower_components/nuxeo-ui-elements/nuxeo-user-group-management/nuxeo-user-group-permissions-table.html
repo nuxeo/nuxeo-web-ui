@@ -65,7 +65,7 @@ Used by `nuxeo-user-group-management`
         @apply(--layout-horizontal);
         @apply(--layout-center);
         background-color: var(--nuxeo-table-header-background, #fafafa);
-        color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
+        color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
         font-weight: 400;
         height: 4em;
         padding: 0 0 0 12px;
@@ -76,6 +76,7 @@ Used by `nuxeo-user-group-management`
         @apply(--layout-center);
         padding: 12px 0 12px 12px;
         border-bottom: 1px solid var(--nuxeo-border, #eee);
+        background-color: var(--nuxeo-table-items-background, #fafafa);
         cursor: pointer;
       }
 
@@ -100,7 +101,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .table-headers > div {
-        background-color: #f8f9fb;
+        background-color: var(--nuxeo-table-header-background,#f8f9fb);
         font-weight: bold;
       }
 
@@ -109,7 +110,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .ace-permission-tag {
-        background-color: #7e90a5;
+        background-color: var(--nuxeo-secondary-color, #7e90a5);
         border-radius: 3px;
         color: #fff;
         margin: 0 0.2em 0.2em 0;
@@ -119,7 +120,7 @@ Used by `nuxeo-user-group-management`
       }
 
       .ace-permission-path {
-        color: #213f7d;
+        color: var(--nuxeo-secondary-color, #213f7d);
         font-size: .8rem;
         margin-top: 5px;
       }

@@ -82,11 +82,12 @@ Example:
       .table .row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        background-color: var(--nuxeo-table-items-background, #e6e9ef);
         padding: 0.6em 1em;
       }
 
       nuxeo-view-user {
-        background: none #fff;
+        background: none var(--nuxeo-box);
         border: 1px solid var(--nuxeo-border, #e6e9ef);
         margin: 2em 0;
         padding: 2em 1.5em;

@@ -39,36 +39,36 @@ Example:
       .code {
         @apply(--layout-flex);
         text-transform: uppercase;
-        color: rgba(0, 0, 0, 0.5);
+        color: var(--nuxeo-text-default, rgba(0,0,0,0.3));
         text-align: center;
-        font-size: 28px;
+        font-size: 1.4rem;
         font-weight: 700;
       }
 
       .description {
         @apply(--layout-flex);
         text-transform: uppercase;
-        color: rgba(0, 0, 0, 0.3);
+        color: var(--nuxeo-text-default, rgba(0,0,0,0.3));
         text-align: center;
-        font-size: 16px;
+        font-size: 1.2rem;
         font-weight: 500;
         padding: 8px;
       }
 
       .url {
         @apply(--layout-flex);
-        color: rgba(0, 0, 0, 0.3);
+        color: var(--nuxeo-text-default, rgba(0,0,0,0.3));
         text-align: center;
         padding: 16px 0;
-        font-size: 11px;
+        font-size: .8rem;
       }
 
       .message {
         @apply(--layout-flex);
-        color: rgba(0, 0, 0, 0.4);
+        color: var(--nuxeo-text-default, rgba(0,0,0,0.3));
         text-align: center;
         padding: 8px 0;
-        font-size: 14px;
+        font-size: 1rem;
         font-weight: 500;
       }
     </style>
