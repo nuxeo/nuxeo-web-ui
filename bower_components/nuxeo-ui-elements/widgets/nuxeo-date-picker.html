@@ -38,10 +38,10 @@ Example:
         --paper-input-container-input-webkit-spinner: {
           -webkit-appearance: none;
         };
-      }
 
-      paper-input::-webkit-clear-button {
-        -webkit-appearance: none;
+        --paper-input-container-input-webkit-clear: {
+          -webkit-appearance: none;
+        };
       }
     </style>
 
@@ -53,50 +53,55 @@ Example:
 </dom-module>
 
 <script>
-  (function () {
-    Polymer({
-      is: 'nuxeo-date-picker',
-      behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
-      properties: {
-        label: String,
+  Polymer({
+    is: 'nuxeo-date-picker',
+    behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+    properties: {
+      label: String,
 
-        value: {
-          type: String,
-          notify: true,
-          observer: '_valueChanged'
-        },
+      invalid: Boolean,
 
-        disabled: {
-          type: Boolean,
-          value: false
-        }
+      required: {
+        type: Boolean,
+        value: false
       },
 
-      _getValidity: function() {
-        if (!this.required) {
-          return true;
-        }
-        return !!this.value;;
+      value: {
+        type: String,
+        notify: true,
+        observer: '_valueChanged'
       },
 
-      _valueChanged: function() {
-
-        if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
-          this.$.date.value = moment(this.value).format('YYYY-MM-DD');
-        }
-        if (!this.value || this.value.length === 0){
-          this.$.date.value = "";
-        }
-      },
-
-      _onChange: function() {
-        if (this.$.date.value && this.$.date.value.length > 0) {
-          this.value = moment(this.$.date.value).toJSON();
-        } else {
-          this.value = "";
-        }
+      disabled: {
+        type: Boolean,
+        value: false
       }
+    },
 
-    });
-  })();
+    _getValidity: function() {
+      if (!this.required) {
+        return true;
+      }
+      return !!this.value;;
+    },
+
+    _valueChanged: function() {
+
+      if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
+        this.$.date.value = moment(this.value).format('YYYY-MM-DD');
+      }
+      if (!this.value || this.value.length === 0){
+        this.$.date.value = "";
+      }
+    },
+
+    _onChange: function() {
+      if (this.$.date.value && this.$.date.value.length > 0) {
+        this.value = moment(this.$.date.value).toJSON();
+      } else {
+        this.value = "";
+      }
+    }
+
+  });
 </script>
