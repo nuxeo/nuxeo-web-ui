@@ -71,8 +71,7 @@ Contributors:
         width: var(--nuxeo-document-creation-form-button-width, 128px);
         height: var(--nuxeo-document-creation-form-button-height, 128px);
         box-shadow: none;
-        background-color: var(--nuxeo-box);
-        border: 1px solid var(--nuxeo-border);
+        background-color: var(--nuxeo-dialog-buttons-bar);
       }
 
       .typeSelection paper-button:hover {
@@ -85,6 +84,8 @@ Contributors:
       .typeSelection iron-icon {
         width: var(--nuxeo-document-creation-form-icon-width, 42px);
         height: var(--nuxeo-document-creation-form-icon-height, 42px);
+        filter: brightness(1.5);
+        -webkit-filter: brightness(1.5);
       }
 
       .editor {
@@ -132,7 +133,7 @@ Contributors:
 
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
-        color: var(--primary-text-color);
+        color: var(--nuxeo-text-default);
         padding-left: 8px;
       }
     </style>
