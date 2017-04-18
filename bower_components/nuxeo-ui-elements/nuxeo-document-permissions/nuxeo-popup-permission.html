@@ -41,6 +41,13 @@ limitations under the License.
          line-height: 35px !important;
       }
 
+      .buttons {
+        background-color: var(--nuxeo-dialog-buttons-bar, white);
+        @apply(--buttons-bar);
+        @apply(--layout-justified);
+        margin-top: 2em;
+      }
+
     </style>
     <nuxeo-operation id="createOp" op="Document.AddPermission" input={{docId}} params={{params}}
       on-response="handleResponse"></nuxeo-operation>
@@ -147,12 +154,12 @@ limitations under the License.
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('popupPermission.cancel')]]</paper-button>
         <template is="dom-if" if="{{!updatingACE}}">
-          <paper-button on-tap="doCreateAndAdd">[[i18n('popupPermission.createAndAdd')]]
+          <paper-button noink class="primary" on-tap="doCreateAndAdd">[[i18n('popupPermission.createAndAdd')]]
           </paper-button>
-          <paper-button class="colorful" on-tap="doCreate">[[i18n('popupPermission.create')]]</paper-button>
+          <paper-button noink class="primary" on-tap="doCreate">[[i18n('popupPermission.create')]]</paper-button>
         </template>
         <template is="dom-if" if="{{updatingACE}}">
-          <paper-button class="colorful" on-tap="doUpdate">[[i18n('popupPermission.update')]]</paper-button>
+          <paper-button noink class="primary" on-tap="doUpdate">[[i18n('popupPermission.update')]]</paper-button>
         </template>
       </div>
     </paper-dialog>

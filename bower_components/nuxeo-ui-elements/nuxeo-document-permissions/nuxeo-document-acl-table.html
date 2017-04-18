@@ -27,31 +27,48 @@ Element displaying a table with document ACLs.
 <dom-module id="nuxeo-document-acl-table">
   <template>
     <style>
-      .acl-table {
-        display: table;
-        border-collapse: collapse;
-        width: 100%;
-        line-height: 1.3em;
+      .acl-table-headers {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
+        font-weight: 700;
+        font-size: 1rem;
+        height: 56px;
+        border-bottom: 2px solid var(--nuxeo-border, #e3e3e3);
+        min-height: 56px;
+        padding: 0 0 0 12px;
       }
 
       .acl-table-row {
-        display: table-row;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        border-bottom: 1px solid var(--nuxeo-border, #e3e3e3);
+        background-color: var(--nuxeo-table-items-background, #fafafa);
+        cursor: pointer;
+        height: 48px;
+        padding: 0 0 0 12px;
       }
 
-      .acl-table-headers {
-        display: table-row;
+      .acl-table-row:hover {
+        background: var(--nuxeo-container-hover, #fafafa);
       }
 
-      .acl-table-row > div {
-        display: table-cell;
-        border: 1px solid #e7e7e7;
-        padding: .6em .4em;
-        color: #000;
+      .acl-table {
+        border: 1px solid var(--nuxeo-border, #eee);
       }
 
-      .acl-table-headers > div {
-        background-color: #f8f9fb;
+      .acl-table-row:last-of-type {
+        border-bottom: none;
+      }
+
+      .table-headers > div {
+        background-color: var(--nuxeo-table-header-background,#f8f9fb);
         font-weight: bold;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
       }
     </style>
 
@@ -61,25 +78,25 @@ Element displaying a table with document ACLs.
 
     <template is="dom-if" if="[[!_empty(aces)]]">
     <div class="acl-table">
-      <div class="acl-table-row acl-table-headers">
-        <div class="tmp-tab">[[i18n('documentAclTable.userGroup')]]</div>
-        <div class="tmp-tab">[[i18n('documentAclTable.right')]]</div>
-        <div class="tmp-tab">[[i18n('documentAclTable.timeFrame')]]</div>
-        <div class="tmp-tab">[[i18n('documentAclTable.grantedBy')]]</div>
+      <div class="acl-table-headers">
+        <div class="flex-2 tmp-tab">[[i18n('documentAclTable.userGroup')]]</div>
+        <div class="flex-2 tmp-tab">[[i18n('documentAclTable.right')]]</div>
+        <div class="flex-2 tmp-tab">[[i18n('documentAclTable.timeFrame')]]</div>
+        <div class="flex-2 tmp-tab">[[i18n('documentAclTable.grantedBy')]]</div>
         <template is="dom-if" if="[[showActions]]">
-          <div class="tmp-tab">[[i18n('documentAclTable.actions')]]</div>
+          <div class="flex-2 tmp-tab">[[i18n('documentAclTable.actions')]]</div>
         </template>
       </div>
       <template is="dom-repeat" items="[[aces]]" as="ace" sort="_sortAces" strip-whitespace>
         <div class$="acl-table-row [[ace.status]]">
-          <div><span class$="[[entityClass(ace.username)]]" title="[[entityTooltip(ace.username)]]">[[entityDisplay(ace.username)]]</span>
+          <div class="flex-2"><span class$="[[entityClass(ace.username)]]" title="[[entityTooltip(ace.username)]]">[[entityDisplay(ace.username)]]</span>
           </div>
-          <div><span class="label">[[i18n(ace.permission)]]</span></div>
-          <div><span>{{formatTimeFrame(ace)}}</span></div>
-          <div><span class$="[[entityClass(ace.creator)]]" title="[[entityTooltip(ace.creator)]]">[[entityDisplay(ace.creator)]]</span>
+          <div class="flex-2"><span class="label">[[i18n(ace.permission)]]</span></div>
+          <div class="flex-2"><span>{{formatTimeFrame(ace)}}</span></div>
+          <div class="flex-2"><span class$="[[entityClass(ace.creator)]]" title="[[entityTooltip(ace.creator)]]">[[entityDisplay(ace.creator)]]</span>
           </div>
           <template is="dom-if" if="[[showActions]]">
-            <div>
+            <div class="flex-2">
               <nuxeo-popup-permission doc-id="{{doc.uid}}" ace="{{ace}}"
                 user-visible-permissions="{{doc.contextParameters.userVisiblePermissions}}"
                 share-with-external="[[shareWithExternal]]"></nuxeo-popup-permission>
@@ -92,18 +109,18 @@ Element displaying a table with document ACLs.
                 <div>
                   <h2>[[i18n('documentAclTable.deleteConfirmation')]]</h2>
                   <div class="acl-table">
-                    <div class="acl-table-row acl-table-headers">
-                      <div class="tmp-tab">[[i18n('documentAclTable.userGroup')]]</div>
-                      <div class="tmp-tab">[[i18n('documentAclTable.right')]]</div>
-                      <div class="tmp-tab">[[i18n('documentAclTable.timeFrame')]]</div>
-                      <div class="tmp-tab">[[i18n('documentAclTable.grantedBy')]]</div>
+                    <div class="acl-table-headers">
+                      <div class="flex-2 tmp-tab">[[i18n('documentAclTable.userGroup')]]</div>
+                      <div class="flex-2 tmp-tab">[[i18n('documentAclTable.right')]]</div>
+                      <div class="flex-2 tmp-tab">[[i18n('documentAclTable.timeFrame')]]</div>
+                      <div class="flex-2 tmp-tab">[[i18n('documentAclTable.grantedBy')]]</div>
                     </div>
                     <div class$="acl-table-row [[ace.status]]">
-                      <div><span class$="[[entityClass(ace.username)]]" title="[[entityTooltip(ace.username)]]">[[entityDisplay(ace.username)]]</span>
+                      <div class="flex-2"><span class$="[[entityClass(ace.username)]]" title="[[entityTooltip(ace.username)]]">[[entityDisplay(ace.username)]]</span>
                       </div>
-                      <div><span class="label">[[i18n(ace.permission)]]</span></div>
-                      <div><span>{{formatTimeFrame(ace)}}</span></div>
-                      <div><span class$="[[entityClass(ace.creator)]]" title="[[entityTooltip(ace.creator)]]">[[entityDisplay(ace.creator)]]</span>
+                      <div class="flex-2"><span class="label">[[i18n(ace.permission)]]</span></div>
+                      <div class="flex-2"><span>{{formatTimeFrame(ace)}}</span></div>
+                      <div class="flex-2"><span class$="[[entityClass(ace.creator)]]" title="[[entityTooltip(ace.creator)]]">[[entityDisplay(ace.creator)]]</span>
                       </div>
                     </div>
                   </div>
