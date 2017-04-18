@@ -3,63 +3,67 @@
   :root {
     /* -- Nuxeo Branding colors -- */
     --nuxeo-app-font: 'Open Sans', Arial, sans-serif;
-    --nuxeo-primary-color: #0079b3;
-    --nuxeo-secundary-color: #3a3a54;
+    --nuxeo-text-default: #fff;
 
-    /* Badges & tags */
-    --nuxeo-tag-background: transparent;
-    --nuxeo-tag-text: #6d7684;
-    --nuxeo-badge-background: #f68500;
-    --nuxeo-validated: #99d749;
+    --nuxeo-primary-color: #00BEB4;
+    --nuxeo-secondary-color: #00867f;
 
-    /* Titles & text */
-    --nuxeo-title-color: #05243e;
-    --nuxeo-text-strong: #191928;
-    --nuxeo-text-default: #243238;
-    --nuxeo-text-medium: rgba(58, 58, 84, .5);
-    --nuxeo-text-light: #939caa;
+    --nuxeo-page-background: none #191928;
+    --nuxeo-border: rgba(0,0,0,0.15);
 
-    /* Global layout */
-    --nuxeo-page-background: none #434649;
-    --nuxeo-drawer-background: #eee;
-    --nuxeo-header-background: #191928;
-    --nuxeo-header-title-color: #fff;
-    --nuxeo-header-actions: #eee;
-    --nuxeo-header-actions-hover: #0079b3;
-    --nuxeo-sidebar-background: #05243e;
-    --nuxeo-sidebar-actions: #879eb2;
-    --nuxeo-sidebar-actions-hover: #fff;
-    --nuxeo-light-background: #fafcfd;
-    --nuxeo-table-header-background: #eff2f4;
-    --nuxeo-table-items-background: #ffffff;
-    --nuxeo-grid-selected: #99d749;
+    /* App Header */
+    --nuxeo-app-header: var(--nuxeo-text-default);
+    --nuxeo-app-header-background: #2e2e3e;
+    --nuxeo-app-header-pill: #434649;
+    --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color);
+    --nuxeo-app-header-pill-active: var(--nuxeo-secondary-color);
+
+    /* App Sidebar + Drawer*/
+    --nuxeo-sidebar-background: #2e2e3e;
+    --nuxeo-sidebar-menu: rgba(255,255,255,.7);
+    --nuxeo-sidebar-menu-hover: rgba(255,255,255,1);
+    --nuxeo-badge-background: #fb6107;
+    --nuxeo-drawer-header: var(--nuxeo-text-default);
+    --nuxeo-drawer-text: var(--nuxeo-text-default);
+    --nuxeo-drawer-background: #404052;
+
+    /* App Quick Search */
+    --nuxeo-quicksearch-text: var(--nuxeo-text-default);
+    --nuxeo-quicksearch-background: #191928;
+
+    /* Tags & Pills */
+    --nuxeo-tag-background: rgba(0,0,0,0.2);
+    --nuxeo-tag-text: var(--nuxeo-text-default);
+    --nuxeo-pill-filter-background: rgba(0,0,0,0.1);
+    --nuxeo-pill-filter-background-active: var(--nuxeo-secondary-color);
+
+    /* Boxes, Tables & Listings */
+    --nuxeo-box: #2e2e3e;
+    --nuxeo-table-header-background: #2e2e3e;
+    --nuxeo-table-items-background: #2e2e3e;
+    --nuxeo-grid-selected: var(--nuxeo-primary-color);
 
     /* Buttons & Links */
-    --nuxeo-button: #f5f9fb;
+    --nuxeo-button: transparent;
     --nuxeo-button-primary: var(--nuxeo-primary-color);
-    --nuxeo-button-primary-focus: var(--nuxeo-header-actions-hover);
+    --nuxeo-button-primary-focus:var(--nuxeo-secondary-color);
     --nuxeo-button-primary-text: #ffffff;
-    --nuxeo-button-disabled: #f5f9fb;
-    --nuxeo-button-disabled-text: #a8a8a8;
+    --nuxeo-button-disabled: rgba(255,255,255,.05);
+    --nuxeo-button-disabled-text: rgba(255,255,255,.1);
     --nuxeo-link-color: var(--nuxeo-text-default);
-    --nuxeo-link-hover-color: #00a6f5;
-    --nuxeo-toolbar: #191928;
+    --nuxeo-link-hover-color: var(--nuxeo-primary-color);
 
-    /* Actions in toolbar, e.g. document view */
-    --nuxeo-pill-color: #434649;
-    --nuxeo-pill-color-hover: var(--nuxeo-primary-color);
-    --nuxeo-pill-color-active: var(--nuxeo-secundary-color);
-    --nuxeo-pill-filter-background: #eee;
-    --nuxeo-pill-filter-background-active: #191928;
-    --nuxeo-action-color: #434343;
-    --nuxeo-action-hover: var(--nuxeo-primary-color);
-    --nuxeo-action-color-activated: #f68500;
-    --nuxeo-container-hover: var(--nuxeo-light-background);
-    --nuxeo-dialog-buttons-bar: var(--nuxeo-light-background);
+    /* Custom Backgrounds */
+    --nuxeo-container-hover: var(--nuxeo-page-background);
+    --nuxeo-dialog-buttons-bar: var(--nuxeo-quicksearch-background);
 
     /* Warn, Info, Error */
-    --nuxeo-warn-text: #d5652c;
+    --nuxeo-action-color-activated: var(--nuxeo-primary-color);
+    --nuxeo-toolbar: var(--nuxeo-quicksearch-background);
+    --nuxeo-warn-text: #fb6107;
+    --nuxeo-validated: #35c50f;
 
+    /*-- Polymer Variables --*/
     --default-primary-color: var(--nuxeo-primary-color);
     --dark-primary-color: #05243e;
     --light-primary-color: #c5cae9;
@@ -69,33 +73,31 @@
     --primary-text-color: #434343;
     --secondary-text-color: #727272;
     --disabled-text-color: #bdbdbd;
-    --divider-color: #B6B6B6;
-
-    --nuxeo-border: #e0e4e6;
+    --divider-color: var(--nuxeo-border);
 
     /* Tabs, Toolbars & Menus */
     --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
     --paper-tab-ink: var(--nuxeo-primary-color);
 
-    --paper-toolbar-background: #ffffff;
-    --paper-toolbar-color: #243238;
+    --paper-toolbar-background: var(--nuxeo-box);
+    --paper-toolbar-color: var(--nuxeo-text-default);
 
-    --paper-menu-background-color: #ffffff;
-    --paper-menu-color: #243238;
+    --paper-menu-background-color: var(--nuxeo-box);
+    --paper-menu-color: var(--nuxeo-text-default);
     --paper-menu-disabled-color: #e9eff3;
 
     /* Forms & Buttons */
     --paper-checkbox-checked-color: var(--nuxeo-primary-color);
-    --paper-checkbox-checked-ink-color: #0079b3;
-    --paper-checkbox-unchecked-color: #243238;
+    --paper-checkbox-checked-ink-color: var(--nuxeo-primary-color);
+    --paper-checkbox-unchecked-color: var(--nuxeo-text-default);
     --paper-checkbox-unchecked-ink-color: #6c6f7c;
-    --paper-checkbox-label-color: #243238;
+    --paper-checkbox-label-color: var(--nuxeo-text-default);
 
     --paper-radio-button-checked-color: var(--nuxeo-primary-color);
     --paper-radio-button-checked-ink-color: #ffffff;
-    --paper-radio-button-unchecked-color: #243238;
+    --paper-radio-button-unchecked-color: var(--nuxeo-text-default);
     --paper-radio-button-unchecked-ink-color: #6c6f7c;
-    --paper-radio-button-label-color: #243238;
+    --paper-radio-button-label-color: #var(--nuxeo-text-default);
 
     --paper-input-container-color: #6c6f7c;
     --paper-input-container-focus-color: var(--nuxeo-primary-color);

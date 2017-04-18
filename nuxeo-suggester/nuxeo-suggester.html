@@ -38,7 +38,7 @@ Contributors:
         width: var(--nuxeo-suggester-width, 60%);
 
         --paper-input-container-input: {
-          color: var(--nuxeo-title-color);
+          color: var(--nuxeo-quicksearch-text);
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
         };
@@ -79,7 +79,7 @@ Contributors:
         width: 60px;
         height: 59px;
         padding: 16px;
-        color: var(--nuxeo-header-actions);
+        color: var(--nuxeo-app-header);
       }
 
       #searchButton:hover {
@@ -106,7 +106,8 @@ Contributors:
 
       #searchBar {
         height: 59px;
-        background-color: white;
+        background-color: var(--nuxeo-quicksearch-background);
+        color: var(--nuxeo-quicksearch-text);
       @apply(--layout-horizontal);
       @apply(--layout-center);
       @apply(--layout-center-justified);
@@ -131,25 +132,21 @@ Contributors:
       .result {
         display: block;
         padding: 1em;
-        background-color: #fff;
-        transform: translateZ(0);
-        transition-duration: .1s;
-        transition-property: transform;
+        background-color: var(--nuxeo-quicksearch-background);
       @apply(--layout-horizontal);
       @apply(--layout-center);
       }
 
       .result + .result {
-        border-top: 1px solid var(--divider-color);
+        border-top: 1px solid var(--nuxeo-border);
        }
 
-      a.result:hover,
-      a.iron-selected {
+      a.result:hover {
         @apply(--nuxeo-block-hover);
-        transform: scale(1.01);
-        @apply(--nuxeo-link-hover);
-        box-shadow: 0 0 0 1px #00adff inset;
-        border: none !important;
+      }
+
+      a.iron-selected {
+        @apply(--nuxeo-block-selected);
       }
 
       .result > iron-icon {

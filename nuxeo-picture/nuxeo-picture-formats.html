@@ -34,7 +34,7 @@ Contributors:
       }
 
       label {
-        color: var(--nuxeo-text-light);
+        opacity: .5;
         width: 30%;
         display: inline-block;
       }
@@ -48,6 +48,14 @@ Contributors:
       .flex.actions {
         text-align: right;
         flex: 0.5;
+      }
+
+      iron-icon {
+        @apply(--nuxeo-action);
+      }
+
+      iron-icon:hover {
+        @apply(--nuxeo-action-hover);
       }
 
     </style>

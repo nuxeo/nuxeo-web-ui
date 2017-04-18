@@ -60,7 +60,7 @@ Contributors:
       }
 
       .list-item-property {
-        color: var(--nuxeo-text-light);
+        opacity: .5;
         margin-right: .2em;
       }
 
@@ -78,12 +78,22 @@ Contributors:
       }
 
       .tip {
-        color: var(--nuxeo-text-light, #939caa);
+        opacity: .5;
         display: block;
         font-weight: 300;
         padding: 8px;
         text-align: center;
         font-size: 1rem;
+      }
+
+      .list-item paper-icon-button ::content iron-icon {
+         @apply(--nuxeo-action);
+         color: var(--nuxeo-drawer-text);
+      }
+
+      .list-item paper-icon-button:hover ::content iron-icon {
+        @apply(--nuxeo-action-hover);
+        color: var(--nuxeo-drawer-text);
       }
 
       .remove {
@@ -113,7 +123,7 @@ Contributors:
                   <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 </div>
                 <span class="list-item-title ellipsis flex">[[document.title]]</span>
-                <paper-icon-button class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
+                <paper-icon-button noink class="remove" icon="clear" alt="Remove" on-tap="_remove"></paper-icon-button>
               </div>
             </div>
           </div>

@@ -60,7 +60,6 @@ Contributors:
       padding: 16px;
       z-index: 101;
       border-left: 1px solid var(--divider-color);
-      background-color: var(--nuxeo-light-background);
     }
 
     .switch:hover {
@@ -69,7 +68,6 @@ Contributors:
     }
 
     .content {
-      font-size: .9rem;
       @apply(--layout-flex);
       @apply(--layout-vertical);
       height: calc(100vh - 61px);
@@ -103,7 +101,7 @@ Contributors:
     }
 
     .collection-property {
-      color: var(--nuxeo-text-light);
+      opacity: .5;
       margin-right: .2em;
     }
 
@@ -111,7 +109,6 @@ Contributors:
       cursor: pointer;
       padding: 1em;
       border-bottom: 1px solid var(--nuxeo-border);
-      font-size: .9rem;
     }
 
     .list-item:hover {
@@ -124,17 +121,21 @@ Contributors:
       @apply(--nuxeo-block-selected);
     }
 
+    .list-item iron-icon {
+      @apply(--nuxeo-action);
+    }
+
+    .list-item iron-icon:hover {
+      @apply(--nuxeo-action-hover);
+    }
+
     .remove {
       width: 1.7em;
       height: 1.7em;
     }
 
-    .list-item-title {
-      font-size: 1.1rem;
-    }
-
     .list-item-property {
-      color: var(--nuxeo-text-light);
+      opacity: .5;
       display: block;
       margin: .2em 0;
       font-size: .8rem;

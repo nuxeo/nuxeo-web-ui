@@ -52,7 +52,15 @@ Contributors:
       }
 
       .detail {
-        color: var(--nuxeo-text-medium);
+        opacity: .5;
+      }
+
+      .actions ::content iron-icon {
+        @apply(--nuxeo-action);
+      }
+
+      .actions ::content iron-icon:hover {
+        @apply(--nuxeo-action-hover);
       }
 
     </style>

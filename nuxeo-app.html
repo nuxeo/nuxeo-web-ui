@@ -47,7 +47,7 @@ Contributors:
       }
 
       paper-header-panel ::content paper-toolbar {
-        color: var(--nuxeo-title-color);
+        color: var(--nuxeo-app-color);
         width: 100%;
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -114,7 +114,7 @@ Contributors:
       }
 
       #menu ::content paper-icon-button {
-        color: var(--nuxeo-sidebar-actions);
+        color: var(--nuxeo-sidebar-menu);
         height: 44px;
         padding: 13px;
         width: 56px;
@@ -123,7 +123,7 @@ Contributors:
       #menu ::content nuxeo-menu-icon:hover ::content paper-icon-button,
       #menu ::content nuxeo-menu-icon.selected ::content paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-actions-hover);
+        color: var(--nuxeo-sidebar-menu-hover);
       }
 
       #menu .profile-icon,
@@ -165,11 +165,12 @@ Contributors:
         padding: 0 16px;
         text-transform: uppercase;
         text-overflow: ellipsis;
-        color: var(--nuxeo-title-color);
+        color: var(--nuxeo-drawer-header);
       }
 
       #drawer iron-pages {
         @apply(--layout-vertical);
+        color: var(--nuxeo-drawer-text);
         width: 294px;
         height: 100vh;
         margin-left: 56px;
