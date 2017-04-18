@@ -149,8 +149,13 @@ Contributors:
         ? doc.contextParameters.runningWorkflows : [];
     },
 
-    _processTask: function() {
-      this.fire('workflowTaskProcess');
+    _processTask: function(e) {
+      var details = {
+        id: e.model.task.id
+      };
+      this.fire('workflowTaskProcess', details);
+
+
     },
 
     _isCurrentUser: function(userId) {
