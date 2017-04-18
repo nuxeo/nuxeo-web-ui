@@ -57,7 +57,10 @@ An element for generic textarea input in forms
       /**
        * Value.
        */
-      value: String,
+      value: {
+        type: String,
+        notify: true
+      },
 
       /**
        * Placeholder.
