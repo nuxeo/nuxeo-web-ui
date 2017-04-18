@@ -69,7 +69,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-document-info-bar document="[[document]]" hidden$="[[isProcessingTask]]"></nuxeo-document-info-bar>
+    <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
 
     <div class="page">
 
@@ -80,21 +80,18 @@ Contributors:
       <div class="side">
 
         <!-- info -->
-        <paper-card hidden$="[[isProcessingTask]]">
+        <paper-card>
           <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
         </paper-card>
 
         <!-- metadata / edit -->
-        <paper-card hidden$="[[isProcessingTask]]">
+        <paper-card>
           <div hidden$="[[edit]]">
             <paper-icon-button id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </div>
           <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
         </paper-card>
-
-        <!-- workflows -->
-        <nuxeo-document-workflows document="[[document]]" is-processing-task$="[[isProcessingTask]]"></nuxeo-document-workflows>
 
         <!-- collections -->
         <paper-card hidden$="[[!_showCollections(document)]]">
@@ -111,7 +108,7 @@ Contributors:
         </paper-card>
 
         <!-- activity -->
-        <paper-card hidden$="[[isProcessingTask]]">
+        <paper-card>
           <h3>[[i18n('documentPage.activity')]]</h3>
           <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
         </paper-card>
@@ -133,25 +130,11 @@ Contributors:
         edit: {
           type: Boolean,
           value: false
-        },
-
-        isProcessingTask: {
-          type: Boolean,
-          value: false,
-          reflectToAttribute: true,
-          notify: true
         }
       },
-
-      listeners: {
-        'workflowTaskProcess': '_workflowTaskProcess',
-        'workflowTaskCancelled': '_workflowTaskCancelled'
-      },
-
       _documentChanged: function() {
         if (this.document) {
           this.edit = false;
-          this.isProcessingTask = false;
         }
       },
 
@@ -168,17 +151,8 @@ Contributors:
       },
 
       _showCollections: function (doc) {
-        return this.hasCollections(doc) && !this.isProcessingTask;
-      },
-
-      _workflowTaskProcess: function() {
-        this.isProcessingTask = true;
-      },
-
-      _workflowTaskCancelled: function() {
-        this.isProcessingTask = false;
+        return this.hasCollections(doc);
       }
-
     });
   </script>
 

@@ -40,13 +40,13 @@ Example:
         };
       }
 
-      paper-input::-webkit-clear-button{
+      paper-input::-webkit-clear-button {
         -webkit-appearance: none;
       }
     </style>
 
     <paper-input id="date" label="[[label]]" name="[[name]]" required="[[required]]" invalid="[[invalid]]"
-                 type="date" on-change="_onChange" always-float-label>
+                 type="date" on-change="_onChange" always-float-label disabled="[[disabled]]">
     </paper-input>
 
   </template>
@@ -59,10 +59,16 @@ Example:
       behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
       properties: {
         label: String,
+
         value: {
           type: String,
           notify: true,
           observer: '_valueChanged'
+        },
+
+        disabled: {
+          type: Boolean,
+          value: false
         }
       },
 
@@ -75,7 +81,7 @@ Example:
 
       _valueChanged: function() {
         if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
-           this.$.date.value = moment(this.value).format('YYYY-MM-DD');
+          this.$.date.value = moment(this.value).format('YYYY-MM-DD');
         }
       },
 
