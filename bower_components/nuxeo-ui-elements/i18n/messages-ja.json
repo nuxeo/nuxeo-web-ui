@@ -210,5 +210,10 @@
   "userProfile.password.old":"古いパスワード",
   "userProfile.password.wrong":"パスワードが正しくありません",
   "viewUser.company":"会社",
-  "viewUser.email":"メール"
+  "viewUser.email":"メール",
+  "workflowButton.dialog.close":"Close",
+  "workflowButton.dialog.start":"Start",
+  "workflowButton.dialog.heading":"Start process",
+  "workflowButton.dialog.placeholder":"Choose process",
+  "workflowButton.tooltip":"Start process"
 }

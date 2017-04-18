@@ -210,5 +210,10 @@
   "userProfile.password.old":"Old password",
   "userProfile.password.wrong":"Wrong password",
   "viewUser.company":"Företag",
-  "viewUser.email":"E-post"
+  "viewUser.email":"E-post",
+  "workflowButton.dialog.close":"Close",
+  "workflowButton.dialog.start":"Start",
+  "workflowButton.dialog.heading":"Start process",
+  "workflowButton.dialog.placeholder":"Choose process",
+  "workflowButton.tooltip":"Start process"
 }

@@ -210,5 +210,10 @@
   "userProfile.password.old":"Old password",
   "userProfile.password.wrong":"Wrong password",
   "viewUser.company":"Empresa",
-  "viewUser.email":"Correo electrónico"
+  "viewUser.email":"Correo electrónico",
+  "workflowButton.dialog.close":"Close",
+  "workflowButton.dialog.start":"Start",
+  "workflowButton.dialog.heading":"Start process",
+  "workflowButton.dialog.placeholder":"Choose process",
+  "workflowButton.tooltip":"Start process"
 }
