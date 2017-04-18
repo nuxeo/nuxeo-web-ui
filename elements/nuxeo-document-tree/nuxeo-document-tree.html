@@ -158,10 +158,10 @@ Contributors:
           type: Boolean,
           value: false
         },
-        rootPath: {
+        rootDocPath: {
           type: String,
           value: '/',
-          observer: '_rootPathChanged'
+          observer: '_rootDocPathChanged'
         },
         docPath: {
           type: String,
@@ -209,12 +209,12 @@ Contributors:
       },
 
       _hideRoot: function(doc) {
-        return this.rootPath !== '/' || (doc && doc.type && doc.type === 'Root');
+        return this.rootDocPath !== '/' || (doc && doc.type && doc.type === 'Root');
       },
 
       _currentDocumentChanged: function() {
         var doc = this.currentDocument;
-        if (doc && doc.path.startsWith(this.rootPath)) {
+        if (doc && doc.path.startsWith(this.rootDocPath)) {
 
           if (this.docPath === doc.path && this.document && this.document.title !== doc.title) {
             //If document is the same as before but its name changed, get the document again
@@ -240,7 +240,7 @@ Contributors:
 
             for (var i = 0; i < entries.length - 1; i++) {
               var entry = entries[i];
-              if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootPath)) {
+              if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
                 this.push('parents', entry);
               }
             }
@@ -255,8 +255,8 @@ Contributors:
         }
       },
 
-      _rootPathChanged: function() {
-        this.docPath = this.rootPath;
+      _rootDocPathChanged: function() {
+        this.docPath = this.rootDocPath;
       },
 
       _expandIcon: function(opened) {
