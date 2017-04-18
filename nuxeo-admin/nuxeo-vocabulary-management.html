@@ -30,31 +30,6 @@ Contributors:
         display: block;
       }
 
-      paper-dropdown-menu {
-        --paper-input-container-underline: {
-          display: none;
-        };
-        --paper-input-container-input: {
-          font-weight: 400;
-          text-align: left;
-          color: var(--nuxeo-app-header);
-        };
-        padding: .3em 0 .5em .5em;
-        margin-left: 1.5em;
-      }
-
-      ::content .unfocused-line.paper-input-container {
-        background-color: transparent;
-      }
-
-      ::content paper-input-container .input-content.paper-input-container {
-        flex-direction: row-reverse;
-      }
-
-      ::content paper-input-container .input-content iron-icon {
-        margin-right: .3em;
-      }
-
       nuxeo-data-table {
         min-height: calc(100vh - 280px);
       }
@@ -69,6 +44,10 @@ Contributors:
         @apply(--layout-center);
         @apply(--layout-end-justified);
         margin: 1em 0 1em 0;
+      }
+
+      nuxeo-select {
+        max-width: 223px;
       }
 
     </style>
@@ -102,14 +81,13 @@ Contributors:
 
       <div class="content">
         <paper-card elevation="0" class="block">
-          <span>[[i18n('vocabularyManagement.vocabulary')]]</span>
-          <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.select')]]">
-            <paper-menu class="dropdown-content" selected="{{selectedVocabulary}}" attr-for-selected="name">
-              <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
-                <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
+          <nuxeo-select label="[[i18n('vocabularyManagement.vocabulary')]]"
+                        placeholder="[[i18n('vocabularyManagement.select')]]"
+                        selected="{{selectedVocabulary}}" attr-for-selected="name">
+            <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
+              <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+            </template>
+          </nuxeo-select>
         </paper-card>
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
