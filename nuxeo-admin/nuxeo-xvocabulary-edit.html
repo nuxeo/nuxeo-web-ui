@@ -83,13 +83,11 @@ Contributors:
         <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
         <span class="required">*</span>
       </div>
-      <paper-dropdown-menu noink no-animations no-label-float label="[[i18n('vocabularyManagement.selectParent')]]">
-        <paper-menu class="dropdown-content" selected="{{entry.properties.parent}}" attr-for-selected="name">
-          <template is="dom-repeat" items="[[parentResponse.entries]]">
-            <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
-          </template>
-        </paper-menu>
-      </paper-dropdown-menu>
+      <nuxeo-select label="[[i18n('vocabularyManagement.selectParent')]]" selected="{{entry.properties.parent}}" attr-for-selected="name">
+        <template is="dom-repeat" items="[[parentResponse.entries]]">
+          <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
+        </template>
+      </nuxeo-select>
     </div>
 
     <div class="row layout horizontal">
