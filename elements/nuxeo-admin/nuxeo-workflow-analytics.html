@@ -95,17 +95,9 @@ Contributors:
 
     <paper-card class="dates">
       <div class="horizontal flex end-justified layout center wrap">
-        <paper-dropdown-menu always-float-label>
-          <paper-menu class="dropdown-content" selected="{{workflow}}" attr-for-selected="key">
-            <paper-item key="ParallelDocumentReview">[[i18n('ParallelDocumentReview')]]</paper-item>
-            <paper-item key="SerialDocumentReview">[[i18n('SerialDocumentReview')]]</paper-item>
-          </paper-menu>
-        </paper-dropdown-menu>
-
-        <nuxeo-date-picker value="{{startDate::change}}"
-                           label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
-        <nuxeo-date-picker value="{{endDate::change}}"
-                           label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
+        <nuxeo-select label="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
+        <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
+        <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
     </paper-card>
 
@@ -194,12 +186,17 @@ Contributors:
             value: 'nuxeo'
           },
           startDate: String,
-          endDate: String
+          endDate: String,
+          workflows: Array
         },
 
         ready: function() {
           this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
           this.endDate = moment().format('YYYY-MM-DD');
+          this.workflows = [
+            {id: 'ParallelDocumentReview', label: this.i18n('ParallelDocumentReview')},
+            {id: 'SerialDocumentReview', label: this.i18n('SerialDocumentReview')}
+          ]
         },
 
         // override _labels and _values from nuxeo-chart-data-behavior.html
