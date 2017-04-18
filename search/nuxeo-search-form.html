@@ -77,8 +77,8 @@ Contributors:
         color: var(--nuxeo-button-primary-text);
       }
 
-      paper-dropdown-menu {
-        margin-left: 1em;
+      nuxeo-select {
+        margin-right: 4.5em;
       }
 
       ::content .unfocused-line.paper-input-container {
@@ -221,14 +221,12 @@ Contributors:
       <div class="header ellipsis search-header">
         <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
-          <paper-dropdown-menu id="actionsDropdown" no-label-float horizontal-align="left">
-            <paper-menu class="dropdown-content" selected="{{selectedSearchIdx}}">
-              <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
-              <template is="dom-repeat" items="[[searches]]" as="search">
-                <paper-item>[[search.title]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
+          <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
+            <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
+            <template is="dom-repeat" items="[[searches]]" as="search">
+              <paper-item>[[search.title]]</paper-item>
+            </template>
+          </nuxeo-select>
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
