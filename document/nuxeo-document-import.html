@@ -72,10 +72,6 @@ Contributors:
         position: relative;
       }
 
-      .typeDropdown {
-        width: 100%;
-      }
-
       paper-progress {
         width: 100%;
       }
@@ -455,20 +451,17 @@ Contributors:
             <form is="iron-form" action="/" id="form" on-submit="_importWithProperties" class="form vertical layout flex">
               <div class="horizontal layout center">
                 <div class="flex">
-                  <paper-dropdown-menu id="docTypeDropdown"
-                                       label="[[i18n('documentImportForm.type.label')]]"
-                                       class="typeDropdown"
-                                       horizontal-align="left"
-                                       error-message="[[i18n('documentImportForm.type.error')]]"
-                                       placeholder="[[i18n('documentImportForm.type.placeholder')]]"
-                                       on-value-changed="_validate"
-                                       noink always-float-label required>
-                    <paper-menu class="dropdown-content" selected="{{selectedDocType}}" attr-for-selected="key">
-                      <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
-                        <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
-                      </template>
-                    </paper-menu>
-                  </paper-dropdown-menu>
+                  <nuxeo-select id="docTypeDropdown"
+                                selected="{{selectedDocType}}" attr-for-selected="key"
+                                label="[[i18n('documentImportForm.type.label')]]"
+                                placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                                error-message="[[i18n('documentImportForm.type.error')]]"
+                                on-value-changed="_validate"
+                                required>
+                    <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
+                      <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
+                    </template>
+                  </nuxeo-select>
                 </div>
               </div>
               <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
