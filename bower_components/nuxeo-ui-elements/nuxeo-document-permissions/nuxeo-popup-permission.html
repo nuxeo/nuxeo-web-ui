@@ -28,6 +28,8 @@ limitations under the License.
 
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../widgets/nuxeo-user-suggestion.html">
+<link rel="import" href="../widgets/nuxeo-date-picker.html">
+<link rel="import" href="../widgets/nuxeo-textarea.html">
 
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 
@@ -79,74 +81,58 @@ limitations under the License.
         <template is="dom-if" if="{{!updatingACE}}">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div>
-              <div><span class="required">[[i18n('popupPermission.userGroup')]]</span></div>
-              <div>
-                <nuxeo-user-suggestion value="{{params.username}}"></nuxeo-user-suggestion>
-              </div>
+                <nuxeo-user-suggestion label="[[i18n('popupPermission.userGroup')]]" value="{{params.username}}"></nuxeo-user-suggestion>
             </div>
           </template>
           <template is="dom-if" if="{{shareWithExternal}}">
-            <div>
-              <div><span class="required">[[i18n('popupPermission.email')]]</span></div>
               <div>
-                <gold-email-input id="email" label="" placeholder="name@company.com" value="{{params.email}}"
+                <gold-email-input id="email" label="[[i18n('popupPermission.email')]]" placeholder="name@company.com" value="{{params.email}}"
                   required auto-validate></gold-email-input>
-              </div>
             </div>
           </template>
         </template>
         <!-- Right row -->
         <div layout horizontal>
-          <div><span class="required">[[i18n('popupPermission.right')]]</span></div>
-          <paper-dropdown-menu>
-            <paper-menu class="dropdown-content" selected="{{params.permission}}" attr-for-selected="permission">
-              <template is="dom-repeat" items="[[userVisiblePermissions]]" as="permission">
-                <paper-item permission="[[permission]]">[[i18n(permission)]]</paper-item>
-              </template>
-            </paper-menu>
-          </paper-dropdown-menu>
+          <nuxeo-select label="[[i18n('popupPermission.right')]]"
+                        selected="{{params.permission}}" options="[[userVisiblePermissions]]">
+
+          </nuxeo-select>
         </div>
         <div>
           <template is="dom-if" if="{{!shareWithExternal}}">
-            <div>[[i18n('popupPermission.timeFrame')]]</div>
+            <label>[[i18n('popupPermission.timeFrame')]]</label>
             <paper-radio-group selected="{{selectedTimeFrame}}">
-              <paper-radio-button name="permanent" on-change="toggleTimeFrame">
+              <paper-radio-button name="permanent">
                 [[i18n('popupPermission.permanent')]]
               </paper-radio-button>
-              <paper-radio-button name="datebased" on-change="toggleTimeFrame">
+              <paper-radio-button name="datebased">
                 [[i18n('popupPermission.dateBased')]]
               </paper-radio-button>
             </paper-radio-group>
           </template>
-          <div class="timeFrameLabel">[[i18n('popupPermission.from')]]</div>
           <div>
-            <input id="begin" class="jsDate" type="date" data-native="mobile" data-format="MM/dd/yyyy"
-              value="{{params.begin::change}}"/>
+            <nuxeo-date-picker id="begin" label="[[i18n('popupPermission.from')]]" value="{{params.begin::change}}" disabled="[[permissionIsPermanent]]"></nuxeo-date-picker>
           </div>
-          <template is="dom-if" if="{{!shareWithExternal}}">
-            <div class="timeFrameLabel"><span>[[i18n('popupPermission.to')]]</span></div>
-          </template>
-          <template is="dom-if" if="{{shareWithExternal}}">
-            <div class="timeFrameLabel"><span class="required">[[i18n('popupPermission.to')]]</span></div>
-          </template>
           <div>
-            <input id="end" class="jsDate" type="date" data-native="mobile" data-format="MM/dd/yyyy"
-              value="{{params.end::change}}"/>
+            <nuxeo-date-picker id="end" label="[[i18n('popupPermission.to')]]" value="{{params.end::change}}"
+                               disabled="[[permissionIsPermanent]]" required="[[shareWithExternal]]"></nuxeo-date-picker>
+
           </div>
         </div>
         <div id="notification">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div layout horizontal>
-              <paper-checkbox checked="{{params.notify}}" on-change="toggleCommentText">
+              <paper-checkbox checked="{{params.notify}}">
                 [[i18n('popupPermission.notify')]]
               </paper-checkbox>
             </div>
           </template>
           <div layout horizontal>
-            <iron-autogrow-textarea
-              placeholder="[[i18n('popupPermission.notifyPlaceholder')]]"
-              max-rows="4"
-              id="commentText" bind-value="{{params.comment}}"></iron-autogrow-textarea>
+            <nuxeo-textarea
+                    label="[[i18n('popupPermission.notifyLabel')]]"
+                    placeholder="[[i18n('popupPermission.notifyPlaceholder')]]"
+                    disabled="[[!params.notify]]"
+                    id="commentText"  value="{{params.comment}}" max-rows="4"></nuxeo-textarea>
           </div>
         </div>
       </paper-dialog-scrollable>
@@ -199,7 +185,8 @@ limitations under the License.
       },
       selectedTimeFrame: {
         type: String,
-        value: 'permanent'
+        value: 'permanent',
+        observer: '_selectedTimeFrameChanged'
       }
     },
 
@@ -208,10 +195,6 @@ limitations under the License.
 
     togglePopup: function () {
       this.$.popupRight.toggle();
-      if (this.selectedTimeFrame === 'permanent') {
-        jQuery(this).find('.jsDate').attr('disabled', true);
-        jQuery(this).find('.timeFrameLabel').addClass('disabled');
-      }
     },
 
     doCreate: function () {
@@ -240,6 +223,7 @@ limitations under the License.
       }
 
       var dateBased = this.selectedTimeFrame === 'datebased';
+
       if (this.params.begin && dateBased) {
         this.params.begin = this.params.begin.length > 0 ? moment(new Date(this.params.begin)).format() : null;
       } else {
@@ -276,36 +260,13 @@ limitations under the License.
         this.set('params.username', null);
         this.set('params.email', null);
         this.set('params.permission', 'Read');
-        this.set('params.begin', '');
-        this.set('params.end', '');
+        this.set('params.begin', null);
+        this.set('params.end', null);
         this.set('params.notify', true);
         this.set('params.comment', '');
         this.set('selectedTimeFrame', this.shareWithExternal ? 'datebased' : 'permanent');
-        // 'hack' to hide the old selected date
-        jQuery(this).find('.btr-dateinput-value').text('');
-      }
-    },
 
-    toggleCommentText: function (event) {
-      var checked = event.target.checked;
-      this.$.notification.querySelector('#commentText').readonly = !checked;
-      if (!checked) {
-        this.set('params.comment', '');
       }
-    },
-
-    toggleTimeFrame: function (event) {
-      var name = event.target.name;
-      this.set('selectedTimeFrame', name);
-      var disabled = name === 'datebased' ? false : true;
-      jQuery(this).find('.jsDate').attr('disabled', disabled);
-      jQuery(this).find('.timeFrameLabel').each(function (i, ele) {
-        if (disabled) {
-          jQuery(ele).addClass('disabled');
-        } else {
-          jQuery(ele).removeClass('disabled');
-        }
-      });
     },
 
     computeParams: function (ace, shareWithExternal) {
@@ -351,6 +312,10 @@ limitations under the License.
 
     isUpdatingACE: function (ace) {
       return ace !== null;
+    },
+
+    _selectedTimeFrameChanged: function() {
+      this.permissionIsPermanent = this.selectedTimeFrame === 'permanent';
     }
   });
 </script>

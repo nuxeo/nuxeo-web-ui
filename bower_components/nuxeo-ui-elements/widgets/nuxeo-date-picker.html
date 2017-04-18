@@ -45,8 +45,8 @@ Example:
       }
     </style>
 
-    <paper-input id="date" label="[[label]]" name="[[name]]" required="[[required]]" invalid="[[invalid]]"
-                 type="date" on-change="_onChange" always-float-label disabled="[[disabled]]">
+    <paper-input id="date" label="[[label]]" name="[[name]]" required$="[[required]]" invalid="[[invalid]]"
+                 type="date" on-change="_onChange" always-float-label disabled$="[[disabled]]">
     </paper-input>
 
   </template>
@@ -80,8 +80,12 @@ Example:
       },
 
       _valueChanged: function() {
+
         if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
           this.$.date.value = moment(this.value).format('YYYY-MM-DD');
+        }
+        if (!this.value || this.value.length === 0){
+          this.$.date.value = "";
         }
       },
 
