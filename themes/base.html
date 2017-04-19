@@ -62,6 +62,12 @@
     @apply(--nuxeo-label);
   }
 
+  /* input */
+  body ::content input {
+    font-family: var(--nuxeo-app-font);
+    font-size: 1rem !important;
+  }
+
   /* paper-button */
   body ::content paper-button {
     min-width: 96px;
@@ -150,8 +156,8 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 400;
-      margin-bottom: .4em;
+      font-weight: 400 !important;
+      letter-spacing: 0.005em !important;
     };
 
     --nuxeo-tag: {
@@ -252,6 +258,7 @@
     --paper-item: {
       color: var(--nuxeo-text-default);
       font-family: var(--nuxeo-app-font);
+      font-size: 1rem;
     };
 
     --paper-input: {
@@ -270,6 +277,7 @@
 
     --paper-input-container-input: {
       font-family: var(--nuxeo-app-font);
+      font-size: 1rem;
     };
 
     --paper-dialog: {

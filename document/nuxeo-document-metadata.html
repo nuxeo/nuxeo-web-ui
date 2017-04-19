@@ -40,6 +40,15 @@ Contributors:
         word-break: break-all;
       }
 
+      ::content label {
+        margin: 0 !important;
+      }
+
+      ::content *[role=widget] {
+        @apply(--layout-vertical);
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+      }
     </style>
 
     <nuxeo-document-layout document="[[document]]" layout="metadata"></nuxeo-document-layout>
@@ -47,15 +56,11 @@ Contributors:
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-metadata',
-        properties: {
-          document: Object
-        }
-      });
-    })();
+    Polymer({
+      is: 'nuxeo-document-metadata',
+      properties: {
+        document: Object
+      }
+    });
   </script>
 </dom-module>
