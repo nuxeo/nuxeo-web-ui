@@ -601,7 +601,9 @@ Contributors:
         },
 
         _navigate: function(e) {
-          page('/browse' + e.detail.doc.path);
+          if (e.detail.doc) {
+            page('/browse' + e.detail.doc.path);
+          }
         },
 
         _navigateFromCollection: function(e) {
