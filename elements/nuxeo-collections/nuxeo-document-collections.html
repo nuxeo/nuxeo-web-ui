@@ -39,6 +39,19 @@ Contributors:
         cursor: pointer;
       }
 
+      .collection-close {
+        /* Similiar look and feel as select2 */
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB1WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOkNvbXByZXNzaW9uPjE8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx0aWZmOlBob3RvbWV0cmljSW50ZXJwcmV0YXRpb24+MjwvdGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KAtiABQAAAOtJREFUGBmNjj1Ow0AQhXfXJCu5MRJKQejcI9HQR/ivIA4VNaLmAHAQjgCipjYGJx0dZdL4AoiKxrZkm28CFm1G+va9GY3mrVI7lpa9NE3dqqrusa9Zlj3ILIqihdZ60bbtbZ7nX3syrOv6huE19ioMw09jzDf+CVzHcQ7Rc8Oj+r5/RN6AHfOMvoALy67r7lC1jRZDaeLeuXz626pN0zQnRVFU0m8vikmSZMbSkfi/mlhrZ0PjiGHpgniJ3IclrOEYLn3f12VZroY/jhiO4YO4ued5c/wKLCkW/S/+F8B0mARBcBDH8dnQ76w/BkJDsEUPsP8AAAAASUVORK5CYII=');
+        width: 9px;
+        height: 9px;
+        display: inline-block;
+        opacity: 0.6;
+      }
+
+      .collection-close:hover{
+        opacity: 1;
+      }
+
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection"
@@ -49,8 +62,8 @@ Contributors:
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <nuxeo-tag>
         [[item.title]]
-        <iron-icon icon="icons:clear" name="remove" data-uid$="[[item.uid]]" on-tap="remove"></iron-icon>
-      </nuxeo-tag>
+       <a name="remove" on-tap="remove" data-uid$="[[item.uid]]" class="collection-close"></a>
+     </nuxeo-tag>
     </template>
 
   </template>
