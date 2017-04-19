@@ -54,6 +54,9 @@ Example:
 
       ::content paper-item {
         font-weight: normal !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         height: 32px;
         min-height: 32px;
         padding: 0 12px;
@@ -188,7 +191,10 @@ Example:
       var button = this.$.paperDropdownMenu.$$('paper-menu-button');
       button.noOverlap = true;
       button.verticalOffset = -8;
-      this.$.paperMenu.style.width = this.getBoundingClientRect().width + 'px';
+      var width = this.getBoundingClientRect().width;
+      if (width > 0) {
+        this.$.paperDropdownMenu.style.width = this.$.paperMenu.style.width = width + 'px';
+      }
     },
 
     _id: function(item) {

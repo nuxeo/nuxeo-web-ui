@@ -32,6 +32,10 @@ Contributors:
         display: block;
       }
 
+      nuxeo-select {
+        min-width: 250px;
+      }
+
       paper-card ::content .header .title-text {
         color: var(--nuxeo-text-default, #000) !important;
       }
@@ -95,7 +99,7 @@ Contributors:
 
     <paper-card class="dates">
       <div class="horizontal flex end-justified layout center wrap">
-        <nuxeo-select label="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
+        <nuxeo-select label="[[i18n('analytics.workflow')]]" placeholder="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
         <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
         <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
