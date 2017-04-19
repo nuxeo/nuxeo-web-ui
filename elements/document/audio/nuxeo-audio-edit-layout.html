@@ -25,13 +25,13 @@ limitations under the License.
     <nuxeo-input role="widget"
                  label="[[i18n('title')]]"
                  name="title"
-                 value="{{document.properties.dc:title::change}}"
-                 required>
+                 value="{{document.properties.dc:title}}"
+                 autofocus required>
     </nuxeo-input>
 
     <nuxeo-textarea role="widget" label="[[i18n('label.description')]]"
                     name="description"
-                    value="{{document.properties.dc:description::change}}">
+                    value="{{document.properties.dc:description}}">
     </nuxeo-textarea>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
