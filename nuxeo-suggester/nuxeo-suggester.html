@@ -44,15 +44,15 @@ Contributors:
         };
 
         --paper-input-container-underline: {
-          background-color: white;
+          background-color: transparent;
         };
 
         --paper-input-container-underline-focus: {
-          background-color: white;
+          background-color: transparent;
         };
 
         --paper-input-container-label: {
-          color: #c6c6c6;
+          color: var(--nuxeo-text-default);
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
           line-height: unset;
@@ -168,6 +168,29 @@ Contributors:
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+      }
+
+      @media (max-width: 1024px) {
+        #searchButton {
+          box-shadow: -3px 0 10px 0 rgba(0,0,0,0.1);
+          background-color: var(--nuxeo-app-header-background);
+          width: 52px;
+          padding: 16px 8px;
+        }
+
+        #searchBar {
+          justify-content: flex-start;
+        }
+
+        paper-input {
+          width: calc(100% - 90px);
+          margin-left: 1.2rem;
+        }
+
+        #results {
+          width: 100%;
+          padding: 1em;
+        }
       }
 
     </style>
