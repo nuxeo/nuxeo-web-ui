@@ -28,7 +28,8 @@ An element for generic input in forms
 <dom-module id="nuxeo-input">
   <template>
 
-    <paper-input label="[[label]]"
+    <paper-input id="input"
+                 label="[[label]]"
                  type="[[type]]"
                  name="[[name]]"
                  value="{{value}}"
@@ -111,6 +112,10 @@ An element for generic input in forms
         value: false,
         reflectToAttribute: true
       }
+    },
+
+    focus: function() {
+      this.$.input.focus();
     }
 
   });

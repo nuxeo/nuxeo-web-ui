@@ -195,6 +195,7 @@ Contributors:
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
+          <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
           <form is="iron-form" id="form" class="form vertical layout flex">
             <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
           </form>
@@ -239,6 +240,10 @@ Contributors:
         observers: [
             '_visibleOnStage(visible,stage)'
         ],
+
+        ready: function() {
+          this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
+        },
 
         init: function(typeId) {
           if (typeId) {
@@ -298,7 +303,7 @@ Contributors:
           }
 
           // XXX: could rely on onsubmit to avoid rechecking for validity
-          return valid && this.$.form.validate() && this.$.form.checkValidity();
+          return this.$.form.validate() && this.$.form.checkValidity() && valid;
         },
 
         _create: function() {
@@ -336,6 +341,21 @@ Contributors:
         _visibleOnStage: function() {
           this.$.pathSuggesterChoose.disabled = !this.visible || this.stage !== 'choose';
           this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
+        },
+
+         _layoutUpdated: function(e) {
+          this.async(function() {
+            var input = e.detail.value.querySelector('[autofocus]');
+            if (input) {
+              input.focus();
+            }
+          });
+        },
+
+        _submitKeyHandler: function(e) {
+          if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
+            this._create();
+          }
         }
 
       });

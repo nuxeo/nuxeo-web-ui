@@ -111,10 +111,6 @@ Contributors:
         margin-bottom: 2.5em;
       }
 
-      #submitButton {
-        display: none;
-      }
-
       #blobEditor {
         overflow-y: auto;
       }
@@ -293,6 +289,10 @@ Contributors:
         margin-right: 8px;
       }
 
+      div[name="upload"] {
+        outline: none;
+      }
+
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -306,10 +306,12 @@ Contributors:
     <nuxeo-document id="parentFetcher"
                     doc-path="[[targetPath]]"></nuxeo-document>
 
+    <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
+
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
 
       <!--Stage: allow the user to upload files-->
-      <div name="upload" class="upload vertical layout flex">
+      <div name="upload" class="upload vertical layout flex" tabindex="0">
 
         <div class="suggester">
           <nuxeo-path-suggestion id="pathSuggesterUpload"
@@ -448,7 +450,7 @@ Contributors:
                                      always-float-label></nuxeo-path-suggestion>
               <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
             </div>
-            <form is="iron-form" action="/" id="form" on-submit="_importWithProperties" class="form vertical layout flex">
+            <form is="iron-form" id="form" class="form vertical layout flex">
               <div class="horizontal layout center">
                 <div class="flex">
                   <nuxeo-select id="docTypeDropdown"
@@ -468,7 +470,6 @@ Contributors:
               <template is="dom-if" if=[[document]] restamp>
                 <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
               </template>
-              <button id="submitButton"></button>
             </form>
           </div>
           <div class="sidePanel horizontal layout">
@@ -538,7 +539,7 @@ Contributors:
 
           <paper-button noink
                         class="primary"
-                        on-tap="_submit"
+                        on-tap="_importWithProperties"
                         disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         [[i18n('command.create')]]
                       </paper-button>
@@ -666,6 +667,7 @@ Contributors:
           this.connection = this.$.nx;
           this.setupDropZone(this.$.dropzone);
           this._clear();
+          this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
         },
 
         init: function(files) {
@@ -902,8 +904,17 @@ Contributors:
         },
 
         _validate: function() {
-          this._submit(true);
-          return this.$.form.checkValidity() && this.$.form.validate();
+          // run our custom validation function first to allow setting custom native validity
+          var layout = this.$$('#document-import');
+          var valid = layout ? layout.validate() : false;
+
+          // fake submit to trigger native validation checks and UI
+          if (valid) {
+            this.$.form._doFakeSubmitForValidation();
+          }
+
+          // XXX: could rely on onsubmit to avoid rechecking for validity
+          return this.$.form.validate() && this.$.form.checkValidity() && valid;
         },
 
         _tapLocalDoc: function(e) {
@@ -952,21 +963,12 @@ Contributors:
           this._importWithPropertiesError = '';
         },
 
-        _submit: function(justValidate) {
-          if (justValidate === true) {
-            this._doNotCreate = true;
-          }
-          this.$.submitButton.click();
-        },
-
         _importWithProperties: function() {
-          if (!this._doNotCreate) {
+          if (this._validate()) {
             this._creating = true;
             this._storeFile(this.docIdx);
             this._processFilesWithMetadata();
           }
-          // skip creation to show form validation only
-          this._doNotCreate = false;
         },
 
         _import: function() {
@@ -1135,6 +1137,10 @@ Contributors:
           for (var i = 0; i < this.localFiles.length; i++) {
             this.properties.push({});
           }
+          var div = this.$$('div[name="upload"]');
+          if (div) {
+            div.focus();
+          }
         },
 
         _blobPicked: function(e) {
@@ -1234,6 +1240,28 @@ Contributors:
           }
 
           this.document = document;
+        },
+
+        _layoutUpdated: function(e) {
+          this.async(function() {
+            var input = e.detail.value.querySelector('[autofocus]');
+            if (input) {
+              input.focus();
+            }
+          });
+        },
+
+        _submitKeyHandler: function(e) {
+          if (this.stage === 'upload' && this._canImport()) {
+            this._import();
+          }
+          if (this.stage === 'customize' && e.detail.keyboardEvent.target.tagName === 'INPUT') {
+            if (this._hasNextFile()) {
+              this._nextFile();
+            } else if (this._canImportWithMetadata()) {
+              this._importWithProperties();
+            }
+          }
         }
       });
     })();
