@@ -130,6 +130,7 @@
 	"popupPermission.from": "De",
 	"popupPermission.newPermission": "Novo",
 	"popupPermission.notify": "Envie um email para notificar o usuário",
+	"popupPermission.notifyLabel": "Notification email",
 	"popupPermission.notifyPlaceholder": "Olá! Você poderia comentar este documento e...",
 	"popupPermission.permanent": "Permanente",
 	"popupPermission.right": "Permissão",

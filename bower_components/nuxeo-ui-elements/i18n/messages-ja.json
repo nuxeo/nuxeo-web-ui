@@ -130,6 +130,7 @@
   "popupPermission.from":"差出人",
   "popupPermission.newPermission":"新規",
   "popupPermission.notify":"ユーザに通知するためメールを送信",
+  "popupPermission.notifyLabel":"Notification email",
   "popupPermission.notifyPlaceholder":"こんにちは！この文書にコメントしてくれませんか？",
   "popupPermission.permanent":"恒久的",
   "popupPermission.right":"権限",

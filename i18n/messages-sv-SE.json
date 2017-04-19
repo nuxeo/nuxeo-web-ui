@@ -130,6 +130,7 @@
 	"popupPermission.from": "Från",
 	"popupPermission.newPermission": "Ny",
 	"popupPermission.notify": "Skicka ett e-postmeddelande för att meddela användaren",
+	"popupPermission.notifyLabel": "Notification email",
 	"popupPermission.notifyPlaceholder": "Hej! Kan du kommentera det här dokumentet och...",
 	"popupPermission.permanent": "Permanent",
 	"popupPermission.right": "Rättighet",

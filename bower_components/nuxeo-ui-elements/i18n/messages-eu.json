@@ -130,6 +130,7 @@
   "popupPermission.from":"From",
   "popupPermission.newPermission":"Berria",
   "popupPermission.notify":"Send an email to notify user",
+  "popupPermission.notifyLabel":"Notification email",
   "popupPermission.notifyPlaceholder":"Hi! Could you comment this document and...",
   "popupPermission.permanent":"Permanent",
   "popupPermission.right":"Right",
