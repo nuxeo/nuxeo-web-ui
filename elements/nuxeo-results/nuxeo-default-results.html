@@ -56,9 +56,8 @@ limitations under the License.
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                        selection-enabled display-quick-filters>
         <template>
-          <nuxeo-document-grid-thumbnail class="grid-box"
-                                         tabindex$="{{tabIndex}}"
-                                         selected$="{{selected}}"
+          <nuxeo-document-grid-thumbnail class="grid-box" tabindex$="{{tabIndex}}"
+                                         selected$="{{selected}}" selected-items="[[selectedItems]]"
                                          doc="[[item]]" on-navigate="_navigate">
           </nuxeo-document-grid-thumbnail>
         </template>
