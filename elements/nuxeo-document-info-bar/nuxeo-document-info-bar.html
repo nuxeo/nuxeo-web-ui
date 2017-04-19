@@ -34,6 +34,10 @@ Contributors:
         margin-bottom: 16px;
       }
 
+      .version {
+        background: white;
+      }
+
       .bar.task {
         background: black;
         color: white;
@@ -50,7 +54,7 @@ Contributors:
       }
 
       iron-icon {
-        margin-right: .5em;
+        margin: 0 .5em;
         width: 1.5em;
       }
 
@@ -69,7 +73,7 @@ Contributors:
     <!-- workflows -->
     <template is="dom-repeat" items="[[workflows]]" as="workflow">
       <div class="bar workflow">
-        <div class="flex">
+        <div class="layout horizontal center flex">
           <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
           <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator)]]">
             <nuxeo-user-tag user="[[workflow.initiator]]"></nuxeo-user-tag>
@@ -96,7 +100,7 @@ Contributors:
     <!-- tasks -->
     <template is="dom-repeat" items="[[tasks]]" as="task">
       <div class="bar task">
-        <div>
+        <div class="layout horizontal center">
           <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
           <span>[[i18n('documentPage.to.process')]]
             <nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date>
@@ -108,8 +112,8 @@ Contributors:
 
     <!-- version -->
     <template is="dom-if" if="[[isVersion(document)]]">
-      <div id="versionInfoBar" class="bar">
-        <div>
+      <div id="versionInfoBar" class="bar version">
+        <div class="layout horizontal center">
           <iron-icon icon="icons:info"></iron-icon>
           <span>[[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
         </div>
