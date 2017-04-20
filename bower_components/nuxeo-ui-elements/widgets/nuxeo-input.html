@@ -28,7 +28,7 @@ An element for generic input in forms
 <dom-module id="nuxeo-input">
   <template>
 
-    <paper-input id="input"
+    <paper-input id="paperInput"
                  label="[[label]]"
                  type="[[type]]"
                  name="[[name]]"
@@ -115,7 +115,7 @@ An element for generic input in forms
     },
 
     focus: function() {
-      this.$.input.focus();
+      this.$.paperInput.focus();
     }
 
   });
