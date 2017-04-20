@@ -56,7 +56,8 @@ Contributors:
 
       properties: {
         document: {
-          type: Object
+          type: Object,
+          observer: '_documentChanged'
         },
 
         activities: {
@@ -65,17 +66,13 @@ Contributors:
         }
       },
 
-      observers: ['_documentChanged(document)'],
-
       _activity: function(event) {
         return this.i18n('activity.' + event.eventId);
       },
 
       _documentChanged: function() {
         if (this.document && this.document.contextParameters && this.document.contextParameters.audit){
-          console.log(this.document.contextParameters.audit);
           this.activities = this._gatherDuplicatedActivities(this.document.contextParameters.audit);
-          console.log(this.activities);
         }
       },
 
@@ -86,7 +83,7 @@ Contributors:
         var activities = original.slice();
         for (var i = 0; i < activities.length - 1; i++) {
           for (var j = i + 1;  j < activities.length; j++) {
-            if (this._areGatherableActivities(activities[i], activities[j])){
+            if (this._areGatherableActivities(activities[i], activities[j])) {
               activities.splice(j,1);
               j--;  //After remove duplicated element, decrease j to keep same index
 
