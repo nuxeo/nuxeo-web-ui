@@ -39,7 +39,7 @@ Contributors:
 
     </style>
 
-    <template is="dom-repeat" items="[[document.contextParameters.audit]]">
+    <template is="dom-repeat" items="[[activities]]">
       <div class="row">
         <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
         <span>[[_activity(item)]]</span>
@@ -49,25 +49,63 @@ Contributors:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-document-activity',
 
-      Polymer({
-        is: 'nuxeo-document-activity',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
 
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
-
-        properties: {
-          document: {
-            type: Object
-          }
+      properties: {
+        document: {
+          type: Object
         },
 
-        _activity: function(event) {
-          return this.i18n('activity.' + event.eventId);
+        activities: {
+          type: Array,
+          value: []
         }
-      });
-    })();
-  </script>
+      },
 
+      observers: ['_documentChanged(document)'],
+
+      _activity: function(event) {
+        return this.i18n('activity.' + event.eventId);
+      },
+
+      _documentChanged: function() {
+        if (this.document && this.document.contextParameters && this.document.contextParameters.audit){
+          console.log(this.document.contextParameters.audit);
+          this.activities = this._gatherDuplicatedActivities(this.document.contextParameters.audit);
+          console.log(this.activities);
+        }
+      },
+
+      /**
+       * Returns a copy of the given array with "repeated" gathered
+       */
+      _gatherDuplicatedActivities: function(original) {
+        var activities = original.slice();
+        for (var i = 0; i < activities.length - 1; i++) {
+          for (var j = i + 1;  j < activities.length; j++) {
+            if (this._areGatherableActivities(activities[i], activities[j])){
+              activities.splice(j,1);
+              j--;  //After remove duplicated element, decrease j to keep same index
+
+            }
+          }
+        }
+        return activities;
+      },
+
+      /**
+       * Checks if two given activities are "gatherable".
+       * Activities are gatharable if they have the same eventId, author
+       * and have less than 24 hours between them.
+       */
+      _areGatherableActivities: function(a, b){
+        var delta = new Date(a.eventDate) - new Date(b.eventDate);
+        delta = delta / 1000 / 60 / 60 ; //Converts ms to hours
+        return a.eventId === b.eventId && a.principalName === b.principalName && delta < 24;
+      }
+    });
+  </script>
 </dom-module>
