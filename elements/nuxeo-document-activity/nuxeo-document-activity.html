@@ -98,13 +98,16 @@ Contributors:
 
       /**
        * Checks if two given activities are "gatherable".
-       * Activities are gatharable if they have the same eventId, author
+       * Activities are gatharable if they are both "download", have the same author
        * and have less than 24 hours between them.
        */
       _areGatherableActivities: function(a, b){
         var delta = new Date(a.eventDate) - new Date(b.eventDate);
         delta = delta / 1000 / 60 / 60 ; //Converts ms to hours
-        return a.eventId === b.eventId && a.principalName === b.principalName && delta < 24;
+        return a.eventId === b.eventId
+            && a.eventId === 'download'
+            && a.principalName === b.principalName
+            && delta < 24;
       }
     });
   </script>
