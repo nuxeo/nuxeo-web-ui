@@ -345,64 +345,88 @@ Contributors:
       behaviors: [Nuxeo.I18nBehavior],
 
       properties: {
+        /**
+         * The selected saved search.
+         **/
         selectedSearch: {
           type: Object,
           notify: true,
           observer: '_selectedSearchChanged'
         },
+        /**
+         * The selected saved search index.
+         **/
         selectedSearchIdx: {
           type: Number,
           value: 0,
           observer: '_selectedSearchIdxChanged'
         },
+        /**
+         * The `nuxeo-page-provider` instance used to perform the search.
+         **/
         provider: {
           type: String
         },
+        /**
+         * The page size passed on to `provider`.
+         **/
         pageSize: {
           type: Number,
           value: 40
         },
+        /**
+         * The parameters passed on to `provider`.
+         **/
         params: {
           type: Object
         },
+        /**
+         * The schemas passed on to `provider`.
+         **/
         schemas: {
           type: String
         },
-        currentIndex: {
-          type: Number,
-          notify: true
-        },
+        /**
+         * Gets or sets the mode, `true` if in queue mode, `false` otherwise.
+         **/
         queue: {
           type: Boolean,
           value: false
         },
-        docItems: {
-          type: Array,
-          value: []
-        },
+        /**
+         * The selected document if in queue mode.
+         **/
         selectedDocument: {
           type: Object,
           observer: '_selectedDocChanged',
           notify: true
         },
-        hasResults: {
-          type: Boolean,
-          value: true
-        },
+        /**
+         * If `true`, the parameters for the currently selected search changed.
+         **/
         dirty: {
           type: Boolean,
           value: false,
           notify: true
         },
+        /**
+         * If `true`, a previously saved search is selected.
+         **/
         isSavedSearch: {
           type: Boolean,
           value: false,
           notify: true
         },
+        /**
+         * If `true`, only the queue title will be displayed in the header, without the actions dropdown.
+         **/
         onlyQueue: {
           type: Boolean,
           value: false
         },
+        /**
+         * Method used to build `params` from a loaded saved search.
+         **/
         paramMutator: {
           type: Function,
           value: function() {
@@ -425,26 +449,38 @@ Contributors:
             };
           }
         },
+        /**
+         * If `true`, requests from `provider` are in flight.
+         **/
         loading: {
           type: Boolean,
           reflectToAttribute: true,
           value: false
         },
+        /**
+         * The name of the search layout.
+         **/
         searchName: String,
+        /**
+         * The aggregations returned by `provider`.
+         **/
         aggregations: {
           type: Object,
           observer: '_aggregationsChanged'
         },
+        /**
+         * If `true`, the current element is visible.
+         **/
         visible: Boolean,
         /**
-         * If true, automatically execute the search each time a param is changed.
+         * If `true`, automatically execute the search each time a param is changed.
          */
         auto: {
           type: Boolean,
           value: false
         },
         /**
-         * If true, display a toggle control to enable or disable auto mode.
+         * If `true`, display a toggle control to enable or disable auto mode.
          */
         displayAutoControl: {
           type: Boolean,
