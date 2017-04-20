@@ -42,12 +42,6 @@ Contributors:
         --nuxeo-path-suggestion-results: {
            z-index: 200;
          };
-         --paper-input-container-underline: {
-           display: none;
-         };
-         --paper-input-container-underline-focus: {
-           display: none;
-         };
       }
 
       .container {
@@ -136,6 +130,12 @@ Contributors:
         color: var(--nuxeo-text-default);
         padding-left: 8px;
       }
+
+      .suggester {
+        background-color: var(--nuxeo-dialog-buttons-bar);
+        padding: 8px 16px;
+        margin: 1rem 0;
+      }
     </style>
 
     <nuxeo-document id="docRequest"
@@ -195,8 +195,8 @@ Contributors:
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
-          <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
           <form is="iron-form" id="form" class="form vertical layout flex">
+            <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
             <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
           </form>
         </div>
@@ -307,7 +307,7 @@ Contributors:
         },
 
         _create: function() {
-          if (!this._validate()) {
+          if (!this._validate() || !this.canCreate) {
             return;
           }
           this.document.name = this._sanitizeName(this.document.properties['dc:title']);
