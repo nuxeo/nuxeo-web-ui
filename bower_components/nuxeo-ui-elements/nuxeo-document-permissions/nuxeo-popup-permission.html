@@ -102,10 +102,10 @@ limitations under the License.
           <template is="dom-if" if="{{!shareWithExternal}}">
             <label>[[i18n('popupPermission.timeFrame')]]</label>
             <paper-radio-group selected="{{selectedTimeFrame}}">
-              <paper-radio-button name="permanent">
+              <paper-radio-button noink name="permanent">
                 [[i18n('popupPermission.permanent')]]
               </paper-radio-button>
-              <paper-radio-button name="datebased">
+              <paper-radio-button noink name="datebased">
                 [[i18n('popupPermission.dateBased')]]
               </paper-radio-button>
             </paper-radio-group>
@@ -122,7 +122,7 @@ limitations under the License.
         <div id="notification">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div layout horizontal>
-              <paper-checkbox checked="{{params.notify}}">
+              <paper-checkbox noink checked="{{params.notify}}">
                 [[i18n('popupPermission.notify')]]
               </paper-checkbox>
             </div>

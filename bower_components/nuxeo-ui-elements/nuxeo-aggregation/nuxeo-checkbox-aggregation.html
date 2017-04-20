@@ -45,7 +45,7 @@ An element to interact with page provider aggregations as checkboxes.
 
   <div class="layout vertical">
     <template is="dom-repeat" items="{{buckets}}">
-      <paper-checkbox checked="{{item.checked}}"
+      <paper-checkbox noink checked="{{item.checked}}"
                       on-change="_computeValues">
         [[_computeLabel(item)]] ([[item.docCount]])
       </paper-checkbox>

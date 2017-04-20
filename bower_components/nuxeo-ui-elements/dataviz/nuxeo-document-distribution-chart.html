@@ -120,17 +120,17 @@ Example:
       </div>
       <div id="sb" class="loadable">
         <paper-radio-group selected="{{mode}}" on-paper-radio-group-changed="execute">
-          <paper-radio-button name="size">[[i18n('documentDistributionChart.size')]]</paper-radio-button>
-          <paper-radio-button name="count">[[i18n('documentDistributionChart.count')]]</paper-radio-button>
+          <paper-radio-button noink name="size">[[i18n('documentDistributionChart.size')]]</paper-radio-button>
+          <paper-radio-button noink name="count">[[i18n('documentDistributionChart.count')]]</paper-radio-button>
         </paper-radio-group>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeHidden}}">[[i18n('documentDistributionChart.includeHidden')]]</paper-checkbox>
+        <paper-checkbox noink on-change="execute" checked="{{includeHidden}}">[[i18n('documentDistributionChart.includeHidden')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeDeleted}}">[[i18n('documentDistributionChart.includeDeleted')]]</paper-checkbox>
+        <paper-checkbox noink on-change="execute" checked="{{includeDeleted}}">[[i18n('documentDistributionChart.includeDeleted')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{includeVersion}}">[[i18n('documentDistributionChart.includeVersions')]]</paper-checkbox>
+        <paper-checkbox noink  on-change="execute" checked="{{includeVersion}}">[[i18n('documentDistributionChart.includeVersions')]]</paper-checkbox>
         <p/>
-        <paper-checkbox on-change="execute" checked="{{onlyFolder}}" disabled="[[_chechFolderDisabled(mode)]]">[[i18n('documentDistributionChart.foldersOnly')]]</paper-checkbox>
+        <paper-checkbox noink on-change="execute" checked="{{onlyFolder}}" disabled="[[_chechFolderDisabled(mode)]]">[[i18n('documentDistributionChart.foldersOnly')]]</paper-checkbox>
         <p/>
       </div>
 
