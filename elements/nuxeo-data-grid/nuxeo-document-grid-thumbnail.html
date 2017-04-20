@@ -124,7 +124,8 @@ Contributors:
       }
 
       .bubbleBox:hover .actions,
-      .bubbleBox:hover .select {
+      .bubbleBox:hover .select,
+      .bubbleBox[selection-mode] .select {
         display: block;
       }
 
@@ -153,7 +154,7 @@ Contributors:
 
     </style>
 
-    <div class="bubbleBox grid-box">
+    <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
         on-tap="handleClick">
       </iron-image>
@@ -185,18 +186,28 @@ Contributors:
             type: Object,
             notify: true
           },
+
           offset: {
             type: Number,
             value: -1
           },
+
           selected: {
             type: Boolean,
             value: false,
             reflectToAttribute: true
+          },
+
+          selectedItems: {
+            type: Array,
+            value: []
           }
         },
 
         behaviors: [Nuxeo.RoutingBehavior],
+
+        observers: [
+            '_selectedItemsChanged(selectedItems.splices)'],
 
         _thumbnail: function(doc) {
           if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
@@ -210,14 +221,24 @@ Contributors:
         },
 
         handleClick: function(e) {
-          if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
+          if (this.selectionMode){
+            this._toogleSelect();
+          } else if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
             this.fire('navigate', {item: this.doc});
           }
         },
 
         _onCheckBoxTap: function() {
+         this._toogleSelect();
+        },
+
+        _toogleSelect: function() {
           this.selected = !this.selected;
           this.fire('selected');
+        },
+
+        _selectedItemsChanged: function(){
+          this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
         }
       });
     })();
