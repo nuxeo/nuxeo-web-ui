@@ -71,7 +71,7 @@ Contributors:
       },
 
       _documentChanged: function() {
-        if (this.document && this.document.contextParameters && this.document.contextParameters.audit){
+        if (this.document && this.document.contextParameters && this.document.contextParameters.audit) {
           this.activities = this._gatherDuplicatedActivities(this.document.contextParameters.audit);
         }
       },
