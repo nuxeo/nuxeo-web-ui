@@ -1,0 +1,83 @@
+<!--
+(C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html>
+  <head>
+    <title>nuxeo-icons</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../../polymer/polymer.html">
+    <link rel="import" href="../../../iron-meta/iron-meta.html">
+    <link rel="import" href="../../nuxeo-icons.html">
+    <style>
+
+      body {
+        font-family: Arial, sans-serif;
+        color: rgba(0, 0, 0, 0.5);
+        text-align: center;
+        width: 800px;
+        margin: 32px auto;
+      }
+
+      .icon {
+        display: inline-block;
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+        text-align: center;
+        width: 170px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        margin: 4px 2px;
+        padding: 4px;
+      }
+      iron-icon {
+        padding: 8px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+
+  <body unresolved>
+
+    <h1>ICONS</h1>
+    <template is="dom-bind">
+      <iron-meta type="iconset" list="{{iconsets}}"></iron-meta>
+      <template is="dom-repeat" items="{{iconsets}}">
+        <h2>{{item.name}}</h2>
+        <template is="dom-repeat" items="{{getIconNames(item)}}">
+          <div class="icon">
+            <iron-icon icon="{{item}}"></iron-icon>
+            <label>{{getName(item)}}</label>
+          </div>
+        </template>
+      </template>
+    </template>
+
+    <script>
+      var el = document.querySelector('[is=dom-bind]');
+      el.getIconNames = function(iconset) {
+        return iconset.getIconNames();
+      };
+      el.getName = function(name) {
+        return name.split(':')[1];
+      };
+    </script>
+
+  </body>
+</html>
