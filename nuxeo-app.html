@@ -491,7 +491,8 @@ Contributors:
           'document-unlocked': '_documentUnlocked',
           'theme-changed': '_themeChanged',
           'search-results': '_showSearchResults',
-          'navigate': '_navigate'
+          'navigate': '_navigate',
+          'select2-click': '_select2Click'
         },
 
         ready: function() {
@@ -713,6 +714,11 @@ Contributors:
             }.bind(this));
             this._fetchTasks();
           }
+        },
+
+        _select2Click: function(){
+          //Sends click event to close open overlays
+          this.fire ('click');
         },
 
         _displayUser: function(user) {
