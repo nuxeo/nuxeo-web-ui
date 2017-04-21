@@ -84,7 +84,9 @@ Contributors:
         <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
       </div>
       <paper-dialog id="graphDialog-[[workflow.id]]" with-backdrop>
-        <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+        <paper-dialog-scrollable>
+          <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
+        </paper-dialog-scrollable>
         <div class="buttons">
           <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
         </div>
