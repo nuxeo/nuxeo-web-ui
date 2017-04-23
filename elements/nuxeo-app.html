@@ -336,8 +336,6 @@ Contributors:
 
           <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
 
-          <nuxeo-collection-results name="collection" id="collectionResults" on-navigate="_navigateFromCollection"></nuxeo-collection-results>
-
           <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
 
           <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
@@ -473,7 +471,6 @@ Contributors:
           'goHome': '_handleUGMgoHome',
           'manageUser': '_handleUGMmanageUser',
           'manageGroup': '_handleUGMmanageGroup',
-          'browseCollection': '_navigateToCollection',
           'workflowStarted': '_refreshAndFetchTasks',
           'workflowTaskProcess': '_workflowTaskProcess',
           'workflowTaskProcessed': '_refreshAndFetchTasks',
@@ -492,7 +489,8 @@ Contributors:
           'theme-changed': '_themeChanged',
           'search-results': '_showSearchResults',
           'navigate': '_navigate',
-          'select2-click': '_select2Click'
+          'select2-click': '_select2Click',
+          'collection-loaded': '_updateCollectionMenu'
         },
 
         ready: function() {
@@ -510,8 +508,6 @@ Contributors:
           }.bind(this));
 
           this.clipboard = this.$.clipboard;
-
-          this.$.collectionResults.nxProvider = this.$.collectionsForm.nxProvider;
 
           this.$.nxcon.connect().then(function(res) {
             this.currentUser = res;
@@ -604,26 +600,24 @@ Contributors:
         _navigate: function(e) {
           if (e.detail.doc) {
             page('/browse' + e.detail.doc.path);
+            if (e.detail.isFromCollection) {
+              this.$.collectionsForm.displayMembers(e.detail.srcDoc, e.detail.doc);
+            }
           }
-        },
-
-        _navigateFromCollection: function(e) {
-          page('/browse' + e.detail.doc.path);
-          this.$.collectionsForm.displayMembers(e.detail.doc, e.detail.index);
         },
 
         _updateSearch: function() {
           this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
         },
 
-        _showSearchResults: function(e) {
-          page('/search/' + e.target.searchName);
+        _updateCollectionMenu: function(e) {
+          if (e.detail.provider) {
+            this.$.collectionsForm.memberProvider = e.detail.provider;
+          }
         },
 
-        _navigateToCollection: function(e) {
-          this.selectedTab = 'collections';
-          this.$.collectionResults.collection = e.detail.collection;
-          this.show('collection');
+        _showSearchResults: function(e) {
+          page('/search/' + e.target.searchName);
         },
 
         _toggleDrawer: function(e) {
