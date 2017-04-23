@@ -264,6 +264,7 @@ Contributors:
 
       _navigate: function(e) {
         this.fire('navigate', {doc: (e.model || e.detail).item});
+        e.stopPropagation();
       },
 
       _computedClass: function(isSelected) {
