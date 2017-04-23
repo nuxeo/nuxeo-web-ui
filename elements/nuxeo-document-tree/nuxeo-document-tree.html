@@ -111,6 +111,12 @@ Contributors:
         padding: .12em 0 0;
       }
 
+      paper-spinner {
+        height: 1.1rem;
+        width: 1.1rem;
+        margin-right: -1.4em;
+      }
+
     </style>
 
     <nuxeo-document id="doc" auto="[[auto]]" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
@@ -139,7 +145,8 @@ Contributors:
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+            <paper-spinner active hidden$=[[!loading]]></paper-spinner>
+            <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$=[[loading]]></iron-icon>
           </template>
           <span class="node-name flex">
             <a href$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>
