@@ -456,8 +456,13 @@ Contributors:
         return false;
       },
 
-      set memberProvider(provider) {
-        this.$.membersList.nxProvider = provider;
+      loadCollection: function(collection, provider) {
+        if (provider) {
+          this.$.membersList.nxProvider = provider;
+          if (collection && this.selectedCollection && this.selectedCollection.uid === collection.uid) {
+            this.displayCollections();
+          }
+        }
       }
 
     });

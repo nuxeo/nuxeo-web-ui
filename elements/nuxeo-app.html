@@ -612,7 +612,7 @@ Contributors:
 
         _updateCollectionMenu: function(e) {
           if (e.detail.provider) {
-            this.$.collectionsForm.memberProvider = e.detail.provider;
+            this.$.collectionsForm.loadCollection(e.detail.srcDoc, e.detail.provider);
           }
         },
 
