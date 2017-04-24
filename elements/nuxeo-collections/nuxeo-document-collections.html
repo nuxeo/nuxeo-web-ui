@@ -92,7 +92,7 @@ Contributors:
           'collection': evt.currentTarget.dataset.uid
         };
         op.execute().then(function() {
-          this.fire('removed-from-collection', {docId: this.document.uid, collectionId: evt.target.dataset.uid});
+          this.fire('removed-from-collection', {doc: this.document, collection: evt.target.dataset});
         }.bind(this));
       }
 

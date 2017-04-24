@@ -290,7 +290,7 @@ Contributors:
           if (this.selectedCollection) {
             this.displayMembers();
             this.$.membersList.fire('iron-resize');
-            if (this.$.membersList.size > 0) {
+            if (this.$.membersList.items.length > 0) {
               this.$.membersList.selectItem(0);
             }
           }
@@ -371,26 +371,30 @@ Contributors:
           'collection': this.selectedCollection
         };
         op.execute().then(function() {
-          var memberIndex;
-          this.$.membersList.$.list.items = this.$.membersList.$.list.items.filter(function(el, index) {
-            if (el.uid === evt.target.dataset.uid) {
-              memberIndex = index;
-              return false;
-            }
-            return true;
-          });
-          if (this.$.membersList.length > memberIndex) {
-            this.$.membersList.selectItem(memberIndex);
-          }
+          this._removeFromMembers(evt.target.dataset.uid)
           this.fire('removed-from-collection',
             {
               innerRemove: true,
-              docId: memberId,
-              collectionId: evt.target.dataset.uid
+              doc: memberId,
+              collection: evt.target.dataset.uid
 
             }
           );
         }.bind(this));
+      },
+
+      _removeFromMembers: function(uid) {
+        var memberIndex = memberIndex = this.$.membersList.items.findIndex(function(el, index) {
+          return el.uid === uid;
+        });
+        if (memberIndex > -1) {
+          this.$.membersList.splice('items', memberIndex, 1);
+          if (this.$.membersList.items.length > memberIndex) {
+            this.$.membersList.selectItem(memberIndex);
+          } else {
+            this.$.membersList.selectItem(this.$.membersList.items.length - 1);
+          }
+        }
       },
 
       _computedClass: function(isSelected) {
@@ -424,7 +428,7 @@ Contributors:
       ready: function() {
         window.addEventListener('added-to-collection', function(e) {
           this.$.collectionsProvider.fetch();
-          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collection.uid) {
             console.log('TODO');
           }
         }.bind(this));
@@ -432,8 +436,8 @@ Contributors:
           if (e.detail.innerRemove) {
             return;
           }
-          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
-            console.log('TODO');
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collection.uid) {
+            this._removeFromMembers(e.detail.doc.uid);
           } else if (!this._isDisplayMembers) {
             this.$.collectionsProvider.fetch();
           }
