@@ -172,10 +172,6 @@ limitations under the License.
       '_dataChanged(data, tagging)'
     ],
 
-    _handleClick: function() {
-      this.fire ('select2-click');
-    },
-
     /**
      * HTML escaping function to be used in formatters.
      */
@@ -286,7 +282,6 @@ limitations under the License.
       jQuery(el).val(this.value).select2(params);
 
       jQuery(el).on('change', this._updateSelection.bind(this));
-      jQuery(el).on('select2-open', this._handleClick.bind(this));
 
       // view or edit mode
       if (this.readonly) {
