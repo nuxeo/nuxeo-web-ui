@@ -20,4 +20,11 @@ export default class DocumentLayout extends BasePage {
     fieldEl.waitForVisible();
     return fixtures.layouts.setValue(fieldEl, value);
   }
+
+  fillMultipleValues(table) {
+    table.rows().forEach((row) => {
+      const fieldEl = this.getField(row[0]);
+      return fixtures.layouts.setValue(fieldEl, row[1]);
+    });
+  }
 }

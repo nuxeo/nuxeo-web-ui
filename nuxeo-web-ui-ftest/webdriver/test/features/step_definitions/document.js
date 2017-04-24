@@ -76,16 +76,8 @@ module.exports = function () {
     page.editButton.waitForVisible();
     page.editButton.click();
     page.edit.waitForVisible();
-    table.rows().forEach((row) => {
-      if (row[0] === 'expired') {
-        page.edit.layout().el.element(`input[name="${row[0]}"]`).click();
-        var keys = row[1].split("-");
-        driver.keys(keys);
-      } else {
-        page.edit.layout().waitForVisible();
-        page.edit.layout().setFieldValue(row[0], row[1]);
-      }
-    });
+    page.edit.layout().waitForVisible();
+    page.edit.layout().fillMultipleValues(table);
     page.saveButton.waitForVisible();
     page.saveButton.click();
   });
