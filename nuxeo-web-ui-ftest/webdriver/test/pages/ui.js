@@ -7,6 +7,8 @@ import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Administration from './ui/administration.js';
 import BasePage from './base';
+import ActivityFeed from './ui/activity_feed';
+import HistoryTable from './ui/history_table';
 
 export default class UI extends BasePage {
 
@@ -26,19 +28,11 @@ export default class UI extends BasePage {
   }
 
   get activityFeed() {
-    return this.el.element('nuxeo-document-activity');
-  }
-
-  getActivity(activity) {
-    return this.el.element(`///nuxeo-document-activity//*[text()="${activity}"]`);
+    return new ActivityFeed('nuxeo-document-activity');
   }
 
   get historyTable() {
-    return this.el.element('nuxeo-document-history');
-  }
-
-  getHistory() {
-    return this.el.elements(`///nuxeo-document-history//*[text()="created a version"]`);
+    return new HistoryTable('nuxeo-document-history');
   }
 
   get createDialog() {
