@@ -4,6 +4,13 @@ global.fieldRegistry = new FieldRegistry();
 global.fieldRegistry.register('nuxeo-input',
                               (element) => element.element('#input').getValue(),
                               (element, value) => { element.element('#input').setValue(value); });
+global.fieldRegistry.register('nuxeo-date-picker',
+                              (element) => element.element('#input').getValue(),
+                              (element, value) => {
+                                element.element('#input').click();
+                                var keys = value.split("-");
+                                driver.keys(keys);
+                              });
 global.fieldRegistry.register('nuxeo-textarea',
                               (element) => element.element('#textarea').getValue(),
                               (element, value) => { element.element('#textarea').setValue(value); });
