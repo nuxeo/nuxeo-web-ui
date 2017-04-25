@@ -180,7 +180,7 @@ Contributors:
       if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
         this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
         this.$.worfklow.remove().then(function() {
-          this.fire('document-updated');
+          this.fire('workflowAbandoned');
         }.bind(this));
       }
     },
