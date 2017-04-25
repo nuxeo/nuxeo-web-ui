@@ -73,6 +73,21 @@ Used by `nuxeo-user-group-management`
         color: red;
         margin: 1em 0;
       }
+
+      .header h3  {
+        margin-bottom: 0;
+      }
+
+      h3 iron-icon {
+        width: 1.3em;
+        margin-right: .2rem;
+      }
+
+       .form-buttons {
+        background-color:var(--nuxeo-dialog-buttons-bar, #eee);
+        padding: 1em;
+        margin: 0 -1.2rem 2em;
+      }
     </style>
 
     <nuxeo-resource id="request" path="/user" headers='{"Content-Type":"application/json"}'></nuxeo-resource>
@@ -81,8 +96,7 @@ Used by `nuxeo-user-group-management`
 
     <div class="header horizontal layout center">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
-      <iron-icon icon="social:person"></iron-icon>
-      <h3>[[i18n('createUser.heading')]]</h3>
+      <h3><iron-icon icon="social:person"></iron-icon>[[i18n('createUser.heading')]]</h3>
     </div>
 
     <form is="iron-form" id="form" class="vertical layout">

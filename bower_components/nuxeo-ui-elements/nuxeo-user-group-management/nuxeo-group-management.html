@@ -45,10 +45,6 @@ Used by `nuxeo-user-group-management`
         display: block;
       }
 
-      paper-button {
-        padding: .2em .5em;
-      }
-
       h2 {
         color: var(--nuxeo-title-color, #213f7d);
       }
@@ -57,39 +53,52 @@ Used by `nuxeo-user-group-management`
         margin-top: 1em;
       }
 
+      .header-actions paper-button {
+        margin-left: 1em;
+      }
+
+      .header-actions iron-icon {
+        width: 1.3rem;
+        margin-right: .5rem;
+      }
+
       .backButton {
         color: var(--nuxeo-button-primary, #00adff);
       }
 
       .card {
-        background: none #fff;
-        border: 1px solid #e6e9ef;
+        background: none var(--nuxeo-box, #fff);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
         margin: 2em 0;
         padding: 2em 1.5em;
       }
 
+      .header {
+        margin-bottom: 2rem;
+      }
+
+      h3 iron-icon {
+        width: 1.3em;
+        margin-right: .2rem;
+      }
+
       .groupname {
-        margin: .3em .1em 0 .1em;
-        padding: .2em;
+        margin: .5rem 0 0;
       }
 
       .grouplabel,
       .counter {
         font-weight: normal;
-        margin: .1em .2em;
-        padding: .2em;
-      }
-
-      .counter {
-        margin-bottom: 3em;
+        margin: .5rem 0 0;
       }
 
       .avatar {
-        margin-top: 10px;
+        margin: .5rem .5rem 0 0;
+        width: 2rem;
       }
 
       .header-actions {
-        height: 2em;
+        height: 2.8rem;
         margin-top: .5em;
       }
 
@@ -109,14 +118,6 @@ Used by `nuxeo-user-group-management`
       }
 
       /* Table */
-      .table-wrapper {
-        position: relative;
-      }
-
-      .table-wrapper .floating-header {
-        position: absolute;
-      }
-
       .title {
         margin: 0 0 .8em 0;
         padding: 0;
@@ -132,8 +133,10 @@ Used by `nuxeo-user-group-management`
         background-color: var(--nuxeo-table-header-background, #fafafa);
         color: var(--nuxeo-table-header-titles, rgba(0, 0, 0, 0.54));
         font-weight: 400;
-        height: 4em;
+        min-height: 48px;
         padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table-row {
@@ -206,6 +209,14 @@ Used by `nuxeo-user-group-management`
         padding: 2em;
       }
 
+      .emptyResult {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+      }
+
     </style>
 
     <nuxeo-resource id="request"
@@ -263,6 +274,7 @@ Used by `nuxeo-user-group-management`
       </div>
     </paper-dialog>
 
+    <paper-card>
     <div class="header horizontal layout">
       <paper-icon-button noink class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:people" class="avatar"></iron-icon>
@@ -274,18 +286,19 @@ Used by `nuxeo-user-group-management`
 
       <template is="dom-if" if=[[!readonly]]>
         <div class="layout horizontal header-actions">
-          <paper-button noink class="flex-end" on-tap="_toggleEditMembers">
-            <iron-icon icon="add"></iron-icon> [[i18n('groupManagement.addMembers')]]
-          </paper-button>
-          <paper-button noink on-tap="_toggleEditGroup">
-            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('groupManagement.editGroup')]]
-          </paper-button>
           <paper-button noink class="flex-end" on-tap="_toggleDeleteGroup">
             <iron-icon icon="icons:delete"></iron-icon> [[i18n('command.delete')]]
+          </paper-button>
+          <paper-button noink class="flex-end primary" on-tap="_toggleEditMembers">
+            <iron-icon icon="add"></iron-icon> [[i18n('groupManagement.addMembers')]]
+          </paper-button>
+          <paper-button noink on-tap="_toggleEditGroup" class="primary">
+            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('groupManagement.editGroup')]]
           </paper-button>
         </div>
       </template>
     </div>
+    </paper-card>
 
     <div class="card layout vertical" hidden$="[[!showEditMembers]]">
       <nuxeo-user-suggestion id="picker"
@@ -305,7 +318,7 @@ Used by `nuxeo-user-group-management`
     </div>
 
     <!-- users table -->
-    <div class="table-wrapper">
+    <paper-card>
       <h3 class="title">
         <iron-icon icon="social:person"></iron-icon> [[i18n('groupManagement.users.heading')]]
       </h3>
@@ -344,16 +357,16 @@ Used by `nuxeo-user-group-management`
           </template>
           <template is="dom-if" if=[[_empty(memberUsers.entries)]]>
             <div class="table-row">
-              <div>[[i18n('groupManagement.noSearchResults')]]</div>
+              <div class="emptyResult">[[i18n('groupManagement.noSearchResults')]]</div>
             </div>
           </template>
         </div>
       </div>
       <nuxeo-pagination-controls page="{{usersCurrentPage}}" number-of-pages="[[memberUsers.numberOfPages]]"></nuxeo-pagination-controls>
-    </div>
+    </paper-card>
 
     <!-- nested groups -->
-    <div class="table-wrapper">
+    <paper-card>
       <h3 class="title">
         <iron-icon icon="social:people"></iron-icon> [[i18n('groupManagement.nestedGroups.heading')]]
       </h3>
@@ -396,13 +409,13 @@ Used by `nuxeo-user-group-management`
         </div>
       </div>
       <nuxeo-pagination-controls page="{{groupsCurrentPage}}" number-of-pages="[[memberGroups.numberOfPages]]"></nuxeo-pagination-controls>
-    </div>
+    </paper-card>
 
     <!-- permissions -->
-    <div class="table-wrapper">
-      <h1 class="title floating-header">[[i18n('groupManagement.permissions.heading')]]</h1>
+    <paper-card>
+      <h3 class="title floating-header">[[i18n('groupManagement.permissions.heading')]]</h3>
       <nuxeo-user-group-permissions-table entity="[[groupname]]"></nuxeo-user-group-permissions-table>
-    </div>
+    </paper-card>
 
   </template>
   <script>

@@ -67,17 +67,19 @@ Used by `nuxeo-user-group-management`
         background-color: var(--nuxeo-table-header-background, #fafafa);
         color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
         font-weight: 400;
-        height: 4em;
+        min-height: 48px;
         padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table-row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-        padding: 12px 0 12px 12px;
+        padding: 0 1em;
+        min-height: 48px;
         border-bottom: 1px solid var(--nuxeo-border, #eee);
         background-color: var(--nuxeo-table-items-background, #fafafa);
-        cursor: pointer;
       }
 
       .table-row:hover {
@@ -90,10 +92,6 @@ Used by `nuxeo-user-group-management`
 
       .table-row:last-of-type {
         border-bottom: none;
-      }
-
-      .table-row > div {
-        padding: 0.6em 1em;
       }
 
       .ace-row > div {
@@ -113,16 +111,16 @@ Used by `nuxeo-user-group-management`
         background-color: var(--nuxeo-secondary-color, #7e90a5);
         border-radius: 3px;
         color: #fff;
-        margin: 0 0.2em 0.2em 0;
-        padding: 0.06em 0.3em;
+        margin: 0 .2em .2em 0;
+        padding: .06em .3em;
         text-transform: uppercase;
         white-space: nowrap;
+        @apply(--nuxeo-tag);
       }
 
       .ace-permission-path {
         color: var(--nuxeo-secondary-color, #213f7d);
         font-size: .8rem;
-        margin-top: 5px;
       }
 
       .buttons {
@@ -133,6 +131,14 @@ Used by `nuxeo-user-group-management`
         padding: 2em;
         font-size: 1.1em;
       }
+
+      .emptyResult {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+      }
     </style>
 
     <nuxeo-operation id="permissions" op="Document.PageProvider" enrichers="acls"></nuxeo-operation>
@@ -140,7 +146,6 @@ Used by `nuxeo-user-group-management`
 
     <div class="layout horizontal center">
       <h3>[[label]]</h3>
-      <nuxeo-pagination-controls page="{{_currentPage}}" number-of-pages="[[_numberOfPages]]"></nuxeo-pagination-controls>
     </div>
 
     <div class="table">
@@ -191,7 +196,7 @@ Used by `nuxeo-user-group-management`
       </template>
       <template is="dom-if" if=[[empty]]>
         <div class="table-row">
-          <div>[[i18n('userGroupPermissions.noPermissions', entity)]]</div>
+          <div class="emptyResult">[[i18n('userGroupPermissions.noPermissions', entity)]]</div>
         </div>
       </template>
     </div>

@@ -79,6 +79,11 @@ Used by `nuxeo-user-group-management`
         margin-left: 1em;
       }
 
+      paper-button iron-icon {
+        width: 1.3rem;
+        margin-right: .5rem;
+      }
+
       .activity-entry:nth-of-type(1) {
         margin-top: 20px;
       }
@@ -95,24 +100,42 @@ Used by `nuxeo-user-group-management`
         text-decoration: underline;
       }
 
-      .table {
-        border: 1px solid var(--nuxeo-border, #e6e9ef);
-        margin-top: 1em;
+      .table-headers {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: var(--nuxeo-table-header-background, #fafafa);
+        color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
+        font-weight: 400;
+        min-height: 48px;
+        padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table-row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        padding: 0 1em;
+        min-height: 48px;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
+        background-color: var(--nuxeo-table-items-background, #fafafa);
       }
 
-      .table-row > div {
-        padding: 0.6em 1em;
+      .table-row:hover {
+        background: var(--nuxeo-container-hover, #fafafa);
+      }
+
+      .table {
+        border: 1px solid var(--nuxeo-border, #eee);
+      }
+
+      .table-row:last-of-type {
+        border-bottom: none;
       }
 
       .table-headers > div {
-        background-color: var(--nuxeo-table-header-background, #e6e9ef);
-        padding: 1.3em 1em;
-        font-weight: 400;
+        background-color: var(--nuxeo-table-header-background,#f8f9fb);
+        font-weight: bold;
       }
 
       .table-actions {
@@ -120,10 +143,7 @@ Used by `nuxeo-user-group-management`
       }
 
       nuxeo-view-user {
-        background: none #fff;
-        border: 1px solid var(--nuxeo-border, #e6e9ef);
-        margin: 2em 0;
-        padding: 2em 1.5em;
+        margin: 2em;
       }
 
       nuxeo-user-group-permissions-table {
@@ -158,6 +178,7 @@ Used by `nuxeo-user-group-management`
 
     <paper-toast id="toast"></paper-toast>
 
+    <paper-card>
     <div class="header horizontal layout">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
       <iron-icon icon="social:person" class="avatar"></iron-icon>
@@ -168,9 +189,27 @@ Used by `nuxeo-user-group-management`
 
       <div class="actions">
 
+        <!-- delete -->
+        <template is="dom-if" if=[[!readonly]]>
+          <paper-button noink id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
+            <iron-icon noink icon="icons:delete"></iron-icon> [[i18n('command.delete')]]
+          </paper-button>
+        </template>
+        <paper-dialog id="deleteUserDialog" modal>
+          <div class="horizontal layout center confirm">
+            [[i18n('userManagement.delete.user.confirm')]]
+          </div>
+          <div class="buttons horizontal end-justified layout">
+            <div class="flex start-justified">
+              <paper-button noink dialog-dismiss>[[i18n('label.no')]]</paper-button>
+            </div>
+            <paper-button noink class="primary" on-tap="_deleteUser">[[i18n('label.yes')]]</paper-button>
+          </div>
+        </paper-dialog>
+
         <!-- change password -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="changePasswordButton" class="horizontal layout center" on-tap="_toggleChangePassword">
+          <paper-button noink id="changePasswordButton" class="primary horizontal layout center" on-tap="_toggleChangePassword">
             <iron-icon icon="icons:lock"></iron-icon> [[i18n('command.change.password')]]
           </paper-button>
         </template>
@@ -191,7 +230,7 @@ Used by `nuxeo-user-group-management`
 
         <!-- edit -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="editUserButton" class="horizontal layout center" on-tap="_toggleEditUser">
+          <paper-button noink id="editUserButton" class="primary horizontal layout center" on-tap="_toggleEditUser">
             <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('userManagement.editUser.button')]]
           </paper-button>
         </template>
@@ -212,31 +251,16 @@ Used by `nuxeo-user-group-management`
           </div>
         </paper-dialog>
 
-        <!-- delete -->
-        <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
-            <iron-icon noink icon="icons:delete"></iron-icon> [[i18n('command.delete')]]
-          </paper-button>
-        </template>
-        <paper-dialog id="deleteUserDialog" modal>
-          <div class="horizontal layout center confirm">
-            [[i18n('userManagement.delete.user.confirm')]]
-          </div>
-          <div class="buttons horizontal end-justified layout">
-            <div class="flex start-justified">
-              <paper-button noink dialog-dismiss>[[i18n('label.no')]]</paper-button>
-            </div>
-            <paper-button noink class="primary" on-tap="_deleteUser">[[i18n('label.yes')]]</paper-button>
-          </div>
-        </paper-dialog>
-
       </div>
     </div>
 
     <!-- user -->
     <nuxeo-view-user id="userViewer" user="[[user]]"></nuxeo-view-user>
 
+    </paper-card>
+
     <!-- groups -->
+    <paper-card>
     <div class="layout horizontal center">
       <h3 class="flex">[[i18n('userManagement.groups')]]</h3>
       <template is="dom-if" if=[[!readonly]]>
@@ -263,7 +287,7 @@ Used by `nuxeo-user-group-management`
       </template>
     </div>
     <div class="table">
-      <div class="table-row table-headers">
+      <div class="table-headers">
         <div class="flex">[[i18n('userManagement.name')]]</div>
         <div class="flex-4">[[i18n('userManagement.identifier')]]</div>
         <div class="table-actions">&nbsp;</div>
@@ -292,17 +316,22 @@ Used by `nuxeo-user-group-management`
         </div>
       </template>
     </div>
+    </paper-card>
 
     <!-- local permissions -->
+    <paper-card>
     <nuxeo-user-group-permissions-table label="[[i18n('userManagement.localPermissions.heading')]]"
                                         entity="[[username]]" readonly="[[readonly]]">
     </nuxeo-user-group-permissions-table>
+    </paper-card>
 
     <!-- group permissions -->
     <template is="dom-repeat" items="[[groups]]">
+      <paper-card>
       <nuxeo-user-group-permissions-table label="[[i18n('userManagement.entityPermissions', item.name)]]"
                                           entity="[[item.name]]" readonly="[[readonly]]">
       </nuxeo-user-group-permissions-table>
+      </paper-card>
     </template>
 
     <paper-dialog id="dialog" modal class="vertical layout">

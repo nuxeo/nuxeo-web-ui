@@ -33,11 +33,10 @@ Element displaying a table with document ACLs.
         background-color: var(--nuxeo-table-header-background, #fafafa);
         color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
         font-weight: 700;
-        font-size: 1rem;
-        height: 56px;
-        border-bottom: 2px solid var(--nuxeo-border, #e3e3e3);
-        min-height: 56px;
+        min-height: 48px;
         padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .acl-table-row {
@@ -46,7 +45,7 @@ Element displaying a table with document ACLs.
         border-bottom: 1px solid var(--nuxeo-border, #e3e3e3);
         background-color: var(--nuxeo-table-items-background, #fafafa);
         cursor: pointer;
-        height: 48px;
+        min-height: 48px;
         padding: 0 0 0 12px;
       }
 
@@ -69,6 +68,14 @@ Element displaying a table with document ACLs.
 
       .buttons {
         @apply(--buttons-bar);
+      }
+
+      .emptyResult {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
       }
     </style>
 

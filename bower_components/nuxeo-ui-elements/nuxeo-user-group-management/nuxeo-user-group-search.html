@@ -40,7 +40,7 @@ Used by `nuxeo-user-management`
       }
 
       .search {
-        width: 50%;
+        width: calc( 100% - 10rem);
         margin-bottom: 32px;
       }
 
@@ -55,8 +55,10 @@ Used by `nuxeo-user-management`
         background-color: var(--nuxeo-table-header-background, #fafafa);
         color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
         font-weight: 400;
-        height: 4em;
+        min-height: 48px;
         padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table-row {
@@ -79,6 +81,19 @@ Used by `nuxeo-user-management`
         margin-right: 2em;
       }
 
+      h3 iron-icon {
+        width: 1.3em;
+        margin-right: .2rem;
+      }
+
+      .emptyResult {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+      }
+
     </style>
 
     <nuxeo-resource id="userSearch" auto path="/user/search" response="{{users}}"></nuxeo-resource>
@@ -88,16 +103,17 @@ Used by `nuxeo-user-management`
                     headers='{"fetch.group": "memberUsers,memberGroups"}'>
     </nuxeo-resource>
 
-    <div class="search">
+    <paper-card class="search">
       <paper-input noink autofocus="true" value="{{searchTerm}}" type="search"
                    placeholder="[[i18n('userGroupSearch.search.placeholder')]]">
         <iron-icon icon="search" prefix></iron-icon>
       </paper-input>
-    </div>
+    </paper-card>
 
     <template is="dom-if" if="[[!_showResults(searchTerm)]]">
 
       <!-- groups -->
+      <paper-card>
       <h3 class="title">
         <iron-icon icon="social:people"></iron-icon> [[i18n('userGroupSearch.groups')]]
       </h3>
@@ -122,14 +138,16 @@ Used by `nuxeo-user-management`
           </template>
           <template is="dom-if" if=[[_empty(groups.entries)]]>
             <div class="table-row">
-              <div>[[i18n('userGroupSearch.empty.groups')]]</div>
+              <div class="emptyResult">[[i18n('userGroupSearch.empty.groups')]]</div>
             </div>
           </template>
         </div>
       </div>
       <nuxeo-pagination-controls page="{{groupsCurrentPage}}" number-of-pages="[[groups.numberOfPages]]"></nuxeo-pagination-controls>
+      </paper-card>
 
       <!-- users -->
+      <paper-card>
       <h3 class="title">
         <iron-icon icon="social:person"></iron-icon> [[i18n('userGroupSearch.users.heading')]]
       </h3>
@@ -153,12 +171,13 @@ Used by `nuxeo-user-management`
           </template>
           <template is="dom-if" if=[[_empty(users.entries)]]>
             <div class="table-row">
-              <div>[[i18n('userGroupSearch.empty.users')]]</div>
+              <div class="emptyResult">[[i18n('userGroupSearch.empty.users')]]</div>
             </div>
           </template>
         </div>
       </div>
       <nuxeo-pagination-controls page="{{usersCurrentPage}}" number-of-pages="[[users.numberOfPages]]"></nuxeo-pagination-controls>
+      </paper-card>
     </template>
   </template>
 </dom-module>

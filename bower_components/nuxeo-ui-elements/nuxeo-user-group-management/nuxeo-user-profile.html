@@ -45,9 +45,8 @@ Example:
       }
 
       .user-icon {
-        --iron-icon-width: 32px;
-        --iron-icon-height: 32px;
         margin: 8px;
+        width: 1.3rem;
       }
 
       .user {
@@ -66,6 +65,11 @@ Example:
         margin-left: 1em;
       }
 
+      .actions iron-icon {
+        width: 1.3rem;
+        margin-right: .5rem;
+      }
+
       .table {
         border: 1px solid var(--nuxeo-border, #e6e9ef);
         margin-top: 1em;
@@ -77,24 +81,21 @@ Example:
         background-color: var(--nuxeo-table-header-background, #e6e9ef);
         padding: 1.3em 1em;
         font-weight: 400;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table .row {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         background-color: var(--nuxeo-table-items-background, #e6e9ef);
-        padding: 0.6em 1em;
+        border-bottom: 1px solid var(--nuxeo-border, #eee);
+        padding: 0 1em;
+        min-height: 48px;
       }
 
       nuxeo-view-user {
-        background: none var(--nuxeo-box);
-        border: 1px solid var(--nuxeo-border, #e6e9ef);
-        margin: 2em 0;
-        padding: 2em 1.5em;
-      }
-
-      nuxeo-user-group-permissions-table {
-        margin-top: 1.5em;
+        margin: 2em;
       }
 
       paper-dialog {
@@ -114,6 +115,8 @@ Example:
 
     <paper-toast id="toast"></paper-toast>
 
+    <paper-card>
+
     <div class="horizontal layout center">
 
       <iron-icon class="user-icon" icon="social:person"></iron-icon>
@@ -126,7 +129,7 @@ Example:
 
         <!-- change password -->
         <template is="dom-if" if=[[!readonly]]>
-          <paper-button noink id="changePasswordButton" class="horizontal layout center" on-tap="_openChangePasswordDialog">
+          <paper-button noink id="changePasswordButton" class="horizontal layout center primary" on-tap="_openChangePasswordDialog">
             <iron-icon icon="icons:lock"></iron-icon> [[i18n('userProfile.password.change')]]
           </paper-button>
         </template>
@@ -164,7 +167,10 @@ Example:
     <!-- user -->
     <nuxeo-view-user id="userViewer" user="[[user]]"></nuxeo-view-user>
 
+    </paper-card>
+
     <!-- groups -->
+    <paper-card>
     <h3 class="flex">[[i18n('userManagement.groups')]]</h3>
     <div class="table">
       <div class="header">
@@ -178,18 +184,23 @@ Example:
         </div>
       </template>
     </div>
+    </paper-card>
 
     <!-- local permissions -->
+    <paper-card>
     <nuxeo-user-group-permissions-table label="[[i18n('userManagement.localPermissions.heading')]]"
                                         entity="[[username]]" readonly>
     </nuxeo-user-group-permissions-table>
+    </paper-card>
 
     <!-- group permissions -->
+    <paper-card>
     <template is="dom-repeat" items="[[groups]]">
       <nuxeo-user-group-permissions-table label="[[i18n('userManagement.entityPermissions', item.name)]]"
                                           entity="[[item.name]]" readonly>
       </nuxeo-user-group-permissions-table>
     </template>
+    </paper-card>
 
   </template>
 

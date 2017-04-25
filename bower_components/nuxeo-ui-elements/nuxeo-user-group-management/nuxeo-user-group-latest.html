@@ -60,8 +60,10 @@ Example:
         background-color: var(--nuxeo-table-header-background, #fafafa);
         color: var(--nuxeo-text-default, rgba(0, 0, 0, 0.54));
         font-weight: 400;
-        height: 4em;
+        min-height: 48px;
         padding: 0 0 0 12px;
+        border-bottom: 2px solid var(--nuxeo-border, #eee);
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
       }
 
       .table-row {
@@ -84,6 +86,19 @@ Example:
         border: 1px solid var(--nuxeo-border, #eee);
       }
 
+      h3 iron-icon {
+         width: 1.3em;
+         margin-right: .2rem;
+      }
+
+      .emptyResult {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+      }
+
     </style>
 
     <nuxeo-resource id="latestCreatedUsersGroups" auto
@@ -92,6 +107,7 @@ Example:
                     headers='{"properties": "*"}'>
     </nuxeo-resource>
 
+    <paper-card>
     <h3 class="title">
       <iron-icon icon="history" prefix></iron-icon>
       [[i18n('userGroupLatest.recentlyCreated')]]
@@ -123,11 +139,12 @@ Example:
         </template>
         <template is="dom-if" if=[[_empty(latestCreatedUsersGroups.entries)]]>
           <div class="table-row">
-            <div>[[i18n('userGroupLatest.emptyRecentUserOrGroup')]]</div>
+            <div class="emptyResult">[[i18n('userGroupLatest.emptyRecentUserOrGroup')]]</div>
           </div>
         </template>
       </div>
     </div>
+    </paper-card>
  </template>
 </dom-module>
 <script>
