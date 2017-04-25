@@ -426,22 +426,31 @@ Contributors:
       },
 
       ready: function() {
-        window.addEventListener('removed-from-collection', function(e) {
-          if (e.detail.innerRemove) {
-            return;
+        window.addEventListener('added-to-collection', function() {
+          if (this.visible) {
+            this._refreshCollections();
           }
-          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
-            this._removeFromMembers(e.detail.doc.uid);
-          } else if (!this._isDisplayMembers) {
-            this.$.collectionsProvider.fetch();
+        }.bind(this));
+        window.addEventListener('removed-from-collection', function(e) {
+          if (this.visible) {
+            if (e.detail.innerRemove) {
+              return;
+            }
+            if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
+              this._removeFromMembers(e.detail.doc.uid);
+            } else if (!this._isDisplayMembers) {
+              this._refreshCollections();
+            }
           }
         }.bind(this));
 
       },
 
       _visibleChanged: function() {
-        if (this.$.collectionsProvider.resultsCount === undefined) {
-          this.$.collectionsProvider.fetch();
+        if (this.visible) {
+          this.selectedCollection = null;
+          this._refreshCollections();
+          this.displayCollections();
         }
       },
 
@@ -452,6 +461,11 @@ Contributors:
           return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
         }
         return false;
+      },
+
+      _refreshCollections: function() {
+        this.$.collectionsProvider.page = 1;
+        this.$.collectionsProvider.fetch();
       },
 
       loadCollection: function(collection, provider) {
