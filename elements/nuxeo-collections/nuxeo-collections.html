@@ -376,7 +376,7 @@ Contributors:
             {
               innerRemove: true,
               doc: memberId,
-              collection: evt.target.dataset.uid
+              collectionId: evt.target.dataset.uid
 
             }
           );
@@ -384,7 +384,7 @@ Contributors:
       },
 
       _removeFromMembers: function(uid) {
-        var memberIndex = memberIndex = this.$.membersList.items.findIndex(function(el, index) {
+        var memberIndex = memberIndex = this.$.membersList.items.findIndex(function(el) {
           return el.uid === uid;
         });
         if (memberIndex > -1) {
@@ -426,17 +426,11 @@ Contributors:
       },
 
       ready: function() {
-        window.addEventListener('added-to-collection', function(e) {
-          this.$.collectionsProvider.fetch();
-          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collection.uid) {
-            console.log('TODO');
-          }
-        }.bind(this));
         window.addEventListener('removed-from-collection', function(e) {
           if (e.detail.innerRemove) {
             return;
           }
-          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collection.uid) {
+          if (this.selectedCollection && this.selectedCollection.uid === e.detail.collectionId) {
             this._removeFromMembers(e.detail.doc.uid);
           } else if (!this._isDisplayMembers) {
             this.$.collectionsProvider.fetch();
