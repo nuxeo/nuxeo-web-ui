@@ -207,15 +207,15 @@ limitations under the License.
           return;
         }
         if (this.nxProvider.page === 1) {
-          this.$.list.items = [];
+          this.items = [];
           this.clearSelection();
         }
         var docs = this.nxProvider.currentPage;
         docs.forEach(function(doc) {
-          this.$.list.push('items', doc);
+          this.push('items', doc);
         }.bind(this));
         this.quickFilters = this.nxProvider.quickFilters;
-        this.size = this.$.list.items.length;
+        this.size = this.items.length;
         this.$.list.notifyResize();
         this.notifyResize();
         this.$.scrollThreshold.clearTriggers();
@@ -229,7 +229,7 @@ limitations under the License.
           return;
         }
         this.nxProvider.page = 1;
-        this.$.list.items = [];
+        this.items = [];
         this.size = 0;
         this.nxProvider.isNextPageAvailable = false;
         this.$.list.notifyResize();
@@ -285,7 +285,7 @@ limitations under the License.
        * Selects all the items in the list.
        */
       selectAll: function() {
-        this.$.list.items.forEach(function(item) {
+        this.items.forEach(function(item) {
           this.selectItem(item);
         }.bind(this.$.list));
         this._updateFlags();
@@ -417,10 +417,6 @@ limitations under the License.
 
       _observeEmptyLabel: function() {
         this._computedEmptyLabel = this.emptyLabel;
-      },
-
-      get items() {
-        return this.$.list.items;
       },
 
       focusOnIndexIfNotVisible: function(idx) {

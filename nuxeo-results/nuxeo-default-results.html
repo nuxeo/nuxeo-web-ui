@@ -162,6 +162,7 @@ limitations under the License.
 
       _navigate: function(e) {
         this.fire('navigate', {doc: (e.model || e.detail).item});
+        e.stopPropagation();
       }
     });
   </script>

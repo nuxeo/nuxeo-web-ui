@@ -81,6 +81,12 @@ limitations under the License.
             observer: '_openedChanged'
           },
 
+          loading: {
+            type: Boolean,
+            value: false,
+            observer: '_loadingChanged'
+          },
+
           /**
           * Template used to render each tree node.
           */
@@ -139,6 +145,7 @@ limitations under the License.
             this._instance = this.stamp({});
             this._instance.item = this.data;
             this._instance.opened = this.opened;
+            this._instance.loading = this.loading;
             this._instance.isLeaf = this.controller.isLeaf(this.data);
             this.dataset[this.nodeKey] = this.data[this.nodeKey];
 
@@ -150,6 +157,7 @@ limitations under the License.
             var children = document.createElement('iron-collapse');
             children.id = 'children';
             children.opened = this.opened;
+            children.loading = this.loading;
             children.noAnimation = 'true';
             Polymer.dom(this).appendChild(children);
 
@@ -180,11 +188,13 @@ limitations under the License.
                 children.appendChild(el);
               }
               resolve();
+              this.loading = false;
             }.bind(this));
           }
         },
 
         _fetchChildren: function() {
+          this.loading = true;
           return this.controller.getChildren(this.data).then(function(results) {
             this._children = results;
             this._updated = true;
@@ -230,6 +240,13 @@ limitations under the License.
             Polymer.dom(this).querySelector('#children').opened = this.opened;
             this._instance.notifyPath('opened', this.opened);
             this._setupToggleListener();
+          }
+        },
+
+        _loadingChanged: function() {
+          if (this._instance) {
+            Polymer.dom(this).querySelector('#children').loading = this.loading;
+            this._instance.notifyPath('loading', this.loading);
           }
         },
 

@@ -200,7 +200,7 @@ An element to display page provider results as a grid with infinite scrolling.
         lower-threshold="1000" class="loadable"
         on-lower-threshold="_loadMoreData">
         <div class="grid-ctn bubbleBoxes">
-          <iron-list id="list" scroll-target="scrollThreshold" grid selected-item="{{selectedItem}}"
+          <iron-list id="list" items="[[items]]" scroll-target="scrollThreshold" grid selected-item="{{selectedItem}}"
             selected-items="{{selectedItems}}" selection-enabled>
           </iron-list>
         </div>
@@ -242,7 +242,7 @@ An element to display page provider results as a grid with infinite scrolling.
             Polymer.dom(this.$.list).appendChild(this._template);
             // set binding to items
             // iron-list will look for our template and stamp the items
-            this.$.list.items = [];
+            this.items = [];
             this._templateStamped = true;
           }
         },

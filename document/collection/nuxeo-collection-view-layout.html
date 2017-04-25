@@ -39,7 +39,7 @@ limitations under the License.
     </nuxeo-page-provider>
 
     <nuxeo-default-results id="results"
-                   items="{{items}}"
+                   items="{{items}}" on-navigate="_navigate"
                    selected-items="{{selectedItems}}"
                    empty-label="[[i18n('collections.noDocument')]]"
                    empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]"
@@ -53,7 +53,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-collection-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FiltersBehavior],
       properties: {
         /**
          * @doctype Collection
@@ -69,17 +69,28 @@ limitations under the License.
       },
 
       _documentChanged: function () {
-        if (this.document) {
+        if (this.document && this.hasFacet(this.document, 'Collection')) {
           this.$.results.nxProvider = this.$.provider;
           this.$.provider.params = [this.document.uid];
           this.$.provider.page = 1;
+          this.fire('collection-loaded', {collection: document, provider: this.$.provider});
           this.$.provider.fetch();
         }
       },
 
       _actionContext: function () {
         return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
+      },
+
+      _navigate: function(e) {
+        this.fire('navigate', {
+                                doc: e.detail.doc,
+                                srcDoc: this.document,
+                                isFromCollection: true
+                              });
+        e.stopPropagation();
       }
+
     });
   </script>
 
