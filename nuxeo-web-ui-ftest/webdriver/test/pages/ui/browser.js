@@ -68,12 +68,8 @@ export default class Browser {
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
         driver.waitUntil(() => {
-          try {
-            collection.click(`nuxeo-tag iron-icon[name="remove"]`);
-            return true;
-          } catch (e) {
-            return this.doNotHaveCollection(name);
-          }
+          collection.click(`nuxeo-tag a[name="remove"]`);
+          return true;
         }, 'Could not remove collection.');
         return true;
       }
