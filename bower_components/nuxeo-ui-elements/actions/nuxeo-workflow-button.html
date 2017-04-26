@@ -49,12 +49,12 @@ Example:
         min-width: 480px;
       }
 
-      paper-dropdown-menu {
-        width: 90%
+      nuxeo-select {
+        max-width: 380px;
       }
 
       paper-dialog .buttons {
-        @apply(--layout-start-justified);
+        @apply(--layout-justified);
         background-color: var(--nuxeo-dialog-buttons-bar, white);
         margin-top: 2em;
       }
@@ -70,13 +70,11 @@ Example:
     <paper-dialog id="dialog" with-backdrop>
       <h2>[[i18n('workflowButton.dialog.heading')]]</h2>
 
-      <paper-dropdown-menu label="[[i18n('workflowButton.dialog.placeholder')]]" noink no-animations horizontal-align="left">
-        <paper-menu class="dropdown-content" selected="{{selectedProcess}}" attr-for-selected="key">
+      <nuxeo-select label="[[i18n('workflowButton.dialog.placeholder')]]" selected="{{selectedProcess}}" attr-for-selected="key">
           <template is="dom-repeat" items="[[processes]]" as="process">
             <paper-item key="[[process.workflowModelName]]">[[i18n(process.title)]]</paper-item>
           </template>
-        </paper-menu>
-      </paper-dropdown-menu>
+      </nuxeo-select>
 
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('workflowButton.dialog.close')]]</paper-button>
