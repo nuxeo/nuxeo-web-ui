@@ -82,19 +82,19 @@
       },
 
       _editEntry: function() {
-        this.fire('editEntry', {item: this.item, index: this.index});
+        this.fire('edit-entry', {item: this.item, index: this.index});
       },
 
       _deleteEntry: function() {
-        this.fire('deleteEntry', {item: this.item, index: this.index});
+        this.fire('delete-entry', {item: this.item, index: this.index});
       },
 
       moveUp: function() {
-        this.fire('moveUpward', {item: this.item, index: this.index});
+        this.fire('move-upward', {item: this.item, index: this.index});
       },
 
       moveDown: function() {
-        this.fire('moveDownward', {item: this.item, index: this.index});
+        this.fire('move-downward', {item: this.item, index: this.index});
       },
 
       isUpVisible: function(index) {

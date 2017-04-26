@@ -311,10 +311,10 @@ Example:
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
         'scroll': '_onHorizontalScroll',
-        'editEntry': '_editEntry',
-        'deleteEntry': '_deleteEntry',
-        'moveUpward': '_moveItemUpward',
-        'moveDownward': '_moveItemDownward',
+        'edit-entry': '_editEntry',
+        'delete-entry': '_deleteEntry',
+        'move-upward': '_moveItemUpward',
+        'move-ownward': '_moveItemDownward',
       },
 
       properties: {
@@ -683,6 +683,7 @@ Example:
       },
 
       _editEntry: function(e) {
+        e.stopPropagation();
         var editForm = this.getContentChildren('#form')[0];
         var items = this.items; // TODO: add support for editing when using a page provider
         editForm.index = e.detail.index;
@@ -691,6 +692,7 @@ Example:
       },
 
       _deleteEntry: function(e) {
+        e.stopPropagation();
         this.splice('items', e.detail.index, 1);
         this.notifyResize();
       },
@@ -706,6 +708,7 @@ Example:
       },
 
       _moveItemUpward: function(e) {
+        e.stopPropagation();
         if (e.detail.index > 0) {
           var item = this.items[e.detail.index];
           this.splice('items', e.detail.index, 1);
@@ -715,6 +718,7 @@ Example:
       },
 
       _moveItemDownward: function(e) {
+        e.stopPropagation();
         if ((this.items.length - 1) > e.detail.index) {
           var item = this.items[e.detail.index];
           this.splice('items', e.detail.index, 1);
