@@ -210,7 +210,7 @@ Contributors:
                 <div>
                 <div class="vertical layout">
                   <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
-                  <span class="date">[[_date(task.dueDate)]][[_formatDate(task.dueDate)]]</span>
+                  <span class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
                 </div>
               </div>
             </template>
