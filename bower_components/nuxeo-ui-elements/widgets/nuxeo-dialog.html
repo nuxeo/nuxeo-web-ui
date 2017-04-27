@@ -36,8 +36,8 @@ An element for dialogs
       }
 
       paper-dialog {
-        @apply(--paper-dialog);
         min-width: 480px;
+        @apply(--paper-dialog);
       }
 
       paper-dialog ::content .buttons {
@@ -48,8 +48,7 @@ An element for dialogs
       }
     </style>
 
-    <paper-dialog id="dialog" with-backdrop no-auto-focus$="[[noAutoFocus]]">
-      <template is="dom-if" if="[[title]]"><h2>[[title]]</h2></template>
+    <paper-dialog id="dialog" with-backdrop modal$="[[modal]]" no-auto-focus$="[[noAutoFocus]]">
       <content></content>
     </paper-dialog>
 
@@ -61,10 +60,15 @@ An element for dialogs
     is: 'nuxeo-dialog',
 
     properties: {
+
       /**
-       * Title.
+       * Modal.
        */
-      title: String,
+      modal: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
 
       /**
        * No auto focus.
