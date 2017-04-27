@@ -240,18 +240,18 @@ Contributors:
 
         <!-- menu -->
         <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
-          <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="defaultSearch" icon="icons:search" label="app.search"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="expiredSearch" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="browser" icon="nuxeo:browse" label="app.browse"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="recents" icon="nuxeo:recent" label="app.recentlyViewed"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="defaultSearch" icon="nuxeo:search" label="app.search"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="expiredSearch" icon="nuxeo:expired" label="app.expiredSearch"></nuxeo-menu-icon>
           <nuxeo-slot slot="SEARCH_MENU_BUTTONS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard" badge="[[clipboardCount]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="administration" icon="icons:build" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="profile" icon="icons:account-circle" label="app.account" class="profile-icon"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="tasks" icon="nuxeo:tasks" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="favorites" icon="nuxeo:favorites" label="app.favorites"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="collections" icon="nuxeo:collections" label="app.collections"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="personalWorkspace" icon="nuxeo:user-space" label="app.personalSpace"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="clipboard" icon="nuxeo:clipboard" label="app.clipboard" badge="[[clipboardCount]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="profile" icon="nuxeo:user-settings" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
         <!-- drawer -->
