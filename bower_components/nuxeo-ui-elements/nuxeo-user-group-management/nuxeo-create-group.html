@@ -127,7 +127,7 @@ Used by `nuxeo-user-group-management`
 
     <div class="header horizontal layout center">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
-      <h3><iron-icon icon="social:people"></iron-icon>[[i18n('createGroup.heading')]]</h3>
+      <h3><iron-icon icon="nuxeo:group"></iron-icon>[[i18n('createGroup.heading')]]</h3>
     </div>
 
     <form is="iron-form" id="form" class="vertical layout">
@@ -150,8 +150,8 @@ Used by `nuxeo-user-group-management`
           <div class="search-entry">
             <div class="user-info">
               <div class="label">
-                <iron-icon icon="social:person" hidden="[[item.groupname]]"></iron-icon>
-                <iron-icon icon="social:people" hidden="[[item.username]]"></iron-icon>
+                <iron-icon icon="nuxeo:user" hidden="[[item.groupname]]"></iron-icon>
+                <iron-icon icon="nuxeo:group" hidden="[[item.username]]"></iron-icon>
                 <span>[[item.displayLabel]]</span>
               </div>
             </div>
@@ -162,7 +162,7 @@ Used by `nuxeo-user-group-management`
             <div class="user-info">
               <span class="email">[[item.email]]</span>
             </div>
-            <paper-icon-button icon="icons:clear" title="remove" on-tap="_remove"></paper-icon-button>
+            <paper-icon-button icon="nuxeo:remove" title="remove" on-tap="_remove"></paper-icon-button>
           </div>
         </template>
       </div>

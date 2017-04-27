@@ -176,12 +176,12 @@ Used by `nuxeo-user-group-management`
                   </div>
                   <div class="flex-2">
                     <template is="dom-if" if=[[ace.creator]]>
-                      <nuxeo-tag icon="social:people">[[ace.creator]]</nuxeo-tag>
+                      <nuxeo-tag icon="nuxeo:group">[[ace.creator]]</nuxeo-tag>
                     </template>
                   </div>
                   <div class="table-actions">
                     <template is="dom-if" if=[[!readonly]]>
-                      <paper-icon-button icon="icons:delete" noink
+                      <paper-icon-button icon="nuxeo:delete" noink
                                        title="[[i18n('userGroupPermissions.delete.button')]]"
                                        on-tap="_toggleDialog"
                                        hidden$="[[!_canDelete(ace)]]">

@@ -109,7 +109,7 @@ Example:
 
     <paper-card>
     <h3 class="title">
-      <iron-icon icon="history" prefix></iron-icon>
+      <iron-icon icon="nuxeo:recent" prefix></iron-icon>
       [[i18n('userGroupLatest.recentlyCreated')]]
     </h3>
     <div class="table">
@@ -117,7 +117,7 @@ Example:
         <div class="flex">[[i18n('userGroupLatest.name')]]</div>
         <div class="flex-2">[[i18n('userGroupLatest.identifier')]]</div>
         <div class="table-actions">
-          <paper-icon-button noink icon="refresh" on-tap="_refreshLatest"></paper-icon-button>
+          <paper-icon-button noink icon="nuxeo:refresh" on-tap="_refreshLatest"></paper-icon-button>
         </div>
       </div>
       <div class="table-rows">
@@ -126,11 +126,11 @@ Example:
             <div class="flex">
               <template is="dom-if" if="[[_isUser(item)]]">
                 <template is="dom-if" if="[[_userHasName(item)]]">
-                  <nuxeo-tag icon="social:person">[[_displayLCUserGroup(item)]]</nuxeo-tag>
+                  <nuxeo-tag icon="nuxeo:user">[[_displayLCUserGroup(item)]]</nuxeo-tag>
                 </template>
               </template>
               <template is="dom-if" if="[[_isGroup(item)]]">
-                <nuxeo-tag icon="social:people">[[_displayLCUserGroup(item)]]</nuxeo-tag>
+                <nuxeo-tag icon="nuxeo:group">[[_displayLCUserGroup(item)]]</nuxeo-tag>
               </template>
             </div>
             <div class="flex-2">[[item.uid]]</div>

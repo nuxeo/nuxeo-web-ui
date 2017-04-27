@@ -36,9 +36,9 @@
         </div>
       </template>
       <template is="dom-if" if="[[editable]]">
-        <paper-icon-button id="edit-button" icon="icons:create" on-tap="_editEntry" noink></paper-icon-button>
+        <paper-icon-button id="edit-button" icon="nuxeo:edit" on-tap="_editEntry" noink></paper-icon-button>
         <paper-tooltip for="edit-button" position="left">[[i18n('command.edit')]]</paper-tooltip>
-        <paper-icon-button id="delete-button" name="delete" icon="icons:delete" on-tap="_deleteEntry" noink></paper-icon-button>
+        <paper-icon-button id="delete-button" name="delete" icon="nuxeo:delete" on-tap="_deleteEntry" noink></paper-icon-button>
         <paper-tooltip for="delete-button" position="left">[[i18n('command.remove')]]</paper-tooltip>
       </template>
     </div>

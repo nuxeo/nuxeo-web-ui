@@ -106,7 +106,7 @@ Used by `nuxeo-user-management`
     <paper-card class="search">
       <paper-input noink autofocus="true" value="{{searchTerm}}" type="search"
                    placeholder="[[i18n('userGroupSearch.search.placeholder')]]">
-        <iron-icon icon="search" prefix></iron-icon>
+        <iron-icon icon="nuxeo:search" prefix></iron-icon>
       </paper-input>
     </paper-card>
 
@@ -115,7 +115,7 @@ Used by `nuxeo-user-management`
       <!-- groups -->
       <paper-card>
       <h3 class="title">
-        <iron-icon icon="social:people"></iron-icon> [[i18n('userGroupSearch.groups')]]
+        <iron-icon icon="nuxeo:group"></iron-icon> [[i18n('userGroupSearch.groups')]]
       </h3>
       <div class="table">
         <div class="table-header">
@@ -127,7 +127,7 @@ Used by `nuxeo-user-management`
           <template is="dom-repeat" items="[[groups.entries]]" as="item">
             <div class="table-row" on-tap="_manageGroup">
               <div class="flex-4">
-                <nuxeo-tag icon="social:people">[[item.grouplabel]]</nuxeo-tag>
+                <nuxeo-tag icon="nuxeo:group">[[item.grouplabel]]</nuxeo-tag>
               </div>
               <div class="flex-2">[[item.groupname]]</div>
               <div class="flex-4">
@@ -149,7 +149,7 @@ Used by `nuxeo-user-management`
       <!-- users -->
       <paper-card>
       <h3 class="title">
-        <iron-icon icon="social:person"></iron-icon> [[i18n('userGroupSearch.users.heading')]]
+        <iron-icon icon="nuxeo:user"></iron-icon> [[i18n('userGroupSearch.users.heading')]]
       </h3>
       <div class="table">
         <div class="table-header">
@@ -162,7 +162,7 @@ Used by `nuxeo-user-management`
             <div class="table-row" on-tap="_manageUser">
               <div class="flex-4">
                 <template is="dom-if" if="[[_userHasName(item)]]">
-                  <nuxeo-tag icon="social:person"> [[item.properties.firstName]] [[item.properties.lastName]]</nuxeo-tag>
+                  <nuxeo-tag icon="nuxeo:user"> [[item.properties.firstName]] [[item.properties.lastName]]</nuxeo-tag>
                 </template>
               </div>
               <div class="flex-2">[[item.id]]</div>

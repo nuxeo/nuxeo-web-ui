@@ -181,7 +181,7 @@ Used by `nuxeo-user-group-management`
     <paper-card>
     <div class="header horizontal layout">
       <paper-icon-button class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
-      <iron-icon icon="social:person" class="avatar"></iron-icon>
+      <iron-icon icon="nuxeo:user" class="avatar"></iron-icon>
       <div class="layout vertical">
         <h3 class="username">[[user.id]]</h3>
         <h4 class="name">[[user.properties.firstName]] [[user.properties.lastName]]</h4>
@@ -192,7 +192,7 @@ Used by `nuxeo-user-group-management`
         <!-- delete -->
         <template is="dom-if" if=[[!readonly]]>
           <paper-button noink id="deleteUserButton" class="horizontal layout center" on-tap="_toggleDeleteUser">
-            <iron-icon noink icon="icons:delete"></iron-icon> [[i18n('command.delete')]]
+            <iron-icon noink icon="nuxeo:delete"></iron-icon> [[i18n('command.delete')]]
           </paper-button>
         </template>
         <paper-dialog id="deleteUserDialog" modal>
@@ -210,7 +210,7 @@ Used by `nuxeo-user-group-management`
         <!-- change password -->
         <template is="dom-if" if=[[!readonly]]>
           <paper-button noink id="changePasswordButton" class="primary horizontal layout center" on-tap="_toggleChangePassword">
-            <iron-icon icon="icons:lock"></iron-icon> [[i18n('command.change.password')]]
+            <iron-icon icon="nuxeo:lock"></iron-icon> [[i18n('command.change.password')]]
           </paper-button>
         </template>
         <paper-dialog id="changePasswordDialog" modal>
@@ -231,7 +231,7 @@ Used by `nuxeo-user-group-management`
         <!-- edit -->
         <template is="dom-if" if=[[!readonly]]>
           <paper-button noink id="editUserButton" class="primary horizontal layout center" on-tap="_toggleEditUser">
-            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('userManagement.editUser.button')]]
+            <iron-icon icon="nuxeo:edit"></iron-icon> [[i18n('userManagement.editUser.button')]]
           </paper-button>
         </template>
         <paper-dialog id="editUserDialog" modal>
@@ -265,7 +265,7 @@ Used by `nuxeo-user-group-management`
       <h3 class="flex">[[i18n('userManagement.groups')]]</h3>
       <template is="dom-if" if=[[!readonly]]>
         <paper-button noink id="addGroup" class="flex-end" on-tap="_toggleEditGroups">
-          <iron-icon icon="add"></iron-icon> [[i18n('userManagement.addToGroup.button')]]
+          <iron-icon icon="nuxeo:add"></iron-icon> [[i18n('userManagement.addToGroup.button')]]
         </paper-button>
       </template>
     </div>
@@ -281,7 +281,7 @@ Used by `nuxeo-user-group-management`
       <template is="dom-repeat" items="[[activity]]">
         <div class="activity-entry">
           [[i18n('userManagement.memberOf.group', user.id)]]
-          <nuxeo-tag icon="social:people">[[item.label]]</nuxeo-tag>
+          <nuxeo-tag icon="nuxeo:group">[[item.label]]</nuxeo-tag>
           <span class="remove" on-tap="_toggleDialog">[[i18n('userManagement.group.remove')]]</span>
         </div>
       </template>
@@ -296,12 +296,12 @@ Used by `nuxeo-user-group-management`
         <template is="dom-repeat" items="[[groups]]">
           <div class="table-row">
             <div class="flex">
-              <nuxeo-tag icon="social:people">[[item.label]]</nuxeo-tag>
+              <nuxeo-tag icon="nuxeo:group">[[item.label]]</nuxeo-tag>
             </div>
             <div class="flex-4">[[item.name]]</div>
             <div class="table-actions">
               <template is="dom-if" if="[[_canRemoveAdministratorsGroup(item)]]">
-                <paper-icon-button icon="icons:clear"
+                <paper-icon-button icon="nuxeo:remove"
                                    title="[[i18n('userManagement.removeFrom.group', item.label)]]"
                                    on-tap="_toggleDialog">
                 </paper-icon-button>

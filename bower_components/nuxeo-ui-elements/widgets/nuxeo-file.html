@@ -54,7 +54,7 @@ An element for uploading blobs using the batch upload API.
   <div id="dropZone">
     <template is="dom-if" if="[[!uploading]]">
       <paper-button id="button" raised on-tap="_pick">
-        <iron-icon icon="file-upload"></iron-icon>
+        <iron-icon icon="nuxeo:upload"></iron-icon>
         <span>Upload</span>
       </paper-button>
     </template>
@@ -72,7 +72,7 @@ An element for uploading blobs using the batch upload API.
       <div class="layout horizontal">
         <span>[[file.name]]</span>
         <iron-icon icon="autorenew" title="Retry" on-click="retry" hidden$="[[!file.error]]"></iron-icon>
-        <iron-icon icon="cancel" title="Remove" on-click="cancel" hidden$="[[file.complete]]"></iron-icon>
+        <iron-icon icon="nuxeo:remove" title="Remove" on-click="cancel" hidden$="[[file.complete]]"></iron-icon>
         <iron-icon icon="check-circle" title="Done" hidden$="[[!file.complete]]"></iron-icon>
       </div>
       <paper-progress value="[[file.progress]]" error="[[file.error]]" hidden="[[file.complete]]"></paper-progress>

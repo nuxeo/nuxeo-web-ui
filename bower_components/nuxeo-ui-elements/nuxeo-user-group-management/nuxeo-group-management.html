@@ -277,7 +277,7 @@ Used by `nuxeo-user-group-management`
     <paper-card>
     <div class="header horizontal layout">
       <paper-icon-button noink class="backButton" icon="icons:arrow-back" on-tap="_goHome"></paper-icon-button>
-      <iron-icon icon="social:people" class="avatar"></iron-icon>
+      <iron-icon icon="nuxeo:user" class="avatar"></iron-icon>
       <div class="layout vertical flex">
         <h3 class="groupname">[[group.groupname]]</h3>
         <h4 class="grouplabel">[[group.grouplabel]]</h4>
@@ -287,13 +287,13 @@ Used by `nuxeo-user-group-management`
       <template is="dom-if" if=[[!readonly]]>
         <div class="layout horizontal header-actions">
           <paper-button noink class="flex-end" on-tap="_toggleDeleteGroup">
-            <iron-icon icon="icons:delete"></iron-icon> [[i18n('command.delete')]]
+            <iron-icon icon="nuxeo:delete"></iron-icon> [[i18n('command.delete')]]
           </paper-button>
           <paper-button noink class="flex-end primary" on-tap="_toggleEditMembers">
-            <iron-icon icon="add"></iron-icon> [[i18n('groupManagement.addMembers')]]
+            <iron-icon icon="nuxeo:add"></iron-icon> [[i18n('groupManagement.addMembers')]]
           </paper-button>
           <paper-button noink on-tap="_toggleEditGroup" class="primary">
-            <iron-icon icon="editor:mode-edit"></iron-icon> [[i18n('groupManagement.editGroup')]]
+            <iron-icon icon="nuxeo:edit"></iron-icon> [[i18n('groupManagement.editGroup')]]
           </paper-button>
         </div>
       </template>
@@ -320,12 +320,12 @@ Used by `nuxeo-user-group-management`
     <!-- users table -->
     <paper-card>
       <h3 class="title">
-        <iron-icon icon="social:person"></iron-icon> [[i18n('groupManagement.users.heading')]]
+        <iron-icon icon="nuxeo:user"></iron-icon> [[i18n('groupManagement.users.heading')]]
       </h3>
       <div class="filter-wrapper">
         <paper-input autofocus="true" value="{{usersFilter}}" type="search"
                      placeholder="[[i18n('groupManagement.filterUsers.placeholder')]]" no-label-float>
-          <iron-icon icon="search" prefix></iron-icon>
+          <iron-icon icon="nuxeo:search" prefix></iron-icon>
         </paper-input>
       </div>
       <div class="table">
@@ -340,13 +340,13 @@ Used by `nuxeo-user-group-management`
               <div class="table-row">
                 <div class="flex-4">
                   <template is="dom-if" if="[[_userHasName(item)]]">
-                    <nuxeo-tag icon="social:person">[[item.properties.firstName]] [[item.properties.lastName]]</nuxeo-tag>
+                    <nuxeo-tag icon="nuxeo:user">[[item.properties.firstName]] [[item.properties.lastName]]</nuxeo-tag>
                   </template>
                 </div>
                 <div class="flex-4">[[item.id]]</div>
                 <div class="table-actions">
                   <template is="dom-if" if=[[!readonly]]>
-                    <paper-icon-button icon="icons:clear" noink
+                    <paper-icon-button icon="nuxeo:clear" noink
                                        title="[[i18n('groupManagement.removeFrom', item.label)]]"
                                        on-tap="_toggleDeleteDialog">
                     </paper-icon-button>
@@ -368,12 +368,12 @@ Used by `nuxeo-user-group-management`
     <!-- nested groups -->
     <paper-card>
       <h3 class="title">
-        <iron-icon icon="social:people"></iron-icon> [[i18n('groupManagement.nestedGroups.heading')]]
+        <iron-icon icon="nuxeo:group"></iron-icon> [[i18n('groupManagement.nestedGroups.heading')]]
       </h3>
       <div class="filter-wrapper">
         <paper-input autofocus="true" value="{{groupsFilter}}" type="search"
                      placeholder="[[i18n('groupManagement.filterGroups.placeholder')]]" no-label-float>
-          <iron-icon icon="search" prefix></iron-icon>
+          <iron-icon icon="nuxeo:search" prefix></iron-icon>
         </paper-input>
       </div>
       <div class="table">
@@ -387,12 +387,12 @@ Used by `nuxeo-user-group-management`
             <template is="dom-repeat" items="[[memberGroups.entries]]">
               <div class="table-row">
                 <div class="flex-4">
-                  <nuxeo-tag icon="social:people">[[item.groupname]]</nuxeo-tag>
+                  <nuxeo-tag icon="nuxeo:group">[[item.groupname]]</nuxeo-tag>
                 </div>
                 <div class="flex-4">[[item.grouplabel]]</div>
                 <div class="table-actions">
                   <template is="dom-if" if=[[!readonly]]>
-                    <paper-icon-button icon="icons:clear" noink
+                    <paper-icon-button icon="nuxeo:clear" noink
                                        title="[[i18n('groupManagement.removeFrom', item.label)]]"
                                        on-tap="_toggleDeleteDialog">
                     </paper-icon-button>
@@ -700,7 +700,7 @@ Used by `nuxeo-user-group-management`
         },
 
         _icon: function(entry) {
-          return entry.type === 'GROUP_TYPE' ? 'social:people' : 'social:person';
+          return entry.type === 'GROUP_TYPE' ? 'nuxeo:group' : 'nuxeo:user';
         },
 
         _countUsers: function(users) {
