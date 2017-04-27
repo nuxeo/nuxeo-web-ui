@@ -39,7 +39,7 @@ Contributors:
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
-    <paper-icon-button icon="delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
+    <paper-icon-button icon="nuxeo:delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
     </paper-icon-button>
     <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
       [[i18n('deleteDocumentsButton.tooltip')]]

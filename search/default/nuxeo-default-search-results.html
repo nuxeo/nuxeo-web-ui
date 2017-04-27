@@ -24,7 +24,7 @@ limitations under the License.
 
     <nuxeo-results name="default" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
 
-      <nuxeo-data-grid name="grid" icon="icons:apps" class="results" empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters>
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters>
         <template>
           <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
@@ -32,7 +32,7 @@ limitations under the License.
         </template>
       </nuxeo-data-grid>
 
-      <nuxeo-data-table name="table" icon="icons:list" class="results"
+      <nuxeo-data-table name="table" icon="nuxeo:view-list" class="results"
                         settings-enabled
                         empty-label="[[i18n('searchResults.noResults')]]"
                         selection-enabled

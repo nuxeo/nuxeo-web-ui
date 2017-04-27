@@ -89,7 +89,7 @@ Contributors:
         <!-- metadata / edit -->
         <paper-card>
           <div hidden$="[[edit]]">
-            <paper-icon-button noink id="edit" icon="editor:mode-edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+            <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </div>
           <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
