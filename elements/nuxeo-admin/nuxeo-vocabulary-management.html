@@ -106,9 +106,9 @@ Contributors:
                     [[_value(item, column.key)]]
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
-                    <paper-icon-button id="edit-button-[[index]]" icon="editor:mode-edit" on-tap="_editEntry"></paper-icon-button>
+                    <paper-icon-button id="edit-button-[[index]]" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
                     <paper-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry')]]</paper-tooltip>
-                    <paper-icon-button id="delete-button-[[index]]" name="delete" icon="icons:delete" on-tap="_deleteEntry"></paper-icon-button>
+                    <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete" on-tap="_deleteEntry"></paper-icon-button>
                     <paper-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry')]]</paper-tooltip>
                   </template>
                 </template>

@@ -228,12 +228,12 @@ Contributors:
             </template>
           </nuxeo-select>
           <template is="dom-if" if="[[queue]]">
-            <paper-icon-button class="switch" icon="editor:border-color" id="toogleFilter" on-tap="_displayFiltersTapped">
+            <paper-icon-button class="switch" icon="nuxeo:filter" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
             <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</paper-tooltip>
           </template>
           <template is="dom-if" if="[[!queue]]">
-            <paper-icon-button class="switch" icon="icons:list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
+            <paper-icon-button class="switch" icon="nuxeo:view-list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
             <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</paper-tooltip>
           </template>

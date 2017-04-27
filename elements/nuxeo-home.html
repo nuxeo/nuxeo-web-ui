@@ -76,7 +76,7 @@ Contributors:
 
           <!-- recently edited -->
           <paper-card>
-            <h3><iron-icon icon="editor:mode-edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
+            <h3><iron-icon icon="nuxeo:edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
             <nuxeo-page-provider auto
               id="latestQuery"
               page-size="20"
@@ -110,13 +110,13 @@ Contributors:
 
           <!-- tasks -->
           <paper-card>
-            <h3><iron-icon icon="icons:check-box" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
+            <h3><iron-icon icon="nuxeo:tasks" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
             <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
           </paper-card>
 
           <!-- recently viewed -->
           <paper-card>
-            <h3><iron-icon icon="icons:restore" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
+            <h3><iron-icon icon="nuxeo:recent" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
             <nuxeo-data-table id="latestViewedDocs"
               items="[[recentDocuments]]"
@@ -144,7 +144,7 @@ Contributors:
 
           <!-- favorites -->
           <paper-card>
-            <h3><iron-icon icon="icons:star" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
+            <h3><iron-icon icon="nuxeo:favorites" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
             <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
             <nuxeo-page-provider id="favoritesProvider"
                provider="default_content_collection"
