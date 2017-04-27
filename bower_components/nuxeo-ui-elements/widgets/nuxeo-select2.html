@@ -91,7 +91,7 @@ An element wrapping Select2 and relying on an operation for suggestions
         if (!this.required) {
           return true;
         }
-        return this.multiple ? this.value.length > 0 : !!this.value;
+        return this.multiple ? !!this.value && this.value.length > 0 : !!this.value;
       },
 
       // Implements abstract Nuxeo.Select2 methods
