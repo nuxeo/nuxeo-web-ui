@@ -180,7 +180,7 @@ Contributors:
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <div class="task-item task-box layout horizontal" on-tap="_process">
-                <div class="layout horizontal flex-1">
+                <div class="layout horizontal flex">
                   <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
                   <div class="task-info layout vertical">
                     <h3 class="task-name">[[i18n(task.name)]]</h3>
@@ -195,7 +195,7 @@ Contributors:
                     </div>
                   </div>
                 </div>
-                <div class="layout vertical flex-2">
+                <div class="layout vertical flex">
                   <div>
                     <span class="task-property">[[i18n('documentTask.assigned')]]</span>
                     <template is="dom-repeat" items="[[task.actors]]" as="actor">
