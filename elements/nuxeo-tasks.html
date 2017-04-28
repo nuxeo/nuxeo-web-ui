@@ -125,13 +125,13 @@ Contributors:
 
     <nuxeo-document id="currentTaskDoc"
                     doc-id="[[_docId(current)]]"
-                    enrichers="preview"
+                    enrichers="preview, breadcrumb"
                     response="{{currentTaskDocument}}"></nuxeo-document>
 
     <nuxeo-page>
       <div class="header">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
-          <a href="[[_href(currentTaskDocument)]]">[[currentTaskDocument.properties.dc:title]]</a>
+          <nuxeo-breadcrumb document="[[currentTaskDocument]]"></nuxeo-breadcrumb>
         </template>
         <template is="dom-if" if="[[!_hasCurrent(current)]]">
           <span class="flex">[[i18n('tasks.label')]]</span>
@@ -185,13 +185,17 @@ Contributors:
                   <div class="task-info layout vertical">
                     <h3 class="task-name">[[i18n(task.name)]]</h3>
                     <span class="task-directive">[[i18n(task.directive)]]</span>
+                    <div class="taskDoc">
+                      <span class="task-property">[[i18n('tasksList.on')]]</span>
+                      <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+                    </div>
+                    <div class="taskPath">
+                      <span class="task-property">[[i18n('tasksList.in')]]</span>
+                      <span class="doc-title">[[_getPath(task.targetDocumentIds.0.path)]]</span>
+                    </div>
                   </div>
                 </div>
                 <div class="layout vertical flex-2">
-                  <div class="taskDoc">
-                   <span class="task-property">[[i18n('tasksList.on')]]</span>
-                   <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
-                  </div>
                   <div>
                     <span class="task-property">[[i18n('documentTask.assigned')]]</span>
                     <template is="dom-repeat" items="[[task.actors]]" as="actor">
@@ -207,7 +211,6 @@ Contributors:
                     </template>
                   </div>
                 </div>
-                <div>
                 <div class="vertical layout">
                   <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
                   <span class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
@@ -265,6 +268,10 @@ Contributors:
           if (doc) {
             return this.urlFor('browse', doc.path);
           }
+        },
+
+        _getPath: function(path){
+          return path.substr(0, path.lastIndexOf("/"));
         },
 
         _date: function(date) {
