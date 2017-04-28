@@ -16,9 +16,6 @@ fixtures.collections = {
 
 module.exports = function () {
   this.After(() => Promise.all(liveCollections
-      .map((col) => {
-        var currentUser = nuxeo._auth.username;
-        nuxeo.repository().delete(`/default-domain/UserWorkspaces/${currentUser}/Collections/${col}`);
-      }))
+      .map((col) => nuxeo.repository().delete(`/default-domain/UserWorkspaces/${this.username}/Collections/${col}`)))
       .then(() => { liveCollections = []; }));
 };
