@@ -94,6 +94,7 @@ Contributors:
         z-index: 102;
         padding: 18px;
         box-sizing: border-box;
+        outline: none;
       }
 
       #logo iron-icon {
@@ -230,7 +231,7 @@ Contributors:
     <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
 
     <!-- app layout -->
-    <paper-drawer-panel drawer-width="[[drawerWidth]]" responsive-width="720px">
+    <paper-drawer-panel id="drawerPanel" drawer-width="[[drawerWidth]]" responsive-width="720px" edge-swipe-sensitivity="0">
       <div drawer>
 
         <!-- logo -->
@@ -255,7 +256,7 @@ Contributors:
         </paper-menu>
 
         <!-- drawer -->
-        <iron-collapse id="drawer" horizontal opened>
+        <div id="drawer">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
 
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
@@ -311,8 +312,7 @@ Contributors:
             </div>
 
           </iron-pages>
-
-        </iron-collapse>
+        </div>
       </div>
 
       <!-- pages -->
@@ -491,10 +491,13 @@ Contributors:
           'search-results': '_showSearchResults',
           'navigate': '_navigate',
           'select2-click': '_select2Click',
-          'collection-loaded': '_updateCollectionMenu'
+          'collection-loaded': '_updateCollectionMenu',
+          'nuxeo-page-drawer-toggle': '_openDrawer'
         },
 
         ready: function() {
+          this.$.drawerPanel.closeDrawer();
+
           window.addEventListener('unhandledrejection', function(error) {
             this._onError(error);
           }.bind(this));
@@ -633,11 +636,13 @@ Contributors:
         _openDrawer: function() {
           this.drawerWidth = '350px';
           this.drawerOpened = true;
+          this.$.drawerPanel.openDrawer();
         },
 
         _closeDrawer: function() {
           this.drawerWidth = '56px';
           this.drawerOpened = false;
+          this.$.drawerPanel.closeDrawer();
         },
 
         _handleUGMgoHome: function() {
