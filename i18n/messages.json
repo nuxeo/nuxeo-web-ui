@@ -759,6 +759,7 @@
 	"tasksList.dueDate": "Due Date",
 	"tasksList.noTasks": "You don't have any task to process at the moment.",
 	"tasksList.on": "On  ",
+	"tasksList.in": "In  ",
 	"taskWidget.dueDate": "Due Date",
 	"taskWidget.noTasks": "There are no tasks to show.",
 	"taskWidget.on": "On  ",
