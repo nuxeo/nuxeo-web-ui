@@ -759,6 +759,7 @@
 	"tasksList.dueDate": "Fecha de vencimiento",
 	"tasksList.noTasks": "No tienes ninguna tarea pendiente.",
 	"tasksList.on": "En  ",
+	"tasksList.in": "In  ",
 	"taskWidget.dueDate": "Fecha de vencimiento",
 	"taskWidget.noTasks": "No hay tareas que mostrar.",
 	"taskWidget.on": "En  ",

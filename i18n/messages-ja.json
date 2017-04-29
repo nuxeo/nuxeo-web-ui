@@ -759,6 +759,7 @@
 	"tasksList.dueDate": "期日 ",
 	"tasksList.noTasks": "現在、タスクはありません",
 	"tasksList.on": "On  ",
+	"tasksList.in": "In  ",
 	"taskWidget.dueDate": "期日",
 	"taskWidget.noTasks": "表示するタスクがありません。",
 	"taskWidget.on": "On  ",
