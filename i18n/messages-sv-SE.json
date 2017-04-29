@@ -551,6 +551,7 @@
   "tasksList.dueDate":"Förfallodatum",
   "tasksList.noTasks":"Du har inte någon uppgift att bearbeta för tillfället.",
   "tasksList.on":"I  ",
+  "tasksList.in":"In  ",
   "taskWidget.dueDate":"Förfallodatum",
   "taskWidget.noTasks":"Det finns inga uppgifter att visa.",
   "taskWidget.on":"På  ",

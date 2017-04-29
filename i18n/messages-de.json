@@ -551,6 +551,7 @@
   "tasksList.dueDate":"Fälligkeitsdatum ",
   "tasksList.noTasks":"Sie haben momentan keine Aufgaben",
   "tasksList.on":"Am  ",
+  "tasksList.in":"In  ",
   "taskWidget.dueDate":"Fälligkeitsdatum",
   "taskWidget.noTasks":"Es können keine Aufgaben angezeigt werden.",
   "taskWidget.on":"Am  ",

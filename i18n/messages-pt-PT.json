@@ -551,6 +551,7 @@
   "tasksList.dueDate":"Data de vencimento",
   "tasksList.noTasks":"Você não tem nenhuma tarefa para processar no momento.",
   "tasksList.on":"Em  ",
+  "tasksList.in":"In  ",
   "taskWidget.dueDate":"Data de vencimento",
   "taskWidget.noTasks":"Nenhuma tarefa para exibir.",
   "taskWidget.on":"Na  ",
