@@ -211,8 +211,19 @@ Contributors:
         border-top: 1px solid var(--nuxeo-border);
       }
 
+      #drawerToggle {
+        position: absolute;
+        top: 9px;
+        left: 9px;
+        z-index: 99;
+      }
+
       nuxeo-document-create-button.admin {
         display: none;
+      }
+
+      paper-drawer-panel[narrow] ::content nuxeo-page ::content paper-toolbar ::content .header {
+        margin-left: 32px;
       }
 
     </style>
@@ -346,6 +357,7 @@ Contributors:
 
         </iron-pages>
 
+        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" paper-drawer-toggle></paper-icon-button>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
 
       </paper-header-panel>
@@ -491,8 +503,7 @@ Contributors:
           'search-results': '_showSearchResults',
           'navigate': '_navigate',
           'select2-click': '_select2Click',
-          'collection-loaded': '_updateCollectionMenu',
-          'nuxeo-page-drawer-toggle': '_openDrawer'
+          'collection-loaded': '_updateCollectionMenu'
         },
 
         ready: function() {

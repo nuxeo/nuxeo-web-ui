@@ -54,17 +54,10 @@ Contributors:
         width: 100%;
         padding: 0 70px 0 16px;
       }
-
-      paper-icon-button {
-        margin-left: 16px;
-        min-width: 36px;
-        min-height: 32px;
-      }
     </style>
 
     <paper-header-panel mode="seamed">
       <paper-toolbar>
-        <paper-icon-button paper-drawer-toggle icon="menu" on-tap="_toggle"></paper-icon-button>
         <content select=".header"></content>
       </paper-toolbar>
       <content select=".content"></content>
@@ -75,10 +68,6 @@ Contributors:
 
 <script>
   Polymer({
-    is: 'nuxeo-page',
-
-    _toggle: function() {
-      this.fire('nuxeo-page-drawer-toggle')
-    }
+    is: 'nuxeo-page'
   });
 </script>
