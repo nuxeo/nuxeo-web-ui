@@ -547,7 +547,6 @@ Contributors:
       </div>
     </iron-pages>
 
-    <paper-toast id="toast"></paper-toast>
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
   </template>
@@ -1021,7 +1020,7 @@ Contributors:
         _handleError: function(error) {
           this.set('_creating', false);
           this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
-          this._toast('ERROR: ' + error.message);
+          this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' + error.message});
         },
 
         _mergeResponses: function() {
@@ -1142,11 +1141,6 @@ Contributors:
         _blobPicked: function(e) {
           this.hasRemoteFiles = true;
           this.notifyPath('remoteFiles', this.remoteFiles.concat(e.detail.blobs));
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
         },
 
         _getDocumentProperties: function() {

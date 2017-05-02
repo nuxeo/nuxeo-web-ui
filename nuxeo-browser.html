@@ -72,7 +72,6 @@ Contributors:
         </div>
 
         <div id="nxContent">
-          <paper-toast id="toast"></paper-toast>
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
             <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
@@ -152,11 +151,6 @@ Contributors:
 
       _navigateToView: function() {
         page('/browse' + this.document.path + '@view');
-      },
-
-      _toast: function(msg) {
-        this.$.toast.text = msg;
-        this.$.toast.open();
       }
 
     });

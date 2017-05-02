@@ -367,7 +367,9 @@ Contributors:
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
     <paper-progress id="loading" indeterminate hidden$="[[!loading]]"></paper-progress>
-    <paper-toast id="toast"></paper-toast>
+    <paper-toast id="toast">
+      <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden$="[[!_dismissible]]"></paper-icon-button>
+    </paper-toast>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
@@ -473,6 +475,11 @@ Contributors:
           actionContext: {
             type: Object,
             computed: '_actionContext(currentDocument, currentUser)'
+          },
+
+          _dismissible: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -502,7 +509,8 @@ Contributors:
           'theme-changed': '_themeChanged',
           'search-results': '_showSearchResults',
           'navigate': '_navigate',
-          'collection-loaded': '_updateCollectionMenu'
+          'collection-loaded': '_updateCollectionMenu',
+          'notify': '_notify'
         },
 
         ready: function() {
@@ -749,9 +757,7 @@ Contributors:
         },
 
         _toast: function(text) {
-          this.$.toast.hide();
-          this.$.toast.text = text;
-          this.$.toast.open();
+          this._notify({detail: {message: text}});
         },
 
         _documentAddedToCollection: function(e) {
@@ -860,6 +866,22 @@ Contributors:
 
         _pageLoaded: function() {
           this.loading = false;
+        },
+
+        _notify: function(e) {
+          var options = e.detail;
+          if (options.close) {
+            this.$.toast.close();
+          } else if (options.message) {
+            this.$.toast.text = options.message;
+            this.$.toast.duration = options.duration ? options.duration : 3000;
+            this.set('_dismissible', !!options.dismissible);
+            this.$.toast.open();
+          }
+        },
+
+        _dismissToast: function() {
+          this.$.toast.toggle();
         }
 
       });
