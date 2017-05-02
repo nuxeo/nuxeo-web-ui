@@ -21,9 +21,9 @@ limitations under the License.
 <link rel="import" href="../../iron-icons/social-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../../paper-input/paper-input.html">
 <link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../widgets/nuxeo-dialog.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -44,16 +44,6 @@ Example:
       :host {
         display: inline-block;
       }
-
-      paper-dialog {
-        min-width: 480px;
-      }
-
-      paper-dialog .buttons {
-        @apply(--layout-start-justified);
-        background-color: var(--nuxeo-dialog-buttons-bar, white);
-        margin-top: 2em;
-      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
@@ -61,7 +51,7 @@ Example:
       <paper-tooltip>[[i18n('shareButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('shareButton.dialog.heading')]]</h2>
       <paper-input id="permalink" label="[[i18n('shareButton.copy.label', document.properties.dc:title)]]"
                    value="[[_buildPermalink(document)]]"
@@ -71,7 +61,7 @@ Example:
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('shareButton.dialog.close')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 

@@ -48,8 +48,7 @@
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <paper-dialog id="columnsSettingsPopup"
-      no-auto-focus>
+    <nuxeo-dialog id="columnsSettingsPopup" with-backdrop no-auto-focus>
       <h2>[[i18n('tableSettings.columnSettings')]]</h2>
       <div class="paper-content layout horizontal">
         <div class="layout vertical">
@@ -79,7 +78,7 @@
         </div>
         <paper-button noink class="primary" dialog-dismiss>[[i18n('tableSettings.columnSettings.close')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
     <paper-icon-button noink icon="nuxeo:settings" id="toggleColSettings"
       on-tap="toggleColsSettingsPopup">

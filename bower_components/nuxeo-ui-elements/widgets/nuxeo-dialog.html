@@ -16,7 +16,9 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../polymer/polymer.html">
-<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../../neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="../../paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../../paper-dialog-behavior/paper-dialog-shared-styles.html">
 
 <!--
 An element for dialogs
@@ -27,20 +29,13 @@ An element for dialogs
 -->
 <dom-module id="nuxeo-dialog">
   <template>
+    <style include="paper-dialog-shared-styles"></style>
 
     <style>
       :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-
-      paper-dialog {
         min-width: 480px;
-        @apply(--paper-dialog);
       }
-
-      paper-dialog ::content .buttons {
+      :host > ::content .buttons {
         @apply(--layout-horizontal);
         @apply(--layout-justified);
         margin-top: 16px;
@@ -48,9 +43,7 @@ An element for dialogs
       }
     </style>
 
-    <paper-dialog id="dialog" with-backdrop modal$="[[modal]]" no-auto-focus$="[[noAutoFocus]]">
-      <content></content>
-    </paper-dialog>
+    <content></content>
 
   </template>
 </dom-module>
@@ -59,43 +52,15 @@ An element for dialogs
   Polymer({
     is: 'nuxeo-dialog',
 
-    properties: {
-
-      /**
-       * Modal.
-       */
-      modal: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * No auto focus.
-       */
-      noAutoFocus: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      }
-    },
+    behaviors: [
+      Polymer.PaperDialogBehavior,
+      Polymer.NeonAnimationRunnerBehavior
+    ],
 
     attached: function() {
       if (this.parentElement !== document.body) {
         document.body.appendChild(this);
       }
-    },
-
-    open: function() {
-      this.$.dialog.open();
-    },
-
-    close: function() {
-      this.$.dialog.close();
-    },
-
-    toggle: function() {
-      this.$.dialog.toggle();
     }
 
   });

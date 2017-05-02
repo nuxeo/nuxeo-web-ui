@@ -20,9 +20,9 @@ limitations under the License.
 <link rel="import" href="../../iron-icons/iron-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../../paper-button/paper-button.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../widgets/nuxeo-dialog.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 
 <!--
@@ -43,16 +43,6 @@ Example:
       :host {
         display: inline-block;
       }
-
-      paper-dialog {
-        min-width: 480px;
-      }
-
-      paper-dialog .buttons {
-        @apply(--layout-justified);
-        background-color: var(--nuxeo-dialog-buttons-bar, white);
-        margin-top: 2em;
-      }
     </style>
 
     <nuxeo-operation id="operation" op="Blob.RemoveFromDocument" input="[[document.uid]]" params="[[_params(xpath)]]"></nuxeo-operation>
@@ -62,14 +52,14 @@ Example:
       <paper-tooltip>[[i18n('deleteBlobButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('deleteBlobButton.dialog.heading')]]</h2>
       <div>[[i18n('deleteBlobButton.dialog.message')]]</div>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('deleteBlobButton.dialog.no')]]</paper-button>
         <paper-button dialog-confirm on-tap="_remove">[[i18n('deleteBlobButton.dialog.yes')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 

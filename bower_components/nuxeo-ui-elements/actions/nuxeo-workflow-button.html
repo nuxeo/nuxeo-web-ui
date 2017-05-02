@@ -21,9 +21,9 @@ limitations under the License.
 <link rel="import" href="../../iron-icons/social-icons.html">
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../paper-dialog/paper-dialog.html">
 <link rel="import" href="../../paper-input/paper-input.html">
 <link rel="import" href="../../paper-button/paper-button.html">
+<link rel="import" href="../widgets/nuxeo-dialog.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -45,18 +45,8 @@ Example:
         display: inline-block;
       }
 
-      paper-dialog {
-        min-width: 480px;
-      }
-
       nuxeo-select {
         max-width: 380px;
-      }
-
-      paper-dialog .buttons {
-        @apply(--layout-justified);
-        background-color: var(--nuxeo-dialog-buttons-bar, white);
-        margin-top: 2em;
       }
     </style>
 
@@ -67,7 +57,7 @@ Example:
       <paper-tooltip>[[i18n('workflowButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('workflowButton.dialog.heading')]]</h2>
 
       <nuxeo-select label="[[i18n('workflowButton.dialog.placeholder')]]" selected="{{selectedProcess}}" attr-for-selected="key">
@@ -80,7 +70,7 @@ Example:
         <paper-button dialog-dismiss>[[i18n('workflowButton.dialog.close')]]</paper-button>
         <paper-button class="primary" disabled="[[!selectedProcess]]" on-tap="_startWorkflow">[[i18n('workflowButton.dialog.start')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 

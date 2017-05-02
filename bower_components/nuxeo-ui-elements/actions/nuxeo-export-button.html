@@ -21,7 +21,7 @@ limitations under the License.
 <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../paper-button/paper-button.html">
-<link rel="import" href="../../paper-dialog/paper-dialog.html">
+<link rel="import" href="../widgets/nuxeo-dialog.html">
 <link rel="import" href="../nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-filters-behavior.html">
 
@@ -43,31 +43,15 @@ Example:
         display: inline-block;
       }
 
-      paper-dialog {
-        min-width: 480px;
-      }
-
-      paper-dialog .buttons {
-        @apply(--layout-start-justified);
-        background-color: var(--nuxeo-dialog-buttons-bar, white);
-        margin-top: 2em;
-      }
-
-      .items {
-        @apply(--layout-vertical);
-        min-width: 25em;
-      }
-
-      .items .item {
+      .item {
         @apply(--layout-horizontal);
         @apply(--layout-center);
         padding: 0.4em 0;
       }
 
-      .items .item a {
-        margin-left: 1em;
+      .item iron-icon {
+        margin-right: 1em;
       }
-
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
@@ -75,22 +59,19 @@ Example:
       <paper-tooltip>[[i18n('exportButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <paper-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('exportButton.dialog.heading')]]</h2>
 
-      <div class="items">
-        <template is="dom-repeat" items="[[_filterRenditions(document)]]">
-          <div class="item">
-            <iron-icon src="[[item.icon]]"></iron-icon><a href="[[item.url]]">[[i18n(item.name)]]</a>
-          </div>
-        </template>
-      </div>
+      <template is="dom-repeat" items="[[_filterRenditions(document)]]">
+        <div class="item">
+          <iron-icon src="[[item.icon]]"></iron-icon> <a href="[[item.url]]">[[i18n(item.name)]]</a>
+        </div>
+      </template>
 
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('exportButton.dialog.cancel')]]</paper-button>
       </div>
-
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 
