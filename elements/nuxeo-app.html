@@ -636,7 +636,10 @@ Contributors:
         _openDrawer: function() {
           this.drawerWidth = '350px';
           this.drawerOpened = true;
-          this.$.drawerPanel.openDrawer();
+          var drawerPanel = this.$.drawerPanel;
+          if (drawerPanel.narrow) {
+            drawerPanel.openDrawer();
+          }
         },
 
         _closeDrawer: function() {
