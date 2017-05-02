@@ -6,7 +6,7 @@ module.exports = function () {
   this.When('I reload the page', () => this.ui.reload());
   this.Then('I can see "$activity" in the Activity feed', (activity) => {
     this.ui.activityFeed.waitForVisible();
-    this.ui.activityFeed.getActivity(activity).isVisible().should.be.true;
+    this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
   });
 
 };
