@@ -114,7 +114,6 @@ Contributors:
     <label id="label" hidden$="[[!label]]">[[label]]</label>
 
     <input hidden id="input" type="file" on-change="_filesChanged">
-    <paper-toast id="toast"></paper-toast>
 
     <div id="dropzone" hidden$="[[_hasFiles]]">
       <div id="container">
@@ -264,11 +263,11 @@ Contributors:
 
             this.$.doc.put().then(function(response) {
               this.document = response;
-              this._toast(this.uploadedMessage);
+              this.fire('notify', {message: this.uploadedMessage});
               this.progress = false;
             }.bind(this));
           } else {
-            this._toast(this.uploadedMessage);
+            this.fire('notify', {message: this.uploadedMessage});
             this.progress = false;
           }
         },
@@ -277,7 +276,7 @@ Contributors:
           return this.$.doc.get().then(function(response) {
             this.document.properties[this.xpath] = response.properties[this.xpath];
             this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
-            this._toast(this.uploadedMessage);
+            this.fire('notify', {message: this.uploadedMessage});
             this.progress = false;
             this._hasFiles = false;
           }.bind(this));
@@ -318,11 +317,6 @@ Contributors:
           this.toggleClass('dragging', false, this.$.label);
           this.toggleClass('dragging', false, this.$.container);
           this._upload(e.dataTransfer.files);
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
         }
 
       });

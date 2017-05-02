@@ -34,11 +34,6 @@ Contributors:
         min-height: calc(100vh - 280px);
       }
 
-      #errorToast {
-        --paper-toast-background-color: red;
-        --paper-toast-color: white;
-      }
-
       .top.actions {
         @apply(--layout-horizontal);
         @apply(--layout-center);
@@ -53,10 +48,6 @@ Contributors:
     </style>
 
     <nuxeo-resource id="directory" path="/directory"></nuxeo-resource>
-
-    <paper-toast id="toast"></paper-toast>
-
-    <paper-toast id="errorToast"></paper-toast>
 
     <paper-dialog id="dialog" with-backdrop no-auto-focus>
       <div id="edit-container">
@@ -269,15 +260,15 @@ Contributors:
             this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
             this.$.directory.remove().then(function() {
               this._refresh();
-              this.$.toast.text = this.i18n('vocabularyManagement.successfullyDeleted');
-              this.$.toast.open();
+              this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyDeleted')});
             }.bind(this), function(err) {
               if (err.status === 401) {
-                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.referencedEntry');
+                this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
+                                              this.i18n('vocabularyManagement.cannotDelete.referencedEntry')});
               } else {
-                this.$.errorToast.text = this.i18n('vocabularyManagement.cannotDelete.error') + ': ' + err.message;
+                this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
+                                              this.i18n('vocabularyManagement.cannotDelete.error')});
               }
-              this.$.errorToast.open();
             }.bind(this));
           }
         },
@@ -299,28 +290,26 @@ Contributors:
             this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
             this.$.directory.post().then(function() {
               this.$.dialog.toggle();
-              this.$.toast.text = this.i18n('vocabularyManagement.successfullyCreated');
-              this.$.toast.open();
+              this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyCreated')});
               this._refresh();
             }.bind(this),
             function(err) {
-              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
-                this.i18n('vocabularyManagement.cannotCreate');
-              this.$.errorToast.open();
+              this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
+                                            (err.message && err.message.length > 0 ? err.message :
+                                             this.i18n('vocabularyManagement.cannotCreate'))});
             }.bind(this));
           } else {
             this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
               '/' + this._selectedEntry.properties.id;
             this.$.directory.put().then(function() {
               this.$.dialog.toggle();
-              this.$.toast.text = this.i18n('vocabularyManagement.successfullyEdited');
-              this.$.toast.open();
+              this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyEdited')});
               this._refresh();
             }.bind(this),
             function(err) {
-              this.$.errorToast.text = err.message && err.message.length > 0 ? err.message :
-                this.i18n('vocabularyManagement.cannotEdit');
-              this.$.errorToast.open();
+              this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
+                                            (err.message && err.message.length > 0 ? err.message :
+                                             this.i18n('vocabularyManagement.cannotEdit'))});
             }.bind(this));
           }
         },

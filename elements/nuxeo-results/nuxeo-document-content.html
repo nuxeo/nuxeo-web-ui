@@ -192,7 +192,6 @@ Contributors:
 
     </div>
 
-    <paper-toast id="toast" duration="0"></paper-toast>
   </template>
 
   <script>
@@ -277,13 +276,12 @@ Contributors:
 
       _dragoverImport: function(e) {
         e.preventDefault();
-        this.$.toast.text = this.i18n('documentContentView.drag.import');
-        this.$.toast.open();
+        this.fire('notify', {message: this.i18n('documentContentView.drag.import'), duration: 0});
         this._toggleDragging(true);
       },
 
       _dragleaveImport: function() {
-        this.$.toast.close();
+        this.fire('notify', {close: true});
         this._toggleDragging(false);
         this.toggleClass('dragging', false, this.$.grid);
         this.toggleClass('dragging', false, this.$.table);
@@ -291,7 +289,7 @@ Contributors:
 
       _dropImport: function(e) {
         e.preventDefault();
-        this.$.toast.close();
+        this.fire('notify', {close: true});
         this._toggleDragging(false);
         this.fire('create-document', {files: e.dataTransfer.files});
       },

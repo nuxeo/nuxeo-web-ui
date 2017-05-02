@@ -84,8 +84,6 @@ Contributors:
 
     </div>
 
-    <paper-toast id="toast"></paper-toast>
-
   </template>
 
 </dom-module>
@@ -135,9 +133,7 @@ Contributors:
           }
         };
         this.$.note.put().then(function() {
-          var toast = this.$$('#toast');
-          toast.text = this.i18n('noteViewLayout.note.saved');
-          toast.open();
+          this.fire('notify', {message: this.i18n('noteViewLayout.note.saved')});
           this._viewMode = true;
           this.fire('document-updated');
         }.bind(this));
