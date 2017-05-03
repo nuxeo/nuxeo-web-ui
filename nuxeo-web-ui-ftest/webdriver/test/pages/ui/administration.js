@@ -26,14 +26,14 @@ export default class Administration {
 
   get vocabularyManagement() {
     if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
+      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return new Vocabulary('nuxeo-vocabulary-management');
   }
 
   goToVocabularyManagement() {
     if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
+      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return this.vocabularyManagement;
   }

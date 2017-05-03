@@ -10,7 +10,7 @@ module.exports = {
   jsonOutput: 'target/cucumber-reports/report.json',
   // - - - - WEBDRIVER-IO  - - - -
   webdriverio: {
-    baseUrl: 'http://localhost:8080/nuxeo',
+    baseUrl: 'http://localhost:8080/nuxeo/',
     waitforTimeout: 5000,
     waitforInterval: 250,
   },
