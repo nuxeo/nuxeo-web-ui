@@ -35,6 +35,7 @@ An element for dialogs
       :host {
         min-width: 480px;
       }
+
       :host > ::content .buttons {
         @apply(--layout-horizontal);
         @apply(--layout-justified);
@@ -52,15 +53,32 @@ An element for dialogs
   Polymer({
     is: 'nuxeo-dialog',
 
+    properties: {
+      parent: {
+        type: Object
+      }
+    },
+
     behaviors: [
       Polymer.PaperDialogBehavior,
       Polymer.NeonAnimationRunnerBehavior
     ],
 
-    attached: function() {
+    listeners: {
+      'iron-overlay-opened': '_opened',
+      'iron-overlay-closed': '_closed',
+      'iron-overlay-canceled': '_closed'
+    },
+
+    _opened: function() {
       if (this.parentElement !== document.body) {
+        this.parent = this.parentElement;
         document.body.appendChild(this);
       }
+    },
+
+    _closed: function() {
+      this.parent.appendChild(this);
     }
 
   });
