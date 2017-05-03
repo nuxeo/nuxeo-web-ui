@@ -584,6 +584,7 @@
 	"label.dublincore.state": "状態",
 	"label.dublincore.subjects": "件名",
 	"label.dublincore.title": "題名",
+	"label.error": "Error",
 	"label.mobile.openInApp": "アプリで開く",
 	"label.myCollections.title": "マイコレクション",
 	"label.permissions.addPermission": "アクセス許可を追加",

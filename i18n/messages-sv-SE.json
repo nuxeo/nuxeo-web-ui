@@ -584,6 +584,7 @@
 	"label.dublincore.state": "Tillstånd",
 	"label.dublincore.subjects": "Ämnen",
 	"label.dublincore.title": "Titel",
+	"label.error": "Error",
 	"label.mobile.openInApp": "Öppna i app",
 	"label.myCollections.title": "Mina samlingar",
 	"label.permissions.addPermission": "Lägg till en behörighet",
