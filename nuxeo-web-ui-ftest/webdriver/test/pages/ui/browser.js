@@ -42,14 +42,14 @@ export default class Browser {
 
   addToCollection(name) {
     this.page.element(`nuxeo-add-to-collection-button paper-icon-button`).click();
-    driver.waitForVisible(`nuxeo-add-to-collection-button #dialog`);
-    this.page.element(`nuxeo-add-to-collection-button #dialog nuxeo-select2 a.select2-choice`).click();
+    driver.waitForVisible(`#dialog nuxeo-select2 a.select2-choice`);
+    driver.element(`#dialog nuxeo-select2 a.select2-choice`).click();
     driver.waitForVisible(`#select2-drop .select2-search input`);
     driver.element(`#select2-drop .select2-search input`).setValue(name);
     driver.waitForVisible(`#select2-drop li.select2-result`);
     driver.element(`#select2-drop li.select2-result`).click();
-    this.page.waitForEnabled(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`);
-    this.page.element(`nuxeo-add-to-collection-button #dialog paper-button[name="add"]`).click();
+    driver.waitForEnabled(`#dialog paper-button[name="add"]`);
+    driver.element(`#dialog paper-button[name="add"]`).click();
     this.page.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
 
