@@ -33,7 +33,7 @@ module.exports = function () {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.view.waitForVisible();
     page.view.attachments.waitForVisible();
-    const preview = page.view.attachments.preview;
+    const preview = page.view.attachments.previewButton;
     preview.waitForVisible();
     preview.element(viewerType).waitForVisible();
   });
