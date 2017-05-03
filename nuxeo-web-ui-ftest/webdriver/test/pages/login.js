@@ -16,7 +16,7 @@ export default class Login {
 
   static get() {
     const baseUrl = process.env.NUXEO_URL || '';
-    driver.url(`${baseUrl}/logout`);
+    driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
     return new this();
   }
 

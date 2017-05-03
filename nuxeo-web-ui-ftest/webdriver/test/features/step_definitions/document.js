@@ -35,7 +35,7 @@ module.exports = function () {
       fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true));
 
   this.When(/^I browse to the document$/, () => {
-    driver.url(`/#!/browse${this.doc.path}`);
+    driver.url(`#!/browse${this.doc.path}`);
     this.ui.browser.breadcrumb.waitForVisible();
   });
 

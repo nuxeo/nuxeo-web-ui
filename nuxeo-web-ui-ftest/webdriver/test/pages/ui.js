@@ -22,7 +22,7 @@ export default class UI extends BasePage {
 
   get vocabularyAdmin() {
     if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '/#!/admin/vocabulary-management' : '/ui/#!/admin/vocabulary-management');
+      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return new Vocabulary('nuxeo-vocabulary-management');
   }
@@ -53,7 +53,7 @@ export default class UI extends BasePage {
   }
 
   static get() {
-    driver.url(process.env.NUXEO_URL ? '/' : '/ui');
+    driver.url(process.env.NUXEO_URL ? '' : 'ui');
     return new UI('nuxeo-app');
   }
 
