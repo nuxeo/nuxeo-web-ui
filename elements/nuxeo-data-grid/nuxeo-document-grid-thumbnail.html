@@ -158,7 +158,7 @@ Contributors:
       <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
         on-tap="handleClick">
       </iron-image>
-      <a class="title" href$="[[urlFor('browse', doc.path)]]" on-click="handleClick">
+      <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
         <div class="dataContainer">
           <div class="title">[[doc.title]]</div>
           <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>

@@ -214,7 +214,7 @@ Contributors:
         <div id="results" hidden$="[[!_canShowResuls(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="result" href$="[[urlFor(item.type, item.id)]]" on-click="_itemClicked">
+              <a class="result" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
                 <iron-icon src="[[_getIcon(item)]]"></iron-icon>
                 <span class="ellipsis">[[item.label]]</span>
               </a>
