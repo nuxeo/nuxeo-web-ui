@@ -282,12 +282,18 @@ limitations under the License.
       jQuery(el).val(this.value).select2(params);
 
       jQuery(el).on('change', this._updateSelection.bind(this));
+      jQuery(el).on('select2-open', this._handleClick.bind(this));
+
 
       // view or edit mode
       if (this.readonly) {
         jQuery(el).select2('readonly', true);
       }
 
+    },
+
+    _handleClick: function() {
+      jQuery(this).closest('nuxeo-select2').click();
     },
 
     _updateSelection: function (e) {

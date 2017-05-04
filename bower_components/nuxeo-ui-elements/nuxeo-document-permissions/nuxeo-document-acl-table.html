@@ -108,9 +108,9 @@ Element displaying a table with document ACLs.
                 user-visible-permissions="{{doc.contextParameters.userVisiblePermissions}}"
                 share-with-external="[[shareWithExternal]]"></nuxeo-popup-permission>
               <template is="dom-if" if="[[shareWithExternal]]">
-                <paper-icon-button icon="nuxeo:send" on-click="sendEmailExternalSharing"></paper-icon-button>
+                <paper-icon-button icon="nuxeo:send" on-tap="sendEmailExternalSharing"></paper-icon-button>
               </template>
-              <paper-icon-button icon="nuxeo:delete" on-click="_deleteAce"></paper-icon-button>
+              <paper-icon-button icon="nuxeo:delete" on-tap="_deleteAce"></paper-icon-button>
               <nuxeo-popup-confirm id="confirmation" delete-label="[[i18n('command.delete')]]"
                 cancel-label="[[i18n('documentAclTable.cancel')]]">
                 <div>

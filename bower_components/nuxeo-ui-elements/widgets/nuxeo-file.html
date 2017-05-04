@@ -71,8 +71,8 @@ An element for uploading blobs using the batch upload API.
     <div class="file">
       <div class="layout horizontal">
         <span>[[file.name]]</span>
-        <iron-icon icon="autorenew" title="Retry" on-click="retry" hidden$="[[!file.error]]"></iron-icon>
-        <iron-icon icon="nuxeo:remove" title="Remove" on-click="cancel" hidden$="[[file.complete]]"></iron-icon>
+        <iron-icon icon="autorenew" title="Retry" on-tap="retry" hidden$="[[!file.error]]"></iron-icon>
+        <iron-icon icon="nuxeo:remove" title="Remove" on-tap="cancel" hidden$="[[file.complete]]"></iron-icon>
         <iron-icon icon="check-circle" title="Done" hidden$="[[!file.complete]]"></iron-icon>
       </div>
       <paper-progress value="[[file.progress]]" error="[[file.error]]" hidden="[[file.complete]]"></paper-progress>

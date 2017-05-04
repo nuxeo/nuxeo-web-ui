@@ -116,7 +116,7 @@ Used by `nuxeo-user-group-management`
 
       <div class="form-buttons">
         <paper-button noink id="cancelButton" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
-        <paper-button noink id="createButton" class="primary" on-click="_submit">[[i18n('command.create')]]</paper-button>
+        <paper-button noink id="createButton" class="primary" on-tap="_submit">[[i18n('command.create')]]</paper-button>
       </div>
 
       <span id="errors" hidden$="[[!_hasErrors(errors)]]">[[errors]]</span>

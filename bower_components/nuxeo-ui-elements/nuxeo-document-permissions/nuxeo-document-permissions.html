@@ -159,10 +159,10 @@ An element providing document permissions management
         </template>
         <template is="dom-if" if="[[_hasPermission(doc,'Everything')]]">
           <template is="dom-if" if="[[!_empty(inheritedAces)]]">
-            <paper-button id="block" on-click="blockInheritance">[[i18n('documentPermissions.block')]]</paper-button>
+            <paper-button id="block" on-tap="blockInheritance">[[i18n('documentPermissions.block')]]</paper-button>
           </template>
           <template is="dom-if" if="[[_empty(inheritedAces)]]">
-            <paper-button id="unblock" on-click="unblockInheritance">[[i18n('documentPermissions.unblock')]]</paper-button>
+            <paper-button id="unblock" on-tap="unblockInheritance">[[i18n('documentPermissions.unblock')]]</paper-button>
           </template>
         </template>
       </div>
