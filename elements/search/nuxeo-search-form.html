@@ -290,51 +290,47 @@ Contributors:
       </div>
     </div>
 
-    <paper-dialog id="saveDialog" with-backdrop>
+    <nuxeo-dialog id="saveDialog" with-backdrop>
       <h2>[[i18n('searchForm.savePopup.heading')]]</h2>
       <paper-input id="savedSearchTitle"
                    label="[[i18n('searchForm.savePopup.label')]]"
                    autofocus
                    no-label-float>
       </paper-input>
-      <div class="buttons horizontal end-justified layout">
-        <div class="flex start-justified">
-          <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-        </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
-    <paper-dialog id="renameDialog" with-backdrop>
-        <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
-          <paper-input id="savedSearchRenameTitle"
-                       label="[[i18n('searchForm.renamePopup.label')]]"
-                       autofocus
-                       no-label-float>
-          </paper-input>
-        <div class="buttons horizontal end-justified layout">
-          <div class="flex start-justified">
-            <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-          </div>
-          <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
-        </div>
-    </paper-dialog>
+    <nuxeo-dialog id="renameDialog" with-backdrop>
+      <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
+      <paper-input id="savedSearchRenameTitle"
+                   label="[[i18n('searchForm.renamePopup.label')]]"
+                   autofocus
+                   no-label-float>
+      </paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
 
-    <paper-dialog id="shareDialog" with-backdrop>
-        <h2>[[i18n('searchForm.shared.heading')]]</h2>
-        <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
-        <div class="buttons">
-         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
-        </div>
-    </paper-dialog>
+    <nuxeo-dialog id="shareDialog" with-backdrop>
+      <h2>[[i18n('searchForm.shared.heading')]]</h2>
+      <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
 
-    <paper-dialog id="deleteDialog" with-backdrop>
-        <p>[[i18n('searchForm.delete.heading')]]</p>
-        <div class="buttons">
-          <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
-        </div>
-    </paper-dialog>
+    <nuxeo-dialog id="deleteDialog" with-backdrop>
+      <h2>[[i18n('searchForm.delete.heading')]]</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
 
   </template>
 
