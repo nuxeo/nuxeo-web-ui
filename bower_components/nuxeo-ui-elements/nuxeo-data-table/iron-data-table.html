@@ -644,8 +644,9 @@ Example:
         var tableSettings = {}
         tableSettings.columns = {};
         if (this.columns) {
-          this.columns.forEach(function(column) {
-            tableSettings.columns[column.name] = {hidden: column.hidden};
+          this.columns.forEach(function(column, idx) {
+            tableSettings.columns[column.field ? column.field : "col-" + idx]
+                = {hidden: column.hidden};
           });
         }
         return tableSettings;
@@ -655,9 +656,8 @@ Example:
         if (settings) {
           if (this.columns && settings.columns) {
             this.columns.forEach(function(column, idx) {
-              if (settings.columns[column.name]) {
-                this.set('columns.' + idx + '.hidden', settings.columns[column.name].hidden);
-              }
+                this.set('columns.' + idx + '.hidden',
+                    settings.columns[column.field ? column.field : "col-" + idx].hidden);
             }, this);
           }
         }
