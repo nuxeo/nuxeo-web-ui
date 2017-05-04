@@ -108,10 +108,6 @@ Contributors:
         margin-left: 1em;
       }
 
-      .buttons {
-        @apply(--buttons-bar);
-      }
-
       nuxeo-workflow-graph {
         position: relative;
       }
@@ -148,7 +144,7 @@ Contributors:
                 <h3 class="task-name">[[i18n(current.name)]]</h3>
                 <span class="workflow-name">[[current.workflowModelName]]</span>
               </div>
-              <paper-dialog id="graphDialog" with-backdrop>
+              <nuxeo-dialog id="graphDialog" with-backdrop>
                 <paper-dialog-scrollable>
                   <div class="graph-container">
                     <nuxeo-workflow-graph workflow-id="[[current.workflowInstanceId]]"></nuxeo-workflow-graph>
@@ -157,7 +153,7 @@ Contributors:
                 <div class="buttons">
                   <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
                 </div>
-              </paper-dialog>
+              </nuxeo-dialog>
               <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph')]]</paper-button>
               <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(current, tasks)]]"></paper-icon-button>
             </div>
