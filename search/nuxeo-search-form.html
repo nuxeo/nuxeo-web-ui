@@ -253,13 +253,13 @@ Contributors:
             <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
           </div>
           <div class="row actions">
-            <paper-button noink class="reset" disabled$="[[!dirty]]" on-click="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset')]]
             </paper-button>
-            <paper-button noink class="primary clear" on-click="_clear">
+            <paper-button noink class="primary clear" on-tap="_clear">
               [[i18n('command.clear')]]
             </paper-button>
-            <paper-button noink class="primary search" on-click="_search" hidden$="[[auto]]">
+            <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
               [[i18n('command.search')]]
             </paper-button>
           </div>
