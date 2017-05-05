@@ -59,7 +59,7 @@ Contributors:
       .current-icon iron-icon {
         width: 1.6rem;
         height: 1.5rem;
-        margin-right: .5em;
+        margin: .3em .5rem 0 0;
         background-color: rgba(255,255,255,0.7);
         padding: .2em;
         border-radius: 2px;
@@ -77,6 +77,7 @@ Contributors:
 
       a.nuxeo-breadcrumb:hover {
         color: var(--nuxeo-link-hover-color);
+        opacity: 1;
       }
 
       .doc-path, .ancestors {
@@ -94,6 +95,16 @@ Contributors:
       a.breadcrumb-item-ancestor:nth-last-child(-n+2)
       a.breadcrumb-item-ancestor:nth-last-child(-n+3) {
         display: inline-block;
+      }
+
+      @media (max-width: 1024px) {
+        :host {
+          min-width: 60%;
+        }
+
+        .current-icon {
+          display: none;
+        }
       }
 
     </style>
