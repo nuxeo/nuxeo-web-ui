@@ -24,17 +24,19 @@
   /* scrollbars */
   body ::content ::-webkit-scrollbar-track {
     width: 3px;
-    height: 8px;
+    height: 3px;
   }
   body ::content ::-webkit-scrollbar {
     background-color: rgba(0, 0, 0, 0.03);
     width: 3px;
-    height: 8px;
+    height: 3px;
   }
   body ::content ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.15);
     border-radius: 2px;
   }
+
+
 
   /* headings */
   body ::content h1, body ::content h2, body ::content h3,
@@ -66,6 +68,35 @@
   body ::content input {
     font-family: var(--nuxeo-app-font);
     font-size: 1rem !important;
+  }
+
+  body ::content paper-input[required] ::content .label-and-input-container::after {
+    display: block;
+    content: '*';
+    position: absolute;
+    right: 0;
+    top: -1rem;
+    color: var(--nuxeo-warn-text);
+    font-size: 1.2em;
+  }
+
+  body ::content paper-input[readonly] ::content paper-input-container {
+    opacity: .5;
+  }
+
+  body ::content paper-input[readonly] ::content .input-content.label-is-highlighted label {
+    color: var(--nuxeo-text-default);
+    opacity: .5;
+  }
+
+  body ::content paper-input[readonly] ::content .unfocused-line,
+  body ::content paper-input[readonly] ::content .focused-line {
+    border-bottom: 1px dashed var(--nuxeo-text-default);
+  }
+
+  body ::content paper-input[required][readonly] ::content .label-and-input-container::after,
+  body ::content paper-input[required][disabled] ::content .label-and-input-container::after {
+    display: none;
   }
 
   /* paper-button */
@@ -273,11 +304,15 @@
 
     --paper-input-container-label: {
       font-family: var(--nuxeo-app-font);
+      font-size: 1.35rem;
     };
 
     --paper-input-container-input: {
       font-family: var(--nuxeo-app-font);
-      font-size: 1rem;
+    };
+
+    --paper-input-container-label-focus: {
+      color: var(--nuxeo-text-default);
     };
 
     --paper-dialog: {
