@@ -65,7 +65,8 @@
   }
 
   /* input */
-  body ::content input {
+  body ::content input,
+  body ::content textarea {
     font-family: var(--nuxeo-app-font);
     font-size: 1rem !important;
   }
@@ -194,14 +195,15 @@
     --nuxeo-tag: {
       display: inline-block;
       background-color: var(--nuxeo-tag-background);
-      padding: 3px 6px;
+      padding: .2rem .5rem;
       color: var(--nuxeo-tag-text);
       font-size: .8rem;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.02em;
+      line-height: 1rem;
       margin-bottom: .3em;
       border-radius: 2em;
       text-decoration: none;
-      vertical-align: middle;
+      vertical-align: baseline;
     };
 
     --nuxeo-user: {
