@@ -12,9 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-    Guillaume Renard <grenard@nuxeo.com>
 -->
 
 <!--
@@ -24,290 +21,167 @@ Contributors:
 -->
 <dom-module id="nuxeo-l10nxvocabulary-edit-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-        --nuxeo-tree-theme: {
-          padding: 1em;
-        };
-        --nuxeo-tree-node-theme: {
-          min-height: 24px;
-        };
-        --nuxeo-tree-children-theme: {
-          padding-left: 1em;
-        };
-      }
 
-      .row {
-        margin-bottom: 25px;
-      }
-
-      input,
-      textarea {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1rem;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
-
-      img {
-        height: 16px;
-        width: 16px;
-      }
-
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
-      }
-
-      .radio-container {
-        padding: 0;
-      }
-
-      .radio-container > * {
-        margin-right: 10px;
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-      }
-
-      .required {
-        color: red;
-        position: absolute;
-        right: 10px;
-      }
-
-
-      .node-name {
-        display: inline;
-        position: absolute;
-        text-overflow: ellipsis;
-      }
-
-      iron-icon {
-        color: var(--nuxeo-link-color);
-      }
-
-      [toggle] {
-        cursor: pointer;
-      }
-
-      nuxeo-tree {
-        width: 300px;
-        height: 300px;
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-
-      nuxeo-tree ::content > nuxeo-tree-node ::content > #content {
-        display: none;
-      }
-
-      nuxeo-tree ::content iron-collapse {
-        padding-left: 2em;
-      }
-
-      .parent {
-        cursor: pointer;
-      }
-
-      .sep {
-        border-top: 1px solid var(--divider-color);
-      }
-
-    </style>
-
-    <paper-dialog id="parentDialog" modal no-auto-focus>
-      <h1>[[i18n('vocabularyManagement.selectParent')]]</h1>
-      <div class="paper-content layout horizontal">
+    <div role="widget">
+      <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
+      <paper-button id="selectParent" on-tap="_toggleParent">[[_parentLabel]]</paper-button>
+      <paper-dialog id="parentDialog" modal no-auto-focus>
+        <h2>[[i18n('vocabularyManagement.selectParent')]]</h2>
         <form id="form" is="iron-form">
-          <div>
-            <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
-              <template>
-                <div name$="[[item.properties.id]]">
-                  <template is="dom-if" if="[[!isLeaf]]">
-                    <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
-                  </template>
-                  <span class="flex node-name" select>
-                    <a class="parent">[[item.properties.id]]</a>
-                  </span>
-                </div>
-              </template>
-            </nuxeo-tree>
-          </div>
-          <div class="card-actions">
-            <div class="buttons sep">
-             <paper-button name="close" dialog-dismiss>[[i18n('command.close')]]</paper-button>
-            </div>
-          </div>
+          <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
+            <template>
+              <div name$="[[item.properties.id]]">
+                <template is="dom-if" if="[[!isLeaf]]">
+                  <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
+                </template>
+                <span class="flex node-name" select>
+                <a class="parent">[[item.properties.id]]</a>
+              </span>
+              </div>
+            </template>
+          </nuxeo-tree>
         </form>
-      </div>
-    </paper-dialog>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
-      </div>
-      <paper-button id="selectParent" on-tap="_toggleParent">
-        [[_parentLabel]]
-      </paper-button>
+        <div class="buttons">
+          <paper-button name="close" dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        </div>
+      </paper-dialog>
     </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.id')]]</label>
-        <span class="required">*</span>
-      </div>
-      <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required readonly$="[[!new]]">
-    </div>
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.id')]]"
+                 name="id"
+                 value="{{entry.properties.id::change}}"
+                 readonly$="[[!new]]"
+                 required>
+    </nuxeo-input>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.label_en')]]</label>
-      </div>
-      <input is="iron-input" name="label" value="{{entry.properties.label_en::change}}" class="flex"></input>
-    </div>
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.label_en')]]"
+                 name="label"
+                 value="{{entry.properties.label_en::change}}">
+    </nuxeo-input>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.label_fr')]]</label>
-      </div>
-      <input is="iron-input" name="label" value="{{entry.properties.label_fr::change}}" class="flex"></input>
-    </div>
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.label_fr')]]"
+                 name="label"
+                 value="{{entry.properties.label_fr::change}}">
+    </nuxeo-input>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
-      </div>
+    <div role="widget">
+      <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
       <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
-        on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
+                           on-change="_obsoleteChanged"
+                           noink>
+      </paper-toggle-button>
     </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.ordering')]]</label>
-      </div>
-      <input type="number" is="iron-input" name="ordering" value="{{entry.properties.ordering::change}}" class="flex"></input>
-    </div>
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.ordering')]]"
+                 name="ordering"
+                 type="number"
+                 value="{{entry.properties.ordering::change}}" >
+    </nuxeo-input>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-l10nxvocabulary-edit-layout',
-
-        properties: {
-          entry: {
-            type: Object,
-            observer: '_entryChanged'
-          },
-
-          new: {
-            type: Boolean,
-            value: false
-          },
-
-          entries: {
-            type: Array
-          },
-
-          _parentLabel: {
-            type: String,
-          },
-
-          controller: Object,
-
-          _root: {
-            type: Object,
-            value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
-          }
-
+    Polymer({
+      is: 'nuxeo-l10nxvocabulary-edit-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        entry: {
+          type: Object,
+          observer: '_entryChanged'
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
-
-        observers: ['_inputChanged(entry, entries)'],
-
-        _entryChanged: function() {
-          // initialize obsolete
-          this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+        new: {
+          type: Boolean,
+          value: false
         },
 
-        _isObsolete: function(obsolete) {
-          return obsolete === 1;
+        entries: {
+          type: Array
         },
 
-        _obsoleteChanged: function() {
-          if (this.entry.properties.obsolete > 0) {
-            this.entry.properties.obsolete = 0;
-          } else {
-            this.entry.properties.obsolete = 1;
-          }
+        _parentLabel: {
+          type: String
         },
 
-        _inputChanged: function() {
-          if (this.entry) {
-            if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
-              this._parentLabel = this.entry.properties.parent;
-            } else {
-              this._parentLabel = this.i18n('vocabularyManagement.edit.selectParent');
-            }
-            if (this.entries) {
-              this.controller = {
-                getChildren: function(node) {
-                  return new Promise(function(resolve) {
-                    var targetParentId = !node ? '' : node.properties.id;
-                    var children = this.entries.filter(
-                      function(e) {
-                        if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
-                          e.id = e.properties.id;
-                          return true;
-                        }
-                      }.bind(this)
-                    );
-                    resolve(children);
-                  }.bind(this));
-                }.bind(this),
+        controller: Object,
 
-                isLeaf: function(node) {
-                  var lookedUpId = node.properties.id;
-                  var isNotLeaf = this.entries.some(
-                    function(e) {
-                      return e.properties.parent === lookedUpId;
-                    }
-                  );
-                  return !isNotLeaf && node.root !== true;
-                }.bind(this)
-              };
-              this.$.tree.open.apply(this.$.tree, ['root']);
-            }
-          }
-        },
-
-        _expandIcon: function(opened) {
-          return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
-        },
-
-        _selectParent: function(e) {
-          this.entry.properties.parent = e.detail.item.properties.id;
-          this._parentLabel = this.entry.properties.parent;
-          this._toggleParent();
-        },
-
-        _toggleParent: function() {
-          this.$.parentDialog.toggle();
+        _root: {
+          type: Object,
+          value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
         }
+      },
 
-      });
-    })();
+      observers: ['_inputChanged(entry, entries)'],
+
+      _entryChanged: function() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+      },
+
+      _isObsolete: function(obsolete) {
+        return obsolete === 1;
+      },
+
+      _obsoleteChanged: function() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
+      },
+
+      _inputChanged: function() {
+        if (this.entry) {
+          if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
+            this._parentLabel = this.entry.properties.parent;
+          } else {
+            this._parentLabel = this.i18n('vocabularyManagement.edit.selectParent');
+          }
+          if (this.entries) {
+            this.controller = {
+              getChildren: function(node) {
+                return new Promise(function(resolve) {
+                  var targetParentId = !node ? '' : node.properties.id;
+                  var children = this.entries.filter(
+                    function(e) {
+                      if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                        e.id = e.properties.id;
+                        return true;
+                      }
+                    }.bind(this)
+                  );
+                  resolve(children);
+                }.bind(this));
+              }.bind(this),
+
+              isLeaf: function(node) {
+                var lookedUpId = node.properties.id;
+                var isNotLeaf = this.entries.some(
+                  function(e) {
+                    return e.properties.parent === lookedUpId;
+                  }
+                );
+                return !isNotLeaf && node.root !== true;
+              }.bind(this)
+            };
+            this.$.tree.open.apply(this.$.tree, ['root']);
+          }
+        }
+      },
+
+      _expandIcon: function(opened) {
+        return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+      },
+
+      _selectParent: function(e) {
+        this.entry.properties.parent = e.detail.item.properties.id;
+        this._parentLabel = this.entry.properties.parent;
+        this._toggleParent();
+      },
+
+      _toggleParent: function() {
+        this.$.parentDialog.toggle();
+      }
+
+    });
   </script>
 </dom-module>

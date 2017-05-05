@@ -12,9 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-Contributors:
-    Guillaume Renard <grenard@nuxeo.com>
 -->
 
 <!--
@@ -24,129 +21,66 @@ Contributors:
 -->
 <dom-module id="nuxeo-vocabulary-edit-layout">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
 
-      .row {
-        margin-bottom: 25px;
-      }
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.id')]]"
+                 name="id"
+                 value="{{entry.properties.id::change}}"
+                 required
+                 readonly$="[[!new]]">
+    </nuxeo-input>
 
-      input,
-      textarea {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: inline-block;
-        font-size: 1rem;
-        margin-bottom: 0.5em;
-        padding: 0.5em;
-      }
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.label')]]"
+                 name="label"
+                 value="{{entry.properties.label::change}}">
+    </nuxeo-input>
 
-      img {
-        height: 16px;
-        width: 16px;
-      }
-
-      paper-radio-button {
-        margin-bottom: 5px;
-        padding: 0;
-      }
-
-      .radio-container {
-        padding: 0;
-      }
-
-      .radio-container > * {
-        margin-right: 10px;
-      }
-
-      .label-container {
-        position: relative;
-        width: 200px;
-      }
-
-      .required {
-        color: red;
-        position: absolute;
-        right: 10px;
-      }
-    </style>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.id')]]</label>
-        <span class="required">*</span>
-      </div>
-      <input is="iron-input" name="id" value="{{entry.properties.id::change}}" class="flex" required readonly$="[[!new]]">
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.label')]]</label>
-      </div>
-      <input is="iron-input" name="label" value="{{entry.properties.label::change}}" class="flex"></input>
-    </div>
-
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
-      </div>
+    <div role="widget">
+      <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
       <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
-        on-change="_obsoleteChanged" noink class="flex"></paper-toggle-button>
+                           on-change="_obsoleteChanged"
+                           noink>
+      </paper-toggle-button>
     </div>
 
-    <div class="row layout horizontal">
-      <div class="label-container">
-        <label>[[i18n('vocabularyManagement.edit.ordering')]]</label>
-      </div>
-      <input type="number" is="iron-input" name="ordering" value="{{entry.properties.ordering::change}}" class="flex"></input>
-    </div>
-
+    <nuxeo-input role="widget"
+                 label="[[i18n('vocabularyManagement.edit.ordering')]]"
+                 name="ordering"
+                 type="number"
+                 value="{{entry.properties.ordering::change}}">
+    </nuxeo-input>
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-vocabulary-edit-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-vocabulary-edit-layout',
-
-        properties: {
-          entry: {
-            type: Object,
-            observer: '_entryChanged'
-          },
-
-          new: {
-            type: Boolean,
-            value: false
-          }
-
+        entry: {
+          type: Object,
+          observer: '_entryChanged'
         },
 
-        behaviors: [Nuxeo.I18nBehavior],
-
-        _entryChanged: function() {
-          // initialize obsolete
-          this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
-        },
-
-        _isObsolete: function(obsolete) {
-          return obsolete === 1;
-        },
-
-        _obsoleteChanged: function() {
-          if (this.entry.properties.obsolete > 0) {
-            this.entry.properties.obsolete = 0;
-          } else {
-            this.entry.properties.obsolete = 1;
-          }
+        new: {
+          type: Boolean,
+          value: false
         }
+      },
 
-      });
-    })();
+      _entryChanged: function() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+      },
+
+      _isObsolete: function(obsolete) {
+        return obsolete === 1;
+      },
+
+      _obsoleteChanged: function() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
+      }
+
+    });
   </script>
 </dom-module>
