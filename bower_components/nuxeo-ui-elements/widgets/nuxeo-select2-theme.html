@@ -29,9 +29,7 @@
   }
 
   .select2-search {
-    border-left: 1px solid var(--paper-input-container-color);
-    border-right: 1px solid var(--paper-input-container-color);
-    border-bottom: 1px solid var(--paper-input-container-color);
+    border: 1px solid var(--nuxeo-border, #ccc);
   }
 
   .select2-container .select2-choice {
@@ -42,7 +40,7 @@
     position: relative;
 
     border: 0;
-    border-bottom: 1px solid var(--paper-input-container-color);
+    border-bottom: 1px solid var(--paper-input-container-color, #ccc);
     white-space: nowrap;
     line-height: 26px;
     text-decoration: none;
@@ -141,7 +139,7 @@
     top: 100%;
 
     background: #fff;
-    color: #000;
+    color: var(--nuxeo-text-default, #000);
     border: 0;
     border-radius: 0;
     -webkit-box-shadow: none;
@@ -157,13 +155,9 @@
     box-shadow: none;
   }
 
-  .select2-drop-active {
-    border: 0;
-    border-top: 1px solid var(--paper-input-container-color) !important;
-  }
-
+  .select2-drop-active,
   .select2-drop.select2-drop-above.select2-drop-active {
-    border-top: 0;
+    border: 0;
   }
 
   .select2-drop-auto-width {
@@ -234,6 +228,7 @@
 
     border: 0;
     border-radius: 0;
+    border-bottom: 1px solid var(--paper-input-container-color, #ccc);
 
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -244,21 +239,12 @@
     padding: 4px 5px 4px 20px;
   }
 
-  .select2-drop.select2-drop-above .select2-search input {
-    margin-top: 4px;
-  }
-
-  .select2-search input.select2-active {
-
-  }
-
   .select2-container-active .select2-choice,
   .select2-container-active .select2-choices {
     border: 0;
-    border-bottom: 1px solid var(--paper-input-container-color);
+    border-bottom: 1px solid var(--paper-input-container-focus-color, #3875d7);
     outline: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
+    box-shadow: 0 -1px 0 var(--paper-input-container-focus-color, #3875d7) inset;
   }
 
   .select2-dropdown-open .select2-choice {
@@ -311,13 +297,13 @@
   /* results */
   .select2-results {
     max-height: 200px;
-    padding: 0 0 0 4px;
+    padding: 0;
     margin: 0;
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    border: 1px solid var(--nuxeo-border);
+    border: 1px solid var(--nuxeo-border, #ccc);
   }
 
   html[dir="rtl"] .select2-results {
@@ -427,7 +413,7 @@
     background: none;
     border: 0 !important;
     cursor: default;
-    color: var(--nuxeo-text-default);
+    color: var(--nuxeo-text-default, #000);
   }
 
   .select2-container.select2-container-disabled .select2-choice .select2-arrow {
@@ -446,11 +432,10 @@
     height: auto !important;
     height: 1%;
     margin: 0;
-    padding: 0 5px 0 0;
+    padding: 0;
     position: relative;
 
     border: 0;
-    border-bottom: 1px solid var(--paper-input-container-color);
     cursor: text;
     overflow: hidden;
 
@@ -472,8 +457,6 @@
   .select2-container-multi.select2-container-active .select2-choices {
     border: 0;
     outline: none;
-    border-bottom: 1px solid var(--paper-input-container-color);
-
     -webkit-box-shadow: none;
     box-shadow: none;
   }
@@ -487,14 +470,8 @@
     float: right;
   }
 
-  .select2-container-multi .select2-choices .select2-search-field {
-    margin: 0;
-    padding: 0;
-    white-space: nowrap;
-  }
-
   .select2-container-multi .select2-choices .select2-search-field input {
-    padding: 5px;
+    padding: 5px 0;
     margin: 1px 0;
     width: 100% !important;
     font-family: inherit;
@@ -505,8 +482,17 @@
     background: transparent !important;
   }
 
-  .select2-container-multi .select2-choices .select2-search-field input.select2-active {
+  .select2-container .select2-choices .select2-search-field {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    width: 100%;
+    border-bottom: 1px solid var(--paper-input-container-color, #ccc);
+  }
 
+  .select2-container-active.select2-container .select2-choices .select2-search-field {
+    border-bottom: 1px solid var(--paper-input-container-focus-color, #3875d7);
+    box-shadow: 0 -1px 0 var(--paper-input-container-focus-color, #3875d7) inset;
   }
 
   .select2-default {

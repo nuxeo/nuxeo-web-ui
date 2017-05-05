@@ -86,7 +86,7 @@ Example:
                          required$="[[required]]">
 
       <paper-menu id="paperMenu" class="dropdown-content"
-                  attr-for-selected="[[_computeAttrForSelected(attrForSelected)]]" selected="{{selected}}">
+                  attr-for-selected="[[_computeAttrForSelected(attrForSelected, options)]]" selected="{{selected}}">
         <template is="dom-if" if="[[options]]">
           <template is="dom-repeat" items="[[options]]" as="item">
             <paper-item option="[[_id(item)]]">[[_label(item)]]</paper-item>
@@ -132,7 +132,8 @@ Example:
        * Options array to show.
        */
       options: {
-        type: Array
+        type: Array,
+        value: null
       },
 
       /**
@@ -208,8 +209,8 @@ Example:
       return (item && item.label) ? item.label : item;
     },
 
-    _computeAttrForSelected: function(attrForSelected) {
-      return this.options ? 'option' : this.attrForSelected;
+    _computeAttrForSelected: function(attrForSelected, options) {
+      return options ? 'option' : attrForSelected;
     }
 
   });

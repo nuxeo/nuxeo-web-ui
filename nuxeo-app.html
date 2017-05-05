@@ -87,55 +87,62 @@ Contributors:
       /* logo */
       #logo {
         position: fixed;
-        width: 56px;
-        height: 58px;
+        width: 52px;
+        height: 53px;
         top: 0;
         left: 0;
         z-index: 102;
-        padding: 18px;
         box-sizing: border-box;
         outline: none;
+        background-color: var(--nuxeo-sidebar-background);
       }
 
       #logo iron-icon {
         width: 20px;
         height: 20px;
+        padding: 18px 16px 16px;
       }
 
       /* menu */
       #menu {
         @apply(--nuxeo-sidebar);
         position: fixed;
-        width: 56px;
-        height: calc(100% - 62px);
+        width: 52px;
+        height: calc(100% - 54px);
         z-index: 100;
-        padding: 62px 0;
+        padding: 53px 0;
         overflow: auto;
       }
 
       #menu ::content paper-icon-button {
         color: var(--nuxeo-sidebar-menu);
-        height: 44px;
-        padding: 13px;
-        width: 56px;
+        height: 48px;
+        padding: 12px 13px;
+        width: 52px;
       }
 
+      #logo:hover iron-icon,
       #menu ::content nuxeo-menu-icon:hover ::content paper-icon-button,
       #menu ::content nuxeo-menu-icon.selected ::content paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
+      #logo:hover iron-icon {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
+
       #menu .profile-icon,
       #menu .admin-icon {
         position: fixed;
-        height: 44px;
+        height: 48px;
         bottom: 0;
         left: 0;
       }
 
       #menu .admin-icon {
-        bottom: 44px;
+        bottom: 48px;
       }
 
       @media (max-width: 1024px), (max-height: 700px) {
@@ -144,9 +151,11 @@ Contributors:
           position: relative;
           bottom: auto;
         }
+      }
 
-        #menu .admin-icon {
-          border-top: 1px solid rgba(0,0,0,0.15);
+      @media (max-width: 1024px) {
+        paper-header-panel ::content .content {
+          padding: 1.1rem .5rem;
         }
       }
 
@@ -161,7 +170,7 @@ Contributors:
         @apply(--layout-horizontal);
         @apply(--layout-center);
         font-size: 1rem;
-        height: 58px;
+        height: 53px;
         padding: 0 16px;
         text-transform: uppercase;
         text-overflow: ellipsis;
@@ -173,7 +182,7 @@ Contributors:
         color: var(--nuxeo-drawer-text);
         width: 294px;
         height: 100vh;
-        margin-left: 56px;
+        margin-left: 52px;
         background-color: var(--nuxeo-drawer-background);
       }
 
@@ -444,7 +453,7 @@ Contributors:
 
           drawerWidth: {
             type: String,
-            value: '56px'
+            value: '52px'
           },
 
           drawerOpened: {
@@ -661,7 +670,7 @@ Contributors:
         },
 
         _closeDrawer: function() {
-          this.drawerWidth = '56px';
+          this.drawerWidth = '52px';
           this.drawerOpened = false;
           this.$.drawerPanel.closeDrawer();
         },
