@@ -38,6 +38,11 @@ An element for generic input in forms
                  readonly$="[[readonly]]"
                  disabled$="[[disabled]]"
                  required$="[[required]]"
+                 minlength$="[[minlength]]"
+                 maxlength$="[[maxlength]]"
+                 min$="[[min]]"
+                 max$="[[max]]"
+                 pattern$="[[pattern]]"
                  always-float-label>
     </paper-input>
 
@@ -111,7 +116,32 @@ An element for generic input in forms
         type: Boolean,
         value: false,
         reflectToAttribute: true
-      }
+      },
+
+      /**
+       * The minimum (numeric or date-time) input value.
+       */
+      min: String,
+
+      /**
+       * The maximum (numeric or date-time) input value.
+       */
+      max: String,
+
+      /**
+       * The minimum length of the input value.
+       */
+      minlength: Number,
+
+      /**
+       * The maximum length of the input value.
+       */
+      maxlength: Number,
+
+      /**
+       * A pattern to validate.
+       */
+      pattern: String
     },
 
     focus: function() {
