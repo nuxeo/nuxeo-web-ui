@@ -28,11 +28,14 @@ Contributors:
     <style>
       .item {
         @apply(--layout-horizontal);
+        line-height: 2.2rem;
       }
+
       .item label {
         width: 100px;
         min-width: 100px;
       }
+
     </style>
 
     <div class="item">
@@ -49,7 +52,7 @@ Contributors:
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.state')]]</label>
-      <nuxeo-tag uppercase>[[document.state]]</nuxeo-tag>
+      <div><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></div>
     </div>
     <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
       <div class="item">

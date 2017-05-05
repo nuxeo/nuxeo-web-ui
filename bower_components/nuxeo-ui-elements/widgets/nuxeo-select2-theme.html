@@ -572,6 +572,10 @@
 
   /* disabled styles */
 
+  .select2-search-field input[disabled] {
+    display: none;
+  }
+
   .select2-container-multi.select2-container-disabled .select2-choices {
     border: 0;
     cursor: default;
@@ -581,6 +585,10 @@
     padding: 3px 5px 3px 5px;
     border: 0;
     background: var(--nuxeo-tag-background, #eee) none;
+  }
+
+  .select2-container.select2-container-disabled .select2-choices .select2-search-field {
+    border-bottom: 0;
   }
 
   .select2-container-multi.select2-container-disabled .select2-choices .select2-search-choice .select2-search-choice-close {
