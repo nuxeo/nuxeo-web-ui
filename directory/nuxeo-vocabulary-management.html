@@ -158,7 +158,7 @@ Contributors:
          * Returns the href for the current layout element
          */
         _layoutHref: function(schema) {
-          return this.resolveUrl(['nuxeo', schema.toLowerCase(), 'edit'].join('-') + '.html');
+          return this.resolveUrl(schema + '/nuxeo-' + schema + '-edit-layout.html');
         },
 
         _layoutModel: function() {

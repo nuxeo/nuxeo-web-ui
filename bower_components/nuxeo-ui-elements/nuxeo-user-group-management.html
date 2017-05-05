@@ -104,11 +104,11 @@ Custom property | Description | Default
                 <span>[[i18n('userGroupManagement.new.usergroup')]]</span>
               </paper-button>
               <paper-menu noAnimation id="menu" class="dropdown-content" selectable="item">
-                <paper-icon-item on-tap="_createUser">
+                <paper-icon-item name="user" on-tap="_createUser">
                   <iron-icon icon="nuxeo:user" item-icon></iron-icon>
                   <span>[[i18n('userGroupManagement.new.user')]]</span>
                 </paper-icon-item>
-                <paper-icon-item on-tap="_createGroup">
+                <paper-icon-item name="group" on-tap="_createGroup">
                   <iron-icon icon="nuxeo:group" item-icon></iron-icon>
                   <span>[[i18n('userGroupManagement.new.group')]]</span>
                 </paper-icon-item>
