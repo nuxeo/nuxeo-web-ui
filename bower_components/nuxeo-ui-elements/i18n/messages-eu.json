@@ -131,7 +131,7 @@
   "popupPermission.newPermission":"Berria",
   "popupPermission.notify":"Send an email to notify user",
   "popupPermission.notifyLabel":"Notification email",
-  "popupPermission.notifyPlaceholder":"Hi! Could you comment this document and...",
+  "popupPermission.notifyPlaceholder":"Hi! Could you comment on this document and...",
   "popupPermission.permanent":"Permanent",
   "popupPermission.right":"Right",
   "popupPermission.shareWithExternalUser":"Share With External User",
