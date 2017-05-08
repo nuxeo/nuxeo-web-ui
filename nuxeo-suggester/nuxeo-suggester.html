@@ -129,19 +129,23 @@ Contributors:
         @apply(--layout-vertical);
       }
 
-      .result {
+      .item {
         display: block;
         padding: 1em;
         background-color: var(--nuxeo-quicksearch-background);
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
       }
 
-      .result + .result {
+      .item + .item {
         border-top: 1px solid var(--nuxeo-border);
-       }
+      }
 
-      a.result:hover {
+      .item ::content iron-icon {
+        margin: 0 16px 0 4px;
+      }
+
+      a.item:hover {
         @apply(--nuxeo-block-hover);
       }
 
@@ -149,8 +153,20 @@ Contributors:
         @apply(--nuxeo-block-selected);
       }
 
-      .result > iron-icon {
-        margin-right: 8px;
+      a .itemName {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      a .itemPath {
+        color: var(--primary-text-color);
+        opacity: 0.5;
+        font-size: 0.8em;
+      }
+
+      a:hover .itemPath {
+        color: var(--nuxeo-primary-color);
       }
 
       .fade {
@@ -162,12 +178,6 @@ Contributors:
         opacity: .8;
         z-index: -1;
         background: var(--primary-text-color);
-      }
-
-      .ellipsis {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
       }
 
       @media (max-width: 1024px) {
@@ -191,7 +201,6 @@ Contributors:
           padding: 1em;
         }
       }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -213,9 +222,14 @@ Contributors:
         <div id="results" hidden$="[[!_canShowResuls(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="result" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
-                <iron-icon src="[[_getIcon(item)]]"></iron-icon>
-                <span class="ellipsis">[[item.label]]</span>
+              <a class="item" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
+                <div class="layout horizontal center">
+                  <iron-icon src="[[_getIcon(item)]]"></iron-icon>
+                  <div class="layout vertical">
+                    <div class="itemName">[[item.label]]</div>
+                    <div class="itemPath">[[_getUrl(item)]]</div>
+                  </div>
+                </div>
               </a>
             </template>
           </iron-selector>
@@ -300,6 +314,10 @@ Contributors:
           } else {
             return this.$.nxcon.url + item.icon;
           }
+        },
+
+        _getUrl: function(item) {
+          return this.urlFor(item.type, item.id).replace('/#!', '');
         },
 
         _upPressed: function() {
