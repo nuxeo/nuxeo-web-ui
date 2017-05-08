@@ -47,7 +47,7 @@ Contributors:
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
-      <paper-icon-button noink icon="icons:book" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
+      <paper-icon-button noink icon="nuxeo:collections" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
       <paper-tooltip for="addColBut">[[i18n('addToCollectionDocumentsButton.tooltip')]]</paper-tooltip>
     </template>
 
