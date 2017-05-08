@@ -68,13 +68,10 @@ Contributors:
       }
     </style>
 
-    <nuxeo-document id="doc" doc-id="[[document.uid]]"
-                    data="{{document}}" response="{{document}}"
-                    headers="[[headers]]">
-    </nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]"></nuxeo-document>
 
     <form id="form" is="iron-form">
-      <nuxeo-document-layout id="document-edit" document="[[document]]" layout="edit"></nuxeo-document-layout>
+      <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
       <div class="actions">
         <paper-button on-tap="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" on-tap="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
@@ -105,6 +102,10 @@ Contributors:
           }
         },
 
+        observers: [
+            '_documentChanged(document.*)'
+        ],
+
         _computeHeaders: function(versioningType) {
           return {
             'X-Versioning-Option': versioningType,
@@ -129,8 +130,12 @@ Contributors:
           if (!this._validate()) {
             return;
           }
-          // TODO: NXP-20782: remove contributors or they will be duplicated
-          delete this.document.properties['dc:contributors'];
+          this.$.doc.data = {
+            'entity-type': 'document',
+            uid: this.document.uid,
+            properties: this._dirtyProperties
+          };
+
           this.$.doc.put().then(this._refresh.bind(this));
         },
 
@@ -140,6 +145,16 @@ Contributors:
 
         _refresh: function() {
           this.fire('document-updated');
+        },
+
+        _documentChanged: function(e) {
+          if (e.path === 'document') {
+            this._dirtyProperties = {};
+          } else {
+            // set dirty properties
+            var path = e.path.replace(/^document\.properties/i, '_dirtyProperties');
+            this.set(path, e.value);
+          }
         }
       });
     })();
