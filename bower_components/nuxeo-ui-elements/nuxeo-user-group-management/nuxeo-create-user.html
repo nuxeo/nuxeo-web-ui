@@ -37,7 +37,7 @@ Used by `nuxeo-user-group-management`
       }
 
       form {
-        margin: 24px 0;
+        margin: 24px 0 0;
       }
 
       nuxeo-user-suggestion {
@@ -86,7 +86,7 @@ Used by `nuxeo-user-group-management`
        .form-buttons {
         background-color:var(--nuxeo-dialog-buttons-bar, #eee);
         padding: 1em;
-        margin: 0 -1.2rem 2em;
+        margin: 0 -1.2rem;
       }
     </style>
 
@@ -101,13 +101,13 @@ Used by `nuxeo-user-group-management`
 
     <form is="iron-form" id="form" class="vertical layout">
       <paper-input label="[[i18n('createUser.username')]]" value="{{user.username}}"
-                   required always-float-label>
+                   name="username" required always-float-label>
       </paper-input>
 
       <nuxeo-edit-user id="propertyEditor" user="{{user}}" new></nuxeo-edit-user>
 
       <label class="label-password">[[i18n('createUser.setPassword')]]</label>
-      <paper-toggle-button checked="{{usePassword}}"></paper-toggle-button>
+      <paper-toggle-button checked="{{usePassword}}" name="password-toggle"></paper-toggle-button>
       <nuxeo-edit-password id="passwordEditor" password="{{user.password}}"
                            required$="[[usePassword]]" hidden$="[[!usePassword]]">
       </nuxeo-edit-password>

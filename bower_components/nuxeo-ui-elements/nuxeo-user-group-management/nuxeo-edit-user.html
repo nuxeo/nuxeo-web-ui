@@ -36,14 +36,15 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
     </style>
 
     <div class="layout vertical">
-      <paper-input label="[[i18n('editUser.firstName')]]" value="{{user.firstName}}" always-float-label></paper-input>
-      <paper-input label="[[i18n('editUser.lastName')]]" value="{{user.lastName}}" always-float-label></paper-input>
-      <paper-input label="[[i18n('editUser.company')]]" value="{{user.company}}" always-float-label></paper-input>
-      <paper-input label="[[i18n('editUser.email')]]" value="{{user.email}}" always-float-label type="email" required></paper-input>
+      <paper-input label="[[i18n('editUser.firstName')]]" value="{{user.firstName}}" name="firstname" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.lastName')]]" value="{{user.lastName}}" name="lastname" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.company')]]" value="{{user.company}}" name="company" always-float-label></paper-input>
+      <paper-input label="[[i18n('editUser.email')]]" value="{{user.email}}" name="email" always-float-label type="email" required></paper-input>
     </div>
 
     <template is="dom-if" if="[[new]]">
       <nuxeo-user-suggestion id="picker"
+                             name="group"
                              search-type="GROUP_TYPE"
                              label="[[i18n('editUser.groups')]]"
                              placeholder="[[i18n('editUser.searchGroups')]]"
