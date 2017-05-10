@@ -134,13 +134,13 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
           // set initial value
           this.element.setData(this.value);
 
-          this.element.on('change', function() {
-            this.value = this.element.getData();
-          }.bind(this));
+          this.element.on('change', this._updateValue.bind(this));
 
-          this.element.on('actionPerformed', function() {
-            this.value = this.element.getData();
-          }.bind(this));
+          this.element.on('actionPerformed', this._updateValue.bind(this));
+        },
+
+        _updateValue : function() {
+          this.value = this.element.getData();
         }
       });
     })();
