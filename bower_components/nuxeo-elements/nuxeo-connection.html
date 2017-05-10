@@ -64,7 +64,10 @@ Note: Elements that depend on a connectionId use `nx` as default.
         username: {type: String, value: null},
 
         /* The password. */
-        password: {type: String, value: null}
+        password: {type: String, value: null},
+
+        /* The current user entity */
+        user: {type: Object, readOnly: true, notify: true}
       },
 
       ready: function() {
@@ -89,8 +92,8 @@ Note: Elements that depend on a connectionId use `nx` as default.
             this.client._username === this.username &&
             this.client._password === this.password &&
             this.client._baseOptions.repositoryName === this.repositoryName) {
-            // return the stored connection request promise
-            return this.client._promise;
+            // return the stored connection request promise and chain handleConnected to update instance properties
+            return this.client._promise.then(this.handleConnected.bind(this));
           } else {
             // otherwise override the client with the new properties
             this.client = null;
@@ -114,12 +117,15 @@ Note: Elements that depend on a connectionId use `nx` as default.
         }
 
         nxClients[id] = this.client = this.client || new Nuxeo(options);
-        return this.client._promise = this.client.login()
-          .then(this.handleConnected.bind(this))
+
+        // share the login promise between all instances (one per client)
+        this.client._promise = this.client.login()
           .catch(function(error) {
             console.log("Nuxeo connection refused: " + error);
             throw error;
           });
+
+        return this.client._promise.then(this.handleConnected.bind(this))
       },
 
       /**
@@ -138,19 +144,13 @@ Note: Elements that depend on a connectionId use `nx` as default.
         return this.client && this.client._activeRequests > 0;
       },
 
-      /**
-       * Returns the current user entity
-       * @type {User}
-       */
-      get user() {
-        return this.client.user;
-      },
 
-      handleConnected: function(res) {
+      handleConnected: function(user) {
         if (this.client.connected) {
-          this.fire('nuxeo-connected', {user: res});
+          this._setUser(user);
+          this.fire('connected');
         }
-        return res;
+        return user;
       },
 
       request: function() {

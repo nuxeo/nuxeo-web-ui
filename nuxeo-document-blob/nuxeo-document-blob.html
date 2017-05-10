@@ -18,6 +18,7 @@ Contributors:
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-preview-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-delete-blob-button.html">
@@ -65,6 +66,8 @@ Contributors:
 
     </style>
 
+    <nuxeo-connection user="{{user}}"></nuxeo-connection>
+
     <template is="dom-if" if="[[blob]]">
       <div class="row">
         <div class="info">
@@ -85,30 +88,29 @@ Contributors:
 </dom-module>
 
 <script>
-  (function() {
-    Polymer({
-      is: 'nuxeo-document-blob',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
-      properties: {
-        document: Object,
-        xpath: {
-          type: String,
-          value: 'file:content'
-        },
-        blob: Object,
-        actionContext: Object
+  Polymer({
+    is: 'nuxeo-document-blob',
+    behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+    properties: {
+      user: Object,
+      document: Object,
+      xpath: {
+        type: String,
+        value: 'file:content'
       },
+      blob: Object,
+      actionContext: Object
+    },
 
-      observers: [
-        '_updateBlob(document, xpath)'
-      ],
+    observers: [
+      '_update(user, document, xpath)'
+    ],
 
-      _updateBlob: function(document, xpath) {
-        var array = xpath.split('/');
-        this.blob = (array.length > 1) ? document.properties[array[0]][array[1]].file : document.properties[xpath];
-        this.actionContext = {document: this.document, blob: this.blob, xpath: this.xpath};
-      }
+    _update: function(user, document, xpath) {
+      var array = xpath.split('/');
+      this.blob = (array.length > 1) ? document.properties[array[0]][array[1]].file : document.properties[xpath];
+      this.actionContext = {user: this.user, document: this.document, blob: this.blob, xpath: this.xpath};
+    }
 
-    });
-  })();
+  });
 </script>
