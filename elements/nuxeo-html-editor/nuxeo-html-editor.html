@@ -137,6 +137,10 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
           this.element.on('change', function() {
             this.value = this.element.getData();
           }.bind(this));
+
+          this.element.on('actionPerformed', function() {
+            this.value = this.element.getData();
+          }.bind(this));
         }
       });
     })();
