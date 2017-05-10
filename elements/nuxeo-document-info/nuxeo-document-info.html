@@ -38,6 +38,20 @@ Contributors:
 
     </style>
 
+    <div class="item" hidden$="[[!_showProcess]]">
+      <label>[[i18n('documentInfo.process')]]</label>
+      <div><nuxeo-tag uppercase>[[i18n('documentInfo.process.running')]]</nuxeo-tag></div>
+    </div>
+    <div class="item">
+      <label>[[i18n('documentInfo.state')]]</label>
+      <div><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></div>
+    </div>
+    <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
+      <div class="item">
+        <label>[[i18n('documentInfo.version')]]</label>
+        <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+      </div>
+    </template>
     <div class="item">
       <label>[[i18n('documentInfo.lastModified')]]</label>
       <nuxeo-date datetime="[[document.properties.dc:modified]]"></nuxeo-date>
@@ -51,22 +65,8 @@ Contributors:
       <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
     </div>
     <div class="item">
-      <label>[[i18n('documentInfo.state')]]</label>
-      <div><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></div>
-    </div>
-    <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
-      <div class="item">
-        <label>[[i18n('documentInfo.version')]]</label>
-        <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
-      </div>
-    </template>
-    <div class="item">
       <label>[[i18n('documentInfo.contributors')]]</label>
       <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
-    </div>
-    <div class="item" hidden$="[[!_showProcess]]">
-      <label>[[i18n('documentInfo.process')]]</label>
-      <nuxeo-tag uppercase>[[i18n('documentInfo.process.running')]]</nuxeo-tag>
     </div>
 
   </template>
