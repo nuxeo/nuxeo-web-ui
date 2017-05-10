@@ -1204,7 +1204,7 @@ Contributors:
          */
         _updateDocument: function() {
 
-          if (!this._isValidType(this.selectedDocType)) {
+          if (!this._isValidType(this.selectedDocType) || !this.parent) {
             this.document = null;
             // prevent error message from being displayed the first time
             this.$.docTypeDropdown.invalid = false;
@@ -1214,6 +1214,7 @@ Contributors:
           var document = {
             'entity-type': 'document',
             'type': this.selectedDocType.type,
+            'parentRef': this.parent.uid,
             'name': '',
             'properties': {
               'dc:title': '',

@@ -60,8 +60,7 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
     },
 
     selectedDocType: {
-      type: String,
-      observer: '_updateDocument'
+      type: String
     },
 
     subtypes: {
@@ -71,7 +70,8 @@ Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
   },
 
   observers: [
-    '_validateLocation(isValidTargetPath,suggesterChildren)'
+    '_validateLocation(isValidTargetPath,suggesterChildren)',
+    '_updateDocument(selectedDocType, parent)'
   ],
 
   _parentChanged: function() {
