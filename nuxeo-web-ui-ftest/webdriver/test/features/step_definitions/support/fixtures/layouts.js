@@ -49,6 +49,9 @@ global.fieldRegistry.register('nuxeo-directory-suggestion',
                                   driver.element(`#select2-drop li.select2-result`).click();
                                 }
                               });
+global.fieldRegistry.register('paper-input',
+                              (element) => element.element('#input').getValue(),
+                              (element, value) => { element.element('#input').setValue(value); });
 global.fieldRegistry.register('generic',
                               (element) => element.getText(),
                               (element, value) => element.setValue(value));
