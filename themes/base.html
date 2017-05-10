@@ -108,10 +108,12 @@
   }
   body ::content paper-button.primary {
     @apply(--nx-button-primary);
+    border-color: transparent;
   }
   body ::content paper-button.primary:hover,
   body ::content paper-button.primary:focus {
     @apply(--nx-button-primary-hover);
+    border-color: transparent;
   }
   body ::content paper-button[disabled] {
     @apply(--nx-button-disabled);
@@ -340,6 +342,7 @@
       font-size: .8rem;
       color: var(--nuxeo-link-color);
       background-color: var(--nuxeo-button);
+      border: 1px solid var(--nuxeo-border);
       border-radius: .1em;
       padding: .8em 2em;
       margin: 0;
@@ -352,11 +355,13 @@
     --paper-button-flat-keyboard-focus: {
       background-color: var(--nuxeo-button-primary-focus);
       color: var(--nuxeo-button-primary-text);
+      border-color: transparent;
     };
 
     --paper-button-raised-keyboard-focus: {
       background-color: var(--nuxeo-button-primary-focus);
       color: var(--nuxeo-button-primary-text);
+      border-color: transparent;
     };
 
     --paper-transition-easing: {
