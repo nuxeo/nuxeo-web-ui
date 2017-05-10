@@ -9,6 +9,7 @@ import Administration from './ui/administration.js';
 import BasePage from './base';
 import ActivityFeed from './ui/activity_feed';
 import HistoryTable from './ui/history_table';
+import UserGroup from './ui/userGroup';
 
 export default class UI extends BasePage {
 
@@ -26,6 +27,10 @@ export default class UI extends BasePage {
 
   get historyTable() {
     return new HistoryTable('nuxeo-document-history');
+  }
+
+  get userGroup() {
+    return new UserGroup('nuxeo-user-group-management');
   }
 
   get createDialog() {
