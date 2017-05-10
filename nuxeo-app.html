@@ -227,9 +227,10 @@ Contributors:
 
       #drawerToggle {
         position: absolute;
-        top: 9px;
-        left: 9px;
+        top: 5px;
+        left: 6px;
         z-index: 99;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       nuxeo-document-create-button.admin {
@@ -238,6 +239,12 @@ Contributors:
 
       paper-drawer-panel[narrow] ::content nuxeo-page ::content paper-toolbar ::content .header {
         margin-left: 32px;
+      }
+
+      @media (max-width: 1024px) {
+        paper-header-panel ::content paper-toolbar .header {
+          overflow-y: scroll;
+        }
       }
 
     </style>
