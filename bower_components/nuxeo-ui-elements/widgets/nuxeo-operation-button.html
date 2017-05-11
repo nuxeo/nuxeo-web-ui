@@ -38,7 +38,7 @@ Example:
 <dom-module id="nuxeo-operation-button">
   <template>
 
-    <nuxeo-operation id="op" op="[[operation]]" input="[[input]]"></nuxeo-operation>
+    <nuxeo-operation id="op" op="[[operation]]" input="[[input]]" params="[[params]]"></nuxeo-operation>
 
     <paper-icon-button id="bt" icon="[[icon]]" on-tap="_execute"></paper-icon-button>
     <paper-tooltip for="bt">[[label]]</paper-tooltip>
@@ -47,39 +47,45 @@ Example:
 </dom-module>
 
 <script>
-  (function () {
-    Polymer({
-      is: 'nuxeo-operation-button',
+  Polymer({
+    is: 'nuxeo-operation-button',
 
-      properties: {
+    properties: {
 
-        /* Icon */
-        icon: String,
+      /* Icon */
+      icon: String,
 
-        /* Label (shown as tooltip) */
-        label: String,
+      /* Label (shown as tooltip) */
+      label: String,
 
-        /* The id of the operation to call. */
-        operation: String,
+      /* The id of the operation to call. */
+      operation: String,
 
-        /* The operation input. */
-        input: String,
+      /* The operation input. */
+      input: String,
 
-        /* The response from the server. */
-        response: {
-          type: Object,
-          value: null,
-          notify: true
+      /* The parameters to send. */
+      params: {
+        type: Object,
+        value: function() {
+          return {};
         }
       },
 
-      _execute: function() {
-        this.$.op.execute().then(function(response) {
-          this.fire('operation-executed', {response: response});
-          this.response = response;
-        }.bind(this));
+      /* The response from the server. */
+      response: {
+        type: Object,
+        value: null,
+        notify: true
       }
+    },
 
-    });
-  })();
+    _execute: function() {
+      this.$.op.execute().then(function(response) {
+        this.fire('operation-executed', {response: response});
+        this.response = response;
+      }.bind(this));
+    }
+
+  });
 </script>
