@@ -713,8 +713,8 @@ Used by `nuxeo-user-group-management`
 
         _countGroups: function(groups) {
           if (groups) {
-            var label = ' ' + (groups.length === 1 ? this.i18n('groupManagement.nesteGroup') :
-                                                     this.i18n('groupManagement.nesteGroups'));
+            var label = ' ' + (groups.length === 1 ? this.i18n('groupManagement.nestedGroup') :
+                                                     this.i18n('groupManagement.nestedGroups'));
             return groups.length + label;
           }
         },
