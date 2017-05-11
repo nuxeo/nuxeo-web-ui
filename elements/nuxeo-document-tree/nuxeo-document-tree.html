@@ -41,6 +41,13 @@ Contributors:
         --nuxeo-tree-children-theme: {
           padding-left: 1em;
         };
+        --nuxeo-tree-node-more-theme: {
+          line-height: 1.3em;
+          display: inline-block;
+          vertical-align: text-top;
+          margin-left: 1.3em;
+          word-break: break-word;
+        }
       }
 
       .content {
@@ -195,10 +202,14 @@ Contributors:
 
       ready: function() {
         this.controller = {
-          getChildren: function(node) {
+          getChildren: function(node, page) {
             this.$.children.params = [node.uid];
+            this.$.children.page = page;
             return this.$.children.fetch().then(function(data) {
-              return data.entries;
+              return {
+                items: data.entries,
+                isNextAvailable: this.$.children.isNextPageAvailable
+              }
             }.bind(this));
           }.bind(this),
 
