@@ -26,4 +26,9 @@ module.exports = function () {
 
   this.Given('I am on cloud services page', () =>
     this.ui.administration.goToCloudServices());
+
+  this.When('I click the new user/group button', () => {
+    this.ui.administration.userGroupCreateButton.waitForVisible();
+    this.ui.administration.userGroupCreateButton.click();
+  });
 };

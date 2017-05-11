@@ -1,6 +1,6 @@
 Feature: User
 
-  As an Administrator I can create, edit and delete users.
+  As an Administrator I can create, edit, search for and delete users.
 
   Background:
     Given I login as "Administrator"
@@ -20,7 +20,6 @@ Feature: User
       | lastname             | Smith         |
       | company              | Nuxeo         |
       | email                | test@test.com |
-      #| groups               | managers      |
       | password             | test          |
       | passwordConfirmation | test          |
     Then I can search for the user "jsmith"

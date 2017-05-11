@@ -1,6 +1,6 @@
 'use strict';
 
-export default class UserGroup {
+export default class User {
 
   constructor(selector) {
     this._selector = selector;
@@ -30,16 +30,28 @@ export default class UserGroup {
     return this.page.waitForVisible();
   }
 
-  get userButton() {
-    return this.page.element('#createButton.nuxeo-user-group-management');
+  get dropdown() {
+    return this.page.element('#menu.nuxeo-user-group-management');
+  }
+
+  get userItem() {
+    return this.page.element(`paper-icon-item[name="user"]`);
+  }
+
+  get createUserForm() {
+    return this.page.element(`#form.nuxeo-create-user`);
+  }
+
+  get createUserDialog() {
+    return { parent: '#form.nuxeo-create-user ' };
   }
 
   get createUserButton() {
-    return this.page.element('#createButton.nuxeo-create-user');
+    return this.page.element(`#createButton.nuxeo-create-user`);
   }
 
   get editUserButton() {
-    return this.page.element('#editUserButton');
+    return this.page.element(`#editUserButton`);
   }
 
   get editUserDialog() {
@@ -47,11 +59,7 @@ export default class UserGroup {
   }
 
   get editUserDialogButton() {
-    return this.page.element('#editUserDialog paper-button');
-  }
-
-  get dropdown() {
-    return this.page.element('#menu.nuxeo-user-group-management');
+    return this.page.element(`#editUserDialog paper-button`);
   }
 
   get deleteUserButton() {
@@ -62,43 +70,28 @@ export default class UserGroup {
     return this.page.element('#deleteUserDialog paper-button');
   }
 
-  searchResult(searchTerm) {
-    return this.page.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
-  }
-
-  item(userOrGroup) {
-    return this.page.element(`paper-icon-item[name="${userOrGroup}"]`);
-  }
-
-  form(userOrGroup) {
-    return this.page.element(`#form.nuxeo-create-${userOrGroup}`);
-  }
-
   fillMultipleValues(table, opts) {
     opts = opts || {};
     let parent = opts.parent || '';
-    let currentUsername;
     table.rows().forEach((row) => {
       if (row[0] === 'username') {
-        currentUsername = row[1];
+        global.users[row[1]] = row[1];
+        this.page.element('paper-toggle-button[name="password-toggle"]').click();
       }
-      const fieldEl = this.getField(row[0], { parent: parent});
+      const fieldEl = this.getField(row[0], { parent: parent });
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
-    global.users[currentUsername] = currentUsername;
   }
 
   searchFor(searchTerm) {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
     const searchBox = this.el.element('paper-input.nuxeo-user-group-search');
+    searchBox.waitForVisible();
     return fixtures.layouts.setValue(searchBox, searchTerm);
   }
 
-  setPassword() {
-    return this.page.element('paper-toggle-button[name="password-toggle"]');
+  searchResult(searchTerm) {
+    return this.page.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
   }
-
-
-
 }
