@@ -286,13 +286,13 @@ Used by `nuxeo-user-group-management`
 
       <template is="dom-if" if=[[!readonly]]>
         <div class="layout horizontal header-actions">
-          <paper-button noink class="flex-end" on-tap="_toggleDeleteGroup">
+          <paper-button id="deleteGroupButton" noink class="flex-end" on-tap="_toggleDeleteGroup">
             <iron-icon icon="nuxeo:delete"></iron-icon> [[i18n('command.delete')]]
           </paper-button>
-          <paper-button noink class="flex-end primary" on-tap="_toggleEditMembers">
+          <paper-button id="addMembersButton" noink class="flex-end primary" on-tap="_toggleEditMembers">
             <iron-icon icon="nuxeo:add"></iron-icon> [[i18n('groupManagement.addMembers')]]
           </paper-button>
-          <paper-button noink on-tap="_toggleEditGroup" class="primary">
+          <paper-button id="editGroupButton" noink on-tap="_toggleEditGroup" class="primary">
             <iron-icon icon="nuxeo:edit"></iron-icon> [[i18n('groupManagement.editGroup')]]
           </paper-button>
         </div>

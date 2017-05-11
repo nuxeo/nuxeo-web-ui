@@ -16,6 +16,7 @@ limitations under the License.
 -->
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-collapse/iron-collapse.html">
+<link rel="import" href="../nuxeo-i18n-behavior.html">
 
 <!-- Part of `nuxeo-tree`-->
 <dom-module id="nuxeo-tree-node">
@@ -29,6 +30,10 @@ limitations under the License.
       ::content iron-collapse {
         padding-left: 1em;
         @apply(--nuxeo-tree-children-theme);
+      }
+
+      ::content .more {
+        @apply(--nuxeo-tree-node-more-theme);
       }
 
       ::content #content {
@@ -57,7 +62,7 @@ limitations under the License.
       Polymer({
         is: 'nuxeo-tree-node',
 
-        behaviors: [Polymer.Templatizer],
+        behaviors: [Polymer.Templatizer, Nuxeo.I18nBehavior],
 
         properties: {
 
@@ -95,6 +100,14 @@ limitations under the License.
           nodeKey: {
             type: String,
             value: 'id'
+          },
+          page: {
+            type: Number,
+            value: 1
+          },
+          isNextAvailable: {
+            type: Boolean,
+            value: false
           }
         },
 
@@ -187,19 +200,47 @@ limitations under the License.
                 el.data = items[i];
                 children.appendChild(el);
               }
+              if (this.isNextAvailable) {
+                var addMore = document.createElement('a');
+                addMore.setAttribute("class","more");
+                addMore.appendChild(document.createTextNode(this.i18n('tree.loadMore')));
+                this.listen(addMore, 'tap', '_loadMoreData');
+                children.appendChild(addMore);
+              }
               resolve();
               this.loading = false;
             }.bind(this));
           }
         },
 
+        _loadMoreData: function() {
+          if (this.isNextAvailable && !this.loading) {
+            this.page = this.page + 1;
+            this._fetchChildren();
+          }
+        },
+
         _fetchChildren: function() {
           this.loading = true;
-          return this.controller.getChildren(this.data).then(function(results) {
-            this._children = results;
-            this._updated = true;
-            return this._renderChildNodes();
-          }.bind(this));
+          if (this.page === 1) {
+            this._children = [];
+            this.isNextAvailable = true;
+          }
+          if (this.isNextAvailable) {
+            return this.controller.getChildren(this.data, this.page).then(function(results) {
+              if (results.items) {
+                results.items.forEach(function(doc) {
+                  this.push('_children', doc);
+                }.bind(this));
+                this.isNextAvailable = results.isNextAvailable;
+              } else {
+                this._children = results;
+                this.isNextAvailable = false;
+              }
+              this._updated = true;
+              return this._renderChildNodes();
+            }.bind(this));
+          }
         },
 
         _setupToggleListener: function() {
