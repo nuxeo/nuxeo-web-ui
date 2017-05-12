@@ -38,7 +38,6 @@ Contributors:
 
       nuxeo-document-preview {
         width: 100%;
-        min-height: 60vh;
       }
 
       nuxeo-document-blob {
@@ -55,13 +54,11 @@ Contributors:
 </dom-module>
 
 <script>
-  (function() {
-    Polymer({
-      is: 'nuxeo-document-viewer',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        document: Object
-      }
-    });
-  })();
+  Polymer({
+    is: 'nuxeo-document-viewer',
+    behaviors: [Nuxeo.I18nBehavior],
+    properties: {
+      document: Object
+    }
+  });
 </script>
