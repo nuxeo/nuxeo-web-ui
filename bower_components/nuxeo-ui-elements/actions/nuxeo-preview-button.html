@@ -57,6 +57,10 @@ Example:
         margin: 0;
         padding: 0;
       }
+
+      nuxeo-dialog > nuxeo-document-preview ::content audio {
+        height: 50%;
+      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">

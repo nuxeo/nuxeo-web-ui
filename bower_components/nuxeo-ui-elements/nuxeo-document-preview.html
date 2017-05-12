@@ -52,9 +52,8 @@ Example:
       }
 
       audio {
-        width: calc(100% - 32px);
-        height: 50%;
-        padding: 16px;
+        width: calc(100% - 16px);
+        margin: 8px;
       }
 
       marked-element {
@@ -80,7 +79,6 @@ Example:
         border: none;
         width: 100%;
         height: 100%;
-        min-height: 60vh;
       }
 
     </style>
@@ -117,152 +115,148 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-document-preview',
+      behaviors: [Polymer.Templatizer],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-document-preview',
-        behaviors: [Polymer.Templatizer],
-        properties: {
+        /**
+         * Document
+         */
+        document: Object,
 
-          /**
-           * Document
-           */
-          document: Object,
-
-          /**
-           * By default it will display a preview of the main file.
-           * For example using `xpath="files:files/0/file"` will display the preview of the document's first attachment.
-           */
-          xpath: {
-            type: String,
-            value: 'file:content'
-          },
-
-          _blob: Object,
-
-          _imageSource: {
-            type: String,
-            computed: '_computeImageSource(document)'
-          },
-
-          _videoSources: {
-            type: Array,
-            computed: '_computeVideoSources(document)'
-          },
-
-          _audioSource: {
-            type: String,
-            computed: '_computeAudioSource(document)'
-          },
-
-          _iFrameSource: {
-            type: String,
-            computed: '_computeIFrameSource(document)'
-          }
+        /**
+         * By default it will display a preview of the main file.
+         * For example using `xpath="files:files/0/file"` will display the preview of the document's first attachment.
+         */
+        xpath: {
+          type: String,
+          value: 'file:content'
         },
 
-        observers: [
-          '_updateBlob(document, xpath)'
-        ],
+        _blob: Object,
 
-        _updateBlob: function() {
-          if (this.document) {
-            // adapt the Note to mimic a Blob
-            if (this.document.type === 'Note') {
-              this._blob = {
-                data: this.document.properties['note:note'],
-                'mime-type': this.document.properties['note:mime_type']
-              };
-            } else {
-              // by default just use the field at xpath as a Blob
-              this._blob = this.document && this._deepFind(this.document.properties, this.xpath);
-            }
-            // update our previewer
-            if (this._blob) {
-              this._updatePreview();
-            }
-          }
+        _imageSource: {
+          type: String,
+          computed: '_computeImageSource(document)'
         },
 
-        _updatePreview: function() {
-          // clear current previewer
-          while (this.$.preview.firstChild) {
-            this.$.preview.removeChild(this.$.preview.firstChild);
-          }
-
-          // lookup the preview according to the blob's mimetype
-          var previewers = Polymer.dom(this.root).querySelectorAll('template');
-          for (var i = 0; i < previewers.length; i++) {
-            var previewer = previewers[i];
-            var regex = new RegExp(previewer.getAttribute('mime-pattern'));
-            if (this._blob['mime-type'].match(regex)) {
-              // Insert our previewer
-              this.templatize(previewer);
-              var instance = this.stamp();
-              this.$.preview.appendChild(instance.root);
-              break;
-            }
-          }
+        _videoSources: {
+          type: Array,
+          computed: '_computeVideoSources(document)'
         },
 
-        _deepFind: function(obj, props) {
-          for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
-            if (!obj || obj === []) {
-              break;
-            }
-            obj = obj[path[i]];
-          }
-          return obj;
+        _audioSource: {
+          type: String,
+          computed: '_computeAudioSource(document)'
         },
 
-        _computeImageSource: function() {
-          if (this.document && this.document.properties && this.document.properties['picture:views']) {
-            var filteredViews = this.document.properties['picture:views'].filter(function(view) {
-              return view.title === 'FullHD';
-            });
-            if (filteredViews.length > 0) {
-              return filteredViews[0].content.data;
-            }
-          }
-          if (this.xpath) {
-            this._updateBlob();
-            if (this._blob && this._blob['mime-type'].match('image.*')) {
-              return this._blob.data;
-            }
-          }
-        },
+        _iFrameSource: {
+          type: String,
+          computed: '_computeIFrameSource(document)'
+        }
+      },
 
-        _computeVideoSources: function() {
-          if (this.document && this.document.properties && this.document.properties['vid:transcodedVideos']) {
-            return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
-              return {
-                data: conversion.content.data,
-                type: conversion.content['mime-type']
-              };
-            });
-          }
-        },
+      observers: [
+        '_updateBlob(document, xpath)'
+      ],
 
-        _computeAudioSource: function() {
+      _updateBlob: function() {
+        if (this.document) {
+          // adapt the Note to mimic a Blob
+          if (this.document.type === 'Note') {
+            this._blob = {
+              data: this.document.properties['note:note'],
+              'mime-type': this.document.properties['note:mime_type']
+            };
+          } else {
+            // by default just use the field at xpath as a Blob
+            this._blob = this.document && this._deepFind(this.document.properties, this.xpath);
+          }
+          // update our previewer
           if (this._blob) {
-            return this._blob.data;
+            this._updatePreview();
           }
-        },
+        }
+      },
 
-        _computeIFrameSource: function() {
-          if (this.document && this.document.contextParameters && this.document.contextParameters.preview) {
-            var url = this.document.contextParameters.preview.url;
-            if (this.xpath !== 'file:content') {
-              url = url.replace('/@preview/', '/@blob/' + this.xpath + '/@preview/');
-            }
-            return url;
-          } else if (this._blob) {
+      _updatePreview: function() {
+        // clear current previewer
+        while (this.$.preview.firstChild) {
+          this.$.preview.removeChild(this.$.preview.firstChild);
+        }
+
+        // lookup the preview according to the blob's mimetype
+        var previewers = Polymer.dom(this.root).querySelectorAll('template');
+        for (var i = 0; i < previewers.length; i++) {
+          var previewer = previewers[i];
+          var regex = new RegExp(previewer.getAttribute('mime-pattern'));
+          if (this._blob['mime-type'].match(regex)) {
+            // Insert our previewer
+            this.templatize(previewer);
+            var instance = this.stamp();
+            this.$.preview.appendChild(instance.root);
+            break;
+          }
+        }
+      },
+
+      _deepFind: function(obj, props) {
+        for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+          if (!obj || obj === []) {
+            break;
+          }
+          obj = obj[path[i]];
+        }
+        return obj;
+      },
+
+      _computeImageSource: function() {
+        if (this.document && this.document.properties && this.document.properties['picture:views']) {
+          var filteredViews = this.document.properties['picture:views'].filter(function(view) {
+            return view.title === 'FullHD';
+          });
+          if (filteredViews.length > 0) {
+            return filteredViews[0].content.data;
+          }
+        }
+        if (this.xpath) {
+          this._updateBlob();
+          if (this._blob && this._blob['mime-type'].match('image.*')) {
             return this._blob.data;
           }
         }
+      },
 
-      });
-    })();
+      _computeVideoSources: function() {
+        if (this.document && this.document.properties && this.document.properties['vid:transcodedVideos']) {
+          return this.document.properties['vid:transcodedVideos'].map(function(conversion) {
+            return {
+              data: conversion.content.data,
+              type: conversion.content['mime-type']
+            };
+          });
+        }
+      },
+
+      _computeAudioSource: function() {
+        if (this._blob) {
+          return this._blob.data;
+        }
+      },
+
+      _computeIFrameSource: function() {
+        if (this.document && this.document.contextParameters && this.document.contextParameters.preview) {
+          var url = this.document.contextParameters.preview.url;
+          if (this.xpath !== 'file:content') {
+            url = url.replace('/@preview/', '/@blob/' + this.xpath + '/@preview/');
+          }
+          return url;
+        } else if (this._blob) {
+          return this._blob.data;
+        }
+      }
+
+    });
   </script>
 </dom-module>
