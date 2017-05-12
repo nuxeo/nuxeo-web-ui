@@ -1222,15 +1222,16 @@ Contributors:
             }
           };
 
-          // Object.assign(document.properties, this._getDocumentProperties());
-          var properties = this._getDocumentProperties();
-          if (properties) {
-            for (var prop in properties) {
-              document.properties[prop] = properties[prop];
+          this.initializeDocument(document).then(function(document) {
+            // Object.assign(document.properties, this._getDocumentProperties());
+            var properties = this._getDocumentProperties();
+            if (properties) {
+              for (var prop in properties) {
+                document.properties[prop] = properties[prop];
+              }
             }
-          }
-
-          this.document = document;
+            this.document = document;
+          }.bind(this));
         },
 
         _layoutUpdated: function(e) {
