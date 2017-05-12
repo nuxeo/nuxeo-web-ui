@@ -20,13 +20,6 @@ export default class UI extends BasePage {
     driver.refresh();
   }
 
-  get vocabularyAdmin() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
-    }
-    return new Vocabulary('nuxeo-vocabulary-management');
-  }
-
   get activityFeed() {
     return new ActivityFeed('nuxeo-document-activity');
   }
