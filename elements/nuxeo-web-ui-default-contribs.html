@@ -279,7 +279,7 @@
 
 <nuxeo-slot-content name="browseDrawerItem" slot="DRAWER_ITEMS" order="10">
   <template>
-    <nuxeo-menu-icon name="browser" icon="icons:folder-open" label="app.browse"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="browser" icon="nuxeo:browse" label="app.browse"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="browseDrawerPage" slot="DRAWER_PAGES">
@@ -295,7 +295,7 @@
 
 <nuxeo-slot-content name="recentsDrawerItem" slot="DRAWER_ITEMS" order="20">
   <template>
-    <nuxeo-menu-icon name="recents" icon="icons:restore" label="app.recentlyViewed"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="recents" icon="nuxeo:recent" label="app.recentlyViewed"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="recentsDrawerPage" slot="DRAWER_PAGES">
@@ -306,18 +306,18 @@
 
 <nuxeo-slot-content name="defaultSearchMenuButton" slot="DRAWER_ITEMS" order="30">
   <template>
-    <nuxeo-menu-icon name="defaultSearch" icon="icons:search" label="app.search"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="defaultSearch" icon="nuxeo:search" label="app.search"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="defaultSearchMenuPage" slot="DRAWER_PAGES">
   <template>
-    <nuxeo-search-form name="defaultSearch" search-name="default" auto display-auto-control
+    <nuxeo-search-form name="defaultSearch" search-name="default"
                                provider="default_search" schemas="dublincore,common,uid"></nuxeo-search-form>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="expiredSearchMenuButton" slot="DRAWER_ITEMS" order="40">
   <template>
-    <nuxeo-menu-icon name="expiredSearch" icon="icons:done-all" label="app.expiredSearch"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="expiredSearch" icon="nuxeo:expired" label="app.expiredSearch"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="expiredSearchMenuPage" slot="DRAWER_PAGES">
@@ -336,7 +336,7 @@
 
 <nuxeo-slot-content name="tasksDrawerItem" slot="DRAWER_ITEMS" order="50">
   <template>
-    <nuxeo-menu-icon name="tasks" icon="icons:check-box" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="tasks" icon="nuxeo:tasks" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="tasksDrawerPage" slot="DRAWER_PAGES">
@@ -346,13 +346,13 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="tasksPage" slot="PAGES">
   <template>
-    <nuxeo-tasks name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+    <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="favoritesDrawerItem" slot="DRAWER_ITEMS" order="60">
   <template>
-    <nuxeo-menu-icon name="favorites" icon="icons:star" label="app.favorites"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="favorites" icon="nuxeo:favorites" label="app.favorites"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="favoritesDrawerPage" slot="DRAWER_PAGES">
@@ -363,7 +363,7 @@
 
 <nuxeo-slot-content name="collectionsDrawerItem" slot="DRAWER_ITEMS" order="70">
   <template>
-    <nuxeo-menu-icon name="collections" icon="icons:book" label="app.collections"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="collections" icon="nuxeo:collections" label="app.collections"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="collectionsDrawerPage" slot="DRAWER_PAGES">
@@ -379,7 +379,7 @@
 
 <nuxeo-slot-content name="personalWorkspaceDrawerItem" slot="DRAWER_ITEMS" order="80">
   <template>
-    <nuxeo-menu-icon name="personalWorkspace" icon="icons:folder-shared" label="app.personalSpace"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="personalWorkspace" icon="nuxeo:user-space" label="app.personalSpace"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="personalWorkspaceDrawerPage" slot="DRAWER_PAGES">
@@ -392,7 +392,7 @@
 
 <nuxeo-slot-content name="clipboardDrawerItem" slot="DRAWER_ITEMS" order="90">
   <template>
-    <nuxeo-menu-icon name="clipboard" icon="icons:content-paste" label="app.clipboard" badge="[[clipboardDocCount]]"></nuxeo-menu-icon>
+    <nuxeo-menu-icon name="clipboard" icon="nuxeo:clipboard" label="app.clipboard" badge="[[clipboardCount]]"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="clipboardDrawerPage" slot="DRAWER_PAGES">
