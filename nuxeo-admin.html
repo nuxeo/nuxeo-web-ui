@@ -40,15 +40,6 @@ Contributors:
 
         <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-        <template is="dom-if" if="[[user.isAdministrator]]">
-          <nuxeo-analytics name="analytics" selected="document-distribution"></nuxeo-analytics>
-        </template>
-
-        <nuxeo-user-group-management-page name="user-group-management" is-administrator$="[[user.isAdministrator]]" entity="[[entity]]"></nuxeo-user-group-management-page>
-
-        <nuxeo-vocabulary-management name="vocabulary-management" id="vocabulary"></nuxeo-vocabulary-management>
-
-        <nuxeo-audit name="audit" id="audit"></nuxeo-audit>
       </iron-pages>
     </template>
   </template>
@@ -69,7 +60,15 @@ Contributors:
             type: Boolean,
             value: false,
             reflectToAttribute: true
+          },
+          actionContext: {
+            type: Object,
+            computed: '_actionContext(user)'
           }
+        },
+
+        _actionContext: function() {
+          return {user: this.user};
         },
 
         _errorUrl: function() {

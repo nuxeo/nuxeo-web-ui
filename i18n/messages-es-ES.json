@@ -150,6 +150,7 @@
 	"tableSettings.columnSettings.reset": "Reiniciar",
 	"tags.addedToDocument": "La etiqueta {0} se ha añadido al documento",
 	"tags.removedFromDocument": "La etiqueta {0} se ha eliminado del documento",
+	"tree.loadMore": "...",
 	"userGroupLatest.emptyRecentUserOrGroup": "Ningún usuario o grupo reciente.",
 	"userGroupLatest.identifier": "Identificador",
 	"userGroupLatest.name": "Nombre",

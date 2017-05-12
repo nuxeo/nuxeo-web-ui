@@ -150,6 +150,7 @@
   "tableSettings.columnSettings.reset":"リセット",
   "tags.addedToDocument":"タグ{0}が文書に追加されました",
   "tags.removedFromDocument":"タグ{0}が文書から削除されました",
+  "tree.loadMore":"...",
   "userGroupLatest.emptyRecentUserOrGroup":"最近のユーザまたはグループはいません。",
   "userGroupLatest.identifier":"識別子",
   "userGroupLatest.name":"名前",

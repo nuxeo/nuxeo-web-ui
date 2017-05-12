@@ -137,7 +137,7 @@ An element providing document permissions management
       <div class="bubbleHeader jsLocalPermissions">
         <h3>[[i18n('documentPermissions.locallyDefined')]]</h3>
         <template is="dom-if" if="[[_hasPermission(doc,'Everything')]]">
-          <nuxeo-popup-permission doc-id="{{doc.uid}}"
+          <nuxeo-popup-permission id="localPermissions" doc-id="{{doc.uid}}"
             user-visible-permissions="{{doc.contextParameters.userVisiblePermissions}}">
           </nuxeo-popup-permission>
         </template>
@@ -181,7 +181,7 @@ An element providing document permissions management
       <div class="bubbleHeader">
         <h3>[[i18n('documentPermissions.external')]]</h3>
         <template is="dom-if" if="[[_hasPermission(doc, 'Everything')]]">
-          <nuxeo-popup-permission doc-id="{{doc.uid}}"
+          <nuxeo-popup-permission id="externalPermissions" doc-id="{{doc.uid}}"
             user-visible-permissions="{{doc.contextParameters.userVisiblePermissions}}"
             share-with-external="true"></nuxeo-popup-permission>
         </template>

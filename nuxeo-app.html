@@ -219,12 +219,6 @@ Contributors:
         justify-content: flex-end;
       }
 
-      #drawer .tasks-dashboard {
-        padding: .7em 1em;
-        display: block;
-        border-top: 1px solid var(--nuxeo-border);
-      }
-
       #drawerToggle {
         position: absolute;
         top: 5px;
@@ -273,61 +267,23 @@ Contributors:
 
         <!-- menu -->
         <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
-          <nuxeo-menu-icon name="browser" icon="nuxeo:browse" label="app.browse"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="recents" icon="nuxeo:recent" label="app.recentlyViewed"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="defaultSearch" icon="nuxeo:search" label="app.search"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="expiredSearch" icon="nuxeo:expired" label="app.expiredSearch"></nuxeo-menu-icon>
-          <nuxeo-slot slot="SEARCH_MENU_BUTTONS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="tasks" icon="nuxeo:tasks" id="menuTasks" label="app.tasks" badge="[[taskCount]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="favorites" icon="nuxeo:favorites" label="app.favorites"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="collections" icon="nuxeo:collections" label="app.collections"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="personalWorkspace" icon="nuxeo:user-space" label="app.personalSpace"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="clipboard" icon="nuxeo:clipboard" label="app.clipboard" badge="[[clipboardCount]]"></nuxeo-menu-icon>
-          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]"></nuxeo-menu-icon>
+          <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
+                           hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
+          </nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" icon="nuxeo:user-settings" label="app.account" class="profile-icon"></nuxeo-menu-icon>
         </paper-menu>
 
         <!-- drawer -->
         <div id="drawer">
-          <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+          <iron-pages id="drawer-pages" selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
 
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
-
-            <nuxeo-document-tree name="browser" id="navTree" label="app.browse" current-document="[[currentDocument]]"></nuxeo-document-tree>
-
-            <nuxeo-recent-documents name="recents" max-size="10" id="recent"></nuxeo-recent-documents>
-
-            <nuxeo-search-form name="defaultSearch" search-name="default" auto
-                               provider="default_search" schemas="dublincore,common,uid"></nuxeo-search-form>
-
-            <nuxeo-search-form name="expiredSearch" search-name="expired" queue auto
-                               provider="expired_search" schemas="dublincore,common,uid"
-                               label="expiredSearch.expiredDocuments"></nuxeo-search-form>
-
-            <div name="tasks">
-              <div class="header">[[i18n('app.tasks')]]</div>
-              <nuxeo-tasks-list id="tasks-list" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
-              <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
-            </div>
-
-            <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
-
-            <nuxeo-collections name="collections" id="collectionsForm"></nuxeo-collections>
-
-            <nuxeo-document-tree name="personalWorkspace" label="app.personalSpace"
-                                 current-document="[[currentDocument]]"
-                                 root-doc-path="[[userWorkspace]]"></nuxeo-document-tree>
-
-            <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]" doc-count="{{clipboardCount}}"></nuxeo-clipboard>
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
                 <div class="header">[[i18n('app.administration')]]</div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                  <nuxeo-menu-item name="analytics" label="analytics.heading" route="administration:analytics" hidden$="[[!currentUser.isAdministrator]]"></nuxeo-menu-item>
-                  <nuxeo-menu-item name="user-group-management" label="admin.usersAndGroups.heading" route="administration:user-group-management"></nuxeo-menu-item>
-                  <nuxeo-menu-item name="vocabulary-management" label="vocabularyManagement.heading" route="administration:vocabulary-management"></nuxeo-menu-item>
-                  <nuxeo-menu-item name="audit" label="audit.heading" route="administration:audit"></nuxeo-menu-item>
                   <nuxeo-slot slot="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
                 </iron-selector>
               </div>
@@ -337,8 +293,6 @@ Contributors:
               <div class="header">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
-                <nuxeo-menu-item name="profile" label="app.user.profile" route="page:profile"></nuxeo-menu-item>
-                <nuxeo-menu-item name="themes" label="app.user.themes" route="page:themes"></nuxeo-menu-item>
                 <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
               </iron-selector>
             </div>
@@ -362,15 +316,7 @@ Contributors:
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
-
-          <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
-
-          <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
-
           <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
-
-          <nuxeo-tasks name="tasks" id="tasks-dashboard" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
           <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
@@ -481,7 +427,8 @@ Contributors:
           },
 
           currentTask: {
-            type: Object
+            type: Object,
+            value: null
           },
 
           currentUser: {
@@ -495,7 +442,18 @@ Contributors:
 
           actionContext: {
             type: Object,
-            computed: '_actionContext(currentDocument, currentUser)'
+            computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
+            ' clipboard, clipboardDocCount)'
+          },
+
+          clipboard: {
+            type: Object,
+            value: null
+          },
+
+          clipboardDocCount: {
+            type: Number,
+            notify: true
           },
 
           _dismissible: {
@@ -531,7 +489,10 @@ Contributors:
           'search-results': '_showSearchResults',
           'navigate': '_navigate',
           'collection-loaded': '_updateCollectionMenu',
-          'notify': '_notify'
+          'notify': '_notify',
+          'nx-clipboard-updated': '_clipboardUpdated',
+          'drawer-pages.iron-items-changed': '_updateDrawer',
+          'pages.iron-items-changed': '_updatePages'
         },
 
         ready: function() {
@@ -543,14 +504,21 @@ Contributors:
 
           window.addEventListener('nuxeo-documents-deleted', function(e) {
             this._fetchTasks();
-            this.$.navTree.removeDocuments(e.detail.documentIds);
+            var navTree = this.$$('navTree');
+            if (navTree) {
+              navTree.removeDocuments(e.detail.documentIds);
+            }
           }.bind(this));
 
           window.addEventListener('nuxeo-documents-deleted-error', function(e) {
             this._documentsDeletedError(e.detail.response, e.detail.documents);
           }.bind(this));
 
-          this.clipboard = this.$.clipboard;
+          window.addEventListener('selected-tab-changed', function(e) {
+            if (e.srcElement === this.$$('#browser')) {
+              this.set('docAction', e.detail.value);
+            }
+          }.bind(this), true);
 
           this.$.nxcon.connect().then(function(res) {
             this.currentUser = res;
@@ -584,14 +552,20 @@ Contributors:
           this.loading = true;
           this.docId = id;
           this.docPath = path;
-          this.docAction = action;
+          var browser = this.$$('#browser');
+          if (browser) {
+            browser.docAction = action
+          }
           this.$.doc.get().then(function(doc) {
             if (this.docId && !doc.isVersion) {
               this.docId = '';
               this.docPath = doc.path;
               window.page('/browse' + doc.path);
             } else {
-              this.$.recent.add(doc);
+              var recent = this.$$('#recent');
+              if (recent) {
+                recent.add(doc);
+              }
               this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
                 doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
               this.set('currentDocument', doc);
@@ -616,7 +590,17 @@ Contributors:
         },
 
         _actionContext: function() {
-          return {document: this.currentDocument, user: this.currentUser};
+          return {
+            currentDocument: this.currentDocument,
+            user: this.currentUser,
+            taskCount: this.taskCount,
+            tasks: this.tasks,
+            currentTask: this.currentTask,
+            clipboardDocCount: this.clipboardDocCount,
+            clipboard: this.clipboard,
+            actionContext: this.actionContext,
+            userWorkspace: this.userWorkspace
+          };
         },
 
         _focusMenu: function() {
@@ -644,18 +628,24 @@ Contributors:
           if (e.detail.doc) {
             page('/browse' + e.detail.doc.path);
             if (e.detail.isFromCollection) {
-              this.$.collectionsForm.displayMembers(e.detail.srcDoc, e.detail.doc);
+              this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
             }
           }
         },
 
         _updateSearch: function() {
           this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
+          if (this.searchForm && this.searchResults) {
+            this.searchResults.searchForm = this.searchForm;
+            if (this.postponedSearch) {
+              this._search();
+            }
+          }
         },
 
         _updateCollectionMenu: function(e) {
           if (e.detail.provider) {
-            this.$.collectionsForm.loadCollection(e.detail.collection, e.detail.provider);
+            this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
           }
         },
 
@@ -744,7 +734,7 @@ Contributors:
         },
 
         _onAddToClipboard: function(e) {
-          if (e.detail.documents) {
+          if (e.detail.documents && this.clipboard) {
             this.clipboard.add(e.detail.documents)
           }
         },
@@ -903,6 +893,58 @@ Contributors:
 
         _dismissToast: function() {
           this.$.toast.toggle();
+        },
+
+        _clipboardUpdated: function(e) {
+          this.clipboard = this.clipboard || this.$$('#clipboard');
+          this.set('clipboardDocCount', e.detail.docCount);
+        },
+
+        _updateDrawer: function() {
+          this.$['drawer-pages'].items.forEach(function(drawerPage) {
+            switch (drawerPage.tagName) {
+              case 'NUXEO-SEARCH-FORM':
+                var searchName = drawerPage.getAttribute('search-name');
+                if (searchName === this.searchName) {
+                  this.searchForm = drawerPage;
+                  if (this.searchResults) {
+                    this.searchResults.searchForm = this.searchForm;
+                    if (this.postponedSearch) {
+                      this._search();
+                    }
+                  }
+                }
+                break;
+            }
+          }.bind(this));
+        },
+
+        _updatePages: function() {
+          this.$['pages'].items.forEach(function(page) {
+            switch (page.tagName) {
+              case 'NUXEO-SEARCH-RESULTS':
+                this.searchResults = page;
+                if (this.searchForm) {
+                  this.searchResults.searchForm = this.searchForm;
+                  if (this.postponedSearch) {
+                    this._search();
+                  }
+                }
+            }
+          }.bind(this));
+        },
+
+        anticipateSearch: function() {
+          if (this.searchForm && this.searchResults) {
+            this._search();
+          } else {
+            this.postponedSearch = true;
+          }
+        },
+
+        _search: function() {
+          this.searchForm._search();
+          this.postponedSearch = false;
         }
 
       });

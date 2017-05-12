@@ -150,6 +150,7 @@
   "tableSettings.columnSettings.reset":"Redefinir",
   "tags.addedToDocument":"A tag {0} foi adicionada ao documento",
   "tags.removedFromDocument":"A tag {0} foi removida do documento",
+  "tree.loadMore":"...",
   "userGroupLatest.emptyRecentUserOrGroup":"Nenhum usuário ou grupo recente.",
   "userGroupLatest.identifier":"Identificador",
   "userGroupLatest.name":"Nome",

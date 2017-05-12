@@ -57,7 +57,7 @@ limitations under the License.
       on-response="handleResponse"></nuxeo-operation>
 
     <template is="dom-if" if="{{!updatingACE}}">
-      <paper-button on-tap="togglePopup">[[i18n('popupPermission.newPermission')]]</paper-button>
+      <paper-button on-tap="togglePopup" id="newPermissionButton">[[i18n('popupPermission.newPermission')]]</paper-button>
     </template>
     <template is="dom-if" if="{{updatingACE}}">
       <paper-icon-button on-tap="togglePopup" icon="nuxeo:edit"></paper-icon-button>
@@ -81,7 +81,7 @@ limitations under the License.
         <template is="dom-if" if="{{!updatingACE}}">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div>
-                <nuxeo-user-suggestion label="[[i18n('popupPermission.userGroup')]]" value="{{params.username}}"></nuxeo-user-suggestion>
+                <nuxeo-user-suggestion label="[[i18n('popupPermission.userGroup')]]" value="{{params.username}}" name="userGroup"></nuxeo-user-suggestion>
             </div>
           </template>
           <template is="dom-if" if="{{shareWithExternal}}">
@@ -93,7 +93,7 @@ limitations under the License.
         </template>
         <!-- Right row -->
         <div layout horizontal>
-          <nuxeo-select label="[[i18n('popupPermission.right')]]"
+          <nuxeo-select label="[[i18n('popupPermission.right')]]" name="right"
                         selected="{{params.permission}}" options="[[userVisiblePermissions]]">
 
           </nuxeo-select>
@@ -122,7 +122,7 @@ limitations under the License.
         <div id="notification">
           <template is="dom-if" if="{{!shareWithExternal}}">
             <div layout horizontal>
-              <paper-checkbox noink checked="{{params.notify}}">
+              <paper-checkbox noink checked="{{params.notify}}" name="notify">
                 [[i18n('popupPermission.notify')]]
               </paper-checkbox>
             </div>
@@ -132,6 +132,7 @@ limitations under the License.
                     label="[[i18n('popupPermission.notifyLabel')]]"
                     placeholder="[[i18n('popupPermission.notifyPlaceholder')]]"
                     disabled="[[!params.notify]]"
+                    name="notifyEmail"
                     id="commentText"  value="{{params.comment}}" max-rows="4"></nuxeo-textarea>
           </div>
         </div>
@@ -140,9 +141,9 @@ limitations under the License.
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('popupPermission.cancel')]]</paper-button>
         <template is="dom-if" if="{{!updatingACE}}">
-          <paper-button noink class="primary" on-tap="doCreateAndAdd">[[i18n('popupPermission.createAndAdd')]]
+          <paper-button noink class="primary" on-tap="doCreateAndAdd" id="createAndAddPermissionButton">[[i18n('popupPermission.createAndAdd')]]
           </paper-button>
-          <paper-button noink class="primary" on-tap="doCreate">[[i18n('popupPermission.create')]]</paper-button>
+          <paper-button noink class="primary" on-tap="doCreate" id="createPermissionButton">[[i18n('popupPermission.create')]]</paper-button>
         </template>
         <template is="dom-if" if="{{updatingACE}}">
           <paper-button noink class="primary" on-tap="doUpdate">[[i18n('popupPermission.update')]]</paper-button>

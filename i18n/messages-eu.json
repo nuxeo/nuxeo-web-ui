@@ -150,6 +150,7 @@
 	"tableSettings.columnSettings.reset": "Reset",
 	"tags.addedToDocument": "The tag {0} has been added to the document.",
 	"tags.removedFromDocument": "The tag {0} has been removed from the document.",
+	"tree.loadMore": "...",
 	"userGroupLatest.emptyRecentUserOrGroup": "No recent user or group.",
 	"userGroupLatest.identifier": "Identifier",
 	"userGroupLatest.name": "Izena",

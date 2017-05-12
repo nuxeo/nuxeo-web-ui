@@ -20,9 +20,6 @@ Contributors:
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-preview-button.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-delete-blob-button.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-download-button.html">
 
 <!--
 `nuxeo-document-blob`
@@ -76,9 +73,6 @@ Contributors:
         </div>
         <div class="actions">
           <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-delete-blob-button document="[[document]]" xpath="[[xpath]]"></nuxeo-delete-blob-button>
-          <nuxeo-preview-button document="[[document]]" xpath="[[xpath]]"></nuxeo-preview-button>
-          <nuxeo-download-button document="[[document]]" xpath="[[xpath]]"></nuxeo-download-button>
         </div>
       </div>
     </template>

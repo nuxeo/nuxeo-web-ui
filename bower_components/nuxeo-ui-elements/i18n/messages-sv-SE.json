@@ -150,6 +150,7 @@
   "tableSettings.columnSettings.reset":"Återställ",
   "tags.addedToDocument":"Taggen {0} har lagts till i dokumentet",
   "tags.removedFromDocument":"Taggen {0} har tagits bort från dokumentet",
+  "tree.loadMore":"...",
   "userGroupLatest.emptyRecentUserOrGroup":"Ingen nyligen skapad användare eller grupp.",
   "userGroupLatest.identifier":"Identifierare",
   "userGroupLatest.name":"Namn",
