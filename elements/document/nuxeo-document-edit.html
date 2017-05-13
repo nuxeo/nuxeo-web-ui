@@ -151,9 +151,12 @@ Contributors:
           if (e.path === 'document') {
             this._dirtyProperties = {};
           } else {
-            // set dirty properties
-            var path = e.path.replace(/^document\.properties/i, '_dirtyProperties');
-            this.set(path, e.value);
+            // copy dirty properties (cannot patch complex or list properties)
+            var match = e.path.match(/^document\.properties\.([^\.]*)/);
+            if (match) {
+              var prop = match[1];
+              this._dirtyProperties[prop] = this.document.properties[prop];
+            }
           }
         }
       });
