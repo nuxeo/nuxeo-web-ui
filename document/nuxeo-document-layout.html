@@ -22,7 +22,11 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-layout">
   <template>
-    <nuxeo-layout id="layout" href="[[_href(document, layout)]]" model="[[_model(document)]]" error="[[i18n('documentView.layoutNotFound', document.type)]]"></nuxeo-layout>
+    <nuxeo-layout id="layout"
+                  href="[[_href(document, layout)]]"
+                  model="[[_model(document)]]"
+                  error="[[i18n('documentView.layoutNotFound', document.type)]]"
+                  on-element-changed="_elementChanged"></nuxeo-layout>
   </template>
   <script>
     (function () {
@@ -33,7 +37,8 @@ limitations under the License.
         behaviors: [Nuxeo.I18nBehavior],
         properties: {
           document: {
-            type: Object
+            type: Object,
+            notify: true
           },
           layout: {
             type: String,
@@ -59,6 +64,13 @@ limitations under the License.
 
         _model: function (document) {
           return { document: document };
+        },
+
+        _elementChanged: function() {
+          // forward document path change events
+          this.element.addEventListener('document-changed', function(e) {
+            this.notifyPath(e.detail.path, e.detail.value);
+          }.bind(this));
         }
 
       });
