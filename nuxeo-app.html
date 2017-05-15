@@ -443,7 +443,7 @@ Contributors:
           actionContext: {
             type: Object,
             computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-            ' clipboard, clipboardDocCount, userWorkspace)'
+            ' clipboard, clipboardDocCount, userWorkspace, docAction)'
           },
 
           clipboard: {
@@ -552,10 +552,7 @@ Contributors:
           this.loading = true;
           this.docId = id;
           this.docPath = path;
-          var browser = this.$$('#browser');
-          if (browser) {
-            browser.docAction = action
-          }
+          this.docAction = action
           this.$.doc.get().then(function(doc) {
             if (this.docId && !doc.isVersion) {
               this.docId = '';
@@ -599,7 +596,8 @@ Contributors:
             clipboardDocCount: this.clipboardDocCount,
             clipboard: this.clipboard,
             actionContext: this.actionContext,
-            userWorkspace: this.userWorkspace
+            userWorkspace: this.userWorkspace,
+            docAction: this.docAction
           };
         },
 
