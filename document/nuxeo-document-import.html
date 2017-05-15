@@ -1211,26 +1211,10 @@ Contributors:
             return;
           }
 
-          var document = {
-            'entity-type': 'document',
-            'type': this.selectedDocType.type,
-            'parentRef': this.parent.uid,
-            'name': '',
-            'properties': {
-              'dc:title': '',
-              'dc:description': ''
-            }
-          };
-
-          // Object.assign(document.properties, this._getDocumentProperties());
-          var properties = this._getDocumentProperties();
-          if (properties) {
-            for (var prop in properties) {
-              document.properties[prop] = properties[prop];
-            }
-          }
-
-          this.document = document;
+          this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
+            document.parentRef = this.parent.uid;
+            this.document = document;
+          }.bind(this));
         },
 
         _layoutUpdated: function(e) {

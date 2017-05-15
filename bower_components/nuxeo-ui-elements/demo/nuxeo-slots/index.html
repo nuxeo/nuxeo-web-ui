@@ -105,8 +105,6 @@ limitations under the License.
       </template>
     </nuxeo-slot-content>
 
-    <!--nuxeo-action id="one" category="LEFT" disabled></nuxeo-action-->
-
     <nuxeo-slot-content name="two" slot="RIGHT">
       <template>
         <nuxeo-alert-button message="Two">TWO</nuxeo-alert-button>
@@ -136,8 +134,7 @@ limitations under the License.
       </tr>
     </table>
 
-    <label>Show Middle?</label>
-    <paper-toggle-button label="Middle?" checked="{{showMiddle}}"></paper-toggle-button>
+    <paper-toggle-button checked="{{showMiddle}}">Show Middle?</paper-toggle-button>
   </template>
 </body>
 </html>
