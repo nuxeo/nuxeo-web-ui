@@ -44,7 +44,7 @@ Contributors:
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.state')]]</label>
-      <div><nuxeo-tag uppercase>[[document.state]]</nuxeo-tag></div>
+      <div><nuxeo-tag uppercase>[[_stateLabel(document.state)]]</nuxeo-tag></div>
     </div>
     <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
       <div class="item">
@@ -91,6 +91,11 @@ Contributors:
     _documentChanged: function() {
       this._showProcess = this.document && this.document.contextParameters &&
         this.document.contextParameters.runningWorkflows && this.document.contextParameters.runningWorkflows.length > 0;
+    },
+
+    _stateLabel: function(state) {
+      var t = this.i18n('label.ui.state.' + state);
+      return t === 'label.ui.state.' + state ? state : t;
     }
   });
 </script>
