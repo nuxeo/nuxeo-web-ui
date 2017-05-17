@@ -83,7 +83,7 @@ An element wrapping Select2 and relying on an operation for suggestions
        queryResultsFilter: Function
       },
 
-      ready: function() {
+      attached: function() {
         this._initSelect2(this.$.select2);
       },
 
