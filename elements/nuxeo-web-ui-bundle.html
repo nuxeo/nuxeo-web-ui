@@ -292,6 +292,19 @@
     <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" clipboard="[[clipboard]]" selected-tab="[[docAction]]"></nuxeo-browser>
   </template>
 </nuxeo-slot-content>
+<nuxeo-slot-content name="errorPage" slot="PAGES">
+  <template>
+    <nuxeo-page name="error">
+      <div class="header"></div>
+      <div class="content">
+        <paper-card>
+          <nuxeo-error id="error" code="[[error.code]]" url="[[error.url]]" message="[[error.message]]">
+          </nuxeo-error>
+        </paper-card>
+      </div>
+    </nuxeo-page>
+  </template>
+</nuxeo-slot-content>
 
 <nuxeo-slot-content name="recentsDrawerItem" slot="DRAWER_ITEMS" order="20">
   <template>

@@ -305,15 +305,6 @@ Contributors:
       <paper-header-panel main mode="seamed">
         <iron-pages id="pages" selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible">
 
-          <nuxeo-page name="error" hidden$="[[!currentDocument]]">
-            <div class="header"></div>
-            <div class="content">
-              <paper-card>
-                <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
-              </paper-card>
-            </div>
-          </nuxeo-page>
-
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
           <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
@@ -446,7 +437,7 @@ Contributors:
           actionContext: {
             type: Object,
             computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-            ' clipboard, clipboardDocCount, userWorkspace, docAction)'
+            ' clipboard, clipboardDocCount, userWorkspace, docAction, error)'
           },
 
           clipboard: {
@@ -462,6 +453,11 @@ Contributors:
           _dismissible: {
             type: Boolean,
             value: false
+          },
+
+          error: {
+            type: Object,
+            value: {}
           }
         },
 
@@ -572,6 +568,14 @@ Contributors:
               this.loading = false;
               this.show(page);
             }
+          }.bind(this)).catch(function(err) {
+            this.loading = false;
+            this.set('error', {
+              code: err.status,
+              message: this.i18n('browse.error'),
+              url: err.message
+            });
+            this.show('error');
           }.bind(this));
         },
 
@@ -600,7 +604,8 @@ Contributors:
             clipboard: this.clipboard,
             actionContext: this.actionContext,
             userWorkspace: this.userWorkspace,
-            docAction: this.docAction
+            docAction: this.docAction,
+            error: this.error
           };
         },
 
@@ -850,7 +855,11 @@ Contributors:
 
         _onError: function(e) {
           if (e.reason && e.reason.status === 404) {
-            this.$.error.show('404', e.reason.message, '');
+            this.set('error', {
+              code: 404,
+              message: e.reason.message,
+              url: this._errorUrl()
+            });
             this.show('error');
           }
         },

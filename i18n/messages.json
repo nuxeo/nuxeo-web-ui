@@ -108,6 +108,7 @@
   "authenticationTokensManagement.permission": "Permission",
   "authenticationTokensManagement.revoked": "Token revoked",
   "authenticationTokensManagement.token": "Token",
+  "browse.error": "Could not load document.",
   "browse.noDocument": "There are no items to display in this folder.",
   "browse.noDocumentWhenFiltered": "There are no documents within these search criteria.",
   "browse.root": "Root",
