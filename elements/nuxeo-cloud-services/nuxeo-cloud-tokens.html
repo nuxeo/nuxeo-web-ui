@@ -1,0 +1,169 @@
+<!--
+(C) Copyright 2017 Nuxeo (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the 'License');
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an 'AS IS' BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+   Pedro Costa <pcosta@nuxeo.com>
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="nuxeo-cloud-token-edit.html">
+<!--
+`nuxeo-cloud-tokens`
+@group Nuxeo UI
+@element nuxeo-cloud-tokens
+-->
+<dom-module id="nuxeo-cloud-tokens">
+  <template>
+    <style>
+      nuxeo-data-table {
+        height: calc(100vh - 172px);
+      }
+    </style>
+    <nuxeo-resource id="tokens"></nuxeo-resource>
+    <paper-card>
+      <h3>[[i18n('cloudTokens.OAuth2Tokens')]]</h3>
+
+      <nuxeo-data-table name="table" icon="nuxeo:view-list"
+                        empty-label="[[i18n('cloudTokens.emptyResult')]]" items="[[oauth2Tokens]]">
+
+        <nuxeo-data-table-column name="[[i18n('cloudTokens.serviceName')]]" field="serviceName" sort-by="serviceName">
+          <template>
+            <span>[[item.serviceName]]</span>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('cloudTokens.nuxeoLogin')]]" field="nuxeoLogin" sort-by="nuxeoLogin">
+          <template>
+            <span>[[item.nuxeoLogin]]</span>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('cloudTokens.serviceLogin')]]" field="serviceLogin" sort-by="serviceLogin">
+          <template>
+            <span>[[item.serviceLogin]]</span>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('cloudTokens.creationDate')]]" field="creationDate" sort-by="creationDate">
+          <template>
+            <nuxeo-date datetime="[[item.creationDate]]"></nuxeo-date>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('cloudTokens.isShared')]]" field="isShared" sort-by="isShared">
+          <template>
+            <paper-checkbox noink checked="[[item.isShared]]" disabled></paper-checkbox>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
+          <template>
+            <paper-icon-button id="edit-button-[[index]]" name="edit" icon="nuxeo:edit"
+                               on-tap="_editEntry"></paper-icon-button>
+            <paper-tooltip for="edit-button-[[index]]">[[i18n('cloudTokens.edit')]]</paper-tooltip>
+            <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete"
+                               on-tap="_deleteEntry"></paper-icon-button>
+            <paper-tooltip for="delete-button-[[index]]">[[i18n('cloudTokens.delete')]]</paper-tooltip>
+          </template>
+        </nuxeo-data-table-column>
+      </nuxeo-data-table>
+    </paper-card>
+
+    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+      <h2>[[i18n('cloudTokens.popup.editEntry')]]</h2>
+      <form id="form" is="iron-form" action="/">
+        <nuxeo-cloud-token-edit entry="{{_selectedEntry}}"></nuxeo-cloud-token-edit>
+      </form>
+      <div class="buttons">
+        <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-cloud-tokens',
+      behaviors: [Nuxeo.FormatBehavior],
+      properties: {
+        oauth2Tokens: {
+          type: Array,
+          value: []
+        },
+
+        _selectedEntry: {
+          type: String
+        },
+
+        _selectedNuxeoLogin: {
+          type: String
+        },
+
+        _selectedServiceName: {
+          type: String
+        }
+      },
+      observers: ['_tokensChanged(data.*)'],
+
+      refresh: function() {
+        this.$.tokens.path = "oauth2/token";
+        this.$.tokens.get().then(function(response) {
+          this.oauth2Tokens = response.entries;
+        }.bind(this));
+      },
+
+      _deleteEntry: function(e) {
+        if (confirm(this.i18n('cloudTokens.confirmDelete'))) {
+          var item = e.model.item;
+          this.$.tokens.path = '/oauth2/token/' + item.serviceName + "/" + item.nuxeoLogin;
+          this.$.tokens.remove().then(function() {
+            this.refresh();
+            this.fire('notify', {message: this.i18n('cloudTokens.successfullyDeleted')});
+          }.bind(this), function() {
+            this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
+            this.i18n('cloudTokens.errorDeleting')
+            });
+          }.bind(this));
+        }
+      },
+
+      _editEntry: function(e) {
+        this._selectedEntry = e.model.item;
+        this._selectedServiceName = this._selectedEntry.serviceName;
+        this._selectedNuxeoLogin = this._selectedEntry.nuxeoLogin;
+        this.$.dialog.toggle();
+      },
+
+      _save: function() {
+        var valid = this.$.form.validate();
+        if (valid) {
+          this._selectedEntry.creationDate = this.formatDate(this._selectedEntry.creationDate, 'YYYY-MM-DD HH:MM:SS');
+          this.$.tokens.data = this._selectedEntry;
+          this.$.tokens.path = 'oauth2/token/' + this._selectedServiceName + '/' + this._selectedNuxeoLogin;
+          this.$.tokens.put().then(function() {
+              this.refresh();
+              this.$.dialog.toggle();
+              this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
+            }.bind(this),
+            function(err) {
+              this.fire('notify', {
+                message: this.i18n('label.error').toUpperCase() + ': ' +
+                (err.message && err.message.length > 0 ? err.message :
+                  this.i18n('cloudTokens.errorEditing'))
+              });
+            }.bind(this));
+        }
+      }
+    });
+  </script>
+</dom-module>

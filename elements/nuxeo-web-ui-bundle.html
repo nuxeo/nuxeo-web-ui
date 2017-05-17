@@ -52,6 +52,17 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="adminCloudServicesMenuItem" slot="ADMINISTRATION_MENU" order="50">
+  <template>
+    <nuxeo-menu-item name="cloudServices" label="cloudServices.heading" route="administration:cloud-services"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminCloudServicesPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-cloud-services name="cloud-services" id="cloud-services"></nuxeo-cloud-services>
+  </template>
+</nuxeo-slot-content>
+
 <!-- ANALYTICS -->
 
 <nuxeo-slot-content name="analyticsDocumentDistributionItem" slot="ANALYTICS_ITEMS" order="10">
