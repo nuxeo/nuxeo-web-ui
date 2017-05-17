@@ -124,9 +124,17 @@ Contributors:
         margin-right: -1.4em;
       }
 
+      .noPermission {
+        opacity: .5;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em .7em;
+        text-align: center;
+        font-size: 1.1rem;
+      }
     </style>
 
-    <nuxeo-document id="doc" auto="[[auto]]" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
+    <nuxeo-document id="doc" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
 
     <nuxeo-page-provider id="children"
                          provider="tree_children"
@@ -137,11 +145,7 @@ Contributors:
     <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
 
     <div class="content">
-      <div class="parents">
-        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
-          <span class="parent">[[i18n('browse.root')]]</span>
-        </a>
+      <div class="parents" hidden$="[[_noPermission]]">
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
             <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
@@ -160,7 +164,9 @@ Contributors:
           </span>
         </template>
       </nuxeo-tree>
+      <div class="noPermission" hidden$="[[!_noPermission]]">[[i18n('browse.tree.noDocument')]]</div>
     </div>
+
   </template>
   <script>
     Polymer({
@@ -195,10 +201,17 @@ Contributors:
         },
         label: String,
         visible: {
+          type: Boolean
+        },
+        cannotSee: {
           type: Boolean,
-          observer: '_visibleChanged'
+          value: false
         }
       },
+
+      observers: [
+        '_fetchDocument(docPath, visible)'
+      ],
 
       ready: function() {
         this.controller = {
@@ -220,14 +233,21 @@ Contributors:
         };
       },
 
-      _visibleChanged: function() {
-        if (this.visible) {
-          this.auto = true;
-        }
-      },
-
       _hideRoot: function(doc) {
         return this.rootDocPath !== '/' || (doc && doc.type && doc.type === 'Root');
+      },
+
+      _fetchDocument: function() {
+        if (this.visible && this.docPath) {
+          this._noPermission = false;
+          this.$.doc.execute().catch(function(err) {
+            if (err && err.status === 403) {
+              this._noPermission = true;
+            } else {
+              throw err;
+            }
+          }.bind(this));
+        }
       },
 
       _currentDocumentChanged: function() {
@@ -258,6 +278,15 @@ Contributors:
 
             for (var i = 0; i < entries.length - 1; i++) {
               var entry = entries[i];
+              if (i === 0) {
+                if (entry.startsWith('/')) {
+                  this.push('parents', {
+                    path: '/',
+                    title: this.i18n('browse.root')
+                  });
+                }
+                entry = entry.substring(1);
+              }
               if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
                 this.push('parents', entry);
               }
