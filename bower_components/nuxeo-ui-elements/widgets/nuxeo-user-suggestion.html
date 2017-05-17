@@ -52,6 +52,7 @@ limitations under the License.
                  required="[[required]]"
                  invalid="[[invalid]]"
                  result-formatter="[[resultFormatter]]"
+                 resolve-entry="[[resolveEntry]]"
                  id-function="[[idFunction]]">
   </nuxeo-select2>
 
@@ -131,8 +132,18 @@ Polymer({
      */
     resultFormatter: {
       type: Function,
-      value: function () {
+      value: function() {
         return this._resultFormatter.bind(this);
+      }
+    },
+
+    /**
+     * Function that transforms entries added to the element using the `value` property into objects.
+     */
+    resolveEntry: {
+      type: Function,
+      value: function() {
+        return this._resolveEntry.bind(this);
       }
     },
 
@@ -143,7 +154,7 @@ Polymer({
 
     idFunction: {
       type: Function,
-      value: function () {
+      value: function() {
         return this._idFunction.bind(this);
       }
     }
@@ -166,11 +177,16 @@ Polymer({
     };
   },
 
-  _resultFormatter: function (item) {
+  _resultFormatter: function(item) {
     return (item.displayLabel || item.title) + ((item.type && item.type === 'USER_TYPE') ? '<br>' + item.email : '');
   },
 
-  _idFunction: function (item) {
+  _resolveEntry: function(term) {
+    return this.prefixed ? {id: term, displayLabel: term, prefixed_id: term }
+                         : {id: term, displayLabel: term};
+  },
+
+  _idFunction: function(item) {
     return this.prefixed ? item.prefixed_id : item.id;
   }
 

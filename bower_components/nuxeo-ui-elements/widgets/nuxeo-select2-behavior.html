@@ -96,7 +96,7 @@ limitations under the License.
        */
       idFunction: {
         type: Function,
-        value: function () {
+        value: function() {
           return this._idFunction.bind(this);
         }
       },
@@ -106,7 +106,7 @@ limitations under the License.
        */
       selectionFormatter: {
         type: Function,
-        value: function () {
+        value: function() {
           return this._selectionFormatter.bind(this);
         }
       },
@@ -116,7 +116,7 @@ limitations under the License.
        */
       resultFormatter: {
         type: Function,
-        value: function () {
+        value: function() {
           return this._resultFormatter.bind(this);
         }
       },
@@ -126,20 +126,30 @@ limitations under the License.
        */
       newEntryFormatter: {
         type: Function,
-        value: function () {
+        value: function() {
           return this._newEntryFormatter.bind(this);
         }
       },
 
       /**
-       * Functon called when an entry is selected.
+       * Function that transforms the entries added using the value property into object
+       */
+      resolveEntry: {
+        type: Function,
+        value: function() {
+          return this._resolveEntry.bind(this);
+        }
+      },
+
+      /**
+       * Function called when an entry is selected.
        */
       addedEntryHandler: {
         type: Function
       },
 
       /**
-       * Functon called when an entry is unselected.
+       * Function called when an entry is unselected.
        */
       removedEntryHandler: {
         type: Function
@@ -150,7 +160,7 @@ limitations under the License.
        */
       initSelection: {
         type: Function,
-        value: function () {
+        value: function() {
           return this._initSelection.bind(this);
         }
       },
@@ -175,33 +185,33 @@ limitations under the License.
     /**
      * HTML escaping function to be used in formatters.
      */
-    escapeHTML: function (markup) {
+    escapeHTML: function(markup) {
       return markup && window.Select2.util.escapeMarkup(markup);
     },
 
-    _idFunction: function (item) {
+    _idFunction: function(item) {
       return item.computedId || item.uid || item.id;
     },
 
-    _selectionFormatter: function (item) {
+    _selectionFormatter: function(item) {
       return this.escapeHTML(item.displayLabel || item.title);
     },
 
-    _resultFormatter: function (item) {
+    _resultFormatter: function(item) {
       return this.escapeHTML(item.displayLabel || item.title);
     },
 
-    _newEntryFormatter: function (term) {
+    _newEntryFormatter: function(term) {
       return { id: term, displayLabel: term };
     },
 
     _initSelection: function(element, callback) {
       if (!this.multiple) {
-        return callback(this._resolveEntry(this.value));
+        return callback(this.resolveEntry(this.value));
       }
       return callback(
         this.value.map(function(entry) {
-          return this._resolveEntry(entry);
+          return this.resolveEntry(entry);
         }.bind(this))
       );
     },
@@ -221,7 +231,7 @@ limitations under the License.
       }
     },
 
-    _initSelect2: function (el) {
+    _initSelect2: function(el) {
       if (this._el) {
         jQuery(el).off('change');
         jQuery(el).select2('destroy');
@@ -260,16 +270,16 @@ limitations under the License.
         params.data = this.data;
       } else {
         params.formatResult = this.resultFormatter;
-        params.query = function (query) {
+        params.query = function(query) {
           // debounce requests
-          this.debounce('_select2Query', function () {
+          this.debounce('_select2Query', function() {
             this._query(query);
           }.bind(this), 300);
         }.bind(this);
       }
 
       if (this.tagging) {
-        params.createSearchChoice = function (term, data) {
+        params.createSearchChoice = function(term, data) {
           if (jQuery(data).filter(function() {
             return this.displayLabel === term;
           }).length === 0) {
@@ -295,7 +305,7 @@ limitations under the License.
       jQuery(this).closest('nuxeo-select2').click();
     },
 
-    _updateSelection: function (e) {
+    _updateSelection: function(e) {
       this.selectedItems = jQuery(this._el).select2('data');
       var value = e.target.value;
       this._inUpdateSelection = true;
@@ -315,7 +325,7 @@ limitations under the License.
       }
     },
 
-    _valueChanged: function (newValue) {
+    _valueChanged: function(newValue) {
       if (this._el && !this._inUpdateSelection) {
         jQuery(this._el).select2('val', newValue);
       }
@@ -334,7 +344,7 @@ limitations under the License.
     },
 
     // Extension points for sub-classes
-    _query: function (query) {
+    _query: function(query) {
     }
   };
 </script>

@@ -265,6 +265,7 @@ Contributors:
               this.document = response;
               this.fire('notify', {message: this.uploadedMessage});
               this.progress = false;
+              this._hasFiles = false;
             }.bind(this));
           } else {
             this.fire('notify', {message: this.uploadedMessage});
