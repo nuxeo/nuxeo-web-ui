@@ -146,6 +146,10 @@ Contributors:
 
     <div class="content">
       <div class="parents" hidden$="[[_noPermission]]">
+        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
+          <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
+          <span class="parent">[[i18n('browse.root')]]</span>
+        </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
             <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
@@ -278,15 +282,6 @@ Contributors:
 
             for (var i = 0; i < entries.length - 1; i++) {
               var entry = entries[i];
-              if (i === 0) {
-                if (entry.startsWith('/')) {
-                  this.push('parents', {
-                    path: '/',
-                    title: this.i18n('browse.root')
-                  });
-                }
-                entry = entry.substring(1);
-              }
               if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
                 this.push('parents', entry);
               }
