@@ -52,52 +52,50 @@ Example:
 </dom-module>
 
 <script>
-  (function() {
-    Polymer({
-      is: 'nuxeo-group-tag',
-      behaviors: [Nuxeo.RoutingBehavior],
-      properties: {
+  Polymer({
+    is: 'nuxeo-group-tag',
+    behaviors: [Nuxeo.RoutingBehavior],
+    properties: {
 
-        /**
-         * Group entity or a string
-         */
-        group: Object,
+      /**
+       * Group entity or a string
+       */
+      group: Object,
 
-        /**
-         * Disable link
-         */
-        disabled: {
-          type: Boolean,
-          value: false
-        }
-      },
-
-      ready: function() {
-        if (this.$.tooltip) {
-          document.body.appendChild(this.$.tooltip);
-        }
-      },
-
-      _isEntity: function(group) {
-        return group && group['entity-type'] && group['entity-type'] === 'group';
-      },
-
-      _name: function(group) {
-        return this._isEntity(group) ? group.groupname : group;
-      },
-
-      _label: function(group) {
-        if (this._isEntity(group)) {
-          return group.grouplabel;
-        } else {
-          return group;
-        }
-      },
-
-      _href: function(group) {
-        return this.urlFor('group', this._name(group));
+      /**
+       * Disable link
+       */
+      disabled: {
+        type: Boolean,
+        value: false
       }
+    },
 
-    });
-  })();
+    ready: function() {
+      if (this.$.tooltip) {
+        document.body.appendChild(this.$.tooltip);
+      }
+    },
+
+    _isEntity: function(group) {
+      return group && group['entity-type'] && group['entity-type'] === 'group';
+    },
+
+    _name: function(group) {
+      return this._isEntity(group) ? group.groupname : group.replace('group:', '');
+    },
+
+    _label: function(group) {
+      if (this._isEntity(group)) {
+        return group.grouplabel;
+      } else {
+        return group.replace('group:', '');
+      }
+    },
+
+    _href: function(group) {
+      return this.urlFor('group', this._name(group));
+    }
+
+  });
 </script>
