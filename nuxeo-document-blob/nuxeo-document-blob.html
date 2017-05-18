@@ -92,9 +92,18 @@ Contributors:
     ],
 
     _update: function(user, document, xpath) {
-      var array = xpath.split('/');
-      this.blob = (array.length > 1) ? document.properties[array[0]][array[1]].file : document.properties[xpath];
+      this.blob = document && this._deepFind(document.properties, xpath);
       this.actionContext = {user: this.user, document: this.document, blob: this.blob, xpath: this.xpath};
+    },
+
+    _deepFind: function(obj, props) {
+      for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+        if (!obj || obj === []) {
+          break;
+        }
+        obj = obj[path[i]];
+      }
+      return obj;
     }
 
   });
