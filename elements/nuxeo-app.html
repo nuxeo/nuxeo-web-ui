@@ -917,7 +917,7 @@ Contributors:
                 var searchName = drawerPage.getAttribute('search-name');
                 if (searchName === this.searchName) {
                   this.searchForm = drawerPage;
-                  if (this.searchResults) {
+                  if (this.searchForm.auto && this.searchResults) {
                     this.searchResults.searchForm = this.searchForm;
                     if (this.postponedSearch) {
                       this._search();
@@ -934,7 +934,7 @@ Contributors:
             switch (page.tagName) {
               case 'NUXEO-SEARCH-RESULTS':
                 this.searchResults = page;
-                if (this.searchForm) {
+                if (this.searchForm && this.searchForm.auto) {
                   this.searchResults.searchForm = this.searchForm;
                   if (this.postponedSearch) {
                     this._search();
@@ -945,7 +945,7 @@ Contributors:
         },
 
         anticipateSearch: function() {
-          if (this.searchForm && this.searchResults) {
+          if (this.searchForm && this.searchResults && this.searchForm.auto) {
             this._search();
           } else {
             this.postponedSearch = true;

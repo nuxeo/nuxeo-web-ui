@@ -212,7 +212,8 @@ Contributors:
        schemas="[[schemas]]"
        loading="{{loading}}"
        headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
-       fetch-aggregates>
+       fetch-aggregates
+       on-error="_onError">
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
@@ -617,6 +618,7 @@ Contributors:
       },
 
       _search: function() {
+        this.$.provider.page = 1;
         return this.$.provider.fetch().then(this._navigateToResults.bind(this));
       },
 
@@ -769,6 +771,10 @@ Contributors:
           }
         }.bind(this));
         this.form.addEventListener('trigger-search', this._search.bind(this));
+      },
+
+      _onError: function(e) {
+        this.fire('notify', e.detail.error);
       }
 
     });

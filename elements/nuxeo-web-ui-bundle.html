@@ -351,6 +351,20 @@
                                label="expiredSearch.expiredDocuments"></nuxeo-search-form>
   </template>
 </nuxeo-slot-content>
+<nuxeo-slot-content name="nxqlSearchMenuButton" slot="DRAWER_ITEMS" order="45">
+  <template>
+    <nuxeo-menu-icon name="nxqlSearch" icon="nuxeo:search-nxql" label="app.nxqlSearch"></nuxeo-menu-icon>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="nxqlSearchMenuPage" slot="DRAWER_PAGES">
+  <template>
+    <nuxeo-search-form name="nxqlSearch" search-name="nxql"
+      provider="nxql_search"
+      query="SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'"
+      schemas="dublincore,common,uid">
+    </nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>
 <nuxeo-slot-content name="searchPage" slot="PAGES">
   <template>
     <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
