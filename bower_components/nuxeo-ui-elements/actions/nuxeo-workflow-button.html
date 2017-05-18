@@ -112,8 +112,11 @@ Example:
       },
 
       _isAvailable: function(document) {
-        this.processes = this.document.contextParameters.runnableWorkflows;
-        this.workflows = this.document.contextParameters.runningWorkflows;
+        if (!document) {
+          return false;
+        }
+        this.processes = document.contextParameters.runnableWorkflows;
+        this.workflows = document.contextParameters.runningWorkflows;
         this.hasWorkflowRunning = this.workflows && this.workflows.length > 0;
         return document && !this.hasWorkflowRunning && this.processes &&  this.processes.length > 0 ;
       },

@@ -301,6 +301,8 @@ element.
             this.currentPageSize = response.currentPageSize;
             this.fire('update');
             return response;
+          }.bind(this)).catch(function(err) {
+            this.fire('error', { error : err });
           }.bind(this));
       },
 
