@@ -78,7 +78,9 @@ An element for dialogs
     },
 
     _closed: function() {
-      this.parent.appendChild(this);
+      if (this.parent) {
+        this.parent.appendChild(this);
+      }
     }
 
   });
