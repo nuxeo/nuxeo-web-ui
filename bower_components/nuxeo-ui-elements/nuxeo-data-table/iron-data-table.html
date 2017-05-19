@@ -402,13 +402,11 @@ Example:
       },
 
       _itemChanged: function(e) {
-        var index = e.target.index;
-        if (this.items && (index > -1)) {
-          var path =  'items.' + index;
-          if (e.detail.path) {
-            path += '.' + e.detail.path;
+        if (this.items) {
+          var index = this.items.indexOf(e.detail.item);
+          if (index >= 0) {
+            this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
-          this.set(path, e.detail.value);
         }
       },
 
