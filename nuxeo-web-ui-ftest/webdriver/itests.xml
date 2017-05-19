@@ -20,6 +20,7 @@
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
     </condition>
+    <delete dir="node_modules" failonerror="true" />
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
