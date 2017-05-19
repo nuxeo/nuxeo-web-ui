@@ -41,9 +41,20 @@ Contributors:
         text-transform: uppercase;
       }
 
+      paper-tabs,
       #holder {
         margin: 0;
         padding: 0;
+      }
+
+      iron-pages,
+      nuxeo-document-import
+      {
+        /*Firefox fix (NXP-22349)*/
+        min-height: 100%;
+      }
+
+      #holder {
         height: 80vh;
         width: 65vw;
       }
@@ -60,10 +71,11 @@ Contributors:
                   opened="{{opened}}"
                   modal
                   no-auto-focus>
+
+      <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
+        <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
+      </paper-tabs>
       <div id="holder" class="vertical layout flex">
-        <paper-tabs hidden$=[[!_showTabs]] selected="{{selectedTab}}" attr-for-selected="name" noink>
-          <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
-        </paper-tabs>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex" selected-attribute="visible">
           <nuxeo-slot slot="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
           <nuxeo-document-create id="simpleCreation"
@@ -76,7 +88,7 @@ Contributors:
                                  parent="[[parent]]"
                                  target-path="{{parentPath}}"
                                  suggester-children="{{suggesterChildren}}"></nuxeo-document-import>
-        </iron-pages>
+      </iron-pages>
       </div>
     </paper-dialog>
 
