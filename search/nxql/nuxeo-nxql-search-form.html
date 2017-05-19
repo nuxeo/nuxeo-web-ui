@@ -1,0 +1,70 @@
+<!--
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+
+<!--
+`nuxeo-nxql-search-form`
+@group Nuxeo UI
+@element nuxeo-nxql-search-form
+-->
+<dom-module id="nuxeo-nxql-search-form">
+  <template>
+
+    <paper-textarea role="widget"
+                 id="queryInput"
+                 type="search"
+                 label="[[i18n('nxqlSearch.query')]]"
+                 value="{{params.queryParams}}"
+                 placeholder="[[i18n('nxqlSearch.query.placeholder')]]"
+                 autofocus
+                 on-keydown="_checkForEnter">
+    </paper-textarea>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-nxql-search-form',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true,
+          observer: '_observeParams'
+        }
+      },
+
+      _observeParams: function() {
+        if (!this.params || !this.params.queryParams || !this.params.queryParams.length === 0) {
+          if (this.params['saved:queryParams']) {
+            this.set('params.queryParams', this.params['saved:queryParams']);
+          } else {
+            this.set('params.queryParams', "SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND " +
+              "ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'");
+          }
+        }
+      },
+
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13 && e.ctrlKey) {
+          this.fire('trigger-search');
+        }
+      }
+
+    });
+  </script>
+</dom-module>
