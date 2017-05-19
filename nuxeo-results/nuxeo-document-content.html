@@ -106,7 +106,7 @@ Contributors:
                           display-quick-filters
                           on-row-clicked="_navigate">
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
-                                   field="dc:title" sort-by="dc:title" flex="100">
+                                   field="dc:title" sort-by="dc:title" filter-by="title"  flex="100">
             <template>
               <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
               <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
@@ -151,13 +151,13 @@ Contributors:
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]"
-                                   field="dc:created" flex="50" hidden>
+                                   field="dc:created" sort-by="dc:created" flex="50" hidden>
             <template>
               <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]"
-                                   field="dc:creator" hidden>
+                                   field="dc:creator" sort-by="dc:creator" hidden>
             <template>
               <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
             </template>

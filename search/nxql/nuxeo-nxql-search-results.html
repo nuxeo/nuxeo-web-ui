@@ -70,13 +70,13 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.created')]]" field="dc:created" flex="50" hidden>
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.created')]]" field="dc:created" sort-by="dc:created" flex="50" hidden>
           <template>
             <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.author')]]" field="dc:creator" hidden>
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.author')]]" field="dc:creator" sort-by="dc:creator" hidden>
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
           </template>
