@@ -50,8 +50,12 @@ limitations under the License.
 
       _observeParams: function() {
         if (!this.params || !this.params.queryParams || !this.params.queryParams.length === 0) {
-          this.set('params.queryParams', "SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND " +
-            "ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'");
+          if (this.params['saved:queryParams']) {
+            this.set('params.queryParams', this.params['saved:queryParams']);
+          } else {
+            this.set('params.queryParams', "SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND " +
+              "ecm:isProxy = 0 AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted'");
+          }
         }
       },
 
