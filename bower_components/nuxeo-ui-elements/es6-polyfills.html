@@ -39,39 +39,37 @@ limitations under the License.
     });
   }
 
-  Array.prototype.findIndex = Array.prototype.findIndex || function (evaluator, thisArg) {
-    'use strict';
-    if (!this) {
-      throw new TypeError('Array.prototype.some called on null or undefined');
-    }
-
-    if (typeof(evaluator) !== 'function') {
-      if (typeof(evaluator) === 'string') {
-        // Attempt to convert it to a function
-        if (!(evaluator = eval(evaluator))) {
-          throw new TypeError();
+  if (!Array.prototype.findIndex) {
+    Object.defineProperty(Array.prototype, 'findIndex', {
+      value: function(predicate) {
+        if (this == null) {
+          throw new TypeError('"this" is null or not defined');
         }
-      } else {
-        throw new TypeError();
-      }
-    }
 
-    var i;
-    if (thisArg === undefined) {  // Optimize for thisArg
-      for (i in this) {
-        if (evaluator(this[i], i, this)) {
-          return i;
+        var o = Object(this);
+
+        var len = o.length >>> 0;
+
+        if (typeof predicate !== 'function') {
+          throw new TypeError('predicate must be a function');
         }
+
+        var thisArg = arguments[1];
+
+        var k = 0;
+
+        while (k < len) {
+          var kValue = o[k];
+          if (predicate.call(thisArg, kValue, k, o)) {
+            return k;
+          }
+          k++;
+        }
+
+        return -1;
       }
-      return -1;
-    }
-    for (i in this) {
-      if (evaluator.call(thisArg, this[i], i, this)) {
-        return i;
-      }
-    }
-    return -1;
-  };
+    });
+  }
 
   String.prototype.startsWith = String.prototype.startsWith || function(searchString, position){
     position = position || 0;

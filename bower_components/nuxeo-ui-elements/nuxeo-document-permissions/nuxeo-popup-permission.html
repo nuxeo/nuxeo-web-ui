@@ -64,17 +64,7 @@ limitations under the License.
     </template>
 
     <paper-dialog id="popupRight" modal no-auto-focus>
-      <template is="dom-if" if="{{!updatingACE}}">
-        <template is="dom-if" if="{{!shareWithExternal}}">
-          <h2>[[i18n('popupPermission.addPermission')]]</h2>
-        </template>
-        <template is="dom-if" if="{{shareWithExternal}}">
-          <h2>[[i18n('popupPermission.shareWithExternalUser')]]</h2>
-        </template>
-      </template>
-      <template is="dom-if" if="{{updatingACE}}">
-        <h2>[[i18n('popupPermission.updatePermission')]]</h2>
-      </template>
+      <h2>[[_computedTitle]]</h2>
 
       <!-- Give acces to row -->
       <paper-dialog-scrollable>
@@ -188,7 +178,15 @@ limitations under the License.
         type: String,
         value: 'permanent',
         observer: '_selectedTimeFrameChanged'
-      }
+      },
+
+      /*
+       * The title of the dialog
+       */
+      _computedTitle: {
+        type: String,
+        computed: '_computeTitle(shareWithExternal, updatingACE)'
+      },
     },
 
     ready: function () {
@@ -208,6 +206,16 @@ limitations under the License.
 
     doUpdate: function () {
       this._doSend(true);
+    },
+
+    _computeTitle: function() {
+      if (this.updatingACE) {
+        return this.i18n('popupPermission.updatePermission');
+      }
+      if (this.shareWithExternal) {
+        return this.i18n('popupPermission.shareWithExternalUser');
+      }
+      return this.i18n('popupPermission.addPermission');
     },
 
     _doSend: function (togglePopup) {

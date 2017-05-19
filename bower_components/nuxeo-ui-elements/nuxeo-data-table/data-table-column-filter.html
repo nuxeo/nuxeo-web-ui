@@ -4,11 +4,7 @@
     :host([hidden]) {
       display: none;
     }
-
     paper-input {
-      --paper-input-container: {
-        margin-bottom: 20px;
-      };
       --paper-input-container-label: {
         font-size: inherit;
       }
@@ -16,7 +12,7 @@
   </style>
 
   <template>
-    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged"></paper-input>
+    <paper-input no-label-float label="[[label]]" value="[[value]]" on-value-changed="_valueChanged"></paper-input>
   </template>
   <script>
     Polymer({
