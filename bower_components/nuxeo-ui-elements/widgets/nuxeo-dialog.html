@@ -54,7 +54,16 @@ An element for dialogs
     is: 'nuxeo-dialog',
 
     properties: {
-      parent: {
+
+      /**
+       * Move dialog to BODY when opening it.
+       */
+      reparent: {
+        type: Boolean,
+        value: false
+      },
+
+      _parent: {
         type: Object
       }
     },
@@ -71,15 +80,15 @@ An element for dialogs
     },
 
     _opened: function() {
-      if (this.parentElement !== document.body) {
-        this.parent = this.parentElement;
+      if (this.reparent && this.parentElement !== document.body) {
+        this._parent = this.parentElement;
         document.body.appendChild(this);
       }
     },
 
     _closed: function() {
-      if (this.parent) {
-        this.parent.appendChild(this);
+      if (this.reparent && this._parent) {
+        this._parent.appendChild(this);
       }
     }
 
