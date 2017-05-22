@@ -220,6 +220,10 @@ limitations under the License.
       this._update();
     },
 
+    detached: function() {
+      this._clear();
+    },
+
     _clear: function() {
       if (this._instance) {
         var c$ = this._instance._children;
