@@ -123,9 +123,11 @@
   }
 
   body ::content paper-textarea {
-    word-wrap: break-word;
+    word-wrap: break-word;  /* legacy property */
+    overflow-wrap: break-word;  /* css3 standard property */
     word-break: break-word;
-    text-align: justify;
+
+    /* Hyphenize words */
     -webkit-hyphens: auto;
     -moz-hyphens: auto;
     -ms-hyphens: auto;

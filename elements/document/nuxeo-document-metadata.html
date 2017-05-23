@@ -37,13 +37,16 @@ Contributors:
       }
 
       ::content div {
+        word-wrap: break-word;  /* legacy property */
+        overflow-wrap: break-word;  /* css3 standard property */
         word-break: break-word;
+
+        /* Hyphenize words */
         -webkit-hyphens: auto;
         -moz-hyphens: auto;
         -ms-hyphens: auto;
         -o-hyphens: auto;
         hyphens: auto;
-        text-align: justify;
       }
 
       ::content label {
