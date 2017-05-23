@@ -40,10 +40,15 @@ Contributors:
 
       .actions {
         @apply(--nx-actions);
+        padding: 0 1rem;
       }
 
       .actions paper-button {
         @apply(--nx-actions-button);
+      }
+
+      .actions .reset {
+        margin-bottom: 1rem;
       }
 
       nuxeo-data-list {
@@ -127,7 +132,6 @@ Contributors:
       .header ::content .input-content.paper-input-container input {
         text-transform: uppercase;
       }
-
 
       .row {
         box-sizing: border-box;
@@ -253,18 +257,20 @@ Contributors:
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
           </div>
-          <div class="row actions">
+          <div class="actions layout vertical">
             <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset')]]
             </paper-button>
-            <paper-button noink class="primary clear" on-tap="_clear">
-              [[i18n('command.clear')]]
-            </paper-button>
-            <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
-              [[i18n('command.search')]]
-            </paper-button>
+            <div class="layout horizontal">
+              <paper-button noink class="primary clear" on-tap="_clear">
+                [[i18n('command.clear')]]
+              </paper-button>
+              <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
+                [[i18n('command.search')]]
+              </paper-button>
+            </div>
           </div>
-          <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+          <paper-spinner-lite active hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
         <div id="queue" hidden$="{{!queue}}">
