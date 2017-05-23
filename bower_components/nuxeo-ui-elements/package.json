@@ -35,6 +35,6 @@
     "@polymer/test-fixture": "0.0.3",
     "eslint": "^3.4.0",
     "eslint-plugin-html": "^1.5.2",
-    "polymer-cli": "^0.16.0"
+    "polymer-cli": "^1.0.0"
   }
 }

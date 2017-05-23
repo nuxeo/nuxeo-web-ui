@@ -82,7 +82,9 @@ Example:
     },
 
     _id: function(user) {
-      return user && user.id ? user.id : user.replace('user:', '');
+      if (user) {
+        return user.id ? user.id : user.replace('user:', '');
+      }
     },
 
     _name: function(user) {
