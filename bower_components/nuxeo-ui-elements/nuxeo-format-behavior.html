@@ -46,8 +46,8 @@ limitations under the License.
      * Use format "relative" to show date relative to current time
      */
     formatDate: function(date, fmt) {
+      moment.locale(this._languageCode());
         if (fmt && fmt === "relative"){
-            moment.locale(this._languageCode());
             return moment().to(date) ;
         }
       return moment(date).format(fmt || 'MMMM D, YYYY');

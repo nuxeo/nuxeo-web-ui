@@ -243,7 +243,7 @@ Contributors:
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
@@ -518,10 +518,6 @@ Contributors:
               this.set('docAction', e.detail.value);
             }
           }.bind(this), true);
-
-          this.$.nxcon.connect().then(function(res) {
-            this.currentUser = res;
-          }.bind(this));
         },
 
         refresh: function() {
