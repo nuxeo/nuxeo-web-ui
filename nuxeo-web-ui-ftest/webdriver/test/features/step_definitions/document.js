@@ -36,6 +36,7 @@ module.exports = function () {
 
   this.When(/^I browse to the document$/, () => {
     driver.url(`#!/browse${this.doc.path}`);
+    this.ui.browser.waitForVisible();
     this.ui.browser.breadcrumb.waitForVisible();
   });
 
