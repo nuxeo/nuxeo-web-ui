@@ -23,6 +23,7 @@ Contributors:
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="nuxeo-app/nuxeo-progress-indicator.html">
 <link rel="import" href="nuxeo-app/nuxeo-menu-item.html">
 <link rel="import" href="nuxeo-app/nuxeo-menu-icon.html">
 <script src="nuxeo-app/nuxeo-doc-types.js"></script>
@@ -71,17 +72,6 @@ Contributors:
         --paper-drawer-panel-scrim: {
           z-index: 2;
         };
-      }
-
-      #loading {
-        position: absolute;
-        width: 100%;
-        top: 0;
-        height: 3px;
-        z-index: 104;
-        --paper-progress-active-color: rgba(0, 128, 255, 0.4);
-        --paper-progress-container-color: transparent;
-        --paper-progress-indeterminate-cycle-duration: 3s;
       }
 
       /* logo */
@@ -324,7 +314,8 @@ Contributors:
     <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]" hidden$="[[isMobile]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/default-domain"></nuxeo-document-create-popup>
 
-    <paper-progress id="loading" indeterminate hidden$="[[!loading]]"></paper-progress>
+    <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
+
     <paper-toast id="toast">
       <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden$="[[!_dismissible]]"></paper-icon-button>
     </paper-toast>
@@ -344,10 +335,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-app',
-        behaviors: [
-          Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior,
-          Polymer.NeonAnimatableBehavior, Polymer.NeonAnimationRunnerBehavior
-        ],
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
         properties: {
           baseUrl: {
             type: String,
@@ -356,21 +344,7 @@ Contributors:
 
           loading: {
             type: Boolean,
-            value: false,
-            observer: '_updateLoading'
-          },
-
-          animationConfig: {
-            type: Object,
-            value: function() {
-              return {
-                'loading': [{
-                  name: 'fade-in-animation',
-                  timing: {delay: 1000, duration: 1500},
-                  node: this.$.loading
-                }]
-              };
-            }
+            value: false
           },
 
           page: {
@@ -547,7 +521,7 @@ Contributors:
           this.loading = true;
           this.docId = id;
           this.docPath = path;
-          this.docAction = action
+          this.docAction = action;
           this.$.doc.get().then(function(doc) {
             if (this.docId && !doc.isVersion) {
               this.docId = '';
@@ -577,12 +551,6 @@ Contributors:
 
         show: function(page) {
           this.page = page;
-        },
-
-        _updateLoading: function(loading) {
-          if (loading) {
-            this.playAnimation('loading');
-          }
         },
 
         _logo: function(baseUrl) {

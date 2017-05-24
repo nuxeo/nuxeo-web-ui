@@ -15,6 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <link rel="import" href="nuxeo-select2.html">
+<link rel="import" href="../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../nuxeo-routing-behavior.html">
 
 <!--
 An element for selecting one or more documents.
@@ -35,6 +37,8 @@ An element for selecting one or more documents.
     }
   </style>
 
+  <nuxeo-operation id="op" op="Document.FetchByProperty"></nuxeo-operation>
+
   <nuxeo-select2 id="s2" operation="Repository.PageProvider"
                  label="[[label]]"
                  min-chars="[[minChars]]"
@@ -42,16 +46,20 @@ An element for selecting one or more documents.
                  params="[[params]]"
                  placeholder="[[placeholder]]"
                  readonly="[[readonly]]"
+                 value="{{value}}"
+                 selected-items="{{selectedItems}}"
+                 selection-formatter="[[selectionFormatter]]"
+                 result-formatter="[[resultFormatter]]"
                  required="[[required]]"
                  invalid="[[invalid]]"
-                 selected-items="{{selectedItems}}">
+                 init-selection="[[initSelection]]">
   </nuxeo-select2>
 
 </template>
 <script>
 Polymer({
   is: 'nuxeo-document-suggestion',
-  behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+  behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior, Nuxeo.RoutingBehavior],
   properties: {
 
     /**
@@ -134,6 +142,45 @@ Polymer({
     selectedItems: {
       type: Object,
       notify: true
+    },
+
+    /**
+     * Formatter for a selected entry.
+     */
+    selectionFormatter: {
+      type: Function,
+      value: function() {
+        return this._selectionFormatter.bind(this);
+      }
+    },
+
+    /**
+     * Formatter for suggested entries.
+     */
+    resultFormatter: {
+      type: Function,
+      value: function() {
+        return this._resultFormatter.bind(this);
+      }
+    },
+
+    /**
+     * Name of the Document property that should be used
+     * to define the ID of entry.
+     **/
+    idProperty: {
+      type: String,
+      value: "ecm:uuid"
+    },
+
+    /**
+     * Formatter for initial selection.
+     */
+    initSelection: {
+      type: Function,
+      value: function () {
+        return this._initSelection.bind(this);
+      }
     }
   },
 
@@ -157,6 +204,45 @@ Polymer({
       page: 0,
       pageSize: 20
     };
+  },
+
+  _selectionFormatter: function(doc) {
+    return '<a href="' + this.urlFor('browse', doc.path) + '">' + doc.title + '</a>';
+  },
+
+  _resultFormatter: function(doc) {
+    return doc.title + '<br/>' + doc.path;
+  },
+
+  _initSelection: function(element, callback) {
+    if (this.value) {
+      if (this.multiple) {
+        if (this.value.length > 0) {
+          if (this.value[0].title) {
+            return callback(this.value);
+          } else if (typeof this.value[0] === "string" && this.value[0].length > 0) {
+            return this._resolveDocs(this.value, callback);
+          }
+        }
+      } else {
+        if (this.value.title) {
+          return callback(this.value);
+        } else if (typeof this.value === "string" && this.value.length > 0) {
+          return this._resolveDocs(this.value, callback);
+        }
+      }
+      console.log('Unable to resolve such entry. Write your own resolver');
+    }
+  },
+
+  _resolveDocs(docs, callback) {
+    this.$.op.params = {
+      values: this.value,
+      property: this.idProperty
+    }
+    this.$.op.execute().then(function(res) {
+      callback(this.multiple ? res.entries : (res.entries.length > 0 ? res.entries[0] : null));
+    });
   }
 
 });
