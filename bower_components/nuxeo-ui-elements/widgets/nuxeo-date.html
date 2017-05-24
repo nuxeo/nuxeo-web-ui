@@ -34,48 +34,46 @@ Example:
 @demo demo/widgets/index.html
 -->
 <dom-module id="nuxeo-date">
-    <template>
-        <span id="datetime">[[formatDate(datetime, format)]]</span>
-        <paper-tooltip id="tooltip" for="datetime">[[formatDate(datetime, tooltipFormat)]]</paper-tooltip>
-    </template>
+  <template>
+    <span id="datetime">[[formatDate(datetime, format)]]</span>
+    <paper-tooltip id="tooltip" for="datetime">[[formatDate(datetime, tooltipFormat)]]</paper-tooltip>
+  </template>
 
-    <script>
-        Polymer({
-            is: 'nuxeo-date',
+  <script>
+    Polymer({
+      is: 'nuxeo-date',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+      properties: {
 
-            behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+        /*
+         * A string with the date and time to be shown
+         */
+        datetime: {
+          type: String
+        },
 
-            properties:{
+        /*
+         * The format of datetime output text representation. Options are "relative" or the
+         * [moment Format](http://momentjs.com/docs/#/displaying/format/).
+         */
+        format: {
+          type: String,
+          value: "MMMM D, YYYY"
+        },
 
-                /*
-                 * A string with the date and time to be shown
-                 */
-                datetime: {
-                    type: String
-                },
+        /*
+         * The format of datetime output text tooltip. Options are "relative" or the
+         * [moment Format](http://momentjs.com/docs/#/displaying/format/).
+         */
+        tooltipFormat: {
+          type: String,
+          value: "MMMM D, YYYY HH:mm"
+        }
+      },
 
-                /*
-                 * The format of datetime output text representation. Options are "relative" or the
-                 * [moment Format](http://momentjs.com/docs/#/displaying/format/).
-                 */
-                format: {
-                    type: String,
-                    value: "MMMM D, YYYY"
-                },
-
-                /*
-                 * The format of datetime output text tooltip. Options are "relative" or the
-                 * [moment Format](http://momentjs.com/docs/#/displaying/format/).
-                 */
-                tooltipFormat: {
-                    type: String,
-                    value: "MMMM D, YYYY HH:mm"
-                }
-            },
-
-            ready: function() {
-                document.body.appendChild(this.$.tooltip);
-            }
-        });
-    </script>
+      ready: function () {
+        document.body.appendChild(this.$.tooltip);
+      }
+    });
+  </script>
 </dom-module>

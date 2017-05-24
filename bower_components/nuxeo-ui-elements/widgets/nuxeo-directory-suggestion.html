@@ -33,185 +33,185 @@ An element for selecting one or more entries from a given directory.
 @homepage http://www.nuxeo.org
 -->
 <dom-module id="nuxeo-directory-suggestion">
-<template>
+  <template>
 
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
-
-  <nuxeo-select2 id="s2" operation="Directory.SuggestEntries"
-                 label="[[label]]"
-                 min-chars="[[minChars]]"
-                 multiple="[[multiple]]"
-                 params="[[params]]"
-                 placeholder="[[placeholder]]"
-                 readonly="[[readonly]]"
-                 value="{{value}}"
-                 selected-items="{{selectedItems}}"
-                 selection-formatter="[[selectionFormatter]]"
-                 required="[[required]]"
-                 invalid="[[invalid]]"
-                 init-selection="[[initSelection]]">
-  </nuxeo-select2>
-
-</template>
-<script>
-Polymer({
-  is: 'nuxeo-directory-suggestion',
-  behaviors: [Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
-  properties: {
-
-    /**
-     * Name of the directory.
-     */
-    directoryName: {
-      type: String
-    },
-
-    /**
-     * Checking this option means that the labels are localized with translations provided
-     * in the directory itself (i.e. in fields). Otherwise labels are translated as usual
-     * picking values in messages*.properties files.
-     */
-    dbl10n: {type: Boolean, value: false},
-
-    /**
-     * Label.
-     */
-    label: String,
-
-    /**
-     * Computed parameters for the `Directory.SuggestEntries` operation.
-     */
-    params: {
-      type: Object,
-      computed: '_computeParams(directoryName, dbl10n)'
-    },
-
-    /**
-     * Selected value(s).
-     */
-    value: {
-      type: String,
-      notify: true
-    },
-
-    /**
-     * Set to `true` to allow multiple selection.
-     */
-    multiple: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Set to `true` for read only mode.
-     */
-    readonly: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Minimum number of chars to trigger the suggestions.
-     */
-    minChars: {
-      type: Number,
-      value: 3
-    },
-
-    /**
-     * Placeholder.
-     */
-    placeholder: String,
-
-    /**
-     * Selected items.
-     */
-    selectedItems: {
-      type: Object,
-      notify: true
-    },
-
-    /**
-     * Formatter for a selected entry.
-     */
-    selectionFormatter: {
-      type: Function,
-      value: function() {
-        return this._selectionFormatter.bind(this);
+    <style>
+      :host {
+        display: block;
       }
-    },
+    </style>
 
-    /**
-     * Formatter for initial selection.
-     */
-    initSelection: {
-      type: Function,
-      value: function () {
-        return this._initSelection.bind(this);
-      }
-    }
-  },
+    <nuxeo-select2 id="s2" operation="Directory.SuggestEntries"
+                   label="[[label]]"
+                   min-chars="[[minChars]]"
+                   multiple="[[multiple]]"
+                   params="[[params]]"
+                   placeholder="[[placeholder]]"
+                   readonly="[[readonly]]"
+                   value="{{value}}"
+                   selected-items="{{selectedItems}}"
+                   selection-formatter="[[selectionFormatter]]"
+                   required="[[required]]"
+                   invalid="[[invalid]]"
+                   init-selection="[[initSelection]]">
+    </nuxeo-select2>
 
-  /* Override method from Polymer.IronValidatableBehavior. */
-  _getValidity: function() {
-    return this.$.s2._getValidity();
-  },
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-directory-suggestion',
+      behaviors: [Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+      properties: {
 
-  /* Override method from Polymer.IronValidatableBehavior. */
-  validate: function(value) {
-    this.invalid = !this.$.s2.validate();
-    return !this.invalid;
-  },
+        /**
+         * Name of the directory.
+         */
+        directoryName: {
+          type: String
+        },
 
-  _computeParams: function() {
-    return this.params = {
-      directoryName: this.directoryName,
-      dbl10n: this.dbl10n,
-      localize : true,
-      lang: (window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en'
-    };
-  },
+        /**
+         * Checking this option means that the labels are localized with translations provided
+         * in the directory itself (i.e. in fields). Otherwise labels are translated as usual
+         * picking values in messages*.properties files.
+         */
+        dbl10n: {type: Boolean, value: false},
 
-  _selectionFormatter: function(entry) {
-    return entry.displayLabel;
-  },
+        /**
+         * Label.
+         */
+        label: String,
 
-  _initSelection: function(element, callback) {
-    if (!this.multiple) {
-      return callback(this._resolveEntry(this.value));
-    }
-    return callback(
-      this.value.map(function(entry) {
-        return this._resolveEntry(entry);
-      }.bind(this))
-    );
-  },
+        /**
+         * Computed parameters for the `Directory.SuggestEntries` operation.
+         */
+        params: {
+          type: Object,
+          computed: '_computeParams(directoryName, dbl10n)'
+        },
 
-  _resolveEntry: function(entry) {
-    if (entry && entry['entity-type'] && entry['entity-type'] === 'directoryEntry') {
-      if (entry.properties && entry.properties.label) {
-        return {
-          id: entry.properties.id,
-          displayLabel: this.i18n(entry.properties.label)
+        /**
+         * Selected value(s).
+         */
+        value: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Set to `true` to allow multiple selection.
+         */
+        multiple: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to `true` for read only mode.
+         */
+        readonly: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Minimum number of chars to trigger the suggestions.
+         */
+        minChars: {
+          type: Number,
+          value: 3
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
+
+        /**
+         * Selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Formatter for a selected entry.
+         */
+        selectionFormatter: {
+          type: Function,
+          value: function() {
+            return this._selectionFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Formatter for initial selection.
+         */
+        initSelection: {
+          type: Function,
+          value: function () {
+            return this._initSelection.bind(this);
+          }
+        }
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      _getValidity: function() {
+        return this.$.s2._getValidity();
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      validate: function(value) {
+        this.invalid = !this.$.s2.validate();
+        return !this.invalid;
+      },
+
+      _computeParams: function() {
+        return this.params = {
+          directoryName: this.directoryName,
+          dbl10n: this.dbl10n,
+          localize : true,
+          lang: (window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en'
         };
-      } else {
-        var label = 'label_' + ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
+      },
+
+      _selectionFormatter: function(entry) {
+        return entry.displayLabel;
+      },
+
+      _initSelection: function(element, callback) {
+        if (!this.multiple) {
+          return callback(this._resolveEntry(this.value));
+        }
+        return callback(
+          this.value.map(function(entry) {
+            return this._resolveEntry(entry);
+          }.bind(this))
+        );
+      },
+
+      _resolveEntry: function(entry) {
+        if (entry && entry['entity-type'] && entry['entity-type'] === 'directoryEntry') {
+          if (entry.properties && entry.properties.label) {
+            return {
+              id: entry.properties.id,
+              displayLabel: this.i18n(entry.properties.label)
+            };
+          } else {
+            var label = 'label_' + ((window.nuxeo.I18n.language) ? window.nuxeo.I18n.language.split('-')[0] : 'en');
+            return {
+              id: entry.properties.id,
+              displayLabel: entry.properties[label] || entry.properties['label_en']
+            };
+          }
+        }
         return {
-          id: entry.properties.id,
-          displayLabel: entry.properties[label] || entry.properties['label_en']
+          id: entry,
+          displayLabel: entry
         };
       }
-    }
-    return {
-      id: entry,
-      displayLabel: entry
-    };
-  }
 
-});
-</script>
+    });
+  </script>
 </dom-module>

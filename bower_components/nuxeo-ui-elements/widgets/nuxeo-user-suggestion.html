@@ -32,164 +32,165 @@ limitations under the License.
 @homepage http://www.nuxeo.org
 -->
 <dom-module id="nuxeo-user-suggestion">
-<template>
+  <template>
 
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
-
-  <nuxeo-select2 id="s2" operation="UserGroup.Suggestion"
-                 label="[[label]]"
-                 min-chars="[[minChars]]"
-                 multiple="[[multiple]]"
-                 params="[[params]]"
-                 placeholder="[[placeholder]]"
-                 readonly="[[readonly]]"
-                 value="{{value}}"
-                 selected-items="{{selectedItems}}"
-                 required="[[required]]"
-                 invalid="[[invalid]]"
-                 result-formatter="[[resultFormatter]]"
-                 resolve-entry="[[resolveEntry]]"
-                 id-function="[[idFunction]]">
-  </nuxeo-select2>
-
-</template>
-<script>
-Polymer({
-  is: 'nuxeo-user-suggestion',
-  behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
-  properties: {
-
-    // USER_TYPE or GROUP_TYPE or USER_GROUP_TYPE
-    searchType: {
-      type: String,
-      value: 'USER_GROUP_TYPE'
-    },
-
-    /**
-     * Label.
-     */
-    label: String,
-
-    /**
-     * Computed parameters for the `UserGroup.Suggestion` operation.
-     */
-    params: {
-      type: Object,
-      computed: '_computeParams(searchType)'
-    },
-
-    /**
-     * Selected value(s).
-     */
-    value: {
-      type: String,
-      notify: true
-    },
-
-    /**
-     * Set to `true` to allow multiple selection.
-     */
-    multiple: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Set to `true` for read only mode.
-     */
-    readonly: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Minimum number of chars to trigger the suggestions.
-     */
-    minChars: {
-      type: Number,
-      value: 3
-    },
-
-    /**
-     * Placeholder.
-     */
-    placeholder: String,
-
-    /**
-     * Selected items.
-     */
-    selectedItems: {
-      type: Object,
-      notify: true
-    },
-
-    /**
-     * Formatter for suggested entries.
-     */
-    resultFormatter: {
-      type: Function,
-      value: function() {
-        return this._resultFormatter.bind(this);
+    <style>
+      :host {
+        display: block;
       }
-    },
+    </style>
 
-    /**
-     * Function that transforms entries added to the element using the `value` property into objects.
-     */
-    resolveEntry: {
-      type: Function,
-      value: function() {
-        return this._resolveEntry.bind(this);
+    <nuxeo-select2 id="s2" operation="UserGroup.Suggestion"
+                   label="[[label]]"
+                   min-chars="[[minChars]]"
+                   multiple="[[multiple]]"
+                   params="[[params]]"
+                   placeholder="[[placeholder]]"
+                   readonly="[[readonly]]"
+                   value="{{value}}"
+                   selected-items="{{selectedItems}}"
+                   required="[[required]]"
+                   invalid="[[invalid]]"
+                   result-formatter="[[resultFormatter]]"
+                   resolve-entry="[[resolveEntry]]"
+                   id-function="[[idFunction]]">
+    </nuxeo-select2>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-user-suggestion',
+      behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+      properties: {
+
+        // USER_TYPE or GROUP_TYPE or USER_GROUP_TYPE
+        searchType: {
+          type: String,
+          value: 'USER_GROUP_TYPE'
+        },
+
+        /**
+         * Label.
+         */
+        label: String,
+
+        /**
+         * Computed parameters for the `UserGroup.Suggestion` operation.
+         */
+        params: {
+          type: Object,
+          computed: '_computeParams(searchType)'
+        },
+
+        /**
+         * Selected value(s).
+         */
+        value: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Set to `true` to allow multiple selection.
+         */
+        multiple: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to `true` for read only mode.
+         */
+        readonly: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Minimum number of chars to trigger the suggestions.
+         */
+        minChars: {
+          type: Number,
+          value: 3
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
+
+        /**
+         * Selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Formatter for suggested entries.
+         */
+        resultFormatter: {
+          type: Function,
+          value: function() {
+            return this._resultFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Function that transforms entries added to the element using the `value` property into objects.
+         */
+        resolveEntry: {
+          type: Function,
+          value: function() {
+            return this._resolveEntry.bind(this);
+          }
+        },
+
+        /**
+        * Set to true to submit ids prefixed with "user:" or "group:".
+        */
+        prefixed: Boolean,
+
+        idFunction: {
+          type: Function,
+          value: function() {
+            return this._idFunction.bind(this);
+          }
+        }
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      _getValidity: function() {
+        return this.$.s2._getValidity();
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      validate: function(value) {
+        this.invalid = !this.$.s2.validate();
+        return !this.invalid;
+      },
+
+      _computeParams: function() {
+        return this.params = {
+          searchType: this.searchType
+        };
+      },
+
+      _resultFormatter: function(item) {
+        return (item.displayLabel || item.title) + ((item.type && item.type === 'USER_TYPE') ? '<br>' + item.email : '');
+      },
+
+      _resolveEntry: function(term) {
+        return this.prefixed ? {id: term, displayLabel: term, prefixed_id: term }
+                             : {id: term, displayLabel: term};
+      },
+
+      _idFunction: function(item) {
+        return this.prefixed ? item.prefixed_id : item.id;
       }
-    },
 
-    /**
-    * Set to true to submit ids prefixed with "user:" or "group:".
-    */
-    prefixed: Boolean,
-
-    idFunction: {
-      type: Function,
-      value: function() {
-        return this._idFunction.bind(this);
-      }
-    }
-  },
-
-  /* Override method from Polymer.IronValidatableBehavior. */
-  _getValidity: function() {
-    return this.$.s2._getValidity();
-  },
-
-  /* Override method from Polymer.IronValidatableBehavior. */
-  validate: function(value) {
-    this.invalid = !this.$.s2.validate();
-    return !this.invalid;
-  },
-
-  _computeParams: function() {
-    return this.params = {
-      searchType: this.searchType
-    };
-  },
-
-  _resultFormatter: function(item) {
-    return (item.displayLabel || item.title) + ((item.type && item.type === 'USER_TYPE') ? '<br>' + item.email : '');
-  },
-
-  _resolveEntry: function(term) {
-    return this.prefixed ? {id: term, displayLabel: term, prefixed_id: term }
-                         : {id: term, displayLabel: term};
-  },
-
-  _idFunction: function(item) {
-    return this.prefixed ? item.prefixed_id : item.id;
-  }
-
-});
-</script>
+    });
+  </script>
 </dom-module>

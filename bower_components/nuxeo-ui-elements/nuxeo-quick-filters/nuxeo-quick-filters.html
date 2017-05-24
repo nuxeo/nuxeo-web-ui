@@ -57,39 +57,32 @@ An element for toggling quickfilters.
     </div>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-quick-filters',
-
-        behaviors: [
-          Nuxeo.I18nBehavior
-        ],
-
-        properties: {
-          /**
-           * Quick filters state.
-           */
-          quickFilters: {
-            type: Array
-          }
-        },
-
-        _selectFilter: function(e) {
-          for (var i = 0; i < this.quickFilters.length; i++) {
-            if (this.quickFilters[i].name === e.model.filter.name) {
-              this.set('quickFilters.' + i + '.active', !this.quickFilters[i].active);
-            }
-          }
-        },
-
-        _computeFilterLabel: function(filter) {
-          return this.i18n('ui.label.quickFilters.' + filter.name);
+    Polymer({
+      is: 'nuxeo-quick-filters',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        /**
+         * Quick filters state.
+         */
+        quickFilters: {
+          type: Array
         }
+      },
 
-      });
-    })();
+      _selectFilter: function(e) {
+        for (var i = 0; i < this.quickFilters.length; i++) {
+          if (this.quickFilters[i].name === e.model.filter.name) {
+            this.set('quickFilters.' + i + '.active', !this.quickFilters[i].active);
+          }
+        }
+      },
+
+      _computeFilterLabel: function(filter) {
+        return this.i18n('ui.label.quickFilters.' + filter.name);
+      }
+
+    });
   </script>
 </dom-module>

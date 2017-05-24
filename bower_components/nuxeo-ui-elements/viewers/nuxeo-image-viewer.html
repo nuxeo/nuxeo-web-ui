@@ -102,98 +102,92 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-image-viewer',
+      behaviors: [Polymer.IronResizableBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-image-viewer',
-
-        properties: {
-
-          /**
-           * The URL of an image.
-           */
-          src: {
-            type: String
-          },
-
-          /**
-           * If true, controls for the user to interact with are displayed.
-           */
-          controls: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * If true, allows to zoom the image by wheeling mouse.
-           */
-          zoomOnWheel: {
-            type: Boolean,
-            value: false
-          },
-
-          /**
-           * If true, the element exhibits responsive resize behavior.
-           */
-          responsive: {
-            type: Boolean,
-            value: false
-          }
+        /**
+         * The URL of an image.
+         */
+        src: {
+          type: String
         },
 
-        behaviors: [Polymer.IronResizableBehavior],
-
-        listeners: {
-          'iron-resize': '_resize'
+        /**
+         * If true, controls for the user to interact with are displayed.
+         */
+        controls: {
+          type: Boolean,
+          value: false
         },
 
-        _init: function() {
-          if (this._el) {
-            this._el.destroy();
-          }
-
-          if (this.src) {
-            var image = this.$.image;
-            var options = {
-              autoCrop: false,
-              background: false,
-              checkCrossOrigin: false,
-              dragMode: 'move',
-              responsive: false,
-              restore: false,
-              toggleDragModeOnDblclick: false,
-              zoomOnWheel: this.zoomOnWheel
-            };
-            this._el = new Cropper(image, options);
-          }
+        /**
+         * If true, allows to zoom the image by wheeling mouse.
+         */
+        zoomOnWheel: {
+          type: Boolean,
+          value: false
         },
 
-        _click: function(event) {
-          var target = event.target;
-          var action = target.dataset.action || target.parentNode.dataset.action;
-          switch (action) {
-            case 'zoom-in':
-              this._el.zoom(0.1);
-              break;
-            case 'zoom-out':
-              this._el.zoom(-0.1);
-              break;
-            case 'rotate-left':
-              this._el.rotate(-90);
-              break;
-            case 'rotate-right':
-              this._el.rotate(90);
-              break;
-          }
-        },
-
-        _resize: function() {
-          if (this._el) {
-            this._el.resize();
-          }
+        /**
+         * If true, the element exhibits responsive resize behavior.
+         */
+        responsive: {
+          type: Boolean,
+          value: false
         }
-      });
-    })();
+      },
+
+      listeners: {
+        'iron-resize': '_resize'
+      },
+
+      _init: function() {
+        if (this._el) {
+          this._el.destroy();
+        }
+
+        if (this.src) {
+          var image = this.$.image;
+          var options = {
+            autoCrop: false,
+            background: false,
+            checkCrossOrigin: false,
+            dragMode: 'move',
+            responsive: false,
+            restore: false,
+            toggleDragModeOnDblclick: false,
+            zoomOnWheel: this.zoomOnWheel
+          };
+          this._el = new Cropper(image, options);
+        }
+      },
+
+      _click: function(event) {
+        var target = event.target;
+        var action = target.dataset.action || target.parentNode.dataset.action;
+        switch (action) {
+          case 'zoom-in':
+            this._el.zoom(0.1);
+            break;
+          case 'zoom-out':
+            this._el.zoom(-0.1);
+            break;
+          case 'rotate-left':
+            this._el.rotate(-90);
+            break;
+          case 'rotate-right':
+            this._el.rotate(90);
+            break;
+        }
+      },
+
+      _resize: function() {
+        if (this._el) {
+          this._el.resize();
+        }
+      }
+    });
   </script>
 </dom-module>

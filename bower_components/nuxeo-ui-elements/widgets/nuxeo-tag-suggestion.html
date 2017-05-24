@@ -35,222 +35,223 @@ limitations under the License.
 @homepage http://www.nuxeo.org
 -->
 <dom-module id="nuxeo-tag-suggestion">
-<template>
+  <template>
 
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
-
-  <nuxeo-select2 id="s2" operation="Tag.Suggestion"
-                 label="[[label]]"
-                 min-chars="[[minChars]]"
-                 tagging$="[[allowNewTags]]"
-                 multiple
-                 params="[[params]]"
-                 placeholder="[[placeholder]]"
-                 readonly="[[readonly]]"
-                 value="{{value}}"
-                 selected-items="{{selectedItems}}"
-                 required="[[required]]"
-                 invalid="[[invalid]]"
-                 new-entry-formatter="[[newEntryFormatter]]"
-                 result-formatter="[[resultFormatter]]"
-                 added-entry-handler="[[addedTagHandler]]"
-                 removed-entry-handler="[[removedTagHandler]]"
-                 init-selection="[[initSelection]]">
-  </nuxeo-select2>
-
-  <nuxeo-operation id="addTagOp"
-                   op="Services.TagDocument"
-                   input="[[document.uid]]">
-  </nuxeo-operation>
-
-  <nuxeo-operation id="removeTagOp"
-                   op="Services.UntagDocument"
-                   input="[[document.uid]]">
-  </nuxeo-operation>
-
-  <paper-toast id="toast"></paper-toast>
-
-</template>
-<script>
-Polymer({
-  is: 'nuxeo-tag-suggestion',
-  behaviors: [Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
-  properties: {
-
-    /**
-     * Label.
-     */
-    label: String,
-
-    document: {
-      type: Object,
-      observer: '_observeDocument'
-    },
-
-    /*
-     * Set to true for allowing to add new tags.
-     */
-    allowNewTags: Boolean,
-
-    /**
-     * Selected value(s).
-     */
-    value: {
-      type: String,
-      notify: true
-    },
-
-    /**
-     * Set to `true` for read only mode.
-     */
-    readonly: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Minimum number of chars to trigger the suggestions.
-     */
-    minChars: {
-      type: Number,
-      value: 1
-    },
-
-    /**
-     * Placeholder.
-     */
-    placeholder: String,
-
-    /**
-     * Selected items.
-     */
-    selectedItems: {
-      type: Object,
-      notify: true
-    },
-
-    /**
-     * Formatter for suggested entries.
-     */
-    resultFormatter: {
-      type: Function,
-      value: function () {
-        return this._resultFormatter.bind(this);
+    <style>
+      :host {
+        display: block;
       }
-    },
+    </style>
 
-    /**
-     * Formatter for initial selection.
-     */
-    initSelection: {
-      type: Function,
-      value: function () {
-        return this._initSelection.bind(this);
+    <nuxeo-select2 id="s2" operation="Tag.Suggestion"
+                   label="[[label]]"
+                   min-chars="[[minChars]]"
+                   tagging$="[[allowNewTags]]"
+                   multiple
+                   params="[[params]]"
+                   placeholder="[[placeholder]]"
+                   readonly="[[readonly]]"
+                   value="{{value}}"
+                   selected-items="{{selectedItems}}"
+                   required="[[required]]"
+                   invalid="[[invalid]]"
+                   new-entry-formatter="[[newEntryFormatter]]"
+                   result-formatter="[[resultFormatter]]"
+                   added-entry-handler="[[addedTagHandler]]"
+                   removed-entry-handler="[[removedTagHandler]]"
+                   init-selection="[[initSelection]]">
+    </nuxeo-select2>
+
+    <nuxeo-operation id="addTagOp"
+                     op="Services.TagDocument"
+                     input="[[document.uid]]">
+    </nuxeo-operation>
+
+    <nuxeo-operation id="removeTagOp"
+                     op="Services.UntagDocument"
+                     input="[[document.uid]]">
+    </nuxeo-operation>
+
+    <paper-toast id="toast"></paper-toast>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-tag-suggestion',
+      behaviors: [Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+      properties: {
+
+        /**
+         * Label.
+         */
+        label: String,
+
+        document: {
+          type: Object,
+          observer: '_observeDocument'
+        },
+
+        /*
+         * Set to true for allowing to add new tags.
+         */
+        allowNewTags: Boolean,
+
+        /**
+         * Selected value(s).
+         */
+        value: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Set to `true` for read only mode.
+         */
+        readonly: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Minimum number of chars to trigger the suggestions.
+         */
+        minChars: {
+          type: Number,
+          value: 1
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
+
+        /**
+         * Selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Formatter for suggested entries.
+         */
+        resultFormatter: {
+          type: Function,
+          value: function () {
+            return this._resultFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Formatter for initial selection.
+         */
+        initSelection: {
+          type: Function,
+          value: function () {
+            return this._initSelection.bind(this);
+          }
+        },
+
+        /**
+         * Formatter for new suggested entries.
+         */
+        newEntryFormatter: {
+          type: Function,
+          value: function () {
+            return this._newEntryFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Handler called when a tag is added.
+         */
+        addedTagHandler: {
+          type: Function,
+          value: function () {
+            return this._addedTagHandler.bind(this);
+          }
+        },
+
+        /**
+         * Handler called when a tag is removed.
+         */
+        removedTagHandler: {
+          type: Function,
+          value: function () {
+            return this._removedTagHandler.bind(this);
+          }
+        }
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      _getValidity: function() {
+        return this.$.s2._getValidity();
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      validate: function(value) {
+        this.invalid = !this.$.s2.validate();
+        return !this.invalid;
+      },
+
+      _resultFormatter: function (tag) {
+        var escapeHTML = window.Select2.util.escapeMarkup;
+        if (tag.newTag) {
+            return "<span class='s2newTag'>" + "+ " +escapeHTML(tag.displayLabel) + "</span>"
+        } else {
+            return "<span class='s2existingTag'>" + escapeHTML(tag.displayLabel) + "</span>"
+        }
+      },
+
+      _newEntryFormatter: function (term) {
+        return { id: term, displayLabel: term,  newTag: true };
+      },
+
+      _addedTagHandler: function(entry) {
+        if (this.document) {
+          this.$.addTagOp.params = {tags: entry.id};
+          this.$.addTagOp.execute().then(function(){
+            this.$.toast.hide();
+            this.$.toast.text = this.i18n('tags.addedToDocument', entry.id);
+            this.$.toast.open();
+          }.bind(this));
+        }
+      },
+
+      _removedTagHandler: function(entry) {
+        if (this.document) {
+          this.$.removeTagOp.params = {tags: entry.id};
+          this.$.removeTagOp.execute().then(function(){
+            this.$.toast.hide();
+            this.$.toast.text = this.i18n('tags.removedFromDocument', entry.id);
+            this.$.toast.open();
+          }.bind(this));
+        }
+      },
+
+      _initSelection: function(element, callback) {
+        return callback(
+          this.value.map(function(entry) {
+            return {id: entry, displayLabel: entry};
+          }.bind(this))
+        );
+      },
+
+      _observeDocument: function() {
+        if (this.document) {
+          if (this.document.contextParameters && this.document.contextParameters.tags) {
+            this.value = this.document.contextParameters.tags;
+          } else {
+            this.value = [];
+            console.warn("Cannot use nuxeo-tag-element on a document that has no tag in its contextParameters. Make sure you use the 'tags' enricher to fetch the document");
+          }
+        } else {
+          this.value = [];
+        }
       }
-    },
 
-    /**
-     * Formatter for new suggested entries.
-     */
-    newEntryFormatter: {
-      type: Function,
-      value: function () {
-        return this._newEntryFormatter.bind(this);
-      }
-    },
-
-    /**
-     * Handler called when a tag is added.
-     */
-    addedTagHandler: {
-      type: Function,
-      value: function () {
-        return this._addedTagHandler.bind(this);
-      }
-    },
-
-    /**
-     * Handler called when a tag is removed.
-     */
-    removedTagHandler: {
-      type: Function,
-      value: function () {
-        return this._removedTagHandler.bind(this);
-      }
-    }
-  },
-
-  /* Override method from Polymer.IronValidatableBehavior. */
-  _getValidity: function() {
-    return this.$.s2._getValidity();
-  },
-
-  /* Override method from Polymer.IronValidatableBehavior. */
-  validate: function(value) {
-    this.invalid = !this.$.s2.validate();
-    return !this.invalid;
-  },
-
-  _resultFormatter: function (tag) {
-    var escapeHTML = window.Select2.util.escapeMarkup;
-    if (tag.newTag) {
-        return "<span class='s2newTag'>" + "+ " +escapeHTML(tag.displayLabel) + "</span>"
-    } else {
-        return "<span class='s2existingTag'>" + escapeHTML(tag.displayLabel) + "</span>"
-    }
-  },
-
-  _newEntryFormatter: function (term) {
-    return { id: term, displayLabel: term,  newTag: true };
-  },
-
-  _addedTagHandler: function(entry) {
-    if (this.document) {
-      this.$.addTagOp.params = {tags: entry.id};
-      this.$.addTagOp.execute().then(function(){
-        this.$.toast.hide();
-        this.$.toast.text = this.i18n('tags.addedToDocument', entry.id);
-        this.$.toast.open();
-      }.bind(this));
-    }
-  },
-
-  _removedTagHandler: function(entry) {
-    if (this.document) {
-      this.$.removeTagOp.params = {tags: entry.id};
-      this.$.removeTagOp.execute().then(function(){
-        this.$.toast.hide();
-        this.$.toast.text = this.i18n('tags.removedFromDocument', entry.id);
-        this.$.toast.open();
-      }.bind(this));
-    }
-  },
-
-  _initSelection: function(element, callback) {
-    return callback(
-      this.value.map(function(entry) {
-        return {id: entry, displayLabel: entry};
-      }.bind(this))
-    );
-  },
-
-  _observeDocument: function() {
-    if (this.document) {
-      if (this.document.contextParameters && this.document.contextParameters.tags) {
-        this.value = this.document.contextParameters.tags;
-      } else {
-        this.value = [];
-        console.warn("Cannot use nuxeo-tag-element on a document that has no tag in its contextParameters. Make sure you use the 'tags' enricher to fetch the document");
-      }
-    } else {
-      this.value = [];
-    }
-  }
-
-});
-</script>
+    });
+  </script>
 </dom-module>

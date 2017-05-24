@@ -46,8 +46,8 @@ Example:
       paper-icon-button {
         padding: 8px;
       }
-
     </style>
+
     <div class="horizontal layout end-justified center">
       <paper-icon-button icon="av:skip-previous" title="First Page"
                          on-tap="_first" disabled$="[[_isFirst(page)]]">
@@ -65,53 +65,50 @@ Example:
     </div>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-pagination-controls',
 
-      Polymer({
-        is: 'nuxeo-pagination-controls',
-
-        properties: {
-          /**
-           * The current page.
-           */
-          page: {
-            type: Number,
-            value: 1,
-            notify: true
-          },
-
-          /**
-           * The current number of pages.
-           */
-          numberOfPages: Number
+      properties: {
+        /**
+         * The current page.
+         */
+        page: {
+          type: Number,
+          value: 1,
+          notify: true
         },
 
-         _previous: function() {
-          this.page--;
-        },
+        /**
+         * The current number of pages.
+         */
+        numberOfPages: Number
+      },
 
-        _next: function() {
-          this.page++;
-        },
+       _previous: function() {
+        this.page--;
+      },
 
-        _first: function() {
-          this.page = 1;
-        },
+      _next: function() {
+        this.page++;
+      },
 
-        _last: function() {
-          this.page = this.numberOfPages;
-        },
+      _first: function() {
+        this.page = 1;
+      },
 
-        _isFirst: function(page) {
-          return page == 1;
-        },
+      _last: function() {
+        this.page = this.numberOfPages;
+      },
 
-        _isLast: function(page) {
-          return page == this.numberOfPages;
-        }
-      });
-    })();
+      _isFirst: function(page) {
+        return page == 1;
+      },
+
+      _isLast: function(page) {
+        return page == this.numberOfPages;
+      }
+    });
   </script>
 </dom-module>

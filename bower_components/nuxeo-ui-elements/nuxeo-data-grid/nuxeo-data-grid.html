@@ -212,47 +212,45 @@ An element to display page provider results as a grid with infinite scrolling.
     <paper-spinner-lite active hidden$=[[!loading]]></paper-spinner-lite>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-data-grid',
+    Polymer({
+      is: 'nuxeo-data-grid',
 
-        behaviors: [
-          Polymer.IronResizableBehavior,
-          Nuxeo.PageProviderDisplayBehavior
-        ],
+      behaviors: [
+        Polymer.IronResizableBehavior,
+        Nuxeo.PageProviderDisplayBehavior
+      ],
 
-        properties: {
-          multiSelection: {
-            type: Boolean,
-            value: true
-          }
-        },
-
-        ready: function() {
-          if (!this._templateStamped) {
-            // use nuxeo-data-grid parent's datahost in the iron-list
-            // functions used in the template should be declared
-            // in the nuxeo-data-grid parent element and not here
-            this.$.list.dataHost = this.dataHost;
-            // get template from nuxeo-data-grid definition
-            this._template = Polymer.dom(this).querySelector('template');
-            // append template in the <iron-list>
-            Polymer.dom(this.$.list).appendChild(this._template);
-            // set binding to items
-            // iron-list will look for our template and stamp the items
-            this.items = [];
-            this._templateStamped = true;
-          }
-        },
-
-        _removeFilter: function(e) {
-          this.fire('column-filter-changed', {value: '', filterBy: e.model.filter.path});
+      properties: {
+        multiSelection: {
+          type: Boolean,
+          value: true
         }
+      },
 
-      });
-    })();
+      ready: function() {
+        if (!this._templateStamped) {
+          // use nuxeo-data-grid parent's datahost in the iron-list
+          // functions used in the template should be declared
+          // in the nuxeo-data-grid parent element and not here
+          this.$.list.dataHost = this.dataHost;
+          // get template from nuxeo-data-grid definition
+          this._template = Polymer.dom(this).querySelector('template');
+          // append template in the <iron-list>
+          Polymer.dom(this.$.list).appendChild(this._template);
+          // set binding to items
+          // iron-list will look for our template and stamp the items
+          this.items = [];
+          this._templateStamped = true;
+        }
+      },
+
+      _removeFilter: function(e) {
+        this.fire('column-filter-changed', {value: '', filterBy: e.model.filter.path});
+      }
+
+    });
   </script>
 
 </dom-module>

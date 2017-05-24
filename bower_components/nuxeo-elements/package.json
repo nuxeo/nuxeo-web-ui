@@ -13,7 +13,7 @@
   "private": true,
   "scripts": {
     "eslint": "eslint *.html demo/**/*.html test/**/*.html",
-    "polylint": "polymer lint nuxeo-elements.html --follow-dependencies",
+    "polylint": "polymer lint -r 'polymer-1' -i *.html",
     "lint": "npm run eslint && npm run polylint",
     "test": "polymer test --simpleOutput --expanded -l chrome"
   },

@@ -64,59 +64,55 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-delete-blob-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-delete-blob-button',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
+        /**
+         * Input document.
+         */
+        document: Object,
 
-          /**
-           * Input document.
-           */
-          document: Object,
-
-          /**
-           * Path of the file object to delete.
-           * For example `xpath="files:files/0/file"`.
-           */
-          xpath: {
-            type: String,
-            value: 'file:content'
-          },
-
-          /**
-           * Icon to use (iconset_name:icon_name).
-           */
-          icon: {
-            type: String,
-            value: 'nuxeo:delete'
-          }
+        /**
+         * Path of the file object to delete.
+         * For example `xpath="files:files/0/file"`.
+         */
+        xpath: {
+          type: String,
+          value: 'file:content'
         },
 
-        _isAvailable: function(doc) {
-          return doc;
-        },
-
-        _toggleDialog: function() {
-          this.$.dialog.toggle();
-        },
-
-        _params: function(xpath) {
-          return {
-            xpath: xpath.startsWith('files:') ? xpath.split('/file')[0] : xpath
-          };
-        },
-
-        _remove: function() {
-          this.$.operation.execute().then(function() {
-            this.fire('file-deleted');
-          }.bind(this));
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'nuxeo:delete'
         }
+      },
 
-      });
-    })();
+      _isAvailable: function(doc) {
+        return doc;
+      },
+
+      _toggleDialog: function() {
+        this.$.dialog.toggle();
+      },
+
+      _params: function(xpath) {
+        return {
+          xpath: xpath.startsWith('files:') ? xpath.split('/file')[0] : xpath
+        };
+      },
+
+      _remove: function() {
+        this.$.operation.execute().then(function() {
+          this.fire('file-deleted');
+        }.bind(this));
+      }
+
+    });
   </script>
 
 </dom-module>

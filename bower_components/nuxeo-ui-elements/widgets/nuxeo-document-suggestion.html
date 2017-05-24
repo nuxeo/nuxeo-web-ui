@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <link rel="import" href="nuxeo-select2.html">
-<link rel="import" href="../nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../nuxeo-routing-behavior.html">
 
 <!--
@@ -29,222 +29,223 @@ An element for selecting one or more documents.
 @homepage http://www.nuxeo.org
 -->
 <dom-module id="nuxeo-document-suggestion">
-<template>
+  <template>
 
-  <style>
-    :host {
-      display: block;
-    }
-  </style>
-
-  <nuxeo-operation id="op" op="Document.FetchByProperty"></nuxeo-operation>
-
-  <nuxeo-select2 id="s2" operation="Repository.PageProvider"
-                 label="[[label]]"
-                 min-chars="[[minChars]]"
-                 multiple="[[multiple]]"
-                 params="[[params]]"
-                 placeholder="[[placeholder]]"
-                 readonly="[[readonly]]"
-                 value="{{value}}"
-                 selected-items="{{selectedItems}}"
-                 selection-formatter="[[selectionFormatter]]"
-                 result-formatter="[[resultFormatter]]"
-                 required="[[required]]"
-                 invalid="[[invalid]]"
-                 init-selection="[[initSelection]]">
-  </nuxeo-select2>
-
-</template>
-<script>
-Polymer({
-  is: 'nuxeo-document-suggestion',
-  behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior, Nuxeo.RoutingBehavior],
-  properties: {
-
-    /**
-     * Page provider to use for looking up suggestions.
-     */
-    pageProvider: {
-      type: String,
-      value: 'default_document_suggestion'
-    },
-
-    /**
-     * Document schemas.
-     */
-    schemas: {
-      type: Array,
-      value: ['*']
-    },
-
-    /**
-     * Repository.
-     */
-    repository: {
-      type: String,
-      value: 'default'
-    },
-
-    /**
-     * Label.
-     */
-    label: String,
-
-    /**
-     * Computed parameters for the `Repository.PageProvider` operation.
-     */
-    params: {
-      type: Object,
-      computed: '_computeParams(pageProvider, schemas, repository)'
-    },
-
-    /**
-     * Selected value(s).
-     */
-    value: {
-      type: String,
-      notify: true
-    },
-
-    /**
-     * Set to `true` to allow multiple selection.
-     */
-    multiple: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Set to `true` for read only mode.
-     */
-    readonly: {
-      type: Boolean,
-      value: false
-    },
-
-    /**
-     * Minimum number of chars to trigger the suggestions.
-     */
-    minChars: {
-      type: Number,
-      value: 3
-    },
-
-    /**
-     * Placeholder.
-     */
-    placeholder: String,
-
-    /**
-     * Selected items.
-     */
-    selectedItems: {
-      type: Object,
-      notify: true
-    },
-
-    /**
-     * Formatter for a selected entry.
-     */
-    selectionFormatter: {
-      type: Function,
-      value: function() {
-        return this._selectionFormatter.bind(this);
+    <style>
+      :host {
+        display: block;
       }
-    },
+    </style>
 
-    /**
-     * Formatter for suggested entries.
-     */
-    resultFormatter: {
-      type: Function,
-      value: function() {
-        return this._resultFormatter.bind(this);
-      }
-    },
+    <nuxeo-operation id="op" op="Document.FetchByProperty"></nuxeo-operation>
 
-    /**
-     * Name of the Document property that should be used
-     * to define the ID of entry.
-     **/
-    idProperty: {
-      type: String,
-      value: "ecm:uuid"
-    },
+    <nuxeo-select2 id="s2" operation="Repository.PageProvider"
+                   label="[[label]]"
+                   min-chars="[[minChars]]"
+                   multiple="[[multiple]]"
+                   params="[[params]]"
+                   placeholder="[[placeholder]]"
+                   readonly="[[readonly]]"
+                   value="{{value}}"
+                   selected-items="{{selectedItems}}"
+                   selection-formatter="[[selectionFormatter]]"
+                   result-formatter="[[resultFormatter]]"
+                   required="[[required]]"
+                   invalid="[[invalid]]"
+                   init-selection="[[initSelection]]">
+    </nuxeo-select2>
 
-    /**
-     * Formatter for initial selection.
-     */
-    initSelection: {
-      type: Function,
-      value: function () {
-        return this._initSelection.bind(this);
-      }
-    }
-  },
+  </template>
 
-  /* Override method from Polymer.IronValidatableBehavior. */
-  _getValidity: function() {
-    return this.$.s2._getValidity();
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-document-suggestion',
+      behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior, Nuxeo.RoutingBehavior],
+      properties: {
 
-  /* Override method from Polymer.IronValidatableBehavior. */
-  validate: function(value) {
-    this.invalid = !this.$.s2.validate();
-    return !this.invalid;
-  },
+        /**
+         * Page provider to use for looking up suggestions.
+         */
+        pageProvider: {
+          type: String,
+          value: 'default_document_suggestion'
+        },
 
-  _computeParams: function() {
-    return this.params = {
-      documentSchemas: this.schemas,
-      repository: this.repository,
-      providerName: this.pageProvider,
-      pageProviderName: this.pageProvider,
-      page: 0,
-      pageSize: 20
-    };
-  },
+        /**
+         * Document schemas.
+         */
+        schemas: {
+          type: Array,
+          value: ['*']
+        },
 
-  _selectionFormatter: function(doc) {
-    return '<a href="' + this.urlFor('browse', doc.path) + '">' + doc.title + '</a>';
-  },
+        /**
+         * Repository.
+         */
+        repository: {
+          type: String,
+          value: 'default'
+        },
 
-  _resultFormatter: function(doc) {
-    return doc.title + '<br/>' + doc.path;
-  },
+        /**
+         * Label.
+         */
+        label: String,
 
-  _initSelection: function(element, callback) {
-    if (this.value) {
-      if (this.multiple) {
-        if (this.value.length > 0) {
-          if (this.value[0].title) {
-            return callback(this.value);
-          } else if (typeof this.value[0] === "string" && this.value[0].length > 0) {
-            return this._resolveDocs(this.value, callback);
+        /**
+         * Computed parameters for the `Repository.PageProvider` operation.
+         */
+        params: {
+          type: Object,
+          computed: '_computeParams(pageProvider, schemas, repository)'
+        },
+
+        /**
+         * Selected value(s).
+         */
+        value: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Set to `true` to allow multiple selection.
+         */
+        multiple: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to `true` for read only mode.
+         */
+        readonly: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Minimum number of chars to trigger the suggestions.
+         */
+        minChars: {
+          type: Number,
+          value: 3
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
+
+        /**
+         * Selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * Formatter for a selected entry.
+         */
+        selectionFormatter: {
+          type: Function,
+          value: function() {
+            return this._selectionFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Formatter for suggested entries.
+         */
+        resultFormatter: {
+          type: Function,
+          value: function() {
+            return this._resultFormatter.bind(this);
+          }
+        },
+
+        /**
+         * Name of the Document property that should be used
+         * to define the ID of entry.
+         **/
+        idProperty: {
+          type: String,
+          value: "ecm:uuid"
+        },
+
+        /**
+         * Formatter for initial selection.
+         */
+        initSelection: {
+          type: Function,
+          value: function () {
+            return this._initSelection.bind(this);
           }
         }
-      } else {
-        if (this.value.title) {
-          return callback(this.value);
-        } else if (typeof this.value === "string" && this.value.length > 0) {
-          return this._resolveDocs(this.value, callback);
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      _getValidity: function() {
+        return this.$.s2._getValidity();
+      },
+
+      /* Override method from Polymer.IronValidatableBehavior. */
+      validate: function(value) {
+        this.invalid = !this.$.s2.validate();
+        return !this.invalid;
+      },
+
+      _computeParams: function() {
+        return this.params = {
+          documentSchemas: this.schemas,
+          repository: this.repository,
+          providerName: this.pageProvider,
+          pageProviderName: this.pageProvider,
+          page: 0,
+          pageSize: 20
+        };
+      },
+
+      _selectionFormatter: function(doc) {
+        return '<a href="' + this.urlFor('browse', doc.path) + '">' + doc.title + '</a>';
+      },
+
+      _resultFormatter: function(doc) {
+        return doc.title + '<br/>' + doc.path;
+      },
+
+      _initSelection: function(element, callback) {
+        if (this.value) {
+          if (this.multiple) {
+            if (this.value.length > 0) {
+              if (this.value[0].title) {
+                return callback(this.value);
+              } else if (typeof this.value[0] === "string" && this.value[0].length > 0) {
+                return this._resolveDocs(this.value, callback);
+              }
+            }
+          } else {
+            if (this.value.title) {
+              return callback(this.value);
+            } else if (typeof this.value === "string" && this.value.length > 0) {
+              return this._resolveDocs(this.value, callback);
+            }
+          }
+          console.log('Unable to resolve such entry. Write your own resolver');
         }
+      },
+
+      _resolveDocs: function(docs, callback) {
+        this.$.op.params = {
+          values: this.value,
+          property: this.idProperty
+        };
+        this.$.op.execute().then(function(res) {
+          callback(this.multiple ? res.entries : (res.entries.length > 0 ? res.entries[0] : null));
+        });
       }
-      console.log('Unable to resolve such entry. Write your own resolver');
-    }
-  },
 
-  _resolveDocs(docs, callback) {
-    this.$.op.params = {
-      values: this.value,
-      property: this.idProperty
-    }
-    this.$.op.execute().then(function(res) {
-      callback(this.multiple ? res.entries : (res.entries.length > 0 ? res.entries[0] : null));
     });
-  }
-
-});
-</script>
+  </script>
 </dom-module>

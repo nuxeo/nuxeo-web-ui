@@ -61,81 +61,78 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-notifications-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
+    Polymer({
+      is: 'nuxeo-notifications-toggle-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
 
-          /**
-           * Input document.
-           */
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          },
-
-          /**
-           * Icon to use (iconset_name:icon_name).
-           */
-          icon: {
-            type: String,
-            value: 'nuxeo:notify'
-          },
-
-          subscribed: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true
-          },
-
-          _tooltip: {
-            type: String,
-            computed: '_computeTooltip(subscribed)'
-          }
+        /**
+         * Input document.
+         */
+        document: {
+          type: Object,
+          observer: '_documentChanged'
         },
 
-        listeners: {
-          'tap': '_toggle'
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'nuxeo:notify'
         },
 
-        ready: function() {
-          window.addEventListener('document-unsubscribed', function(e) {
-            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
-              this.subscribed = false;
-            }
-          }.bind(this));
+        subscribed: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
 
-        _isAvailable: function(doc) {
-          return doc && !doc.isVersion;
-        },
-
-        _toggle: function() {
-          if (!this.subscribed) {
-            this.$.opSubscribe.execute().then(function() {
-              this.fire('document-subscribed', {doc: this.document});
-              this.subscribed = true;
-            }.bind(this));
-          } else {
-            this.$.opUnsubscribe.execute().then(function() {
-              this.fire('document-unsubscribed', {doc: this.document});
-              this.subscribed = false;
-            }.bind(this));
-          }
-        },
-
-        _computeTooltip: function(isSubscribed) {
-          return this.i18n('notificationsToggleButton.tooltip.' + (isSubscribed ? 'doNotNotify' : 'notify'));
-        },
-
-        _documentChanged: function() {
-          this.subscribed = this.isSubscribed(this.document);
+        _tooltip: {
+          type: String,
+          computed: '_computeTooltip(subscribed)'
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'tap': '_toggle'
+      },
+
+      ready: function() {
+        window.addEventListener('document-unsubscribed', function(e) {
+          if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
+            this.subscribed = false;
+          }
+        }.bind(this));
+      },
+
+      _isAvailable: function(doc) {
+        return doc && !doc.isVersion;
+      },
+
+      _toggle: function() {
+        if (!this.subscribed) {
+          this.$.opSubscribe.execute().then(function() {
+            this.fire('document-subscribed', {doc: this.document});
+            this.subscribed = true;
+          }.bind(this));
+        } else {
+          this.$.opUnsubscribe.execute().then(function() {
+            this.fire('document-unsubscribed', {doc: this.document});
+            this.subscribed = false;
+          }.bind(this));
+        }
+      },
+
+      _computeTooltip: function(isSubscribed) {
+        return this.i18n('notificationsToggleButton.tooltip.' + (isSubscribed ? 'doNotNotify' : 'notify'));
+      },
+
+      _documentChanged: function() {
+        this.subscribed = this.isSubscribed(this.document);
+      }
+
+    });
   </script>
 
 </dom-module>

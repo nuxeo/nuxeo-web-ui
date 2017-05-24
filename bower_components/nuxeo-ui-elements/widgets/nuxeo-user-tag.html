@@ -98,7 +98,7 @@ Example:
     },
 
     _email: function(user) {
-      return this._isEntity(user) ? user.properties.email : '';
+      return this._isEntity(user) && user.properties.email !== this._id(user) ? user.properties.email : '';
     },
 
     _href: function(user) {

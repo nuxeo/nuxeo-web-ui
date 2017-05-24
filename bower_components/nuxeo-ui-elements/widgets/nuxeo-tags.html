@@ -53,35 +53,31 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-tags',
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-tags',
-        properties: {
-
-          /**
-           * Type ("tag", "user", "group").
-           */
-          type: {
-            type: String,
-            value: 'tag'
-          },
-
-          /**
-           * Array of user/group entities or strings.
-           */
-          items: {
-            type: Array
-          }
+        /**
+         * Type ("tag", "user", "group").
+         */
+        type: {
+          type: String,
+          value: 'tag'
         },
 
-        _type: function(value) {
-          return this.type === value;
+        /**
+         * Array of user/group entities or strings.
+         */
+        items: {
+          type: Array
         }
+      },
 
-      });
-    })();
+      _type: function(value) {
+        return this.type === value;
+      }
+
+    });
   </script>
 
 </dom-module>

@@ -419,327 +419,321 @@ Used by `nuxeo-user-group-management`
 
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-group-management',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        groupname: {
+          type: String,
+          observer: '_fetch'
+        },
 
-      Polymer({
-        is: 'nuxeo-group-management',
+        group: Object,
 
-        behaviors: [Nuxeo.I18nBehavior],
+        selectedMember: {
+          type: Object,
+          observer: '_memberSelected'
+        },
 
-        properties: {
-          groupname: {
-            type: String,
-            observer: '_fetch'
-          },
+        memberUsers: Object,
 
-          group: Object,
+        memberGroups: Object,
 
-          selectedMember: {
-            type: Object,
-            observer: '_memberSelected'
-          },
+        activity: {
+          type: Array,
+          value: []
+        },
 
-          memberUsers: Object,
-
-          memberGroups: Object,
-
-          activity: {
-            type: Array,
-            value: []
-          },
-
-          resultsFilter: {
-            type: Function,
-            value: function() {
-              return this._resultsFilter.bind(this);
-            }
-          },
-
-          resultFormatter: {
-            type: Function,
-            value: function() {
-              return this._resultFormatter.bind(this);
-            }
-          },
-
-          showEditMembers: {
-            type: Boolean,
-            value: false
-          },
-
-          usersCurrentPage: Number,
-
-          usersFilter: String,
-
-          groupsCurrentPage: Number,
-
-          groupsFilter: String,
-
-          _editableGroup: Object,
-
-          _removedMember: Object,
-
-          _fromDelete: {
-            type: Boolean,
-            value: false
-          },
-
-          readonly: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
+        resultsFilter: {
+          type: Function,
+          value: function() {
+            return this._resultsFilter.bind(this);
           }
         },
 
-        observers: [
-          '_fetchUsers(usersCurrentPage)',
-          '_filterUsers(usersFilter)',
-          '_fetchGroups(groupsCurrentPage)',
-          '_filterGroups(groupsFilter)'
-        ],
-
-        ready: function() {
-          this.$.picker.$$('nuxeo-select2').queryResultsFilter = this.resultsFilter;
-          this.$.editForm.addEventListener('iron-form-presubmit', function(event) {
-            event.preventDefault();
-            this._saveGroup();
-          }.bind(this));
-        },
-
-        _userHasName: function(user) {
-          return user.properties.firstName || user.properties.lastName;
-        },
-
-        _fetch: function() {
-          this.$.request.get().then(function(response) {
-            this.activity = [];
-            this.showEditMembers = false;
-            this.selectedMember = null;
-            this._fetchGroups();
-            this._fetchUsers();
-          }.bind(this));
-        },
-
-        _saveGroup: function() {
-          this.$.editRequest.data = this._editableGroup;
-          this.$.editRequest.put().then(function(response) {
-            this._toast(this.i18n('groupManagement.group.updated'));
-            this.$.editGroupDialog.toggle();
-          }.bind(this));
-        },
-
-        _fetchGroups: function() {
-          if (this.group) {
-            // if there's only one entry left in the current page and we delete it, we should go to prev page
-            if (this._fromDelete && this.memberGroups.currentPageSize === 1) {
-              this._fromDelete = false;
-              this.groupsCurrentPage--;
-              return;
-            }
-            var params = {
-              q: this.groupsFilter,
-              currentPageIndex: this.groupsCurrentPage - 1
-            };
-            this.$.groups.params = params;
+        resultFormatter: {
+          type: Function,
+          value: function() {
+            return this._resultFormatter.bind(this);
           }
         },
 
-        _fetchUsers: function() {
-          if (this.group) {
-            // if there's only one entry left in the current page and we delete it, we should go to prev page
-            if (this._fromDelete && this.memberUsers.currentPageSize === 1) {
-              this._fromDelete = false;
-              this.usersCurrentPage--;
-              return;
-            }
-            var params = {
-              q: this.usersFilter,
-              currentPageIndex: this.usersCurrentPage - 1
-            };
-            this.$.users.params = params;
-          }
+        showEditMembers: {
+          type: Boolean,
+          value: false
         },
 
-        _memberSelected: function() {
-          if (this.selectedMember) {
-            var member = this.selectedMember;
-            switch (member.type) {
-              case 'USER_TYPE':
-                var users = this.group.memberUsers || [];
-                users.push(member.id);
-                member['entity-type'] = 'user';
-                this.group.memberUsers = users;
-                break;
-              case 'GROUP_TYPE':
-                var groups = this.group.memberGroups || [];
-                groups.push(member.id);
-                member['entity-type'] = 'group';
-                this.group.memberGroups = groups;
-                break;
-            }
-            this.push('activity', member);
-            this.$.editRequest.data = this.group;
-            this.$.editRequest.put().then(function(response) {
-              if (member['entity-type'] === 'user') {
-                this._fetchUsers();
-              } else {
-                this._fetchGroups();
-              }
-              this._toast(this.i18n('groupManagement.addedUserToGroup', member.displayLabel, this.group.groupname));
-            }.bind(this));
-          }
+        usersCurrentPage: Number,
+
+        usersFilter: String,
+
+        groupsCurrentPage: Number,
+
+        groupsFilter: String,
+
+        _editableGroup: Object,
+
+        _removedMember: Object,
+
+        _fromDelete: {
+          type: Boolean,
+          value: false
+        },
+
+        readonly: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
+      },
+
+      observers: [
+        '_fetchUsers(usersCurrentPage)',
+        '_filterUsers(usersFilter)',
+        '_fetchGroups(groupsCurrentPage)',
+        '_filterGroups(groupsFilter)'
+      ],
+
+      ready: function() {
+        this.$.picker.$$('nuxeo-select2').queryResultsFilter = this.resultsFilter;
+        this.$.editForm.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          this._saveGroup();
+        }.bind(this));
+      },
+
+      _userHasName: function(user) {
+        return user.properties.firstName || user.properties.lastName;
+      },
+
+      _fetch: function() {
+        this.$.request.get().then(function(response) {
+          this.activity = [];
+          this.showEditMembers = false;
           this.selectedMember = null;
-        },
+          this._fetchGroups();
+          this._fetchUsers();
+        }.bind(this));
+      },
 
-        _removeMember: function() {
-          var member = this._removedMember;
-          var idx;
-          switch (member['entity-type']) {
-            case 'user':
-              if (this.group.memberUsers) {
-                idx = this.group.memberUsers.indexOf(this._removedMember.id);
-                this.group.memberUsers.splice(idx, 1);
-              }
-              break;
-            case 'group':
-              if (this.group.memberGroups) {
-                idx = this.group.memberGroups.indexOf(this._removedMember.id);
-                this.group.memberGroups.splice(idx, 1);
-                break;
-              }
+      _saveGroup: function() {
+        this.$.editRequest.data = this._editableGroup;
+        this.$.editRequest.put().then(function(response) {
+          this._toast(this.i18n('groupManagement.group.updated'));
+          this.$.editGroupDialog.toggle();
+        }.bind(this));
+      },
+
+      _fetchGroups: function() {
+        if (this.group) {
+          // if there's only one entry left in the current page and we delete it, we should go to prev page
+          if (this._fromDelete && this.memberGroups.currentPageSize === 1) {
+            this._fromDelete = false;
+            this.groupsCurrentPage--;
+            return;
           }
+          var params = {
+            q: this.groupsFilter,
+            currentPageIndex: this.groupsCurrentPage - 1
+          };
+          this.$.groups.params = params;
+        }
+      },
+
+      _fetchUsers: function() {
+        if (this.group) {
+          // if there's only one entry left in the current page and we delete it, we should go to prev page
+          if (this._fromDelete && this.memberUsers.currentPageSize === 1) {
+            this._fromDelete = false;
+            this.usersCurrentPage--;
+            return;
+          }
+          var params = {
+            q: this.usersFilter,
+            currentPageIndex: this.usersCurrentPage - 1
+          };
+          this.$.users.params = params;
+        }
+      },
+
+      _memberSelected: function() {
+        if (this.selectedMember) {
+          var member = this.selectedMember;
+          switch (member.type) {
+            case 'USER_TYPE':
+              var users = this.group.memberUsers || [];
+              users.push(member.id);
+              member['entity-type'] = 'user';
+              this.group.memberUsers = users;
+              break;
+            case 'GROUP_TYPE':
+              var groups = this.group.memberGroups || [];
+              groups.push(member.id);
+              member['entity-type'] = 'group';
+              this.group.memberGroups = groups;
+              break;
+          }
+          this.push('activity', member);
           this.$.editRequest.data = this.group;
           this.$.editRequest.put().then(function(response) {
-            this._fromDelete = true;
             if (member['entity-type'] === 'user') {
               this._fetchUsers();
             } else {
               this._fetchGroups();
             }
-            this._removeRecent(this._removedMember.id);
-            this._toast(this.i18n('groupManagement.removedUserFromGroup', this._removedMember.id));
+            this._toast(this.i18n('groupManagement.addedUserToGroup', member.displayLabel, this.group.groupname));
           }.bind(this));
-        },
+        }
+        this.selectedMember = null;
+      },
 
-        _removeRecent: function(group) {
-          // remove from 'recent', if it exists
-          for (var i = 0; i < this.activity.length; i++) {
-            if (this.activity[i].id === group) {
-              this.splice('activity', i, 1);
-              return;
+      _removeMember: function() {
+        var member = this._removedMember;
+        var idx;
+        switch (member['entity-type']) {
+          case 'user':
+            if (this.group.memberUsers) {
+              idx = this.group.memberUsers.indexOf(this._removedMember.id);
+              this.group.memberUsers.splice(idx, 1);
             }
-          }
-        },
-
-        _submitEditForm: function() {
-          this.$.editForm.submit();
-        },
-
-        _filterUsers: function() {
-          if (this.group) {
-            this.usersCurrentPage = 1;
+            break;
+          case 'group':
+            if (this.group.memberGroups) {
+              idx = this.group.memberGroups.indexOf(this._removedMember.id);
+              this.group.memberGroups.splice(idx, 1);
+              break;
+            }
+        }
+        this.$.editRequest.data = this.group;
+        this.$.editRequest.put().then(function(response) {
+          this._fromDelete = true;
+          if (member['entity-type'] === 'user') {
             this._fetchUsers();
-          }
-        },
-
-        _filterGroups: function() {
-          if (this.group) {
-            this.groupsCurrentPage = 1;
+          } else {
             this._fetchGroups();
           }
-        },
+          this._removeRecent(this._removedMember.id);
+          this._toast(this.i18n('groupManagement.removedUserFromGroup', this._removedMember.id));
+        }.bind(this));
+      },
 
-        _deleteGroup: function() {
-          this.$.deleteGroupDialog.toggle();
-          this.$.editRequest.data = this.group;
-          this.$.editRequest.remove();
-          this._goHome();
-        },
-
-        _toggleEditMembers: function() {
-          this.showEditMembers = !this.showEditMembers;
-        },
-
-        _toggleDeleteDialog: function(e) {
-          var type = e.model.item['entity-type'];
-          this._removedMember = e.model.item;
-          this._removedMember.id = type === 'user' ? e.model.item.id : e.model.item.groupname;
-          this.$.rmFromGroupDialog.toggle();
-        },
-
-        _toggleEditGroup: function() {
-          this._clone();
-          this.$.editGroupDialog.toggle();
-        },
-
-        _toggleDeleteGroup: function() {
-          this.$.deleteGroupDialog.toggle();
-        },
-
-        _empty: function(entries) {
-          return entries && entries.length === 0;
-        },
-
-        _goHome: function() {
-          this.fire('goHome');
-        },
-
-        _resultsFilter: function(entry) {
-          if (this.group.memberUsers) {
-            var userInGroup = this.group.memberUsers.indexOf(entry.id) >= 0;
-          }
-          if (this.group.memberGroups) {
-            var groupInGroup = this.group.memberGroups.indexOf(entry.id) >= 0;
-          }
-          return !userInGroup && !groupInGroup && entry.id !== this.group.groupname;
-        },
-
-        _resultFormatter: function(item) {
-          return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
-        },
-
-        _icon: function(entry) {
-          return entry.type === 'GROUP_TYPE' ? 'nuxeo:group' : 'nuxeo:user';
-        },
-
-        _countUsers: function(users) {
-          if (users) {
-            var label = ' ' + (users.length === 1 ? this.i18n('groupManagement.member') :
-                                                    this.i18n('groupManagement.members'));
-            return users.length + label;
-          }
-        },
-
-        _countGroups: function(groups) {
-          if (groups) {
-            var label = ' ' + (groups.length === 1 ? this.i18n('groupManagement.nestedGroup') :
-                                                     this.i18n('groupManagement.nestedGroups'));
-            return groups.length + label;
-          }
-        },
-
-        _toast: function(msg) {
-          this.$.toast.text = msg;
-          this.$.toast.open();
-        },
-
-        _clone: function() {
-          this._editableGroup = JSON.parse(JSON.stringify(this.group));
-        },
-
-        _usersPath: function() {
-          if (this.groupname) {
-            return 'group/' + this.groupname + '/@users';
-          }
-        },
-
-        _groupsPath: function() {
-          if (this.groupname) {
-            return 'group/' + this.groupname + '/@groups';
+      _removeRecent: function(group) {
+        // remove from 'recent', if it exists
+        for (var i = 0; i < this.activity.length; i++) {
+          if (this.activity[i].id === group) {
+            this.splice('activity', i, 1);
+            return;
           }
         }
-      });
-    })();
+      },
+
+      _submitEditForm: function() {
+        this.$.editForm.submit();
+      },
+
+      _filterUsers: function() {
+        if (this.group) {
+          this.usersCurrentPage = 1;
+          this._fetchUsers();
+        }
+      },
+
+      _filterGroups: function() {
+        if (this.group) {
+          this.groupsCurrentPage = 1;
+          this._fetchGroups();
+        }
+      },
+
+      _deleteGroup: function() {
+        this.$.deleteGroupDialog.toggle();
+        this.$.editRequest.data = this.group;
+        this.$.editRequest.remove();
+        this._goHome();
+      },
+
+      _toggleEditMembers: function() {
+        this.showEditMembers = !this.showEditMembers;
+      },
+
+      _toggleDeleteDialog: function(e) {
+        var type = e.model.item['entity-type'];
+        this._removedMember = e.model.item;
+        this._removedMember.id = type === 'user' ? e.model.item.id : e.model.item.groupname;
+        this.$.rmFromGroupDialog.toggle();
+      },
+
+      _toggleEditGroup: function() {
+        this._clone();
+        this.$.editGroupDialog.toggle();
+      },
+
+      _toggleDeleteGroup: function() {
+        this.$.deleteGroupDialog.toggle();
+      },
+
+      _empty: function(entries) {
+        return entries && entries.length === 0;
+      },
+
+      _goHome: function() {
+        this.fire('goHome');
+      },
+
+      _resultsFilter: function(entry) {
+        if (this.group.memberUsers) {
+          var userInGroup = this.group.memberUsers.indexOf(entry.id) >= 0;
+        }
+        if (this.group.memberGroups) {
+          var groupInGroup = this.group.memberGroups.indexOf(entry.id) >= 0;
+        }
+        return !userInGroup && !groupInGroup && entry.id !== this.group.groupname;
+      },
+
+      _resultFormatter: function(item) {
+        return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
+      },
+
+      _icon: function(entry) {
+        return entry.type === 'GROUP_TYPE' ? 'nuxeo:group' : 'nuxeo:user';
+      },
+
+      _countUsers: function(users) {
+        if (users) {
+          var label = ' ' + (users.length === 1 ? this.i18n('groupManagement.member') :
+                                                  this.i18n('groupManagement.members'));
+          return users.length + label;
+        }
+      },
+
+      _countGroups: function(groups) {
+        if (groups) {
+          var label = ' ' + (groups.length === 1 ? this.i18n('groupManagement.nestedGroup') :
+                                                   this.i18n('groupManagement.nestedGroups'));
+          return groups.length + label;
+        }
+      },
+
+      _toast: function(msg) {
+        this.$.toast.text = msg;
+        this.$.toast.open();
+      },
+
+      _clone: function() {
+        this._editableGroup = JSON.parse(JSON.stringify(this.group));
+      },
+
+      _usersPath: function() {
+        if (this.groupname) {
+          return 'group/' + this.groupname + '/@users';
+        }
+      },
+
+      _groupsPath: function() {
+        if (this.groupname) {
+          return 'group/' + this.groupname + '/@groups';
+        }
+      }
+    });
   </script>
 </dom-module>

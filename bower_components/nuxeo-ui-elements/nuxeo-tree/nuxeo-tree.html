@@ -109,106 +109,101 @@ controller = {
 
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-tree',
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-tree',
-
-        properties: {
-
-          data: Object,
-
-          /**
-           * An object for accessing information for rendering a tree item.
-           *
-           * getChildren(node) : Promise<Array<Object>>
-           * isLeaf(node) : Boolean
-           */
-          controller: Object,
-
-          /**
-          * Template used to render each tree item.
-          */
-          template: Object,
-
-          nodeKey: {
-            type: String,
-            value: 'id'
-          }
-        },
-
-        observers: [
-          'init(data, controller)'
-        ],
+        data: Object,
 
         /**
-        * Initializes the tree whenever the data and/or controller changes.
-        */
-        init: function() {
-          if (this.data && this.controller) {
-            this.template = Polymer.dom(this).querySelector('template');
-            if (this._root) {
-              Polymer.dom(this).removeChild(this._root);
-            }
-            this._root = document.createElement('nuxeo-tree-node');
-            this._root.id = 'root';
-            this._root.dataHost = this.dataHost;
-            this._root.controller = this.controller;
-            this._root.template = this.template;
-            this._root.nodeKey = this.nodeKey;
-            this._root.data = this.data;
-            this._root.dataset[this.nodeKey] = this.data[this.nodeKey];
-            Polymer.dom(this).appendChild(this._root);
-            this._root.open();
-            Polymer.dom.flush();
-          }
-        },
+         * An object for accessing information for rendering a tree item.
+         *
+         * getChildren(node) : Promise<Array<Object>>
+         * isLeaf(node) : Boolean
+         */
+        controller: Object,
 
         /**
-        * Find and open a set of nodes given a set of keys.
-        * Nodes keys must be sorted in terms of hierarchy, otherwise some nodes
-        * might not be rendered yet.
+        * Template used to render each tree item.
         */
-        open: function() {
-          this._openNodes(arguments);
-        },
+        template: Object,
 
-        /**
-        * Recursively opens a set of nodes.
-        */
-        _openNodes: function(keys) {
-          if (!keys || keys.length === 0) {
-            return;
-          }
-          var node = this._find(keys[0]);
-          if (node) {
-            node.open().then(function() {
-              this._openNodes(Array.prototype.slice.call(keys, 1));
-            }.bind(this));
-          }
-        },
-
-        /**
-        * Find a node by key.
-        */
-        _find: function(key) {
-          return this.querySelector('[data-' + this.nodeKey + '="' + key + '"]');
-        },
-
-        removeNodes: function(keys) {
-          if (!keys || keys.length === 0) {
-            return;
-          }
-          var node = this._find(keys[0]);
-          if (node) {
-            node.removeSelf().then(function() {
-              this.removeNodes(Array.prototype.slice.call(keys, 1));
-            }.bind(this));
-          }
+        nodeKey: {
+          type: String,
+          value: 'id'
         }
+      },
 
-      });
-    })();
+      observers: [
+        'init(data, controller)'
+      ],
+
+      /**
+      * Initializes the tree whenever the data and/or controller changes.
+      */
+      init: function() {
+        if (this.data && this.controller) {
+          this.template = Polymer.dom(this).querySelector('template');
+          if (this._root) {
+            Polymer.dom(this).removeChild(this._root);
+          }
+          this._root = document.createElement('nuxeo-tree-node');
+          this._root.id = 'root';
+          this._root.dataHost = this.dataHost;
+          this._root.controller = this.controller;
+          this._root.template = this.template;
+          this._root.nodeKey = this.nodeKey;
+          this._root.data = this.data;
+          this._root.dataset[this.nodeKey] = this.data[this.nodeKey];
+          Polymer.dom(this).appendChild(this._root);
+          this._root.open();
+          Polymer.dom.flush();
+        }
+      },
+
+      /**
+      * Find and open a set of nodes given a set of keys.
+      * Nodes keys must be sorted in terms of hierarchy, otherwise some nodes
+      * might not be rendered yet.
+      */
+      open: function() {
+        this._openNodes(arguments);
+      },
+
+      /**
+      * Recursively opens a set of nodes.
+      */
+      _openNodes: function(keys) {
+        if (!keys || keys.length === 0) {
+          return;
+        }
+        var node = this._find(keys[0]);
+        if (node) {
+          node.open().then(function() {
+            this._openNodes(Array.prototype.slice.call(keys, 1));
+          }.bind(this));
+        }
+      },
+
+      /**
+      * Find a node by key.
+      */
+      _find: function(key) {
+        return this.querySelector('[data-' + this.nodeKey + '="' + key + '"]');
+      },
+
+      removeNodes: function(keys) {
+        if (!keys || keys.length === 0) {
+          return;
+        }
+        var node = this._find(keys[0]);
+        if (node) {
+          node.removeSelf().then(function() {
+            this.removeNodes(Array.prototype.slice.call(keys, 1));
+          }.bind(this));
+        }
+      }
+
+    });
   </script>
 </dom-module>

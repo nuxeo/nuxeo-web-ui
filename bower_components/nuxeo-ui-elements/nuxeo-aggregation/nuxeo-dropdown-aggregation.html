@@ -35,78 +35,72 @@ An element to interact with page provider aggregations as suggestions.
 @element nuxeo-dropdown-aggregation
 -->
 <dom-module id="nuxeo-dropdown-aggregation">
- <template>
-   <style>
-     :host {
-       display: block;
-       width: 100%;
-     }
-   </style>
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+      }
+    </style>
 
-  <div class="layout vertical">
-    <nuxeo-select2 data="[[_computedData]]"
-                   min-chars="[[minChars]]"
-                   multiple="[[multiple]]"
-                   placeholder="[[placeholder]]"
-                   value="{{value}}">
-    </nuxeo-select2>
-  </div>
+    <div class="layout vertical">
+      <nuxeo-select2 data="[[_computedData]]"
+                     min-chars="[[minChars]]"
+                     multiple="[[multiple]]"
+                     placeholder="[[placeholder]]"
+                     value="{{value}}">
+      </nuxeo-select2>
+    </div>
 
- </template>
- <script>
-   (function() {
-     'use strict';
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-dropdown-aggregation',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.AggregationBehavior],
+      properties: {
 
-     Polymer({
-       is: 'nuxeo-dropdown-aggregation',
+        value: {
+          type: Array,
+          value: [],
+          notify: true
+        },
 
-       behaviors: [Nuxeo.I18nBehavior, Nuxeo.AggregationBehavior],
+        multiple: {
+          type: Boolean,
+          value: false
+        },
 
-       properties: {
+        minChars: {
+          type: Number,
+          value: 0
+        },
 
-         value: {
-           type: Array,
-           value: [],
-           notify: true
-         },
+        placeholder: String,
 
-         multiple: {
-           type: Boolean,
-           value: false
-         },
+        _computedData: {
+          type: Object,
+          value: []
+        }
+      },
 
-         minChars: {
-           type: Number,
-           value: 0
-         },
+      observers: [
+        '_computeData(data)'
+      ],
 
-         placeholder: String,
-
-         _computedData: {
-           type: Object,
-           value: []
-         }
-       },
-
-       observers: [
-         '_computeData(data)'
-       ],
-
-       _computeData: function() {
-         if (this.data) {
-           this._computedData = this.data.extendedBuckets.map(function(item) {
-             var label = this._computeLabel(item) + ' (' + item.docCount + ')';
-             return {
-               id: item.key,
-               text: label,
-               displayLabel: label
-             };
-           }.bind(this));
-         } else {
-           this._computedData = [];
-         }
-       }
-     });
-   })();
- </script>
+      _computeData: function () {
+        if (this.data) {
+          this._computedData = this.data.extendedBuckets.map(function (item) {
+            var label = this._computeLabel(item) + ' (' + item.docCount + ')';
+            return {
+              id: item.key,
+              text: label,
+              displayLabel: label
+            };
+          }.bind(this));
+        } else {
+          this._computedData = [];
+        }
+      }
+    });
+  </script>
 </dom-module>

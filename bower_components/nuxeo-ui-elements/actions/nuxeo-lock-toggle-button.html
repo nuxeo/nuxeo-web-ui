@@ -62,111 +62,108 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-lock-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.FormatBehavior],
-        properties: {
+    Polymer({
+      is: 'nuxeo-lock-toggle-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.FormatBehavior],
+      properties: {
 
-          /**
-           * Input document.
-           */
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          },
-
-          /**
-           * Icon to use (iconset_name:icon_name).
-           */
-          icon: {
-            type: String,
-            computed: '_computeIcon(locked)'
-          },
-
-          locked: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true
-          },
-
-          _tooltip: {
-            type: String,
-            computed: '_computeTooltip(locked)'
-          }
+        /**
+         * Input document.
+         */
+        document: {
+          type: Object,
+          observer: '_documentChanged'
         },
 
-        listeners: {
-          'tap': '_toggle'
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          computed: '_computeIcon(locked)'
         },
 
-        _isAvailable: function(doc) {
-          return doc && !doc.isVersion
-            && this.document.facets.indexOf('Folderish') === -1
-            && this.document.facets.indexOf('Immutable') === -1
-            && this.document.type !== 'Root';
+        locked: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
 
-        _toggle: function() {
-          if (!this.locked && this._canLock()) {
-            this.$.opLock.execute().then(function(doc) {
-              this.locked = true;
-              this.fire('document-locked', {doc: doc});
-            }.bind(this));
-          } else if (this._canUnlock()) {
-            this.$.opUnlock.execute().then(function(doc) {
-              this.locked = false;
-              this.fire('document-unlocked', {doc: doc});
-            }.bind(this));
-          }
-        },
+        _tooltip: {
+          type: String,
+          computed: '_computeTooltip(locked)'
+        }
+      },
 
-        _computeTooltip: function(locked) {
-          if (locked && this.document.lockOwner && this.document.lockCreated) {
-            return this.i18n('lockToggleButton.tooltip.lockedBy', this.document.lockOwner, this.formatDate(this.document.lockCreated));
-          } else {
-            return this.i18n('lockToggleButton.tooltip.' + (locked ? 'unlock' : 'lock'));
-          }
+      listeners: {
+        'tap': '_toggle'
+      },
 
-        },
+      _isAvailable: function(doc) {
+        return doc && !doc.isVersion
+          && this.document.facets.indexOf('Folderish') === -1
+          && this.document.facets.indexOf('Immutable') === -1
+          && this.document.type !== 'Root';
+      },
 
-        _computeIcon: function(locked) {
-          return locked ? 'nuxeo:lock' : 'nuxeo:unlock';
-        },
-
-        _documentChanged: function() {
-          this.locked = !!(this.document && this.document.lockCreated);
-        },
-
-        _canLock: function() {
-          return this.$.nxcon.connect().then(function(currentUser) {
-            if (this.document.isProxy || this.document.isVersion) {
-              return false;
-            } else {
-              return currentUser.isAdministrator || this.document.contextParameters.permissions.indexOf('Everything') > -1
-                              || this.document.contextParameters.permissions.indexOf('Write') > -1;
-            }
+      _toggle: function() {
+        if (!this.locked && this._canLock()) {
+          this.$.opLock.execute().then(function(doc) {
+            this.locked = true;
+            this.fire('document-locked', {doc: doc});
           }.bind(this));
-        },
-
-        _canUnlock: function() {
-          return this.$.nxcon.connect().then(function(currentUser) {
-            if (this.document.isProxy) {
-              return false;
-            } else {
-              return (currentUser.isAdministrator
-                        || this.document.contextParameters.permissions.indexOf('Everything') > -1
-                                ? true
-                                : (currentUser.id === this.document.lockOwner)
-                                        && this.document.contextParameters.permissions.indexOf('Write') > -1)
-                        && !document.isVersion;
-            }
+        } else if (this._canUnlock()) {
+          this.$.opUnlock.execute().then(function(doc) {
+            this.locked = false;
+            this.fire('document-unlocked', {doc: doc});
           }.bind(this));
         }
+      },
 
-      });
-    })();
+      _computeTooltip: function(locked) {
+        if (locked && this.document.lockOwner && this.document.lockCreated) {
+          return this.i18n('lockToggleButton.tooltip.lockedBy', this.document.lockOwner, this.formatDate(this.document.lockCreated));
+        } else {
+          return this.i18n('lockToggleButton.tooltip.' + (locked ? 'unlock' : 'lock'));
+        }
+
+      },
+
+      _computeIcon: function(locked) {
+        return locked ? 'nuxeo:lock' : 'nuxeo:unlock';
+      },
+
+      _documentChanged: function() {
+        this.locked = !!(this.document && this.document.lockCreated);
+      },
+
+      _canLock: function() {
+        return this.$.nxcon.connect().then(function(currentUser) {
+          if (this.document.isProxy || this.document.isVersion) {
+            return false;
+          } else {
+            return currentUser.isAdministrator || this.document.contextParameters.permissions.indexOf('Everything') > -1
+                            || this.document.contextParameters.permissions.indexOf('Write') > -1;
+          }
+        }.bind(this));
+      },
+
+      _canUnlock: function() {
+        return this.$.nxcon.connect().then(function(currentUser) {
+          if (this.document.isProxy) {
+            return false;
+          } else {
+            return (currentUser.isAdministrator
+                      || this.document.contextParameters.permissions.indexOf('Everything') > -1
+                              ? true
+                              : (currentUser.id === this.document.lockOwner)
+                                      && this.document.contextParameters.permissions.indexOf('Write') > -1)
+                      && !document.isVersion;
+          }
+        }.bind(this));
+      }
+
+    });
   </script>
 
 </dom-module>

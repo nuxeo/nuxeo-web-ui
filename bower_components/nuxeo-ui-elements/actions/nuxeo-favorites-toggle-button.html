@@ -59,81 +59,78 @@ Example:
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-favorites-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
+    Polymer({
+      is: 'nuxeo-favorites-toggle-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
 
-          /**
-           * Input document.
-           */
-          document: {
-            type: Object,
-            observer: '_documentChanged'
-          },
-
-          /**
-           * Icon to use (iconset_name:icon_name).
-           */
-          icon: {
-            type: String,
-            value: 'nuxeo:favorites'
-          },
-
-          favorite: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true
-          },
-
-          _tooltip: {
-            type: String,
-            computed: '_computeTooltip(favorite)'
-          }
+        /**
+         * Input document.
+         */
+        document: {
+          type: Object,
+          observer: '_documentChanged'
         },
 
-        listeners: {
-          'tap': '_toggle'
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'nuxeo:favorites'
         },
 
-        ready: function() {
-          window.addEventListener('removed-from-favorites', function(e) {
-            if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
-              this.favorite = false;
-            }
-          }.bind(this));
+        favorite: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
 
-        _isAvailable: function(doc) {
-          return this.isCollectionMember(doc);
-        },
-
-        _toggle: function() {
-          if (!this.favorite) {
-            this.$.opAdd.execute().then(function() {
-              this.fire('added-to-favorites', {doc: this.document});
-              this.favorite = true;
-            }.bind(this));
-          } else {
-            this.$.opRemove.execute().then(function() {
-              this.fire('removed-from-favorites', {doc: this.document});
-              this.favorite = false;
-            }.bind(this));
-          }
-        },
-
-        _computeTooltip: function(favorite) {
-          return this.i18n('favoritesToggleButton.tooltip.' + (favorite ? 'remove' : 'add'));
-        },
-
-        _documentChanged: function() {
-          this.favorite = this.isFavorite(this.document);
+        _tooltip: {
+          type: String,
+          computed: '_computeTooltip(favorite)'
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'tap': '_toggle'
+      },
+
+      ready: function() {
+        window.addEventListener('removed-from-favorites', function(e) {
+          if (this.document && e.detail.docUid && e.detail.docUid === this.document.uid) {
+            this.favorite = false;
+          }
+        }.bind(this));
+      },
+
+      _isAvailable: function(doc) {
+        return this.isCollectionMember(doc);
+      },
+
+      _toggle: function() {
+        if (!this.favorite) {
+          this.$.opAdd.execute().then(function() {
+            this.fire('added-to-favorites', {doc: this.document});
+            this.favorite = true;
+          }.bind(this));
+        } else {
+          this.$.opRemove.execute().then(function() {
+            this.fire('removed-from-favorites', {doc: this.document});
+            this.favorite = false;
+          }.bind(this));
+        }
+      },
+
+      _computeTooltip: function(favorite) {
+        return this.i18n('favoritesToggleButton.tooltip.' + (favorite ? 'remove' : 'add'));
+      },
+
+      _documentChanged: function() {
+        this.favorite = this.isFavorite(this.document);
+      }
+
+    });
   </script>
 
 </dom-module>

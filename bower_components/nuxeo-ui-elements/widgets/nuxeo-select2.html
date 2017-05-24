@@ -56,61 +56,57 @@ An element wrapping Select2 and relying on an operation for suggestions
 
  </template>
  <script>
-   (function() {
-     'use strict';
+   Polymer({
+    is: 'nuxeo-select2',
+    behaviors: [Nuxeo.Select2Behavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
 
-     Polymer({
-      is: 'nuxeo-select2',
-      behaviors: [Nuxeo.Select2Behavior, Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+    properties: {
 
-      properties: {
+     /**
+      * Operation to call for suggestions.
+      */
+     operation: String,
 
-       /**
-        * Operation to call for suggestions.
-        */
-       operation: String,
+     /**
+      * Parameters to use in the operation call (will include `searchTerm`).
+      */
+     params: {
+       type: Object
+     },
 
-       /**
-        * Parameters to use in the operation call (will include `searchTerm`).
-        */
-       params: {
-         type: Object
-       },
+     /**
+      * Results filtering function (optional).
+      */
+     queryResultsFilter: Function
+    },
 
-       /**
-        * Results filtering function (optional).
-        */
-       queryResultsFilter: Function
-      },
+    attached: function() {
+      this._initSelect2(this.$.select2);
+    },
 
-      attached: function() {
-        this._initSelect2(this.$.select2);
-      },
-
-      _getValidity: function() {
-        if (!this.required) {
-          return true;
-        }
-        return this.multiple ? !!this.value && this.value.length > 0 : !!this.value;
-      },
-
-      // Implements abstract Nuxeo.Select2 methods
-      _query: function(query) {
-        var params = this.params || {};
-        params.searchTerm = query.term;
-        this.$.op.params = params;
-
-        this.$.op.execute().then(function(response) {
-          var results = Array.isArray(response.entries) ? response.entries : response;
-          if (this.queryResultsFilter) {
-            results = results.filter(this.queryResultsFilter);
-          }
-          query.callback({
-            results: results
-          });
-        }.bind(this));
+    _getValidity: function() {
+      if (!this.required) {
+        return true;
       }
-     });
-   })();
- </script>
+      return this.multiple ? !!this.value && this.value.length > 0 : !!this.value;
+    },
+
+    // Implements abstract Nuxeo.Select2 methods
+    _query: function(query) {
+      var params = this.params || {};
+      params.searchTerm = query.term;
+      this.$.op.params = params;
+
+      this.$.op.execute().then(function(response) {
+        var results = Array.isArray(response.entries) ? response.entries : response;
+        if (this.queryResultsFilter) {
+          results = results.filter(this.queryResultsFilter);
+        }
+        query.callback({
+          results: results
+        });
+      }.bind(this));
+    }
+   });
+  </script>
 </dom-module>
