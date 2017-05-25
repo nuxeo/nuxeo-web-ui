@@ -21,6 +21,9 @@ Contributors:
     var msgFolder = (window.nuxeo.I18n.baseUrl || location.origin + location.pathname) + '/i18n';
     window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
     window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
-    window.nuxeo.I18n.loadLocale();
+    window.nuxeo.I18n.loadLocale().then(function(){
+      /* Set html lang attribute. Required by the better-dateinput element */
+      document.getElementsByTagName("html")[0].lang =  window.nuxeo.I18n.language;
+    });
   })();
 </script>
