@@ -49,6 +49,13 @@ Contributors:
         min-width: 480px;
       }
 
+      @media (max-width: 1024px) {
+        ::content paper-dialog {
+          min-width: 0;
+          width: 90%;
+        }
+      }
+
       ::content paper-dialog ::content .buttons {
         @apply(--layout-horizontal);
         @apply(--layout-justified);
