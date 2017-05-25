@@ -159,7 +159,7 @@ Contributors:
 
         _selectionChanged: function() {
           if (this._selection && !this.noNavigation) {
-            page('/tasks/' + this._selection.id);
+            this.navigateTo('tasks', this._selection.id);
           }
         },
 

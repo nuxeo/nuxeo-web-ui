@@ -18,6 +18,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-restore-version-button`
@@ -67,7 +68,7 @@ Contributors:
 
       Polymer({
         is: 'nuxeo-restore-version-button',
-        behaviors: [Nuxeo.I18nBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
         properties: {
           document: Object,
           latest: Object
@@ -101,7 +102,7 @@ Contributors:
             this.$.opRestoreVersion.params = {checkout: true};
             this.$.opRestoreVersion.execute().then(function() {
               this.fire('document-updated');
-              page('/browse' + this.document.path + '@view');
+              this.navigateTo('browse', this.document.path + '@view');
             }.bind(this));
           }
         }

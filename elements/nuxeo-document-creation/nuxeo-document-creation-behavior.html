@@ -22,7 +22,7 @@ Contributors:
   (function() {
     var schemaFetcher = null;
     var schemaRegistry = {};
-    Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
+    Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, Nuxeo.RoutingBehavior, {
       properties: {
         parent: {
           type: Object,

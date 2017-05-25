@@ -496,7 +496,7 @@ Contributors:
 
         refresh: function() {
           if (this.docPath && this.docPath.length > 0) {
-            page('/browse' + this.docPath);
+            this.navigateTo('browse', this.docPath ? this.docPath : '');
           } else {
             page('/');
           }
@@ -526,7 +526,7 @@ Contributors:
             if (this.docId && !doc.isVersion) {
               this.docId = '';
               this.docPath = doc.path;
-              window.page('/browse' + doc.path);
+              this.navigateTo('browse', doc.path);
             } else {
               var recent = this.$$('#recent');
               if (recent) {
@@ -596,7 +596,7 @@ Contributors:
 
         _navigate: function(e) {
           if (e.detail.doc) {
-            page('/browse' + e.detail.doc.path);
+            this.navigateTo('browse', e.detail.doc.path);
             if (e.detail.isFromCollection) {
               this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
             }
@@ -620,7 +620,8 @@ Contributors:
         },
 
         _showSearchResults: function(e) {
-          page('/search/' + e.target.searchName);
+          //page('/search/' + e.target.searchName);
+          this.navigateTo('search', e.target.searchName);
         },
 
         _toggleDrawer: function(e) {
@@ -693,7 +694,7 @@ Contributors:
         },
 
         _workflowTaskProcess: function(e) {
-          page("/tasks/" + e.detail.id);
+          this.navigateTo('tasks', e.detail.id);
         },
 
         _onAddedToClipboard: function(e){

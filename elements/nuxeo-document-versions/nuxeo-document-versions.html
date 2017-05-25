@@ -233,12 +233,12 @@ Contributors:
 
         _showLatest: function() {
           this._hideList();
-          page('/browse' + this.document.path + '@view');
+          this.navigateTo('browse', this.document.path + '@view');
         },
 
         _showVersion: function(e) {
           this._hideList();
-          page('/doc/' + e.model.item.uid);
+          this.navigateTo('document', e.model.item.uid);
         },
 
         _labelLatest: function(doc) {
