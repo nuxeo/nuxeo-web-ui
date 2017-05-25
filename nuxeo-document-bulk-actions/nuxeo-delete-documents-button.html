@@ -65,7 +65,7 @@ Contributors:
         observers : ['_checkDocsPermissions(documents.splices)'],
 
         listeners: {
-          'tap': 'deleteDocuments',
+          'tap': 'deleteDocuments'
         },
 
         deleteDocuments: function() {
@@ -95,9 +95,9 @@ Contributors:
          */
         _checkDocsPermissions: function() {
           this.docsHavePermissions = !(this.documents.some(
-            function (document) {
+            function(document) {
               return !this._docHasPermissions(document);
-          }.bind(this)));
+            }.bind(this)));
         },
 
         /*

@@ -151,10 +151,10 @@ Contributors:
           this.$.tokens.data = this._selectedEntry;
           this.$.tokens.path = 'oauth2/token/' + this._selectedServiceName + '/' + this._selectedNuxeoLogin;
           this.$.tokens.put().then(function() {
-              this.refresh();
-              this.$.dialog.toggle();
-              this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
-            }.bind(this),
+            this.refresh();
+            this.$.dialog.toggle();
+            this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
+          }.bind(this),
             function(err) {
               this.fire('notify', {
                 message: this.i18n('label.error').toUpperCase() + ': ' +

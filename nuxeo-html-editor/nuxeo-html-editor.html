@@ -20,9 +20,9 @@ Contributors:
 <!--  XXX CKEditor causes firefox to crash when scripts are inlined, moved to index.html -->
 <!-- <script src="../../bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all.js" type="text/javascript" ></script> -->
 <script type="text/javascript">
-CKEDITOR.config.customConfig = ''; // skip loading config.js
-CKEDITOR.config.language = 'en'; // force en locale since it is the only one being vulcanized
-AlloyEditor._langResourceRequested = true; // skip loading of language file
+  CKEDITOR.config.customConfig = ''; // skip loading config.js
+  CKEDITOR.config.language = 'en'; // force en locale since it is the only one being vulcanized
+  AlloyEditor._langResourceRequested = true; // skip loading of language file
 </script>
 <script src="../../bower_components/alloyeditor/dist/alloy-editor/config.js" type="text/javascript" ></script>
 <script src="../../bower_components/alloyeditor/dist/alloy-editor/lang/en.js" type="text/javascript" ></script>
@@ -112,7 +112,7 @@ AlloyEditor._langResourceRequested = true; // skip loading of language file
                 {
                   name: 'text',
                   buttons: ['styles', 'bold', 'italic', 'underline', 'strike', 'paragraphLeft', 'paragraphCenter',
-                            'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
+                    'paragraphJustify', 'ul', 'ol', 'quote', 'link', 'removeFormat'],
                   test: AlloyEditor.SelectionTest.text
                 },
                 {

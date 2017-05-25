@@ -232,9 +232,7 @@ Contributors:
           this._hasFiles = true;
           this.set('files', e.detail.blobs);
           if (this.blobList) {
-            this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) {
-                return file.key;
-              }).join();
+            this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
             this.$.bulkAttach.params = {
               useMainBlob: false,
               context: {
