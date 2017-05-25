@@ -123,105 +123,105 @@ Used by `nuxeo-user-group-management`
 
     </form>
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-create-user',
-    behaviors: [Nuxeo.I18nBehavior],
-    properties: {
-      user: {
-        type: Object,
-        value: {}
+  <script>
+    Polymer({
+      is: 'nuxeo-create-user',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        user: {
+          type: Object,
+          value: {}
+        },
+
+        usePassword: {
+          type: Boolean,
+          value: false
+        },
+
+        errors: {
+          type: String,
+          value: ''
+        },
+
+        isAdministrator: {
+          type: Boolean,
+          value: false
+        }
       },
 
-      usePassword: {
-        type: Boolean,
-        value: false
+      ready: function() {
+        this.$.form.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          this._create();
+        }.bind(this));
       },
 
-      errors: {
-        type: String,
-        value: ''
+      _goHome: function() {
+        this.fire('goHome');
       },
 
-      isAdministrator: {
-        type: Boolean,
-        value: false
-      }
-    },
+      /**
+       * Submits the form.
+       */
+      _submit: function() {
+        this.$.form.submit();
+      },
 
-    ready: function() {
-      this.$.form.addEventListener('iron-form-presubmit', function(event) {
-        event.preventDefault();
-        this._create();
-      }.bind(this));
-    },
-
-    _goHome: function() {
-      this.fire('goHome');
-    },
-
-    /**
-     * Submits the form.
-     */
-    _submit: function() {
-      this.$.form.submit();
-    },
-
-    /**
-     * Creates a new user if the form was successfully submitted.
-     */
-    _create: function() {
-      if (!this.isAdministrator && this.user.groups && this.user.groups.indexOf('administrators') !== -1) {
-        this.errors = this.i18n('createUser.errorAdministratorsGroup');
-        return;
-      }
-      this._doCreate(this.user).then(function(user) {
+      /**
+       * Creates a new user if the form was successfully submitted.
+       */
+      _create: function() {
+        if (!this.isAdministrator && this.user.groups && this.user.groups.indexOf('administrators') !== -1) {
+          this.errors = this.i18n('createUser.errorAdministratorsGroup');
+          return;
+        }
+        this._doCreate(this.user).then(function(user) {
           this._resetFields();
           if (!this.$.another.checked) {
             this._goHome();
           }
         }.bind(this))
-        .catch(function(error) {
-          this.errors = error.message;
-        }.bind(this));
-    },
+          .catch(function(error) {
+            this.errors = error.message;
+          }.bind(this));
+      },
 
-    _doCreate: function(user) {
-      var entity = {
-        'entity-type': 'user',
-        'id': '', // empty id for compat with NuxeoPrincipalReader deprecated on 7.10
-        'properties': user
-      };
-      if (this.usePassword) {
-        this.$.request.data = entity;
-        return this.$.request.post().then(function(user) {
-          this.fire('nuxeo-user-created', user);
-        }.bind(this))
-      } else {
-        this.$.invite.input = entity;
-        return this.$.invite.execute().then(function(id) {
-          entity.id = user.username;
-          this.fire('nuxeo-user-invited', entity);
-        }.bind(this));
+      _doCreate: function(user) {
+        var entity = {
+          'entity-type': 'user',
+          'id': '', // empty id for compat with NuxeoPrincipalReader deprecated on 7.10
+          'properties': user
+        };
+        if (this.usePassword) {
+          this.$.request.data = entity;
+          return this.$.request.post().then(function(user) {
+            this.fire('nuxeo-user-created', user);
+          }.bind(this))
+        } else {
+          this.$.invite.input = entity;
+          return this.$.invite.execute().then(function(id) {
+            entity.id = user.username;
+            this.fire('nuxeo-user-invited', entity);
+          }.bind(this));
+        }
+      },
+
+      _cancel: function() {
+        this._resetFields();
+        this._goHome();
+      },
+
+      _resetFields: function() {
+        this.user = {};
+        this.$.passwordEditor.resetFields();
+        this.errors = '';
+        this.usePassword = false;
+      },
+
+      _hasErrors: function() {
+        return this.errors !== '';
       }
-    },
-
-    _cancel: function() {
-      this._resetFields();
-      this._goHome();
-    },
-
-    _resetFields: function() {
-      this.user = {};
-      this.$.passwordEditor.resetFields();
-      this.errors = '';
-      this.usePassword = false;
-    },
-
-    _hasErrors: function() {
-      return this.errors !== '';
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

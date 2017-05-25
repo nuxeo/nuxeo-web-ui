@@ -47,106 +47,106 @@ An element for generic input in forms
     </paper-input>
 
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-input',
+  <script>
+    Polymer({
+      is: 'nuxeo-input',
 
-    properties: {
-      /**
-       * Label.
-       */
-      label: String,
+      properties: {
+        /**
+         * Label.
+         */
+        label: String,
 
-      /**
-       * Type.
-       */
-      type: String,
-
-      /**
-       * Name.
-       */
-      name: String,
-
-      /**
-       * Value.
-       */
-      value: {
+        /**
+         * Type.
+         */
         type: String,
-        notify: true
+
+        /**
+         * Name.
+         */
+        name: String,
+
+        /**
+         * Value.
+         */
+        value: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
+
+        /**
+         * Autofocus.
+         */
+        autofocus:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Read only.
+         */
+        readonly:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Disabled.
+         */
+        disabled:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Required.
+         */
+        required:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * The minimum (numeric or date-time) input value.
+         */
+        min: String,
+
+        /**
+         * The maximum (numeric or date-time) input value.
+         */
+        max: String,
+
+        /**
+         * The minimum length of the input value.
+         */
+        minlength: Number,
+
+        /**
+         * The maximum length of the input value.
+         */
+        maxlength: Number,
+
+        /**
+         * A pattern to validate.
+         */
+        pattern: String
       },
 
-      /**
-       * Placeholder.
-       */
-      placeholder: String,
+      focus: function() {
+        this.$.paperInput.focus();
+      }
 
-      /**
-       * Autofocus.
-       */
-      autofocus:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Read only.
-       */
-      readonly:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Disabled.
-       */
-      disabled:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Required.
-       */
-      required:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * The minimum (numeric or date-time) input value.
-       */
-      min: String,
-
-      /**
-       * The maximum (numeric or date-time) input value.
-       */
-      max: String,
-
-      /**
-       * The minimum length of the input value.
-       */
-      minlength: Number,
-
-      /**
-       * The maximum length of the input value.
-       */
-      maxlength: Number,
-
-      /**
-       * A pattern to validate.
-       */
-      pattern: String
-    },
-
-    focus: function() {
-      this.$.paperInput.focus();
-    }
-
-  });
-</script>
+    });
+  </script>
+</dom-module>

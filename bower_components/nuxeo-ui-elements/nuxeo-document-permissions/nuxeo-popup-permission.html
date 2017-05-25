@@ -141,190 +141,185 @@ limitations under the License.
       </div>
     </paper-dialog>
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-popup-permission',
+  <script>
+    Polymer({
+      is: 'nuxeo-popup-permission',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        docId: {
+          type: String,
+          value: ''
+        },
+        ace: {
+          type: Object,
+          value: null
+        },
+        userVisiblePermissions: {
+          type: Array,
+          value: []
+        },
+        params: {
+          type: Object,
+          computed: 'computeParams(ace, shareWithExternal)'
+        },
+        updatingACE: {
+          type: Boolean,
+          computed: 'isUpdatingACE(ace)'
+        },
+        shareWithExternal: {
+          type: Boolean,
+          value: false
+        },
+        selectedTimeFrame: {
+          type: String,
+          value: 'permanent',
+          observer: '_selectedTimeFrameChanged'
+        },
 
-    behaviors: [Nuxeo.I18nBehavior],
-
-    properties: {
-      docId: {
-        type: String,
-        value: ''
-      },
-      ace: {
-        type: Object,
-        value: null
-      },
-      userVisiblePermissions: {
-        type: Array,
-        value: []
-      },
-      params: {
-        type: Object,
-        computed: 'computeParams(ace, shareWithExternal)'
-      },
-      updatingACE: {
-        type: Boolean,
-        computed: 'isUpdatingACE(ace)'
-      },
-      shareWithExternal: {
-        type: Boolean,
-        value: false
-      },
-      selectedTimeFrame: {
-        type: String,
-        value: 'permanent',
-        observer: '_selectedTimeFrameChanged'
-      },
-
-      /*
-       * The title of the dialog
-       */
-      _computedTitle: {
-        type: String,
-        computed: '_computeTitle(shareWithExternal, updatingACE)'
-      },
-    },
-
-    ready: function () {
-    },
-
-    togglePopup: function () {
-      this.$.popupRight.toggle();
-    },
-
-    doCreate: function () {
-      this._doSend(true);
-    },
-
-    doCreateAndAdd: function () {
-      this._doSend(false);
-    },
-
-    doUpdate: function () {
-      this._doSend(true);
-    },
-
-    _computeTitle: function() {
-      if (this.updatingACE) {
-        return this.i18n('popupPermission.updatePermission');
-      }
-      if (this.shareWithExternal) {
-        return this.i18n('popupPermission.shareWithExternalUser');
-      }
-      return this.i18n('popupPermission.addPermission');
-    },
-
-    _doSend: function (togglePopup) {
-      if (this.shareWithExternal && ((!this.updatingACE && !this.params.email) || (this.updatingACE && !this.params.username))) {
-        return;
-      }
-      if (!this.shareWithExternal && !this.params.username) {
-        return;
-      }
-
-      // not a valid email
-      if (this.params.email && !document.querySelector("#email").validate()) {
-        return;
-      }
-
-      var dateBased = this.selectedTimeFrame === 'datebased';
-
-      if (this.params.begin && dateBased) {
-        this.params.begin = this.params.begin.length > 0 ? moment(new Date(this.params.begin)).format() : null;
-      } else {
-        this.params.begin = null;
-      }
-
-      if (this.params.end && dateBased) {
-        this.params.end = this.params.end.length > 0 ? moment(new Date(this.params.end)).format() : null;
-      } else {
-        this.params.end = null;
-      }
-      if (this.params.end === null && this.shareWithExternal) {
-        //do nothing, we need an end date
-        return;
-      }
-
-      if (this.updatingACE) {
-        this.$.replaceOp.execute();
-      } else {
-        this.$.createOp.execute();
-      }
-
-      if (togglePopup) {
-        this.togglePopup();
-      }
-    },
-
-    handleResponse: function () {
-      if (this.updatingACE) {
-        this.fire('aceupdated');
-      } else {
-        this.fire('acecreated');
-
-        this.set('params.username', null);
-        this.set('params.email', null);
-        this.set('params.permission', 'Read');
-        this.set('params.begin', null);
-        this.set('params.end', null);
-        this.set('params.notify', true);
-        this.set('params.comment', '');
-        this.set('selectedTimeFrame', this.shareWithExternal ? 'datebased' : 'permanent');
-
-      }
-    },
-
-    computeParams: function (ace, shareWithExternal) {
-      var params = {
-        username: null,
-        email: null,
-        permission: 'Read',
-        begin: '',
-        end: '',
-        notify: true,
-        comment: ''
-      };
-
-      // force datebased and notification for external share
-      if (shareWithExternal) {
-        this.set('selectedTimeFrame', 'datebased');
-      }
-
-      if (ace !== null) {
-        params.id = ace.id;
-        var username = typeof ace.username === 'object' ? (ace.username['entity-type'] === 'user' ? ace.username.id : ace.username.groupname) : ace.username;
-        params.username = username;
-
-        params.permission = ace.permission;
-        params.notify = ace.notify;
-        params.comment = ace.comment;
-        var dateBased = false;
-        if (ace.begin !== null) {
-          params.begin = moment(new Date(ace.begin)).format('YYYY-MM-DD');
-          dateBased = true;
+        /*
+         * The title of the dialog
+         */
+        _computedTitle: {
+          type: String,
+          computed: '_computeTitle(shareWithExternal, updatingACE)'
         }
-        if (ace.end !== null) {
-          params.end = moment(new Date(ace.end)).format('YYYY-MM-DD');
-          dateBased = true;
+      },
+
+      togglePopup: function () {
+        this.$.popupRight.toggle();
+      },
+
+      doCreate: function () {
+        this._doSend(true);
+      },
+
+      doCreateAndAdd: function () {
+        this._doSend(false);
+      },
+
+      doUpdate: function () {
+        this._doSend(true);
+      },
+
+      _computeTitle: function() {
+        if (this.updatingACE) {
+          return this.i18n('popupPermission.updatePermission');
+        }
+        if (this.shareWithExternal) {
+          return this.i18n('popupPermission.shareWithExternalUser');
+        }
+        return this.i18n('popupPermission.addPermission');
+      },
+
+      _doSend: function (togglePopup) {
+        if (this.shareWithExternal && ((!this.updatingACE && !this.params.email) || (this.updatingACE && !this.params.username))) {
+          return;
+        }
+        if (!this.shareWithExternal && !this.params.username) {
+          return;
         }
 
-        if (dateBased) {
+        // not a valid email
+        if (this.params.email && !document.querySelector("#email").validate()) {
+          return;
+        }
+
+        var dateBased = this.selectedTimeFrame === 'datebased';
+
+        if (this.params.begin && dateBased) {
+          this.params.begin = this.params.begin.length > 0 ? moment(new Date(this.params.begin)).format() : null;
+        } else {
+          this.params.begin = null;
+        }
+
+        if (this.params.end && dateBased) {
+          this.params.end = this.params.end.length > 0 ? moment(new Date(this.params.end)).format() : null;
+        } else {
+          this.params.end = null;
+        }
+        if (this.params.end === null && this.shareWithExternal) {
+          //do nothing, we need an end date
+          return;
+        }
+
+        if (this.updatingACE) {
+          this.$.replaceOp.execute();
+        } else {
+          this.$.createOp.execute();
+        }
+
+        if (togglePopup) {
+          this.togglePopup();
+        }
+      },
+
+      handleResponse: function () {
+        if (this.updatingACE) {
+          this.fire('aceupdated');
+        } else {
+          this.fire('acecreated');
+
+          this.set('params.username', null);
+          this.set('params.email', null);
+          this.set('params.permission', 'Read');
+          this.set('params.begin', null);
+          this.set('params.end', null);
+          this.set('params.notify', true);
+          this.set('params.comment', '');
+          this.set('selectedTimeFrame', this.shareWithExternal ? 'datebased' : 'permanent');
+
+        }
+      },
+
+      computeParams: function (ace, shareWithExternal) {
+        var params = {
+          username: null,
+          email: null,
+          permission: 'Read',
+          begin: '',
+          end: '',
+          notify: true,
+          comment: ''
+        };
+
+        // force datebased and notification for external share
+        if (shareWithExternal) {
           this.set('selectedTimeFrame', 'datebased');
         }
+
+        if (ace !== null) {
+          params.id = ace.id;
+          var username = typeof ace.username === 'object' ? (ace.username['entity-type'] === 'user' ? ace.username.id : ace.username.groupname) : ace.username;
+          params.username = username;
+
+          params.permission = ace.permission;
+          params.notify = ace.notify;
+          params.comment = ace.comment;
+          var dateBased = false;
+          if (ace.begin !== null) {
+            params.begin = moment(new Date(ace.begin)).format('YYYY-MM-DD');
+            dateBased = true;
+          }
+          if (ace.end !== null) {
+            params.end = moment(new Date(ace.end)).format('YYYY-MM-DD');
+            dateBased = true;
+          }
+
+          if (dateBased) {
+            this.set('selectedTimeFrame', 'datebased');
+          }
+        }
+        return params;
+      },
+
+      isUpdatingACE: function (ace) {
+        return ace !== null;
+      },
+
+      _selectedTimeFrameChanged: function() {
+        this.permissionIsPermanent = this.selectedTimeFrame === 'permanent';
       }
-      return params;
-    },
-
-    isUpdatingACE: function (ace) {
-      return ace !== null;
-    },
-
-    _selectedTimeFrameChanged: function() {
-      this.permissionIsPermanent = this.selectedTimeFrame === 'permanent';
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

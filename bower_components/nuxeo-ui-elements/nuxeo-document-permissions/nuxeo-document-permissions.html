@@ -27,8 +27,6 @@ limitations under the License.
 <link rel="import" href="../../nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../nuxeo-elements/nuxeo-resource.html">
 
-<link rel="import" href="better-dateinput-polyfill.html">
-
 <link rel="import" href="nuxeo-document-acl-table.html">
 <link rel="import" href="nuxeo-popup-permission.html">
 <link rel="import" href="nuxeo-popup-confirm.html">
@@ -201,104 +199,102 @@ An element providing document permissions management
     <nuxeo-operation id="unblockOp" op="Document.UnblockPermissionInheritance" input="{{doc.uid}}"></nuxeo-operation>
 
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-document-permissions',
-
-    behaviors: [Nuxeo.I18nBehavior],
-
-    properties: {
-      doc: {
-        type: Object,
-        value: null
-      },
-      docId: {
-        type: String,
-        value: ''
-      },
-      docPath: {
-        type: String,
-        value: ''
-      },
-      params: {
-        type: Object,
-        value: {
-          "fetch.acls": "username,creator,extended",
-          "depth": "children",
-          "time": new Date().getTime()
+  <script>
+    Polymer({
+      is: 'nuxeo-document-permissions',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        doc: {
+          type: Object,
+          value: null
+        },
+        docId: {
+          type: String,
+          value: ''
+        },
+        docPath: {
+          type: String,
+          value: ''
+        },
+        params: {
+          type: Object,
+          value: {
+            "fetch.acls": "username,creator,extended",
+            "depth": "children",
+            "time": new Date().getTime()
+          }
         }
-      }
-    },
+      },
 
-    listeners: {
-      'acecreated': 'onACECreated',
-      'aceupdated': 'onACEUpdated',
-      'acedeleted': 'onACEDeleted',
-      'notification': 'onNotification'
-    },
+      listeners: {
+        'acecreated': 'onACECreated',
+        'aceupdated': 'onACEUpdated',
+        'acedeleted': 'onACEDeleted',
+        'notification': 'onNotification'
+      },
 
-    refresh: function () {
-      this.params.time = new Date().getTime();
-      this.$.doc.get();
-    },
+      refresh: function () {
+        this.params.time = new Date().getTime();
+        this.$.doc.get();
+      },
 
-    onACECreated: function() {
-      this.$.toast.text = this.i18n('documentPermissions.permissionCreated');
-      this.$.toast.show();
-      this.refresh();
-    },
+      onACECreated: function() {
+        this.$.toast.text = this.i18n('documentPermissions.permissionCreated');
+        this.$.toast.show();
+        this.refresh();
+      },
 
-    onACEUpdated: function() {
-      this.$.toast.text = this.i18n('documentPermissions.permissionUpdated');
-      this.$.toast.show();
-      this.refresh();
-    },
+      onACEUpdated: function() {
+        this.$.toast.text = this.i18n('documentPermissions.permissionUpdated');
+        this.$.toast.show();
+        this.refresh();
+      },
 
-    onACEDeleted: function() {
-      this.$.toast.text = this.i18n('documentPermissions.permissionDeleted');
-      this.$.toast.show();
-      this.refresh();
-    },
+      onACEDeleted: function() {
+        this.$.toast.text = this.i18n('documentPermissions.permissionDeleted');
+        this.$.toast.show();
+        this.refresh();
+      },
 
-    onNotification: function() {
-      this.$.toast.text = this.i18n('documentPermissions.permissionNotificationSent');
-      this.$.toast.show();
-    },
+      onNotification: function() {
+        this.$.toast.text = this.i18n('documentPermissions.permissionNotificationSent');
+        this.$.toast.show();
+      },
 
-    _hasPermission: function (doc, name) {
-      var permissions = this.doc && this.doc.contextParameters && this.doc.contextParameters.permissions;
-      return permissions && permissions.indexOf('Everything') !== -1;
-    },
+      _hasPermission: function (doc, name) {
+        var permissions = this.doc && this.doc.contextParameters && this.doc.contextParameters.permissions;
+        return permissions && permissions.indexOf('Everything') !== -1;
+      },
 
-    _empty: function(arr) {
-      return arr.length == 0;
-    },
+      _empty: function(arr) {
+        return arr.length == 0;
+      },
 
-    _excludeInheritedAcls: function (acl) {
+      _excludeInheritedAcls: function (acl) {
         return acl.name !== 'inherited';
-    },
+      },
 
-    _onlyInheritedAcls: function (acl) {
+      _onlyInheritedAcls: function (acl) {
         return acl.name === 'inherited';
-    },
+      },
 
-    _excludeExternalUserAces: function (ace) {
-      return ace.granted && (ace.status === 'pending' || ace.status === 'effective') && ace.externalUser === false;
-    },
+      _excludeExternalUserAces: function (ace) {
+        return ace.granted && (ace.status === 'pending' || ace.status === 'effective') && ace.externalUser === false;
+      },
 
-    _onlyExternalUserAces: function (ace) {
-      return ace.granted && (ace.status === 'pending' || ace.status === 'effective') && ace.externalUser === true;
-    },
+      _onlyExternalUserAces: function (ace) {
+        return ace.granted && (ace.status === 'pending' || ace.status === 'effective') && ace.externalUser === true;
+      },
 
-    blockInheritance: function () {
-      this.$.blockOp.execute().then(this.refresh.bind(this));
-    },
+      blockInheritance: function () {
+        this.$.blockOp.execute().then(this.refresh.bind(this));
+      },
 
-    unblockInheritance: function () {
-      this.$.unblockOp.execute().then(this.refresh.bind(this));
-    }
+      unblockInheritance: function () {
+        this.$.unblockOp.execute().then(this.refresh.bind(this));
+      }
 
-  });
-</script>
+    });
+  </script>
+</dom-module>

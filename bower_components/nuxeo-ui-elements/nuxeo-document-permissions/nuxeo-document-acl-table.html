@@ -144,203 +144,201 @@ Element displaying a table with document ACLs.
   <nuxeo-operation id="sendNotificationEmailPermissionOp" op="Document.SendNotificationEmailForPermission" input="{{doc.uid}}"></nuxeo-operation>
 
   </template>
-</dom-module>
 
-<script>
-Polymer({
-  is: 'nuxeo-document-acl-table',
-
-  behaviors: [Nuxeo.I18nBehavior],
-
-  properties: {
-    doc: {
-      type: Object
-    },
-    aclFilter: {
-      type: Function,
-      observer: 'aclFilterChanged'
-    },
-    aceFilter: {
-      type: Function,
-      observer: 'aceFilterChanged'
-    },
-    shareWithExternal: {
-      type: Object, // Boolean
-      value: false
-    },
-    aces: {
-      type: Array,
-      value: function() { return []; },
-      notify: true
-    },
-    showActions: {
-      type: Object, // Boolean
-      value: false
-    }
-  },
-
-  observers: [
-    '_updateAces(doc)'
-  ],
-
-  aclFilterChanged: function(fn) {
-    this._aclFilter = fn && function() { return this.dataHost[fn].apply(this.dataHost, arguments); };
-    this._updateAces();
-  },
-
-  aceFilterChanged: function(fn) {
-    this._aceFilter = fn && function() { return this.dataHost[fn].apply(this.dataHost, arguments); };
-    this._updateAces();
-  },
-
-  _updateAces: function() {
-    var acls = this.doc && this.doc.contextParameters && this.doc.contextParameters.acls;
-    if (!acls) return;
-    if (this._aclFilter) {
-      acls = acls.filter(this._aclFilter.bind(this));
-    }
-    var aces = [];
-    acls.forEach(function(acl) {
-      acl.aces.forEach(function(ace) {
-        if (this._aceFilter(ace)) {
-          ace.aclName = acl.name;
-          aces.push(ace);
+  <script>
+    Polymer({
+      is: 'nuxeo-document-acl-table',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        doc: {
+          type: Object
+        },
+        aclFilter: {
+          type: Function,
+          observer: 'aclFilterChanged'
+        },
+        aceFilter: {
+          type: Function,
+          observer: 'aceFilterChanged'
+        },
+        shareWithExternal: {
+          type: Object, // Boolean
+          value: false
+        },
+        aces: {
+          type: Array,
+          value: function() { return []; },
+          notify: true
+        },
+        showActions: {
+          type: Object, // Boolean
+          value: false
         }
-      }.bind(this));
-    }.bind(this));
+      },
 
-    this.aces = aces.sort(this._sortAces);
-  },
+      observers: [
+        '_updateAces(doc)'
+      ],
 
-  _aclFilter: function(acl) {
-    return acl.name !== 'inherited';
-  },
+      aclFilterChanged: function(fn) {
+        this._aclFilter = fn && function() { return this.dataHost[fn].apply(this.dataHost, arguments); };
+        this._updateAces();
+      },
 
-  _aceFilter: function(ace) {
-    return ace.granted && (ace.status === 'pending' || ace.status === 'effective');
-  },
+      aceFilterChanged: function(fn) {
+        this._aceFilter = fn && function() { return this.dataHost[fn].apply(this.dataHost, arguments); };
+        this._updateAces();
+      },
 
-  _sortAces: function (a, b) {
-    if (a.begin === null) {
-      return -1;
-    } else if (b.begin === null) {
-      return 1;
-    } else {
-      var aBegin = moment(a.begin);
-      var bBegin = moment(b.begin);
-      return aBegin.isBefore(bBegin) ? -1 : 1;
-    }
-  },
+      _updateAces: function() {
+        var acls = this.doc && this.doc.contextParameters && this.doc.contextParameters.acls;
+        if (!acls) return;
+        if (this._aclFilter) {
+          acls = acls.filter(this._aclFilter.bind(this));
+        }
+        var aces = [];
+        acls.forEach(function(acl) {
+          acl.aces.forEach(function(ace) {
+            if (this._aceFilter(ace)) {
+              ace.aclName = acl.name;
+              aces.push(ace);
+            }
+          }.bind(this));
+        }.bind(this));
 
-  _deleteAce: function (e, i) {
-    var popup = e.currentTarget.parentElement.querySelector("nuxeo-popup-confirm");
-    popup.toggle(function () {
-      this.$.rmPermission.params = {
-        id: e.model.ace.id
-      };
-      this.$.rmPermission.execute().then(function() {
-        this.fire('acedeleted');
-      }.bind(this));
-    }.bind(this));
-  },
+        this.aces = aces.sort(this._sortAces);
+      },
 
-  formatTimeFrame: function (ace) {
-    var now = moment();
-    var begin = ace.begin;
-    var end = ace.end;
-    var format = 'D MMM YYYY';
+      _aclFilter: function(acl) {
+        return acl.name !== 'inherited';
+      },
 
-    var sinceStr = this.i18n('documentAclTable.since') + ' ';
-    var fromStr = this.i18n('documentAclTable.from') + ' ';
-    var untilStr = this.i18n('documentAclTable.until') + ' ';
-    var untilMiddleStr = ' ' + this.i18n('documentAclTable.untilMiddle') + ' ';
+      _aceFilter: function(ace) {
+        return ace.granted && (ace.status === 'pending' || ace.status === 'effective');
+      },
 
-    if (begin !== null && end === null) {
-      return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
-    } else if (begin === null && end !== null) {
-      return untilStr + moment(end).format(format);
-    } else if (begin !== null && end !== null) {
-      return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
-    } else {
-      return this.i18n('documentAclTable.permanent');
-    }
-  },
-
-  entityDisplay: function (entity) {
-    if (!entity) {
-      return '';
-    }
-
-    if (typeof entity === 'object') {
-      if (entity['entity-type'] === 'user') {
-        var id = entity.id;
-        var first = entity.properties.firstName;
-        var last = entity.properties.lastName;
-        if (first === null || first.length === 0) {
-          if (last === null || last.length === 0) {
-            return id;
-          } else {
-            return last;
-          }
+      _sortAces: function (a, b) {
+        if (a.begin === null) {
+          return -1;
+        } else if (b.begin === null) {
+          return 1;
         } else {
-          if (last === null || last.length === 0) {
-            return first;
-          } else {
-            return first + ' ' + last;
+          var aBegin = moment(a.begin);
+          var bBegin = moment(b.begin);
+          return aBegin.isBefore(bBegin) ? -1 : 1;
+        }
+      },
+
+      _deleteAce: function (e, i) {
+        var popup = e.currentTarget.parentElement.querySelector("nuxeo-popup-confirm");
+        popup.toggle(function () {
+          this.$.rmPermission.params = {
+            id: e.model.ace.id
+          };
+          this.$.rmPermission.execute().then(function() {
+            this.fire('acedeleted');
+          }.bind(this));
+        }.bind(this));
+      },
+
+      formatTimeFrame: function (ace) {
+        var now = moment();
+        var begin = ace.begin;
+        var end = ace.end;
+        var format = 'D MMM YYYY';
+
+        var sinceStr = this.i18n('documentAclTable.since') + ' ';
+        var fromStr = this.i18n('documentAclTable.from') + ' ';
+        var untilStr = this.i18n('documentAclTable.until') + ' ';
+        var untilMiddleStr = ' ' + this.i18n('documentAclTable.untilMiddle') + ' ';
+
+        if (begin !== null && end === null) {
+          return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format);
+        } else if (begin === null && end !== null) {
+          return untilStr + moment(end).format(format);
+        } else if (begin !== null && end !== null) {
+          return (now.isAfter(begin) ? sinceStr : fromStr) + moment(begin).format(format) + untilMiddleStr + moment(end).format(format);
+        } else {
+          return this.i18n('documentAclTable.permanent');
+        }
+      },
+
+      entityDisplay: function (entity) {
+        if (!entity) {
+          return '';
+        }
+
+        if (typeof entity === 'object') {
+          if (entity['entity-type'] === 'user') {
+            var id = entity.id;
+            var first = entity.properties.firstName;
+            var last = entity.properties.lastName;
+            if (first === null || first.length === 0) {
+              if (last === null || last.length === 0) {
+                return id;
+              } else {
+                return last;
+              }
+            } else {
+              if (last === null || last.length === 0) {
+                return first;
+              } else {
+                return first + ' ' + last;
+              }
+            }
+          } else if (entity['entity-type'] === 'group') {
+            var groupLabel = entity.grouplabel;
+            return groupLabel !== null && groupLabel.length > 0 ? groupLabel : entity.groupname;
           }
         }
-      } else if (entity['entity-type'] === 'group') {
-        var groupLabel = entity.grouplabel;
-        return groupLabel !== null && groupLabel.length > 0 ? groupLabel : entity.groupname;
+        return entity;
+      },
+
+      entityClass: function (entity) {
+        if (!entity) {
+          return '';
+        }
+
+        if (typeof entity === 'object') {
+          if (entity['entity-type'] === 'user') {
+            return 'tag user';
+          } else if (entity['entity-type'] === 'group') {
+            return 'tag group';
+          }
+        }
+        return '';
+      },
+
+      entityTooltip: function (entity) {
+        if (!entity) {
+          return '';
+        }
+
+        if (typeof entity === 'object') {
+          if (entity['entity-type'] === 'user') {
+            var email = entity.properties.email;
+            return entity.id + (email !== null && email.length > 0 ? ' - ' + email : '');
+          } else if (entity['entity-type'] === 'group') {
+            return entity.groupname;
+          }
+        }
+        return entity;
+      },
+
+      sendEmailExternalSharing: function(e, i) {
+        var item = e.model.dataHost.dataHost.ace;
+        this.$.sendNotificationEmailPermissionOp.params = {
+          id: item.id
+        };
+        var self = this;
+        this.$.sendNotificationEmailPermissionOp.execute().then(function() {
+          self.fire('notification');
+        });
+      },
+
+      _empty: function(arr) {
+        return arr.length == 0;
       }
-    }
-    return entity;
-  },
-
-  entityClass: function (entity) {
-    if (!entity) {
-      return '';
-    }
-
-    if (typeof entity === 'object') {
-      if (entity['entity-type'] === 'user') {
-        return 'tag user';
-      } else if (entity['entity-type'] === 'group') {
-        return 'tag group';
-      }
-    }
-    return '';
-  },
-
-  entityTooltip: function (entity) {
-    if (!entity) {
-      return '';
-    }
-
-    if (typeof entity === 'object') {
-      if (entity['entity-type'] === 'user') {
-        var email = entity.properties.email;
-        return entity.id + (email !== null && email.length > 0 ? ' - ' + email : '');
-      } else if (entity['entity-type'] === 'group') {
-        return entity.groupname;
-      }
-    }
-    return entity;
-  },
-
-  sendEmailExternalSharing: function(e, i) {
-    var item = e.model.dataHost.dataHost.ace;
-    this.$.sendNotificationEmailPermissionOp.params = {
-      id: item.id
-    };
-    var self = this;
-    this.$.sendNotificationEmailPermissionOp.execute().then(function() {
-      self.fire('notification');
     });
-  },
-
-  _empty: function(arr) {
-    return arr.length == 0;
-  }
-});
-</script>
+  </script>
+</dom-module>

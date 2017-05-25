@@ -44,59 +44,58 @@ Element providing a confirmation popup.
       </div>
     </paper-dialog>
   </template>
-</dom-module>
 
+  <script>
+    Polymer({
+      is: 'nuxeo-popup-confirm',
 
-<script>
-  Polymer({
-    is: 'nuxeo-popup-confirm',
+      properties: {
+        /**
+         * Cancel handler.
+         */
+        onCancel: Function,
 
-    properties: {
-      /**
-       * Cancel handler.
-       */
-      onCancel: Function,
+        /**
+         * Confirm handler.
+         */
+        onConfirm: Function,
 
-      /**
-       * Confirm handler.
-       */
-      onConfirm: Function,
-
-      deleteLabel: {
-        type: String,
-        value: 'Delete'
+        deleteLabel: {
+          type: String,
+          value: 'Delete'
+        },
+        cancelLabel: {
+          type: String,
+          value: 'Cancel'
+        }
       },
-      cancelLabel: {
-        type: String,
-        value: 'Cancel'
+
+      /**
+       * Toggle the popup. Optionally you can specific the comfirm handler as parameter.
+       */
+      toggle: function(func) {
+        if(typeof func === 'function') {
+          this.onConfirm = func;
+        }
+
+        this.$.dialog.toggle();
+      },
+
+      _onCancel: function() {
+        if(this.onCancel) {
+          this.onCancel();
+        }
+
+        this.toggle();
+      },
+
+      _onConfirm: function() {
+        if(this.onConfirm) {
+          this.onConfirm();
+        }
+
+        this.toggle();
       }
-    },
-
-    /**
-     * Toggle the popup. Optionally you can specific the comfirm handler as parameter.
-     */
-    toggle: function(func) {
-      if(typeof func === 'function') {
-        this.onConfirm = func;
-      }
-
-      this.$.dialog.toggle();
-    },
-
-    _onCancel: function() {
-      if(this.onCancel) {
-        this.onCancel();
-      }
-
-      this.toggle();
-    },
-
-    _onConfirm: function() {
-      if(this.onConfirm) {
-        this.onConfirm();
-      }
-
-      this.toggle();
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

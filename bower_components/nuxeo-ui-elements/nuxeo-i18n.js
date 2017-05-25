@@ -61,9 +61,11 @@ function XHRLocaleResolver(msgFolder) {
           if (xhr.readyState === 4) {
             if (xhr.status === 200) {
               window.nuxeo.I18n[language] = JSON.parse(this.response); // cache this locale
+              window.nuxeo.I18n.language = language;
               resolve(this.response);
             } else if (xhr.status === 404 && url !== referenceFile) {
               console.log('Could not find locale "' + language + '". Defaulting to "en".');
+              language = 'en';
               loadLang(referenceFile); // default to messages.json
             }
           }

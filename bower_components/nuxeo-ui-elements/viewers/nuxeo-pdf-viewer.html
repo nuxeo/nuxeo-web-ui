@@ -56,26 +56,24 @@ Custom property | Description | Default
 
   </template>
 
-</dom-module>
+  <script>
+    Polymer({
+      is: 'nuxeo-pdf-viewer',
+      properties: {
 
-<script>
-  Polymer({
-    is: 'nuxeo-pdf-viewer',
-    properties: {
+        /**
+         * The path to the pdf file to display.
+         */
+        src: {
+          type: String
+        }
+      },
 
-      /**
-       * The path to the pdf file to display.
-       */
-      src: {
-        type: String
+      _path: function(file) {
+        // get an absolute href
+        file = this.create("a", {href: file}).href;
+        return this.resolveUrl('pdfjs/web/viewer.html?file=' + file);
       }
-    },
-
-    _path: function(file) {
-      // get an absolute href
-      file = this.create("a", {href: file}).href;
-      return this.resolveUrl('pdfjs/web/viewer.html?file=' + file);
-    }
-  });
-
-</script>
+    });
+  </script>
+</dom-module>

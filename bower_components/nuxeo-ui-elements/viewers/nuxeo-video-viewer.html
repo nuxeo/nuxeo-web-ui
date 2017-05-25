@@ -52,86 +52,83 @@ Example:
     </video>
   </template>
 
+  <script>
+    Polymer({
+      is: 'nuxeo-video-viewer',
+      properties: {
+
+        /**
+         * The width of this video player, in pixels.
+         */
+        width: {
+          type: Number,
+          value: 640,
+          observer: '_widthChanged'
+        },
+
+        /**
+         * The height of this video player, in pixels.
+         */
+        height: {
+          type: Number,
+          value: 360,
+          observer: '_heightChanged'
+        },
+
+        /**
+         * The `preload` attribute specifies if/how the video should be loaded.
+         */
+        preload: {
+          type: String,
+          value: 'auto'
+        },
+
+        /**
+         * If true, controls for the user to interact with are displayed.
+         */
+        controls: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * The `poster` attribute specifies an image shown while downloading.
+         */
+        poster: String,
+
+        /**
+         * The `sources` to be displayed.
+         */
+        sources: Object
+      },
+
+      ready: function() {
+        // Capture tap event to prevent clashing with videojs tap/click events
+        this.addEventListener('tap', function(event) {
+          event.stopPropagation();
+        }, true);
+      },
+
+      attached: function() {
+        this.videojs = videojs(this.$.video);
+        this.videojs.el().style.width = '100%';
+      },
+
+      detached: function() {
+        this.videojs.dispose();
+      },
+
+      _widthChanged: function() {
+        if (this.videojs) {
+          this.videojs.el().style.width = this.width;
+        }
+      },
+
+      _heightChanged: function() {
+        if (this.videojs) {
+          this.videojs.el().style.height = this.height;
+        }
+      }
+    });
+  </script>
 </dom-module>
-
-<script>
-
-  Polymer({
-    is: 'nuxeo-video-viewer',
-    properties: {
-
-      /**
-       * The width of this video player, in pixels.
-       */
-      width: {
-        type: Number,
-        value: 640,
-        observer: '_widthChanged'
-      },
-
-      /**
-       * The height of this video player, in pixels.
-       */
-      height: {
-        type: Number,
-        value: 360,
-        observer: '_heightChanged'
-      },
-
-      /**
-       * The `preload` attribute specifies if/how the video should be loaded.
-       */
-      preload: {
-        type: String,
-        value: 'auto'
-      },
-
-      /**
-       * If true, controls for the user to interact with are displayed.
-       */
-      controls: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The `poster` attribute specifies an image shown while downloading.
-       */
-      poster: String,
-
-      /**
-       * The `sources` to be displayed.
-       */
-      sources: Object
-    },
-
-    ready: function() {
-      // Capture tap event to prevent clashing with videojs tap/click events
-      this.addEventListener('tap', function(event) {
-        event.stopPropagation();
-      }, true);
-    },
-
-    attached: function() {
-      this.videojs = videojs(this.$.video);
-      this.videojs.el().style.width = '100%';
-    },
-
-    detached: function() {
-      this.videojs.dispose();
-    },
-
-    _widthChanged: function() {
-      if (this.videojs) {
-        this.videojs.el().style.width = this.width;
-      }
-    },
-
-    _heightChanged: function() {
-      if (this.videojs) {
-        this.videojs.el().style.height = this.height;
-      }
-    }
-  });
-
-</script>

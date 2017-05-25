@@ -55,47 +55,45 @@ Used by `nuxeo-user-management` and `nuxeo-create-user`
     </template>
 
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-edit-user',
+  <script>
+    Polymer({
+      is: 'nuxeo-edit-user',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        /**
+         * The user object to be edited or created.
+         */
+        user: {
+          type: Object,
+          value: {}
+        },
+        /**
+         * If true, a new user is being created; if false, an already existing user is being edited.
+         */
+        new: {
+          type: Boolean,
+          value: false
+        },
 
-    behaviors: [Nuxeo.I18nBehavior],
-
-    properties: {
-      /**
-       * The user object to be edited or created.
-       */
-      user: {
-        type: Object,
-        value: {}
-      },
-      /**
-       * If true, a new user is being created; if false, an already existing user is being edited.
-       */
-      new: {
-        type: Boolean,
-        value: false
-      },
-
-      resultFormatter: {
-        type: Function,
-        value: function() {
-          return this._resultFormatter.bind(this);
+        resultFormatter: {
+          type: Function,
+          value: function() {
+            return this._resultFormatter.bind(this);
+          }
         }
+      },
+
+      /**
+       * Resets the form fields to empty values.
+       */
+      resetFields: function() {
+        this.user = {};
+      },
+
+      _resultFormatter: function(item) {
+        return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
       }
-    },
-
-    /**
-     * Resets the form fields to empty values.
-     */
-    resetFields: function() {
-      this.user = {};
-    },
-
-    _resultFormatter: function(item) {
-      return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

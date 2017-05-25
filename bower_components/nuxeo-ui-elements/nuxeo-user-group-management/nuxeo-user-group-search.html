@@ -180,92 +180,93 @@ Used by `nuxeo-user-management`
       </paper-card>
     </template>
   </template>
-</dom-module>
-<script>
-  Polymer({
-    is: 'nuxeo-user-group-search',
-    behaviors: [Nuxeo.I18nBehavior],
-    properties: {
 
-      searchTerm: {
-        type: String,
-        value: '',
-        observer: '_searchTermChanged',
-        notify: true
+  <script>
+    Polymer({
+      is: 'nuxeo-user-group-search',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+
+        searchTerm: {
+          type: String,
+          value: '',
+          observer: '_searchTermChanged',
+          notify: true
+        },
+
+        users: Object,
+        groups: Object,
+
+        groupsCurrentPage: Number,
+
+        usersCurrentPage: Number
       },
 
-      users: Object,
-      groups: Object,
+      observers: [
+        '_searchGroups(groupsCurrentPage)',
+        '_searchUsers(usersCurrentPage)'
+      ],
 
-      groupsCurrentPage: Number,
+      _searchTermChanged: function() {
+        if (this.searchTerm !== '') {
+          this.groupsCurrentPage = this.usersCurrentPage = 1;
+          this._searchGroups();
+          this._searchUsers();
+        } else {
+          this.users = this.groups = {};
+        }
+      },
 
-      usersCurrentPage: Number
-    },
+      _searchGroups: function() {
+        var params = {
+          q: this.searchTerm,
+          currentPageIndex: this.groupsCurrentPage - 1
+        };
+        this.$.groupSearch.params = params;
+      },
 
-    observers: [
-      '_searchGroups(groupsCurrentPage)',
-      '_searchUsers(usersCurrentPage)'
-    ],
+      _searchUsers: function() {
+        var params = {
+          q: this.searchTerm,
+          currentPageIndex: this.usersCurrentPage - 1
+        };
+        this.$.userSearch.params = params;
+      },
 
-    _searchTermChanged: function() {
-      if (this.searchTerm !== '') {
-        this.groupsCurrentPage = this.usersCurrentPage = 1;
-        this._searchGroups();
-        this._searchUsers();
-      } else {
-        this.users = this.groups = {};
+      _manageUser: function(e) {
+        this.fire('manageUser', {user: e.model.item.id});
+      },
+
+      _manageGroup: function(e) {
+        this.fire('manageGroup', {group: e.model.item.groupname});
+      },
+
+      _empty: function(entries) {
+        return entries && entries.length === 0;
+      },
+
+      _countUsers: function(users) {
+        var label = ' ' + (users.length === 1 ? this.i18n('userGroupSearch.member') :
+            this.i18n('userGroupSearch.members'));
+        return users.length + label;
+      },
+
+      _countGroups: function(groups) {
+        if (groups.length > 0) {
+          var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nestedGroup') :
+              this.i18n('userGroupSearch.nestedGroups'));
+          return groups.length + label;
+        }
+      },
+
+      _userHasName: function(user) {
+        return user.properties.firstName || user.properties.lastName;
+      },
+
+      _showResults: function() {
+        return this.searchTerm.length === 0;
       }
-    },
 
-    _searchGroups: function() {
-      var params = {
-        q: this.searchTerm,
-        currentPageIndex: this.groupsCurrentPage - 1
-      };
-      this.$.groupSearch.params = params;
-    },
-
-    _searchUsers: function() {
-      var params = {
-        q: this.searchTerm,
-        currentPageIndex: this.usersCurrentPage - 1
-      };
-      this.$.userSearch.params = params;
-    },
-
-    _manageUser: function(e) {
-      this.fire('manageUser', {user: e.model.item.id});
-    },
-
-    _manageGroup: function(e) {
-      this.fire('manageGroup', {group: e.model.item.groupname});
-    },
-
-    _empty: function(entries) {
-      return entries && entries.length === 0;
-    },
-
-    _countUsers: function(users) {
-      var label = ' ' + (users.length === 1 ? this.i18n('userGroupSearch.member') :
-                                              this.i18n('userGroupSearch.members'));
-      return users.length + label;
-    },
-
-    _countGroups: function(groups) {
-      if (groups.length > 0) {
-        var label = ' ' + (groups.length === 1 ? this.i18n('userGroupSearch.nestedGroup') :
-                                                 this.i18n('userGroupSearch.nestedGroups'));
-        return groups.length + label;
-      }
-    },
-
-    _userHasName: function(user) {
-      return user.properties.firstName || user.properties.lastName;
-    },
-
-    _showResults: function() {
-      return this.searchTerm.length === 0;
-    }
-
-  });
-</script>
+    });
+  </script>
+</dom-module>

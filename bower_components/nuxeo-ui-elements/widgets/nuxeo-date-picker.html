@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../iron-form-element-behavior/iron-form-element-behavior.html">
 <link rel="import" href="../../iron-validatable-behavior/iron-validatable-behavior.html">
 <link rel="import" href="../moment-import.html">
+<link rel="import" href="../better-dateinput-polyfill.html">
 
 <!--
 An element for picking a W3C YYYY-MM-DDThh:mm:ss.sTZD based date (eg 1997-07-16T19:20:30.45+01:00).
@@ -53,58 +54,58 @@ Example:
     </paper-input>
 
   </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-date-picker',
+      behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
+      properties: {
+        label: String,
+
+        invalid: Boolean,
+
+        required: {
+          type: Boolean,
+          value: false
+        },
+
+        value: {
+          type: String,
+          notify: true,
+          observer: '_valueChanged'
+        },
+
+        disabled: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      _getValidity: function() {
+        if (!this.required) {
+          return true;
+        }
+        return !!this.value;;
+      },
+
+      _valueChanged: function() {
+
+        if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
+          this.$.date.value = moment(this.value).format('YYYY-MM-DD');
+        }
+        if (!this.value || this.value.length === 0){
+          this.$.date.value = "";
+        }
+      },
+
+      _onChange: function() {
+        if (this.$.date.value && this.$.date.value.length > 0) {
+          this.value = moment(this.$.date.value).toJSON();
+        } else {
+          this.value = "";
+        }
+      }
+
+    });
+  </script>
 </dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-date-picker',
-    behaviors: [Polymer.IronFormElementBehavior, Polymer.IronValidatableBehavior],
-    properties: {
-      label: String,
-
-      invalid: Boolean,
-
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      value: {
-        type: String,
-        notify: true,
-        observer: '_valueChanged'
-      },
-
-      disabled: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    _getValidity: function() {
-      if (!this.required) {
-        return true;
-      }
-      return !!this.value;;
-    },
-
-    _valueChanged: function() {
-
-      if (this.$.date.value.length === 0 && this.value && moment(this.value).isValid()) {
-        this.$.date.value = moment(this.value).format('YYYY-MM-DD');
-      }
-      if (!this.value || this.value.length === 0){
-        this.$.date.value = "";
-      }
-    },
-
-    _onChange: function() {
-      if (this.$.date.value && this.$.date.value.length > 0) {
-        this.value = moment(this.$.date.value).toJSON();
-      } else {
-        this.value = "";
-      }
-    }
-
-  });
-</script>

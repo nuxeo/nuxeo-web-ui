@@ -37,63 +37,63 @@ An element for generic textarea input in forms
     </paper-textarea>
 
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-textarea',
+  <script>
+    Polymer({
+      is: 'nuxeo-textarea',
 
-    properties: {
-      /**
-       * Label.
-       */
-      label: String,
+      properties: {
+        /**
+         * Label.
+         */
+        label: String,
 
-      /**
-       * Name.
-       */
-      name: String,
+        /**
+         * Name.
+         */
+        name: String,
 
-      /**
-       * Value.
-       */
-      value: {
-        type: String,
-        notify: true
-      },
+        /**
+         * Value.
+         */
+        value: {
+          type: String,
+          notify: true
+        },
 
-      /**
-       * Placeholder.
-       */
-      placeholder: String,
+        /**
+         * Placeholder.
+         */
+        placeholder: String,
 
-      /**
-       * Read only.
-       */
-      readonly:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
+        /**
+         * Read only.
+         */
+        readonly:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
 
-      /**
-       * Disabled.
-       */
-      disabled:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
+        /**
+         * Disabled.
+         */
+        disabled:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
 
-      /**
-       * Required.
-       */
-      required:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
+        /**
+         * Required.
+         */
+        required:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
       }
-    }
 
-  });
-</script>
+    });
+  </script>
+</dom-module>

@@ -136,142 +136,142 @@ Custom property | Description | Default
       </section>
     </iron-pages>
   </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-user-group-management',
+
+      behaviors: [Nuxeo.I18nBehavior],
+
+      properties: {
+        /**
+         * The user-group-management page to be displayed. Possible values are:
+         * `search`, `create-user`, `manage-user`, `create-group` and `manage-group`.
+         */
+        page: {
+          type: String,
+          value: 'search',
+          notify: true
+        },
+
+        /**
+         * Selected user id.
+         */
+        selectedUser: String,
+
+        /**
+         * Selected group id.
+         */
+        selectedGroup: {
+          type: String,
+          observer: '_selectedGroupChanged'
+        },
+
+        /**
+         * True if currently in read only mode.
+         */
+        readonly: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Set to true for administrators to remove restrictions.
+         */
+        isAdministrator: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      listeners: {
+        'goHome': '_goSearch',
+        'nuxeo-user-created': '_toast',
+        'nuxeo-user-invited': '_toast',
+        'nuxeo-group-created': '_toast'
+      },
+
+      /**
+       * Go to the 'search' page.
+       */
+      _goSearch: function() {
+        this.page = 'search';
+        this.$$('nuxeo-user-group-search')._searchTermChanged();
+      },
+
+      /**
+       * Got to the 'create-user' page.
+       */
+      _createUser: function() {
+        this.page = 'create-user';
+      },
+
+      /**
+       * Go to the 'create-group' page.
+       */
+      _createGroup: function() {
+        this.page = 'create-group';
+      },
+
+      _manageUser: function(e) {
+        this.selectedUser = e.detail.user;
+        this.page = 'manage-user';
+      },
+
+      _manageGroup: function(e) {
+        this.selectedGroup = e.detail.group;
+        this.page = 'manage-group';
+      },
+
+      _selectedGroupChanged: function() {
+        this.readonly = !!(this.selectedGroup === 'administrators' && !this.isAdministrator);
+      },
+
+      /**
+       * Displays a message.
+       */
+      _toast: function(event) {
+        var msg;
+        switch (event.type) {
+          case 'nuxeo-user-created':
+          case 'nuxeo-user-invited':
+            msg = 'User ' + event.detail.id + ' created';
+            break;
+          case 'nuxeo-group-created':
+            msg = 'Group ' + event.detail.groupname + ' created';
+            break;
+        }
+        if (msg) {
+          this.$.toast.text = msg;
+          this.$.toast.open();
+        }
+      },
+
+      ready: function() {
+        // dynamic loading of user layouts
+        if (!this._isRegistered('nuxeo-view-user')) {
+          Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-view-user.html'));
+        }
+        if (!this._isRegistered('nuxeo-edit-user')) {
+          Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-edit-user.html'));
+        }
+
+        window.addEventListener('manageUser', function(e) {
+          this._manageUser(e);
+        }.bind(this));
+        window.addEventListener('manageGroup', function(e) {
+          this._manageGroup(e);
+        }.bind(this));
+      },
+
+      /**
+       * Determines whether a custom element is registered
+       */
+      _isRegistered: function(tag) {
+        return Polymer.isInstance(document.createElement(tag));
+      }
+
+    });
+  </script>
 </dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-user-group-management',
-
-    behaviors: [Nuxeo.I18nBehavior],
-
-    properties: {
-      /**
-       * The user-group-management page to be displayed. Possible values are:
-       * `search`, `create-user`, `manage-user`, `create-group` and `manage-group`.
-       */
-      page: {
-        type: String,
-        value: 'search',
-        notify: true
-      },
-
-      /**
-       * Selected user id.
-       */
-      selectedUser: String,
-
-      /**
-       * Selected group id.
-       */
-      selectedGroup: {
-        type: String,
-        observer: '_selectedGroupChanged'
-      },
-
-      /**
-       * True if currently in read only mode.
-       */
-      readonly: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Set to true for administrators to remove restrictions.
-       */
-      isAdministrator: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    listeners: {
-      'goHome': '_goSearch',
-      'nuxeo-user-created': '_toast',
-      'nuxeo-user-invited': '_toast',
-      'nuxeo-group-created': '_toast'
-    },
-
-    /**
-     * Go to the 'search' page.
-     */
-    _goSearch: function() {
-      this.page = 'search';
-      this.$$('nuxeo-user-group-search')._searchTermChanged();
-    },
-
-    /**
-     * Got to the 'create-user' page.
-     */
-    _createUser: function() {
-      this.page = 'create-user';
-    },
-
-    /**
-     * Go to the 'create-group' page.
-     */
-    _createGroup: function() {
-      this.page = 'create-group';
-    },
-
-    _manageUser: function(e) {
-      this.selectedUser = e.detail.user;
-      this.page = 'manage-user';
-    },
-
-    _manageGroup: function(e) {
-      this.selectedGroup = e.detail.group;
-      this.page = 'manage-group';
-    },
-
-    _selectedGroupChanged: function() {
-      this.readonly = !!(this.selectedGroup === 'administrators' && !this.isAdministrator);
-    },
-
-    /**
-     * Displays a message.
-     */
-    _toast: function(event) {
-      var msg;
-      switch (event.type) {
-        case 'nuxeo-user-created':
-        case 'nuxeo-user-invited':
-          msg = 'User ' + event.detail.id + ' created';
-          break;
-        case 'nuxeo-group-created':
-          msg = 'Group ' + event.detail.groupname + ' created';
-          break;
-      }
-      if (msg) {
-        this.$.toast.text = msg;
-        this.$.toast.open();
-      }
-    },
-
-    ready: function() {
-      // dynamic loading of user layouts
-      if (!this._isRegistered('nuxeo-view-user')) {
-        Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-view-user.html'));
-      }
-      if (!this._isRegistered('nuxeo-edit-user')) {
-        Polymer.Base.importHref(this.resolveUrl('nuxeo-user-group-management/nuxeo-edit-user.html'));
-      }
-
-      window.addEventListener('manageUser', function(e) {
-        this._manageUser(e);
-      }.bind(this));
-      window.addEventListener('manageGroup', function(e) {
-        this._manageGroup(e);
-      }.bind(this));
-    },
-
-    /**
-     * Determines whether a custom element is registered
-     */
-    _isRegistered: function(tag) {
-      return Polymer.isInstance(document.createElement(tag));
-    }
-
-  });
-</script>

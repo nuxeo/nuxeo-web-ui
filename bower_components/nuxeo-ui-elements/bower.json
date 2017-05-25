@@ -28,7 +28,7 @@
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "nuxeo-elements": "nuxeo/nuxeo-elements#master",
     "gold-email-input": "PolymerElements/gold-email-input#^1.0.6",
-    "better-dateinput-polyfill": "1.5.2",
+    "better-dateinput-polyfill": "2.0.2",
     "moment": "2.10.6",
     "d3": "3.5.17",
     "randomcolor": "0.4.1",

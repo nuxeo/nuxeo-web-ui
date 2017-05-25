@@ -44,20 +44,20 @@ Used by `nuxeo-user-management`
       </div>
     </div>
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-view-user',
-    behaviors: [Nuxeo.I18nBehavior],
-    properties: {
-      /**
-       * The user object to be displayed.
-       */
-      user: {
-        type: Object,
-        value: {}
+  <script>
+    Polymer({
+      is: 'nuxeo-view-user',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        /**
+         * The user object to be displayed.
+         */
+        user: {
+          type: Object,
+          value: {}
+        }
       }
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

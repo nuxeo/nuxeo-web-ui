@@ -103,121 +103,121 @@ Example:
     </paper-dropdown-menu>
 
   </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-select',
+      behaviors: [Polymer.IronResizableBehavior],
+      properties: {
+
+        /**
+         * Label.
+         */
+        label: {
+          type: String,
+          value: null
+        },
+
+        /**
+         * Placeholder.
+         */
+        placeholder: {
+          type: String,
+          value: ' '
+        },
+
+        /**
+         * Error message.
+         */
+        errorMessage: {
+          type: String
+        },
+
+        /**
+         * Options array to show.
+         */
+        options: {
+          type: Array,
+          value: null
+        },
+
+        /**
+         * Gets or sets the selected option.
+         */
+        selected: {
+          type: String,
+          notify: true
+        },
+
+        /**
+         * Attribute value or property of an element for `selected` instead of the default `option` value.
+         */
+        attrForSelected: {
+          type: String,
+          value: null
+        },
+
+        /**
+         * Read only.
+         */
+        readonly:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Disabled.
+         */
+        disabled:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * Required.
+         */
+        required:  {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
+      },
+
+      listeners: {
+        'iron-resize': '_resize'
+      },
+
+      close: function() {
+        this.$.paperDropdownMenu.close();
+      },
+
+      _resize: function() {
+        var button = this.$.paperDropdownMenu.$$('paper-menu-button');
+        button.noOverlap = true;
+        button.verticalOffset = -8;
+        var width = this.getBoundingClientRect().width;
+        if (width > 0) {
+          this.$.paperDropdownMenu.style.width = this.$.paperMenu.style.width = width + 'px';
+        }
+      },
+
+      _id: function(item) {
+        if (!this.selected) { // select first item as default selection
+          this.selected = (item && item.id) ? item.id : item;
+        }
+        return (item && item.id) ? item.id : item;
+      },
+
+      _label: function(item) {
+        return (item && item.label) ? item.label : item;
+      },
+
+      _computeAttrForSelected: function(attrForSelected, options) {
+        return options ? 'option' : attrForSelected;
+      }
+
+    });
+  </script>
 </dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-select',
-    behaviors: [Polymer.IronResizableBehavior],
-    properties: {
-
-      /**
-       * Label.
-       */
-      label: {
-        type: String,
-        value: null
-      },
-
-      /**
-       * Placeholder.
-       */
-      placeholder: {
-        type: String,
-        value: ' '
-      },
-
-      /**
-       * Error message.
-       */
-      errorMessage: {
-        type: String
-      },
-
-      /**
-       * Options array to show.
-       */
-      options: {
-        type: Array,
-        value: null
-      },
-
-      /**
-       * Gets or sets the selected option.
-       */
-      selected: {
-        type: String,
-        notify: true
-      },
-
-      /**
-       * Attribute value or property of an element for `selected` instead of the default `option` value.
-       */
-      attrForSelected: {
-        type: String,
-        value: null
-      },
-
-      /**
-       * Read only.
-       */
-      readonly:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Disabled.
-       */
-      disabled:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Required.
-       */
-      required:  {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true
-      }
-    },
-
-    listeners: {
-      'iron-resize': '_resize'
-    },
-
-    close: function() {
-      this.$.paperDropdownMenu.close();
-    },
-
-    _resize: function() {
-      var button = this.$.paperDropdownMenu.$$('paper-menu-button');
-      button.noOverlap = true;
-      button.verticalOffset = -8;
-      var width = this.getBoundingClientRect().width;
-      if (width > 0) {
-        this.$.paperDropdownMenu.style.width = this.$.paperMenu.style.width = width + 'px';
-      }
-    },
-
-    _id: function(item) {
-      if (!this.selected) { // select first item as default selection
-        this.selected = (item && item.id) ? item.id : item;
-      }
-      return (item && item.id) ? item.id : item;
-    },
-
-    _label: function(item) {
-      return (item && item.label) ? item.label : item;
-    },
-
-    _computeAttrForSelected: function(attrForSelected, options) {
-      return options ? 'option' : attrForSelected;
-    }
-
-  });
-</script>

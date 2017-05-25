@@ -44,48 +44,48 @@ Example:
     <paper-tooltip for="bt">[[label]]</paper-tooltip>
 
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-operation-button',
+  <script>
+    Polymer({
+      is: 'nuxeo-operation-button',
 
-    properties: {
+      properties: {
 
-      /* Icon */
-      icon: String,
+        /* Icon */
+        icon: String,
 
-      /* Label (shown as tooltip) */
-      label: String,
+        /* Label (shown as tooltip) */
+        label: String,
 
-      /* The id of the operation to call. */
-      operation: String,
+        /* The id of the operation to call. */
+        operation: String,
 
-      /* The operation input. */
-      input: String,
+        /* The operation input. */
+        input: String,
 
-      /* The parameters to send. */
-      params: {
-        type: Object,
-        value: function() {
-          return {};
+        /* The parameters to send. */
+        params: {
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        /* The response from the server. */
+        response: {
+          type: Object,
+          value: null,
+          notify: true
         }
       },
 
-      /* The response from the server. */
-      response: {
-        type: Object,
-        value: null,
-        notify: true
+      _execute: function() {
+        this.$.op.execute().then(function(response) {
+          this.fire('operation-executed', {response: response});
+          this.response = response;
+        }.bind(this));
       }
-    },
 
-    _execute: function() {
-      this.$.op.execute().then(function(response) {
-        this.fire('operation-executed', {response: response});
-        this.response = response;
-      }.bind(this));
-    }
-
-  });
-</script>
+    });
+  </script>
+</dom-module>

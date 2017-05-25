@@ -178,154 +178,154 @@ Used by `nuxeo-user-group-management`
 
     </form>
   </template>
-</dom-module>
 
-<script>
-  Polymer({
-    is: 'nuxeo-create-group',
-    behaviors: [Nuxeo.I18nBehavior],
-    properties: {
-      groupName: {
-        type: String,
-        notify: true
-      },
+  <script>
+    Polymer({
+      is: 'nuxeo-create-group',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        groupName: {
+          type: String,
+          notify: true
+        },
 
-      groupLabel: {
-        type: String,
-        notify: true
-      },
+        groupLabel: {
+          type: String,
+          notify: true
+        },
 
-      selectedUser: {
-        type: Object,
-        notify: true
-      },
+        selectedUser: {
+          type: Object,
+          notify: true
+        },
 
-      selectedUsers: {
-        type: Array,
-        value: [],
-        notify: true
-      },
+        selectedUsers: {
+          type: Array,
+          value: [],
+          notify: true
+        },
 
-      resultsFilter: {
-        type: Function,
-        value: function() {
-          return this._resultsFilter.bind(this);
+        resultsFilter: {
+          type: Function,
+          value: function() {
+            return this._resultsFilter.bind(this);
+          }
+        },
+
+        resultFormatter: {
+          type: Function,
+          value: function() {
+            return this._resultFormatter.bind(this);
+          }
+        },
+
+        errors: {
+          type: String,
+          value: ''
         }
       },
 
-      resultFormatter: {
-        type: Function,
-        value: function() {
-          return this._resultFormatter.bind(this);
+      observers: [
+        '_observeSelectedUser(selectedUser)'
+      ],
+
+      ready: function() {
+        this.$.picker.$$('nuxeo-select2').queryResultsFilter = this.resultsFilter;
+        this.$.form.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          this._create();
+        }.bind(this));
+      },
+
+      _goHome: function() {
+        this.fire('goHome');
+      },
+
+      _observeSelectedUser: function(selectedUser) {
+        if (this.selectedUser && this.selectedUsers.indexOf(this.selectedUser) === -1) {
+          this.push('selectedUsers', this.selectedUser);
+        }
+        this.selectedUser = null;
+      },
+
+      _remove: function(e) {
+        if (e.model.item) {
+          this.splice('selectedUsers', this.selectedUsers.indexOf(e.model.item), 1);
         }
       },
 
-      errors: {
-        type: String,
-        value: ''
-      }
-    },
+      /**
+       * Submits the form.
+       */
+      _submit: function() {
+        this.$.form.submit();
+      },
 
-    observers: [
-      '_observeSelectedUser(selectedUser)'
-    ],
+      /**
+       * Creates a new group if the form was successfully submitted.
+       */
+      _create: function() {
+        this.$.request.data = this._computeData();
+        this.$.request.post().then(function(response) {
+          this.fire('nuxeo-group-created', response);
+          this._resetFields();
+          if (!this.$.another.checked) {
+            this._goHome();
+          }
+        }.bind(this))
+          .catch(function(error) {
+            this.errors = error.message;
+          }.bind(this));;
+      },
 
-    ready: function() {
-      this.$.picker.$$('nuxeo-select2').queryResultsFilter = this.resultsFilter;
-      this.$.form.addEventListener('iron-form-presubmit', function(event) {
-        event.preventDefault();
-        this._create();
-      }.bind(this));
-    },
-
-    _goHome: function() {
-      this.fire('goHome');
-    },
-
-    _observeSelectedUser: function(selectedUser) {
-      if (this.selectedUser && this.selectedUsers.indexOf(this.selectedUser) === -1) {
-        this.push('selectedUsers', this.selectedUser);
-      }
-      this.selectedUser = null;
-    },
-
-    _remove: function(e) {
-      if (e.model.item) {
-        this.splice('selectedUsers', this.selectedUsers.indexOf(e.model.item), 1);
-      }
-    },
-
-    /**
-     * Submits the form.
-     */
-    _submit: function() {
-      this.$.form.submit();
-    },
-
-    /**
-     * Creates a new group if the form was successfully submitted.
-     */
-    _create: function() {
-      this.$.request.data = this._computeData();
-      this.$.request.post().then(function(response) {
-        this.fire('nuxeo-group-created', response);
+      _cancel: function() {
         this._resetFields();
-        if (!this.$.another.checked) {
-          this._goHome();
-        }
-      }.bind(this))
-      .catch(function(error) {
-        this.errors = error.message;
-      }.bind(this));;
-    },
+        this._goHome();
+      },
 
-    _cancel: function() {
-      this._resetFields();
-      this._goHome();
-    },
+      _resetFields: function() {
+        this.groupName = '';
+        this.groupLabel = '';
+        this.errors = '';
+        this.selectedUsers = [];
+      },
 
-    _resetFields: function() {
-      this.groupName = '';
-      this.groupLabel = '';
-      this.errors = '';
-      this.selectedUsers = [];
-    },
-
-    _computeData: function() {
-      return {
-        "entity-type": "group",
-        "groupname": this.groupName,
-        "grouplabel": this.groupLabel,
-        "memberUsers": this.selectedUsers.filter(function(record) {
-          return record.type === 'USER_TYPE';
-        })
+      _computeData: function() {
+        return {
+          "entity-type": "group",
+          "groupname": this.groupName,
+          "grouplabel": this.groupLabel,
+          "memberUsers": this.selectedUsers.filter(function(record) {
+            return record.type === 'USER_TYPE';
+          })
             .map(function(record) {
               return record.username;
             }),
-        "memberGroups": this.selectedUsers.filter(function(record) {
-          return record.type === 'GROUP_TYPE';
-        })
+          "memberGroups": this.selectedUsers.filter(function(record) {
+            return record.type === 'GROUP_TYPE';
+          })
             .map(function(record) {
               return record.groupname;
             })
-      };
-    },
+        };
+      },
 
-    _resultsFilter: function(entry) {
-      for (var i = 0; i < this.selectedUsers.length; i++) {
-        if (entry.id === this.selectedUsers[i].id) {
-          return false;
+      _resultsFilter: function(entry) {
+        for (var i = 0; i < this.selectedUsers.length; i++) {
+          if (entry.id === this.selectedUsers[i].id) {
+            return false;
+          }
         }
+        return true;
+      },
+
+      _resultFormatter: function(item) {
+        return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
+      },
+
+      _hasErrors: function() {
+        return this.errors !== '';
       }
-      return true;
-    },
-
-    _resultFormatter: function(item) {
-      return item.displayLabel + ' (' + (item.groupname || item.username) + ')';
-    },
-
-    _hasErrors: function() {
-      return this.errors !== '';
-    }
-  });
-</script>
+    });
+  </script>
+</dom-module>

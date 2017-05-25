@@ -49,65 +49,65 @@ Example:
     </nuxeo-tag>
 
   </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-user-tag',
+      behaviors: [Nuxeo.RoutingBehavior],
+      properties: {
+
+        /**
+         * User entity or a string
+         */
+        user: Object,
+
+        /**
+         * Disable link
+         */
+        disabled: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      ready: function() {
+        if (this.$.tooltip) {
+          document.body.appendChild(this.$.tooltip);
+        }
+      },
+
+      _isEntity: function(user) {
+        return user && user['entity-type'] && user['entity-type'] === 'user' && user.properties;
+      },
+
+      _id: function(user) {
+        if (user) {
+          return user.id ? user.id : user.replace('user:', '');
+        }
+      },
+
+      _name: function(user) {
+        if (this._isEntity(user)) {
+          var firstName = user.properties.firstName;
+          var lastName = user.properties.lastName;
+          return (firstName || lastName) ? firstName + ' ' + lastName : user.properties.email;
+        } else {
+          return this._id(user);
+        }
+      },
+
+      _email: function(user) {
+        return this._isEntity(user) && user.properties.email !== this._id(user) ? user.properties.email : '';
+      },
+
+      _href: function(user) {
+        return this.urlFor('user', this._id(user));
+      },
+
+      _hasLink: function(user) {
+        return !(this.disabled || (this._name(user) === 'system'));
+      }
+
+    });
+  </script>
 </dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-user-tag',
-    behaviors: [Nuxeo.RoutingBehavior],
-    properties: {
-
-      /**
-       * User entity or a string
-       */
-      user: Object,
-
-      /**
-       * Disable link
-       */
-      disabled: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    ready: function() {
-      if (this.$.tooltip) {
-        document.body.appendChild(this.$.tooltip);
-      }
-    },
-
-    _isEntity: function(user) {
-      return user && user['entity-type'] && user['entity-type'] === 'user' && user.properties;
-    },
-
-    _id: function(user) {
-      if (user) {
-        return user.id ? user.id : user.replace('user:', '');
-      }
-    },
-
-    _name: function(user) {
-      if (this._isEntity(user)) {
-        var firstName = user.properties.firstName;
-        var lastName = user.properties.lastName;
-        return (firstName || lastName) ? firstName + ' ' + lastName : user.properties.email;
-      } else {
-        return this._id(user);
-      }
-    },
-
-    _email: function(user) {
-      return this._isEntity(user) && user.properties.email !== this._id(user) ? user.properties.email : '';
-    },
-
-    _href: function(user) {
-      return this.urlFor('user', this._id(user));
-    },
-
-    _hasLink: function(user) {
-      return !(this.disabled || (this._name(user) === 'system'));
-    }
-
-  });
-</script>
