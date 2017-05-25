@@ -247,7 +247,7 @@ Contributors:
         },
 
         observers: [
-            '_visibleOnStage(visible,stage)'
+          '_visibleOnStage(visible,stage)'
         ],
 
         ready: function() {
@@ -337,7 +337,7 @@ Contributors:
           this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
         },
 
-         _layoutUpdated: function(e) {
+        _layoutUpdated: function(e) {
           this.async(function() {
             var input = e.detail.value.querySelector('[autofocus]');
             if (input) {

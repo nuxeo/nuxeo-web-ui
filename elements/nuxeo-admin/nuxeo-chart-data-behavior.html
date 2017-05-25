@@ -18,33 +18,33 @@ Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 -->
 <script>
-var Nuxeo = Nuxeo || {};
-Nuxeo.ChartDataBehavior = {
-  _labels: function(data) {
-    return data.map(function(entry) {
-      if (Array.isArray(entry.value)) {
-        return entry.value.map(this._labels.bind(this));
-      } else {
-        return entry.key;
-      }
-    });
-  },
-  _series: function(data) {
-    return data.map(function(obj) {
-      return obj.key;
-    });
-  },
-  _values: function(data) {
-    return [data.map(function(entry) {
-      if (Array.isArray(entry.value)) {
-        return entry.value.map(this._values.bind(this));
-      } else {
-        return entry.value;
-      }
-    })];
-  },
-  _extendEndDate: function(date) {
-    return date ? date + 'T23:59:59.999' : date;
-  }
-};
+  var Nuxeo = Nuxeo || {};
+  Nuxeo.ChartDataBehavior = {
+    _labels: function(data) {
+      return data.map(function(entry) {
+        if (Array.isArray(entry.value)) {
+          return entry.value.map(this._labels.bind(this));
+        } else {
+          return entry.key;
+        }
+      });
+    },
+    _series: function(data) {
+      return data.map(function(obj) {
+        return obj.key;
+      });
+    },
+    _values: function(data) {
+      return [data.map(function(entry) {
+        if (Array.isArray(entry.value)) {
+          return entry.value.map(this._values.bind(this));
+        } else {
+          return entry.value;
+        }
+      })];
+    },
+    _extendEndDate: function(date) {
+      return date ? date + 'T23:59:59.999' : date;
+    }
+  };
 </script>

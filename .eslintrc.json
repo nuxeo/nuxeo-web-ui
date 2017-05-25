@@ -1,6 +1,10 @@
 {
   "extends": "eslint:recommended",
   "rules": {
+    "indent": ["error", 2, {
+      "VariableDeclarator": 2,
+      "SwitchCase": 1
+    }],
     "no-console": 0,
     "max-len": [2, 120, 2, {
       "ignoreUrls": true,
@@ -13,6 +17,10 @@
   "plugins": [
     "html"
   ],
+  "settings": {
+    "html/indent": "+2",
+    "html/report-bad-indent": "error"
+  },
   "globals": {
     "__dirname": false,
     "require": false,

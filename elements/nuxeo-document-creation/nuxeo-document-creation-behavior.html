@@ -17,232 +17,233 @@ Contributors:
 -->
 
 <script>
-var Nuxeo = Nuxeo || {};
+  var Nuxeo = Nuxeo || {};
 
-(function() {
-  var schemaFetcher = null;
-  var schemaRegistry = {};
-  Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
-    properties: {
-      parent: {
-        type: Object,
-        observer: '_parentChanged'
-      },
+  (function() {
+    var schemaFetcher = null;
+    var schemaRegistry = {};
+    Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, {
+      properties: {
+        parent: {
+          type: Object,
+          observer: '_parentChanged'
+        },
 
-      targetPath: {
-        type: Object,
-        notify: true
-      },
+        targetPath: {
+          type: Object,
+          notify: true
+        },
 
-      suggesterParent: {
-        type: Object
-      },
+        suggesterParent: {
+          type: Object
+        },
 
-      suggesterChildren: {
-        type: Array,
-        observer: '_suggesterChildrenChanged',
-        notify: true
-      },
+        suggesterChildren: {
+          type: Array,
+          observer: '_suggesterChildrenChanged',
+          notify: true
+        },
 
-      isValidTargetPath: {
-        type: Boolean,
-        notify: true
-      },
+        isValidTargetPath: {
+          type: Boolean,
+          notify: true
+        },
 
-      canCreate: {
-        type: Boolean,
-        notify: true
-      },
+        canCreate: {
+          type: Boolean,
+          notify: true
+        },
 
-      targetLocationError: {
-        type: String,
-        notify: true
-      },
+        targetLocationError: {
+          type: String,
+          notify: true
+        },
 
-      document: {
-        type: Object
-      },
+        document: {
+          type: Object
+        },
 
-      selectedDocType: {
-        type: String
-      },
+        selectedDocType: {
+          type: String
+        },
 
-      subtypes: {
-        type: Array
-      }
-
-    },
-
-    observers: [
-      '_validateLocation(isValidTargetPath,suggesterChildren)',
-      '_updateDocument(selectedDocType, parent)'
-    ],
-
-    newDocument: function(type, properties) {
-      var doc = {
-        'entity-type': 'document',
-        'type': type,
-        'name': '',
-        'properties': {
-          'dc:title': '',
-          'dc:description': ''
+        subtypes: {
+          type: Array
         }
-      };
-      // NXP-22300: initialize complex properties
-      if (!(type in schemaRegistry)) {
-        if (!schemaFetcher) {
-          schemaFetcher = document.createElement('nuxeo-resource');
-        }
-        schemaFetcher.path = '/config/types/' + this.selectedDocType.type;
-        return schemaFetcher.get().then(function(doctype) {
-          // cache doctype schemas
-          schemaRegistry[doctype.name] = doctype;
-          return this._newDocument(doctype, doc, properties);
-        }.bind(this));
-      } else {
-        return Promise.resolve(this._newDocument(schemaRegistry[type], doc, properties));
-      }
-    },
 
-    _newDocument: function(doctype, doc, properties) {
-      if (doctype.schemas) {
-        doctype.schemas.forEach(function(schema) {
-          this._initializeFields(doc, schema);
-        }.bind(this));
-      }
-      if (properties) {
-        for (var prop in properties) {
-          doc.properties[prop] = properties[prop];
-        }
-      }
-      return doc;
-    },
+      },
 
-    _initializeFields: function(doc, node, nodePath) {
-      if (typeof nodePath === 'undefined') {
-        nodePath = '';
-      }
-      var prefix = (node['@prefix'] ? node['@prefix'] : node['name']);
-      Object.keys(node.fields).forEach(function(fieldName) {
-        var field = node.fields[fieldName]
-        if (field !== null && typeof field === 'object' &&
-            field.type && field.type === 'complex') {
-          this._deepFind(doc.properties, nodePath)[prefix + ':' + fieldName] = {};
-          this._initializeFields(doc, field, field, nodePath === '' ? fieldName : nodePath + '.' + fieldName);
-        }
-      }.bind(this));
-    },
+      observers: [
+        '_validateLocation(isValidTargetPath,suggesterChildren)',
+        '_updateDocument(selectedDocType, parent)'
+      ],
 
-    _deepFind: function(node, path) {
-      return path ? path.split('.').reduce(function(obj,p) { return obj[p]; }, node) : node;
-    },
-
-    _parentChanged: function() {
-      if (this.parent) {
-        if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, "$1") !== this.parent.path) {
-          this.set('targetPath', this.parent.path);
+      newDocument: function(type, properties) {
+        var doc = {
+          'entity-type': 'document',
+          'type': type,
+          'name': '',
+          'properties': {
+            'dc:title': '',
+            'dc:description': ''
+          }
+        };
+        // NXP-22300: initialize complex properties
+        if (!(type in schemaRegistry)) {
+          if (!schemaFetcher) {
+            schemaFetcher = document.createElement('nuxeo-resource');
+          }
+          schemaFetcher.path = '/config/types/' + this.selectedDocType.type;
+          return schemaFetcher.get().then(function(doctype) {
+            // cache doctype schemas
+            schemaRegistry[doctype.name] = doctype;
+            return this._newDocument(doctype, doc, properties);
+          }.bind(this));
+        } else {
+          return Promise.resolve(this._newDocument(schemaRegistry[type], doc, properties));
         }
-        var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-                              this.parent.contextParameters.subtypes.map(function(type) {
-                                type.id = type.type.toLowerCase();
-                                return type;
-                              }) : [];
-        var filteredSubtypes = [];
-        if (this._canCreateIn(this.parent)) {
-          subtypes.forEach(function(type) {
-            if (type.facets.indexOf('HiddenInCreation') === -1) {
-              filteredSubtypes.push(type);
-            }
+      },
+
+      _newDocument: function(doctype, doc, properties) {
+        if (doctype.schemas) {
+          doctype.schemas.forEach(function(schema) {
+            this._initializeFields(doc, schema);
           }.bind(this));
         }
-        this.set('subtypes', filteredSubtypes.sort(function(a, b) {
-          if (a.id < b.id) {
-            return -1;
+        if (properties) {
+          for (var prop in properties) {
+            doc.properties[prop] = properties[prop];
           }
-          if (a.id > b.id) {
-            return 1;
+        }
+        return doc;
+      },
+
+      _initializeFields: function(doc, node, nodePath) {
+        if (typeof nodePath === 'undefined') {
+          nodePath = '';
+        }
+        var prefix = (node['@prefix'] ? node['@prefix'] : node['name']);
+        Object.keys(node.fields).forEach(function(fieldName) {
+          var field = node.fields[fieldName]
+          if (field !== null && typeof field === 'object' &&
+              field.type && field.type === 'complex') {
+            this._deepFind(doc.properties, nodePath)[prefix + ':' + fieldName] = {};
+            this._initializeFields(doc, field, field, nodePath === '' ? fieldName : nodePath + '.' + fieldName);
           }
-          return 0;
-        }));
+        }.bind(this));
+      },
+
+      _deepFind: function(node, path) {
+        return path ? path.split('.').reduce(function(obj,p) { return obj[p]; }, node) : node;
+      },
+
+      _parentChanged: function() {
+        if (this.parent) {
+          if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, "$1") !== this.parent.path) {
+            this.set('targetPath', this.parent.path);
+          }
+          var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+                                this.parent.contextParameters.subtypes.map(function(type) {
+                                  type.id = type.type.toLowerCase();
+                                  return type;
+                                }) : [];
+          var filteredSubtypes = [];
+          if (this._canCreateIn(this.parent)) {
+            subtypes.forEach(function(type) {
+              if (type.facets.indexOf('HiddenInCreation') === -1) {
+                filteredSubtypes.push(type);
+              }
+            }.bind(this));
+          }
+          this.set('subtypes', filteredSubtypes.sort(function(a, b) {
+            if (a.id < b.id) {
+              return -1;
+            }
+            if (a.id > b.id) {
+              return 1;
+            }
+            return 0;
+          }));
+        }
+        this._validateLocation();
+      },
+
+      _suggesterChildrenChanged: function() {
+        var valid = (this.parent ? this.targetPath.replace(/(.+)\/$/, "$1") === this.parent.path : false) ||
+                    (this.suggesterParent ?
+                    this.targetPath.replace(/(.+)\/$/, "$1") === this.suggesterParent.path : false) ||
+                    (this.suggesterChildren ? this.suggesterChildren.some(function(child) {
+                      return this.targetPath === child.path;
+                    }.bind(this)) : false);
+        this.set('isValidTargetPath', valid);
+        this.fire('nx-document-creation-suggester-parent-changed', {isValidTargetPath: valid});
+      },
+
+      _validateLocation: function() {
+        if (!this.isValidTargetPath) {
+          this.set('canCreate', false);
+          this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidLocation'));
+        } else if (!this._canCreateIn(this.parent)) {
+          this.set('canCreate', false);
+          this.set('errorMessage', this.i18n('documentCreationBehavior.error.noPermission'));
+        } else if (this.subtypes && this.subtypes.length === 0) {
+          this.set('canCreate', false);
+          this.set('errorMessage', this.i18n('documentCreationBehavior.error.noSubtypes'));
+        } else {
+          this.set('canCreate', true);
+          this.set('errorMessage', '');
+        }
+        this.fire('nx-document-creation-parent-validated');
+      },
+
+      _notify: function(response, close) {
+        this.fire('document-created', {response: response});
+        if (close === undefined) {
+          close = true;
+        }
+        if (close) {
+          this.fire('nx-document-creation-finished');
+        }
+      },
+
+      _formatErrorMessage: function() {
+        return this.errorMessage ? 'error' : '';
+      },
+
+      _canCreateIn: function(document) {
+        if (document && document.contextParameters && document.contextParameters.permissions) {
+          // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
+          // so we had to rely on Write.
+          return document.contextParameters.permissions.indexOf('Write') > -1 ||
+                document.contextParameters.permissions.indexOf('AddChildren') > -1;
+        } else {
+          return false;
+        }
+      },
+
+      _sanitizeName: function(name) {
+        return name.replace(/[^a-z0-9.]/gi, '_');
+      },
+
+      _isValidType: function(type) {
+        return type && this.subtypes && this.subtypes.findIndex(
+            function(t) {
+              return t._id === type._id && t.type === type.type && t.icon === type.icon;
+            }) > -1;
+      },
+
+      _getTypeLabel: function(type) {
+        return this._isValidType(type) ? this.i18n('label.document.type.' + type.id) : '';
+      },
+
+      _getTypeIcon: function(type) {
+        return this._isValidType(type) ? 'images/doctypes/' + type.id + '.svg' : '';
+      },
+
+      // extension point
+      _getDocumentProperties: function() {
+        return null;
       }
-      this._validateLocation();
-    },
-
-    _suggesterChildrenChanged: function() {
-      var valid = (this.parent ? this.targetPath.replace(/(.+)\/$/, "$1") === this.parent.path : false) ||
-                  (this.suggesterParent ?
-                  this.targetPath.replace(/(.+)\/$/, "$1") === this.suggesterParent.path : false) ||
-                  (this.suggesterChildren ? this.suggesterChildren.some(function(child) {
-                    return this.targetPath === child.path;
-                  }.bind(this)) : false);
-      this.set('isValidTargetPath', valid);
-      this.fire('nx-document-creation-suggester-parent-changed', {isValidTargetPath: valid});
-    },
-
-    _validateLocation: function() {
-      if (!this.isValidTargetPath) {
-        this.set('canCreate', false);
-        this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidLocation'));
-      } else if (!this._canCreateIn(this.parent)) {
-        this.set('canCreate', false);
-        this.set('errorMessage', this.i18n('documentCreationBehavior.error.noPermission'));
-      } else if (this.subtypes && this.subtypes.length === 0) {
-        this.set('canCreate', false);
-        this.set('errorMessage', this.i18n('documentCreationBehavior.error.noSubtypes'));
-      } else {
-        this.set('canCreate', true);
-        this.set('errorMessage', '');
-      }
-      this.fire('nx-document-creation-parent-validated');
-    },
-
-    _notify: function(response, close) {
-      this.fire('document-created', {response: response});
-      if (close === undefined) {
-        close = true;
-      }
-      if (close) {
-        this.fire('nx-document-creation-finished');
-      }
-    },
-
-    _formatErrorMessage: function() {
-      return this.errorMessage ? 'error' : '';
-    },
-
-    _canCreateIn: function(document) {
-      if (document && document.contextParameters && document.contextParameters.permissions) {
-        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
-        // so we had to rely on Write.
-        return document.contextParameters.permissions.indexOf('Write') > -1 ||
-              document.contextParameters.permissions.indexOf('AddChildren') > -1;
-      } else {
-        return false;
-      }
-    },
-
-    _sanitizeName: function(name) {
-      return name.replace(/[^a-z0-9.]/gi, '_');
-    },
-
-    _isValidType: function(type) {
-      return type && this.subtypes && this.subtypes.findIndex(function(t) {
-          return t._id === type._id && t.type === type.type && t.icon === type.icon;
-        }) > -1;
-    },
-
-    _getTypeLabel: function(type) {
-      return this._isValidType(type) ? this.i18n('label.document.type.' + type.id) : '';
-    },
-
-    _getTypeIcon: function(type) {
-      return this._isValidType(type) ? 'images/doctypes/' + type.id + '.svg' : '';
-    },
-
-    // extension point
-    _getDocumentProperties: function() {
-      return null;
-    }
-  }];
-})();
+    }];
+  })();
 </script>

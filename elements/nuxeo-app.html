@@ -504,13 +504,13 @@ Contributors:
 
         loadTask: function(id) {
           if (id && id.length > 0){
-              this.loading = true;
-              this.currentTaskId = id;
-              this.$.task.get().then(function(task) {
-                this.currentTask = task;
-                this.show('tasks');
-                this.loading = false;
-              }.bind(this));
+            this.loading = true;
+            this.currentTaskId = id;
+            this.$.task.get().then(function(task) {
+              this.currentTask = task;
+              this.show('tasks');
+              this.loading = false;
+            }.bind(this));
           } else {
             this.currentTask = null;
             this.show('tasks');

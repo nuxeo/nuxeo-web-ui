@@ -207,7 +207,8 @@ Contributors:
         behaviors: [Nuxeo.RoutingBehavior],
 
         observers: [
-            '_selectedItemsChanged(selectedItems.splices)'],
+          '_selectedItemsChanged(selectedItems.splices)'
+        ],
 
         _thumbnail: function(doc) {
           if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
@@ -229,7 +230,7 @@ Contributors:
         },
 
         _onCheckBoxTap: function() {
-         this._toogleSelect();
+          this._toogleSelect();
         },
 
         _toogleSelect: function() {

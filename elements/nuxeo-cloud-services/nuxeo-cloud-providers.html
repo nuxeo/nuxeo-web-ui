@@ -195,10 +195,10 @@ Contributors:
             this.refresh();
             this.fire('notify', {message: this.i18n('cloudProviders.successfullyDeleted')});
           }.bind(this), function() {
-              this.fire('notify', {
-                message: this.i18n('label.error').toUpperCase() + ': ' +
-                this.i18n('cloudProviders.errorDeleting')
-              });
+            this.fire('notify', {
+              message: this.i18n('label.error').toUpperCase() + ': ' +
+              this.i18n('cloudProviders.errorDeleting')
+            });
           }.bind(this));
         }
       }
