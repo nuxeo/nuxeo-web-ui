@@ -308,7 +308,7 @@ Contributors:
           this.$.docRequest.post().then(function(response) {
             this.$.creationStats.storeType(this.selectedDocType.id);
             this._clear();
-            page('/browse' + response.path);
+            this.navigateTo('browse', response.path);
             this._notify(response);
           }.bind(this));
         },

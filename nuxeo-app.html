@@ -439,9 +439,6 @@ Contributors:
           'document-updated': 'refresh',
           'create-document': '_showDocumentCreationWizard',
           'document-created': '_handleDocumentCreated',
-          'goHome': '_handleUGMgoHome',
-          'manageUser': '_handleUGMmanageUser',
-          'manageGroup': '_handleUGMmanageGroup',
           'workflowStarted': '_refreshAndFetchTasks',
           'workflowAbandoned': '_refreshAndFetchTasks',
           'workflowTaskProcess': '_workflowTaskProcess',
@@ -496,7 +493,7 @@ Contributors:
 
         refresh: function() {
           if (this.docPath && this.docPath.length > 0) {
-            page('/browse' + this.docPath);
+            this.navigateTo('browse', this.docPath ? this.docPath : '');
           } else {
             page('/');
           }
@@ -526,7 +523,7 @@ Contributors:
             if (this.docId && !doc.isVersion) {
               this.docId = '';
               this.docPath = doc.path;
-              window.page('/browse' + doc.path);
+              this.navigateTo('browse', doc.path);
             } else {
               var recent = this.$$('#recent');
               if (recent) {
@@ -596,7 +593,7 @@ Contributors:
 
         _navigate: function(e) {
           if (e.detail.doc) {
-            page('/browse' + e.detail.doc.path);
+            this.navigateTo('browse', e.detail.doc.path);
             if (e.detail.isFromCollection) {
               this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
             }
@@ -620,7 +617,8 @@ Contributors:
         },
 
         _showSearchResults: function(e) {
-          page('/search/' + e.target.searchName);
+          //page('/search/' + e.target.searchName);
+          this.navigateTo('search', e.target.searchName);
         },
 
         _toggleDrawer: function(e) {
@@ -647,37 +645,6 @@ Contributors:
           this.$.drawerPanel.closeDrawer();
         },
 
-        _handleUGMgoHome: function() {
-          this.entity = {};
-          page('/admin/user-group-management');
-        },
-
-        _handleUGMmanageUser: function(e) {
-          this.entity = {type: 'user', id: e.detail.user};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          page('/admin/' + url);
-        },
-
-        _handleUGMmanageGroup: function(e) {
-          this.entity = {type: 'group', id: e.detail.group};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          page('/admin/' + url);
-        },
-
         _fetchTasks: function() {
           this.$.tasks.params = {'userId': this.currentUser.id};
           this.$.tasks.get().then(function(response) {
@@ -693,7 +660,7 @@ Contributors:
         },
 
         _workflowTaskProcess: function(e) {
-          page("/tasks/" + e.detail.id);
+          this.navigateTo('tasks', e.detail.id);
         },
 
         _onAddedToClipboard: function(e){

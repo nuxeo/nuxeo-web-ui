@@ -69,10 +69,6 @@ limitations under the License.
           var params = Array.prototype.slice.call(arguments, 1);
           return this.router[route].apply(this, params);
         }
-      },
-
-      navigateTo: function() {
-        window.location = this.urlFor.apply(this, arguments);
       }
     };
   })();

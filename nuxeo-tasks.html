@@ -247,7 +247,7 @@ Contributors:
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
 
         _process: function(e) {
-          page('/tasks/' + e.model.task.id);
+          this.navigateTo('tasks', e.model.task.id);
         },
 
         _currentChanged: function() {
@@ -303,11 +303,11 @@ Contributors:
         },
 
         _prev: function() {
-          page('/tasks/' + this.tasks[this.currenIndex - 1].id);
+          this.navigateTo('tasks', this.tasks[this.currenIndex - 1].id);
         },
 
         _next: function() {
-          page('/tasks/' + this.tasks[this.currenIndex + 1].id);
+          this.navigateTo('tasks', this.tasks[this.currenIndex + 1].id);
         },
 
         _isFirst: function() {

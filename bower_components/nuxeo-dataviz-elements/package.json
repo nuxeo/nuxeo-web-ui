@@ -25,8 +25,8 @@
     "@polymer/iron-component-page": "0.0.3",
     "web-component-tester": "*",
     "moment": "^2.10.6",
-    "eslint": "^3.4.0",
-    "eslint-plugin-html": "^1.5.2",
+    "eslint": "^3.0.0",
+    "eslint-plugin-html": "^2.0.0",
     "polymer-cli": "^0.16.0"
   }
 }

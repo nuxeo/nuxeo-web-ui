@@ -138,8 +138,8 @@ Contributors:
           return page.url('/queue/' + searchId);
         },
 
-        tasks: function() {
-          return page.url('/tasks');
+        tasks: function(id) {
+          return page.url('/tasks' + (typeof id === 'undefined' ? '' : '/' + id));
         },
 
         administration: function(tab) {
@@ -159,7 +159,10 @@ Contributors:
         }
 
       },
-      baseUrl: page.base()
+      baseUrl: page.base(),
+      navigateTo: function() {
+        page(this.urlFor.apply(this, arguments).replace('/#!', ''));
+      }
     });
     document.dispatchEvent(new Event('router-changed'));
   });

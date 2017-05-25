@@ -19,6 +19,7 @@ Contributors:
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
  `nuxeo-search-form`
@@ -345,7 +346,7 @@ Contributors:
     Polymer({
       is: 'nuxeo-search-form',
 
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
 
       properties: {
         /**
@@ -568,7 +569,7 @@ Contributors:
 
       _selectedDocChanged: function(doc) {
         if (doc) {
-          page('/browse' + doc.path);
+          this.navigateTo('browse',  doc.path);
         }
       },
 

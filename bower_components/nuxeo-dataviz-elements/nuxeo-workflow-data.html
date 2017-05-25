@@ -144,7 +144,7 @@ If all the aggregation levels are configured it will produce a query like:
 
     // @override
     _fieldFor: function(column) {
-      // TODO: limit 'exposed' fields to system field (ex: 'user', 'taskName', 'action', 'duration', etc) and 'workflowVariables.*'
+      // TODO: limit 'exposed' fields to system field (ex: 'user', 'taskName', 'action', etc) and 'workflowVariables.*'
       return 'extended.' + column;
     }
 

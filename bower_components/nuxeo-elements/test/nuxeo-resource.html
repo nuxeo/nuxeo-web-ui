@@ -95,24 +95,24 @@ limitations under the License.
 
       // This test fails on firefox due to the 'error' event fired in component
       // https://github.com/webcomponents/webcomponentsjs/issues/138
-       test('shouldn\'t retrieve something invalid', function() {
-         server.respondWith(
-           'GET',
-           '/api/v1/something?',
-           [
-             500,
-             responseHeaders.json,
-             '{"message":"Internal Server Error"}'
-           ]
-         );
+      test('shouldn\'t retrieve something invalid', function() {
+        server.respondWith(
+         'GET',
+         '/api/v1/something?',
+          [
+            500,
+            responseHeaders.json,
+            '{"message":"Internal Server Error"}'
+          ]
+        );
 
-         var resource = fixture('nxc-ok');
-         return resource.get().then(function() {
-           throw new Error('Expected to an invalid response!');
-         }).catch(function(error) {
-           expect(error.message).to.be.eq('Internal Server Error');
-         });
-       });
+        var resource = fixture('nxc-ok');
+        return resource.get().then(function() {
+          throw new Error('Expected to an invalid response!');
+        }).catch(function(error) {
+          expect(error.message).to.be.eq('Internal Server Error');
+        });
+      });
 
     });
 

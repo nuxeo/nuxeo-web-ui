@@ -170,7 +170,7 @@ element.
 
       // Look up document schemas to be returned
       if (this.schemas && this.schemas.length > 1) {
-          options.schemas = this.schemas.trim().split(/[\s,]+/);
+        options.schemas = this.schemas.trim().split(/[\s,]+/);
       }
       // Look up headers parameter
       options.headers = this.headers || {};
@@ -207,7 +207,8 @@ element.
       return this._request
         .path(this.path)
         .queryParams(params)
-        .repositoryName(this._request._baseOptions.repositoryName === 'default' ? undefined : this._request._baseOptions.repositoryName)
+        .repositoryName(this._request._baseOptions.repositoryName === 'default' ?
+          undefined : this._request._baseOptions.repositoryName)
         .execute(options)
         .then(function(response) {
           return response.text().then(function(text) {

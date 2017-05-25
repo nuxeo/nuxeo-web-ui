@@ -99,7 +99,7 @@ Example:
           url = url.replace(/(^\/+)|([^:])\/\/+/g, '$2/');
 
           if (this.type) { url += '?search_type=' + this.type; }
-           var options = {
+          var options = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: {
