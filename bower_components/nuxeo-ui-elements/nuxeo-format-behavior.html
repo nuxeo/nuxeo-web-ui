@@ -47,9 +47,9 @@ limitations under the License.
      */
     formatDate: function(date, fmt) {
       moment.locale(this._languageCode());
-        if (fmt && fmt === "relative"){
-            return moment().to(date) ;
-        }
+      if (fmt && fmt === "relative"){
+        return moment().to(date) ;
+      }
       return moment(date).format(fmt || 'MMMM D, YYYY');
     },
 

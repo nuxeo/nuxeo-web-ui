@@ -115,11 +115,11 @@ limitations under the License.
          * `true` if the table is currently loading data from the data source.
          */
         loading: {
-         type: Boolean,
-         reflectToAttribute: true,
-         notify: true,
-         readOnly: true,
-         value: false
+          type: Boolean,
+          reflectToAttribute: true,
+          notify: true,
+          readOnly: true,
+          value: false
         },
 
         selectionEnabled: {
@@ -261,11 +261,12 @@ limitations under the License.
         if (!this.loading) {
           var selectedItems = this.$.list.selectedItems;
           this._isSelectAllIndeterminate = selectedItems
-                                            && selectedItems.length > 0
-                                            && selectedItems.length < this.size;
+              && selectedItems.length > 0
+              && selectedItems.length < this.size;
           this._isSelectAllChecked = selectedItems && selectedItems.length > 0 && selectedItems.length === this.size;
           this._isEmpty = this.size === 0;
-          this._computedEmptyLabel = (this.filters && this.filters.length > 0) ? this.emptyLabelWhenFiltered : this.emptyLabel;
+          this._computedEmptyLabel = (this.filters && this.filters.length > 0) ?
+              this.emptyLabelWhenFiltered : this.emptyLabel;
         }
       },
 

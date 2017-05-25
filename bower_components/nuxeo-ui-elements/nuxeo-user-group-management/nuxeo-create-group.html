@@ -241,7 +241,7 @@ Used by `nuxeo-user-group-management`
         this.fire('goHome');
       },
 
-      _observeSelectedUser: function(selectedUser) {
+      _observeSelectedUser: function() {
         if (this.selectedUser && this.selectedUsers.indexOf(this.selectedUser) === -1) {
           this.push('selectedUsers', this.selectedUser);
         }

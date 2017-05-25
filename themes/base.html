@@ -21,6 +21,18 @@
     font-weight: 400;
   }
 
+  /* dialogs */
+  body ::content nuxeo-dialog {
+    min-width: 480px;
+  }
+
+  @media (max-width: 1024px) {
+    body ::content nuxeo-dialog {
+      min-width: 0;
+      width: 90%;
+    }
+  }
+
   /* scrollbars */
   body ::content ::-webkit-scrollbar-track {
     width: 3px;

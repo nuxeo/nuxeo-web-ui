@@ -104,7 +104,7 @@ limitations under the License.
         },
 
         observers: [
-            '_updateModel(model.*)'
+          '_updateModel(model.*)'
         ],
 
         attached: function() {
@@ -136,7 +136,7 @@ limitations under the License.
             if (c$ && c$.length) {
               // use first child parent, for case when dom-if may have been detached
               var p = Polymer.dom(Polymer.dom(c$[0]).parentNode);
-              for (var i=0, n; (i<c$.length) && (n=c$[i]); i++) {
+              for (var i = 0, n; (i < c$.length) && (n = c$[i]); i++) {
                 p.removeChild(n);
               }
             }

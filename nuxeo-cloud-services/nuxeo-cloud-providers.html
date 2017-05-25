@@ -79,10 +79,12 @@ Contributors:
 
     <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('cloudProviders.popup.editEntry')]]</h2>
-      <form id="form" is="iron-form" action="/">
-        <nuxeo-cloud-provider-edit id="edit" entry="{{_selectedEntry}}" isNew="[[_isNew]]">
-        </nuxeo-cloud-provider-edit>
-      </form>
+      <paper-dialog-scrollable>
+        <form id="form" is="iron-form" action="/">
+          <nuxeo-cloud-provider-edit id="edit" entry="{{_selectedEntry}}" isNew="[[_isNew]]">
+          </nuxeo-cloud-provider-edit>
+        </form>
+      </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
