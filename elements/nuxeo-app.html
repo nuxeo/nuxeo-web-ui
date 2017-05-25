@@ -439,9 +439,6 @@ Contributors:
           'document-updated': 'refresh',
           'create-document': '_showDocumentCreationWizard',
           'document-created': '_handleDocumentCreated',
-          'goHome': '_handleUGMgoHome',
-          'manageUser': '_handleUGMmanageUser',
-          'manageGroup': '_handleUGMmanageGroup',
           'workflowStarted': '_refreshAndFetchTasks',
           'workflowAbandoned': '_refreshAndFetchTasks',
           'workflowTaskProcess': '_workflowTaskProcess',
@@ -646,37 +643,6 @@ Contributors:
           this.drawerWidth = '52px';
           this.drawerOpened = false;
           this.$.drawerPanel.closeDrawer();
-        },
-
-        _handleUGMgoHome: function() {
-          this.entity = {};
-          page('/admin/user-group-management');
-        },
-
-        _handleUGMmanageUser: function(e) {
-          this.entity = {type: 'user', id: e.detail.user};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          page('/admin/' + url);
-        },
-
-        _handleUGMmanageGroup: function(e) {
-          this.entity = {type: 'group', id: e.detail.group};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          page('/admin/' + url);
         },
 
         _fetchTasks: function() {
