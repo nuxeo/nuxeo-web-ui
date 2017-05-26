@@ -339,7 +339,8 @@ Contributors:
         properties: {
           baseUrl: {
             type: String,
-            value: '/'
+            value: '/',
+            observer: '_baseUrlChanged'
           },
 
           loading: {
@@ -548,6 +549,10 @@ Contributors:
 
         show: function(page) {
           this.page = page;
+        },
+
+        _baseUrlChanged: function() {
+          Nuxeo.RoutingBehavior.baseUrl = this.baseUrl;
         },
 
         _logo: function(baseUrl) {
