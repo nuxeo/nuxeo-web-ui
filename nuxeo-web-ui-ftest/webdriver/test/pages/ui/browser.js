@@ -2,6 +2,7 @@
 
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
+import DocumentPermissions from './browser/document_permissions';
 
 export default class Browser extends BasePage {
 
@@ -15,6 +16,14 @@ export default class Browser extends BasePage {
 
   get permissions() {
     return this._section('permissions').element('nuxeo-document-permissions');
+  }
+
+  get permissionsView() {
+    return new DocumentPermissions('nuxeo-document-permissions');
+  }
+
+  get permissionsViewButton() {
+    return this.page.element('///nuxeo-page-item[@name="permissions"]');
   }
 
   get breadcrumb() {

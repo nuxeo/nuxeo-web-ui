@@ -15,6 +15,16 @@ module.exports = function () {
       },
     }));
 
+  this.Given('user "$username" exists', (username) => fixtures.users.create(
+    {
+      'entity-type': 'user',
+      properties: {
+        username,
+        firstName: username,
+        password: fixtures.users.DEFAULT_PASSWORD,
+      },
+    }));
+
   this.When('I login as "$username"', (username) => {
     const login = Login.get();
     login.username = username;
