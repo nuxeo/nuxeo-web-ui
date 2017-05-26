@@ -4,6 +4,15 @@ global.fieldRegistry = new FieldRegistry();
 global.fieldRegistry.register('nuxeo-input',
                               (element) => element.element('#input').getValue(),
                               (element, value) => { element.element('#input').setValue(value); });
+global.fieldRegistry.register('nuxeo-select',
+                              (element) => {
+                                element.element('#input').getValue();
+                              },
+                              (element, value) => {
+                                element.element('#input').click();
+                                driver.waitForVisible(`//paper-item[text()="${value}"]`);
+                                element.element(`///paper-item[text()="${value}"]`).click();
+                              });
 global.fieldRegistry.register('nuxeo-date-picker',
                               (element) => element.element('#input').getValue(),
                               (element, value) => {
@@ -14,6 +23,17 @@ global.fieldRegistry.register('nuxeo-date-picker',
 global.fieldRegistry.register('nuxeo-textarea',
                               (element) => element.element('#textarea').getValue(),
                               (element, value) => { element.element('#textarea').setValue(value); });
+global.fieldRegistry.register('nuxeo-user-suggestion',
+                              (element) => {
+                                driver.element(`#select2-drop div.select2-search input.select2-input`).getValue();
+                              },
+                              (element, value) => {
+                                element.element('nuxeo-select2 div#s2id_select2').click();
+                                driver.waitForVisible(`#select2-drop div.select2-search input.select2-input`);
+                                driver.element(`#select2-drop div.select2-search input.select2-input`).setValue(value);
+                                driver.waitForVisible(`#select2-drop li.select2-result`);
+                                driver.element(`#select2-drop li.select2-result`).click();
+                              });
 global.fieldRegistry.register('nuxeo-directory-suggestion',
                               (element) => {
                                 if (element.getAttribute('multiple')) {
@@ -52,6 +72,22 @@ global.fieldRegistry.register('nuxeo-directory-suggestion',
 global.fieldRegistry.register('paper-input',
                               (element) => element.element('#input').getValue(),
                               (element, value) => { element.element('#input').setValue(value); });
+global.fieldRegistry.register('paper-radio-button',
+                              (element) => {
+                                element.element('#radioContainer').getAttribute('multiple');
+                              },
+                              (element, value) => {
+                                element.element('#radioContainer').click();
+                              });
+global.fieldRegistry.register('paper-checkbox',
+                              (element) => {
+                                element.getAttribute('checked');
+                              },
+                              (element, value) => {
+                                if ((value === false && element.getAttribute('checked') === 'true') || (value === true && element.getAttribute('checked') === 'null')) {
+                                  element.click();
+                                }
+                              })
 global.fieldRegistry.register('generic',
                               (element) => element.getText(),
                               (element, value) => element.setValue(value));
