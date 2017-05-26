@@ -137,7 +137,7 @@ Contributors:
       <div class="content">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout vertical">
-            <div class="layout horizontal center task-header">
+            <div class="layout horizontal center task-header wrap">
               <paper-icon-button noink icon="icons:chevron-left" class="prev-button" on-tap="_prev" disabled$="[[_isFirst(current, tasks)]]"></paper-icon-button>
               <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
               <div class="layout horizontal center flex">
@@ -157,7 +157,7 @@ Contributors:
               <paper-button noink on-tap="_toggleGraphDialog">[[i18n('tasks.viewGraph')]]</paper-button>
               <paper-icon-button noink icon="icons:chevron-right" class="next-button" on-tap="_next" disabled$="[[_isLast(current, tasks)]]"></paper-icon-button>
             </div>
-            <div class="layout horizontal">
+            <div class="layout horizontal wrap">
               <template is="dom-if" if="[[_docId(current)]]">
                 <div class="vertical layout flex-2 document-view">
                   <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
