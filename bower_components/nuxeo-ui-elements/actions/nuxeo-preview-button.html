@@ -104,7 +104,7 @@ Example:
       },
 
       _isAvailable: function(document) {
-        return !this.hasFacet(document, 'Folderish');
+        return !(this.hasFacet(document, 'Folderish') || this.hasFacet(document, 'Collection'));
       },
 
       _toggleDialog: function() {
