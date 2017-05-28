@@ -289,25 +289,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="browseDrawerPage" slot="DRAWER_PAGES">
   <template>
-    <nuxeo-document-tree name="browser" id="navTree" label="app.browse" current-document="[[currentDocument]]"></nuxeo-document-tree>
-  </template>
-</nuxeo-slot-content>
-<nuxeo-slot-content name="browsePage" slot="PAGES">
-  <template>
-    <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" clipboard="[[clipboard]]" selected-tab="[[docAction]]"></nuxeo-browser>
-  </template>
-</nuxeo-slot-content>
-<nuxeo-slot-content name="errorPage" slot="PAGES">
-  <template>
-    <nuxeo-page name="error">
-      <div class="header"></div>
-      <div class="content">
-        <paper-card>
-          <nuxeo-error id="error" code="[[error.code]]" url="[[error.url]]" message="[[error.message]]">
-          </nuxeo-error>
-        </paper-card>
-      </div>
-    </nuxeo-page>
+    <nuxeo-document-tree name="browser" id="navTree" label="app.browse" current-document="[[document]]"></nuxeo-document-tree>
   </template>
 </nuxeo-slot-content>
 
@@ -345,12 +327,6 @@
                                label="expiredSearch.expiredDocuments"></nuxeo-search-form>
   </template>
 </nuxeo-slot-content>
-<nuxeo-slot-content name="searchPage" slot="PAGES">
-  <template>
-    <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
-  </template>
-</nuxeo-slot-content>
-
 
 <nuxeo-slot-content name="tasksDrawerItem" slot="DRAWER_ITEMS" order="50">
   <template>
@@ -362,11 +338,6 @@
     <nuxeo-tasks-drawer name="tasks" tasks="[[tasks]]" current-task="[[currentTask]]"></nuxeo-tasks-drawer>
   </template>
 </nuxeo-slot-content>
-<nuxeo-slot-content name="tasksPage" slot="PAGES">
-  <template>
-    <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
-  </template>
-</nuxeo-slot-content>
 
 <nuxeo-slot-content name="favoritesDrawerItem" slot="DRAWER_ITEMS" order="60">
   <template>
@@ -375,7 +346,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="favoritesDrawerPage" slot="DRAWER_PAGES">
   <template>
-    <nuxeo-favorites name="favorites" doc="[[currentDocument]]"></nuxeo-favorites>
+    <nuxeo-favorites name="favorites"></nuxeo-favorites>
   </template>
 </nuxeo-slot-content>
 
@@ -403,7 +374,7 @@
 <nuxeo-slot-content name="personalWorkspaceDrawerPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-document-tree name="personalWorkspace" label="app.personalSpace"
-                         current-document="[[currentDocument]]"
+                         current-document="[[document]]"
                          root-doc-path="[[userWorkspace]]"></nuxeo-document-tree>
   </template>
 </nuxeo-slot-content>
@@ -415,7 +386,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="clipboardDrawerPage" slot="DRAWER_PAGES">
   <template>
-    <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[currentDocument]]"></nuxeo-clipboard>
+    <nuxeo-clipboard name="clipboard" id="clipboard" target-document="[[document]]"></nuxeo-clipboard>
   </template>
 </nuxeo-slot-content>
 

@@ -313,11 +313,27 @@ Contributors:
 
           <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
 
+          <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
+
+          <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
+
+          <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+
           <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
 
           <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
           <nuxeo-themes name="themes" selected="[[selectedProfileTab]]"></nuxeo-themes>
+
+          <nuxeo-page name="error">
+            <div class="header"></div>
+            <div class="content">
+              <paper-card>
+                <nuxeo-error id="error" code="[[error.code]]" url="[[error.url]]" message="[[error.message]]">
+                </nuxeo-error>
+              </paper-card>
+            </div>
+          </nuxeo-page>
 
         </iron-pages>
 
@@ -427,7 +443,7 @@ Contributors:
           actionContext: {
             type: Object,
             computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-            ' clipboard, clipboardDocCount, userWorkspace, docAction, error)'
+            ' clipboard, clipboardDocCount, userWorkspace)'
           },
 
           clipboard: {
@@ -477,8 +493,7 @@ Contributors:
           'collection-loaded': '_updateCollectionMenu',
           'notify': '_notify',
           'nx-clipboard-updated': '_clipboardUpdated',
-          'drawer-pages.iron-items-changed': '_updateDrawer',
-          'pages.iron-items-changed': '_updatePages'
+          'drawer-pages.iron-items-changed': '_updateSearch'
         },
 
         ready: function() {
@@ -495,12 +510,6 @@ Contributors:
           window.addEventListener('nuxeo-documents-deleted-error', function(e) {
             this._documentsDeletedError(e.detail.response, e.detail.documents);
           }.bind(this));
-
-          window.addEventListener('selected-tab-changed', function(e) {
-            if (e.srcElement === this.$$('#browser')) {
-              this.set('docAction', e.detail.value);
-            }
-          }.bind(this), true);
         },
 
         refresh: function() {
@@ -568,7 +577,7 @@ Contributors:
 
         _actionContext: function() {
           return {
-            currentDocument: this.currentDocument,
+            document: this.currentDocument,
             user: this.currentUser,
             taskCount: this.taskCount,
             tasks: this.tasks,
@@ -576,9 +585,7 @@ Contributors:
             clipboardDocCount: this.clipboardDocCount,
             clipboard: this.clipboard,
             actionContext: this.actionContext,
-            userWorkspace: this.userWorkspace,
-            docAction: this.docAction,
-            error: this.error
+            userWorkspace: this.userWorkspace
           };
         },
 
@@ -612,13 +619,12 @@ Contributors:
           }
         },
 
+        // lookup the search
         _updateSearch: function() {
           this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
-          if (this.searchForm && this.searchResults) {
-            this.searchResults.searchForm = this.searchForm;
-            if (this.postponedSearch) {
-              this._search();
-            }
+          if (this.searchForm && this._searchOnLoad) {
+            this.searchForm._search();
+            this._searchOnLoad = false;
           }
         },
 
@@ -851,53 +857,6 @@ Contributors:
         _clipboardUpdated: function(e) {
           this.clipboard = this.clipboard || this.$$('#clipboard');
           this.set('clipboardDocCount', e.detail.docCount);
-        },
-
-        _updateDrawer: function() {
-          this.$['drawer-pages'].items.forEach(function(drawerPage) {
-            switch (drawerPage.tagName) {
-              case 'NUXEO-SEARCH-FORM':
-                var searchName = drawerPage.getAttribute('search-name');
-                if (searchName === this.searchName) {
-                  this.searchForm = drawerPage;
-                  if (this.searchForm.auto && this.searchResults) {
-                    this.searchResults.searchForm = this.searchForm;
-                    if (this.postponedSearch) {
-                      this._search();
-                    }
-                  }
-                }
-                break;
-            }
-          }.bind(this));
-        },
-
-        _updatePages: function() {
-          this.$['pages'].items.forEach(function(page) {
-            switch (page.tagName) {
-              case 'NUXEO-SEARCH-RESULTS':
-                this.searchResults = page;
-                if (this.searchForm && this.searchForm.auto) {
-                  this.searchResults.searchForm = this.searchForm;
-                  if (this.postponedSearch) {
-                    this._search();
-                  }
-                }
-            }
-          }.bind(this));
-        },
-
-        anticipateSearch: function() {
-          if (this.searchForm && this.searchResults && this.searchForm.auto) {
-            this._search();
-          } else {
-            this.postponedSearch = true;
-          }
-        },
-
-        _search: function() {
-          this.searchForm._search();
-          this.postponedSearch = false;
         }
 
       });
