@@ -17,7 +17,17 @@ Contributors:
     Gabriel Barata <gbarata@nuxeo.com>
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
+<link rel="import" href="../nuxeo-document-creation-stats/nuxeo-document-creation-stats.html">
+<link rel="import" href="nuxeo-document-layout.html">
 
 <!--
 `nuxeo-document-create`
@@ -174,7 +184,7 @@ Contributors:
                             name$="[[type.type]]"
                             class="docTypeButton vertical layout"
                             on-tap="_selectType"
-                            data-args="[[type]]">
+                            data-args$="[[type]]">
                 <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
                 <span>[[_getTypeLabel(type)]]</span>
               </paper-button>

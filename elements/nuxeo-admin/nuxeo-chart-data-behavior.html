@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,10 @@ Contributors:
 -->
 <script>
   var Nuxeo = Nuxeo || {};
+
+  /**
+   * @polymerBehavior Nuxeo.ChartDataBehavior
+   */
   Nuxeo.ChartDataBehavior = {
     _labels: function(data) {
       return data.map(function(entry) {

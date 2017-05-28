@@ -1,4 +1,5 @@
 <!--
+@license
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
@@ -16,12 +17,20 @@ Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 -->
 
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <script>
   var Nuxeo = Nuxeo || {};
 
   (function() {
     var schemaFetcher = null;
     var schemaRegistry = {};
+
+    /**
+     * `Nuxeo.DocumentCreationBehavior`
+     *
+     * @polymerBehavior
+     */
     Nuxeo.DocumentCreationBehavior = [Nuxeo.FormatBehavior, Nuxeo.RoutingBehavior, {
       properties: {
         parent: {
