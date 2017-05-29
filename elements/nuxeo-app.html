@@ -488,7 +488,7 @@ Contributors:
             this._onError(error);
           }.bind(this));
 
-          window.addEventListener('nuxeo-documents-deleted', function(e) {
+          window.addEventListener('nuxeo-documents-deleted', function() {
             this._fetchTasks();
           }.bind(this));
 
