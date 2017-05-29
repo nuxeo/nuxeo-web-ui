@@ -51,7 +51,7 @@ Contributors:
       <paper-tooltip for="addColBut">[[i18n('addToCollectionDocumentsButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" no-auto-focus with-backdrop>
+    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" no-auto-focus with-backdrop reparent>
       <paper-dialog-scrollable>
         <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
         <label>[[i18n('addToCollectionDocumentsButton.dialog.collections')]]<span class="required">*</span></label>
