@@ -218,6 +218,10 @@ Contributors:
       ],
 
       ready: function() {
+        window.addEventListener('nuxeo-documents-deleted', function(e) {
+          this.removeDocuments(e.detail.documentIds);
+        }.bind(this));
+
         this.controller = {
           getChildren: function(node, page) {
             this.$.children.params = [node.uid];
