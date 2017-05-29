@@ -41,6 +41,10 @@ Contributors:
         color: var(--paper-input-container-invalid-color, red);
         padding: 4px;
       }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
     </style>
 
     <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
