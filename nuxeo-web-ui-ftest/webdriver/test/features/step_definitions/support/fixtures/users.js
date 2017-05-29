@@ -16,6 +16,8 @@ fixtures.users = {
           .catch((response) => {
             if (response.response && response.response.status && response.response.status === 404) {
               return nuxeo.users().create(user);
+            } else {
+              throw `unable to fetch user "${username}"`;
             }
           }).then((_user) => {
             users[_user.id] = 'password';
@@ -28,9 +30,6 @@ fixtures.users = {
 
 module.exports = function () {
   this.After(() => Promise.all(Object.keys(users).map((user) => {
-    if (user !== 'Administrator') {
-      nuxeo.users().delete(user);
-      delete users[user];
-    }
+    return (user !== 'Administrator' ? fixtures.users.delete(user) : Promise.resolve());
   })));
 };
