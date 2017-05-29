@@ -490,10 +490,6 @@ Contributors:
 
           window.addEventListener('nuxeo-documents-deleted', function(e) {
             this._fetchTasks();
-            var navTree = this.$$('navTree');
-            if (navTree) {
-              navTree.removeDocuments(e.detail.documentIds);
-            }
           }.bind(this));
 
           window.addEventListener('nuxeo-documents-deleted-error', function(e) {
