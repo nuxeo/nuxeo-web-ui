@@ -59,12 +59,10 @@ Contributors:
     <nuxeo-page class="main">
 
       <div class="header">
-        <paper-toolbar>
-          <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
-          <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-            <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
-          </paper-listbox>
-        </paper-toolbar>
+        <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
+        <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+          <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+        </paper-listbox>
       </div>
 
       <div class="content">

@@ -79,17 +79,6 @@ Contributors:
         box-shadow: 3px 0 5px rgba(0,0,0,0.04) inset;
       }
 
-      paper-header-panel ::content paper-toolbar {
-        width: 100%;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
-      }
-
-      paper-header-panel ::content paper-toolbar paper-toolbar {
-        box-shadow: none;
-      }
-
       paper-header-panel, iron-pages::content paper-header-panel {
         --paper-header-panel-body: {
           background: var(--nuxeo-page-background);
@@ -253,16 +242,9 @@ Contributors:
         display: none;
       }
 
-      paper-drawer-panel[narrow] ::content nuxeo-page ::content paper-toolbar ::content .header {
+      paper-drawer-panel[narrow] ::content nuxeo-page ::content .header {
         margin-left: 32px;
       }
-
-      @media (max-width: 1024px) {
-        paper-header-panel ::content paper-toolbar .header {
-          overflow-y: scroll;
-        }
-      }
-
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
