@@ -59,12 +59,12 @@ Contributors:
     });
 
     page('/search/:searchName', function(data) {
-      app.searchName = data.params.searchName;
-      app.show('search');
       // trigger search when navigating to it directly
       if (page.len === 0) {
-        app.anticipateSearch();
+        app._searchOnLoad = true;
       }
+      app.searchName = data.params.searchName;
+      app.show('search');
     });
 
     page('/doc/:repo?/:id/', function(data) {
@@ -110,58 +110,67 @@ Contributors:
     });
 
     // add #! before urls
-    var useHashbang = true;
     page({hashbang: true, click: false});
-    page.url = function(path) {
-      return page.base() + '/' + (useHashbang ? '#!' : '') + path;
-    };
 
+    Nuxeo.RoutingBehavior.useHashbang = true;
     Polymer.Base._addFeature({
       router: {
         browse: function(path) {
-          return page.url('/browse' + path);
+          return '/browse' + path;
         },
 
         document: function(id) {
-          return page.url('/doc/' + id);
+          return '/doc/' + id;
         },
 
         home: function() {
-          return page.url('/home');
+          return '/home';
         },
 
         search: function(searchId) {
-          return page.url('/search/' + searchId);
+          return '/search/' + searchId;
         },
 
         queue: function(searchId) {
-          return page.url('/queue/' + searchId);
+          return '/queue/' + searchId;
         },
 
         tasks: function(id) {
-          return page.url('/tasks' + (typeof id === 'undefined' ? '' : '/' + id));
+          return '/tasks' + (typeof id === 'undefined' ? '' : '/' + id);
         },
 
         administration: function(tab) {
-          return page.url('/admin/' + tab);
+          return '/admin/' + tab;
         },
 
         user: function(name) {
-          return page.url('/user/' + name);
+          return '/user/' + name;
         },
 
         group: function(name) {
-          return page.url('/group/' + name);
+          return '/group/' + name;
         },
 
         page: function(name) {
-          return page.url('/' + name);
+          return '/' + name;
         }
 
       },
-      baseUrl: page.base(),
       navigateTo: function() {
-        page(this.urlFor.apply(this, arguments).replace('/#!', ''));
+        if (this.router) {
+          var route = arguments[0];
+          var baseUrl = Nuxeo.RoutingBehavior.baseUrl || '';
+          if (route.startsWith('/')) {
+            page(baseUrl + route);
+          }
+          if (!this.router[route]) {
+            console.error('Could not navigate to a url for route ' + route);
+          }
+          var params = Array.prototype.slice.call(arguments, 1);
+          page(this.router[route].apply(this, params));
+        } else {
+          console.error('No router defined');
+        }
       }
     });
     document.dispatchEvent(new Event('router-changed'));

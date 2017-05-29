@@ -28,13 +28,6 @@ limitations under the License.
     Nuxeo.RoutingBehavior = {
       properties: {
         router: Object,
-
-        baseUrl: {
-          type: String,
-          value: '',
-          notify: true
-        },
-
         urlFor: {
           type: Function,
           notify: true,
@@ -59,15 +52,18 @@ limitations under the License.
       generateUrl: function() {
         if (this.router) {
           var route = arguments[0];
+          var baseUrl = Nuxeo.RoutingBehavior.baseUrl || '';
           if (route.startsWith('/')) {
-            return this.baseUrl + route;
+            return baseUrl + route;
           }
           if (!this.router[route]) {
             console.error('Could not generate a url for route ' + route);
             return;
           }
           var params = Array.prototype.slice.call(arguments, 1);
-          return this.router[route].apply(this, params);
+          return baseUrl + (baseUrl.endsWith('/') ? '' : '/') +
+                           (Nuxeo.RoutingBehavior.useHashbang ? '#!' : '') +
+                           this.router[route].apply(this, params);
         }
       }
     };
