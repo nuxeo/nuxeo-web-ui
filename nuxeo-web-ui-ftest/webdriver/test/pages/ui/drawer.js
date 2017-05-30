@@ -1,24 +1,21 @@
 'use strict';
 
+import BasePage from '../base';
 import Collections from './collections';
 import Favorites from './favorites';
 
-export default class Drawer {
-
-  constructor(selector) {
-    this._selector = selector;
-  }
+export default class Drawer extends BasePage {
 
   get menu() {
-    return driver.element(this._selector).element('#menu');
+    return this.el.element('#menu');
   }
 
   get pages() {
-    return driver.element(this._selector).element('iron-pages');
+    return this.el.element('iron-pages');
   }
 
   get logo() {
-    return driver.element(this._selector).element('#logo');
+    return this.el.element('#logo');
   }
 
   get browser() {
@@ -42,7 +39,7 @@ export default class Drawer {
   }
 
   get tasksLink() {
-      return this.pages.element(`a.tasks-dashboard`);
+    return this.pages.element(`a.tasks-dashboard`);
   }
 
   get favorites() {

@@ -1,19 +1,13 @@
 'use strict';
+
+import BasePage from '../../base';
 import DocumentAttachments from './document_attachments';
 import NoteEditor from '../note_editor';
 
-export default class DocumentView {
-  constructor(el, docType) {
-    this.el = el;
+export default class DocumentView extends BasePage {
+  constructor(selector, docType) {
+    super(selector);
     this.docType = docType;
-  }
-
-  isVisible() {
-    return this.el.isVisible();
-  }
-
-  waitForVisible() {
-    return this.el.waitForVisible();
   }
 
   get preview() {
@@ -25,10 +19,10 @@ export default class DocumentView {
   }
 
   get attachments() {
-    return new DocumentAttachments(this.el.element('nuxeo-document-attachments'), this.docType);
+    return new DocumentAttachments('nuxeo-document-attachments', this.docType);
   }
 
   get noteEditor() {
-    return new NoteEditor(this.el.element('nuxeo-note-editor'));
+    return new NoteEditor('nuxeo-note-editor');
   }
 }

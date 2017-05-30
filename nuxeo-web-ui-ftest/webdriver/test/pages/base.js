@@ -11,11 +11,11 @@ export default class BasePage {
   }
 
   isVisible() {
-    return this.el.isVisible();
+    return this.el.isVisible.apply(this, arguments);
   }
 
   waitForVisible() {
-    return this.el.waitForVisible();
+    return this.el.waitForVisible.apply(this, arguments);
   }
 
 }

@@ -29,7 +29,6 @@ fixtures.users = {
 };
 
 module.exports = function () {
-  this.After(() => Promise.all(Object.keys(users).map((user) => {
-    return (user !== 'Administrator' ? fixtures.users.delete(user) : Promise.resolve());
-  })));
+  this.After(() => Promise.all(Object.keys(users)
+      .map((user) => user !== 'Administrator' ? fixtures.users.delete(user) : Promise.resolve())));
 };

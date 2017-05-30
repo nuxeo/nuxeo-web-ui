@@ -1,30 +1,35 @@
 'use strict';
 
-export default class Favorites {
+import BasePage from '../base';
 
-  constructor(selector) {
-    driver.waitForVisible(selector);
-    this.page = driver.element(selector);
-  }
+export default class Favorites extends BasePage {
 
   hasDocument(doc) {
-    const favorites = this.page.elements(`#favoritesList #items div`).value;
-    return favorites.some((favorite) =>
-      favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title
-    );
+    this.waitForVisible();
+    return this._hasDocument(doc, this.el);
   }
 
   removeDocument(doc) {
-    const favorites = this.page.elements(`#favoritesList #items div`).value;
+    this.waitForVisible();
+    const favorites = this.el.elements(`#favoritesList #items div`).value;
     return favorites.some((favorite) => {
       if (favorite.getText(`span.list-item-title`).trim() === doc.title) {
         favorite.element(`iron-icon.remove`).click();
-        driver.waitUntil(() => !this.hasDocument(doc));
+        const el = this.el;
+        driver.waitUntil(() => !this._hasDocument(doc, el));
         return true;
       } else {
         return false;
       }
     });
+  }
+
+  // prevent usage of this.el inside waitUntil
+  _hasDocument(doc, el) {
+    const favorites = el.elements(`#favoritesList #items div`).value;
+    return favorites.some((favorite) =>
+        favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title
+    );
   }
 
 }

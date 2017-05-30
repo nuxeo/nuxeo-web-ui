@@ -1,21 +1,11 @@
 'use strict';
 
-export default class ActivityFeed {
+import BasePage from '../base';
 
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
-
-  waitForVisible() {
-    return this.page.waitForVisible();
-  }
+export default class ActivityFeed extends BasePage {
 
   getActivity(activity) {
-    return this.page.element(`///*[text()="${activity}"]`);
+    return this.el.element(`///*[text()="${activity}"]`);
   }
 
 }

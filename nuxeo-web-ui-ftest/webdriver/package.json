@@ -4,8 +4,11 @@
   "scripts": {
     "lint": "eslint scripts test",
     "test": "scripts/test.js",
+      "pretest": "npm run lint",
     "test:dev": "NUXEO_URL=http://localhost:8080/nuxeo chimp config/chimp.js --watch",
-    "test:watch": "chimp config/chimp.js --watch"
+      "pretest:dev": "npm run lint",
+    "test:watch": "chimp config/chimp.js --watch",
+      "pretest:watch": "npm run lint"
   },
   "license": "Apache-2.0",
   "devDependencies": {

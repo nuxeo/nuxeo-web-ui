@@ -1,21 +1,11 @@
 'use strict';
 
-export default class HistoryTable {
+import BasePage from '../base';
 
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
-
-  waitForVisible() {
-    return this.page.waitForVisible();
-  }
+export default class HistoryTable extends BasePage {
 
   getHistory(event) {
-    return this.page.element(`///*[text()="${event}"]`);
+    return this.el.element(`///*[text()="${event}"]`);
   }
 
 }

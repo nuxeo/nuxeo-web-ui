@@ -1,15 +1,13 @@
 'use strict';
 
-export default class Collections {
+import BasePage from '../base';
 
-  constructor(selector) {
-    driver.waitForVisible(selector);
-    this.page = driver.element(selector);
-  }
+export default class Collections extends BasePage {
 
   waitForHasCollection(name, reverse) {
+    const el = this.el;
     driver.waitUntil(() => {
-      const collections = this.page.elements(`span.collection-name`).value;
+      const collections = el.elements(`span.collection-name`).value;
       if (reverse) {
         return collections.every((collection) => collection.getText().trim() !== name);
       } else {
@@ -20,7 +18,7 @@ export default class Collections {
   }
 
   select(name) {
-    const el = this.page.element(`nuxeo-collections #collectionsList #items span.title`);
+    const el = this.el.element(`nuxeo-collections #collectionsList #items span.title`);
     if (el.getText().trim() === name) {
       el.click();
       return true;
@@ -30,16 +28,17 @@ export default class Collections {
   }
 
   get isQueueMode() {
-    return this.page.isExisting(`#membersList`) && this.page.isVisible(`#membersList`);
+    return this.el.isExisting(`#membersList`) && this.el.isVisible(`#membersList`);
   }
 
   get queueCount() {
-    return this.page.elements(`#membersList #items div`).value.length;
+    return this.el.elements(`#membersList #items div`).value.length;
   }
 
   waitForHasMember(doc, reverse) {
+    const el = this.el;
     driver.waitUntil(() => {
-      const members = this.page.elements(`#membersList .list-item-title`).value;
+      const members = el.elements(`#membersList .list-item-title`).value;
       if (reverse) {
         return members.every((member) => member.getText().trim() !== doc.title);
       } else {
@@ -50,7 +49,7 @@ export default class Collections {
   }
 
   removeMember(doc) {
-    const members = this.page.elements(`#membersList #items div`).value;
+    const members = this.el.elements(`#membersList #items div`).value;
     return members.some((member) => {
       if (member.getText(`span.list-item-title`).trim() === doc.title) {
         member.element(`iron-icon.remove`).click();

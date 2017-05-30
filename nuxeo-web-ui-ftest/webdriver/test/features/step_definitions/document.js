@@ -49,7 +49,7 @@ module.exports = function () {
     this.ui.browser.documentPage(docType).metadata.waitForVisible();
     table.rows().forEach((row) => {
       this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
-      if (row[0] == 'subjects') {
+      if (row[0] === 'subjects') {
         this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.include(row[1]);
       } else {
         this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
@@ -60,13 +60,13 @@ module.exports = function () {
   this.Then(/^I can edit the (.*) metadata$/, (docType) => {
     const page = this.ui.browser.documentPage(docType);
     page.metadata.waitForVisible();
-    page.edit.isVisible().should.be.false;
+    page.edit.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
     page.editButton.waitForVisible();
     page.editButton.click();
     page.edit.waitForVisible();
-    page.metadata.isVisible().should.be.false;
+    page.metadata.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
     page.edit.title = docType;
-    page.saveButton.isVisible().should.be.true;
+    page.saveButton.waitForVisible().should.be.true;
     page.saveButton.click();
     page.metadata.waitForVisible();
   });
@@ -101,12 +101,14 @@ module.exports = function () {
     switch (format) {
       case 'HTML':
       case 'XML':
+        page.view.noteEditor.waitForVisible();
         page.view.noteEditor.setContent(newContent);
         page.view.noteEditor.save();
         page.view.noteEditor.hasContent(`<p>${newContent}<br></p>`);
         break;
       case 'Markdown':
       case 'Text':
+        page.view.noteEditor.waitForVisible();
         page.view.noteEditor.edit();
         page.view.noteEditor.textarea.waitForVisible();
         page.view.noteEditor.textarea.setValue(newContent);

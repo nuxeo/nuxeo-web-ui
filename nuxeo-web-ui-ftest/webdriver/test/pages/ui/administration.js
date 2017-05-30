@@ -1,27 +1,16 @@
 'use strict';
 
+import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
 
-export default class Administration {
-
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
-
-  waitForVisible() {
-    return this.page.waitForVisible();
-  }
+export default class Administration extends BasePage {
 
   get analytics() {
-    return this.page.element('nuxeo-analytics');
+    return this.el.element('nuxeo-analytics');
   }
 
   get userAndGroupManagement() {
-    return this.page.element('nuxeo-user-group-management');
+    return this.el.element('nuxeo-user-group-management');
   }
 
   get vocabularyManagement() {
