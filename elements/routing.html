@@ -75,11 +75,11 @@ Contributors:
     });
 
     page('/admin/:tab?', function(data) {
+      app.entity = {};
+      app.show('admin');
       if (data.params.tab) {
         app.selectedAdminTab = data.params.tab;
       }
-      app.entity = {};
-      app.show('admin');
     });
 
     page('/admin/user-group-management/:type/:id', function(data) {
@@ -107,6 +107,10 @@ Contributors:
 
     page('/:page', function(ctx) {
       app.show(ctx.params.page);
+    });
+
+    page('*', function(ctx) {
+      app.showError(404, '', ctx.path);
     });
 
     // add #! before urls

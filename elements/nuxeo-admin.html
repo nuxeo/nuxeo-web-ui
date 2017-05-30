@@ -27,16 +27,7 @@ Contributors:
 <dom-module id="nuxeo-admin">
   <template>
     <template is="dom-if" if="[[visible]]">
-      <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
-
-        <nuxeo-page name="error">
-          <div class="header"></div>
-          <div class="content">
-            <paper-card>
-              <nuxeo-error id="error" code="404" url="[[_errorUrl()]]"></nuxeo-error>
-            </paper-card>
-          </div>
-        </nuxeo-page>
+      <iron-pages selected="{{selected}}" attr-for-selected="name" fallback-selection="error" selected-attribute="visible">
 
         <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -54,7 +45,8 @@ Contributors:
           visible: Boolean,
           selected: {
             type: String,
-            value: 'analytics'
+            value: 'analytics',
+            observer: '_checkError'
           },
           isAdministrator: {
             type: Boolean,
@@ -73,6 +65,12 @@ Contributors:
 
         _errorUrl: function() {
           return window.location.href;
+        },
+
+        _checkError: function() {
+          if (this.selected === 'error') {
+            this.fire('error', {code: 404});
+          }
         }
       });
     })();

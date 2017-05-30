@@ -291,7 +291,7 @@ Contributors:
 
       <!-- pages -->
       <paper-header-panel main mode="seamed">
-        <iron-pages id="pages" selected="[[page]]" fallback-selection="error" attr-for-selected="name" selected-attribute="visible">
+        <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -313,7 +313,7 @@ Contributors:
             <div class="header"></div>
             <div class="content">
               <paper-card>
-                <nuxeo-error id="error" code="[[error.code]]" url="[[error.url]]" message="[[error.message]]">
+                <nuxeo-error id="error">
                 </nuxeo-error>
               </paper-card>
             </div>
@@ -444,11 +444,6 @@ Contributors:
           _dismissible: {
             type: Boolean,
             value: false
-          },
-
-          error: {
-            type: Object,
-            value: {}
           }
         },
 
@@ -478,7 +473,8 @@ Contributors:
           'collection-loaded': '_updateCollectionMenu',
           'notify': '_notify',
           'nx-clipboard-updated': '_clipboardUpdated',
-          'drawer-pages.iron-items-changed': '_updateSearch'
+          'drawer-pages.iron-items-changed': '_updateSearch',
+          'error': '_onError'
         },
 
         ready: function() {
@@ -542,14 +538,17 @@ Contributors:
               this.show(page);
             }
           }.bind(this)).catch(function(err) {
-            this.loading = false;
-            this.set('error', {
-              code: err.status,
-              message: this.i18n('browse.error'),
-              url: err.message
-            });
-            this.show('error');
+            this.showError(err.status, this.i18n('browse.error'), err.message)
           }.bind(this));
+        },
+
+        showError: function(code, msg, url) {
+          this.loading = false;
+          var errorEl = this.$.error;
+          errorEl.code = code;
+          errorEl.message = msg;
+          errorEl.url = url;
+          this.show('error');
         },
 
         show: function(page) {
@@ -793,12 +792,9 @@ Contributors:
 
         _onError: function(e) {
           if (e.reason && e.reason.status === 404) {
-            this.set('error', {
-              code: 404,
-              message: e.reason.message,
-              url: this._errorUrl()
-            });
-            this.show('error');
+            this.showError(404, e.reason.message, this._errorUrl());
+          } else if (e.detail) {
+            this.showError(e.detail.code, e.detail.message, this._errorUrl());
           }
         },
 
@@ -814,11 +810,17 @@ Contributors:
             if (!el) {
               el = Polymer.dom(this.$.pages).querySelector('[name=' + page + ']');
             }
+            if (!el) {
+              this.showError(404, '', page);
+              return;
+            }
             // check if page is already registered (vulcanized)
             if (!Polymer.isInstance(el)) {
               this.loading = true;
               var tag = el.tagName.toLowerCase();
-              this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, null, true);
+              this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, function() {
+                this.showError(404, '', tag + '.html');
+              }.bind(this), true);
             }
           }
         },
