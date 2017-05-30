@@ -29,7 +29,7 @@ Example:
 -->
 <dom-module id="nuxeo-layout">
   <template>
-    <nuxeo-error hidden$="[[element]]" code="404" url="[[href]]" message="[[error]]"></nuxeo-error>
+    <nuxeo-error id="error" code="404" url="[[href]]" message="[[error]]"></nuxeo-error>
     <div id="container"></div>
   </template>
   <script>
@@ -89,14 +89,15 @@ Example:
 
       _stamp: function(href) {
         if (!href) {
-          this.$.container.hidden = true;
+          this.hidden = true;
           return;
         }
 
+        this.$.error.hidden = true;
+        this.hidden = this.$.container.hidden = false;
+
         var file = href.split('/').pop(),
             name = file.split('.')[0];
-
-        this.$.container.hidden = false;
 
         this.importHref(href,
             function() {
@@ -115,7 +116,9 @@ Example:
             // error handling
             function() {
               this._setElement(undefined);
+              this.$.error.hidden = false;
               this.$.container.hidden = true;
+              this.notifyResize()
             });
       },
 
