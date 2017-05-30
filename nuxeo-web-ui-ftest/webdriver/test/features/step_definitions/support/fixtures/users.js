@@ -15,7 +15,14 @@ fixtures.users = {
           .fetch(username)
           .catch((response) => {
             if (response.response && response.response.status && response.response.status === 404) {
-              return nuxeo.users().create(user);
+              return nuxeo.users().create(user).catch((err) => {
+                // XXX try to handle NPE on UserRootObject
+                if (err.response.status === 500) {
+                  return nuxeo.users().create(user);
+                } else {
+                  throw err;
+                }
+              });
             } else {
               throw `unable to fetch user "${username}"`;
             }
