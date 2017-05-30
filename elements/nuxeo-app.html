@@ -303,7 +303,7 @@ Contributors:
 
           <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
-          <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]"></nuxeo-admin>
+          <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]" on-error="_onError"></nuxeo-admin>
 
           <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
@@ -473,15 +473,16 @@ Contributors:
           'collection-loaded': '_updateCollectionMenu',
           'notify': '_notify',
           'nx-clipboard-updated': '_clipboardUpdated',
-          'drawer-pages.iron-items-changed': '_updateSearch',
-          'error': '_onError'
+          'drawer-pages.iron-items-changed': '_updateSearch'
         },
 
         ready: function() {
           this.$.drawerPanel.closeDrawer();
 
-          window.addEventListener('unhandledrejection', function(error) {
-            this._onError(error);
+          window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && e.reason.status === 404) {
+              this.showError(404, e.reason.message, this._errorUrl());
+            }
           }.bind(this));
 
           window.addEventListener('nuxeo-documents-deleted', function() {
@@ -796,11 +797,7 @@ Contributors:
         },
 
         _onError: function(e) {
-          if (e.reason && e.reason.status === 404) {
-            this.showError(404, e.reason.message, this._errorUrl());
-          } else if (e.detail) {
-            this.showError(e.detail.code, e.detail.message, this._errorUrl());
-          }
+          this.showError(e.detail.code, e.detail.message, this._errorUrl());
         },
 
         _logout: function() {
