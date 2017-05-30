@@ -141,7 +141,7 @@ module.exports = function () {
   });
 
   this.Then('I can see the document does not belong to the "$name" collection', (name) =>
-      this.ui.browser.hasCollection(name, true).should.be.true);
+      this.ui.browser.doesNotHaveCollection(name).should.be.true);
 
   this.Then('I add the document to the favorites', () => {
     this.ui.browser.addToFavorites();

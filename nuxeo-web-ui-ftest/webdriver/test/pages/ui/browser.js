@@ -42,12 +42,26 @@ export default class Browser extends BasePage {
     this.el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
 
-  hasCollection(name, reverse) {
+  doesNotHaveCollection(name) {
     const page = this.el;
     driver.waitUntil(() => {
+      if (!driver.isExisting('nuxeo-document-collections')) {
+        return true;
+      }
       const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
-      return reverse ? collections.every((collection) => collection.getText().trim() !== name)
-        : collections.some((collection) => collection.getText().trim() === name);
+      return collections.every((collection) => collection.getText().trim() !== name);
+    }, `The document does belong to the collection`);
+    return true;
+  }
+
+  hasCollection(name) {
+    const page = this.el;
+    driver.waitUntil(() => {
+      if (!driver.isExisting('nuxeo-document-collections')) {
+        return false;
+      }
+      const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+      return collections.some((collection) => collection.getText().trim() === name);
     }, `The document does not belong to the collection`);
     return true;
   }
