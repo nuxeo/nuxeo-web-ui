@@ -53,9 +53,12 @@ export default class Browser extends BasePage {
   }
 
   removeFromCollection(name) {
+    const el = this.el;
+    el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
     const collections = this.el.elements(`nuxeo-document-collections nuxeo-tag`).value;
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
+        collection.waitForVisible(`nuxeo-tag iron-icon[name="remove"]`);
         driver.waitUntil(() => {
           collection.click(`nuxeo-tag iron-icon[name="remove"]`);
           return true;
@@ -77,6 +80,7 @@ export default class Browser extends BasePage {
   }
 
   hasTitle(title) {
+    driver.waitForVisible('.breadcrumb-item-current');
     driver.waitUntil(
       () => driver.getText('.breadcrumb-item-current').trim() === title,
       `The document does not have such title`

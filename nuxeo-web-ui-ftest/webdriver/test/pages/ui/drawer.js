@@ -59,7 +59,6 @@ export default class Drawer extends BasePage {
   }
 
   open(name) {
-    this.menu.waitForVisible();
     this.menu.click(`nuxeo-menu-icon[name='${name}']`);
     const section = this._section(name);
     section.waitForVisible();
@@ -67,12 +66,10 @@ export default class Drawer extends BasePage {
   }
 
   _section(name) {
-    this.pages.waitForVisible();
     return this.pages.element(`[name='${name}']`);
   }
 
   _search(name) {
-    this.pages.waitForVisible();
     return this.pages.element(`[search-name='${name}']`);
   }
 }

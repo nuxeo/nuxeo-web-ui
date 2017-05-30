@@ -6,6 +6,7 @@ export default class CollectionBrowser extends BasePage {
 
   waitForHasMember(doc) {
     const el = this.el;
+    el.waitForVisible('nuxeo-data-table #list nuxeo-data-table-row');
     driver.waitUntil(() => {
       const rows = el.elements('nuxeo-data-table #list nuxeo-data-table-row');
       return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
