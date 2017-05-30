@@ -1,17 +1,12 @@
 'use strict';
 
-export default class DocumentAttachments {
-  constructor(el, docType) {
-    this.el = el;
+import BasePage from '../../base';
+
+export default class DocumentAttachments extends BasePage {
+
+  constructor(selector, docType) {
+    super(selector);
     this.docType = docType;
-  }
-
-  isVisible() {
-    return this.el.isVisible();
-  }
-
-  waitForVisible() {
-    return this.el.waitForVisible();
   }
 
   get previewButton() {

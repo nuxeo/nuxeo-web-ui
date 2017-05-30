@@ -18,6 +18,7 @@
     'no-unused-expressions': 0,
     'no-param-reassign': 0,
     'no-else-return': 0,
+    'no-throw-literal': 0,
     'radix': 0
   },
   'globals': {

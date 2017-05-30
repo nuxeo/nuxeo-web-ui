@@ -24,6 +24,6 @@ module.exports = function () {
   });
 
   this.Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
-    driver.waitForVisible('#dialog ' + viewerType);
+    driver.waitForVisible(`#dialog ${viewerType}`);
   });
 };

@@ -12,5 +12,4 @@ module.exports = function () {
     this.ui.activityFeed.waitForVisible();
     this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
   });
-
 };

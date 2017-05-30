@@ -20,7 +20,7 @@ module.exports = function () {
     this.ui.createDialog.documentCreate.waitForVisible();
     this.ui.createDialog.documentCreate.layout(currentDocType).fillMultipleValues(table);
     this.ui.createDialog.documentCreate.layout(currentDocType).getField('title').should.not.be.empty;
-    let title = this.ui.createDialog.documentCreate.layout(currentDocType).getFieldValue('title');
+    const title = this.ui.createDialog.documentCreate.layout(currentDocType).getFieldValue('title');
     this.ui.createDialog.createButton.waitForVisible();
     this.ui.createDialog.createButton.click();
     this.ui.browser.hasTitle(title).should.be.true;

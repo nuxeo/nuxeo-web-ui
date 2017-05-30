@@ -8,7 +8,7 @@ global.fieldRegistry.register('nuxeo-date-picker',
                               (element) => element.element('#input').getValue(),
                               (element, value) => {
                                 element.element('#input').click();
-                                var keys = value.split("-");
+                                const keys = value.split('-');
                                 driver.keys(keys);
                               });
 global.fieldRegistry.register('nuxeo-textarea',
@@ -17,28 +17,30 @@ global.fieldRegistry.register('nuxeo-textarea',
 global.fieldRegistry.register('nuxeo-directory-suggestion',
                               (element) => {
                                 if (element.getAttribute('multiple')) {
-                                  var multiple = '';
-                                  var i;
-                                  for (i = 1; i < element.elements('#s2id_select2 ul li.select2-search-choice').value.length; i++) {
-                                    multiple += (element.element('#s2id_select2 ul li.select2-search-choice:nth-child(' + i + ') div').getText() + ',');
+                                  let multiple = '';
+                                  let i;
+                                  for (i = 1; i < element
+                                      .elements('#s2id_select2 ul li.select2-search-choice').value.length; i++) {
+                                    multiple += `${element.element(`#s2id_select2 ul
+                                                 li.select2-search-choice:nth-child(${i}) div`).getText()},`;
                                   }
-                                  multiple += (element.element('#s2id_select2 ul li.select2-search-choice:nth-child(' + i + ') div').getText());
+                                  multiple += element.element(`#s2id_select2 ul
+                                              li.select2-search-choice:nth-child(${i}) div`).getText();
                                   return multiple;
                                 } else {
-                                  element.element('#select2').getValue()
+                                  element.element('#select2').getValue();
                                 }
                               },
                               (element, value) => {
                                 if (element.getAttribute('multiple')) {
-                                  var values = value.split(",");
-                                  for (var i=0; i<values.length; i++) {
+                                  const values = value.split(',');
+                                  for (let i = 0; i < values.length; i++) {
                                     element.element('nuxeo-select2 div#s2id_select2').click();
                                     driver.waitForVisible(`input.select2-focused`);
                                     driver.element(`input.select2-focused`).setValue(values[i]);
                                     driver.waitForVisible(`#select2-drop li.select2-result`);
                                     driver.element(`#select2-drop li.select2-result`).click();
                                   }
-
                                 } else {
                                   element.element('nuxeo-select2 a.select2-choice').click();
                                   driver.waitForVisible(`#select2-drop .select2-search input`);

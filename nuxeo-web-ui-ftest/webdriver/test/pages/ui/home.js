@@ -1,17 +1,10 @@
 'use strict';
 
-export default class Home {
+import BasePage from '../base';
 
-  constructor(selector) {
-    driver.waitForVisible(selector);
-    this.dashboard = driver.element(selector);
-  }
-
-  isVisible() {
-    return this.dashboard.isVisible();
-  }
+export default class Home extends BasePage {
 
   card(contentId) {
-    return this.dashboard.element(`#${contentId}`);
+    return this.el.element(`#${contentId}`);
   }
 }

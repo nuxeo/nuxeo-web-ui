@@ -1,10 +1,8 @@
 'use strict';
 
-export default class NoteEditor {
+import BasePage from '../base';
 
-  constructor(el) {
-    this.el = el;
-  }
+export default class NoteEditor extends BasePage {
 
   setContent(content) {
     this.el.element('#editor').waitForVisible();
@@ -16,7 +14,8 @@ export default class NoteEditor {
   }
 
   hasContent(content) {
-    let editor = this.el.element('#editor');
+    const editor = this.el.element('#editor');
+    editor.waitForVisible();
     driver.waitUntil(() => {
       try {
         return editor.getAttribute('innerHTML') === content;

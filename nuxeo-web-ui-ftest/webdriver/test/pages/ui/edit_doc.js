@@ -1,28 +1,22 @@
 'use strict';
 
-export default class EditDoc {
+import BasePage from '../base';
 
-  constructor(selector) {
-    this.dialog = driver.element(selector);
-  }
-
-  get isVisible() {
-    return this.dialog.isVisible();
-  }
+export default class EditDoc extends BasePage {
 
   submit() {
-    this.dialog.waitForVisible('paper-button.primary');
-    this.dialog.element('paper-button.primary').click();
+    this.el.waitForVisible('paper-button.primary');
+    this.el.element('paper-button.primary').click();
   }
 
   editTitle(docType) {
     const doctype = docType.toLowerCase();
     if (doctype === 'picture') {
-      this.dialog.waitForVisible('input.nuxeo-file-edit');
-      this.dialog.setValue('input.nuxeo-file-edit', `New_Test_${docType}`);
+      this.el.waitForVisible('input.nuxeo-file-edit');
+      this.el.setValue('input.nuxeo-file-edit', `New_Test_${docType}`);
     } else {
-      this.dialog.waitForVisible(`input.nuxeo-${doctype}-edit`);
-      this.dialog.setValue(`input.nuxeo-${doctype}-edit`, `New_Test_${docType}`);
+      this.el.waitForVisible(`input.nuxeo-${doctype}-edit`);
+      this.el.setValue(`input.nuxeo-${doctype}-edit`, `New_Test_${docType}`);
     }
   }
 
