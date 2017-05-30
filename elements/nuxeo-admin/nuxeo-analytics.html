@@ -26,10 +26,6 @@ Contributors:
 <dom-module id="nuxeo-analytics">
   <template>
     <style>
-      .header .title {
-        @apply(--layout-flex);
-      }
-
       .header paper-listbox {
         @apply(--layout-horizontal);
         --paper-listbox-background-color: transparent;
@@ -38,7 +34,7 @@ Contributors:
 
     <nuxeo-page>
       <div class="header">
-        <div class="title">[[i18n('analytics.heading')]]</div>
+        <span class="flex">[[i18n('analytics.heading')]]</span>
         <paper-listbox selected="{{selected}}" attr-for-selected="name">
           <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
