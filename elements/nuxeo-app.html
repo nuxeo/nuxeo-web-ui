@@ -643,6 +643,11 @@ Contributors:
           if (drawerPanel.narrow) {
             drawerPanel.openDrawer();
           }
+          if (!this.selectedTab){
+            var drawer = this.$['drawer-pages'];
+            drawer.selectIndex(0);
+            this.selectedTab = drawer.selected
+          }
         },
 
         _closeDrawer: function() {
