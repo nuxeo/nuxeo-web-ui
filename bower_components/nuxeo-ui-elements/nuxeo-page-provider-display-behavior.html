@@ -182,6 +182,13 @@ limitations under the License.
             this.nxProvider = parentNode.querySelector('#' + nxProvider);
           }
         } else if (nxProvider) {
+          if (this.nxProvider.currentPage && this.nxProvider.currentPage.length > 0) {
+            this.items = [];
+            var docs = this.nxProvider.currentPage;
+            docs.forEach(function(doc) {
+              this.push('items', doc);
+            }.bind(this));
+          }
           this.listen(this.nxProvider, 'update', '_updateResults');
           this.nxProvider.addEventListener('loading-changed', function() {
             this._setLoading(this.nxProvider.loading);
