@@ -15,7 +15,7 @@ export default class Administration extends BasePage {
   }
 
   get userGroupCreateButton() {
-    return this.page.element('#createButton.nuxeo-user-group-management');
+    return this.el.element('#createButton.nuxeo-user-group-management');
   }
 
   get vocabularyManagement() {

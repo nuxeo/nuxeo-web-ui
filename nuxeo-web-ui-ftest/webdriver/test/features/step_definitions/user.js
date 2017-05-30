@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = function () {
-
   this.When(/^I select user from the dropdown menu$/, () => {
     this.ui.user.dropdown.waitForVisible();
     this.ui.user.userItem.click();
@@ -29,9 +28,8 @@ module.exports = function () {
     this.ui.user.editUserDialogButton.click();
   });
 
-  this.Then(/^I can delete the user "([^"]*)"$/, (username) => {
+  this.Then(/^I can delete the user$/, () => {
     this.ui.user.deleteUserButton.click();
     this.ui.user.confirmDeleteUserButton.click();
   });
-
 };

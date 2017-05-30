@@ -1,16 +1,15 @@
 'use strict';
 
 module.exports = function () {
-
   this.When(/^I give (\w+) permission to "([^"]*)" on the document$/, (permission, name) => {
     this.ui.browser.permissionsViewButton.click();
     this.ui.browser.permissionsView.waitForVisible();
     this.ui.browser.permissionsView.newPermissionButton.click();
     this.ui.browser.permissionsView.setPermissions(name,
       {
-        permission: permission,
+        permission,
         timeFrame: 'permanent',
-        notify: false
+        notify: false,
       }
     );
     this.ui.browser.permissionsView.createPermissionButton.click();
@@ -33,16 +32,19 @@ module.exports = function () {
     this.ui.browser.permissionsView.permissionUser(name).waitForVisible();
     this.ui.browser.permissionsView.editPermissionButton.waitForVisible();
     if (date === 'tomorrow') {
-      var currentDate = new Date();
-      date = (currentDate.getMonth() + 1) + "-" + (currentDate.getDate() + 1) + "-" + currentDate.getFullYear();
+      const currentDate = new Date();
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate() + 1;
+      const year = currentDate.getFullYear();
+      date = `${month}-${day}-${year}`;
     }
     this.ui.browser.permissionsView.editPermissionButton.click();
     this.ui.browser.permissionsView.editPermissions(
       {
-        permission: permission,
+        permission,
         timeFrame: 'datebased',
         begin: date,
-        notify: false
+        notify: false,
       }
     );
     this.ui.browser.permissionsView.updatePermissionButton.click();
@@ -52,5 +54,4 @@ module.exports = function () {
     driver.url(`#!/browse${this.doc.path}`);
     this.ui.browser.breadcrumb.should.not.be.visible;
   });
-
 };

@@ -30,6 +30,10 @@ export default class DocumentPermissions {
     return this.page.element('///*[@id="popupRight"]/div/paper-button[text()="Update"]');
   }
 
+  get timeFrameButton() {
+    return this.page.element('paper-radio-button #radioContainer');
+  }
+
   permissionUser(name) {
     return this.page.element(`div.acl-table-row.nuxeo-document-acl-table span.user[title="${name}"]`);
   }
@@ -72,16 +76,16 @@ export default class DocumentPermissions {
 
   setPermissions(name, opts) {
     opts = opts || {};
-    let permission = opts.permission || '';
-    let timeFrame = opts.timeFrame || '';
-    let begin = opts.begin || '';
-    let end = opts.end || '';
-    let notify = opts.notify;
+    const permission = opts.permission || '';
+    const timeFrame = opts.timeFrame || '';
+    const begin = opts.begin || '';
+    const end = opts.end || '';
+    const notify = opts.notify;
     if (name) {
       this.setFieldValue('userGroup', name);
     }
     this.setFieldValue('right', permission);
-    this.setFieldValue(timeFrame, timeFrame);
+    this.timeFrameButton.click();
     if (timeFrame === 'datebased') {
       this.setFieldValue('begin', begin);
       if (end) {
@@ -93,11 +97,11 @@ export default class DocumentPermissions {
 
   editPermissions(opts) {
     opts = opts || {};
-    let permission = opts.permission || '';
-    let timeFrame = opts.timeFrame || '';
-    let begin = opts.begin || '';
-    let end = opts.end || '';
-    let notify = opts.notify;
+    const permission = opts.permission || '';
+    const timeFrame = opts.timeFrame || '';
+    const begin = opts.begin || '';
+    const end = opts.end || '';
+    const notify = opts.notify;
     this.editFieldValue('right', permission);
     this.editFieldValue(timeFrame, timeFrame);
     if (timeFrame === 'datebased') {

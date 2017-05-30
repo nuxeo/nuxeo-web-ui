@@ -27,4 +27,4 @@ Feature: User
       | name                 | value          |
       | firstname            | Jane           |
       | email                | test2@test.com |
-    And I can delete the user "jsmith"
+    And I can delete the user
