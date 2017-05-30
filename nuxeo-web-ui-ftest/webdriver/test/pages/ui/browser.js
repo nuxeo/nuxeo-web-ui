@@ -48,8 +48,12 @@ export default class Browser extends BasePage {
       if (!driver.isExisting('nuxeo-document-collections')) {
         return true;
       }
-      const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
-      return collections.every((collection) => collection.getText().trim() !== name);
+      try {
+        const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+        return collections.every((collection) => collection.getText().trim() !== name);
+      } catch (e) {
+        return false;
+      }
     }, `The document does belong to the collection`);
     return true;
   }
@@ -60,8 +64,12 @@ export default class Browser extends BasePage {
       if (!driver.isExisting('nuxeo-document-collections')) {
         return false;
       }
-      const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
-      return collections.some((collection) => collection.getText().trim() === name);
+      try {
+        const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+        return collections.some((collection) => collection.getText().trim() === name);
+      } catch (e) {
+        return false;
+      }
     }, `The document does not belong to the collection`);
     return true;
   }
