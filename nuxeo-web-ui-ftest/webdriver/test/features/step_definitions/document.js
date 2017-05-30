@@ -115,9 +115,8 @@ module.exports = function () {
         page.view.noteEditor.save();
         page.view.preview.waitForVisible();
         if (format === 'Markdown') {
-          const markedElement = page.view.preview.element('marked-element');
-          markedElement.waitForVisible();
-          const markedContent = markedElement.element('div.markdown-html');
+          page.view.preview.waitForVisible('marked-element div.markdown-html');
+          const markedContent = page.view.preview.element('marked-element div.markdown-html');
           markedContent.waitForVisible();
           markedContent.getText().should.equal(newContent);
         } else if (format === 'Text') {
