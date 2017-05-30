@@ -19,4 +19,4 @@ Feature: Group
       | groupLabel | Managers |
     Then I can search for the group "managers"
     And I can edit the group "managers" label as "Managers Group"
-    And I can delete the group "managers"
+    And I can delete the group

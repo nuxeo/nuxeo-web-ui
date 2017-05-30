@@ -27,6 +27,7 @@
     'liveCollections': true,
     'liveDocuments': true,
     'users': true,
+    'groups': true,
     'browser': true,
   }
 }

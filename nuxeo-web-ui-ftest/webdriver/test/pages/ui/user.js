@@ -16,7 +16,7 @@ export default class User {
 
   getField(field, opts) {
     opts = opts || {};
-    let parent = opts.parent || '';
+    const parent = opts.parent || '';
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
     if (field === 'password' || field === 'passwordConfirmation') {
@@ -72,13 +72,13 @@ export default class User {
 
   fillMultipleValues(table, opts) {
     opts = opts || {};
-    let parent = opts.parent || '';
+    const parent = opts.parent || '';
     table.rows().forEach((row) => {
       if (row[0] === 'username') {
         global.users[row[1]] = row[1];
         this.page.element('paper-toggle-button[name="password-toggle"]').click();
       }
-      const fieldEl = this.getField(row[0], { parent: parent });
+      const fieldEl = this.getField(row[0], { parent });
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }

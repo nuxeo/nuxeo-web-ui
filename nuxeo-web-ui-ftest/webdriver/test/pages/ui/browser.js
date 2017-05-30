@@ -23,7 +23,7 @@ export default class Browser extends BasePage {
   }
 
   get permissionsViewButton() {
-    return this.page.element('///nuxeo-page-item[@name="permissions"]');
+    return this.el.element('///nuxeo-page-item[@name="permissions"]');
   }
 
   get breadcrumb() {

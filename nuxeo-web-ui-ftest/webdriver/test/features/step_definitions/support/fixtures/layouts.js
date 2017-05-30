@@ -25,7 +25,7 @@ global.fieldRegistry.register('nuxeo-textarea',
                               (element, value) => { element.element('#textarea').setValue(value); });
 global.fieldRegistry.register('nuxeo-user-suggestion',
                               (element) => {
-                                driver.element(`#select2-drop div.select2-search input.select2-input`).getValue();
+                                element.element(`#select2-drop div.select2-search input.select2-input`).getValue();
                               },
                               (element, value) => {
                                 element.element('nuxeo-select2 div#s2id_select2').click();
@@ -77,17 +77,20 @@ global.fieldRegistry.register('paper-radio-button',
                                 element.element('#radioContainer').getAttribute('multiple');
                               },
                               (element, value) => {
-                                element.element('#radioContainer').click();
+                                if (value) {
+                                  element.element('#radioContainer').click();
+                                }
                               });
 global.fieldRegistry.register('paper-checkbox',
                               (element) => {
                                 element.getAttribute('checked');
                               },
                               (element, value) => {
-                                if ((value === false && element.getAttribute('checked') === 'true') || (value === true && element.getAttribute('checked') === 'null')) {
+                                if ((value === false && element.getAttribute('checked') === 'true') ||
+                                  (value === true && element.getAttribute('checked') === 'null')) {
                                   element.click();
                                 }
-                              })
+                              });
 global.fieldRegistry.register('generic',
                               (element) => element.getText(),
                               (element, value) => element.setValue(value));
