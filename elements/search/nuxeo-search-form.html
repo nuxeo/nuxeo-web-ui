@@ -598,6 +598,7 @@ limitations under the License.
           this.isSavedSearch = true;
           this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
           this.params = this._mutateParams(this.selectedSearch.params);
+          this._navigateToResults();
         } else {
           this._clear();
         }
@@ -611,7 +612,6 @@ limitations under the License.
             this.searchTerm = this.params.ecm_fulltext.replace('*', '');
             this.form.searchTerm = this.searchTerm;
           }
-          this._navigateToResults();
         }
       },
 
