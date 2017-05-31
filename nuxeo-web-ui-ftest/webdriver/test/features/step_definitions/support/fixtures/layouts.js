@@ -69,6 +69,36 @@ global.fieldRegistry.register('nuxeo-directory-suggestion',
                                   driver.element(`#select2-drop li.select2-result`).click();
                                 }
                               });
+global.fieldRegistry.register('nuxeo-dropdown-aggregation',
+                              (element) => {
+                                element.element('nuxeo-select2 input').getValue();
+                              },
+                              (element, value) => {
+                                element.element('nuxeo-select2 input').click();
+                                driver.element('nuxeo-select2 input').setValue(value);
+                                driver.waitForVisible(`#select2-drop li.select2-result`);
+                                driver.element(`#select2-drop li.select2-result`).click();
+                              });
+global.fieldRegistry.register('nuxeo-select2',
+                              (element) => {
+                                element.element('div ul li input').getValue();
+                              },
+                              (element, value) => {
+                                element.element('div ul li input').click();
+                                driver.element('div ul li input').setValue(value);
+                                driver.waitForVisible(`//div[text()='${value}' and @class='select2-result-label']`);
+                                driver.element(`//div[text()='${value}' and @class='select2-result-label']`).click();
+                              });
+global.fieldRegistry.register('nuxeo-tag-suggestion',
+                              (element) => {
+                                element.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input').getValue();
+                              },
+                              (element, value) => {
+                                element.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input').click();
+                                driver.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input').setValue(value);
+                                driver.waitForVisible(`//div[@class='select2-result-label']/span[text()='${value}']`);
+                                driver.element(`//div[@class='select2-result-label']/span[text()='${value}']`).click();
+                              });
 global.fieldRegistry.register('paper-input',
                               (element) => element.element('#input').getValue(),
                               (element, value) => { element.element('#input').setValue(value); });
@@ -90,6 +120,16 @@ global.fieldRegistry.register('paper-checkbox',
                                   (value === true && element.getAttribute('checked') === 'null')) {
                                   element.click();
                                 }
+                              });
+global.fieldRegistry.register('nuxeo-checkbox-aggregation',
+                              (element) => {
+                                element.element(
+                                  `///div[@id='checkboxLabel' and contains(., '${value}')]/parent::paper-checkbox`
+                                ).getAttribute('aria-checked');
+                              },
+                              (element, value) => {
+                                driver.waitForVisible(`//div[@id='checkboxLabel' and contains(., '${value}')]`);
+                                element.element(`///div[@id='checkboxLabel' and contains(., '${value}')]`).click();
                               });
 global.fieldRegistry.register('generic',
                               (element) => element.getText(),

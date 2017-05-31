@@ -37,5 +37,13 @@ fixtures.users = {
 
 module.exports = function () {
   this.After(() => Promise.all(Object.keys(users)
-      .map((user) => user !== 'Administrator' ? fixtures.users.delete(user) : Promise.resolve())));
+      .map((user) => {
+        if (user !== 'Administrator') {
+          const userWorkspace = `/default-domain/UserWorkspaces/${user}`;
+          nuxeo.repository().delete(userWorkspace).catch(() => {});
+          fixtures.users.delete(user);
+        } else {
+          Promise.resolve();
+        }
+      })));
 };

@@ -12,6 +12,7 @@ module.exports = function () {
         notify: false,
       }
     );
+    this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
     this.ui.browser.permissionsView.createPermissionButton.click();
   });
 
