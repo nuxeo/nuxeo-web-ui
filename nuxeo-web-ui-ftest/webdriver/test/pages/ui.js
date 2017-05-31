@@ -11,6 +11,7 @@ import ActivityFeed from './ui/activity_feed';
 import HistoryTable from './ui/history_table';
 import User from './ui/user';
 import Group from './ui/group';
+import Search from './ui/search';
 
 export default class UI extends BasePage {
 
@@ -36,6 +37,22 @@ export default class UI extends BasePage {
 
   get group() {
     return new Group('nuxeo-user-group-management');
+  }
+
+  get searchForm() {
+    return new Search('nuxeo-search-form[name="defaultSearch"]');
+  }
+
+  get searchResults() {
+    return new Search('nuxeo-data-table.nuxeo-default-search-results');
+  }
+
+  get quickSearch() {
+    return new Search('#suggester #suggester');
+  }
+
+  get searchButton() {
+    return this.el.element('#searchButton');
   }
 
   get createDialog() {

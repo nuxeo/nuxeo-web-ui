@@ -23,6 +23,35 @@ fixtures.documents = {
     liveDocuments.push(doc.path);
     return doc;
   }),
+  createWithAuthor: (parent, document, username) => nuxeo.repository()
+      .create(parent, document)
+      .then((doc) => {
+        liveDocuments.push(doc.path);
+        if (username) {
+          return doc.set({
+            'dc:creator': username,
+          }).save();
+        }
+        return doc;
+      }),
+  addToCollection: (document, collectionName) => nuxeo.repository()
+      .fetch(`/default-domain/${collectionName}`)
+      .then((collection) => nuxeo.operation('Document.AddToCollection')
+          .input(document)
+          .params({
+            collection,
+          })
+          .execute()
+        ),
+  addTag: (document, tag) => nuxeo.operation('Services.TagDocument')
+      .input(document)
+      .params({
+        tags: tag,
+      })
+      .execute()
+      .catch((error) => {
+        throw new Error(error);
+      }),
   createVersion: (document, versionType) => nuxeo.operation('Document.CreateVersion').input(document.uid).params({
     increment: versionType,
     saveDocument: true,
