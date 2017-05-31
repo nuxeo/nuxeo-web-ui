@@ -38,7 +38,11 @@ Build and optimize the current project, ready for deployment. This includes lint
 
 ## License
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) 
+
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+All images, icons, fonts, and videos contained in this folder are copyrighted by Nuxeo, all rights reserved.
 
 ## About Nuxeo
 
