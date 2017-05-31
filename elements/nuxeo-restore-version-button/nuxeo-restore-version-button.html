@@ -100,7 +100,7 @@ limitations under the License.
           this.$.opRestoreVersion.params = {checkout: true};
           this.$.opRestoreVersion.execute().then(function() {
             this.fire('document-updated');
-            this.navigateTo('browse', this.document.path + '@view');
+            this.navigateTo('browse', this.document.path);
           }.bind(this));
         }
       }

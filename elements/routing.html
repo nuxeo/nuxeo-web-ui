@@ -47,11 +47,11 @@ limitations under the License.
     });
 
     // /browse/<path>@<action>
-    page(/^\/browse\/([^@]*)(?:@(.*))?/, function(data) {
+    page(/^\/browse\/(.*)?/, function(data) {
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
-      app.load('browse', '', '/' + data.params[0], data.params[1] || 'view');
+      app.load('browse', '', '/' + data.params[0], 'view');
     });
 
     page('/search/:searchName', function(data) {
