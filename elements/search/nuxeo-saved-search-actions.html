@@ -73,65 +73,61 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-saved-search-actions',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        searchId: String,
+        searchDoc: Object,
+        searchForm: Object
+      },
 
-      Polymer({
-        is: 'nuxeo-saved-search-actions',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          searchId: String,
-          searchDoc: Object,
-          searchForm: Object
-        },
+      set searchForm(form) {
+        this.searchForm = form;
+        this.searchId = this._searchForm.selectedSearch.id;
+        this.isSavedSearch = !!this.searchId; //this._searchForm.isSavedSearch;
+      },
 
-        set searchForm(form) {
-          this.searchForm = form;
-          this.searchId = this._searchForm.selectedSearch.id;
-          this.isSavedSearch = !!this.searchId; //this._searchForm.isSavedSearch;
-        },
+      get searchForm() {
+        return this._searchForm;
+      },
 
-        get searchForm() {
-          return this._searchForm;
-        },
+      _saveSearch: function() {
+        this.searchForm.save();
+      },
 
-        _saveSearch: function() {
-          this.searchForm.save();
-        },
+      _saveSearchAs: function() {
+        this.searchForm.saveAs();
+      },
 
-        _saveSearchAs: function() {
-          this.searchForm.saveAs();
-        },
+      _renameSearch: function() {
+        this.searchForm.rename();
+      },
 
-        _renameSearch: function() {
-          this.searchForm.rename();
-        },
+      _shareSearch: function() {
+        this.searchForm.share();
+      },
 
-        _shareSearch: function() {
-          this.searchForm.share();
-        },
+      _deleteSearch: function() {
+        this.searchForm.delete();
+      },
 
-        _deleteSearch: function() {
-          this.searchForm.delete();
-        },
+      _showSaveAs: function() {
+        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm.dirty);
+      },
 
-        _showSaveAs: function() {
-          return this.isSavedSearch || (!this.isSavedSearch && this.searchForm.dirty);
-        },
+      _showSave: function() {
+        return this.isSavedSearch && this.searchForm.dirty && this._hasPermissions();
+      },
 
-        _showSave: function() {
-          return this.isSavedSearch && this.searchForm.dirty && this._hasPermissions();
-        },
+      _showOtherSearchActions: function() {
+        return this.isSavedSearch && this._hasPermissions();
+      },
 
-        _showOtherSearchActions: function() {
-          return this.isSavedSearch && this._hasPermissions();
-        },
-
-        _hasPermissions: function() {
-          return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
-                  this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
-        }
-      });
-    })();
+      _hasPermissions: function() {
+        return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
+                this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
+      }
+    });
   </script>
 </dom-module>

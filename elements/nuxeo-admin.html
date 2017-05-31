@@ -24,51 +24,45 @@ limitations under the License.
   <template>
     <template is="dom-if" if="[[visible]]">
       <iron-pages selected="{{selected}}" attr-for-selected="name" fallback-selection="error" selected-attribute="visible">
-
         <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
-
       </iron-pages>
     </template>
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-admin',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          visible: Boolean,
-          selected: {
-            type: String,
-            value: 'analytics',
-            observer: '_checkError'
-          },
-          isAdministrator: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          },
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(user)'
-          }
+    Polymer({
+      is: 'nuxeo-admin',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        visible: Boolean,
+        selected: {
+          type: String,
+          value: 'analytics',
+          observer: '_checkError'
         },
-
-        _actionContext: function() {
-          return {user: this.user};
+        isAdministrator: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         },
-
-        _errorUrl: function() {
-          return window.location.href;
-        },
-
-        _checkError: function() {
-          if (this.selected === 'error') {
-            this.fire('error', {code: 404});
-          }
+        actionContext: {
+          type: Object,
+          computed: '_actionContext(user)'
         }
-      });
-    })();
+      },
+
+      _actionContext: function() {
+        return {user: this.user};
+      },
+
+      _errorUrl: function() {
+        return window.location.href;
+      },
+
+      _checkError: function() {
+        if (this.selected === 'error') {
+          this.fire('error', {code: 404});
+        }
+      }
+    });
   </script>
 </dom-module>

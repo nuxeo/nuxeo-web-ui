@@ -45,76 +45,72 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-clipboard-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
+    Polymer({
+      is: 'nuxeo-clipboard-toggle-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
 
-          /**
-           * Input document.
-           */
-          document: {
-            type: Object,
-            observer: '_update'
-          },
-
-          /**
-           * Icon to use (iconset_name:icon_name).
-           */
-          icon: {
-            type: String,
-            value: 'icons:content-paste'
-          },
-
-          inClipboard: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true
-          },
-
-          _tooltip: {
-            type: String,
-            computed: '_computeTooltip(inClipboard)'
-          }
+        /**
+         * Input document.
+         */
+        document: {
+          type: Object,
+          observer: '_update'
         },
 
-        _isAvailable: function(doc) {
-          return this.isCollectionMember(doc) && !doc.isVersion;
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'icons:content-paste'
         },
 
-        toggle: function() {
-          if (this._clipboard.contains(this.document)) {
-            this._clipboard.remove(this.document);
-          } else {
-            this._clipboard.add(this.document);
-          }
+        inClipboard: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
         },
 
-        _computeTooltip: function(inClipboard) {
-          return this.i18n('clipboardToggleButton.tooltip.' + (inClipboard ? 'remove' : 'add'));
-        },
-
-        _update: function() {
-          this.inClipboard = this._clipboard && this.document && this._clipboard.contains(this.document);
-        },
-
-        set clipboard(clipboard) {
-          if (!clipboard) {
-            return;
-          }
-          this._clipboard = clipboard;
-          this._clipboard.addEventListener('documents-changed', this._update.bind(this));
-          this._update();
-        },
-
-        get clipboard() {
-          return this._clipboard;
+        _tooltip: {
+          type: String,
+          computed: '_computeTooltip(inClipboard)'
         }
+      },
 
-      });
-    })();
+      _isAvailable: function(doc) {
+        return this.isCollectionMember(doc) && !doc.isVersion;
+      },
+
+      toggle: function() {
+        if (this._clipboard.contains(this.document)) {
+          this._clipboard.remove(this.document);
+        } else {
+          this._clipboard.add(this.document);
+        }
+      },
+
+      _computeTooltip: function(inClipboard) {
+        return this.i18n('clipboardToggleButton.tooltip.' + (inClipboard ? 'remove' : 'add'));
+      },
+
+      _update: function() {
+        this.inClipboard = this._clipboard && this.document && this._clipboard.contains(this.document);
+      },
+
+      set clipboard(clipboard) {
+        if (!clipboard) {
+          return;
+        }
+        this._clipboard = clipboard;
+        this._clipboard.addEventListener('documents-changed', this._update.bind(this));
+        this._update();
+      },
+
+      get clipboard() {
+        return this._clipboard;
+      }
+
+    });
   </script>
-
 </dom-module>

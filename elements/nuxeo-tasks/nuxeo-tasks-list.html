@@ -132,80 +132,74 @@ limitations under the License.
     </nuxeo-data-list>
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-tasks-list',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        tasks: Array,
 
-      Polymer({
-        is: 'nuxeo-tasks-list',
-
-        properties: {
-          tasks: Array,
-
-          current: {
-            type: Object,
-            observer: '_currentChanged'
-          },
-
-          _selection: {
-            type: Object,
-            observer: '_selectionChanged'
-          },
-
-          /**
-           * Set to true to prevent from fire event to navigate to the task.
-           **/
-          noNavigation: Boolean
+        current: {
+          type: Object,
+          observer: '_currentChanged'
         },
 
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-        _selectionChanged: function() {
-          if (this._selection && !this.noNavigation) {
-            this.navigateTo('tasks', this._selection.id);
-          }
+        _selection: {
+          type: Object,
+          observer: '_selectionChanged'
         },
 
-        _currentChanged: function(newVal, oldVal) {
-          if (newVal && oldVal && newVal.id === oldVal.id) {
-            return;
-          }
-          if (newVal && this.tasks) {
-            for (var i = 0; i < this.tasks.length; i++) {
-              if (this.tasks[i].id === newVal.id) {
-                this.$.list.selectItem(this.tasks[i]);
-                break;
-              }
-            }
-          } else {
-            var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
-            // make sure this task still exists to avoid iron-list exceptions
-            if (_exists) {
-              this.$.list.deselectItem(oldVal);
-            }
-          }
-        },
+        /**
+         * Set to true to prevent from fire event to navigate to the task.
+         **/
+        noNavigation: Boolean
+      },
 
-        _computedClass: function(isSelected) {
-          var classes = 'list-item';
-          if (isSelected) {
-            classes += ' selected';
-          }
-          return classes;
-        },
-
-        _isUser: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'user';
-        },
-
-        _isGroup: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'group';
-        },
-
-        _isNotUserOrGroup: function(actor) {
-          return !this._isUser(actor) && !this._isGroup(actor);
+      _selectionChanged: function() {
+        if (this._selection && !this.noNavigation) {
+          this.navigateTo('tasks', this._selection.id);
         }
+      },
 
-      });
-    })();
+      _currentChanged: function(newVal, oldVal) {
+        if (newVal && oldVal && newVal.id === oldVal.id) {
+          return;
+        }
+        if (newVal && this.tasks) {
+          for (var i = 0; i < this.tasks.length; i++) {
+            if (this.tasks[i].id === newVal.id) {
+              this.$.list.selectItem(this.tasks[i]);
+              break;
+            }
+          }
+        } else {
+          var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
+          // make sure this task still exists to avoid iron-list exceptions
+          if (_exists) {
+            this.$.list.deselectItem(oldVal);
+          }
+        }
+      },
+
+      _computedClass: function(isSelected) {
+        var classes = 'list-item';
+        if (isSelected) {
+          classes += ' selected';
+        }
+        return classes;
+      },
+
+      _isUser: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'user';
+      },
+
+      _isGroup: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'group';
+      },
+
+      _isNotUserOrGroup: function(actor) {
+        return !this._isUser(actor) && !this._isGroup(actor);
+      }
+
+    });
   </script>
 </dom-module>

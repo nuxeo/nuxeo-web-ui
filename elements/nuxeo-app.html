@@ -343,514 +343,510 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-app',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        baseUrl: {
+          type: String,
+          value: '/',
+          observer: '_baseUrlChanged'
+        },
 
-      Polymer({
-        is: 'nuxeo-app',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          baseUrl: {
-            type: String,
-            value: '/',
-            observer: '_baseUrlChanged'
-          },
+        loading: {
+          type: Boolean,
+          value: false
+        },
 
-          loading: {
-            type: Boolean,
-            value: false
-          },
+        page: {
+          type: String,
+          observer: '_pageChanged'
+        },
 
-          page: {
-            type: String,
-            observer: '_pageChanged'
-          },
+        selectedTab: String,
+        selectedAdminTab: String,
 
-          selectedTab: String,
-          selectedAdminTab: String,
+        currentDocument: Object,
+        currentParent: Object,
+        docId: String,
+        docPath: String,
+        docAction: {
+          type: String,
+          value: 'view'
+        },
 
-          currentDocument: Object,
-          currentParent: Object,
-          docId: String,
-          docPath: String,
-          docAction: {
-            type: String,
-            value: 'view'
-          },
+        entity: Object,
 
-          entity: Object,
+        searchName: {
+          type: String,
+          observer: '_updateSearch'
+        },
 
-          searchName: {
-            type: String,
-            observer: '_updateSearch'
-          },
+        tasks: Array,
 
-          tasks: Array,
+        taskCount: Number,
 
-          taskCount: Number,
+        clipboardCount: Number,
 
-          clipboardCount: Number,
+        drawerWidth: {
+          type: String,
+          value: '52px'
+        },
 
-          drawerWidth: {
-            type: String,
-            value: '52px'
-          },
+        drawerOpened: {
+          type: Boolean,
+          value: false
+        },
 
-          drawerOpened: {
-            type: Boolean,
-            value: false
-          },
-
-          keyEventTarget: {
-            type: Object,
-            value: function() {
-              return document.body;
-            }
-          },
-
-          currentTask: {
-            type: Object,
-            value: null
-          },
-
-          currentUser: {
-            type: Object,
-            observer: '_observeCurrentUser'
-          },
-
-          userWorkspace: {
-            type: String
-          },
-
-          actionContext: {
-            type: Object,
-            computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-            ' clipboard, clipboardDocCount, userWorkspace)'
-          },
-
-          clipboard: {
-            type: Object,
-            value: null
-          },
-
-          clipboardDocCount: {
-            type: Number,
-            notify: true
-          },
-
-          _dismissible: {
-            type: Boolean,
-            value: false
+        keyEventTarget: {
+          type: Object,
+          value: function() {
+            return document.body;
           }
         },
 
-        listeners: {
-          'document-updated': 'refresh',
-          'create-document': '_showDocumentCreationWizard',
-          'document-created': '_handleDocumentCreated',
-          'workflowStarted': '_refreshAndFetchTasks',
-          'workflowAbandoned': '_refreshAndFetchTasks',
-          'workflowTaskProcess': '_workflowTaskProcess',
-          'workflowTaskProcessed': '_refreshAndFetchTasks',
-          'added-to-clipboard': '_onAddedToClipboard',
-          'add-to-clipboard': '_onAddToClipboard',
-          'added-to-collection': '_documentAddedToCollection',
-          'removed-from-clipboard': '_documentRemovedFromClipboard',
-          'removed-from-collection': '_documentRemovedFromCollection',
-          'file-deleted': '_documentFileDeleted',
-          'added-to-favorites': '_documentAddedToFavorites',
-          'removed-from-favorites': '_documentRemovedFromFavorites',
-          'document-subscribed': '_documentSubscribed',
-          'document-unsubscribed': '_documentUnsubscribed',
-          'document-locked': '_documentLocked',
-          'document-unlocked': '_documentUnlocked',
-          'theme-changed': '_themeChanged',
-          'search-results': '_showSearchResults',
-          'navigate': '_navigate',
-          'collection-loaded': '_updateCollectionMenu',
-          'notify': '_notify',
-          'nx-clipboard-updated': '_clipboardUpdated',
-          'drawer-pages.iron-items-changed': '_updateSearch'
+        currentTask: {
+          type: Object,
+          value: null
         },
 
-        ready: function() {
-          this.$.drawerPanel.closeDrawer();
-
-          window.addEventListener('unhandledrejection', function(e) {
-            if (e.reason && e.reason.status === 404) {
-              this.showError(404, e.reason.message, this._errorUrl());
-            }
-          }.bind(this));
-
-          window.addEventListener('nuxeo-documents-deleted', function() {
-            this._fetchTasks();
-          }.bind(this));
-
-          window.addEventListener('nuxeo-documents-deleted-error', function(e) {
-            this._documentsDeletedError(e.detail.response, e.detail.documents);
-          }.bind(this));
+        currentUser: {
+          type: Object,
+          observer: '_observeCurrentUser'
         },
 
-        refresh: function() {
-          if (this.docPath && this.docPath.length > 0) {
-            this.navigateTo('browse', this.docPath ? this.docPath : '');
-          } else {
-            page('/');
+        userWorkspace: {
+          type: String
+        },
+
+        actionContext: {
+          type: Object,
+          computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
+          ' clipboard, clipboardDocCount, userWorkspace)'
+        },
+
+        clipboard: {
+          type: Object,
+          value: null
+        },
+
+        clipboardDocCount: {
+          type: Number,
+          notify: true
+        },
+
+        _dismissible: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      listeners: {
+        'document-updated': 'refresh',
+        'create-document': '_showDocumentCreationWizard',
+        'document-created': '_handleDocumentCreated',
+        'workflowStarted': '_refreshAndFetchTasks',
+        'workflowAbandoned': '_refreshAndFetchTasks',
+        'workflowTaskProcess': '_workflowTaskProcess',
+        'workflowTaskProcessed': '_refreshAndFetchTasks',
+        'added-to-clipboard': '_onAddedToClipboard',
+        'add-to-clipboard': '_onAddToClipboard',
+        'added-to-collection': '_documentAddedToCollection',
+        'removed-from-clipboard': '_documentRemovedFromClipboard',
+        'removed-from-collection': '_documentRemovedFromCollection',
+        'file-deleted': '_documentFileDeleted',
+        'added-to-favorites': '_documentAddedToFavorites',
+        'removed-from-favorites': '_documentRemovedFromFavorites',
+        'document-subscribed': '_documentSubscribed',
+        'document-unsubscribed': '_documentUnsubscribed',
+        'document-locked': '_documentLocked',
+        'document-unlocked': '_documentUnlocked',
+        'theme-changed': '_themeChanged',
+        'search-results': '_showSearchResults',
+        'navigate': '_navigate',
+        'collection-loaded': '_updateCollectionMenu',
+        'notify': '_notify',
+        'nx-clipboard-updated': '_clipboardUpdated',
+        'drawer-pages.iron-items-changed': '_updateSearch'
+      },
+
+      ready: function() {
+        this.$.drawerPanel.closeDrawer();
+
+        window.addEventListener('unhandledrejection', function(e) {
+          if (e.reason && e.reason.status === 404) {
+            this.showError(404, e.reason.message, this._errorUrl());
           }
-        },
+        }.bind(this));
 
-        loadTask: function(id) {
-          if (id && id.length > 0){
-            this.loading = true;
-            this.currentTaskId = id;
-            this.$.task.get().then(function(task) {
-              this.currentTask = task;
-              this.show('tasks');
-              this.loading = false;
-            }.bind(this));
-          } else {
-            this.currentTask = null;
-            this.show('tasks');
-          }
-        },
+        window.addEventListener('nuxeo-documents-deleted', function() {
+          this._fetchTasks();
+        }.bind(this));
 
-        load: function(page, id, path, action) {
+        window.addEventListener('nuxeo-documents-deleted-error', function(e) {
+          this._documentsDeletedError(e.detail.response, e.detail.documents);
+        }.bind(this));
+      },
+
+      refresh: function() {
+        if (this.docPath && this.docPath.length > 0) {
+          this.navigateTo('browse', this.docPath ? this.docPath : '');
+        } else {
+          page('/');
+        }
+      },
+
+      loadTask: function(id) {
+        if (id && id.length > 0){
           this.loading = true;
-          this.docId = id;
-          this.docPath = path;
-          this.docAction = action;
-          this.$.doc.get().then(function(doc) {
-            if (this.docId && !doc.isVersion) {
-              this.docId = '';
-              this.docPath = doc.path;
-              this.navigateTo('browse', doc.path);
-            } else {
-              var recent = this.$$('#recent');
-              if (recent) {
-                recent.add(doc);
-              }
-              this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
-                doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-              this.set('currentDocument', doc);
-              this.loading = false;
-              this.show(page);
-            }
-          }.bind(this)).catch(function(err) {
-            this.showError(err.status, this.i18n('browse.error'), err.message)
+          this.currentTaskId = id;
+          this.$.task.get().then(function(task) {
+            this.currentTask = task;
+            this.show('tasks');
+            this.loading = false;
           }.bind(this));
-        },
+        } else {
+          this.currentTask = null;
+          this.show('tasks');
+        }
+      },
 
-        showError: function(code, msg, url) {
-          this.loading = false;
-          var errorEl = this.$.error;
-          errorEl.code = code;
-          errorEl.message = msg;
-          errorEl.url = url;
-          this.show('error');
-        },
+      load: function(page, id, path, action) {
+        this.loading = true;
+        this.docId = id;
+        this.docPath = path;
+        this.docAction = action;
+        this.$.doc.get().then(function(doc) {
+          if (this.docId && !doc.isVersion) {
+            this.docId = '';
+            this.docPath = doc.path;
+            this.navigateTo('browse', doc.path);
+          } else {
+            var recent = this.$$('#recent');
+            if (recent) {
+              recent.add(doc);
+            }
+            this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
+              doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+            this.set('currentDocument', doc);
+            this.loading = false;
+            this.show(page);
+          }
+        }.bind(this)).catch(function(err) {
+          this.showError(err.status, this.i18n('browse.error'), err.message)
+        }.bind(this));
+      },
 
-        show: function(page) {
-          this.page = page;
-        },
+      showError: function(code, msg, url) {
+        this.loading = false;
+        var errorEl = this.$.error;
+        errorEl.code = code;
+        errorEl.message = msg;
+        errorEl.url = url;
+        this.show('error');
+      },
 
-        _baseUrlChanged: function() {
-          Nuxeo.RoutingBehavior.baseUrl = this.baseUrl;
-        },
+      show: function(page) {
+        this.page = page;
+      },
 
-        _logo: function(baseUrl) {
-          return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
-        },
+      _baseUrlChanged: function() {
+        Nuxeo.RoutingBehavior.baseUrl = this.baseUrl;
+      },
 
-        _actionContext: function() {
-          return {
-            document: this.currentDocument,
-            user: this.currentUser,
-            taskCount: this.taskCount,
-            tasks: this.tasks,
-            currentTask: this.currentTask,
-            clipboardDocCount: this.clipboardDocCount,
-            clipboard: this.clipboard,
-            actionContext: this.actionContext,
-            userWorkspace: this.userWorkspace
-          };
-        },
+      _logo: function(baseUrl) {
+        return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
+      },
 
-        _focusMenu: function() {
-          this.$.menu.focus();
-        },
+      _actionContext: function() {
+        return {
+          document: this.currentDocument,
+          user: this.currentUser,
+          taskCount: this.taskCount,
+          tasks: this.tasks,
+          currentTask: this.currentTask,
+          clipboardDocCount: this.clipboardDocCount,
+          clipboard: this.clipboard,
+          actionContext: this.actionContext,
+          userWorkspace: this.userWorkspace
+        };
+      },
 
-        _showSuggester: function() {
-          this.$.suggester.toggle();
-        },
+      _focusMenu: function() {
+        this.$.menu.focus();
+      },
 
-        _showDocumentCreationWizard: function(e) {
-          if (e.detail.keyboardEvent && (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey)) {
+      _showSuggester: function() {
+        this.$.suggester.toggle();
+      },
+
+      _showDocumentCreationWizard: function(e) {
+        if (e.detail.keyboardEvent && (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey)) {
+          return;
+        }
+        if (e.detail.files) {
+          this.$.importPopup.toggleDialogImport(e.detail.files);
+        } else if (e.detail.type) {
+          this.$.importPopup.toggleDialogCreate(e.detail.type);
+        } else {
+          this.$.importPopup.toggleDialog();
+        }
+      },
+
+      _navigate: function(e) {
+        if (e.detail.doc) {
+          this.navigateTo('browse', e.detail.doc.path);
+          if (e.detail.isFromCollection) {
+            this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
+          }
+        }
+      },
+
+      // lookup the search
+      _updateSearch: function() {
+        this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
+        if (this.searchForm && this._searchOnLoad) {
+          this.searchForm._search();
+          this._searchOnLoad = false;
+        }
+      },
+
+      _updateCollectionMenu: function(e) {
+        if (e.detail.provider) {
+          this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
+        }
+      },
+
+      _showSearchResults: function(e) {
+        //page('/search/' + e.target.searchName);
+        this.navigateTo('search', e.target.searchName);
+      },
+
+      _toggleDrawer: function(e) {
+        if (this._selected === e.detail.selected && this.drawerOpened) {
+          this._closeDrawer();
+        } else {
+          this._openDrawer();
+        }
+        this._selected = e.detail.selected;
+      },
+
+      _openDrawer: function() {
+        this.drawerWidth = '350px';
+        this.drawerOpened = true;
+        var drawerPanel = this.$.drawerPanel;
+        if (drawerPanel.narrow) {
+          drawerPanel.openDrawer();
+        }
+        if (!this.selectedTab){
+          var drawer = this.$['drawer-pages'];
+          drawer.selectIndex(0);
+          this.selectedTab = drawer.selected
+        }
+      },
+
+      _closeDrawer: function() {
+        this.drawerWidth = '52px';
+        this.drawerOpened = false;
+        this.$.drawerPanel.closeDrawer();
+      },
+
+      _fetchTasks: function() {
+        this.$.tasks.params = {'userId': this.currentUser.id};
+        this.$.tasks.get().then(function(response) {
+          this.tasks = response.entries;
+          this.taskCount = this.tasks.length;
+        }.bind(this));
+      },
+
+      _refreshAndFetchTasks: function() {
+        // let's refresh the current document since it might have been changed (ex: state and version)
+        this.refresh();
+        this._fetchTasks();
+      },
+
+      _workflowTaskProcess: function(e) {
+        this.navigateTo('tasks', e.detail.id);
+      },
+
+      _onAddedToClipboard: function(e){
+        this._toast(
+          this.i18n(e.detail.docIds && e.detail.docIds.length > 1
+            ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard')
+        );
+      },
+
+      _onAddToClipboard: function(e) {
+        if (e.detail.documents && this.clipboard) {
+          this.clipboard.add(e.detail.documents)
+        }
+      },
+
+      _observeCurrentUser: function() {
+        if (this.currentUser) {
+          this.$.userWorkspace.execute().then(function(response) {
+            this.userWorkspace = response.path;
+          }.bind(this));
+          this._fetchTasks();
+        }
+      },
+
+      _displayUser: function(user) {
+        if (user) {
+          var result = '';
+          if (user.properties['firstName']) {
+            result += user.properties['firstName'];
+          }
+          if (user.properties['lastName']) {
+            if (result.length > 0) {
+              result += ' ';
+            }
+            result += user.properties['lastName'];
+          }
+          if (result.length === 0) {
+            result = user.id;
+          }
+          return result;
+        }
+      },
+
+      _toast: function(text) {
+        this._notify({detail: {message: text}});
+      },
+
+      _documentAddedToCollection: function(e) {
+        this._toast(
+          this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection')
+        );
+      },
+
+      _documentRemovedFromCollection: function() {
+        this._toast(this.i18n('app.document.removedFromCollection'));
+      },
+
+      _documentRemovedFromClipboard: function() {
+        this._toast(this.i18n('app.document.removedFromClipboard'));
+      },
+
+      _documentAddedToFavorites: function() {
+        this._toast(this.i18n('app.document.addedToFavorites'));
+      },
+
+      _documentRemovedFromFavorites: function() {
+        this._toast(this.i18n('app.document.removedFromFavorites'));
+      },
+
+      _documentSubscribed: function() {
+        this._toast(this.i18n('app.document.subscribed'));
+      },
+
+      _documentUnsubscribed: function() {
+        this._toast(this.i18n('app.document.unsubscribed'));
+      },
+
+      _documentLocked: function() {
+        this._toast(this.i18n('app.document.locked'));
+      },
+
+      _documentUnlocked: function() {
+        this._toast(this.i18n('app.document.unlocked'));
+      },
+
+      _documentsDeletedError: function(err, documents){
+        var errorMessage = this.i18n(documents && documents.length > 1
+          ? 'app.documents.deleted.error' : 'app.document.deleted.error');
+
+        switch (err.status){
+          case 403: errorMessage = errorMessage + " " +  this.i18n('error.403'); break;
+          default: break;
+        }
+        this._toast(errorMessage);
+      },
+
+      _documentFileDeleted: function() {
+        this._toast(this.i18n('app.document.fileDeleted'));
+        this.fire('document-updated');
+      },
+
+      _themeChanged: function() {
+        this._toast(this.i18n('themes.applying'));
+        location.reload();
+      },
+
+      _handleDocumentCreated: function(e) {
+        if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
+          var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
+          this._toast(this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title));
+        } else {
+          this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
+        }
+      },
+
+      _hasAdministrationPermissions: function(user) {
+        return user.isAdministrator || this.isMember(user, 'powerusers');
+      },
+
+      _errorUrl: function() {
+        return window.location.href;
+      },
+
+      _onError: function(e) {
+        this.showError(e.detail.code, e.detail.message, this._errorUrl());
+      },
+
+      _logout: function() {
+        return this.$.nxcon.url + '/logout';
+      },
+
+      _pageChanged: function(page) {
+        if (page !== null) {
+          var el = this.$.pages.selectedItem;
+          // selectItem might be undefined
+          // https://github.com/PolymerElements/iron-pages/issues/52
+          if (!el) {
+            el = Polymer.dom(this.$.pages).querySelector('[name=' + page + ']');
+          }
+          if (!el) {
+            this.showError(404, '', page);
             return;
           }
-          if (e.detail.files) {
-            this.$.importPopup.toggleDialogImport(e.detail.files);
-          } else if (e.detail.type) {
-            this.$.importPopup.toggleDialogCreate(e.detail.type);
-          } else {
-            this.$.importPopup.toggleDialog();
+          // check if page is already registered (vulcanized)
+          if (!Polymer.isInstance(el)) {
+            this.loading = true;
+            var tag = el.tagName.toLowerCase();
+            this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, function() {
+              this.showError(404, '', tag + '.html');
+            }.bind(this), true);
           }
-        },
-
-        _navigate: function(e) {
-          if (e.detail.doc) {
-            this.navigateTo('browse', e.detail.doc.path);
-            if (e.detail.isFromCollection) {
-              this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
-            }
-          }
-        },
-
-        // lookup the search
-        _updateSearch: function() {
-          this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
-          if (this.searchForm && this._searchOnLoad) {
-            this.searchForm._search();
-            this._searchOnLoad = false;
-          }
-        },
-
-        _updateCollectionMenu: function(e) {
-          if (e.detail.provider) {
-            this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
-          }
-        },
-
-        _showSearchResults: function(e) {
-          //page('/search/' + e.target.searchName);
-          this.navigateTo('search', e.target.searchName);
-        },
-
-        _toggleDrawer: function(e) {
-          if (this._selected === e.detail.selected && this.drawerOpened) {
-            this._closeDrawer();
-          } else {
-            this._openDrawer();
-          }
-          this._selected = e.detail.selected;
-        },
-
-        _openDrawer: function() {
-          this.drawerWidth = '350px';
-          this.drawerOpened = true;
-          var drawerPanel = this.$.drawerPanel;
-          if (drawerPanel.narrow) {
-            drawerPanel.openDrawer();
-          }
-          if (!this.selectedTab){
-            var drawer = this.$['drawer-pages'];
-            drawer.selectIndex(0);
-            this.selectedTab = drawer.selected
-          }
-        },
-
-        _closeDrawer: function() {
-          this.drawerWidth = '52px';
-          this.drawerOpened = false;
-          this.$.drawerPanel.closeDrawer();
-        },
-
-        _fetchTasks: function() {
-          this.$.tasks.params = {'userId': this.currentUser.id};
-          this.$.tasks.get().then(function(response) {
-            this.tasks = response.entries;
-            this.taskCount = this.tasks.length;
-          }.bind(this));
-        },
-
-        _refreshAndFetchTasks: function() {
-          // let's refresh the current document since it might have been changed (ex: state and version)
-          this.refresh();
-          this._fetchTasks();
-        },
-
-        _workflowTaskProcess: function(e) {
-          this.navigateTo('tasks', e.detail.id);
-        },
-
-        _onAddedToClipboard: function(e){
-          this._toast(
-            this.i18n(e.detail.docIds && e.detail.docIds.length > 1
-              ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard')
-          );
-        },
-
-        _onAddToClipboard: function(e) {
-          if (e.detail.documents && this.clipboard) {
-            this.clipboard.add(e.detail.documents)
-          }
-        },
-
-        _observeCurrentUser: function() {
-          if (this.currentUser) {
-            this.$.userWorkspace.execute().then(function(response) {
-              this.userWorkspace = response.path;
-            }.bind(this));
-            this._fetchTasks();
-          }
-        },
-
-        _displayUser: function(user) {
-          if (user) {
-            var result = '';
-            if (user.properties['firstName']) {
-              result += user.properties['firstName'];
-            }
-            if (user.properties['lastName']) {
-              if (result.length > 0) {
-                result += ' ';
-              }
-              result += user.properties['lastName'];
-            }
-            if (result.length === 0) {
-              result = user.id;
-            }
-            return result;
-          }
-        },
-
-        _toast: function(text) {
-          this._notify({detail: {message: text}});
-        },
-
-        _documentAddedToCollection: function(e) {
-          this._toast(
-            this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection')
-          );
-        },
-
-        _documentRemovedFromCollection: function() {
-          this._toast(this.i18n('app.document.removedFromCollection'));
-        },
-
-        _documentRemovedFromClipboard: function() {
-          this._toast(this.i18n('app.document.removedFromClipboard'));
-        },
-
-        _documentAddedToFavorites: function() {
-          this._toast(this.i18n('app.document.addedToFavorites'));
-        },
-
-        _documentRemovedFromFavorites: function() {
-          this._toast(this.i18n('app.document.removedFromFavorites'));
-        },
-
-        _documentSubscribed: function() {
-          this._toast(this.i18n('app.document.subscribed'));
-        },
-
-        _documentUnsubscribed: function() {
-          this._toast(this.i18n('app.document.unsubscribed'));
-        },
-
-        _documentLocked: function() {
-          this._toast(this.i18n('app.document.locked'));
-        },
-
-        _documentUnlocked: function() {
-          this._toast(this.i18n('app.document.unlocked'));
-        },
-
-        _documentsDeletedError: function(err, documents){
-          var errorMessage = this.i18n(documents && documents.length > 1
-            ? 'app.documents.deleted.error' : 'app.document.deleted.error');
-
-          switch (err.status){
-            case 403: errorMessage = errorMessage + " " +  this.i18n('error.403'); break;
-            default: break;
-          }
-          this._toast(errorMessage);
-        },
-
-        _documentFileDeleted: function() {
-          this._toast(this.i18n('app.document.fileDeleted'));
-          this.fire('document-updated');
-        },
-
-        _themeChanged: function() {
-          this._toast(this.i18n('themes.applying'));
-          location.reload();
-        },
-
-        _handleDocumentCreated: function(e) {
-          if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
-            var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-            this._toast(this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title));
-          } else {
-            this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
-          }
-        },
-
-        _hasAdministrationPermissions: function(user) {
-          return user.isAdministrator || this.isMember(user, 'powerusers');
-        },
-
-        _errorUrl: function() {
-          return window.location.href;
-        },
-
-        _onError: function(e) {
-          this.showError(e.detail.code, e.detail.message, this._errorUrl());
-        },
-
-        _logout: function() {
-          return this.$.nxcon.url + '/logout';
-        },
-
-        _pageChanged: function(page) {
-          if (page !== null) {
-            var el = this.$.pages.selectedItem;
-            // selectItem might be undefined
-            // https://github.com/PolymerElements/iron-pages/issues/52
-            if (!el) {
-              el = Polymer.dom(this.$.pages).querySelector('[name=' + page + ']');
-            }
-            if (!el) {
-              this.showError(404, '', page);
-              return;
-            }
-            // check if page is already registered (vulcanized)
-            if (!Polymer.isInstance(el)) {
-              this.loading = true;
-              var tag = el.tagName.toLowerCase();
-              this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, function() {
-                this.showError(404, '', tag + '.html');
-              }.bind(this), true);
-            }
-          }
-        },
-
-        _pageLoaded: function() {
-          this.loading = false;
-        },
-
-        _notify: function(e) {
-          var options = e.detail;
-          if (options.close) {
-            this.$.toast.close();
-          } else if (options.message) {
-            this.$.toast.text = options.message;
-            this.$.toast.duration = options.duration ? options.duration : 3000;
-            this.set('_dismissible', !!options.dismissible);
-            this.$.toast.open();
-          }
-        },
-
-        _dismissToast: function() {
-          this.$.toast.toggle();
-        },
-
-        _clipboardUpdated: function(e) {
-          this.clipboard = this.clipboard || this.$$('#clipboard');
-          this.set('clipboardDocCount', e.detail.docCount);
         }
+      },
 
-      });
-    })();
+      _pageLoaded: function() {
+        this.loading = false;
+      },
+
+      _notify: function(e) {
+        var options = e.detail;
+        if (options.close) {
+          this.$.toast.close();
+        } else if (options.message) {
+          this.$.toast.text = options.message;
+          this.$.toast.duration = options.duration ? options.duration : 3000;
+          this.set('_dismissible', !!options.dismissible);
+          this.$.toast.open();
+        }
+      },
+
+      _dismissToast: function() {
+        this.$.toast.toggle();
+      },
+
+      _clipboardUpdated: function(e) {
+        this.clipboard = this.clipboard || this.$$('#clipboard');
+        this.set('clipboardDocCount', e.detail.docCount);
+      }
+
+    });
   </script>
 
 </dom-module>

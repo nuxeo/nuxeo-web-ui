@@ -221,117 +221,112 @@ limitations under the License.
     </nuxeo-page>
 
   </template>
+
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-tasks',
-
-        properties: {
-          tasks: {
-            type: Array
-          },
-
-          current: {
-            type: Object,
-            value: null,
-            observer: '_currentChanged'
-          },
-
-          currentTaskDocument: Object
+    Polymer({
+      is: 'nuxeo-tasks',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        tasks: {
+          type: Array
         },
 
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-        _process: function(e) {
-          this.navigateTo('tasks', e.model.task.id);
+        current: {
+          type: Object,
+          value: null,
+          observer: '_currentChanged'
         },
 
-        _currentChanged: function() {
-          if (this.current) {
-            this.$.currentTaskDoc.get();
-          }
-        },
+        currentTaskDocument: Object
+      },
 
-        _hasCurrent: function() {
-          return this.current ? true : false;
-        },
+      _process: function(e) {
+        this.navigateTo('tasks', e.model.task.id);
+      },
 
-        _href: function(doc) {
-          if (doc) {
-            return this.urlFor('browse', doc.path);
-          }
-        },
+      _currentChanged: function() {
+        if (this.current) {
+          this.$.currentTaskDoc.get();
+        }
+      },
 
-        _getPath: function(path){
-          return path.substr(0, path.lastIndexOf("/"));
-        },
+      _hasCurrent: function() {
+        return this.current ? true : false;
+      },
 
-        _date: function(date) {
-          return moment(date).format('MMMM D, YYYY');
-        },
+      _href: function(doc) {
+        if (doc) {
+          return this.urlFor('browse', doc.path);
+        }
+      },
 
-        _isUser: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'user';
-        },
+      _getPath: function(path){
+        return path.substr(0, path.lastIndexOf("/"));
+      },
 
-        _isGroup: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'group';
-        },
+      _date: function(date) {
+        return moment(date).format('MMMM D, YYYY');
+      },
 
-        _isNotUserOrGroup: function(actor) {
-          return !this._isUser(actor) && !this._isGroup(actor);
-        },
+      _isUser: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'user';
+      },
 
-        _toggleGraphDialog: function() {
-          this.$$('#graphDialog').toggle();
-        },
+      _isGroup: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'group';
+      },
 
-        _count: function() {
-          if (this.tasks) {
-            return this.tasks.length;
-          }
-        },
+      _isNotUserOrGroup: function(actor) {
+        return !this._isUser(actor) && !this._isGroup(actor);
+      },
 
-        _docId: function() {
-          if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
-            return this.current.targetDocumentIds[0].uid;
-          }
-        },
+      _toggleGraphDialog: function() {
+        this.$$('#graphDialog').toggle();
+      },
 
-        _prev: function() {
-          this.navigateTo('tasks', this.tasks[this.currenIndex - 1].id);
-        },
+      _count: function() {
+        if (this.tasks) {
+          return this.tasks.length;
+        }
+      },
 
-        _next: function() {
-          this.navigateTo('tasks', this.tasks[this.currenIndex + 1].id);
-        },
+      _docId: function() {
+        if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
+          return this.current.targetDocumentIds[0].uid;
+        }
+      },
 
-        _isFirst: function() {
-          return this.currenIndex <= 0;
-        },
+      _prev: function() {
+        this.navigateTo('tasks', this.tasks[this.currenIndex - 1].id);
+      },
 
-        _isLast: function() {
-          return this.currenIndex === this.tasks.length - 1 || this.currenIndex < 0;
-        },
+      _next: function() {
+        this.navigateTo('tasks', this.tasks[this.currenIndex + 1].id);
+      },
 
-        _empty: function(tasks) {
-          return tasks && tasks.length === 0;
-        },
+      _isFirst: function() {
+        return this.currenIndex <= 0;
+      },
 
-        get currenIndex() {
-          if (this.tasks && this.current) {
-            for (var i = 0; i < this.tasks.length; i++) {
-              if (this.tasks[i].id === this.current.id) {
-                return i;
-              }
+      _isLast: function() {
+        return this.currenIndex === this.tasks.length - 1 || this.currenIndex < 0;
+      },
+
+      _empty: function(tasks) {
+        return tasks && tasks.length === 0;
+      },
+
+      get currenIndex() {
+        if (this.tasks && this.current) {
+          for (var i = 0; i < this.tasks.length; i++) {
+            if (this.tasks[i].id === this.current.id) {
+              return i;
             }
           }
-          return -1;
         }
+        return -1;
+      }
 
-      });
-    })();
+    });
   </script>
 </dom-module>

@@ -154,182 +154,178 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-dropzone',
-        behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
-        properties: {
-          document: {
-            type: Object,
-            notify: true
-          },
-          label: {
-            type: String
-          },
-          message: {
-            type: String,
-            value: 'Add a file'
-          },
-          blobList: {
-            type: Boolean,
-            value: false
-          },
-          xpath: {
-            type: String,
-            value: 'file:content'
-          },
-          updateDocument: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          },
-          uploadedMessage: {
-            type: String,
-            value: 'File uploaded'
-          },
-          progressMessage: {
-            type: String,
-            value: 'Uploading...'
-          },
-          progress: {
-            type: Boolean,
-            value: false
-          },
-          _hasFiles: {
-            type: Boolean,
-            value: false
-          }
+    Polymer({
+      is: 'nuxeo-dropzone',
+      behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+      properties: {
+        document: {
+          type: Object,
+          notify: true
         },
-
-        listeners: {
-          'batchFinished': 'importBatch',
-          'nx-blob-picked': '_blobPicked'
+        label: {
+          type: String
         },
-
-        ready: function() {
-          this.connection = this.$.nx;
-          this.setupDropZone(this.$.dropzone);
-          this.message = this.i18n('dropzone.message');
-          this.uploadedMessage = this.i18n('dropzone.uploaded');
-          this.progressMessage = this.i18n('dropzone.progress');
+        message: {
+          type: String,
+          value: 'Add a file'
         },
-
-        open: function() {
-          this.$$('input').click();
+        blobList: {
+          type: Boolean,
+          value: false
         },
-
-        importBatch: function(data) {
-          data.stopPropagation();
-          if (this.blobList) {
-            this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
-              useMainBlob: false,
-              context: {
-                currentDocument: this.document.path
-              }
-            }).then(this._handleBlobListUploaded.bind(this));
-          } else {
-            this.document.properties[this.xpath] = {
-              'upload-batch': data.detail.batchId,
-              'upload-fileId': '0'
-            };
-            this._handleBlobUploaded();
-          }
+        xpath: {
+          type: String,
+          value: 'file:content'
         },
-
-        _blobPicked: function(e) {
-          this._hasFiles = true;
-          this.set('files', e.detail.blobs);
-          if (this.blobList) {
-            this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
-            this.$.bulkAttach.params = {
-              useMainBlob: false,
-              context: {
-                currentDocument: this.document.path
-              },
-              noMimeTypeCheck: true
-            };
-            this.$.bulkAttach.headers = {'nx_es_sync': 'true'};
-            return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
-          } else {
-            var file = e.detail.blobs[e.detail.blobs.length - 1];
-            this.document.properties[this.xpath] = {
-              'providerId': file.providerId,
-              'user': file.user,
-              'fileId': file.fileId
-            };
-            this._handleBlobUploaded();
-          }
+        updateDocument: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         },
-
-        _handleBlobUploaded: function() {
-          if (this.updateDocument) {
-
-            // TODO: NXP-20782: remove contributors or they will be duplicated
-            delete this.document.properties['dc:contributors'];
-
-            this.$.doc.put().then(function(response) {
-              this.document = response;
-              this.fire('notify', {message: this.uploadedMessage});
-              this.progress = false;
-              this._hasFiles = false;
-            }.bind(this));
-          } else {
-            this.fire('notify', {message: this.uploadedMessage});
-            this.progress = false;
-          }
+        uploadedMessage: {
+          type: String,
+          value: 'File uploaded'
         },
+        progressMessage: {
+          type: String,
+          value: 'Uploading...'
+        },
+        progress: {
+          type: Boolean,
+          value: false
+        },
+        _hasFiles: {
+          type: Boolean,
+          value: false
+        }
+      },
 
-        _handleBlobListUploaded: function() {
-          return this.$.doc.get().then(function(response) {
-            this.document.properties[this.xpath] = response.properties[this.xpath];
-            this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
+      listeners: {
+        'batchFinished': 'importBatch',
+        'nx-blob-picked': '_blobPicked'
+      },
+
+      ready: function() {
+        this.connection = this.$.nx;
+        this.setupDropZone(this.$.dropzone);
+        this.message = this.i18n('dropzone.message');
+        this.uploadedMessage = this.i18n('dropzone.uploaded');
+        this.progressMessage = this.i18n('dropzone.progress');
+      },
+
+      open: function() {
+        this.$$('input').click();
+      },
+
+      importBatch: function(data) {
+        data.stopPropagation();
+        if (this.blobList) {
+          this.batchExecute('BlobHolder.AttachOnCurrentDocument', {
+            useMainBlob: false,
+            context: {
+              currentDocument: this.document.path
+            }
+          }).then(this._handleBlobListUploaded.bind(this));
+        } else {
+          this.document.properties[this.xpath] = {
+            'upload-batch': data.detail.batchId,
+            'upload-fileId': '0'
+          };
+          this._handleBlobUploaded();
+        }
+      },
+
+      _blobPicked: function(e) {
+        this._hasFiles = true;
+        this.set('files', e.detail.blobs);
+        if (this.blobList) {
+          this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
+          this.$.bulkAttach.params = {
+            useMainBlob: false,
+            context: {
+              currentDocument: this.document.path
+            },
+            noMimeTypeCheck: true
+          };
+          this.$.bulkAttach.headers = {'nx_es_sync': 'true'};
+          return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
+        } else {
+          var file = e.detail.blobs[e.detail.blobs.length - 1];
+          this.document.properties[this.xpath] = {
+            'providerId': file.providerId,
+            'user': file.user,
+            'fileId': file.fileId
+          };
+          this._handleBlobUploaded();
+        }
+      },
+
+      _handleBlobUploaded: function() {
+        if (this.updateDocument) {
+
+          // TODO: NXP-20782: remove contributors or they will be duplicated
+          delete this.document.properties['dc:contributors'];
+
+          this.$.doc.put().then(function(response) {
+            this.document = response;
             this.fire('notify', {message: this.uploadedMessage});
             this.progress = false;
             this._hasFiles = false;
           }.bind(this));
-        },
-
-        _deleteFile: function() {
-          this.$.input.value = '';
-          this.document.properties[this.xpath] = '';
-          this._hasFiles = false;
-        },
-
-        _filesChanged: function(e) {
-          this._upload(e.target.files);
-        },
-
-        _upload: function(files) {
-          if (files && files.length > 0) {
-            this._hasFiles = true;
-            this.progress = true;
-            this.uploadFiles(files);
-          }
-        },
-
-        _dragover: function(e) {
-          e.preventDefault();
-          this.toggleClass('dragging', true, this.$.label);
-          this.toggleClass('dragging', true, this.$.container);
-        },
-
-        _dragleave: function() {
-          this.toggleClass('dragging', false, this.$.label);
-          this.toggleClass('dragging', false, this.$.container);
-        },
-
-        _drop: function(e) {
-          e.preventDefault();
-          this.progress = true;
-          this.toggleClass('dragging', false, this.$.label);
-          this.toggleClass('dragging', false, this.$.container);
-          this._upload(e.dataTransfer.files);
+        } else {
+          this.fire('notify', {message: this.uploadedMessage});
+          this.progress = false;
         }
+      },
 
-      });
-    })();
+      _handleBlobListUploaded: function() {
+        return this.$.doc.get().then(function(response) {
+          this.document.properties[this.xpath] = response.properties[this.xpath];
+          this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
+          this.fire('notify', {message: this.uploadedMessage});
+          this.progress = false;
+          this._hasFiles = false;
+        }.bind(this));
+      },
+
+      _deleteFile: function() {
+        this.$.input.value = '';
+        this.document.properties[this.xpath] = '';
+        this._hasFiles = false;
+      },
+
+      _filesChanged: function(e) {
+        this._upload(e.target.files);
+      },
+
+      _upload: function(files) {
+        if (files && files.length > 0) {
+          this._hasFiles = true;
+          this.progress = true;
+          this.uploadFiles(files);
+        }
+      },
+
+      _dragover: function(e) {
+        e.preventDefault();
+        this.toggleClass('dragging', true, this.$.label);
+        this.toggleClass('dragging', true, this.$.container);
+      },
+
+      _dragleave: function() {
+        this.toggleClass('dragging', false, this.$.label);
+        this.toggleClass('dragging', false, this.$.container);
+      },
+
+      _drop: function(e) {
+        e.preventDefault();
+        this.progress = true;
+        this.toggleClass('dragging', false, this.$.label);
+        this.toggleClass('dragging', false, this.$.container);
+        this._upload(e.dataTransfer.files);
+      }
+
+    });
   </script>
 
 </dom-module>

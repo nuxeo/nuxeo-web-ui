@@ -180,73 +180,67 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-grid-thumbnail',
-        properties: {
-          doc: {
-            type: Object,
-            notify: true
-          },
-
-          offset: {
-            type: Number,
-            value: -1
-          },
-
-          selected: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          },
-
-          selectedItems: {
-            type: Array,
-            value: []
-          }
+    Polymer({
+      is: 'nuxeo-document-grid-thumbnail',
+      behaviors: [Nuxeo.RoutingBehavior],
+      properties: {
+        doc: {
+          type: Object,
+          notify: true
         },
 
-        behaviors: [Nuxeo.RoutingBehavior],
-
-        observers: [
-          '_selectedItemsChanged(selectedItems.splices)'
-        ],
-
-        _thumbnail: function(doc) {
-          if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-            doc.contextParameters.thumbnail.url) {
-            return doc.contextParameters.thumbnail.url;
-          }
+        offset: {
+          type: Number,
+          value: -1
         },
 
-        _docType: function() {
-          return this.doc.type;
+        selected: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         },
 
-        handleClick: function(e) {
-          if (this.selectionMode){
-            this._toogleSelect();
-          } else if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
-            this.fire('navigate', {item: this.doc});
-          }
-        },
-
-        _onCheckBoxTap: function() {
-          this._toogleSelect();
-        },
-
-        _toogleSelect: function() {
-          this.selected = !this.selected;
-          this.fire('selected');
-        },
-
-        _selectedItemsChanged: function(){
-          this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
+        selectedItems: {
+          type: Array,
+          value: []
         }
-      });
-    })();
-  </script>
+      },
 
+      observers: [
+        '_selectedItemsChanged(selectedItems.splices)'
+      ],
+
+      _thumbnail: function(doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        }
+      },
+
+      _docType: function() {
+        return this.doc.type;
+      },
+
+      handleClick: function(e) {
+        if (this.selectionMode){
+          this._toogleSelect();
+        } else if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
+          this.fire('navigate', {item: this.doc});
+        }
+      },
+
+      _onCheckBoxTap: function() {
+        this._toogleSelect();
+      },
+
+      _toogleSelect: function() {
+        this.selected = !this.selected;
+        this.fire('selected');
+      },
+
+      _selectedItemsChanged: function(){
+        this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
+      }
+    });
+  </script>
 </dom-module>

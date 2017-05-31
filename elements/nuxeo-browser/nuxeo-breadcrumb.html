@@ -135,60 +135,55 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-breadcrumb',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        document: {
+          type: Object
+        }
+      },
 
-      Polymer({
-        is: 'nuxeo-breadcrumb',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-        properties: {
-          document: {
-            type: Object
-          }
-        },
+      _breadcrumb: function() {
+        if (this._enrichers) {
+          return this._enrichers.breadcrumb.entries.slice(0, this._enrichers.breadcrumb.entries.length - 1);
+        }
+      },
 
-        _breadcrumb: function() {
-          if (this._enrichers) {
-            return this._enrichers.breadcrumb.entries.slice(0, this._enrichers.breadcrumb.entries.length - 1);
-          }
-        },
-
-        _computeCssClass: function(index) {
-          if (this._enrichers) {
-            if (index === this._enrichers.breadcrumb.entries.length - 1) {
-              return 'breadcrumb-item-current';
-            } else if (index === this._enrichers.breadcrumb.entries.length - 2) {
-              return 'breadcrumb-item-parent';
-            } else if (index === this._enrichers.breadcrumb.entries.length - 3) {
-              return 'breadcrumb-item-grand-parent';
-            } else {
-              return 'breadcrumb-item-ancestor';
-            }
-          }
-        },
-
-        _title: function(document) {
-          if (document) {
-            return (document.type === 'Root') ? this.i18n('browse.root') : document.title;
-          }
-        },
-
-        _icon: function(document)  {
-          if (document && document.properties && document.properties['common:icon']) {
-            return this.$.nxcon.url + document.properties['common:icon'];
+      _computeCssClass: function(index) {
+        if (this._enrichers) {
+          if (index === this._enrichers.breadcrumb.entries.length - 1) {
+            return 'breadcrumb-item-current';
+          } else if (index === this._enrichers.breadcrumb.entries.length - 2) {
+            return 'breadcrumb-item-parent';
+          } else if (index === this._enrichers.breadcrumb.entries.length - 3) {
+            return 'breadcrumb-item-grand-parent';
           } else {
-            return '';
-          }
-        },
-
-        get _enrichers() {
-          if (this.document) {
-            return this.document.contextParameters;
+            return 'breadcrumb-item-ancestor';
           }
         }
+      },
 
-      });
-    })();
+      _title: function(document) {
+        if (document) {
+          return (document.type === 'Root') ? this.i18n('browse.root') : document.title;
+        }
+      },
+
+      _icon: function(document)  {
+        if (document && document.properties && document.properties['common:icon']) {
+          return this.$.nxcon.url + document.properties['common:icon'];
+        } else {
+          return '';
+        }
+      },
+
+      get _enrichers() {
+        if (this.document) {
+          return this.document.contextParameters;
+        }
+      }
+
+    });
   </script>
-
 </dom-module>

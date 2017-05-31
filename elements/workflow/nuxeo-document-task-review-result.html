@@ -32,23 +32,19 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-task-review-result',
-        properties: {
-          result: {
-            type: String,
-            observer: '_observeResult'
-          }
-        },
-
-        _observeResult: function() {
-          this.innerHTML = this.result;
+    Polymer({
+      is: 'nuxeo-document-task-review-result',
+      properties: {
+        result: {
+          type: String,
+          observer: '_observeResult'
         }
-      });
-    })();
+      },
+
+      _observeResult: function() {
+        this.innerHTML = this.result;
+      }
+    });
   </script>
 
 </dom-module>

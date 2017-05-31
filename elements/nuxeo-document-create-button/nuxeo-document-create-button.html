@@ -89,101 +89,95 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-create-button',
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        properties: {
-          parent: {
-            type: Object,
-            observer: '_parentChanged'
+    Polymer({
+      is: 'nuxeo-document-create-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        parent: {
+          type: Object,
+          observer: '_parentChanged'
+        },
+        subtypes: {
+          type: Array
+        },
+        shortcutsVisible: {
+          type: Boolean,
+          value: false
+        },
+        actionContext: {
+          type: Object,
+          value: function() {
+            return {};
           },
-          subtypes: {
-            type: Array
-          },
-          shortcutsVisible: {
-            type: Boolean,
-            value: false
-          },
-          actionContext: {
-            type: Object,
-            value: function() {
-              return {};
-            },
-            computed: '_actionContext(shortcutsVisible,subtypes)'
-          }
-        },
-
-        listeners: {
-          'create-document': '_hideShortcuts'
-        },
-
-        _parentChanged: function() {
-          if (this.parent) {
-            if (!this.parent.contextParameters || !this.parent.contextParameters.subtypes ||
-              !this.parent.contextParameters.permissions) {
-              this.$.defaultDoc.get();
-            } else {
-              var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-                this.parent.contextParameters.subtypes.map(function(type) {
-                  type.id = type.type.toLowerCase();
-                  return type;
-                }) : [];
-              var filteredSubtypes = [];
-              if (this._canCreateIn(this.parent)) {
-                subtypes.forEach(function(type) {
-                  if (type.facets.indexOf('HiddenInCreation') === -1) {
-                    filteredSubtypes.push(type.id);
-                  }
-                }.bind(this));
-              }
-              this.set('subtypes', filteredSubtypes);
-            }
-          }
-        },
-
-        _canCreateIn: function(document) {
-          if (document && document.contextParameters && document.contextParameters.permissions) {
-            return document.contextParameters.permissions.indexOf('Write') > -1 ||
-              document.contextParameters.permissions.indexOf('Everything') > -1;
-          } else {
-            return false;
-          }
-        },
-
-        _actionContext: function() {
-          return {hostVisible: this.shortcutsVisible, subtypes: this.subtypes};
-        },
-
-        _showShortcuts: function() {
-          this.shortcutsVisible = true;
-        },
-
-        _hideShortcuts: function() {
-          this.shortcutsVisible = false;
-        },
-
-        _onMouseEnter: function() {
-          this._showShortcuts();
-        },
-
-        _onMouseLeave: function() {
-          this._hideShortcuts();
-        },
-
-        _displayWizard: function() {
-          this.fire('create-document');
-        },
-
-        _animateOpen: function() {
-          return this.shortcutsVisible ? 'open' : '';
+          computed: '_actionContext(shortcutsVisible,subtypes)'
         }
-      });
-    })();
+      },
+
+      listeners: {
+        'create-document': '_hideShortcuts'
+      },
+
+      _parentChanged: function() {
+        if (this.parent) {
+          if (!this.parent.contextParameters || !this.parent.contextParameters.subtypes ||
+            !this.parent.contextParameters.permissions) {
+            this.$.defaultDoc.get();
+          } else {
+            var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+              this.parent.contextParameters.subtypes.map(function(type) {
+                type.id = type.type.toLowerCase();
+                return type;
+              }) : [];
+            var filteredSubtypes = [];
+            if (this._canCreateIn(this.parent)) {
+              subtypes.forEach(function(type) {
+                if (type.facets.indexOf('HiddenInCreation') === -1) {
+                  filteredSubtypes.push(type.id);
+                }
+              }.bind(this));
+            }
+            this.set('subtypes', filteredSubtypes);
+          }
+        }
+      },
+
+      _canCreateIn: function(document) {
+        if (document && document.contextParameters && document.contextParameters.permissions) {
+          return document.contextParameters.permissions.indexOf('Write') > -1 ||
+            document.contextParameters.permissions.indexOf('Everything') > -1;
+        } else {
+          return false;
+        }
+      },
+
+      _actionContext: function() {
+        return {hostVisible: this.shortcutsVisible, subtypes: this.subtypes};
+      },
+
+      _showShortcuts: function() {
+        this.shortcutsVisible = true;
+      },
+
+      _hideShortcuts: function() {
+        this.shortcutsVisible = false;
+      },
+
+      _onMouseEnter: function() {
+        this._showShortcuts();
+      },
+
+      _onMouseLeave: function() {
+        this._hideShortcuts();
+      },
+
+      _displayWizard: function() {
+        this.fire('create-document');
+      },
+
+      _animateOpen: function() {
+        return this.shortcutsVisible ? 'open' : '';
+      }
+    });
   </script>
 
 </dom-module>

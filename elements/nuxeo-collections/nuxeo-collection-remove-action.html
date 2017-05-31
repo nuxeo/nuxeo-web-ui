@@ -40,9 +40,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation op="Collection.RemoveFromCollection"
-                     id="removeOp">
-    </nuxeo-operation>
+    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp"></nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
       <paper-icon-button noink
@@ -55,49 +53,45 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-collection-remove-action',
-        properties: {
-          members: {
-            type: Object
-          },
-          collection: {
-            type: Object
-          }
+    Polymer({
+      is: 'nuxeo-collection-remove-action',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        members: {
+          type: Object
         },
-        behaviors: [Nuxeo.I18nBehavior],
-
-        listeners: {
-          'tap': 'remove',
-        },
-
-        remove: function() {
-          if (this.members && this.members.length > 0) {
-            var uids = this.members.map(function(doc) {
-              return doc.uid;
-            }).join(',');
-            this.$.removeOp.input = 'docs:' + uids;
-            this.$.removeOp.params = {collection: this.collection};
-            this.$.removeOp.execute().then(function() {
-              this.members = [];
-              this.fire('refresh');
-            }.bind(this));
-          }
-        },
-
-        _isAvailable: function(members, collection) {
-          if (collection && collection.contextParameters && collection.contextParameters.permissions) {
-            // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
-            // Action will therefore not be available
-            return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
-          }
-          return false;
+        collection: {
+          type: Object
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'tap': 'remove'
+      },
+
+      remove: function() {
+        if (this.members && this.members.length > 0) {
+          var uids = this.members.map(function(doc) {
+            return doc.uid;
+          }).join(',');
+          this.$.removeOp.input = 'docs:' + uids;
+          this.$.removeOp.params = {collection: this.collection};
+          this.$.removeOp.execute().then(function() {
+            this.members = [];
+            this.fire('refresh');
+          }.bind(this));
+        }
+      },
+
+      _isAvailable: function(members, collection) {
+        if (collection && collection.contextParameters && collection.contextParameters.permissions) {
+          // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
+          // Action will therefore not be available
+          return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
+        }
+        return false;
+      }
+
+    });
   </script>
-
 </dom-module>

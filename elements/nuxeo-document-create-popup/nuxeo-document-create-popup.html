@@ -100,125 +100,119 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-create-popup',
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        properties: {
-          parent: {
-            type: Object
-          },
-
-          _showTabs: {
-            type: Boolean,
-            value: true
-          },
-          selectedTab: {
-            type: String,
-            value: ''
-          },
-          parentPath: {
-            type: String
-          },
-          defaultPath: {
-            type: String
-          },
-          opened: {
-            type: Boolean,
-            value: false,
-            observer: '_openedChanged'
-          },
-          importContext: {
-            type: Object,
-            computed: '_importContext(parent, i18n)'
-          }
+    Polymer({
+      is: 'nuxeo-document-create-popup',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        parent: {
+          type: Object
         },
 
-        listeners: {
-          'nx-creation-wizard-hide-tabs': '_hideTabs',
-          'nx-creation-wizard-show-tabs': '_displayTabs',
-          'nx-document-creation-finished': '_close',
-          'nx-document-creation-suggester-parent-changed': '_parentPathChanged'
+        _showTabs: {
+          type: Boolean,
+          value: true
         },
-
-        _hideTabs: function() {
-          this._showTabs = false;
+        selectedTab: {
+          type: String,
+          value: ''
         },
-
-        _displayTabs: function() {
-          this._showTabs = true;
+        parentPath: {
+          type: String
         },
-
-        _close: function() {
-          if (this.$.createDocDialog.opened) {
-            this.$.createDocDialog.toggle();
-            this._showTabs = true;
-          }
+        defaultPath: {
+          type: String
         },
-
-        toggleDialogCreate: function(type) {
-          this.selectedTab = 'create';
-          this._showTabs = false;
-          this._fetchParent().then(function() {
-            this.$.simpleCreation.init(type);
-            this.$.bulkCreation.init();
-            this.$.createDocDialog.toggle();
-          }.bind(this));
+        opened: {
+          type: Boolean,
+          value: false,
+          observer: '_openedChanged'
         },
-
-        toggleDialogImport: function(files) {
-          this.selectedTab = 'import';
-          this._fetchParent().then(function() {
-            this.$.bulkCreation.init(files);
-            this.$.createDocDialog.toggle();
-          }.bind(this));
-        },
-
-        toggleDialog: function() {
-          this._fetchParent().then(function() {
-            this.$.bulkCreation.init();
-            this.$.createDocDialog.toggle();
-          }.bind(this));
-        },
-
-        _fetchParent: function() {
-          if (!this.parentPath) {
-            this.set('parentPath', this.defaultPath);
-          }
-          if (!this.parent || !this.parent.contextParameters) {
-            return this.$.defaultDoc.get();
-          } else {
-            return Promise.resolve();
-          }
-        },
-
-        _parentPathChanged: function(e) {
-          if (e.detail.isValidTargetPath &&
-            (!this.parent || (this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
-            this.$.defaultDoc.get();
-          }
-        },
-
-        _openedChanged: function() {
-          if (this.opened) {
-            if (this.selectedTab === '') {
-              this.selectedTab = 'create';
-            }
-          } else {
-            this.selectedTab = '';
-          }
-        },
-
-        _importContext: function() {
-          return {parent: this.parent, i18n: this.i18n};
+        importContext: {
+          type: Object,
+          computed: '_importContext(parent, i18n)'
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'nx-creation-wizard-hide-tabs': '_hideTabs',
+        'nx-creation-wizard-show-tabs': '_displayTabs',
+        'nx-document-creation-finished': '_close',
+        'nx-document-creation-suggester-parent-changed': '_parentPathChanged'
+      },
+
+      _hideTabs: function() {
+        this._showTabs = false;
+      },
+
+      _displayTabs: function() {
+        this._showTabs = true;
+      },
+
+      _close: function() {
+        if (this.$.createDocDialog.opened) {
+          this.$.createDocDialog.toggle();
+          this._showTabs = true;
+        }
+      },
+
+      toggleDialogCreate: function(type) {
+        this.selectedTab = 'create';
+        this._showTabs = false;
+        this._fetchParent().then(function() {
+          this.$.simpleCreation.init(type);
+          this.$.bulkCreation.init();
+          this.$.createDocDialog.toggle();
+        }.bind(this));
+      },
+
+      toggleDialogImport: function(files) {
+        this.selectedTab = 'import';
+        this._fetchParent().then(function() {
+          this.$.bulkCreation.init(files);
+          this.$.createDocDialog.toggle();
+        }.bind(this));
+      },
+
+      toggleDialog: function() {
+        this._fetchParent().then(function() {
+          this.$.bulkCreation.init();
+          this.$.createDocDialog.toggle();
+        }.bind(this));
+      },
+
+      _fetchParent: function() {
+        if (!this.parentPath) {
+          this.set('parentPath', this.defaultPath);
+        }
+        if (!this.parent || !this.parent.contextParameters) {
+          return this.$.defaultDoc.get();
+        } else {
+          return Promise.resolve();
+        }
+      },
+
+      _parentPathChanged: function(e) {
+        if (e.detail.isValidTargetPath &&
+          (!this.parent || (this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
+          this.$.defaultDoc.get();
+        }
+      },
+
+      _openedChanged: function() {
+        if (this.opened) {
+          if (this.selectedTab === '') {
+            this.selectedTab = 'create';
+          }
+        } else {
+          this.selectedTab = '';
+        }
+      },
+
+      _importContext: function() {
+        return {parent: this.parent, i18n: this.i18n};
+      }
+
+    });
   </script>
 
 </dom-module>

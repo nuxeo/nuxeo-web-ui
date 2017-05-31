@@ -233,64 +233,60 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-repository-analytics',
-        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
-        properties: {
-          index: {
-            type: String,
-            value: '_all'
-          },
-          startDate: String,
-          endDate: String
+    Polymer({
+      is: 'nuxeo-repository-analytics',
+      behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        index: {
+          type: String,
+          value: '_all'
         },
+        startDate: String,
+        endDate: String
+      },
 
-        ready: function() {
-          this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
-          this.endDate = moment().format('YYYY-MM-DD');
-        },
+      ready: function() {
+        this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+        this.endDate = moment().format('YYYY-MM-DD');
+      },
 
-        _types: function(data) {
-          return data.map(function(obj) {
-            var mimeType = Nuxeo.mimeTypes[obj.key];
-            if (mimeType) {
-              if (mimeType.name) {
-                return mimeType.name;
-              } else if (mimeType.extensions && mimeType.extensions.length > 0) {
-                return mimeType.extensions[0].toUpperCase();
-              } else {
-                return obj.key;
-              }
+      _types: function(data) {
+        return data.map(function(obj) {
+          var mimeType = Nuxeo.mimeTypes[obj.key];
+          if (mimeType) {
+            if (mimeType.name) {
+              return mimeType.name;
+            } else if (mimeType.extensions && mimeType.extensions.length > 0) {
+              return mimeType.extensions[0].toUpperCase();
             } else {
               return obj.key;
             }
-          });
-        },
-
-        // builds page provider query to get info about downloaded docs
-        _downloadsQuery: function(entries) {
-          if (entries.length > 0) {
-            var values = entries.map(function(entry) {
-              return '\'' + entry.key + '\'';
-            }).join(',');
-            return 'SELECT * FROM Document WHERE ecm:uuid IN (' + values + ')';
+          } else {
+            return obj.key;
           }
-        },
+        });
+      },
 
-        _numberOfDownloads: function(doc) {
-          return this.downloads.find(function(entry) {
-            return entry.key === doc.uid;
-          }).value;
-        },
-
-        _isEmpty: function(array) {
-          return !array || array.length === 0;
+      // builds page provider query to get info about downloaded docs
+      _downloadsQuery: function(entries) {
+        if (entries.length > 0) {
+          var values = entries.map(function(entry) {
+            return '\'' + entry.key + '\'';
+          }).join(',');
+          return 'SELECT * FROM Document WHERE ecm:uuid IN (' + values + ')';
         }
+      },
 
-      });
-    })();
+      _numberOfDownloads: function(doc) {
+        return this.downloads.find(function(entry) {
+          return entry.key === doc.uid;
+        }).value;
+      },
+
+      _isEmpty: function(array) {
+        return !array || array.length === 0;
+      }
+
+    });
   </script>
 </dom-module>

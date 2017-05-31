@@ -28,54 +28,51 @@ limitations under the License.
                   href="[[_href(document, layout)]]"
                   model="[[_model(document)]]"
                   error="[[i18n('documentView.layoutNotFound', document.type)]]"
-                  on-element-changed="_elementChanged"></nuxeo-layout>
+                  on-element-changed="_elementChanged">
+    </nuxeo-layout>
   </template>
   <script>
-    (function () {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-layout',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          document: {
-            type: Object,
-            notify: true
-          },
-          layout: {
-            type: String,
-            value: 'view'
-          }
+    Polymer({
+      is: 'nuxeo-document-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        document: {
+          type: Object,
+          notify: true
         },
-
-        get element() {
-          return this.$.layout.element;
-        },
-
-        validate: function() {
-          return this.$.layout.validate();
-        },
-
-        _href: function (document, layout) {
-          if (document) {
-            var doctype = document.type.toLowerCase();
-            var name = ['nuxeo', doctype, layout, 'layout'].join('-');
-            return this.resolveUrl(doctype + '/' + name + '.html');
-          }
-        },
-
-        _model: function (document) {
-          return { document: document };
-        },
-
-        _elementChanged: function() {
-          // forward document path change events
-          this.element.addEventListener('document-changed', function(e) {
-            this.notifyPath(e.detail.path, e.detail.value);
-          }.bind(this));
+        layout: {
+          type: String,
+          value: 'view'
         }
+      },
 
-      });
-    })();
+      get element() {
+        return this.$.layout.element;
+      },
+
+      validate: function() {
+        return this.$.layout.validate();
+      },
+
+      _href: function (document, layout) {
+        if (document) {
+          var doctype = document.type.toLowerCase();
+          var name = ['nuxeo', doctype, layout, 'layout'].join('-');
+          return this.resolveUrl(doctype + '/' + name + '.html');
+        }
+      },
+
+      _model: function (document) {
+        return { document: document };
+      },
+
+      _elementChanged: function() {
+        // forward document path change events
+        this.element.addEventListener('document-changed', function(e) {
+          this.notifyPath(e.detail.path, e.detail.value);
+        }.bind(this));
+      }
+
+    });
   </script>
 </dom-module>

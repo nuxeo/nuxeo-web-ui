@@ -95,44 +95,40 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-distribution-analytics',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          index: {
-            type: String,
-            value: '_all'
-          },
-          path: {
-            type: String
-          },
-          depth: {
-            type: Number,
-            value: 7
-          }
+    Polymer({
+      is: 'nuxeo-distribution-analytics',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        index: {
+          type: String,
+          value: '_all'
         },
-
-        observers: [
-          '_observeDocPath(path, depth)'
-        ],
-
-        _observeDocPath: function() {
-          if (this.path && this.path.length && this.path.endsWith('/') &&
-            (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
-            this.$.chart.maxDepth = this.depth;
-            this.$.chart.path = this.path;
-            this.$.chart.execute();
-          }
+        path: {
+          type: String
         },
-
-        ready: function() {
-          this.path = '/default-domain/';
+        depth: {
+          type: Number,
+          value: 7
         }
+      },
 
-      });
-    })();
+      observers: [
+        '_observeDocPath(path, depth)'
+      ],
+
+      _observeDocPath: function() {
+        if (this.path && this.path.length && this.path.endsWith('/') &&
+          (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
+          this.$.chart.maxDepth = this.depth;
+          this.$.chart.path = this.path;
+          this.$.chart.execute();
+        }
+      },
+
+      ready: function() {
+        this.path = '/default-domain/';
+      }
+
+    });
   </script>
 </dom-module>

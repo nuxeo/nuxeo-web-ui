@@ -36,54 +36,51 @@ limitations under the License.
         padding: 1em;
         display: block;
       }
-
     </style>
+
     <a href$="[[_href(urlFor, route, link)]]">[[i18n(label)]]</a>
+
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-menu-item',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
-        properties: {
-          /**
-           * The 18n label key
-           */
-          label: {
-            type: String
-          },
-
-          /**
-           * A named route and arguments. Route syntax is <name>:<arg 1>/<arg 2>/.../<arg n>.
-           */
-          route: {
-            type: String,
-            value: ''
-          },
-
-          /**
-           * An explicit link.
-           */
-          link: {
-            type: String,
-            value: ''
-          }
+    Polymer({
+      is: 'nuxeo-menu-item',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      properties: {
+        /**
+         * The 18n label key
+         */
+        label: {
+          type: String
         },
 
-        _href: function() {
-          if (this.link) {
-            return this.link;
-          }
-          if (this.urlFor) {
-            var parts = this.route.split(':');
-            var name = parts[0];
-            var args = (parts[1] && parts[1].split('/')) || [];
-            return this.urlFor.apply(this, [name].concat(args));
-          }
+        /**
+         * A named route and arguments. Route syntax is <name>:<arg 1>/<arg 2>/.../<arg n>.
+         */
+        route: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * An explicit link.
+         */
+        link: {
+          type: String,
+          value: ''
         }
-      });
-    })();
+      },
+
+      _href: function() {
+        if (this.link) {
+          return this.link;
+        }
+        if (this.urlFor) {
+          var parts = this.route.split(':');
+          var name = parts[0];
+          var args = (parts[1] && parts[1].split('/')) || [];
+          return this.urlFor.apply(this, [name].concat(args));
+        }
+      }
+    });
   </script>
 </dom-module>

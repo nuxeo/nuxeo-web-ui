@@ -47,30 +47,27 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-clipboard-documents-button',
-        properties: {
-          documents: {
-            type: Array,
-            notify: true,
-            value: []
-          }
-        },
-        behaviors: [Nuxeo.I18nBehavior],
-
-        listeners: {
-          'tap': 'addToClipBoard'
-        },
-
-        addToClipBoard: function() {
-          this.fire('add-to-clipboard', {documents: this.documents});
-          this.fire ('clear-selected-items');
+    Polymer({
+      is: 'nuxeo-clipboard-documents-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        documents: {
+          type: Array,
+          notify: true,
+          value: []
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'tap': 'addToClipBoard'
+      },
+
+      addToClipBoard: function() {
+        this.fire('add-to-clipboard', {documents: this.documents});
+        this.fire ('clear-selected-items');
+      }
+
+    });
   </script>
 
 </dom-module>

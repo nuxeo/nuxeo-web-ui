@@ -213,58 +213,53 @@ limitations under the License.
     </div>
   </template>
 
-  </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-search-analytics',
-        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
-        properties: {
-          index: {
-            type: String,
-            value: 'audit'
-          },
-          startDate: String,
-          endDate: String,
-          hoursBounds: {
-            value: {min: 0, max: 23}
-          }
+    Polymer({
+      is: 'nuxeo-search-analytics',
+      behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        index: {
+          type: String,
+          value: 'audit'
         },
-
-        ready: function() {
-          this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
-          this.endDate = moment().format('YYYY-MM-DD');
-        },
-
-        _range: function(start, end) {
-          var res = [];
-          for (var i = start; i <= end; i++) {
-            res.push(i);
-          }
-          return res;
-        },
-
-        _aggregatePerHourOfDay: function(entries) {
-          // aggregate our buckets by key
-          var agg = {};
-          entries.forEach(function(e) {
-            agg[e.key] = agg[e.key] || [];
-            agg[e.key].push(e.value);
-          });
-          // build our total per bucket
-          var hours = this._range(this.hoursBounds.min, this.hoursBounds.max);
-          return [hours.map(function(i) {
-            if (!agg[i] || !agg[i].length) { return 0; }
-            // TODO: use Array.reduce once prototype.js is removed!
-            // return agg[i].reduce(function(a, b) { return a + b; });
-            var sum = 0;
-            agg[i].forEach(function(v) { sum += v; });
-            return sum;
-          })];
+        startDate: String,
+        endDate: String,
+        hoursBounds: {
+          value: {min: 0, max: 23}
         }
-      });
-    })();
+      },
+
+      ready: function() {
+        this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+        this.endDate = moment().format('YYYY-MM-DD');
+      },
+
+      _range: function(start, end) {
+        var res = [];
+        for (var i = start; i <= end; i++) {
+          res.push(i);
+        }
+        return res;
+      },
+
+      _aggregatePerHourOfDay: function(entries) {
+        // aggregate our buckets by key
+        var agg = {};
+        entries.forEach(function(e) {
+          agg[e.key] = agg[e.key] || [];
+          agg[e.key].push(e.value);
+        });
+        // build our total per bucket
+        var hours = this._range(this.hoursBounds.min, this.hoursBounds.max);
+        return [hours.map(function(i) {
+          if (!agg[i] || !agg[i].length) { return 0; }
+          // TODO: use Array.reduce once prototype.js is removed!
+          // return agg[i].reduce(function(a, b) { return a + b; });
+          var sum = 0;
+          agg[i].forEach(function(v) { sum += v; });
+          return sum;
+        })];
+      }
+    });
   </script>
 </dom-module>

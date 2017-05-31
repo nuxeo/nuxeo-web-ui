@@ -254,99 +254,93 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-suggester',
-
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-
-        properties: {
-          toggled: {
-            type: Boolean,
-            notify: true,
-            value: false
-          },
-          searchTerm: {
-            type: String,
-            value: '',
-            notify: true,
-            observer: '_searchTermChanged'
-          },
-          searchDelay: {
-            type: Number,
-            value: 200
-          },
-          target: {
-            type: Object,
-            value: function() {
-              return this;
-            }
+    Polymer({
+      is: 'nuxeo-suggester',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        toggled: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        searchTerm: {
+          type: String,
+          value: '',
+          notify: true,
+          observer: '_searchTermChanged'
+        },
+        searchDelay: {
+          type: Number,
+          value: 200
+        },
+        target: {
+          type: Object,
+          value: function() {
+            return this;
           }
-        },
+        }
+      },
 
-        toggle: function() {
-          this.toggled = !this.toggled;
-          this.searchTerm = '';
-          this.toggleClass('toggled', this.toggled, this.$.searchButton);
-          if (this.toggled) {
-            this.$.searchInput.focus();
-          }
-        },
-
-        closeResults: function() {
-          this.toggle();
-        },
-
-        _searchTermChanged: function() {
-          this.$.selector.selected = 0;
-          if (this.searchTerm === '') {
-            this.items = [];
-          } else {
-            this.debounce('suggester-search', function() {
-              this.$.op.execute();
-            }.bind(this), this.searchDelay);
-          }
-        },
-
-        _canShowResuls: function() {
-          return this.searchTerm !== '' && this.items &&
-            (Array.isArray(this.items) ? this.items.length > 0 : true);
-        },
-
-        _getIcon: function(item) {
-          if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
-            return this.$.nxcon.url + '/' + item.thumbnailUrl;
-          } else {
-            return this.$.nxcon.url + item.icon;
-          }
-        },
-
-        _getUrl: function(item) {
-          return this.urlFor(item.type, item.id).replace('/#!', '');
-        },
-
-        _upPressed: function() {
-          this.$.selector.selectPrevious();
-        },
-
-        _downPressed: function() {
-          this.$.selector.selectNext();
-        },
-
-        _enterPressed: function() {
-          this.$.selector.items[this.$.selector.selected].click();
-        },
-
-        _itemClicked: function() {
-          this.toggle();
-        },
-
-        _focusSearch: function() {
+      toggle: function() {
+        this.toggled = !this.toggled;
+        this.searchTerm = '';
+        this.toggleClass('toggled', this.toggled, this.$.searchButton);
+        if (this.toggled) {
           this.$.searchInput.focus();
         }
-      });
-    })();
+      },
+
+      closeResults: function() {
+        this.toggle();
+      },
+
+      _searchTermChanged: function() {
+        this.$.selector.selected = 0;
+        if (this.searchTerm === '') {
+          this.items = [];
+        } else {
+          this.debounce('suggester-search', function() {
+            this.$.op.execute();
+          }.bind(this), this.searchDelay);
+        }
+      },
+
+      _canShowResuls: function() {
+        return this.searchTerm !== '' && this.items &&
+          (Array.isArray(this.items) ? this.items.length > 0 : true);
+      },
+
+      _getIcon: function(item) {
+        if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
+          return this.$.nxcon.url + '/' + item.thumbnailUrl;
+        } else {
+          return this.$.nxcon.url + item.icon;
+        }
+      },
+
+      _getUrl: function(item) {
+        return this.urlFor(item.type, item.id).replace('/#!', '');
+      },
+
+      _upPressed: function() {
+        this.$.selector.selectPrevious();
+      },
+
+      _downPressed: function() {
+        this.$.selector.selectNext();
+      },
+
+      _enterPressed: function() {
+        this.$.selector.items[this.$.selector.selected].click();
+      },
+
+      _itemClicked: function() {
+        this.toggle();
+      },
+
+      _focusSearch: function() {
+        this.$.searchInput.focus();
+      }
+    });
   </script>
 </dom-module>

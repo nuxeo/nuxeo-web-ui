@@ -54,22 +54,19 @@ limitations under the License.
     <nuxeo-dropzone document="{{document}}"
                     xpath="files:files"
                     uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
-                    blob-list update-document></nuxeo-dropzone>
+                    blob-list update-document>
+    </nuxeo-dropzone>
 
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-attachments',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          document: Object
-        }
-      });
-    })();
+    Polymer({
+      is: 'nuxeo-document-attachments',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: Object
+      }
+    });
   </script>
 
 </dom-module>

@@ -89,83 +89,79 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-document-task',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-document-task',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
-        properties: {
-
-          task: {
-            type: Object
-          },
-
-          _selectedTab: {
-            type: String,
-            value: 'resolution'
-          }
+        task: {
+          type: Object
         },
 
-        /**
-         * Returns the name for the current layout element
-         */
-        _layoutHref: function(task) {
-          if (task) {
-            var layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
-            return this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
-          }
-        },
+        _selectedTab: {
+          type: String,
+          value: 'resolution'
+        }
+      },
 
-        _layoutModel: function(task) {
-          if (task) {
-            return { document: task.targetDocumentIds[0], task: task };
-          }
-        },
+      /**
+       * Returns the name for the current layout element
+       */
+      _layoutHref: function(task) {
+        if (task) {
+          var layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
+          return this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
+        }
+      },
 
-        validate: function() {
-          // run our custom validation function first to allow setting custom native validity
-          var valid = this.$.layout.validate();
+      _layoutModel: function(task) {
+        if (task) {
+          return { document: task.targetDocumentIds[0], task: task };
+        }
+      },
 
-          var form = this.$['task-container'];
+      validate: function() {
+        // run our custom validation function first to allow setting custom native validity
+        var valid = this.$.layout.validate();
 
-          // fake submit to trigger native validation checks and UI
-          if (valid) {
-            form._doFakeSubmitForValidation();
-          }
+        var form = this.$['task-container'];
 
-          // XXX: could rely on onsubmit to avoid rechecking for validity
-          return valid && form.validate() && form.checkValidity();
-        },
-
-        _processTask: function(e) {
-          if (this.validate()) {
-            this.action = e.target.dataset.args;
-            this.taskData = {
-              'entity-type': 'task',
-              id: this.$.layout.element.task.id,
-              variables: this.$.layout.element.task.variables
-            };
-            this.$.taskRequest.put().then(function() {
-              this.fire('workflowTaskProcessed');
-            }.bind(this));
-          }
-        },
-
-        _isUser: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'user';
-        },
-
-        _isGroup: function(actor) {
-          return actor['entity-type'] && actor['entity-type'] === 'group';
-        },
-
-        _isNotUserOrGroup: function(actor) {
-          return !this._isUser(actor) && !this._isGroup(actor);
+        // fake submit to trigger native validation checks and UI
+        if (valid) {
+          form._doFakeSubmitForValidation();
         }
 
-      });
-    })();
+        // XXX: could rely on onsubmit to avoid rechecking for validity
+        return valid && form.validate() && form.checkValidity();
+      },
+
+      _processTask: function(e) {
+        if (this.validate()) {
+          this.action = e.target.dataset.args;
+          this.taskData = {
+            'entity-type': 'task',
+            id: this.$.layout.element.task.id,
+            variables: this.$.layout.element.task.variables
+          };
+          this.$.taskRequest.put().then(function() {
+            this.fire('workflowTaskProcessed');
+          }.bind(this));
+        }
+      },
+
+      _isUser: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'user';
+      },
+
+      _isGroup: function(actor) {
+        return actor['entity-type'] && actor['entity-type'] === 'group';
+      },
+
+      _isNotUserOrGroup: function(actor) {
+        return !this._isUser(actor) && !this._isGroup(actor);
+      }
+
+    });
   </script>
 
 </dom-module>

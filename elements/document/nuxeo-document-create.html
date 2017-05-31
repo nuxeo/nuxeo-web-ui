@@ -234,135 +234,128 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-document-create',
+      behaviors: [Polymer.IronResizableBehavior, Nuxeo.DocumentCreationBehavior],
+      properties: {
 
-      Polymer({
-        is: 'nuxeo-document-create',
-
-        behaviors: [Polymer.IronResizableBehavior, Nuxeo.DocumentCreationBehavior],
-
-        properties: {
-
-          stage: {
-            type: String,
-            value: 'choose'
-          },
-
-          visible: {
-            type: Boolean
-          }
-
+        stage: {
+          type: String,
+          value: 'choose'
         },
 
-        observers: [
-          '_visibleOnStage(visible,stage)'
-        ],
-
-        ready: function() {
-          this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
-        },
-
-        init: function(typeId) {
-          if (typeId) {
-            var typeObj = this.subtypes.find(function(type) {
-              return type.id === typeId;
-            });
-            if (typeObj) {
-              this.selectedDocType = typeObj;
-            }
-          }
-        },
-
-        /**
-         * Retrieves and creates the layout for the current document type
-         */
-        _updateDocument: function() {
-
-          if (!this._isValidType(this.selectedDocType) || !this.parent) {
-            this.document = null;
-            return;
-          }
-
-          this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
-            document.parentRef = this.parent.uid;
-            this.document = document;
-            this.stage = 'edit';
-          }.bind(this));
-        },
-
-        _selectType: function(e) {
-          this.selectedDocType = e.model.type;
-          this.fire('nx-creation-wizard-hide-tabs');
-        },
-
-        _validate: function() {
-          // run our custom validation function first to allow setting custom native validity
-          var valid = this.$['document-create'].validate();
-
-          // fake submit to trigger native validation checks and UI
-          if (valid) {
-            this.$.form._doFakeSubmitForValidation();
-          }
-
-          // XXX: could rely on onsubmit to avoid rechecking for validity
-          return this.$.form.validate() && this.$.form.checkValidity() && valid;
-        },
-
-        _create: function() {
-          if (!this._validate() || !this.canCreate) {
-            return;
-          }
-          this.document.name = this._sanitizeName(this.document.properties['dc:title']);
-          this.$.docRequest.post().then(function(response) {
-            this.$.creationStats.storeType(this.selectedDocType.id);
-            this._clear();
-            this.navigateTo('browse', response.path);
-            this._notify(response);
-          }.bind(this));
-        },
-
-        _back: function() {
-          this._clear();
-          this.fire('nx-creation-wizard-show-tabs');
-        },
-
-        _cancel: function() {
-          this._clear();
-          this.fire('nx-creation-wizard-show-tabs');
-        },
-
-        _newDocumentLabel: function() {
-          return this.i18n('documentCreationForm.newDoc.heading', this._getTypeLabel(this.selectedDocType));
-        },
-
-        _clear: function() {
-          this.stage = 'choose';
-          this.selectedDocType = {};
-        },
-
-        _visibleOnStage: function() {
-          this.$.pathSuggesterChoose.disabled = !this.visible || this.stage !== 'choose';
-          this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
-        },
-
-        _layoutUpdated: function(e) {
-          this.async(function() {
-            var input = e.detail.value.querySelector('[autofocus]');
-            if (input) {
-              input.focus();
-            }
-          });
-        },
-
-        _submitKeyHandler: function(e) {
-          if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
-            this._create();
-          }
+        visible: {
+          type: Boolean
         }
 
-      });
-    })();
-  </script>
+      },
 
+      observers: [
+        '_visibleOnStage(visible,stage)'
+      ],
+
+      ready: function() {
+        this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
+      },
+
+      init: function(typeId) {
+        if (typeId) {
+          var typeObj = this.subtypes.find(function(type) {
+            return type.id === typeId;
+          });
+          if (typeObj) {
+            this.selectedDocType = typeObj;
+          }
+        }
+      },
+
+      /**
+       * Retrieves and creates the layout for the current document type
+       */
+      _updateDocument: function() {
+
+        if (!this._isValidType(this.selectedDocType) || !this.parent) {
+          this.document = null;
+          return;
+        }
+
+        this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
+          document.parentRef = this.parent.uid;
+          this.document = document;
+          this.stage = 'edit';
+        }.bind(this));
+      },
+
+      _selectType: function(e) {
+        this.selectedDocType = e.model.type;
+        this.fire('nx-creation-wizard-hide-tabs');
+      },
+
+      _validate: function() {
+        // run our custom validation function first to allow setting custom native validity
+        var valid = this.$['document-create'].validate();
+
+        // fake submit to trigger native validation checks and UI
+        if (valid) {
+          this.$.form._doFakeSubmitForValidation();
+        }
+
+        // XXX: could rely on onsubmit to avoid rechecking for validity
+        return this.$.form.validate() && this.$.form.checkValidity() && valid;
+      },
+
+      _create: function() {
+        if (!this._validate() || !this.canCreate) {
+          return;
+        }
+        this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+        this.$.docRequest.post().then(function(response) {
+          this.$.creationStats.storeType(this.selectedDocType.id);
+          this._clear();
+          this.navigateTo('browse', response.path);
+          this._notify(response);
+        }.bind(this));
+      },
+
+      _back: function() {
+        this._clear();
+        this.fire('nx-creation-wizard-show-tabs');
+      },
+
+      _cancel: function() {
+        this._clear();
+        this.fire('nx-creation-wizard-show-tabs');
+      },
+
+      _newDocumentLabel: function() {
+        return this.i18n('documentCreationForm.newDoc.heading', this._getTypeLabel(this.selectedDocType));
+      },
+
+      _clear: function() {
+        this.stage = 'choose';
+        this.selectedDocType = {};
+      },
+
+      _visibleOnStage: function() {
+        this.$.pathSuggesterChoose.disabled = !this.visible || this.stage !== 'choose';
+        this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
+      },
+
+      _layoutUpdated: function(e) {
+        this.async(function() {
+          var input = e.detail.value.querySelector('[autofocus]');
+          if (input) {
+            input.focus();
+          }
+        });
+      },
+
+      _submitKeyHandler: function(e) {
+        if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
+          this._create();
+        }
+      }
+
+    });
+  </script>
 </dom-module>

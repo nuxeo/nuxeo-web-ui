@@ -67,49 +67,44 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-confirm-button',
-
-        properties: {
-          dialogTitle: {
-            type: String,
-            value: 'Are you sure?'
-          },
-          dialogConfirm: {
-            type: String,
-            value: 'Yes'
-          },
-          dialogDismiss: {
-            type: String,
-            value: 'No'
-          },
-          _model: {
-            type: Object
-          }
+    Polymer({
+      is: 'nuxeo-confirm-button',
+      properties: {
+        dialogTitle: {
+          type: String,
+          value: 'Are you sure?'
         },
-
-        ready: function() {
-          this.$.dialog.positionTarget = this.$.button;
+        dialogConfirm: {
+          type: String,
+          value: 'Yes'
         },
-
-        _toggleDialog: function(e) {
-          this._model = e.model;
-          this.$.dialog.toggle();
+        dialogDismiss: {
+          type: String,
+          value: 'No'
         },
-
-        _confirm: function() {
-          this.fire('confirm', {model: this._model});
-        },
-
-        _dismiss: function() {
-          this.fire('dismiss', {model: this._model});
+        _model: {
+          type: Object
         }
+      },
 
-      });
-    })();
+      ready: function() {
+        this.$.dialog.positionTarget = this.$.button;
+      },
+
+      _toggleDialog: function(e) {
+        this._model = e.model;
+        this.$.dialog.toggle();
+      },
+
+      _confirm: function() {
+        this.fire('confirm', {model: this._model});
+      },
+
+      _dismiss: function() {
+        this.fire('dismiss', {model: this._model});
+      }
+
+    });
   </script>
 
 </dom-module>

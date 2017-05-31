@@ -51,68 +51,64 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-delete-documents-button',
-        properties: {
-          documents: {
-            type: Array,
-            notify: true,
-            value: []
-          }
-        },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        observers : ['_checkDocsPermissions(documents.splices)'],
-
-        listeners: {
-          'tap': 'deleteDocuments'
-        },
-
-        deleteDocuments: function() {
-          if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
-            if (this.documents && this.documents.length) {
-              var uids = this.documents.map(function(doc) {
-                return doc.uid;
-              }).join(',');
-              this.$.deleteOp.input = 'docs:' + uids;
-              var uidsArray = this.documents.map(function(doc) {
-                return doc.uid;
-              });
-              this.$.deleteOp.execute().then(function() {
-                this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
-                this.documents = [];
-                this.fire('refresh');
-              }.bind(this),
-              function(err){
-                this.fire('nuxeo-documents-deleted-error', {response: err.response,  documents: uidsArray});
-              }.bind(this));
-            }
-          }
-        },
-
-        /*
-         * Checks if all files in the selected documents have write permission.
-         */
-        _checkDocsPermissions: function() {
-          this.docsHavePermissions = !(this.documents.some(
-            function(document) {
-              return !this._docHasPermissions(document);
-            }.bind(this)));
-        },
-
-        /*
-         * Checks if a single given document has write permissions
-         */
-        _docHasPermissions: function(document) {
-          return document && document.contextParameters && document.contextParameters.permissions
-            ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
-            document.contextParameters.permissions.indexOf('Everything') > -1) : false;
+    Polymer({
+      is: 'nuxeo-delete-documents-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        documents: {
+          type: Array,
+          notify: true,
+          value: []
         }
-      });
-    })();
+      },
+
+      observers : ['_checkDocsPermissions(documents.splices)'],
+
+      listeners: {
+        'tap': 'deleteDocuments'
+      },
+
+      deleteDocuments: function() {
+        if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
+          if (this.documents && this.documents.length) {
+            var uids = this.documents.map(function(doc) {
+              return doc.uid;
+            }).join(',');
+            this.$.deleteOp.input = 'docs:' + uids;
+            var uidsArray = this.documents.map(function(doc) {
+              return doc.uid;
+            });
+            this.$.deleteOp.execute().then(function() {
+              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
+              this.documents = [];
+              this.fire('refresh');
+            }.bind(this),
+            function(err){
+              this.fire('nuxeo-documents-deleted-error', {response: err.response,  documents: uidsArray});
+            }.bind(this));
+          }
+        }
+      },
+
+      /*
+       * Checks if all files in the selected documents have write permission.
+       */
+      _checkDocsPermissions: function() {
+        this.docsHavePermissions = !(this.documents.some(
+          function(document) {
+            return !this._docHasPermissions(document);
+          }.bind(this)));
+      },
+
+      /*
+       * Checks if a single given document has write permissions
+       */
+      _docHasPermissions: function(document) {
+        return document && document.contextParameters && document.contextParameters.permissions
+          ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
+          document.contextParameters.permissions.indexOf('Everything') > -1) : false;
+      }
+    });
   </script>
 
 </dom-module>

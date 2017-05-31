@@ -62,32 +62,26 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-document-export',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        document: Object
+      },
 
-      Polymer({
-        is: 'nuxeo-document-export',
-
-        properties: {
-          document: Object
-        },
-
-        behaviors: [Nuxeo.I18nBehavior],
-
-        _filterRenditions: function(document) {
-          if (document && document.contextParameters) {
-            return document.contextParameters.renditions.filter(function(rendition) {
-              return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
-            }).map(function(item) {
-              item.name = 'documentExport.' + item.name;
-              return item;
-            });
-          } else {
-            return [];
-          }
+      _filterRenditions: function(document) {
+        if (document && document.contextParameters) {
+          return document.contextParameters.renditions.filter(function(rendition) {
+            return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
+          }).map(function(item) {
+            item.name = 'documentExport.' + item.name;
+            return item;
+          });
+        } else {
+          return [];
         }
+      }
 
-      });
-    })();
+    });
   </script>
 </dom-module>

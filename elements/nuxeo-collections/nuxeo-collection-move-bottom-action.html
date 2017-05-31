@@ -39,9 +39,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation op="Document.MoveCollectionMember"
-                     id="moveBottomOp">
-    </nuxeo-operation>
+    <nuxeo-operation op="Document.MoveCollectionMember" id="moveBottomOp"></nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
       <paper-icon-button noink
@@ -54,75 +52,71 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-      Polymer({
-        is: 'nuxeo-collection-move-bottom-action',
-        properties: {
-          members: {
-            type: Object
-          },
-          allMembers: {
-            type: Object
-          },
-          collection: {
-            type: Object
-          },
-          _member1Idx: {
-            type: Number
-          },
-          _member2Idx: {
-            type: Number
-          }
+    Polymer({
+      is: 'nuxeo-collection-move-bottom-action',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        members: {
+          type: Object
         },
-        behaviors: [Nuxeo.I18nBehavior],
-
-        listeners: {
-          'tap': 'moveBottom',
+        allMembers: {
+          type: Object
         },
-
-        moveBottom: function() {
-          if (this.members && this.members.length === 1 && this.allMembers) {
-            var member2 = this.members[0].uid;
-            var i = 0;
-            for (; i < this.allMembers.length; i++) {
-              if (this.allMembers[i].uid === member2) {
-                if (i < this.allMembers.length - 1) {
-                  this._member2Idx = i;
-                  this._member1Idx = this.allMembers.length - 1;
-                  var member1 = this.allMembers[this._member1Idx].uid;
-                  this.$.moveBottomOp.input = this.collection.uid;
-                  this.$.moveBottomOp.params = {
-                    member1: member1,
-                    member2: member2
-                  };
-                  this.$.moveBottomOp.execute().then(function() {
-                    this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
-                      this.allMembers[this._member2Idx])[0];
-                    this.fire('refresh-display', {focusIndex: this._member1Idx});
-                  }.bind(this));
-                }
-                break;
-              }
-            }
-          }
+        collection: {
+          type: Object
         },
-
-        _isAvailable: function() {
-          if (this.members && this.members.length === 1) {
-            if (this.allMembers && this.allMembers.length <= 1) {
-              return false;
-            }
-            if (this.allMembers[this.allMembers.length - 1].uid === this.members[0].uid) {
-              return false;
-            }
-            return true;
-          }
-          return false;
+        _member1Idx: {
+          type: Number
+        },
+        _member2Idx: {
+          type: Number
         }
+      },
 
-      });
-    })();
+      listeners: {
+        'tap': 'moveBottom'
+      },
+
+      moveBottom: function() {
+        if (this.members && this.members.length === 1 && this.allMembers) {
+          var member2 = this.members[0].uid;
+          var i = 0;
+          for (; i < this.allMembers.length; i++) {
+            if (this.allMembers[i].uid === member2) {
+              if (i < this.allMembers.length - 1) {
+                this._member2Idx = i;
+                this._member1Idx = this.allMembers.length - 1;
+                var member1 = this.allMembers[this._member1Idx].uid;
+                this.$.moveBottomOp.input = this.collection.uid;
+                this.$.moveBottomOp.params = {
+                  member1: member1,
+                  member2: member2
+                };
+                this.$.moveBottomOp.execute().then(function() {
+                  this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
+                    this.allMembers[this._member2Idx])[0];
+                  this.fire('refresh-display', {focusIndex: this._member1Idx});
+                }.bind(this));
+              }
+              break;
+            }
+          }
+        }
+      },
+
+      _isAvailable: function() {
+        if (this.members && this.members.length === 1) {
+          if (this.allMembers && this.allMembers.length <= 1) {
+            return false;
+          }
+          if (this.allMembers[this.allMembers.length - 1].uid === this.members[0].uid) {
+            return false;
+          }
+          return true;
+        }
+        return false;
+      }
+
+    });
   </script>
-
 </dom-module>

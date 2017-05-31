@@ -181,89 +181,85 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-workflow-analytics',
-        behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
-        properties: {
-          workflow: {
-            type: String,
-            value: 'ParallelDocumentReview'
-          },
-          index: {
-            type: String,
-            value: 'nuxeo'
-          },
-          startDate: String,
-          endDate: String,
-          workflows: Array
+    Polymer({
+      is: 'nuxeo-workflow-analytics',
+      behaviors: [Nuxeo.ChartDataBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        workflow: {
+          type: String,
+          value: 'ParallelDocumentReview'
         },
-
-        ready: function() {
-          this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
-          this.endDate = moment().format('YYYY-MM-DD');
-          this.workflows = [
-            {id: 'ParallelDocumentReview', label: this.i18n('ParallelDocumentReview')},
-            {id: 'SerialDocumentReview', label: this.i18n('SerialDocumentReview')}
-          ]
+        index: {
+          type: String,
+          value: 'nuxeo'
         },
+        startDate: String,
+        endDate: String,
+        workflows: Array
+      },
 
-        // override _labels and _values from nuxeo-chart-data-behavior.html
-        _labels: function(data) {
-          if (!data) { return []; }
-          if (data.value) {
-            return data.value.map(function(obj) {
-              return obj.key;
-            });
-          } else {
-            return this._labels(data[0]);
-          }
-        },
+      ready: function() {
+        this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+        this.endDate = moment().format('YYYY-MM-DD');
+        this.workflows = [
+          {id: 'ParallelDocumentReview', label: this.i18n('ParallelDocumentReview')},
+          {id: 'SerialDocumentReview', label: this.i18n('SerialDocumentReview')}
+        ]
+      },
 
-        _values: function(data) {
-          var values = [];
-          data.forEach(function(entry) {
-            if (Array.isArray(entry.value)) {
-              values.push(entry.value.map(function(e) { return e.value; }));
-            } else {
-              values.push(entry.value);
-            }
+      // override _labels and _values from nuxeo-chart-data-behavior.html
+      _labels: function(data) {
+        if (!data) { return []; }
+        if (data.value) {
+          return data.value.map(function(obj) {
+            return obj.key;
           });
-          return values;
-        },
-
-        _asDuration: function(duration) {
-          var seconds = Math.floor(duration / 1000),
-              minutes = Math.floor(seconds / 60),
-              hours = Math.floor(minutes / 60),
-              days = Math.floor(hours / 24),
-              result = '';
-          hours = hours - (days * 24);
-          minutes = minutes - (days * 24 * 60) - (hours * 60);
-          seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
-          if (days > 0) {
-            result += days + ' Days ';
-          }
-          if (hours > 0) {
-            result += hours + 'h ';
-          }
-          if (minutes > 0) {
-            result += minutes + 'm ';
-          }
-          if (seconds > 0) {
-            result += seconds + 's ';
-          }
-          return result;
-        },
-
-        _table: function(data) {
-          return data.map(function(e) {
-            return {key: e.key, value: this._asDuration(e.value)};
-          }.bind(this));
+        } else {
+          return this._labels(data[0]);
         }
-      });
-    })();
+      },
+
+      _values: function(data) {
+        var values = [];
+        data.forEach(function(entry) {
+          if (Array.isArray(entry.value)) {
+            values.push(entry.value.map(function(e) { return e.value; }));
+          } else {
+            values.push(entry.value);
+          }
+        });
+        return values;
+      },
+
+      _asDuration: function(duration) {
+        var seconds = Math.floor(duration / 1000),
+            minutes = Math.floor(seconds / 60),
+            hours = Math.floor(minutes / 60),
+            days = Math.floor(hours / 24),
+            result = '';
+        hours = hours - (days * 24);
+        minutes = minutes - (days * 24 * 60) - (hours * 60);
+        seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+        if (days > 0) {
+          result += days + ' Days ';
+        }
+        if (hours > 0) {
+          result += hours + 'h ';
+        }
+        if (minutes > 0) {
+          result += minutes + 'm ';
+        }
+        if (seconds > 0) {
+          result += seconds + 's ';
+        }
+        return result;
+      },
+
+      _table: function(data) {
+        return data.map(function(e) {
+          return {key: e.key, value: this._asDuration(e.value)};
+        }.bind(this));
+      }
+    });
   </script>
 </dom-module>

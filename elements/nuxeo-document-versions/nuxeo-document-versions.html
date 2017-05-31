@@ -163,126 +163,123 @@ limitations under the License.
   </template>
 
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-versions',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          document: Object,
-          latest: Object,
-          versions: {
-            type: Array,
-            value: [],
-            notify: true
-          },
-          query: String,
-          page: {
-            type: Number,
-            value: 0
-          },
-          pageSize: {
-            type: Number,
-            value: 100
-          }
+    Polymer({
+      is: 'nuxeo-document-versions',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        document: Object,
+        latest: Object,
+        versions: {
+          type: Array,
+          value: [],
+          notify: true
         },
-        observers: [
-          '_update(document)'
-        ],
-
-        _update: function() {
-          if (this.document) {
-            if (this.document.isVersion) {
-              this.$.opGetLatest.execute().then(function() {
-                this._query(this.latest.uid);
-              }.bind(this));
-            } else {
-              this._query(this.document.uid);
-            }
-          }
+        query: String,
+        page: {
+          type: Number,
+          value: 0
         },
-
-        _isCreateDisabled: function(doc) {
-          return !doc || !doc.isCheckedOut;
-        },
-
-        _query: function(id) {
-          this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '"';
-          this.page = 0;
-          this._loadMore();
-        },
-
-        _loadMore: function() {
-          this.$.scrollThreshold.clearTriggers();
-          if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
-            this.page = this.page + 1;
-            this.$.provider.fetch().then(function(results) {
-              if (this.page === 1) {
-                this.set('versions', []);
-              }
-              results.entries.forEach(function(doc) {
-                this.push('versions', doc);
-              }.bind(this));
-            }.bind(this));
-          }
-        },
-
-        _showList: function() {
-          this.$.list.open();
-        },
-
-        _hideList: function() {
-          this.$.list.close();
-        },
-
-        _showLatest: function() {
-          this._hideList();
-          this.navigateTo('browse', this.document.path + '@view');
-        },
-
-        _showVersion: function(e) {
-          this._hideList();
-          this.navigateTo('document', e.model.item.uid);
-        },
-
-        _labelLatest: function(doc) {
-          if (doc) {
-            var number = this.i18n('versions.version',
-                doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
-              ((doc.isCheckedOut) ? '+ ' : ' ');
-            var label = (doc.isCheckedOut) ?
-              this.i18n('versions.unversioned') :
-              this.i18n('versions.latest');
-            return number + label;
-          }
-          this._hideList();
-          return '';
-        },
-
-        _labelTitle: function(doc) {
-          if (doc) {
-            return this.i18n('versions.version',
-              doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
-          }
-          return '';
-        },
-
-        _labelCheckedOut: function(doc) {
-          return (doc && doc.isCheckedOut) ? '+' : '';
-        },
-
-        _labelModified: function(doc) {
-          return this.i18n('versions.modified',
-            moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
-        },
-
-        _date: function(date) {
-          return moment(date).format('DD/MM/YYYY HH:mm');
+        pageSize: {
+          type: Number,
+          value: 100
         }
+      },
 
-      });
-    })();
+      observers: [
+        '_update(document)'
+      ],
+
+      _update: function() {
+        if (this.document) {
+          if (this.document.isVersion) {
+            this.$.opGetLatest.execute().then(function() {
+              this._query(this.latest.uid);
+            }.bind(this));
+          } else {
+            this._query(this.document.uid);
+          }
+        }
+      },
+
+      _isCreateDisabled: function(doc) {
+        return !doc || !doc.isCheckedOut;
+      },
+
+      _query: function(id) {
+        this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '"';
+        this.page = 0;
+        this._loadMore();
+      },
+
+      _loadMore: function() {
+        this.$.scrollThreshold.clearTriggers();
+        if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
+          this.page = this.page + 1;
+          this.$.provider.fetch().then(function(results) {
+            if (this.page === 1) {
+              this.set('versions', []);
+            }
+            results.entries.forEach(function(doc) {
+              this.push('versions', doc);
+            }.bind(this));
+          }.bind(this));
+        }
+      },
+
+      _showList: function() {
+        this.$.list.open();
+      },
+
+      _hideList: function() {
+        this.$.list.close();
+      },
+
+      _showLatest: function() {
+        this._hideList();
+        this.navigateTo('browse', this.document.path + '@view');
+      },
+
+      _showVersion: function(e) {
+        this._hideList();
+        this.navigateTo('document', e.model.item.uid);
+      },
+
+      _labelLatest: function(doc) {
+        if (doc) {
+          var number = this.i18n('versions.version',
+              doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
+            ((doc.isCheckedOut) ? '+ ' : ' ');
+          var label = (doc.isCheckedOut) ?
+            this.i18n('versions.unversioned') :
+            this.i18n('versions.latest');
+          return number + label;
+        }
+        this._hideList();
+        return '';
+      },
+
+      _labelTitle: function(doc) {
+        if (doc) {
+          return this.i18n('versions.version',
+            doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
+        }
+        return '';
+      },
+
+      _labelCheckedOut: function(doc) {
+        return (doc && doc.isCheckedOut) ? '+' : '';
+      },
+
+      _labelModified: function(doc) {
+        return this.i18n('versions.modified',
+          moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
+      },
+
+      _date: function(date) {
+        return moment(date).format('DD/MM/YYYY HH:mm');
+      }
+
+    });
   </script>
 
 </dom-module>

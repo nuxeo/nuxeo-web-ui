@@ -46,100 +46,96 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-user-group-management-page',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
-        properties: {
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          },
-          page: {
-            type: String,
-            value: 'search'
-          },
-          entity: {
-            type: Object,
-            value: {},
-            observer: '_entityChanged'
-          },
-          isAdministrator: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          }
+    Polymer({
+      is: 'nuxeo-user-group-management-page',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
         },
-
-        listeners: {
-          'goHome': '_handleUGMgoHome',
-          'manageUser': '_handleUGMmanageUser',
-          'manageGroup': '_handleUGMmanageGroup',
+        page: {
+          type: String,
+          value: 'search'
         },
-
-        _entityChanged: function() {
-          if (!this.visible) {
-            return;
-          }
-          var management = this.querySelector('nuxeo-user-group-management');
-          if (this.entity && this.entity.id && this.entity.type) {
-            if (this.entity.type === 'group') {
-              management.selectedGroup = this.entity.id;
-              management.page = 'manage-group';
-            } else if (this.entity.type === 'user') {
-              management.selectedUser = this.entity.id;
-              management.page = 'manage-user';
-            }
-          } else {
-            management.$$('nuxeo-user-group-search')._searchTermChanged();
-          }
+        entity: {
+          type: Object,
+          value: {},
+          observer: '_entityChanged'
         },
-
-        _visibleChanged: function() {
-          if (this.visible) {
-            this.async(function() {
-              this._entityChanged();
-            }.bind(this));
-          }
-        },
-
-        _displayLatest: function() {
-          return this.page === 'search';
-        },
-
-        _handleUGMgoHome: function() {
-          this.entity = {};
-          this.navigateTo('administration', 'user-group-management');
-        },
-
-        _handleUGMmanageUser: function(e) {
-          this.entity = {type: 'user', id: e.detail.user};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          this.navigateTo('administration', url);
-        },
-
-        _handleUGMmanageGroup: function(e) {
-          this.entity = {type: 'group', id: e.detail.group};
-          var url = '';
-          if (this.selectedAdminTab) {
-            url += this.selectedAdminTab;
-            if (this.selectedAdminTab === 'user-group-management' &&
-              this.entity && this.entity.id && this.entity.type) {
-              url += '/' + this.entity.type + '/' + this.entity.id;
-            }
-          }
-          this.navigateTo('administration', url);
+        isAdministrator: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
         }
-      });
-    })();
+      },
+
+      listeners: {
+        'goHome': '_handleUGMgoHome',
+        'manageUser': '_handleUGMmanageUser',
+        'manageGroup': '_handleUGMmanageGroup',
+      },
+
+      _entityChanged: function() {
+        if (!this.visible) {
+          return;
+        }
+        var management = this.querySelector('nuxeo-user-group-management');
+        if (this.entity && this.entity.id && this.entity.type) {
+          if (this.entity.type === 'group') {
+            management.selectedGroup = this.entity.id;
+            management.page = 'manage-group';
+          } else if (this.entity.type === 'user') {
+            management.selectedUser = this.entity.id;
+            management.page = 'manage-user';
+          }
+        } else {
+          management.$$('nuxeo-user-group-search')._searchTermChanged();
+        }
+      },
+
+      _visibleChanged: function() {
+        if (this.visible) {
+          this.async(function() {
+            this._entityChanged();
+          }.bind(this));
+        }
+      },
+
+      _displayLatest: function() {
+        return this.page === 'search';
+      },
+
+      _handleUGMgoHome: function() {
+        this.entity = {};
+        this.navigateTo('administration', 'user-group-management');
+      },
+
+      _handleUGMmanageUser: function(e) {
+        this.entity = {type: 'user', id: e.detail.user};
+        var url = '';
+        if (this.selectedAdminTab) {
+          url += this.selectedAdminTab;
+          if (this.selectedAdminTab === 'user-group-management' &&
+            this.entity && this.entity.id && this.entity.type) {
+            url += '/' + this.entity.type + '/' + this.entity.id;
+          }
+        }
+        this.navigateTo('administration', url);
+      },
+
+      _handleUGMmanageGroup: function(e) {
+        this.entity = {type: 'group', id: e.detail.group};
+        var url = '';
+        if (this.selectedAdminTab) {
+          url += this.selectedAdminTab;
+          if (this.selectedAdminTab === 'user-group-management' &&
+            this.entity && this.entity.id && this.entity.type) {
+            url += '/' + this.entity.type + '/' + this.entity.id;
+          }
+        }
+        this.navigateTo('administration', url);
+      }
+    });
   </script>
 </dom-module>

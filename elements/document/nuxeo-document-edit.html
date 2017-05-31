@@ -83,87 +83,82 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
-
-      Polymer({
-        is: 'nuxeo-document-edit',
-        behaviors: [Polymer.IronResizableBehavior, Nuxeo.I18nBehavior],
-        properties: {
-          document: {
-            type: Object,
-            notify: true
-          },
-
-          versioningType: {
-            type: String
-          },
-
-          headers: {
-            type: Object,
-            computed: '_computeHeaders(versioningType)'
-          }
+    Polymer({
+      is: 'nuxeo-document-edit',
+      behaviors: [Polymer.IronResizableBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        document: {
+          type: Object,
+          notify: true
         },
 
-        observers: [
-          '_documentChanged(document.*)'
-        ],
-
-        _computeHeaders: function(versioningType) {
-          return {
-            'X-Versioning-Option': versioningType,
-            'X-NXfetch.document': 'lock'
-          };
+        versioningType: {
+          type: String
         },
 
-        _validate: function() {
-          // run our custom validation function first to allow setting custom native validity
-          var valid = this.$['document-edit'].validate();
+        headers: {
+          type: Object,
+          computed: '_computeHeaders(versioningType)'
+        }
+      },
 
-          // fake submit to trigger native validation checks and UI
-          if (valid) {
-            this.$.form._doFakeSubmitForValidation();
-          }
+      observers: [
+        '_documentChanged(document.*)'
+      ],
 
-          // XXX: could rely on onsubmit to avoid rechecking for validity
-          return valid && this.$.form.validate() && this.$.form.checkValidity();
-        },
+      _computeHeaders: function(versioningType) {
+        return {
+          'X-Versioning-Option': versioningType,
+          'X-NXfetch.document': 'lock'
+        };
+      },
 
-        _save: function() {
-          if (!this._validate()) {
-            return;
-          }
-          this.$.doc.data = {
-            'entity-type': 'document',
-            uid: this.document.uid,
-            properties: this._dirtyProperties
-          };
+      _validate: function() {
+        // run our custom validation function first to allow setting custom native validity
+        var valid = this.$['document-edit'].validate();
 
-          this.$.doc.put().then(this._refresh.bind(this));
-        },
+        // fake submit to trigger native validation checks and UI
+        if (valid) {
+          this.$.form._doFakeSubmitForValidation();
+        }
 
-        _cancel: function() {
-          this._refresh();
-        },
+        // XXX: could rely on onsubmit to avoid rechecking for validity
+        return valid && this.$.form.validate() && this.$.form.checkValidity();
+      },
 
-        _refresh: function() {
-          this.fire('document-updated');
-        },
+      _save: function() {
+        if (!this._validate()) {
+          return;
+        }
+        this.$.doc.data = {
+          'entity-type': 'document',
+          uid: this.document.uid,
+          properties: this._dirtyProperties
+        };
 
-        _documentChanged: function(e) {
-          if (e.path === 'document') {
-            this._dirtyProperties = {};
-          } else {
-            // copy dirty properties (cannot patch complex or list properties)
-            var match = e.path.match(/^document\.properties\.([^\.]*)/);
-            if (match) {
-              var prop = match[1];
-              this._dirtyProperties[prop] = this.document.properties[prop];
-            }
+        this.$.doc.put().then(this._refresh.bind(this));
+      },
+
+      _cancel: function() {
+        this._refresh();
+      },
+
+      _refresh: function() {
+        this.fire('document-updated');
+      },
+
+      _documentChanged: function(e) {
+        if (e.path === 'document') {
+          this._dirtyProperties = {};
+        } else {
+          // copy dirty properties (cannot patch complex or list properties)
+          var match = e.path.match(/^document\.properties\.([^\.]*)/);
+          if (match) {
+            var prop = match[1];
+            this._dirtyProperties[prop] = this.document.properties[prop];
           }
         }
-      });
-    })();
+      }
+    });
   </script>
-
 </dom-module>

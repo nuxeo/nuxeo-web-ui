@@ -64,41 +64,37 @@ limitations under the License.
 
   </template>
   <script>
-    (function() {
-      'use strict';
+    Polymer({
+      is: 'nuxeo-theme',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        name: String,
+        title: String,
+        preview: String
+      },
 
-      Polymer({
-        is: 'nuxeo-theme',
-        behaviors: [Nuxeo.I18nBehavior],
-        properties: {
-          name: String,
-          title: String,
-          preview: String
-        },
+      _image: function(name) {
+        return (this.preview) ? this.preview : 'themes/' + name + '/preview.jpg';
+      },
 
-        _image: function(name) {
-          return (this.preview) ? this.preview : 'themes/' + name + '/preview.jpg';
-        },
+      _label: function(name) {
+        return (this.title) ? this.title : this.i18n('themes.' + name);
+      },
 
-        _label: function(name) {
-          return (this.title) ? this.title : this.i18n('themes.' + name);
-        },
+      _button: function(name) {
+        return this.i18n('themes.' + (this._selected(name) ? 'current' : 'apply'));
+      },
 
-        _button: function(name) {
-          return this.i18n('themes.' + (this._selected(name) ? 'current' : 'apply'));
-        },
+      _selected: function(name) {
+        var theme = localStorage.getItem('theme');
+        return (theme) ? theme === name : name === 'default';
+      },
 
-        _selected: function(name) {
-          var theme = localStorage.getItem('theme');
-          return (theme) ? theme === name : name === 'default';
-        },
+      _apply: function() {
+        localStorage.setItem('theme', this.name);
+        this.fire('theme-changed', {theme: this.name});
+      }
 
-        _apply: function() {
-          localStorage.setItem('theme', this.name);
-          this.fire('theme-changed', {theme: this.name});
-        }
-
-      });
-    })();
+    });
   </script>
 </dom-module>
