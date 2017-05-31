@@ -37,7 +37,7 @@ To deploy on Nuxeo Platform manually: copy the builded JAR bundles into `$NUXEO_
 
 # Licensing
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
 # About Nuxeo
 
