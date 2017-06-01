@@ -14,4 +14,13 @@ module.exports = {
     waitforTimeout: 5000,
     waitforInterval: 250,
   },
+  desiredCapabilities: {
+    browserName : "chrome",
+    javascriptEnabled : true,
+    acceptSslCerts : true,
+    chromeOptions : {
+      args : ["--no-sandbox"]
+    }
+  }
+
 };
