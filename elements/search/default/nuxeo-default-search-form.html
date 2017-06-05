@@ -54,7 +54,8 @@ limitations under the License.
       <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
-        multiple="true">
+        multiple="true"
+        name="authors">
       </nuxeo-dropdown-aggregation>
     </div>
 
@@ -64,7 +65,8 @@ limitations under the License.
                      min-chars="0"
                      placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
                      value="{{params.ecm_collections}}"
-                     multiple="true">
+                     multiple="true"
+                     name="collections">
       </nuxeo-select2>
     </div>
 
@@ -73,7 +75,8 @@ limitations under the License.
       <nuxeo-tag-suggestion min-chars="1"
                      placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
                      value="{{params.ecm_tags}}"
-                     multiple="true">
+                     multiple="true"
+                     name="tags">
       </nuxeo-tag-suggestion>
     </div>
 
@@ -81,7 +84,8 @@ limitations under the License.
       <label>[[i18n('defaultSearch.nature')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_nature_agg]]"
-        value="{{params.dc_nature_agg}}">
+        value="{{params.dc_nature_agg}}"
+        name="nature">
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -89,7 +93,8 @@ limitations under the License.
       <label>[[i18n('defaultSearch.subject')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
-        value="{{params.dc_subjects_agg}}">
+        value="{{params.dc_subjects_agg}}"
+        name="subject">
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -97,7 +102,8 @@ limitations under the License.
       <label>[[i18n('defaultSearch.coverage')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
-        value="{{params.dc_coverage_agg}}">
+        value="{{params.dc_coverage_agg}}"
+        name="coverage">
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -105,7 +111,8 @@ limitations under the License.
       <label>[[i18n('defaultSearch.size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
-        value="{{params.common_size_agg}}">
+        value="{{params.common_size_agg}}"
+        name="size">
       </nuxeo-checkbox-aggregation>
     </div>
   </template>
