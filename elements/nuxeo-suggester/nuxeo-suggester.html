@@ -226,7 +226,7 @@ limitations under the License.
                        label="[[i18n('suggester.label')]]"
                        no-label-float></paper-input>
         </div>
-        <div id="results" hidden$="[[!_canShowResuls(searchTerm, items)]]">
+        <div id="results" hidden$="[[!_canShowResults(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
               <a class="item" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
@@ -242,13 +242,12 @@ limitations under the License.
           </iron-selector>
         </div>
       </div>
-      <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle"></paper-icon-button>
+      <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle" on-keyup="_focusSearch"></paper-icon-button>
     </div>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
-    <nuxeo-keys target="[[target]]" keys="tab" on-pressed="_focusSearch"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="esc" on-pressed="closeResults"></nuxeo-keys>
 
   </template>
@@ -305,7 +304,7 @@ limitations under the License.
         }
       },
 
-      _canShowResuls: function() {
+      _canShowResults: function() {
         return this.searchTerm !== '' && this.items &&
           (Array.isArray(this.items) ? this.items.length > 0 : true);
       },
