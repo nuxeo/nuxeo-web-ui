@@ -282,7 +282,7 @@ limitations under the License.
 
             var entries = doc.contextParameters.breadcrumb.entries;
             var lastEntry = entries[entries.length - 1];
-            if (this.hasFacet(lastEntry, 'Folderish')) {
+            if (this.hasFacet(lastEntry, 'Folderish') || entries.length === 1) {
               this.docPath = lastEntry.path;
             } else {
               this.docPath = entries[entries.length - 2].path;
