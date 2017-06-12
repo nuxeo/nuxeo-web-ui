@@ -235,7 +235,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _isCurrentDisplayMode: function(item) {
-        return item.name == this.displayMode;
+        return item.name === this.displayMode;
       },
 
       _toggleDisplayMode: function(e) {
@@ -268,7 +268,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           displayMode: this.displayMode,
           nxProvider: this.nxProvider,
           selectedItems: this.selectedItems,
-          columns: this.view ? this.view.columns : []
+          columns: this.columns
         };
       },
 
@@ -293,6 +293,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       saveSettings: function() {
         this.$.prefStorage.save();
+      },
+
+      _columnsChanged: function(e) {
+        this.columns = e.srcElement.columns;
       },
 
       _selectedItemsChanged: function() {
@@ -341,6 +345,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       _deselectView: function(e) {
         var view = e.detail.item;
+        this.unlisten(view, 'columns-changed', '_columnsChanged');
         this.unlisten(view, 'selected-items-changed', '_selectedItemsChanged');
         this.unlisten(view, 'settings-changed', '_saveViewSettings');
       },
@@ -362,7 +367,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.selectItems(this.selectedItems.slice());
         }
 
-        // listen for settings and selection changed
+        // listen for columns, settings and selection changed
+        this.listen(view, 'columns-changed', '_columnsChanged');
         this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
         this.listen(view, 'settings-changed', '_saveViewSettings');
       }
