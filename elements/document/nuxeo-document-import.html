@@ -52,10 +52,6 @@ limitations under the License.
         @apply(--layout-vertical);
       }
 
-      paper-button[disabled] {
-        display: none;
-      }
-
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
            z-index: 200;
@@ -162,7 +158,7 @@ limitations under the License.
         border: 1px solid var(--divider-color);
         border-radius: 1px;
         background-color: var(--nuxeo-box);
-        padding: 16px 14px 1px 14px;
+        padding: 16px 14px 16px 14px;
         margin: 8px;
         font-weight: bold;
         text-transform: none;
@@ -431,24 +427,27 @@ limitations under the License.
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss
                           on-tap="_cancel"
-                          disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+                          hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
           <paper-button noink
                         class="primary"
                         on-tap="_toggleCustomize"
-                        disabled$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
+                        hidden$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
                         [[i18n('documentImportForm.addProperties')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_import"
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                        [[i18n('command.create')]]
+                        <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+                          [[i18n('command.create')]]
+                        </template>
+                        <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+                          <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+                          <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
+                          <paper-spinner-lite active></paper-spinner-lite>
+                        </template>
                       </paper-button>
-          <div class="horizontal layout" hidden$="[[!_creating]]">
-            <span class="importing-label">[[i18n('documentImport.importing')]]</span>
-            <paper-spinner-lite active></paper-spinner-lite>
-          </div>
         </div>
       </div>
 
@@ -499,6 +498,9 @@ limitations under the License.
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
                         [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
+                      <template is="dom-if" if="[[!file.complete]]">
+                        <paper-progress indeterminate></paper-progress>
+                      </template>
                     </div>
                     <iron-icon icon="icons:check-circle"
                                class$="blobCheck [[_styleFileCheck(file.*)]]"
@@ -530,26 +532,26 @@ limitations under the License.
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss
                           on-tap="_cancel"
-                          disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+                          hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
           <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back')]]</paper-button>-->
 
           <paper-button noink
                         on-tap="_previousFile"
-                        disabled$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
+                        hidden$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
                         &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
-                        disabled$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
+                        hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.nextDocument')]]&nbsp;&#x276f;
                       </paper-button>
 
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
-                        disabled$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
+                        hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.applyToAll')]]
                       </paper-button>
 
@@ -557,12 +559,15 @@ limitations under the License.
                         class="primary"
                         on-tap="_importWithProperties"
                         disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
-                        [[i18n('command.create')]]
+                        <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+                          [[i18n('command.create')]]
+                        </template>
+                        <template is="dom-if" if="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+                          <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+                          <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
+                          <paper-spinner-lite active></paper-spinner-lite>
+                        </template>
                       </paper-button>
-          <div class="horizontal layout" hidden$="[[!_creating]]">
-            <span class="importing-label">[[i18n('documentImport.importing')]]</span>
-            <paper-spinner-lite active></paper-spinner-lite>
-          </div>
         </div>
       </div>
     </iron-pages>
@@ -725,10 +730,14 @@ limitations under the License.
           && this.canCreate && !this._creating;
       },
 
+      _isUploadingOrImporting: function() {
+        return this._creating || this.hasLocalFiles ? !this.hasLocalFilesUploaded : false;
+      },
+
       _canImportWithMetadata: function() {
         return this._getAllFiles().every(function(file) {
-          return 'checked' in file;
-        }) && this.canCreate && !this._creating;
+          return 'checked' in file
+        }) && this._canImport();
       },
 
       _canAddProperties: function() {
