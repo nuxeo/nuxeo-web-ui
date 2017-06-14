@@ -268,6 +268,7 @@
   "documentImport.error.cannotImport":"Impossible d'importer des documents à cet endroit",
   "documentImport.error.importFailed":"Les documents n'ont pas pu être créés, soit parce que le serveur est injoignable, soit parce que certains des documents ont un problème. Vous pouvez essayer à nouveau de les créer, annuler ou recommencer plus tard.",
   "documentImport.importing":"Import en cours",
+  "documentImport.uploading":"Uploading...",
   "documentImportForm.addProperties.otherDocuments":"+ {0} autres documents",
   "documentImportForm.addProperties":"Ajouter des propriétés",
   "documentImportForm.applyToAll":"Appliquer à tous",

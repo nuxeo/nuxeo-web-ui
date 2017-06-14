@@ -268,6 +268,7 @@
   "documentImport.error.cannotImport":"この場所に文書をインポートすることができません",
   "documentImport.error.importFailed":"サーバに接続できなかったか、一部のアセットに問題があるため、これらのアセットを作成できませんでした。アセットの作成をもう一度試すか、キャンセルするか、後で再試行することができます。",
   "documentImport.importing":"インポート中...",
+  "documentImport.uploading":"Uploading...",
   "documentImportForm.addProperties.otherDocuments":"+ {0}の他の文書",
   "documentImportForm.addProperties":"プロパティを追加",
   "documentImportForm.applyToAll":"すべてに適用",

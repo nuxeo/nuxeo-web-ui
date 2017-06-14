@@ -268,6 +268,7 @@
   "documentImport.error.cannotImport":"Dokumente konnten nicht an diesem Ort importiert werden",
   "documentImport.error.importFailed":"Diese Assets konnten nicht erstellt werden, entweder weil der Server nicht erreicht werden konnte oder es bei einigen Assets Probleme gibt. Sie können versuchen, diese nochmals zu erstellen, den Vorgang abzubrechen, oder es später erneut zu versuchen.",
   "documentImport.importing":"Wird importiert...",
+  "documentImport.uploading":"Uploading...",
   "documentImportForm.addProperties.otherDocuments":"+ {0} andere Dokumente",
   "documentImportForm.addProperties":"Eigenschaften hinzufügen",
   "documentImportForm.applyToAll":"Für alle übernehmen",

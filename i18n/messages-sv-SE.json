@@ -268,6 +268,7 @@
   "documentImport.error.cannotImport":"Välj en annan behållare för att importera ditt innehåll",
   "documentImport.error.importFailed":"Dessa tillgångar kunde inte skapas, antingen eftersom servern inte kunde nås eller för att vissa tillgångar har problem. Du kan försöka skapa dem igen, avbryta eller försöka igen senare.",
   "documentImport.importing":"Importerar...",
+  "documentImport.uploading":"Uploading...",
   "documentImportForm.addProperties.otherDocuments":"+ {0} andra dokument",
   "documentImportForm.addProperties":"Lägg till egenskaper",
   "documentImportForm.applyToAll":"Använd för alla",
