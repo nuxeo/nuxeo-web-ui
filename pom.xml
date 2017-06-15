@@ -14,7 +14,6 @@
   <version>1.1.2-SNAPSHOT</version>
 
   <modules>
-    <module>nuxeo-web-ui</module>
     <module>nuxeo-web-ui-marketplace</module>
   </modules>
 
@@ -29,11 +28,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.nuxeo.web.ui</groupId>
-        <artifactId>nuxeo-web-ui</artifactId>
-        <version>${project.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.nuxeo.web.ui</groupId>
         <artifactId>nuxeo-web-ui-marketplace</artifactId>
