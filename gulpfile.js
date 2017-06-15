@@ -1,25 +1,18 @@
 /*
- Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
- This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
- The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
- The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
- Code distributed by Google as part of the polymer project is also
- subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
- (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
 
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 'use strict';
 
@@ -33,10 +26,7 @@ var reload = browserSync.reload;
 var merge = require('merge-stream');
 var path = require('path');
 var fs = require('fs');
-var glob = require('glob-all');
 var historyApiFallback = require('connect-history-api-fallback');
-var packageJson = require('./package.json');
-var crypto = require('crypto');
 var through = require('through2');
 var mergeJson = require('gulp-merge-json');
 
@@ -52,15 +42,21 @@ var AUTOPREFIXER_BROWSERS = [
   'bb >= 10'
 ];
 
-var DIST = 'dist';
+var DIST = 'target/classes/web/nuxeo.war/ui';
 
 var dist = function(subpath) {
   return !subpath ? DIST : path.join(DIST, subpath);
 };
 
+var APP = '.';
+
+var app = function(subpath) {
+  return !subpath ? APP : path.join(APP, subpath);
+};
+
 var styleTask = function(stylesPath, srcs) {
   return gulp.src(srcs.map(function(src) {
-    return path.join(stylesPath, src);
+    return path.join(app(), stylesPath, src);
   }))
       .pipe($.changed(stylesPath, {extension: '.css'}))
       .pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
@@ -71,7 +67,7 @@ var styleTask = function(stylesPath, srcs) {
 };
 
 var imageOptimizeTask = function(src, dest) {
-  return gulp.src(src)
+  return gulp.src(path.join(app(), src))
       .pipe($.imagemin({
         progressive: true,
         interlaced: true
@@ -82,8 +78,6 @@ var imageOptimizeTask = function(src, dest) {
 
 var optimizeHtmlTask = function(src, dest) {
   return gulp.src(src)
-    // Replace path for vulcanized assets
-      .pipe($.if('*.html', $.replace('elements/elements.html', 'elements.vulcanized.html')))
     // Concatenate and minify JavaScript
       .pipe($.if('*.js', $.uglify({
         preserveComments: 'some'
@@ -92,7 +86,7 @@ var optimizeHtmlTask = function(src, dest) {
     // In case you are still using useref build blocks
       .pipe($.if('*.css', $.minifyCss()))
       .pipe($.useref({
-        searchPath: ['.tmp', '.', dist()]
+        searchPath: ['.tmp', app(), dist()]
       }))
     // Minify any HTML
       .pipe($.if('*.html', $.minifyHtml({
@@ -138,48 +132,37 @@ gulp.task('images', function() {
   return imageOptimizeTask('images/**/*', dist('images'));
 });
 
-// Copy all files at the root level (app)
 gulp.task('copy', function() {
-  var app = gulp.src([
-    '*.{html,ico}',
-    'manifest.json',
-    'i18n/**/*',
-    'themes/**/*'
+  var application = gulp.src([
+    app('*.{html,ico}'),
+    app('manifest.json'),
+    app('elements/**/*'),
+    app('i18n/**/*'),
+    app('styles/**/*'),
+    app('themes/**/*')
   ], {
-    dot: true,
-    base: '.'
+    base: app()
   }).pipe(gulp.dest(dist()));
 
-  var bower = gulp.src([
-    'bower_components/**/*'
-  ]).pipe(gulp.dest(dist('bower_components')));
+  // copy user-group-management layouts
+  var userGroupManagement = gulp.src([
+    app('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
+    app('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
+      .pipe(gulp.dest(dist('nuxeo-user-group-management')));
 
-  var elements = gulp.src(['elements/**/*.html',
-    'elements/**/*.css',
-    'elements/**/*.js'
-  ])
-    .pipe(gulp.dest(dist()));
+  // copy select2 resources
+  var select2 = gulp.src([app('bower_components/select2/select2.png'),
+    app('bower_components/select2/select2-spinner.gif'),
+    app('bower_components/select2/select2x2.png')])
+      .pipe(gulp.dest(dist('vendor')));
 
-  var swBootstrap = gulp.src(['bower_components/platinum-sw/bootstrap/*.js'])
-    .pipe(gulp.dest(dist('elements/bootstrap')));
-
-  var swToolbox = gulp.src(['bower_components/sw-toolbox/*.js'])
-    .pipe(gulp.dest(dist('sw-toolbox')));
-
-  var vulcanized = gulp.src(['elements/elements.html'])
-    .pipe($.rename('elements.vulcanized.html'))
-    .pipe(gulp.dest(dist()));
-
-  return merge(app, bower, elements, vulcanized, swBootstrap, swToolbox)
-    .pipe($.size({
-      title: 'copy'
-    }));
+  return merge(application, userGroupManagement, select2);
 });
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function() {
   return optimizeHtmlTask(
-      ['index.html'],
+      [app('index.html')],
       dist());
 });
 
@@ -205,55 +188,76 @@ gulp.task('merge-message-files', function() {
 
 // Vulcanize granular configuration
 gulp.task('vulcanize', function() {
-  return gulp.src(dist('elements.vulcanized.html'))
+  return gulp.src(dist('elements/elements.html'))
       .pipe($.vulcanize({
         stripComments: true,
         inlineCss: true,
         inlineScripts: true
       }))
+      .pipe($.replace('..\/bower_components', 'bower_components'))
       //.pipe($.minifyInline())
       .pipe(gulp.dest(dist()))
       .pipe($.size({title: 'vulcanize'}));
 });
 
-// Generate config data for the <sw-precache-cache> element.
-// This include a list of files that should be precached, as well as a (hopefully unique) cache
-// id that ensure that multiple PSK projects don't share the same Cache Storage.
-// This task does not run by default, but if you are interested in using service worker caching
-// in your project, please enable it within the 'default' task.
-// See https://github.com/PolymerElements/polymer-starter-kit#enable-service-worker-support
-// for more context.
-gulp.task('cache-config', function(callback) {
-  var dir = dist();
-  var config = {
-    cacheId: packageJson.name || path.basename(__dirname),
-    disabled: false
-  };
 
-  glob([
-    'index.html',
-    './',
-    'bower_components/webcomponentsjs/webcomponents-lite.min.js',
-    '{elements,scripts,styles}/**/*.*'],
-      {cwd: dir}, function(error, files) {
-        if (error) {
-          callback(error);
-        } else {
-          config.precache = files;
+// Move dynamic layouts to root
+gulp.task('move-layouts', function() {
+  return gulp.src([
+    dist('elements/document/**'), '!' + dist('elements/document/*.html'),
+    dist('elements/directory/**'), '!' + dist('elements/directory/*.html'),
+    dist('elements/search/**'), '!' + dist('elements/search/*.html'),
+    dist('elements/workflow/**'), '!' + dist('elements/workflow/*.html'),
+    dist('elements/nuxeo-*.html')
+  ], {base: dist('elements')}).pipe(gulp.dest(dist()));
+});
 
-          var md5 = crypto.createHash('md5');
-          md5.update(JSON.stringify(config.precache));
-          config.precacheFingerprint = md5.digest('hex');
-
-          var configPath = path.join(dir, 'cache-config.json');
-          fs.writeFile(configPath, JSON.stringify(config), callback);
-        }
-      });
+// Strip unnecessary stuff
+gulp.task('strip', function() {
+  return del([
+    dist('index.html'), // use our JSP
+    dist('elements'),
+    app('bower_components/**'),
+    '!' + app('bower_components'),
+    '!' + app('bower_components/nuxeo-ui-elements'),
+    '!' + app('bower_components/nuxeo-ui-elements/viewers'),
+    '!' + app('bower_components/nuxeo-ui-elements/viewers/pdfjs'),
+    '!' + app('bower_components/nuxeo-ui-elements/viewers/pdfjs/**'),
+    // keep Alloy editor assets
+    '!' + app('bower_components/alloyeditor'),
+    '!' + app('bower_components/alloyeditor/dist'),
+    '!' + app('bower_components/alloyeditor/dist/alloy-editor'),
+    '!' + app('bower_components/alloyeditor/dist/alloy-editor/assets'),
+    '!' + app('bower_components/alloyeditor/dist/alloy-editor/assets/**'),
+  ]);
 });
 
 // Clean output directory
 gulp.task('clean', function() {
-  return del(['.tmp', dist()]);
+  return del(['.tmp']);
+});
+
+// Build production files, the default task
+gulp.task('build-prod', ['clean'], function(cb) {
+  runSequence(
+      'merge-message-files',
+      ['copy', 'styles'],
+      ['images', 'html'],
+      'vulcanize',
+      'move-layouts',
+      'strip',
+      cb);
+});
+
+// Build production files, the default task
+gulp.task('default', ['clean'], function(cb) {
+  // Uncomment 'cache-config' if you are going to use service workers.
+  runSequence(
+      ['copy', 'styles'],
+      'elements',
+      ['lint', 'images', 'html', 'merge-message-files'],
+      'vulcanize', // 'cache-config',
+      cb);
 });
 
 // Watch files for changes & reload
@@ -312,31 +316,6 @@ gulp.task('serve:dist', ['default'], function() {
     server: dist(),
     middleware: [historyApiFallback()]
   });
-});
-
-// Build production files, the default task
-gulp.task('default', ['clean'], function(cb) {
-  // Uncomment 'cache-config' if you are going to use service workers.
-  runSequence(
-      ['copy', 'styles'],
-      'elements',
-      ['lint', 'images', 'html', 'merge-message-files'],
-      'vulcanize', // 'cache-config',
-      cb);
-});
-
-// Build then deploy to GitHub pages gh-pages branch
-gulp.task('build-deploy-gh-pages', function(cb) {
-  runSequence(
-      'default',
-      'deploy-gh-pages',
-      cb);
-});
-
-// Deploy to GitHub pages gh-pages branch
-gulp.task('deploy-gh-pages', function() {
-  return gulp.src([dist('**/*'), dist('**/.*')])
-      .pipe($.ghPages());
 });
 
 // Load tasks for web-component-tester

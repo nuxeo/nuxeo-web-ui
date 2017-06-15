@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<component name="org.nuxeo.web.ui.resources">
+
+  <extension target="org.nuxeo.ecm.platform.WebResources" point="resources">
+
+    <resource name="elements.html" type="import">
+      <uri>/ui/elements.html</uri>
+    </resource>
+
+    <resource name="nuxeo-web-ui-bundle.html" type="import">
+      <uri>/ui/nuxeo-web-ui-bundle.html</uri>
+    </resource>
+
+  </extension>
+
+  <extension target="org.nuxeo.ecm.platform.WebResources" point="bundles">
+
+    <!-- main bundle with all import resources -->
+    <bundle name="web-ui">
+      <resources>
+        <resource>elements.html</resource>
+        <resource>nuxeo-web-ui-bundle.html</resource>
+      </resources>
+    </bundle>
+
+  </extension>
+
+</component>

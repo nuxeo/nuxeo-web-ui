@@ -1,0 +1,9 @@
+<component name="org.nuxeo.web.ui.authentication.contrib">
+  <extension point="startURL" target="org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService">
+    <startURLPattern>
+      <patterns>
+        <pattern>ui</pattern>
+      </patterns>
+    </startURLPattern>
+  </extension>
+</component>
