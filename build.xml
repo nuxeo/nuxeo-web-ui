@@ -38,12 +38,14 @@ limitations under the License.
     <exec executable="${cmd.bower}" failonerror="true">
       <arg value="install" />
     </exec>
-    <move file="bower_components" tofile="target/classes/web/nuxeo.war/ui/bower_components"/>
+    <copy todir="target/classes/web/nuxeo.war/ui/bower_components">
+      <fileset dir="bower_components"/>
+    </copy>
   </target>
 
   <target name="build" depends="init">
     <exec executable="${cmd.gulp}" failonerror="true">
-      <arg value="build-prod" />
+      <arg value="build" />
     </exec>
   </target>
 
