@@ -146,14 +146,14 @@ gulp.task('copy', function() {
 
   // copy user-group-management layouts
   var userGroupManagement = gulp.src([
-    app('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
-    app('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
+    dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
+    dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
       .pipe(gulp.dest(dist('nuxeo-user-group-management')));
 
   // copy select2 resources
-  var select2 = gulp.src([app('bower_components/select2/select2.png'),
-    app('bower_components/select2/select2-spinner.gif'),
-    app('bower_components/select2/select2x2.png')])
+  var select2 = gulp.src([dist('bower_components/select2/select2.png'),
+    dist('bower_components/select2/select2-spinner.gif'),
+    dist('bower_components/select2/select2x2.png')])
       .pipe(gulp.dest(dist('vendor')));
 
   return merge(application, userGroupManagement, select2);
@@ -184,6 +184,21 @@ gulp.task('merge-message-files', function() {
              .pipe(gulp.dest(i18ntmp))
              .pipe(gulp.dest(i18ndist))
              .pipe($.size({title: 'merge-message-files'}));
+});
+
+gulp.task('merge-message-files-prod', function() {
+  var i18ndist = dist('i18n');
+  return gulp.src([dist('bower_components/nuxeo-ui-elements/i18n/messages*.json')])
+      .pipe($.if(function(file) {
+        return fs.existsSync(path.join(i18ndist, path.basename(file.path)));
+      }, through.obj(function(file, enc, callback) {
+        gulp.src([file.path, path.join(i18ndist, path.basename(file.path))])
+            .pipe(mergeJson(path.basename(file.path)))
+            .pipe(gulp.dest(i18ndist));
+        callback();
+      })))
+      .pipe(gulp.dest(i18ndist))
+      .pipe($.size({title: 'merge-message-files'}));
 });
 
 // Vulcanize granular configuration
@@ -237,11 +252,11 @@ gulp.task('clean', function() {
   return del(['.tmp']);
 });
 
-// Build production files, the default task
-gulp.task('build-prod', ['clean'], function(cb) {
+// Build production files
+gulp.task('build', ['clean'], function(cb) {
   runSequence(
-      'merge-message-files',
       ['copy', 'styles'],
+      'merge-message-files-prod',
       ['images', 'html'],
       'vulcanize',
       'move-layouts',
