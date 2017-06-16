@@ -217,18 +217,18 @@ gulp.task('strip', function() {
   return del([
     dist('index.html'), // use our JSP
     dist('elements'),
-    app('bower_components/**'),
-    '!' + app('bower_components'),
-    '!' + app('bower_components/nuxeo-ui-elements'),
-    '!' + app('bower_components/nuxeo-ui-elements/viewers'),
-    '!' + app('bower_components/nuxeo-ui-elements/viewers/pdfjs'),
-    '!' + app('bower_components/nuxeo-ui-elements/viewers/pdfjs/**'),
+    dist('bower_components/**'),
+    '!' + dist('bower_components'),
+    '!' + dist('bower_components/nuxeo-ui-elements'),
+    '!' + dist('bower_components/nuxeo-ui-elements/viewers'),
+    '!' + dist('bower_components/nuxeo-ui-elements/viewers/pdfjs'),
+    '!' + dist('bower_components/nuxeo-ui-elements/viewers/pdfjs/**'),
     // keep Alloy editor assets
-    '!' + app('bower_components/alloyeditor'),
-    '!' + app('bower_components/alloyeditor/dist'),
-    '!' + app('bower_components/alloyeditor/dist/alloy-editor'),
-    '!' + app('bower_components/alloyeditor/dist/alloy-editor/assets'),
-    '!' + app('bower_components/alloyeditor/dist/alloy-editor/assets/**'),
+    '!' + dist('bower_components/alloyeditor'),
+    '!' + dist('bower_components/alloyeditor/dist'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor/assets'),
+    '!' + dist('bower_components/alloyeditor/dist/alloy-editor/assets/**'),
   ]);
 });
 
