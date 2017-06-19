@@ -43,6 +43,12 @@ limitations under the License.
     </copy>
   </target>
 
+  <target name="test">
+    <exec executable="${cmd.gulp}" failonerror="true">
+      <arg value="test:local" />
+    </exec>
+  </target>
+
   <target name="build" depends="init">
     <exec executable="${cmd.gulp}" failonerror="true">
       <arg value="build" />
