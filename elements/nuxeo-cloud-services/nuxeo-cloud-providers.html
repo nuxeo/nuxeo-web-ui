@@ -57,7 +57,7 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('cloudProviders.serviceName')]]"
                                  field="serviceName" sort-by="serviceName">
           <template>
-            <span>[[item.serviceName]]</span>
+            <span name="serviceName">[[item.serviceName]]</span>
           </template>
         </nuxeo-data-table-column>
 
@@ -77,7 +77,7 @@ limitations under the License.
 
         <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
           <template>
-            <paper-icon-button id="edit-button-[[index]]" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
+            <paper-icon-button id="edit-button-[[index]]" name="edit" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
             <paper-tooltip for="edit-button-[[index]]">[[i18n('cloudProviders.edit')]]</paper-tooltip>
             <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete"
                                on-tap="_deleteEntry"></paper-icon-button>
