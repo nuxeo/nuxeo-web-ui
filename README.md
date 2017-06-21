@@ -1,6 +1,7 @@
+[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=master/nuxeo-web-ui-master)](https://qa.nuxeo.org/jenkins/job/master/job/nuxeo-web-ui-master/)
 ## Nuxeo Web UI
 
-> Ongoing work to build a new Nuxeo Web UI. See [demo](http://nuxeo.github.io/nuxeo-web-ui/#!/home).
+> Ongoing work to build a new Nuxeo Web UI. See [demo](https://webui-demo.nuxeo.com/nuxeo/ui/), use `demo`/`demo` for credentials.
 
 ## Getting Started
 
