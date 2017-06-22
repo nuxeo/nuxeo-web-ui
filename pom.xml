@@ -69,7 +69,7 @@
             <id>grunt-test</id>
             <phase>test</phase>
             <configuration>
-              <target unless="skip.surefire.tests">
+              <target unless="${skip.surefire.tests}">
                 <ant antfile="${basedir}/build.xml" dir="${basedir}" target="test"></ant>
               </target>
             </configuration>
