@@ -152,7 +152,7 @@ limitations under the License.
         function performFavoritesResponse() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/default_content_collection?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
+            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -166,7 +166,7 @@ limitations under the License.
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/default_content_collection?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
+            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
             [
               200,
               {'Content-Type': 'application/json'},

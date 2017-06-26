@@ -64,7 +64,7 @@ limitations under the License.
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
+            '/dummy/api/v1/search/pp/user_collections/execute?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -92,7 +92,7 @@ limitations under the License.
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/query/user_collections?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
+            '/dummy/api/v1/search/pp/user_collections/execute?currentPageIndex=0&pageSize=40&sortBy=dc%3Amodified&sortOrder=desc&searchTerm=%25&user=%24currentUser',
             [
               200,
               {'Content-Type': 'application/json'},
