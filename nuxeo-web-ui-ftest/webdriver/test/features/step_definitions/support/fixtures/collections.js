@@ -12,6 +12,15 @@ fixtures.collections = {
         collection: col,
       }).execute();
     }),
+  addToCollection: (document, colName) => nuxeo.repository()
+      .fetch(`/default-domain/${colName}`)
+      .then((collection) => nuxeo.operation('Document.AddToCollection')
+          .input(document)
+          .params({
+            collection,
+          })
+          .execute()
+        ),
 };
 
 module.exports = function () {

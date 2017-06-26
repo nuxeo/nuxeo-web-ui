@@ -124,7 +124,7 @@ global.fieldRegistry.register('paper-checkbox',
 global.fieldRegistry.register('nuxeo-checkbox-aggregation',
                               (element) => {
                                 element.element(
-                                  `///div[@id='checkboxLabel' and contains(., '${value}')]/parent::paper-checkbox`
+                                  `///div[@id='checkboxLabel']/parent::paper-checkbox`
                                 ).getAttribute('aria-checked');
                               },
                               (element, value) => {

@@ -98,6 +98,7 @@ export default class Search extends BasePage {
 
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
+      this.el.element(`#paperInput #input`).waitForVisible();
       return this.el.element(`#paperInput #input`).setValue(searchTerm);
     } else {
       this.setFieldValue(searchType, searchTerm);
@@ -105,6 +106,7 @@ export default class Search extends BasePage {
   }
 
   fulltextSearch(searchTerm) {
+    this.el.element(`#paperInput #input`).waitForVisible();
     return this.el.element(`#paperInput #input`).setValue(searchTerm);
   }
 

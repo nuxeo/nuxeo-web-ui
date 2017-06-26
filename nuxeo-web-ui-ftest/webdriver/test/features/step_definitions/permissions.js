@@ -2,6 +2,7 @@
 
 module.exports = function () {
   this.When(/^I give (\w+) permission to "([^"]*)" on the document$/, (permission, name) => {
+    this.ui.browser.permissionsViewButton.waitForVisible();
     this.ui.browser.permissionsViewButton.click();
     this.ui.browser.permissionsView.waitForVisible();
     this.ui.browser.permissionsView.newPermissionButton.click();
@@ -16,15 +17,13 @@ module.exports = function () {
     this.ui.browser.permissionsView.createPermissionButton.click();
   });
 
-  this.When(/^"([^"]*)" has (\w+) permission on the document$/, (name, permission) => {
+  this.Given(/^"([^"]*)" has (\w+) permission on the document$/, (name, permission) => {
     fixtures.documents.setPermissions(this.doc, permission, name).then((d) => { this.doc = d; });
   });
 
   this.Then(/^I can see that "([^"]*)" has the (\w+) permission$/, (name, permission) => {
-    this.ui.browser.permissionsView.permissionUser(name).waitForVisible();
-    this.ui.browser.permissionsView.permissionUser(name).isVisible().should.be.true;
-    this.ui.browser.permissionsView.permission(permission).waitForVisible();
-    this.ui.browser.permissionsView.permission(permission).isVisible().should.be.true;
+    this.ui.browser.permissionsView.permissionUser(name).waitForVisible().should.be.true;
+    this.ui.browser.permissionsView.permission(permission).waitForVisible().should.be.true;
   });
 
   this.When(/^I edit the (\w+) permission for "([^"]*)" to start (\w+)$/, (permission, name, date) => {
@@ -53,6 +52,6 @@ module.exports = function () {
 
   this.Then(/^I can't view the document$/, () => {
     driver.url(`#!/browse${this.doc.path}`);
-    this.ui.browser.breadcrumb.should.not.be.visible;
+    this.ui.browser.breadcrumb.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
   });
 };

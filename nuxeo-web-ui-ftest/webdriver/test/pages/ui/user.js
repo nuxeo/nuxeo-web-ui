@@ -1,18 +1,8 @@
 'use strict';
 
-export default class User {
+import BasePage from '../base';
 
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get el() {
-    return driver.element(this._selector);
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
+export default class User extends BasePage {
 
   getField(field, opts) {
     opts = opts || {};
@@ -26,20 +16,16 @@ export default class User {
     }
   }
 
-  waitForVisible() {
-    return this.page.waitForVisible();
-  }
-
   get dropdown() {
-    return this.page.element('#menu.nuxeo-user-group-management');
+    return this.el.element('#menu.nuxeo-user-group-management');
   }
 
   get userItem() {
-    return this.page.element(`paper-icon-item[name="user"]`);
+    return this.el.element(`paper-icon-item[name="user"]`);
   }
 
   get createUserForm() {
-    return this.page.element(`#form.nuxeo-create-user`);
+    return this.el.element(`#form.nuxeo-create-user`);
   }
 
   get createUserDialog() {
@@ -47,11 +33,11 @@ export default class User {
   }
 
   get createUserButton() {
-    return this.page.element(`#createButton.nuxeo-create-user`);
+    return this.el.element(`#createButton.nuxeo-create-user`);
   }
 
   get editUserButton() {
-    return this.page.element(`#editUserButton`);
+    return this.el.element(`#editUserButton`);
   }
 
   get editUserDialog() {
@@ -59,15 +45,15 @@ export default class User {
   }
 
   get editUserDialogButton() {
-    return this.page.element(`#editUserDialog paper-button`);
+    return this.el.element(`#editUserDialog paper-button`);
   }
 
   get deleteUserButton() {
-    return this.page.element('#deleteUserButton');
+    return this.el.element('#deleteUserButton');
   }
 
   get confirmDeleteUserButton() {
-    return this.page.element('#deleteUserDialog paper-button');
+    return this.el.element('#deleteUserDialog paper-button');
   }
 
   fillMultipleValues(table, opts) {
@@ -76,7 +62,8 @@ export default class User {
     table.rows().forEach((row) => {
       if (row[0] === 'username') {
         global.users[row[1]] = row[1];
-        this.page.element('paper-toggle-button[name="password-toggle"]').click();
+        this.el.element('paper-toggle-button[name="password-toggle"]').waitForVisible();
+        this.el.element('paper-toggle-button[name="password-toggle"]').click();
       }
       const fieldEl = this.getField(row[0], { parent });
       return fixtures.layouts.setValue(fieldEl, row[1]);
@@ -92,6 +79,6 @@ export default class User {
   }
 
   searchResult(searchTerm) {
-    return this.page.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
+    return this.el.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
   }
 }
