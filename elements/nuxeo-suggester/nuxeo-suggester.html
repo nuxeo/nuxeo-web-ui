@@ -187,6 +187,12 @@ limitations under the License.
         background: var(--primary-text-color);
       }
 
+      .thumbnailContainer {
+        width: 60px;
+        height: 60px;
+        margin-right: 10px;
+      }
+
       @media (max-width: 1024px) {
         #searchButton {
           box-shadow: -3px 0 10px 0 rgba(0,0,0,0.1);
@@ -231,10 +237,14 @@ limitations under the License.
             <template is="dom-repeat" items="{{items}}">
               <a class="item" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
                 <div class="layout horizontal center">
-                  <iron-icon src="[[_getIcon(item)]]"></iron-icon>
+                  <div class="thumbnailContainer">
+                    <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
+                    </iron-image>
+                  </div>
                   <div class="layout vertical">
                     <div class="itemName">[[item.label]]</div>
                     <div class="itemPath">[[_getUrl(item)]]</div>
+                    <nuxeo-document-highlights highlights="[[item.highlights]]"></nuxeo-document-highlights>
                   </div>
                 </div>
               </a>
