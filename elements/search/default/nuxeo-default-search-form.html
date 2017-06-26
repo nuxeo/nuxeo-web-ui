@@ -160,12 +160,6 @@ limitations under the License.
         if (e.keyCode === 13) {
           this.fire('trigger-search');
         }
-      },
-
-      attached: function() {
-        document.querySelector('nuxeo-app').selectedTab = 'defaultSearch';
-        document.querySelector('nuxeo-app')._openDrawer();
-        page.redirect('/search/default');
       }
 
     });

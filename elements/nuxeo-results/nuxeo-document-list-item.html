@@ -63,7 +63,7 @@ limitations under the License.
 
       .thumbnailContainer {
         background-color: rgba(0,0,0,0.1);
-        width: 100%;
+        width: 190px;
         height: 190px;
       }
 
@@ -118,6 +118,7 @@ limitations under the License.
         left: 0;
         right: 0;
         min-height: 2.5em;
+        width: 190px;
       }
 
       .actions ::content paper-icon-button ::content iron-icon {
@@ -169,7 +170,11 @@ limitations under the License.
       }
 
       .segment {
-        margin-right: 0.8em;
+        margin-right: 5px;
+      }
+
+      .segment em {
+        background-color: #FFFF00;
       }
 
     </style>
@@ -177,8 +182,8 @@ limitations under the License.
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette">
-          <iron-image src="[[_thumbnail(doc)]]" position="left" class="thumbnailContainer"
-            on-tap="handleClick">
+            <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
+              on-tap="handleClick">
           </iron-image>
         </div>
         <div class="vertical layout">
@@ -186,10 +191,28 @@ limitations under the License.
             <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
               <div class="title">[[doc.title]]</div>
             </a>
-          <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
-          <div class="highlights" id="highlights">
+            <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
+            <div class="highlights" id="highlights">
+              <template is="dom-repeat" items="[[doc.contextParameters.highlight]]" as="highlight">
+                <span class="highlight">
+                  <paper-tooltip>[[_highlightTooltip(highlight)]]</paper-tooltip>
+                  <span class="segments">
+                    <template is="dom-repeat" items="[[highlight.segments]]" as="segment">
+                      <span class="segment">"
+                        <template is="dom-repeat" items="[[_segmentOc(segment)]]" as="segmentOc">
+                            [[_preSegment(segmentOc)]]
+                            <em>
+                              [[_segment(segmentOc)]]
+                            </em>
+                            [[_postSegment(segmentOc)]]
+                        </template>"
+                      </span>
+                    </template>
+                  </span>
+                <span>
+              </template>
+            </div>
           </div>
-        </div>
         </div>
         <div class="actions">
           <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
@@ -231,8 +254,7 @@ limitations under the License.
       },
 
       observers: [
-        '_selectedItemsChanged(selectedItems.splices)',
-        '_displaySegments(doc)'
+        '_selectedItemsChanged(selectedItems.splices)'
       ],
 
       _thumbnail: function(doc) {
@@ -267,51 +289,43 @@ limitations under the License.
         this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
       },
 
-      _escapeHTML: function(unsafe_str) {
-          return unsafe_str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/\"/g, '&quot;')
-            .replace(/\'/g, '&#39;')
-            .replace(/\//g, '&#x2F;')
+      _highlightTooltip: function(highlight) {
+        return this.i18n('searchResults.highlight.field.' + highlight.field);
       },
 
-      _displaySegments: function(doc) {
-        if (this.doc && this.doc.contextParameters && this.doc.contextParameters.highlight) {
-          this.$['highlights'].innerHTML = '';
-          for (var i = 0; i < this.doc.contextParameters.highlight.length; i++) {
-            var highlight = this.doc.contextParameters.highlight[i];
-            var highlightEl = document.createElement('span');
-            highlightEl.setAttribute("class", "segments");
-            var ttElt = document.createElement('paper-tooltip');
-            ttElt.textContent = this.i18n('searchResults.highlight.field.' + highlight.field);
-            highlightEl.appendChild(ttElt);
-            for (var j = 0; j < highlight.segments.length; j++) {
-              var segmentEl = document.createElement('span');
-              segmentEl.setAttribute("class", "segment");
-              segmentEl.setAttribute("style", "margin-right: 5px;");
-              var finalHtml = '"';
-              var emSplit = highlight.segments[j].split('<em>');
-              for (var k = 0; k < emSplit.length; k++) {
-                var eoEmIdx = emSplit[k].indexOf('</em>');
-                if (eoEmIdx > -1) {
-                  finalHtml += this._escapeHTML(emSplit[k].substring(0, eoEmIdx));
-                  finalHtml += '</em>';
-                  finalHtml += this._escapeHTML(emSplit[k].substring(eoEmIdx + 5, emSplit[k].length));
-                } else {
-                  finalHtml += this._escapeHTML(emSplit[k]);
-                }
-                if (k < emSplit.length - 1) {
-                  finalHtml += '<em style="background-color: #FFFF00;">';
-                }
-              }
-              finalHtml += finalHtml + '"';
-              segmentEl.innerHTML = finalHtml + '"';
-              highlightEl.appendChild(segmentEl);
-            }
-            this.$['highlights'].appendChild(highlightEl);
-          }
+      _preSegment: function(segment) {
+        var soEmIdx = segment.indexOf('<em>');
+        if (soEmIdx > -1) {
+          return segment.substring(0, soEmIdx);
+        } else {
+          return segment;
+        }
+      },
+
+      _segment: function(segment) {
+        var soEmIdx = segment.indexOf('<em>');
+        var eoEmIdx = segment.indexOf('</em>');
+        if (soEmIdx > -1 && eoEmIdx > -1) {
+          return segment.substring(soEmIdx + 4, eoEmIdx);
+        } else {
+          return '';
+        }
+      },
+
+      _segmentOc: function(segment) {
+        var segmentOc = [];
+        segment.split('<em>').forEach(function(item, idx) {
+          segmentOc.push(idx > 0 ? '<em>' + item: item);
+        });
+        return segmentOc;
+      },
+
+      _postSegment: function(segment) {
+        var eoEmIdx = segment.indexOf('</em>');
+        if (eoEmIdx > -1) {
+          return segment.substring(eoEmIdx + 5, segment.length);
+        } else {
+          return '';
         }
       }
     });
