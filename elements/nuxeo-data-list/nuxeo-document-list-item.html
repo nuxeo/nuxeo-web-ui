@@ -169,14 +169,6 @@ limitations under the License.
         width: 200px;
       }
 
-      .segment {
-        margin-right: 5px;
-      }
-
-      .segment em {
-        background-color: #FFFF00;
-      }
-
     </style>
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
@@ -192,26 +184,7 @@ limitations under the License.
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
-            <div class="highlights" id="highlights">
-              <template is="dom-repeat" items="[[doc.contextParameters.highlight]]" as="highlight">
-                <span class="highlight">
-                  <paper-tooltip>[[_highlightTooltip(highlight)]]</paper-tooltip>
-                  <span class="segments">
-                    <template is="dom-repeat" items="[[highlight.segments]]" as="segment">
-                      <span class="segment">"
-                        <template is="dom-repeat" items="[[_segmentOc(segment)]]" as="segmentOc">
-                            [[_preSegment(segmentOc)]]
-                            <em>
-                              [[_segment(segmentOc)]]
-                            </em>
-                            [[_postSegment(segmentOc)]]
-                        </template>"
-                      </span>
-                    </template>
-                  </span>
-                <span>
-              </template>
-            </div>
+            <nuxeo-document-highlights highlights="[[doc.contextParameters.highlight]]"></nuxeo-document-highlights>
           </div>
         </div>
         <div class="actions">
@@ -287,46 +260,6 @@ limitations under the License.
 
       _selectedItemsChanged: function() {
         this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
-      },
-
-      _highlightTooltip: function(highlight) {
-        return this.i18n('searchResults.highlight.field.' + highlight.field);
-      },
-
-      _preSegment: function(segment) {
-        var soEmIdx = segment.indexOf('<em>');
-        if (soEmIdx > -1) {
-          return segment.substring(0, soEmIdx);
-        } else {
-          return segment;
-        }
-      },
-
-      _segment: function(segment) {
-        var soEmIdx = segment.indexOf('<em>');
-        var eoEmIdx = segment.indexOf('</em>');
-        if (soEmIdx > -1 && eoEmIdx > -1) {
-          return segment.substring(soEmIdx + 4, eoEmIdx);
-        } else {
-          return '';
-        }
-      },
-
-      _segmentOc: function(segment) {
-        var segmentOc = [];
-        segment.split('<em>').forEach(function(item, idx) {
-          segmentOc.push(idx > 0 ? '<em>' + item: item);
-        });
-        return segmentOc;
-      },
-
-      _postSegment: function(segment) {
-        var eoEmIdx = segment.indexOf('</em>');
-        if (eoEmIdx > -1) {
-          return segment.substring(eoEmIdx + 5, segment.length);
-        } else {
-          return '';
-        }
       }
     });
   </script>
