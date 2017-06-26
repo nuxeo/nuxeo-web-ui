@@ -1,0 +1,319 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-download-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+
+<!--
+`nuxeo-document-list-item`
+@group Nuxeo UI
+@element nuxeo-document-list-item
+-->
+<dom-module id="nuxeo-document-list-item">
+  <template>
+
+    <style>
+      .listBox {
+        display: block;
+        margin: 0 .4em .8em;
+        position: relative;
+        background-color: var(--nuxeo-box);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);;
+        padding: 0;
+        filter: 0.1s ease-out, filter 0.1s ease-out;
+        -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
+        border: 2px solid transparent;
+      }
+
+      .listBox:hover,
+      .listBox:focus {
+        cursor: pointer;
+        z-index: 500;
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+      }
+
+      .listBox .title {
+        margin-bottom: .4em;
+      }
+
+      .listBox:hover .title {
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      .thumbnailContainer {
+        background-color: rgba(0,0,0,0.1);
+        width: 100%;
+        height: 190px;
+      }
+
+      .dataContainer {
+        padding: .3em .8em;
+      }
+
+      .dataContainer p {
+        margin: 0 0 .4em;
+        font-size: .75rem;
+      }
+
+      .listBox .select {
+        display: none;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        border: 2px solid #ddd;
+        background-color: var(--nuxeo-box);
+        z-index: 2;
+        border-radius: 3em;
+      }
+
+      .select paper-icon-button {
+        margin: 0;
+        padding: .3em;
+        box-sizing: border-box;
+      }
+
+      .listBox .select,
+      .select paper-icon-button {
+        width: 2.5em;
+        height: 2.5em;
+      }
+
+      .select:hover paper-icon-button {
+        color: #fff;
+      }
+
+      .title {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+      }
+
+      .listBox .actions {
+        display: none;
+        background-color: var(--nuxeo-box);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        min-height: 2.5em;
+      }
+
+      .actions ::content paper-icon-button ::content iron-icon {
+        @apply(--nuxeo-action);
+      }
+
+      .actions ::content paper-icon-button:hover ::content iron-icon {
+        @apply(--nuxeo-action-hover);
+      }
+
+      .listBox:hover .actions,
+      .listBox:hover .select,
+      .listBox[selection-mode] .select {
+        display: block;
+      }
+
+      .listBox:hover .select:hover {
+        border: 2px solid var(--nuxeo-button-primary);
+        background-color: var(--nuxeo-button-primary);
+        cursor: pointer;
+      }
+
+      :host[selected] .listBox .select,
+      :host[selected] .listBox:hover .select:hover {
+        border: 2px solid var(--nuxeo-grid-selected);
+        background-color: var(--nuxeo-grid-selected);
+        cursor: pointer;
+        display: block;
+      }
+
+      :host[selected] .select paper-icon-button {
+        color: #fff;
+      }
+
+      :host[selected] .listBox {
+        border: 2px solid var(--nuxeo-grid-selected);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+      }
+
+      .typeSelection paper-button {
+        width: var(--nuxeo-document-creation-form-button-width, 128px);
+        height: var(--nuxeo-document-creation-form-button-height, 128px);
+        box-shadow: none;
+        background-color: var(--nuxeo-dialog-buttons-bar);
+      }
+
+      .vignette {
+        width: 200px;
+      }
+
+      .segment {
+        margin-right: 0.8em;
+      }
+
+    </style>
+
+    <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
+      <div class="horizontal layout">
+        <div class="vignette">
+          <iron-image src="[[_thumbnail(doc)]]" position="left" class="thumbnailContainer"
+            on-tap="handleClick">
+          </iron-image>
+        </div>
+        <div class="vertical layout">
+          <div class="dataContainer">
+            <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
+              <div class="title">[[doc.title]]</div>
+            </a>
+          <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
+          <div class="highlights" id="highlights">
+          </div>
+        </div>
+        </div>
+        <div class="actions">
+          <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
+          <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
+        </div>
+        <div class="select">
+          <paper-icon-button noink icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
+        </div>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document-list-item',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      properties: {
+        doc: {
+          type: Object,
+          notify: true
+        },
+
+        offset: {
+          type: Number,
+          value: -1
+        },
+
+        selected: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        selectedItems: {
+          type: Array,
+          value: []
+        }
+      },
+
+      observers: [
+        '_selectedItemsChanged(selectedItems.splices)',
+        '_displaySegments(doc)'
+      ],
+
+      _thumbnail: function(doc) {
+        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+          doc.contextParameters.thumbnail.url) {
+          return doc.contextParameters.thumbnail.url;
+        }
+      },
+
+      _docType: function() {
+        return this.doc.type;
+      },
+
+      handleClick: function(e) {
+        if (this.selectionMode){
+          this._toogleSelect();
+        } else if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
+          this.fire('navigate', {item: this.doc});
+        }
+      },
+
+      _onCheckBoxTap: function() {
+        this._toogleSelect();
+      },
+
+      _toogleSelect: function() {
+        this.selected = !this.selected;
+        this.fire('selected');
+      },
+
+      _selectedItemsChanged: function() {
+        this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
+      },
+
+      _escapeHTML: function(unsafe_str) {
+          return unsafe_str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\"/g, '&quot;')
+            .replace(/\'/g, '&#39;')
+            .replace(/\//g, '&#x2F;')
+      },
+
+      _displaySegments: function(doc) {
+        if (this.doc && this.doc.contextParameters && this.doc.contextParameters.highlight) {
+          this.$['highlights'].innerHTML = '';
+          for (var i = 0; i < this.doc.contextParameters.highlight.length; i++) {
+            var highlight = this.doc.contextParameters.highlight[i];
+            var highlightEl = document.createElement('span');
+            highlightEl.setAttribute("class", "segments");
+            var ttElt = document.createElement('paper-tooltip');
+            ttElt.textContent = this.i18n('searchResults.highlight.field.' + highlight.field);
+            highlightEl.appendChild(ttElt);
+            for (var j = 0; j < highlight.segments.length; j++) {
+              var segmentEl = document.createElement('span');
+              segmentEl.setAttribute("class", "segment");
+              segmentEl.setAttribute("style", "margin-right: 5px;");
+              var finalHtml = '"';
+              var emSplit = highlight.segments[j].split('<em>');
+              for (var k = 0; k < emSplit.length; k++) {
+                var eoEmIdx = emSplit[k].indexOf('</em>');
+                if (eoEmIdx > -1) {
+                  finalHtml += this._escapeHTML(emSplit[k].substring(0, eoEmIdx));
+                  finalHtml += '</em>';
+                  finalHtml += this._escapeHTML(emSplit[k].substring(eoEmIdx + 5, emSplit[k].length));
+                } else {
+                  finalHtml += this._escapeHTML(emSplit[k]);
+                }
+                if (k < emSplit.length - 1) {
+                  finalHtml += '<em style="background-color: #FFFF00;">';
+                }
+              }
+              finalHtml += finalHtml + '"';
+              segmentEl.innerHTML = finalHtml + '"';
+              highlightEl.appendChild(segmentEl);
+            }
+            this.$['highlights'].appendChild(highlightEl);
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>

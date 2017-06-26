@@ -120,7 +120,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-default-search-form',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
       properties: {
         params: {
           type: Object,
@@ -146,10 +146,12 @@ limitations under the License.
       _addFullTextSearch: function() {
         if (this.searchTerm) {
           this.set('params.ecm_fulltext', this.searchTerm + '*');
+          this.set('params.highlight', '*');
         } else {
           if (this.params.ecm_fulltext) {
             this.set('params.ecm_fulltext', '');
             delete this.params.ecm_fulltext;
+            delete this.params.highlight;
           }
         }
       },
@@ -158,6 +160,12 @@ limitations under the License.
         if (e.keyCode === 13) {
           this.fire('trigger-search');
         }
+      },
+
+      attached: function() {
+        document.querySelector('nuxeo-app').selectedTab = 'defaultSearch';
+        document.querySelector('nuxeo-app')._openDrawer();
+        page.redirect('/search/default');
       }
 
     });

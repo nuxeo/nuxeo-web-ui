@@ -104,6 +104,18 @@ limitations under the License.
         </nuxeo-data-table-column>
 
       </nuxeo-data-table>
+
+      <nuxeo-data-list class="results" name="list" icon="nuxeo:view-headline"
+                       empty-label="[[emptyLabel]]"
+                       empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
+                       selection-enabled display-quick-filters>
+        <template>
+          <nuxeo-document-list-item selected$="{{selected}}" doc="[[item]]"
+                                    on-navigate="_navigate" selected-items="[[selectedItems]]">
+          </nuxeo-document-list-item>
+        </template>
+      </nuxeo-data-list>
+
     </nuxeo-results>
   </template>
 
