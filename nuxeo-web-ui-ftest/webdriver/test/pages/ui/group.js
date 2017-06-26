@@ -1,18 +1,8 @@
 'use strict';
 
-export default class Group {
+import BasePage from '../base';
 
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get el() {
-    return driver.element(this._selector);
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
+export default class Group extends BasePage {
 
   getField(field) {
     driver.waitForExist(this._selector);
@@ -20,44 +10,40 @@ export default class Group {
     return this.el.element(`[id="${field}"]`);
   }
 
-  waitForVisible() {
-    return this.page.waitForVisible();
-  }
-
   get dropdown() {
-    return this.page.element('#menu.nuxeo-user-group-management');
+    return this.el.element('#menu.nuxeo-user-group-management');
   }
 
   get groupItem() {
-    return this.page.element(`paper-icon-item[name="group"]`);
+    return this.el.element(`paper-icon-item[name="group"]`);
   }
 
   get createGroupForm() {
-    return this.page.element(`#form.nuxeo-create-group`);
+    return this.el.element(`#form.nuxeo-create-group`);
   }
 
   get createGroupButton() {
-    return this.page.element(`#createButton.nuxeo-create-group`);
+    return this.el.element(`#createButton.nuxeo-create-group`);
   }
 
   get editGroupButton() {
-    return this.page.element(`#editGroupButton`);
+    return this.el.element(`#editGroupButton`);
   }
 
   get editGroupLabel() {
-    return this.page.element('#editGroupDialog input');
+    return this.el.element('#editGroupDialog input');
   }
 
   get editGroupDialogButton() {
-    return this.page.element(`#editGroupDialog paper-button`);
+    return this.el.element(`#editGroupDialog paper-button`);
   }
 
   get deleteGroupButton() {
-    return this.page.element('#deleteGroupButton');
+    return this.el.element('#deleteGroupButton');
   }
 
   get confirmDeleteGroupButton() {
-    return this.page.element('#deleteGroupDialog paper-button');
+    return this.el.element('#deleteGroupDialog paper-button');
   }
 
   fillMultipleValues(table) {
@@ -79,6 +65,6 @@ export default class Group {
   }
 
   searchResult(searchTerm) {
-    return this.page.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
+    return this.el.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
   }
 }

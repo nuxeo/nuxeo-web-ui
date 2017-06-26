@@ -42,7 +42,7 @@ module.exports = function () {
           group !== 'powerusers') {
           return fixtures.groups.delete(group);
         } else {
-          Promise.resolve();
+          return Promise.resolve();
         }
       })));
 };

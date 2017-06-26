@@ -17,11 +17,11 @@ module.exports = function () {
 
   this.Then(/^I can search for the group "([^"]*)"$/, (groupname) => {
     this.ui.group.searchFor(groupname);
-    this.ui.group.searchResult(groupname).waitForVisible();
-    this.ui.group.searchResult(groupname).isVisible().should.be.true;
+    this.ui.group.searchResult(groupname).waitForVisible().should.be.true;
   });
 
   this.Then(/^I can edit the group "([^"]*)" label as "([^"]*)"$/, (groupname, newLabel) => {
+    this.ui.group.searchResult(groupname).waitForVisible();
     this.ui.group.searchResult(groupname).click();
     this.ui.group.editGroupButton.click();
     fixtures.layouts.setValue(this.ui.group.editGroupLabel, newLabel);

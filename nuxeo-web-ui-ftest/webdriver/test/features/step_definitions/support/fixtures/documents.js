@@ -34,15 +34,6 @@ fixtures.documents = {
         }
         return doc;
       }),
-  addToCollection: (document, collectionName) => nuxeo.repository()
-      .fetch(`/default-domain/${collectionName}`)
-      .then((collection) => nuxeo.operation('Document.AddToCollection')
-          .input(document)
-          .params({
-            collection,
-          })
-          .execute()
-        ),
   addTag: (document, tag) => nuxeo.operation('Services.TagDocument')
       .input(document)
       .params({

@@ -57,7 +57,7 @@ module.exports = function () {
       // create the document
       return fixtures.documents.createWithAuthor(row[6], doc, row[5]).then((docWithAuthor) => {
         if (row[7].length > 0) {
-          return fixtures.documents.addToCollection(docWithAuthor, row[7]).then((docInCollection) => {
+          return fixtures.collections.addToCollection(docWithAuthor, row[7]).then((docInCollection) => {
             if (row[8].length > 0) {
               return fixtures.documents.addTag(docInCollection, row[8]).then((docWithTag) => {
                 if (row[9].length > 0) {
@@ -83,6 +83,7 @@ module.exports = function () {
     }
   });
   this.Then(/^I edit the results columns to show (.+)$/, (heading) => {
+    this.ui.searchResults.toggleColumnSettings.waitForVisible();
     this.ui.searchResults.toggleColumnSettings.click();
     this.ui.searchResults.getColumnCheckbox(heading).waitForVisible();
     this.ui.searchResults.checkColumnCheckbox(heading);
@@ -91,12 +92,15 @@ module.exports = function () {
     this.ui.searchResults.getResultsColumn(heading).isVisible().should.be.true;
   });
   this.Then(/^I save my search as "(.+)"$/, (searchName) => {
+    this.ui.searchResults.saveSearchAsButton.waitForVisible();
     this.ui.searchResults.saveSearchAsButton.click();
     this.ui.searchResults.enterInput(searchName);
     this.ui.searchResults.confirmSaveSearchButton.click();
   });
   this.Then(/^I share my search with (.+)/, (username) => {
+    this.ui.searchResults.savedSearchActionButton.waitForVisible();
     this.ui.searchResults.savedSearchActionButton.click();
+    this.ui.searchResults.shareAction.waitForVisible();
     this.ui.searchResults.shareAction.click();
     this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
     this.ui.browser.permissionsView.newPermissionButton.click();
@@ -111,6 +115,7 @@ module.exports = function () {
     this.ui.browser.permissionsView.createPermissionButton.click();
   });
   this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
+    this.ui.searchResults.menuButton.waitForVisible();
     this.ui.searchResults.menuButton.click();
     this.ui.searchResults.getSavedSearch(searchName).isVisible().should.be.true;
   });

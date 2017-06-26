@@ -14,11 +14,10 @@ Feature: Permissions
     When I logout
     And I login as "Susan"
     And I browse to the document
-# Uncomment these steps once ELEMENTS-325 and NXP-22419 are resolved
-#    Then I can see the "my document" document
-#    And I can edit the following properties in the Note metadata:
-#      | name  | value         |
-#      | title | changed title |
+    Then I can see the "my document" document
+    And I can edit the following properties in the Note metadata:
+      | name  | value         |
+      | title | changed title |
 
   Scenario: Edit permission
     Given "Susan" has ReadWrite permission on the document

@@ -40,10 +40,14 @@ module.exports = function () {
       .map((user) => {
         if (user !== 'Administrator') {
           const userWorkspace = `/default-domain/UserWorkspaces/${user}`;
-          nuxeo.repository().delete(userWorkspace).catch(() => {});
-          fixtures.users.delete(user);
+          const userFavorites = `${userWorkspace}/Favorites`;
+          return nuxeo.repository().delete(userFavorites)
+                         .catch(() => {}) // eslint-disable-line arrow-body-style
+                         .then(() => nuxeo.repository().delete(userWorkspace))
+                         .catch(() => {}) // eslint-disable-line arrow-body-style
+                         .then(() => fixtures.users.delete(user));
         } else {
-          Promise.resolve();
+          return Promise.resolve();
         }
       })));
 };
