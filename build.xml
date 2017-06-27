@@ -32,6 +32,7 @@ limitations under the License.
 
   <target name="init" description="Download all node and web dependencies">
     <delete dir="node_modules" failonerror="true" />
+    <delete dir="bower_components" failonerror="true" />
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
