@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-default-search-results">
   <template>
 
-    <nuxeo-results name="default" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+    <nuxeo-results name="default" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-mode="list">
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters>
         <template>
