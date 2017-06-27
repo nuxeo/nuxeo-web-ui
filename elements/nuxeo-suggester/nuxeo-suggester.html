@@ -152,11 +152,9 @@ limitations under the License.
         margin: 0 16px 0 4px;
       }
 
-      a.item:hover {
-        @apply(--nuxeo-block-hover);
-      }
-
+      a.item:hover,
       a.iron-selected {
+        color: var(--nuxeo-text-default);
         @apply(--nuxeo-block-selected);
       }
 
@@ -167,12 +165,11 @@ limitations under the License.
       }
 
       a .itemPath {
-        color: var(--primary-text-color);
-        opacity: 0.5;
-        font-size: 0.8em;
+        opacity: .7;
+        font-size: .8em;
       }
 
-      a:hover .itemPath {
+      a:hover .itemName {
         color: var(--nuxeo-primary-color);
       }
 
@@ -191,6 +188,10 @@ limitations under the License.
         width: 60px;
         height: 60px;
         margin-right: 10px;
+      }
+
+      nuxeo-document-highlights {
+        font-size: .85rem;
       }
 
       @media (max-width: 1024px) {

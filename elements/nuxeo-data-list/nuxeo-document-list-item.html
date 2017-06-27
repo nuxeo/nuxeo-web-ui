@@ -48,7 +48,6 @@ limitations under the License.
       .listBox:hover,
       .listBox:focus {
         cursor: pointer;
-        z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
@@ -63,12 +62,12 @@ limitations under the License.
 
       .thumbnailContainer {
         background-color: rgba(0,0,0,0.1);
-        width: 190px;
-        height: 190px;
+        width: 10rem;
+        height: 10rem;
       }
 
       .dataContainer {
-        padding: .3em .8em;
+        padding: .5rem 1rem;
       }
 
       .dataContainer p {
@@ -118,7 +117,7 @@ limitations under the License.
         left: 0;
         right: 0;
         min-height: 2.5em;
-        width: 190px;
+        width: 10rem;
       }
 
       .actions ::content paper-icon-button ::content iron-icon {
@@ -165,8 +164,12 @@ limitations under the License.
         background-color: var(--nuxeo-dialog-buttons-bar);
       }
 
+      nuxeo-document-highlights {
+        font-size: .85rem;
+      }
+
       .vignette {
-        width: 200px;
+        display: flex;
       }
 
     </style>
@@ -178,14 +181,14 @@ limitations under the License.
               on-tap="handleClick">
           </iron-image>
         </div>
-        <div class="vertical layout">
-          <div class="dataContainer">
-            <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
+        <div class="dataContainer flex">
+          <div class="horizontal layout center">
+            <a class="title flex" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
-            <nuxeo-document-highlights highlights="[[doc.contextParameters.highlight]]"></nuxeo-document-highlights>
           </div>
+          <nuxeo-document-highlights highlights="[[doc.contextParameters.highlight]]"></nuxeo-document-highlights>
         </div>
         <div class="actions">
           <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>

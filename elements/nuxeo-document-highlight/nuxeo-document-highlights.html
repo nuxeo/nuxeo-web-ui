@@ -37,16 +37,25 @@ limitations under the License.
         margin-right: 5px;
       }
 
+      .category {
+        opacity: .7;
+        text-transform: uppercase;
+        font-size: .75rem;
+      }
+
       .segment em {
-        background-color: #FFFF00;
+        color: var(--nuxeo-result-highlight, #0066CC);
+        font-weight: bold;
+        font-style: normal;
+        border-bottom: 1px solid var(--nuxeo-result-highlight, #0066CC);
       }
 
     </style>
 
     <div class="highlights" id="highlights">
       <template is="dom-repeat" items="[[highlights]]" as="highlight">
-        <span class="highlight">
-          <paper-tooltip>[[_highlightFieldLabel(highlight)]]</paper-tooltip>
+        <div class="highlight">
+          <span class="category">[[_highlightFieldLabel(highlight)]]</span>
           <span class="segments">
             <template is="dom-repeat" items="[[highlight.segments]]" as="segment">
               <span class="segment">"
@@ -60,7 +69,7 @@ limitations under the License.
               </span>
             </template>
           </span>
-        <span>
+        <div>
       </template>
     </div>
 
