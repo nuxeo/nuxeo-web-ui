@@ -33,14 +33,11 @@ limitations under the License.
   <template>
 
     <style>
-      .segment {
-        margin-right: 5px;
-      }
-
       .category {
         opacity: .7;
         text-transform: uppercase;
         font-size: .75rem;
+        padding-right: .5rem;
       }
 
       .segment em {
@@ -50,6 +47,10 @@ limitations under the License.
         border-bottom: 1px solid var(--nuxeo-result-highlight, #0066CC);
       }
 
+      .segment + .segment::before {
+        display: inline-block;
+        content: '...';
+      }
     </style>
 
     <div class="highlights" id="highlights">
@@ -58,14 +59,14 @@ limitations under the License.
           <span class="category">[[_highlightFieldLabel(highlight)]]</span>
           <span class="segments">
             <template is="dom-repeat" items="[[highlight.segments]]" as="segment">
-              <span class="segment">"
+              <span class="segment">
                 <template is="dom-repeat" items="[[_segmentOc(segment)]]" as="segmentOc">
                     [[_preSegment(segmentOc)]]
                     <em>
                       [[_segment(segmentOc)]]
                     </em>
                     [[_postSegment(segmentOc)]]
-                </template>"
+                </template>
               </span>
             </template>
           </span>
