@@ -18,14 +18,14 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-group-tag.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
+<link rel="import" href="../nuxeo-workflow-graph/nuxeo-workflow-graph.html">
 
 <!--
 `nuxeo-document-task`
@@ -38,6 +38,24 @@ limitations under the License.
       :host {
         display: block;
       }
+
+      nuxeo-workflow-graph {
+        position: relative;
+      }
+
+      .date-field {
+        margin-bottom: 2rem;
+      }
+
+      .date {
+        margin-left: .5rem;
+        color: var(--nuxeo-warn-text);
+      }
+
+      .view-graph {
+        margin-left: .5rem;
+        text-decoration: underline;
+      }
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
@@ -46,29 +64,26 @@ limitations under the License.
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
-          <h3>[[i18n('documentTask.taskResolution')]]</h3>
-          <div>
-            <label>[[i18n('documentTask.dueDate')]]</label>
-            <div><nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date></div>
-          </div>
-          <div>
-            <label>[[i18n('documentTask.assigned')]]</label>
-            <div>
-              <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                <template is="dom-if" if="[[_isUser(actor)]]">
-                  <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
-                </template>
-                <template is="dom-if" if="[[_isGroup(actor)]]">
-                  <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
-                </template>
-                <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
-                  <nuxeo-tag>[[actor]]</nuxeo-tag>
-                </template>
-              </template>
+          <nuxeo-dialog id="graphDialog" with-backdrop>
+            <paper-dialog-scrollable>
+              <div class="graph-container">
+                <nuxeo-workflow-graph workflow-id="[[task.workflowInstanceId]]"></nuxeo-workflow-graph>
+              </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+              <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
             </div>
+          </nuxeo-dialog>
+          <h3>[[i18n(task.name)]]</h3>
+          <div class="horizontal layout center">
+            <span>[[i18n(task.directive)]]</span>
+            <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
+          </div>
+          <div class="date-field horizontal layout">
+            <label>[[i18n('documentTask.dueDate')]]</label>
+            <div class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></div>
           </div>
 
-          <h4>[[i18n(task.directive)]]</h4>
           <form id="task-container" action="/" is="iron-form">
             <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]"
                           error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
@@ -149,17 +164,9 @@ limitations under the License.
         }
       },
 
-      _isUser: function(actor) {
-        return actor['entity-type'] && actor['entity-type'] === 'user';
+      _toggleGraphDialog: function() {
+        this.$.graphDialog.toggle();
       },
-
-      _isGroup: function(actor) {
-        return actor['entity-type'] && actor['entity-type'] === 'group';
-      },
-
-      _isNotUserOrGroup: function(actor) {
-        return !this._isUser(actor) && !this._isGroup(actor);
-      }
 
     });
   </script>

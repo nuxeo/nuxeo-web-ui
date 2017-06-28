@@ -20,8 +20,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-group-tag.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 
 <!--
 `nuxeo-tasks-list`
@@ -86,9 +84,13 @@ limitations under the License.
         pointer-events: none;
       }
       /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
-      .task-box nuxeo-user-tag,
       .task-box nuxeo-date {
         pointer-events: all;
+      }
+
+      .task-name {
+        font-weight: bold;
+        text-transform: uppercase;
       }
     </style>
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
@@ -98,26 +100,11 @@ limitations under the License.
       <template>
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
           <div class="task-box vertical layout">
-            <div class="task-info horizontal layout center">
+            <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>
             </div>
             <div class="task-detail">
               <div class="taskDoc horizontal layout center">
-                <span class="task-property">[[i18n('documentTask.assigned')]]</span>
-                <template is="dom-repeat" items="[[task.actors]]" as="actor">
-                  <template is="dom-if" if="[[_isUser(actor)]]">
-                    <nuxeo-user-tag user="[[actor]]"></nuxeo-user-tag>
-                  </template>
-                  <template is="dom-if" if="[[_isGroup(actor)]]">
-                    <nuxeo-group-tag group="[[actor]]"></nuxeo-group-tag>
-                  </template>
-                  <template is="dom-if" if="[[_isNotUserOrGroup(actor)]]">
-                    <nuxeo-tag>[[actor]]</nuxeo-tag>
-                  </template>
-                </template>
-              </div>
-              <div class="taskDoc horizontal layout center">
-                <span class="task-property">[[i18n('tasksList.on')]]</span>
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
               <div class="horizontal layout center">
@@ -125,6 +112,9 @@ limitations under the License.
                 <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
                 <span class="date"> <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
               </div>
+            </div>
+            <div class="horizontal layout center">
+              <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
             </div>
           </div>
         </div>
@@ -186,18 +176,6 @@ limitations under the License.
           classes += ' selected';
         }
         return classes;
-      },
-
-      _isUser: function(actor) {
-        return actor['entity-type'] && actor['entity-type'] === 'user';
-      },
-
-      _isGroup: function(actor) {
-        return actor['entity-type'] && actor['entity-type'] === 'group';
-      },
-
-      _isNotUserOrGroup: function(actor) {
-        return !this._isUser(actor) && !this._isGroup(actor);
       }
 
     });
