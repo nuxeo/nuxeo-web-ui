@@ -102,7 +102,7 @@ limitations under the License.
             <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </div>
-          <nuxeo-document-edit document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
+          <nuxeo-document-edit id="documentEdit" document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
         </paper-card>
 
         <!-- collections -->
@@ -160,6 +160,7 @@ limitations under the License.
 
       _editMode: function() {
         this.edit = true;
+        this.$.documentEdit.notifyResize();
       },
 
       _showCollections: function (doc) {
