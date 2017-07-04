@@ -731,7 +731,7 @@ limitations under the License.
       },
 
       _isUploadingOrImporting: function() {
-        return this._creating || this.hasLocalFiles ? !this.hasLocalFilesUploaded : false;
+        return this._creating || (this.hasLocalFiles ? !this.hasLocalFilesUploaded : false);
       },
 
       _canImportWithMetadata: function() {
