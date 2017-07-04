@@ -1,0 +1,341 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="nuxeo-search-form-layout.html">
+<link rel="import" href="nuxeo-search-results-layout.html">
+
+<!--
+`nuxeo-results-view`
+@group Nuxeo UI
+@element nuxeo-results-view
+-->
+<dom-module id="nuxeo-results-view">
+  <template>
+    <style>
+
+      ::content nuxeo-data-table,
+      ::content nuxeo-data-grid,
+      ::content nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 130px);
+      }
+
+      ::content .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+      }
+
+      ::content .capitalize {
+        text-transform: capitalize;
+      }
+
+      ::content *[role=widget] {
+        @apply(--layout-vertical);
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        padding: 0 1rem;
+        width: 100%;
+      }
+
+      .form {
+        @apply(--paper-card);
+        padding: 0;
+      }
+
+      .header, #collapse {
+        padding: 16px;
+      }
+
+      .buttons {
+        @apply(--buttons-bar);
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      .count {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-center-justified);
+        background: var(--nuxeo-badge-background);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        margin-left: 1em;
+      }
+
+      .filter {
+        text-transform: uppercase;
+      }
+    </style>
+
+    <nuxeo-page-provider id="provider" auto$="[[_isAuto(auto, visible)]]"
+       provider="[[provider]]"
+       page-size="[[pageSize]]"
+       aggregations="{{aggregations}}"
+       enrichers="[[enrichers]]"
+       params="[[_params]]"
+       quick-filters="{{quickFilters}}"
+       schemas="[[schemas]]"
+       loading="{{loading}}"
+       headers="[[headers]]"
+       fetch-aggregates
+       on-error="_onError">
+    </nuxeo-page-provider>
+
+    <template is="dom-if" if="[[showFilters]]">
+      <div class="form">
+        <div class="header horizontal layout center">
+          <a href="javascript:undefined" class="horizontal layout center" on-tap="toggleExpand">
+            <span><iron-icon icon="[[_expandIcon(_opened)]]" toggle></iron-icon></span>
+            <span class="filter">[[i18n('resultsView.filters.heading')]]</span>
+          </a>
+          <div class$="count [[_hideCounter(_opened, _params.*)]]">
+            <span>[[_getFilterCount(_params.*)]]</span>
+          </div>
+          <div class="horizontal layout flex center end-justified">
+            <paper-button noink on-tap="_clear" class$="[[_hideCounter(_opened, _params.*)]]">
+              [[i18n('command.clear')]]
+            </paper-button>
+          </div>
+        </div>
+        <iron-collapse id="collapse" opened="{{_opened}}">
+          <nuxeo-search-form-layout id="form"
+                                    provider="[[provider]]"
+                                    search-name="[[searchName]]"
+                                    aggregations="[[aggregations]]"
+                                    params="[[_params]]"
+                                    on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
+          <paper-spinner-lite active hidden$="[[!loading]]"></paper-spinner-lite>
+        </iron-collapse>
+        <div class="buttons layout horizontal" hidden$="[[!_opened]]">
+          <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
+            [[i18n('command.search')]]
+          </paper-button>
+          <div class="horizontal layout flex end-justified">
+            <paper-button noink class="clear" on-tap="_clear">
+              [[i18n('command.clear')]]
+            </paper-button>
+          </div>
+        </div>
+      </div>
+    </template>
+    <div class="results">
+      <nuxeo-search-results-layout id="results"
+                                   search-name="[[searchName]]"
+                                   nx-provider="[[_nxProvider]]"></nuxeo-search-results-layout>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-results-view',
+
+      behaviors: [Nuxeo.I18nBehavior],
+
+      properties: {
+        /**
+         * The `nuxeo-page-provider` instance used to perform the search.
+         **/
+        provider: {
+          type: String
+        },
+        /**
+         * The page size passed on to `provider`.
+         **/
+        pageSize: {
+          type: Number,
+          value: 40
+        },
+        /**
+         * The parameters passed on to `provider`.
+         **/
+        params: {
+          type: Object,
+          observer: '_paramsChanged'
+        },
+        /**
+         * The schemas passed on to `provider`.
+         **/
+        schemas: {
+          type: String
+        },
+        /**
+         * List of content enrichers passed on to `provider`.
+         * Already set by default are thumbnail, permissions and highlight.
+         */
+        enrichers: {
+          type: String,
+          value: 'thumbnail, permissions, highlight'
+        },
+        /**
+         * The headers passed on to `provider`.
+         * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
+         */
+        headers: {
+          type: String,
+          value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+        },
+        /**
+         * If `true`, requests from `provider` are in flight.
+         **/
+        loading: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+        /**
+         * The name of the search layout.
+         **/
+        searchName: String,
+        /**
+         * The aggregations returned by `provider`.
+         **/
+        aggregations: {
+          type: Object,
+          observer: '_aggregationsChanged'
+        },
+        /**
+         * If `true`, the current element is visible.
+         **/
+        visible: Boolean,
+        /**
+         * If `true`, automatically execute the search each time a param is changed.
+         */
+        auto: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * If `true`, display the top filtering panel.
+         */
+        showFilters: {
+          type: Boolean,
+          value: false
+        },
+        _params: Object,
+        _paramsCount: Number,
+        _opened: {
+          type: Boolean,
+          value: false
+        },
+        _nxProvider: HTMLElement
+      },
+
+      ready: function() {
+        this._nxProvider = this.$.provider;
+      },
+
+      get form() {
+        var form = this.$$('#form');
+        if (form) {
+          return form.element;
+        }
+      },
+
+      get results() {
+        return this.$.results.element;
+      },
+
+      toggleExpand: function() {
+        this.$$('#collapse').toggle();
+      },
+
+      _isAuto: function() {
+        return this.visible && this.auto;
+      },
+
+      _expandIcon: function(opened) {
+        return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+      },
+
+      _getFilterCount: function() {
+        if (this._params) {
+          // subtract the number of original parameters (this._paramsCount)
+          return Object.keys(this._params).length - this._paramsCount - ('highlight' in this._params ? 1 : 0);
+        } else {
+          return 0;
+        }
+      },
+
+      _hideCounter: function(opened) {
+        var count = this._getFilterCount();
+        return opened || count === 0 ? 'hidden' : '';
+      },
+
+      _paramsChanged: function() {
+        if (this.params) {
+          // if the supplied params are a string, parse them; otherwise clone the object
+          this._params = JSON.parse(typeof this.params === 'string' ? this.params : JSON.stringify(this.params));
+          // cache the number of this.params to avoid having to parse json again if this.params is a string
+          this._paramsCount = Object.keys(this._params).length;
+        } else {
+          this._params = {};
+          this._paramsCount = 0;
+        }
+      },
+
+      _search: function() {
+        this.$.provider.page = 1;
+        return this.$.provider.fetch();
+      },
+
+      _aggregationsChanged: function() {
+        if (this.form) {
+          this.form.aggregations = this.aggregations;
+        }
+      },
+
+      _onError: function(e) {
+        this.fire('notify', e.detail.error);
+      },
+
+      _clear: function() {
+        if (this.form && this.form.clear != undefined && typeof this.form.clear == 'function') {
+          this.form.clear();
+        }
+        this._paramsChanged();
+        if (!this.auto) {
+          this.aggregations = {};
+        }
+      },
+
+      _formChanged: function(e) {
+        this._clear();
+        var form = e.detail.value;
+        // setup data binding
+        form.addEventListener('params-changed', function(e) {
+          // e.detail.path is params.prop_name eg: params.ecm_fulltext
+          if (e.detail.path) {
+            var param = e.detail.path.split('.')[1];
+            this.set('_params.' + param, e.detail.value);
+          }
+        }.bind(this));
+        form.addEventListener('trigger-search', this._search.bind(this));
+      }
+
+    });
+  </script>
+
+</dom-module>
