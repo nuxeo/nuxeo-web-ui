@@ -52,7 +52,9 @@ limitations under the License.
         <nuxeo-saved-search-actions id="actions" class="actions" search-form="[[searchForm]]"></nuxeo-saved-search-actions>
       </div>
       <div class="content">
-        <nuxeo-layout id="results" href="[[_resultsHref]]" model="[[_resultsModel]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]"></nuxeo-layout>
+        <nuxeo-search-results-layout id="results"
+                                     search-name="[[_searchName]]"
+                                     nx-provider="[[_nxProvider]]"></nuxeo-search-results-layout>
       </div>
     </nuxeo-page>
 
@@ -68,7 +70,9 @@ limitations under the License.
         searchForm: {
           type: Object,
           observer: '_searchFormChanged'
-        }
+        },
+        _searchName: String,
+        _nxProvider: HTMLElement
       },
 
       listeners: {
@@ -80,12 +84,8 @@ limitations under the License.
       },
 
       _searchFormChanged: function(searchForm) {
-        this.nxProvider = searchForm.nxProvider;
-        this.searchName = searchForm.searchName;
-
-        var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-        this._resultsHref = this.resolveUrl(['search', this.searchName.toLowerCase(), name + '.html'].join('/'));
-        this._resultsModel = { nxProvider: this.nxProvider, name: this.searchName };
+        this._nxProvider = searchForm.nxProvider;
+        this._searchName = searchForm.searchName;
       },
 
       _navigateFromSearch: function(e) {

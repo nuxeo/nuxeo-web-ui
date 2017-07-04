@@ -32,6 +32,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
+<link rel="import" href="nuxeo-search-form-layout.html">
 
 <!--
  `nuxeo-search-form`
@@ -263,9 +264,12 @@ limitations under the License.
 
       <div class="content">
         <div id="filters" class="filters loadable" hidden$="{{queue}}">
-          <nuxeo-layout id="layout" href="[[_formHref(provider, searchName)]]" model="[[_formModel(provider, aggregations, params)]]"
-                        error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
-                        on-element-changed="_formChanged"></nuxeo-layout>
+          <nuxeo-search-form-layout id="layout"
+                                    provider="[[provider]]"
+                                    search-name="[[searchName]]"
+                                    aggregations="[[aggregations]]"
+                                    params="[[params]]"
+                                    on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
@@ -481,8 +485,7 @@ limitations under the License.
          * The aggregations returned by `provider`.
          **/
         aggregations: {
-          type: Object,
-          observer: '_aggregationsChanged'
+          type: Object
         },
         /**
          * If `true`, the current element is visible.
@@ -588,9 +591,6 @@ limitations under the License.
       _paramsChanged: function() {
         this.$.provider.page = 1;
         this.dirty = true;
-        if (this.form) {
-          this.form.params = this.params;
-        }
       },
 
       _selectedSearchIdxChanged: function() {
@@ -749,21 +749,6 @@ limitations under the License.
 
       _computeSavedSearchesParams: function() {
         return {pageProvider: this.provider};
-      },
-
-      _aggregationsChanged: function() {
-        if (this.form) {
-          this.form.aggregations = this.aggregations;
-        }
-      },
-
-      _formHref: function (provider, searchName) {
-        var name = (searchName || provider).toLowerCase();
-        return this.resolveUrl(name + '/' + ['nuxeo', name, 'search-form'].join('-') + '.html');
-      },
-
-      _formModel: function () {
-        return { provider: this.provider, params: this.params, aggregations: this.aggregations };
       },
 
       _formChanged: function() {
