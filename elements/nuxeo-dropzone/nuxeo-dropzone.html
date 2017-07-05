@@ -271,6 +271,7 @@ limitations under the License.
             this.fire('notify', {message: this.uploadedMessage});
             this.progress = false;
             this._hasFiles = false;
+            this.fire('document-updated');
           }.bind(this));
         } else {
           this.fire('notify', {message: this.uploadedMessage});
@@ -279,13 +280,10 @@ limitations under the License.
       },
 
       _handleBlobListUploaded: function() {
-        return this.$.doc.get().then(function(response) {
-          this.document.properties[this.xpath] = response.properties[this.xpath];
-          this.notifyPath('document.properties.' + this.xpath, this.document.properties[this.xpath]);
-          this.fire('notify', {message: this.uploadedMessage});
-          this.progress = false;
-          this._hasFiles = false;
-        }.bind(this));
+        this.fire('notify', {message: this.uploadedMessage});
+        this.progress = false;
+        this._hasFiles = false;
+        this.fire('document-updated');
       },
 
       _deleteFile: function() {
