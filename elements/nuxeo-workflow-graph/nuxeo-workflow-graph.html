@@ -34,7 +34,7 @@ limitations under the License.
         display: block;
       }
 
-      #graph {
+      #container {
         position: relative;
         width: 880px;
         height: 720px;
@@ -121,7 +121,6 @@ limitations under the License.
         transform: none !important;
       }
 
-
       .jsplumb-endpoint {
         z-index: 110;
       }
@@ -131,12 +130,12 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-resource id="grahResource"
+    <nuxeo-resource id="graphResource"
                     path="/workflow/[[workflowId]]/graph"
                     response="{{graph}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
-    <div id="graph"></div>
+    <div id="container"></div>
   </template>
 
   <script>
@@ -189,6 +188,10 @@ limitations under the License.
             // without specifying this the targetEndpoint doesn't accept multiple connections
             maxConnections: -1
           }
+        },
+
+        _jsPlumbInstance: {
+          type: Object
         }
       },
 
@@ -202,12 +205,12 @@ limitations under the License.
       },
 
       ready: function() {
-        this.scopeSubtree(this.$.graph, true);
+        this.scopeSubtree(this.$.container, true);
         this._initialize();
       },
 
       _initialize: function() {
-        jsPlumb.importDefaults({
+        this._jsPlumbInstance = jsPlumb.getInstance({
           DragOptions: {
             cursor: 'pointer',
             zIndex: 2000
@@ -230,7 +233,7 @@ limitations under the License.
             width: 14
           }]]
         });
-        jsPlumb.setContainer(this.$.graph);
+        this._jsPlumbInstance.setContainer(this.$.container);
       },
 
       _transitionOverlay: function(transition) {
@@ -262,7 +265,7 @@ limitations under the License.
 
       _fetchGraph: function() {
         if (this.workflowId && this.workflowId.length > 0) {
-          this.$.grahResource.execute();
+          this.$.graphResource.execute();
         }
       },
 
@@ -272,10 +275,10 @@ limitations under the License.
         }
 
         // clear when re-rendering
-        while (this.$.graph.firstChild) {
-          this.$.graph.removeChild(this.$.graph.firstChild);
+        while (this.$.container.firstChild) {
+          this.$.container.removeChild(this.$.container.firstChild);
         }
-        jsPlumb.reset();
+        this._jsPlumbInstance.reset();
 
         // XXX: build these in the template
         data.nodes.forEach(function(node) {
@@ -288,7 +291,7 @@ limitations under the License.
           if (node.state === 'suspended') {
             element.classList.add('workflow_node_suspended');
           }
-          this.$.graph.appendChild(element);
+          this.$.container.appendChild(element);
         }.bind(this));
 
         // initialize connection source points
@@ -315,11 +318,11 @@ limitations under the License.
           // determine anchors for transition node
           var anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
           // add endpoints
-          var endPointSource = this._addSourceEndpoint(Polymer.dom(this.$.graph).querySelector('#' + source),
+          var endPointSource = this._addSourceEndpoint(Polymer.dom(this.$.container).querySelector('#' + source),
                                                        anchors[anchorIndex]),
-              endPointTarget = this._addTargetEndpoint(Polymer.dom(this.$.graph).querySelector('#' + target));
+              endPointTarget = this._addTargetEndpoint(Polymer.dom(this.$.container).querySelector('#' + target));
 
-          var connection = jsPlumb.connect({
+          var connection = this._jsPlumbInstance.connect({
             connector: 'Flowchart',
             source: endPointSource,
             target: endPointTarget,
@@ -350,16 +353,16 @@ limitations under the License.
       },
 
       _addTargetEndpoint: function(target) {
-        return jsPlumb.addEndpoint(target, {anchor: 'TopCenter'}, this.targetEndpointOptions);
+        return this._jsPlumbInstance.addEndpoint(target, {anchor: 'TopCenter'}, this.targetEndpointOptions);
       },
 
       _addSourceEndpoint: function(source, pos) {
         var anchor = [pos, 1, 0, 1];
-        return jsPlumb.addEndpoint(source, {anchor: anchor}, this.sourceEndpointOptions);
+        return this._jsPlumbInstance.addEndpoint(source, {anchor: anchor}, this.sourceEndpointOptions);
       },
 
       _resize: function() {
-        jsPlumb.repaintEverything();
+        this._jsPlumbInstance.repaintEverything();
       }
 
     });
