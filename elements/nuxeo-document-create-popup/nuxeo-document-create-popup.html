@@ -160,7 +160,7 @@ limitations under the License.
         this._showTabs = false;
         this._fetchParent().then(function() {
           this.$.simpleCreation.init(type);
-          this.$.bulkCreation.init();
+          this.$$('#bulkCreation').init();
           this.$.createDocDialog.toggle();
         }.bind(this));
       },
@@ -168,14 +168,14 @@ limitations under the License.
       toggleDialogImport: function(files) {
         this.selectedTab = 'import';
         this._fetchParent().then(function() {
-          this.$.bulkCreation.init(files);
+          this.$$('#bulkCreation').init(files);
           this.$.createDocDialog.toggle();
         }.bind(this));
       },
 
       toggleDialog: function() {
         this._fetchParent().then(function() {
-          this.$.bulkCreation.init();
+          this.$$('#bulkCreation').init();
           this.$.createDocDialog.toggle();
         }.bind(this));
       },
