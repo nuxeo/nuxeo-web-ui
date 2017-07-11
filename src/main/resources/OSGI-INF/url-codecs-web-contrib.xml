@@ -2,7 +2,7 @@
 <component name="org.nuxeo.url.codec.web.contribs">
 
   <extension target="org.nuxeo.ecm.platform.url.service.DocumentViewCodecService" point="codecs">
-    <documentViewCodec name="notificationDocId" enabled="true" prefix="doc"
+    <documentViewCodec name="notificationDocId" enabled="true" prefix="doc" priority="10"
       class="org.nuxeo.web.ui.url.codec.WebNotificationDocumentIdCodec" />
   </extension>
 
