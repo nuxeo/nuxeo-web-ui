@@ -87,7 +87,8 @@ limitations under the License.
 <body unresolved class="fullbleed layout vertical">
   <nuxeo-connection url="<%= request.getContextPath() %>"
                     repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
-  <nuxeo-app base-url="<%= request.getRequestURI() %>"></nuxeo-app>
+  <nuxeo-app base-url="<%= request.getRequestURI() %>"
+             product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>"></nuxeo-app>
 </body>
 
 </html>
