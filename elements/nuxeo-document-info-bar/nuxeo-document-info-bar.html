@@ -76,7 +76,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
 
     <nuxeo-resource id="worfklow" path="/workflow"></nuxeo-resource>
     <nuxeo-resource id="task" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
@@ -87,7 +87,7 @@ limitations under the License.
       <div class="bar workflow">
         <div class="layout horizontal center flex">
           <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
-          <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator)]]">
+          <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator, currentUser)]]">
             <nuxeo-user-tag user="[[workflow.initiator]]"></nuxeo-user-tag>
           </template>
           <span>[[_labelForInitiatedWf(workflow)]]</span>
@@ -163,7 +163,7 @@ limitations under the License.
     },
 
     _workflows: function(doc) {
-      return doc && doc.contextParameters && doc.contextParameters.pendingTasks
+      return doc && doc.contextParameters && doc.contextParameters.runningWorkflows
         ? doc.contextParameters.runningWorkflows : [];
     },
 
@@ -172,12 +172,10 @@ limitations under the License.
         id: e.model.task.id
       };
       this.fire('workflowTaskProcess', details);
-
-
     },
 
-    _isCurrentUser: function(userId) {
-      return this.$.nxcon.user.id === userId;
+    _isCurrentUser: function(userId, currentUser) {
+      return currentUser && currentUser.id === userId;
     },
 
     _labelForInitiatedWf: function(workflow) {
