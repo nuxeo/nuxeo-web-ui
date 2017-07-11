@@ -347,6 +347,12 @@ limitations under the License.
       is: 'nuxeo-app',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
+
+        productName: {
+          type: String,
+          value: 'Nuxeo'
+        },
+
         baseUrl: {
           type: String,
           value: '/',
@@ -548,6 +554,59 @@ limitations under the License.
 
       show: function(page) {
         this.page = page;
+        this._updateTitle();
+      },
+
+      _updateTitle: function() {
+        var title = [];
+        switch (this.page) {
+          case 'browse':
+            if (this.currentDocument && this.currentDocument.title) {
+              title.push(this.currentDocument.title);
+              if (this.currentDocument.type === 'Collections') {
+                title.push(this.i18n('app.title.collections'));
+              } else if (this.hasFacet(this.currentDocument, 'Collection')) {
+                if (this.currentDocument.type === 'Favorites') {
+                  title.push(this.i18n('app.title.favorites'));
+                } else {
+                  title.push(this.i18n('app.title.collection'));
+                }
+              }
+            }
+            break;
+
+          case 'search':
+            if (this.searchForm) {
+              if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
+                title.push(this.searchForm.selectedSearch.title);
+              } else if (this.searchForm.searchName) {
+                title.push(this.i18n('app.title.search.' + this.searchForm.searchName));
+              }
+            }
+            title.push(this.i18n('app.title.search'));
+            break;
+
+          case 'tasks':
+            if (this.currentTask) {
+              title.push(this.i18n(this.currentTask.workflowModelName));
+              title.push(this.i18n(this.currentTask.name));
+            } else {
+              title.push(this.i18n('app.title.' + this.page));
+            }
+            break;
+
+          case 'admin':
+            if (this.selectedAdminTab) {
+              title.push(this.i18n('app.title.admin.' + this.selectedAdminTab));
+            }
+            title.push(this.i18n('app.title.' + this.page));
+            break;
+
+          default:
+            title.push(this.i18n('app.title.' + this.page));
+        }
+        title.push(this.productName);
+        document.title = title.join(' - ');
       },
 
       _baseUrlChanged: function() {
@@ -618,7 +677,6 @@ limitations under the License.
       },
 
       _showSearchResults: function(e) {
-        //page('/search/' + e.target.searchName);
         this.navigateTo('search', e.target.searchName);
       },
 
