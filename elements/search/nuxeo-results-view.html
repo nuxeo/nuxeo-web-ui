@@ -110,11 +110,11 @@ limitations under the License.
             <span><iron-icon icon="[[_expandIcon(_opened)]]" toggle></iron-icon></span>
             <span class="filter">[[i18n('resultsView.filters.heading')]]</span>
           </a>
-          <div class$="count [[_hideCounter(_opened, _params.*)]]">
+          <div class$="count [[_hideCounter]]">
             <span>[[_getFilterCount(_params.*)]]</span>
           </div>
           <div class="horizontal layout flex center end-justified">
-            <paper-button noink on-tap="_clear" class$="[[_hideCounter(_opened, _params.*)]]">
+            <paper-button noink on-tap="_clear" class$="[[_hideCounter]]">
               [[i18n('command.clear')]]
             </paper-button>
           </div>
@@ -173,7 +173,8 @@ limitations under the License.
          **/
         params: {
           type: Object,
-          observer: '_paramsChanged'
+          observer: '_paramsChanged',
+          value: {}
         },
         /**
          * The schemas passed on to `provider`.
@@ -219,7 +220,10 @@ limitations under the License.
         /**
          * If `true`, the current element is visible.
          **/
-        visible: Boolean,
+        visible: {
+          type: Boolean,
+          observer: '_visibilityChanged'
+        },
         /**
          * If `true`, automatically execute the search each time a param is changed.
          */
@@ -240,7 +244,12 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        _nxProvider: HTMLElement
+        _nxProvider: HTMLElement,
+        _hideCounter: {
+          type: String,
+          computed: '_computeHideCounter(_opened, _params.*)',
+          value: 'hidden'
+        }
       },
 
       ready: function() {
@@ -279,7 +288,7 @@ limitations under the License.
         }
       },
 
-      _hideCounter: function(opened) {
+      _computeHideCounter: function(opened) {
         var count = this._getFilterCount();
         return opened || count === 0 ? 'hidden' : '';
       },
@@ -319,6 +328,9 @@ limitations under the License.
         if (!this.auto) {
           this.aggregations = {};
         }
+        if (!this.auto && this.visible) {
+          this._nxProvider.fetch();
+        }
       },
 
       _formChanged: function(e) {
@@ -333,6 +345,12 @@ limitations under the License.
           }
         }.bind(this));
         form.addEventListener('trigger-search', this._search.bind(this));
+      },
+
+      _visibilityChanged: function() {
+        if (!this.auto && this.visible) {
+          this._nxProvider.fetch();
+        }
       }
 
     });
