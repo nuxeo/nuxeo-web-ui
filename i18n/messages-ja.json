@@ -625,6 +625,7 @@
   "repositoryAnalytics.topDownloads.file":"ファイル",
   "repositoryAnalytics.topDownloads.heading":"トップダウンロード",
   "repositoryAnalytics.topNCreators.heading":"トップ{0}クリエーター",
+  "resultsView.filters.heading":"Filters",
   "searchAnalytics.callsPerHour.heading":"時間ごとの呼出",
   "searchAnalytics.callsPerPageProvider.heading":"ページプロバイダごとの呼出",
   "searchAnalytics.filtersUsed.heading":"使用されているフィルタ",

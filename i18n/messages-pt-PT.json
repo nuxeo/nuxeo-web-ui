@@ -625,6 +625,7 @@
   "repositoryAnalytics.topDownloads.file":"Arquivo",
   "repositoryAnalytics.topDownloads.heading":"Top Downloads",
   "repositoryAnalytics.topNCreators.heading":"Maiores {0} Criadores",
+  "resultsView.filters.heading":"Filters",
   "searchAnalytics.callsPerHour.heading":"Chamadas por hora",
   "searchAnalytics.callsPerPageProvider.heading":"Chamadas por PageProvider",
   "searchAnalytics.filtersUsed.heading":"Filtros usados",
