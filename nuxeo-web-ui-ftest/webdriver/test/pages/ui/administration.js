@@ -2,6 +2,7 @@
 
 import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
+import CloudServices from './admin/cloudServices';
 
 export default class Administration extends BasePage {
 
@@ -25,6 +26,21 @@ export default class Administration extends BasePage {
       driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return this.vocabularyManagement;
+  }
+
+  get audit() {
+    return this.el.element('nuxeo-audit');
+  }
+
+  get cloudServices() {
+    return new CloudServices('nuxeo-cloud-services');
+  }
+
+  goToCloudServices() {
+    if (!browser.getUrl().endsWith('cloud-services')) {
+      driver.url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
+    }
+    return this.cloudServices;
   }
 
 }

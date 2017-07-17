@@ -16,6 +16,14 @@ Feature: Admin center
     When I click "Users & Groups" in the administration menu
     Then I can see the users and groups page
 
+    #Audit
+    When I click "Audit" in the administration menu
+    Then I can see the audit page
+
+    #Cloud Services
+    When I click "Cloud Services" in the administration menu
+    Then I can see the cloud services page
+
   Scenario: Admin center as member user
     Given user "John" exists in group "members"
     And I login as "John"
