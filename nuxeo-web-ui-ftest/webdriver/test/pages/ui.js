@@ -43,16 +43,21 @@ export default class UI extends BasePage {
     return new Search('nuxeo-search-form[name="defaultSearch"]');
   }
 
-  get searchResults() {
-    return new Search('nuxeo-data-table.nuxeo-default-search-results');
-  }
-
   get quickSearch() {
     return new Search('#suggester #suggester');
   }
 
   get searchButton() {
     return this.el.element('#searchButton');
+  }
+
+  get results() {
+    return new Search('#results');
+  }
+
+  get searchResults() {
+    const displayMode = this.results.displayMode;
+    return new Search(`nuxeo-data-${displayMode}.results`);
   }
 
   get createDialog() {

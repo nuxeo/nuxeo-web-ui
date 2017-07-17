@@ -75,16 +75,22 @@ module.exports = function () {
     this.ui.searchForm.search(searchType, searchTerm);
   });
   this.Then(/^I can see (\d+) search results$/, (numberOfResults) => {
+    const displayMode = this.ui.results.displayMode;
     if (numberOfResults === '0') {
       this.ui.searchResults.noResults.waitForVisible().should.be.true;
     } else {
-      this.ui.searchResults.results.waitForVisible();
-      this.ui.searchResults.resultsCount().toString().should.equal(numberOfResults);
+      this.ui.searchResults;
+      this.ui.searchResults.getResults(displayMode).waitForVisible();
+      this.ui.searchResults.resultsCount(displayMode).toString().should.equal(numberOfResults);
     }
   });
   this.Then(/^I edit the results columns to show (.+)$/, (heading) => {
-    this.ui.searchResults.toggleColumnSettings.waitForVisible();
-    this.ui.searchResults.toggleColumnSettings.click();
+    this.ui.results.resultActions.waitForVisible();
+    if (this.ui.results.toggleTableView.isVisible()) {
+      this.ui.results.toggleTableView.click();
+    }
+    this.ui.results.toggleColumnSettings.waitForVisible();
+    this.ui.results.toggleColumnSettings.click();
     this.ui.searchResults.getColumnCheckbox(heading).waitForVisible();
     this.ui.searchResults.checkColumnCheckbox(heading);
     this.ui.searchResults.columnsCloseButton.click();
@@ -115,9 +121,9 @@ module.exports = function () {
     this.ui.browser.permissionsView.createPermissionButton.click();
   });
   this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
-    this.ui.searchResults.menuButton.waitForVisible();
-    this.ui.searchResults.menuButton.click();
-    this.ui.searchResults.getSavedSearch(searchName).isVisible().should.be.true;
+    this.ui.searchForm.menuButton.waitForVisible();
+    this.ui.searchForm.menuButton.click();
+    this.ui.searchForm.getSavedSearch(searchName).isVisible().should.be.true;
   });
   this.When(/^I click the QuickSearch button$/, () => {
     this.ui.searchButton.waitForVisible();
