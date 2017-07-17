@@ -4,16 +4,26 @@ import BasePage from '../base';
 
 export default class Search extends BasePage {
 
-  get results() {
-    return this.el.elements('#list #items div.item');
-  }
-
   get quickSearchResults() {
     return this.el.elements('#results #selector a');
   }
 
   get noResults() {
     return this.el.element('div.emptyResult');
+  }
+
+  get resultActions() {
+    return this.el.elements('div.resultActions paper-icon-button.displayMode');
+  }
+
+  get displayMode() {
+    this.resultActions.waitForVisible();
+    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('hidden'));
+    return displayMode[0].getAttribute('title').replace('Switch to ', '').replace(/ view| View/, '').toLowerCase();
+  }
+
+  get toggleTableView() {
+    return this.el.element('///*[contains(@title, "Table View")]');
   }
 
   get toggleColumnSettings() {
@@ -48,6 +58,17 @@ export default class Search extends BasePage {
     return driver.element(
       '//paper-menu-button[contains (@class, "nuxeo-saved-search-actions")]//paper-item[contains (., "Share")]'
     );
+  }
+
+  getResults(displayMode) {
+    switch (displayMode) {
+      case 'grid':
+        return this.el.elements('#list #items nuxeo-document-grid-thumbnail');
+      case 'list':
+        return this.el.elements('#list #items nuxeo-document-list-item');
+      default:
+        return this.el.elements('#list #items div.item');
+    }
   }
 
   getColumnCheckbox(heading) {
@@ -110,8 +131,8 @@ export default class Search extends BasePage {
     return this.el.element(`#paperInput #input`).setValue(searchTerm);
   }
 
-  resultsCount() {
-    const rows = this.el.elements('#list #items div.item');
+  resultsCount(displayMode) {
+    const rows = this.getResults(displayMode);
     const res = rows.value.filter((result) => {
       if (result.getAttribute('hidden') === null) {
         return result;
