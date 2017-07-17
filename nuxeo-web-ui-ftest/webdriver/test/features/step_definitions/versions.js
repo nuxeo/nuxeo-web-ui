@@ -65,7 +65,7 @@ module.exports = function () {
     page.waitForVisible();
     page.versions.waitForVisible();
     // wait for invisible
-    page.versions.createVersionButton.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
+    page.versions.createVersionButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
     page.versions.toggle.waitForVisible();
     page.versions.toggle.getText().should.equals(label);
   });

@@ -4,7 +4,7 @@ module.exports = function () {
   this.Then('I can see the administration menu', () => this.ui.drawer.administration.waitForVisible().should.be.true);
 
   this.Then('I cannot see the administration button', () => this.ui.adminButton
-      .waitForVisible(driver._original.options.waitforTimeout, true).should.be.true);
+      .waitForVisible(browser.options.waitForTimeout, true).should.be.true);
 
   // XXX: this.ui.drawer.administration.click()
   this.When('I click "$text" in the administration menu', (text) => driver.click(`a=${text}`));
