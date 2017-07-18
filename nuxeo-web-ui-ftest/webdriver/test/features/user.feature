@@ -9,7 +9,7 @@ Feature: User
     And I click "Users & Groups" in the administration menu
     And I can see the users and groups page
 
-  Scenario: Create, Edit, Search and Delete Users
+  Scenario: Create Users
     When I click the new user/group button
     And I select user from the dropdown menu
     Then I can see the new user form
@@ -22,9 +22,18 @@ Feature: User
       | email                | test@test.com |
       | password             | test          |
       | passwordConfirmation | test          |
+
+  Scenario: Search for Users
+    Given user "jsmith" exists
     Then I can search for the user "jsmith"
-    And I can edit the user "jsmith" with the following properties:
+
+  Scenario: Edit Users
+    Given user "jsmith" exists
+    Then I can edit the user "jsmith" with the following properties:
       | name                 | value          |
       | firstname            | Jane           |
       | email                | test2@test.com |
-    And I can delete the user
+
+  Scenario: Delete Users
+    Given user "jsmith" exists
+    Then I can delete the user "jsmith"
