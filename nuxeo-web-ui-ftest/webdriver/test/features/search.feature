@@ -32,29 +32,18 @@ Feature: Search
     And I click the "defaultSearch" button
 
   Scenario Outline: Searches
-    When I perform a fulltext search for Lorem Ipsum
-    Then I can see 3 search results
-
-    When I perform a authors search for Bob
-    Then I can see 5 search results
-
-    When I perform a collections search for Nuxeo_Collection
-    Then I can see 4 search results
-
-    When I perform a tags search for urgent
-    Then I can see 6 search results
-
-    When I perform a nature search for Booklet
-    Then I can see 8 search results
-
-    When I perform a subject search for Society/Ecology
-    Then I can see 4 search results
-
-    When I perform a coverage search for Europe/Portugal
-    Then I can see 5 search results
-
-    When I perform a size search for Between 100 KB and 1 MB
-    Then I can see 1 search results
+    When I perform a <searchType> search for <searchTerm>
+    Then I can see <resultsCount> search results
+    Examples:
+    | searchType  | searchTerm              | resultsCount |
+    | fulltext    | Lorem Ipsum             | 3            |
+    | authors     | Bob                     | 5            |
+    | collections | Nuxeo_Collection        | 4            |
+    | tags        | urgent                  | 6            |
+    | nature      | Booklet                 | 8            |
+    | subject     | Society/Ecology         | 4            |
+    | coverage    | Europe/Portugal         | 5            |
+    | size        | Between 100 KB and 1 MB | 1            |
 
   Scenario: Saved Search
     When I perform a coverage search for Europe/France
