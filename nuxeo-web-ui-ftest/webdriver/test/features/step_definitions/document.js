@@ -130,7 +130,6 @@ module.exports = function () {
 
   this.Then('I add the document to the "$name" collection', (name) => {
     this.ui.browser.addToCollection(name);
-    liveCollections.push(name);
   });
 
   this.Then('I can see the document belongs to the "$name" collection', (name) =>
