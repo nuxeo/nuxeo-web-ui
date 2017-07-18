@@ -15,21 +15,31 @@ module.exports = function () {
     this.ui.group.createGroupButton.click();
   });
 
-  this.Then(/^I can search for the group "([^"]*)"$/, (groupname) => {
-    this.ui.group.searchFor(groupname);
-    this.ui.group.searchResult(groupname).waitForVisible().should.be.true;
+  this.Then(/^I can search for the following groups$/, (table) => {
+    table.rows().forEach((row) => {
+      this.ui.group.searchFor(row[0]);
+      this.ui.group.searchResult(row[0]).waitForVisible().should.be.true;
+    });
   });
 
-  this.Then(/^I can edit the group "([^"]*)" label as "([^"]*)"$/, (groupname, newLabel) => {
-    this.ui.group.searchResult(groupname).waitForVisible();
-    this.ui.group.searchResult(groupname).click();
-    this.ui.group.editGroupButton.click();
-    fixtures.layouts.setValue(this.ui.group.editGroupLabel, newLabel);
-    this.ui.group.editGroupDialogButton.click();
+  this.Then(/^I can edit the following groups$/, (table) => {
+    table.rows().forEach((row) => {
+      this.ui.group.searchFor(row[0]);
+      this.ui.group.searchResult(row[0]).waitForVisible();
+      this.ui.group.searchResult(row[0]).click();
+      this.ui.group.editGroupButton.click();
+      fixtures.layouts.setValue(this.ui.group.editGroupLabel, row[1]);
+      this.ui.group.editGroupDialogButton.click();
+    });
   });
 
-  this.Then(/^I can delete the group$/, () => {
-    this.ui.group.deleteGroupButton.click();
-    this.ui.group.confirmDeleteGroupButton.click();
+  this.Then(/^I can delete the following groups$/, (table) => {
+    table.rows().forEach((row) => {
+      this.ui.group.searchFor(row[0]);
+      this.ui.group.searchResult(row[0]).waitForVisible();
+      this.ui.group.searchResult(row[0]).click();
+      this.ui.group.deleteGroupButton.click();
+      this.ui.group.confirmDeleteGroupButton.click();
+    });
   });
 };

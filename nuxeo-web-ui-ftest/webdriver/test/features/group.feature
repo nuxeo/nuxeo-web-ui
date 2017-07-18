@@ -9,7 +9,7 @@ Feature: Group
     And I click "Users & Groups" in the administration menu
     And I can see the users and groups page
 
-  Scenario: Create, Edit, Search and Delete Users
+  Scenario: Create Groups
     When I click the new user/group button
     And I select group from the dropdown menu
     Then I can see the new group form
@@ -17,6 +17,27 @@ Feature: Group
       | name       | value    |
       | groupName  | managers |
       | groupLabel | Managers |
-    Then I can search for the group "managers"
-    And I can edit the group "managers" label as "Managers Group"
-    And I can delete the group
+
+  Scenario: Search Groups
+    Given I have the following groups
+      | name      | label    |
+      | managers  | Managers |
+    Then I can search for the following groups
+      | name      | label    |
+      | managers  | Managers |
+
+  Scenario: Edit Groups
+    Given I have the following groups
+      | name      | label    |
+      | managers  | Managers |
+    Then I can edit the following groups
+      | name      | newLabel       |
+      | managers  | Managers Group |
+
+  Scenario: Delete Groups
+    Given I have the following groups
+      | name      | label    |
+      | managers  | Managers |
+    Then I can delete the following groups
+      | name      | label    |
+      | managers  | Managers |
