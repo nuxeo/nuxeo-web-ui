@@ -31,76 +31,30 @@ Feature: Search
     And I login as "Administrator"
     And I click the "defaultSearch" button
 
-  Scenario Outline: Full-text Search
-    When I perform a fulltext search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm  | numberOfResults |
-      | Lorem Ipsum | 3               |
-      | Test        | 8               |
+  Scenario Outline: Searches
+    When I perform a fulltext search for Lorem Ipsum
+    Then I can see 3 search results
 
-  Scenario Outline: Author Search
-    When I perform a authors search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm  | numberOfResults |
-      | Bob         | 5               |
-      | Susan       | 7               |
-      | John        | 3               |
+    When I perform a authors search for Bob
+    Then I can see 5 search results
 
-  Scenario Outline: Collections Search
-    When I perform a collections search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm       | numberOfResults |
-      | My_Collection    | 3               |
-      | Nuxeo_Collection | 4               |
-      | Test_Collection  | 2               |
+    When I perform a collections search for Nuxeo_Collection
+    Then I can see 4 search results
 
-  Scenario Outline: Tags Search
-    When I perform a tags search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm | numberOfResults |
-      | tag        | 1               |
-      | hello      | 2               |
-      | urgent     | 6               |
+    When I perform a tags search for urgent
+    Then I can see 6 search results
 
-  Scenario Outline: Nature Search
-    When I perform a nature search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm | numberOfResults |
-      | Booklet    | 8               |
-      | Invoice    | 3               |
-      | Memo       | 4               |
+    When I perform a nature search for Booklet
+    Then I can see 8 search results
 
-  Scenario Outline: Subjects Search
-    When I perform a subject search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm         | numberOfResults |
-      | Society/Ecology    | 4               |
-      | Art/Culture        | 3               |
-      | Science/Astronomy  | 8               |
+    When I perform a subject search for Society/Ecology
+    Then I can see 4 search results
 
-  Scenario Outline: Coverage Search
-    When I perform a coverage search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm           | numberOfResults |
-      | North-america/Canada | 3               |
-      | Europe/Portugal      | 5               |
-      | Europe/France        | 7               |
+    When I perform a coverage search for Europe/Portugal
+    Then I can see 5 search results
 
-  Scenario Outline: Size Search
-    When I perform a size search for <searchTerm>
-    Then I can see <numberOfResults> search results
-    Examples:
-      | searchTerm              | numberOfResults |
-      | Less than 100 KB        | 2               |
-      | Between 100 KB and 1 MB | 1               |
-      | Between 1 MB and 10 MB  | 0               |
+    When I perform a size search for Between 100 KB and 1 MB
+    Then I can see 1 search results
 
   Scenario: Saved Search
     When I perform a coverage search for Europe/France
