@@ -26,8 +26,7 @@ module.exports = function () {
     this.ui.browser.permissionsView.permission(permission).waitForVisible().should.be.true;
   });
 
-  this.When(/^I edit the (\w+) permission for "([^"]*)" to start (\w+)$/, (permission, name, date) => {
-    driver.url(`#!/browse${this.doc.path}`);
+  this.When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$/, (permission, name, date) => {
     this.ui.browser.permissionsViewButton.click();
     this.ui.browser.permissionsView.permissionUser(name).waitForVisible();
     this.ui.browser.permissionsView.editPermissionButton.waitForVisible();
