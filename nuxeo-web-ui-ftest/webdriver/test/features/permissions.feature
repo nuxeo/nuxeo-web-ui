@@ -21,7 +21,8 @@ Feature: Permissions
 
   Scenario: Edit permission
     Given "Susan" has ReadWrite permission on the document
-    When I edit the ReadWrite permission for "Susan" to start tomorrow
+    When I browse to the document
+    And I edit the ReadWrite permission on the document for "Susan" to start tomorrow
     And I logout
     And I login as "Susan"
     Then I can't view the document
