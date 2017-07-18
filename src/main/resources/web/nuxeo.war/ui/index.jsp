@@ -22,9 +22,11 @@ limitations under the License.
 <%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
+<%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
 
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
+<% String ua = request.getHeader("user-agent"); %>
 
 <!DOCTYPE html>
 <html lang="">
@@ -61,7 +63,12 @@ limitations under the License.
 
   <link rel="stylesheet" href="vendor/select2.css">
 
-  <script src="webcomponentsjs/webcomponents.min.js"></script>
+  <%-- Load full polyfill in IE for compatibility --%>
+  <% if (UserAgentMatcher.isMSIE10OrMore(ua) || UserAgentMatcher.isMSEdge(ua)) { %>
+  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+  <% } else { %>
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <% } %>
 
   <script>
     window.Polymer = {
