@@ -1,33 +1,33 @@
 Feature: Search
 
   Background:
-  Given I have the following groups
-    | name       | label      |
-    | managers   | Managers   |
-    | accounting | Accounting |
-    | marketing  | Marketing  |
-  And I have the following users
-    | username | firstname | lastname | group      |
-    | JSmith   | John      | Smith    | managers   |
-    | SJones   | Susan     | Jones    | accounting |
-    | BJones   | Bob       | Jones    | marketing  |
-  And I have the following documents
-    | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
-    | Workspace  | Test_Workspace   | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
-    | Workspace  | My_Workspace     | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
-    | Workspace  | Nuxeo_Workspace  | memo    | sciences/astronomy      | europe/France        | JSmith  | /default-domain                 |                  |        |            |
-    | Collection | Test_Collection  | booklet | sciences/astronomy      | north-america/Canada | JSmith  | /default-domain                 |                  |        |            |
-    | Collection | My_Collection    | invoice | sciences/astronomy      | north-america/Canada | SJones  | /default-domain                 |                  |        |            |
-    | Collection | Nuxeo_Collection | booklet | sciences/astronomy      | north-america/Canada | BJones  | /default-domain                 |                  |        |            |
-    | Folder     | Test_Folder      | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Nuxeo_Workspace | My_Collection    | tag    |            |
-    | Folder     | My_Folder        | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain/Test_Workspace  | My_Collection    | hello  |            |
-    | Folder     | Nuxeo_Folder     | memo    | society/ecology         | europe/Portugal      | SJones  | /default-domain/My_Workspace    | Test_Collection  | hello  |            |
-    | Note       | Test_Note        | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/Nuxeo_Workspace | Nuxeo_Collection | urgent |            |
-    | Note       | My_Note          | memo    | society/ecology         | europe/France        | BJones  | /default-domain/Test_Workspace  | Nuxeo_Collection | urgent |            |
-    | Note       | Nuxeo_Note       | booklet | society/ecology         | europe/France        | SJones  | /default-domain/Test_Workspace  | Nuxeo_Collection | urgent |            |
-    | File       | Test_File        | booklet | art/culture             | europe/France        | SJones  | /default-domain/Nuxeo_Workspace | My_Collection    | urgent | sample.png |
-    | File       | My_File          | memo    | art/culture             | europe/France        | SJones  | /default-domain/My_Workspace    | Nuxeo_Collection | urgent | sample.png |
-    | File       | Nuxeo_File       | invoice | art/culture             | europe/France        | BJones  | /default-domain/My_Workspace    | Test_Collection  | urgent | sample.mp4 |
+    Given I have the following groups
+      | name       | label      |
+      | managers   | Managers   |
+      | accounting | Accounting |
+      | marketing  | Marketing  |
+    And I have the following users
+      | username | firstname | lastname | group      |
+      | JSmith   | John      | Smith    | managers   |
+      | SJones   | Susan     | Jones    | accounting |
+      | BJones   | Bob       | Jones    | marketing  |
+    And I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | Test_Workspace   | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
+      | Workspace  | My_Workspace     | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
+      | Workspace  | Nuxeo_Workspace  | memo    | sciences/astronomy      | europe/France        | JSmith  | /default-domain                 |                  |        |            |
+      | Collection | Test_Collection  | booklet | sciences/astronomy      | north-america/Canada | JSmith  | /default-domain                 |                  |        |            |
+      | Collection | My_Collection    | invoice | sciences/astronomy      | north-america/Canada | SJones  | /default-domain                 |                  |        |            |
+      | Collection | Nuxeo_Collection | booklet | sciences/astronomy      | north-america/Canada | BJones  | /default-domain                 |                  |        |            |
+      | Folder     | Test_Folder      | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Nuxeo_Workspace | My_Collection    | tag    |            |
+      | Folder     | My_Folder        | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain/Test_Workspace  | My_Collection    | hello  |            |
+      | Folder     | Nuxeo_Folder     | memo    | society/ecology         | europe/Portugal      | SJones  | /default-domain/My_Workspace    | Test_Collection  | hello  |            |
+      | Note       | Test_Note        | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/Nuxeo_Workspace | Nuxeo_Collection | urgent |            |
+      | Note       | My_Note          | memo    | society/ecology         | europe/France        | BJones  | /default-domain/Test_Workspace  | Nuxeo_Collection | urgent |            |
+      | Note       | Nuxeo_Note       | booklet | society/ecology         | europe/France        | SJones  | /default-domain/Test_Workspace  | Nuxeo_Collection | urgent |            |
+      | File       | Test_File        | booklet | art/culture             | europe/France        | SJones  | /default-domain/Nuxeo_Workspace | My_Collection    | urgent | sample.png |
+      | File       | My_File          | memo    | art/culture             | europe/France        | SJones  | /default-domain/My_Workspace    | Nuxeo_Collection | urgent | sample.png |
+      | File       | Nuxeo_File       | invoice | art/culture             | europe/France        | BJones  | /default-domain/My_Workspace    | Test_Collection  | urgent | sample.mp4 |
     And I login as "Administrator"
     And I click the "defaultSearch" button
 

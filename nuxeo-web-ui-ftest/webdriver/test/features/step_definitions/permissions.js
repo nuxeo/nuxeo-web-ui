@@ -48,9 +48,4 @@ module.exports = function () {
     );
     this.ui.browser.permissionsView.updatePermissionButton.click();
   });
-
-  this.Then(/^I can't view the document$/, () => {
-    driver.url(`#!/browse${this.doc.path}`);
-    this.ui.browser.breadcrumb.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
-  });
 };

@@ -40,6 +40,11 @@ module.exports = function () {
     this.ui.browser.breadcrumb.waitForVisible();
   });
 
+  this.Then(/^I can't view the document$/, () => {
+    driver.url(`#!/browse${this.doc.path}`);
+    this.ui.browser.breadcrumb.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
+  });
+
   this.Then('I can see the document\'s title', () => {
     this.ui.browser.title.waitForVisible();
   });
