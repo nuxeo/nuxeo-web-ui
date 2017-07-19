@@ -181,9 +181,9 @@ limitations under the License.
               on-tap="handleClick">
           </iron-image>
         </div>
-        <div class="dataContainer flex">
+        <div class="dataContainer flex" on-tap="handleClick">
           <div class="horizontal layout center">
-            <a class="title flex" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
+            <a class="title flex">
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
