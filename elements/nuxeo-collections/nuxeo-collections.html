@@ -195,7 +195,7 @@ limitations under the License.
 
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList"
               selected-item="{{selectedCollection}}"
-              selection-enabled as="collection"
+              selection-enabled select-on-tap as="collection"
               empty-label="[[i18n('collections.empty')]]"
               empty-label-when-filtered="[[i18n('collections.empty')]]">
               <template>
@@ -230,7 +230,7 @@ limitations under the License.
           <div id="queue" hidden$="{{!_isDisplayMembers}}">
             <nuxeo-data-list id="membersList"
               selected-item="{{selectedMember}}"
-              selection-enabled as="member"
+              selection-enabled select-on-tap as="member"
               empty-label="[[i18n('collections.members.empty')]]"
               empty-label-when-filtered="[[i18n('collections.members.empty')]]">
               <template>
