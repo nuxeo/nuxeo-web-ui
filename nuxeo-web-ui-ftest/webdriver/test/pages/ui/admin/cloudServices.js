@@ -15,7 +15,7 @@ export default class CloudServices extends BasePage {
   addProvider(provider) {
     driver.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    driver.waitForVisible(`#dialog`, 2000);
+    driver.waitForVisible(`#dialog`);
     this.fillProviderDetails(provider);
     this.clickElementName(`save`);
   }
@@ -25,7 +25,7 @@ export default class CloudServices extends BasePage {
     rows.some((row) => {
       if (row.getText(`[name="serviceName"]`).trim() === currentName) {
         row.click(`[name="edit"]`);
-        driver.waitForVisible(`#dialog`, 2000);
+        driver.waitForVisible(`#dialog`);
         this.fillProviderDetails(newDetails);
         this.el.click('#dialog paper-button[name="save"]');
       }
@@ -33,6 +33,7 @@ export default class CloudServices extends BasePage {
   }
 
   deleteProvider(serviceName) {
+    driver.waitForVisible(`nuxeo-data-table #list nuxeo-data-table-row`);
     const rows = this.el.elements('nuxeo-data-table #list nuxeo-data-table-row').value;
     rows.some((row) => {
       if (row.getText(`[name="serviceName"]`).trim() === serviceName) {
