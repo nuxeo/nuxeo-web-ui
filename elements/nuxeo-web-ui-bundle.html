@@ -63,6 +63,17 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="adminNxqlSearchMenuItem" slot="ADMINISTRATION_MENU" order="60">
+  <template>
+    <nuxeo-menu-item label="nxqlSearch.heading" name="nxql" route="administration:nxql"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminNxqlSearchPage" slot="ADMINISTRATION_PAGES" order="60">
+  <template>
+    <nuxeo-nxql-search id="nxql" name="nxql"></nuxeo-nxql-search>
+  </template>
+</nuxeo-slot-content>
+
 <!-- ANALYTICS -->
 
 <nuxeo-slot-content name="analyticsDocumentDistributionItem" slot="ANALYTICS_ITEMS" order="10">
