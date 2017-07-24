@@ -549,8 +549,13 @@ limitations under the License.
         }
       },
 
+
       _isAuto: function() {
-        return this.visible && this.auto;
+        var result = this.visible && this.auto;
+        if (result) {
+          this._resetResults();
+        }
+        return result;
       },
 
       _resetResults: function() {
