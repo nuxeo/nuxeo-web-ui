@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
+<link rel="import" href="../search/nuxeo-results-view.html">
 
 <!--
 `nuxeo-nxql-search`
@@ -25,8 +26,6 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-nxql-search">
   <template>
-    <style>
-    </style>
     <nuxeo-page>
       <div class="header">
         <span class="flex">[[i18n('nxqlSearch.heading')]]</span>
@@ -45,7 +44,8 @@ limitations under the License.
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         visible: {
-          type: Boolean
+          type: Boolean,
+          value: false
         },
       },
       _onError: function(e) {
