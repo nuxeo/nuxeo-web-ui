@@ -107,7 +107,7 @@ limitations under the License.
       <div class="form">
         <div class="header horizontal layout center">
           <a href="javascript:undefined" class="horizontal layout center" on-tap="toggleExpand">
-            <span><iron-icon icon="[[_expandIcon(_opened)]]" toggle></iron-icon></span>
+            <span><iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon></span>
             <span class="filter">[[i18n('resultsView.filters.heading')]]</span>
           </a>
           <div class$="count [[_hideCounter]]">
@@ -119,7 +119,7 @@ limitations under the License.
             </paper-button>
           </div>
         </div>
-        <iron-collapse id="collapse" opened="{{_opened}}">
+        <iron-collapse id="collapse" opened="{{opened}}">
           <nuxeo-search-form-layout id="form"
                                     provider="[[provider]]"
                                     search-name="[[searchName]]"
@@ -128,7 +128,7 @@ limitations under the License.
                                     on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <paper-spinner-lite active hidden$="[[!loading]]"></paper-spinner-lite>
         </iron-collapse>
-        <div class="buttons layout horizontal" hidden$="[[!_opened]]">
+        <div class="buttons layout horizontal" hidden$="[[!opened]]">
           <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
             [[i18n('command.search')]]
           </paper-button>
@@ -222,7 +222,7 @@ limitations under the License.
          **/
         visible: {
           type: Boolean,
-          observer: '_visibilityChanged'
+          value: false
         },
         /**
          * If `true`, automatically execute the search each time a param is changed.
@@ -238,16 +238,21 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        _params: Object,
-        _paramsCount: Number,
-        _opened: {
+
+        /*
+         * If `true`, opens the collapsible top filtering panel.
+         */
+        opened: {
           type: Boolean,
           value: false
         },
+
+        _params: Object,
+        _paramsCount: Number,
         _nxProvider: HTMLElement,
         _hideCounter: {
           type: String,
-          computed: '_computeHideCounter(_opened, _params.*)',
+          computed: '_computeHideCounter(opened, _params.*)',
           value: 'hidden'
         }
       },
@@ -345,12 +350,7 @@ limitations under the License.
           }
         }.bind(this));
         form.addEventListener('trigger-search', this._search.bind(this));
-      },
-
-      _visibilityChanged: function() {
-        if (!this.auto && this.visible) {
-          this._nxProvider.fetch();
-        }
+        this._search();
       }
 
     });
