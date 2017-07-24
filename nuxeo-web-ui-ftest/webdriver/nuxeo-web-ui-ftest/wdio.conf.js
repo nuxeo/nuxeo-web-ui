@@ -8,10 +8,7 @@ exports.config = {
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  specs: [
-    // './test/test.feature'
-    './test/features/*.feature'
-  ],
+  specs: require('./scripts/specs-processor.js')(process.argv),
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -70,11 +67,11 @@ exports.config = {
   coloredLogs: true,
   //
   // Saves a screenshot to a given path if a command fails.
-  screenshotPath: './target/shots',
+  screenshotPath: './target/screenshots',
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
-  baseUrl: 'http://localhost:8080/nuxeo',
+  baseUrl: process.env.NUXEO_URL ? 'http://localhost:5000/' : 'http://localhost:8080/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: 10000,
@@ -121,14 +118,9 @@ exports.config = {
   framework: 'cucumber',
   //
   // Test reporter for stdout.
-  // The only one supported by default is 'dot'
-  // see also: http://webdriver.io/guide/testrunner/reporters.html
-  //Nice to try: dot, junit, json, spec
-  reporters: ['spec', 'json', 'junit'],
+  reporters: ['spec', 'json'],
 
   reporterOptions: {
-    // Configures output from reports
-    // see also: https://github.com/fijijavis/wdio-json-reporter
     json :{
       outputDir: './target/json-reports/',
       combined: true,
@@ -142,13 +134,11 @@ exports.config = {
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: ['./test/features/step_definitions'],        // <string[]> (file/dir) require files before executing features
+    require: ['./node_modules/nuxeo-web-ui-ftest/test/features/step_definitions'],        // <string[]> (file/dir) require files before executing features
     backtrace: true,   // <boolean> show full backtrace for errors
     compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
     dryRun: false,      // <boolean> invoke formatters without executing steps
     failFast: true,    // <boolean> abort the run on first failure
-    // format: ['pretty','json:target/cucumber-reports/out.json'], // <string[]> (type[:path]) specify the output format, optionally supply PATH to redirect formatter output (repeatable)
-    // NOTE: support for 'format' was removed: https://github.com/webdriverio/wdio-cucumber-framework/commit/724d39504d9371536da0f18d9ac49d29cf2ab62c
     colors: true,       // <boolean> disable colors in formatter output
     snippets: true,     // <boolean> hide step definition snippets for pending steps
     source: false,       // <boolean> hide source uris
@@ -157,13 +147,6 @@ exports.config = {
     tags: [],           // <string[]> (expression) only execute the features or scenarios with tags matching the expression
     timeout: 20000,     // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
-
-    //Properties from old chimp config file. dont do anything as they are not supported by wdio-cucumber-framework
-    // chai: true,
-    // screenshotsOnError: true,
-    // screenshotsPath: './target/screenshots',
-    // saveScreenshotsToDisk: true,
-    // jsonOutput: './target/cucumber-reports/report.json',
   },
 
   //
@@ -174,22 +157,29 @@ exports.config = {
   // it and to build services around it. You can either apply a single function or an array of
   // methods to it. If one of them returns with a promise, WebdriverIO will wait until that promise got
   // resolved to continue.
-  //f
+  //
   // Gets executed once before all workers get launched.
-  // onPrepare: function (config, capabilities) {
-    // const resultsJsonLocation = path.join(__dirname, 'tests_result.json')
-    // if (fs.existsSync(resultsJsonLocation)) {
-    //   fs.unlinkSync(resultsJsonLocation)
-   //  }
-   //},
+  onPrepare: function (config, capabilities) {
+    const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
+    if (reportFilePath){
+      const fs = require('fs');
+      if (fs.existsSync(reportFilePath)) {
+        fs.unlinkSync(reportFilePath);
+      }
+    }
+  },
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
   before: function () {
     /*
-    Increase window size to avoid hidden buttons
+     * Increase window size to avoid hidden buttons
      */
-    browser.windowHandleSize({width: 1600, height: 1024});
+    browser.windowHandleMaximize();
+
+    require('babel-core/register')({
+      ignore: /node_modules\/(?!nuxeo-web-ui-ftest)/
+    });
 
     /**
      * Setup the Chai assertion framework
@@ -242,6 +232,16 @@ exports.config = {
   //
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
-  // onComplete: function(exitCode) {
-  // }
+  onComplete: function(exitCode) {
+    const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
+    const junitReport = process.env.JUNIT_REPORT_PATH
+    if (reportFilePath && junitReport){
+      const path = require('path'),
+          fs = require('fs'),
+          mkdirp = require('mkdirp');
+      const jUnitReporter = require('cucumber-junit');
+      mkdirp.sync(path.dirname(junitReport));
+      fs.writeFileSync(junitReport, jUnitReporter(fs.readFileSync(reportFilePath)));
+    }
+  }
 };

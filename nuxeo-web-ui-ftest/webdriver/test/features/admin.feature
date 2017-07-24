@@ -1,3 +1,4 @@
+@watch
 Feature: Admin center
 
   As an Administrator I have an Admin center
