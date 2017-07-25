@@ -63,18 +63,6 @@ limitations under the License.
 
   <link rel="stylesheet" href="vendor/select2.css">
 
-  <%-- Load full polyfill in IE for compatibility --%>
-  <% if (UserAgentMatcher.isMSIE10OrMore(ua) || UserAgentMatcher.isMSEdge(ua)) { %>
-  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
-  <% } else { %>
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-  <% } %>
-
-  <script>
-    window.Polymer = {
-      lazyRegister: true
-    };
-  </script>
 
   <script src="vendor/jquery.js"></script>
   <script src="vendor/select2.js"></script>
@@ -89,13 +77,85 @@ limitations under the License.
   <link rel="import" href="nuxeo-user-group-management/nuxeo-view-user.html">
   <link rel="import" href="nuxeo-user-group-management/nuxeo-edit-user.html">
 
+  <style>
+    #loader {
+      display: none;
+    }
+    #fakeDrawer {
+      width: 56px;
+      color: #3a3a54;
+      background-color: #3a3a54;
+      display: block;
+      height: 100%;
+      left: 0px;
+      top: 0px;
+      position: absolute;
+      box-sizing: border-box;
+      z-index: 100;
+    }
+    #fakeHeader {
+      width: 100%;
+      height: 53px;
+      color: #3a3a54;
+      background-color: #fff;
+      box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
+      z-index: 3;
+    }
+    #splash {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      /* bring your own prefixes */
+      transform: translate(-50%, -50%);
+    }
+    .logo {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 52px;
+      height: 52px;
+    }
+    .image {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 64px;
+        height: 64px;
+        margin:-60px 0 0 -60px;
+    }
+    @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+    @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+    @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+  </style>
+
 </head>
 
-<body unresolved class="fullbleed layout vertical">
+<body class="fullbleed layout vertical">
   <nuxeo-connection url="<%= request.getContextPath() %>"
                     repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= request.getRequestURI() %>"
              product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>"></nuxeo-app>
+
+  <div id="loader">
+    <div id="fakeDrawer">
+      <img draggable="false" src="themes/default/logo.png" class="logo">
+    </div>
+    <div id="fakeHeader">
+    </div>
+    <div id="splash">
+      <img class="image" src="images/web-ui-loader.svg">
+    </div>
+  </div>
+
+  <script src="app.js" async></script>
+
+  <%-- Load full polyfill in IE for compatibility --%>
+  <% if (UserAgentMatcher.isMSIE10OrMore(ua) || UserAgentMatcher.isMSEdge(ua)) { %>
+  <script src="bower_components/webcomponentsjs/webcomponents.min.js" onload="finishLazyLoading()" async></script>
+  <% } else { %>
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js" onload="finishLazyLoading()" async></script>
+  <% } %>
+
 </body>
 
 </html>
