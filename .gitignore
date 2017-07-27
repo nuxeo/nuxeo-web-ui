@@ -5,3 +5,4 @@ bower_components
 .publish/
 .DS_Store
 .swp
+target
