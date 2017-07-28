@@ -104,6 +104,11 @@ limitations under the License.
 
     </style>
 
+    <nuxeo-resource auto
+                    path="workflowModel"
+                    on-response="_handleWorkflowModelResponse">
+    </nuxeo-resource>
+
     <paper-card class="dates">
       <div class="horizontal flex end-justified layout center wrap">
         <nuxeo-select label="[[i18n('analytics.workflow')]]" placeholder="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
@@ -201,10 +206,6 @@ limitations under the License.
       ready: function() {
         this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
         this.endDate = moment().format('YYYY-MM-DD');
-        this.workflows = [
-          {id: 'ParallelDocumentReview', label: this.i18n('ParallelDocumentReview')},
-          {id: 'SerialDocumentReview', label: this.i18n('SerialDocumentReview')}
-        ]
       },
 
       // override _labels and _values from nuxeo-chart-data-behavior.html
@@ -259,7 +260,24 @@ limitations under the License.
         return data.map(function(e) {
           return {key: e.key, value: this._asDuration(e.value)};
         }.bind(this));
+      },
+
+      _handleWorkflowModelResponse: function(response) {
+        var _workflowModels = response.detail.response.entries;
+
+        if (_workflowModels.length > 0) {
+          this.workflows = [];
+          for (var i = 0; i < _workflowModels.length; i++) {
+            var newItem = {
+              id: _workflowModels[i].name,
+              label: this.i18n(_workflowModels[i].title)
+            }
+            this.push("workflows", newItem);
+          }
+          this.workflow = this.workflows[0].id;
+        }
       }
+
     });
   </script>
 </dom-module>
