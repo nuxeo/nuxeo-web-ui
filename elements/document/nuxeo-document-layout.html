@@ -25,8 +25,8 @@ limitations under the License.
 <dom-module id="nuxeo-document-layout">
   <template>
     <nuxeo-layout id="layout"
-                  href="[[_href(document, layout)]]"
-                  model="[[_model(document)]]"
+                  href="[[_href]]"
+                  model="[[_model]]"
                   error="[[i18n('documentView.layoutNotFound', document.type)]]"
                   on-element-changed="_elementChanged">
     </nuxeo-layout>
@@ -43,8 +43,19 @@ limitations under the License.
         layout: {
           type: String,
           value: 'view'
+        },
+        _model: {
+          type: Object,
+          notify: true,
+          value: {}
+        },
+        _href: {
+          type: String,
+          notify: true
         }
       },
+
+      observers: ['_loadLayout(document, layout)'],
 
       get element() {
         return this.$.layout.element;
@@ -54,19 +65,21 @@ limitations under the License.
         return this.$.layout.validate();
       },
 
-      _href: function (document, layout) {
+      _loadLayout: function (document, layout) {
+        if (document && this.previousDocument && document.type === this.previousDocument.type) {
+          this._model = { document: document };
+        }
+
         if (document) {
           var doctype = document.type.toLowerCase();
           var name = ['nuxeo', doctype, layout, 'layout'].join('-');
-          return this.resolveUrl(doctype + '/' + name + '.html');
+          this._href = this.resolveUrl(doctype + '/' + name + '.html');
         }
-      },
-
-      _model: function (document) {
-        return { document: document };
+        this.previousDocument = document;
       },
 
       _elementChanged: function() {
+        this._model = { document: this.document};
         // forward document path change events
         this.element.addEventListener('document-changed', function(e) {
           this.notifyPath(e.detail.path, e.detail.value);
