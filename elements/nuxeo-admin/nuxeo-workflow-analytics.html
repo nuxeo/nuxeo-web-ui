@@ -265,18 +265,15 @@ limitations under the License.
 
       _handleWorkflowModelResponse: function(response) {
         var _workflowModels = response.detail.response.entries;
-
-        if (_workflowModels.length > 0) {
-          this.workflows = [];
-          for (var i = 0; i < _workflowModels.length; i++) {
-            var newItem = {
-              id: _workflowModels[i].name,
-              label: this.i18n(_workflowModels[i].title)
-            }
-            this.push("workflows", newItem);
+        this.workflows = [];
+        _workflowModels.map(function(wfm) {
+          var newItem = {
+            id: wfm.name,
+            label: this.i18n(wfm.title)
           }
-          this.workflow = this.workflows[0].id;
-        }
+          this.push('workflows', newItem);
+        }.bind(this));
+        this.workflow = this.workflows[0].id;
       }
 
     });
