@@ -65,10 +65,10 @@ limitations under the License.
         return this.$.layout.validate();
       },
 
-      _loadLayout: function (document, layout) {
+      _loadLayout: function(document, layout) {
         if (document) {
           if (this.previousDocument && document.type === this.previousDocument.type) {
-            this._model = { document: document };
+            this._model = {document: document};
           }
           var doctype = document.type.toLowerCase();
           var name = ['nuxeo', doctype, layout, 'layout'].join('-');
@@ -78,7 +78,7 @@ limitations under the License.
       },
 
       _elementChanged: function() {
-        this._model = { document: this.document};
+        this._model = {document: this.document};
         // forward document path change events
         this.element.addEventListener('document-changed', function(e) {
           this.notifyPath(e.detail.path, e.detail.value);
