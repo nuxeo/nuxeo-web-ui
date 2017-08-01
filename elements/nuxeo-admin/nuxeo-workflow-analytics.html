@@ -265,13 +265,11 @@ limitations under the License.
 
       _handleWorkflowModelResponse: function(response) {
         var _workflowModels = response.detail.response.entries;
-        this.workflows = [];
-        _workflowModels.map(function(wfm) {
-          var newItem = {
+        this.workflows = _workflowModels.map(function(wfm) {
+          return {
             id: wfm.name,
             label: this.i18n(wfm.title)
           }
-          this.push('workflows', newItem);
         }.bind(this));
         this.workflow = this.workflows[0].id;
       }
