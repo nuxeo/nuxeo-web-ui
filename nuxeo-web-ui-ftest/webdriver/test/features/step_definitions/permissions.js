@@ -31,11 +31,10 @@ module.exports = function () {
     this.ui.browser.permissionsView.permissionUser(name).waitForVisible();
     this.ui.browser.permissionsView.editPermissionButton.waitForVisible();
     if (date === 'tomorrow') {
-      const currentDate = new Date();
-      const month = currentDate.getMonth() + 1;
-      const day = currentDate.getDate() + 1;
-      const year = currentDate.getFullYear();
-      date = `${month}-${day}-${year}`;
+      const tmp = new Date();
+      tmp.setDate(tmp.getDate() + 1);
+      const keys = tmp.toISOString().substring(0, 10).split('-');
+      date = keys[1].concat('-').concat(keys[2]).concat('-').concat('-').concat(keys[0]);
     }
     this.ui.browser.permissionsView.editPermissionButton.click();
     this.ui.browser.permissionsView.editPermissions(
