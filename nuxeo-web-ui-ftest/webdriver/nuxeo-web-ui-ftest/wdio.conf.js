@@ -67,7 +67,7 @@ exports.config = {
   coloredLogs: true,
   //
   // Saves a screenshot to a given path if a command fails.
-  screenshotPath: './target/screenshots',
+  screenshotPath: '',
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
@@ -124,10 +124,6 @@ exports.config = {
     json :{
       outputDir: './target/json-reports/',
       combined: true,
-      filename: 'report'
-    },
-    junit: {
-      outputDir: './target/junit-reports',
       filename: 'report'
     }
   },

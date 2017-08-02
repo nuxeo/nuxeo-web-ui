@@ -10,7 +10,7 @@ module.exports = function () {
   this.When('I click "$text" in the administration menu', (text) => driver.click(`a=${text}`));
 
   this.Then('I can see the analytics page', () =>
-    this.ui.administration.analytics.waitForVisible(10000));
+    this.ui.administration.analytics.waitForVisible());
 
   this.Then('I can see the users and groups page', () =>
     this.ui.administration.userAndGroupManagement.waitForVisible().should.be.true);

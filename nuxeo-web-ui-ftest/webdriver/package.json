@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint test",
-    "test": "webui-ftest --cucumberReport=./target/cucumber-reports/report.json --junitReport=./target/surefire-reports/TEST-report.xml",
-      "pretest": "npm run lint",
+    "test": "webui-ftest --report --screenshots",
+    "pretest": "npm run lint",
     "test:dev": "webui-ftest --nuxeoUrl=http://localhost:8080/nuxeo",
-      "pretest:dev": "npm run lint",
+    "pretest:dev": "npm run lint",
     "test:watch": "webui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --watch --tags=@watch",
-      "pretest:watch": "npm run lint"
+    "pretest:watch": "npm run lint"
   },
   "license": "Apache-2.0",
   "dependencies": {
