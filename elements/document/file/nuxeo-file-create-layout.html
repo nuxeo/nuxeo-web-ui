@@ -36,7 +36,10 @@ limitations under the License.
                     value="{{document.properties.dc:description}}">
     </nuxeo-textarea>
 
-    <nuxeo-dropzone role="widget" label="[[i18n('file.content')]]" document="[[document]]"></nuxeo-dropzone>
+    <nuxeo-dropzone role="widget"
+                    label="[[i18n('file.content')]]"
+                    name="content"
+                    document="[[document]]"></nuxeo-dropzone>
 
     <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
                                 name="nature"
