@@ -1,7 +1,7 @@
-const JsonFormatter = require('cucumber').Listener.JsonFormatter(),
-      mkdirp = require('mkdirp'),
-      path = require('path'),
-      fs = require('fs');
+const JsonFormatter = require('cucumber').Listener.JsonFormatter(); // eslint-disable-line new-cap
+const mkdirp = require('mkdirp');
+const path = require('path');
+const fs = require('fs');
 
 module.exports = function JsonOutputHook() {
   const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
