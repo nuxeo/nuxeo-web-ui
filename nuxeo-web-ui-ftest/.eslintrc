@@ -1,5 +1,6 @@
 {
   'extends': 'airbnb/base',
+  'root': true,
   'rules': {
     'func-names': 0,
     'max-len': [2, 120, 2, {

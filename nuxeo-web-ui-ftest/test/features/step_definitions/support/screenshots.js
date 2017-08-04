@@ -14,7 +14,7 @@ module.exports = function screenshotHook() {
       mkdirp.sync(process.env.SCREENSHOTS_PATH);
       const screenshotId = `${lastStep.getUri()}:${lastStep.getLine()}`;
       const fileName = path.join(process.env.SCREENSHOTS_PATH,
-                                 `${lastStep.getKeyword()} ${lastStep.getName()} (failed).png`);
+                                 `${lastStep.getKeyword()} ${lastStep.getName()} (${stepResult.getStatus()}).png`);
       return browser.saveScreenshot().then((screenshot) => {
         const stream = fs.createWriteStream(fileName);
         stream.write(screenshot);
