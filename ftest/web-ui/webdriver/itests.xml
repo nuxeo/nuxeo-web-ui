@@ -20,6 +20,14 @@
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
     </condition>
+    <delete dir="../../../nuxeo-web-ui-ftest/node_modules" failonerror="true" />
+    <exec executable="${cmd.npm}" dir="../../../nuxeo-web-ui-ftest" failonerror="true">
+      <arg value="install" />
+    </exec>
+    <exec executable="${cmd.npm}" dir="../../../nuxeo-web-ui-ftest" failonerror="true">
+      <arg value="run" />
+      <arg value="lint" />
+    </exec>
     <delete dir="node_modules" failonerror="true" />
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />

@@ -67,7 +67,7 @@ module.exports = function () {
     // wait for invisible
     page.versions.createVersionButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
     page.versions.toggle.waitForVisible();
-    page.versions.toggle.getText().should.equals(label);
+    driver.waitUntil(() => page.versions.toggle.getText() === label, `No version found with label "${label}"`);
   });
 
   this.When(/^I click the versions list$/, () => {

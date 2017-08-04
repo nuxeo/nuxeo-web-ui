@@ -67,7 +67,7 @@ exports.config = {
   coloredLogs: true,
   //
   // Saves a screenshot to a given path if a command fails.
-  screenshotPath: '',
+  // screenshotPath: '',
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
@@ -130,7 +130,7 @@ exports.config = {
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: ['./node_modules/nuxeo-web-ui-ftest/test/features/step_definitions'],        // <string[]> (file/dir) require files before executing features
+    require: ['./node_modules/@nuxeo/nuxeo-web-ui-ftest/test/features/step_definitions'],        // <string[]> (file/dir) require files before executing features
     backtrace: true,   // <boolean> show full backtrace for errors
     compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
     dryRun: false,      // <boolean> invoke formatters without executing steps
@@ -141,7 +141,7 @@ exports.config = {
     profile: [],        // <string[]> (name) specify the profile to use
     strict: true,      // <boolean> fail if there are any undefined or pending steps
     tags: [],           // <string[]> (expression) only execute the features or scenarios with tags matching the expression
-    timeout: 20000,     // <number> timeout for step definitions
+    timeout: 10000,     // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
 
@@ -174,7 +174,7 @@ exports.config = {
     browser.windowHandleMaximize();
 
     require('babel-core/register')({
-      ignore: /node_modules\/(?!nuxeo-web-ui-ftest)/
+      ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/
     });
 
     /**
