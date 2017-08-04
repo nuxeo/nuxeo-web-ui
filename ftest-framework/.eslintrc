@@ -1,0 +1,34 @@
+{
+  'extends': 'airbnb/base',
+  'root': true,
+  'rules': {
+    'func-names': 0,
+    'max-len': [2, 120, 2, {
+      'ignoreUrls': true,
+      'ignoreComments': false
+    }],
+    'new-cap': [2, {
+      'capIsNewExceptions': [
+        'Given',
+        'When',
+        'Then',
+        'After',
+        'Before',
+      ]
+    }],
+    'no-unused-expressions': 0,
+    'no-param-reassign': 0,
+    'no-else-return': 0,
+    'no-throw-literal': 0,
+    'radix': 0
+  },
+  'globals': {
+    'driver': true,
+    'fixtures': true,
+    'liveCollections': true,
+    'liveDocuments': true,
+    'users': true,
+    'groups': true,
+    'browser': true,
+  }
+}

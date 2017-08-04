@@ -45,6 +45,13 @@ limitations under the License.
       <arg value="run" />
       <arg value="lint" />
     </exec>
+    <exec executable="${cmd.npm}" dir="ftest-framework" failonerror="true">
+      <arg value="install" />
+    </exec>
+    <exec executable="${cmd.npm}" dir="ftest-framework" failonerror="true">
+      <arg value="run" />
+      <arg value="lint" />
+    </exec>
     <copy todir="target/classes/web/nuxeo.war/ui/bower_components">
       <fileset dir="bower_components"/>
     </copy>
