@@ -617,6 +617,10 @@ limitations under the License.
         return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
       },
 
+      showHome: function() {
+         this.show('home');
+      },
+
       _actionContext: function() {
         return {
           document: this.currentDocument,
