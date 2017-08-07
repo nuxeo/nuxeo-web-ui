@@ -67,7 +67,7 @@ limitations under the License.
 
       _loadLayout: function(document, layout) {
         if (document) {
-          if (this.previousDocument && document.type === this.previousDocument.type) {
+          if (!this.previousDocument || (this.previousDocument && document.type === this.previousDocument.type)) {
             this._model = {document: document};
           }
           var doctype = document.type.toLowerCase();
