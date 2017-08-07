@@ -10,7 +10,7 @@ export default class CreateDialog extends BasePage {
   }
 
   get createButton() {
-    return this.el.element('///paper-button[text()="Create"]');
+    return this.el.element('///paper-button[@id="create"]');
   }
 
 }
