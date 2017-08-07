@@ -224,7 +224,7 @@ limitations under the License.
             <paper-button noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
           <paper-button noink on-tap="_back" disabled$="[[creating]]">[[i18n('command.back')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_create" disabled$="[[!_canCreate(canCreate,creating)]]">
+          <paper-button id="create" noink class="primary" on-tap="_create" disabled$="[[!_canCreate(canCreate,creating)]]">
             <template is="dom-if" if="[[!creating]]">
               [[i18n('command.create')]]
             </template>
