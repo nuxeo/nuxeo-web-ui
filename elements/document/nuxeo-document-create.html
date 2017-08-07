@@ -43,10 +43,6 @@ limitations under the License.
         @apply(--layout-vertical);
       }
 
-      paper-button[disabled] {
-        display: none;
-      }
-
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
            z-index: 200;
@@ -154,6 +150,10 @@ limitations under the License.
         margin-bottom: .5rem;
       }
 
+      .importing-label {
+        margin-right: 8px;
+      }
+
     </style>
 
     <nuxeo-document id="docRequest"
@@ -220,10 +220,18 @@ limitations under the License.
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink on-tap="_back">[[i18n('command.back')]]</paper-button>
-          <paper-button noink class="primary" on-tap="_create" disabled$="[[!canCreate]]">[[i18n('command.create')]]</paper-button>
+          <paper-button noink on-tap="_back" disabled$="[[creating]]">[[i18n('command.back')]]</paper-button>
+          <paper-button noink class="primary" on-tap="_create" disabled$="[[!_canCreate(canCreate,creating)]]">
+            <template is="dom-if" if="[[!creating]]">
+              [[i18n('command.create')]]
+            </template>
+            <template is="dom-if" if="[[creating]]">
+              <span class="importing-label">[[i18n('documentImport.creating')]]</span>
+              <paper-spinner-lite active></paper-spinner-lite>
+            </template>
+          </paper-button>
         </div>
       </div>
 
@@ -246,6 +254,11 @@ limitations under the License.
 
         visible: {
           type: Boolean
+        },
+
+        creating: {
+          type: Boolean,
+          value: false
         }
 
       },
@@ -309,12 +322,16 @@ limitations under the License.
           return;
         }
         this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+        this.set('creating', true);
         this.$.docRequest.post().then(function(response) {
           this.$.creationStats.storeType(this.selectedDocType.id);
           this._clear();
           this.navigateTo('browse', response.path);
           this._notify(response);
-        }.bind(this));
+          this.set('creating', false);
+        }.bind(this)).catch(function() {
+          this.set('creating', false);
+        });
       },
 
       _back: function() {
@@ -354,6 +371,10 @@ limitations under the License.
         if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
           this._create();
         }
+      },
+
+      _canCreate: function() {
+        return this.canCreate && !this.creating;
       }
 
     });
