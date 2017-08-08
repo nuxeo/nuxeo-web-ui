@@ -93,7 +93,7 @@ limitations under the License.
                                  parent="[[parent]]"
                                  target-path="{{parentPath}}"
                                  suggester-children="{{suggesterChildren}}"></nuxeo-document-import>
-      </iron-pages>
+        </iron-pages>
       </div>
     </paper-dialog>
 
@@ -159,33 +159,52 @@ limitations under the License.
         this.selectedTab = 'create';
         this._showTabs = false;
         this._fetchParent().then(function() {
-          this.$.simpleCreation.init(type);
-          this.$$('#bulkCreation').init();
-          this.$.createDocDialog.toggle();
+          if (this._noPermission) {
+            this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+          } else {
+            this.$.simpleCreation.init(type);
+            this.$$('#bulkCreation').init();
+            this.$.createDocDialog.toggle();
+          }
         }.bind(this));
       },
 
       toggleDialogImport: function(files) {
         this.selectedTab = 'import';
         this._fetchParent().then(function() {
-          this.$$('#bulkCreation').init(files);
-          this.$.createDocDialog.toggle();
+          if (this._noPermission) {
+            this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+          } else {
+            this.$$('#bulkCreation').init(files);
+            this.$.createDocDialog.toggle();
+          }
         }.bind(this));
       },
 
       toggleDialog: function() {
         this._fetchParent().then(function() {
-          this.$$('#bulkCreation').init();
-          this.$.createDocDialog.toggle();
+          if (this._noPermission) {
+            this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+          } else {
+            this.$$('#bulkCreation').init();
+            this.$.createDocDialog.toggle();
+          }
         }.bind(this));
       },
 
       _fetchParent: function() {
+        this._noPermission = false;
         if (!this.parentPath) {
           this.set('parentPath', this.defaultPath);
         }
         if (!this.parent || !this.parent.contextParameters) {
-          return this.$.defaultDoc.get();
+          return this.$.defaultDoc.get().catch(function(err) {
+            if (err && err.status === 403) {
+              this._noPermission = true;
+            } else {
+              throw err;
+            }
+          }.bind(this));
         } else {
           return Promise.resolve();
         }
