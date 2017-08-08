@@ -118,7 +118,7 @@ limitations under the License.
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" data="{{document}}" enrichers="preview"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="preview"></nuxeo-document>
     <nuxeo-operation id="bulkAttach" op="BlobHolder.AttachOnCurrentDocument"></nuxeo-operation>
 
     <label id="label" hidden$="[[!label]]">[[label]]</label>
@@ -262,10 +262,14 @@ limitations under the License.
 
       _handleBlobUploaded: function() {
         if (this.updateDocument) {
-
-          // TODO: NXP-20782: remove contributors or they will be duplicated
-          delete this.document.properties['dc:contributors'];
-
+          var props = {};
+          props[this.xpath] = this.document.properties[this.xpath];
+          this.$.doc.data = {
+            "entity-type": "document",
+            "repository": this.document.repository,
+            "uid": this.document.uid,
+            "properties": props
+          };
           this.$.doc.put().then(function(response) {
             this.document = response;
             this.fire('notify', {message: this.uploadedMessage});
