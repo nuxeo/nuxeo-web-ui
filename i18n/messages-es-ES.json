@@ -300,6 +300,7 @@
   "documentHistory.performedAction":"Acción realizada",
   "documentHistory.state":"Estado",
   "documentHistory.username":"Nombre de usuario",
+  "documentImport.creating":"Creating...",
   "documentImport.error.cannotImport":"Seleccione un contenedor diferente para importar su contenido",
   "documentImport.error.importFailed":"Estos recursos no se pudieron crear, ya sea porque no se pudo llegar al servidor o algunos de los recursos tienen problemas. Puede intentar crearlos de nuevo, cancelar o volver a intentarlo más tarde.",
   "documentImport.importing":"Importando...",

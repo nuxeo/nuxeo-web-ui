@@ -300,6 +300,7 @@
   "documentHistory.performedAction":"Action",
   "documentHistory.state":"Etat",
   "documentHistory.username":"Utilisateur",
+  "documentImport.creating":"Creating...",
   "documentImport.error.cannotImport":"Impossible d'importer des documents à cet endroit",
   "documentImport.error.importFailed":"Les documents n'ont pas pu être créés, soit parce que le serveur est injoignable, soit parce que certains des documents ont un problème. Vous pouvez essayer à nouveau de les créer, annuler ou recommencer plus tard.",
   "documentImport.importing":"Import en cours",

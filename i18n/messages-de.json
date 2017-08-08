@@ -300,6 +300,7 @@
   "documentHistory.performedAction":"Ausgeführte Aktion",
   "documentHistory.state":"Status",
   "documentHistory.username":"Benutzername",
+  "documentImport.creating":"Creating...",
   "documentImport.error.cannotImport":"Dokumente konnten nicht an diesem Ort importiert werden",
   "documentImport.error.importFailed":"Diese Assets konnten nicht erstellt werden, entweder weil der Server nicht erreicht werden konnte oder es bei einigen Assets Probleme gibt. Sie können versuchen, diese nochmals zu erstellen, den Vorgang abzubrechen, oder es später erneut zu versuchen.",
   "documentImport.importing":"Wird importiert...",

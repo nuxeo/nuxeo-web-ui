@@ -300,6 +300,7 @@
   "documentHistory.performedAction":"Utförd åtgärd",
   "documentHistory.state":"Tillstånd",
   "documentHistory.username":"Användarnamn",
+  "documentImport.creating":"Creating...",
   "documentImport.error.cannotImport":"Välj en annan behållare för att importera ditt innehåll",
   "documentImport.error.importFailed":"Dessa tillgångar kunde inte skapas, antingen eftersom servern inte kunde nås eller för att vissa tillgångar har problem. Du kan försöka skapa dem igen, avbryta eller försöka igen senare.",
   "documentImport.importing":"Importerar...",

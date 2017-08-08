@@ -300,6 +300,7 @@
   "documentHistory.performedAction":"実行された動作",
   "documentHistory.state":"状態",
   "documentHistory.username":"ユーザ名",
+  "documentImport.creating":"Creating...",
   "documentImport.error.cannotImport":"この場所に文書をインポートすることができません",
   "documentImport.error.importFailed":"サーバに接続できなかったか、一部のアセットに問題があるため、これらのアセットを作成できませんでした。アセットの作成をもう一度試すか、キャンセルするか、後で再試行することができます。",
   "documentImport.importing":"インポート中...",
