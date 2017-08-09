@@ -32,7 +32,7 @@ Feature: Group
       | managers  | Managers |
     Then I can edit the following groups
       | name      | newLabel       |
-      | managers  | Managers Group |
+      | Managers  | Managers Group |
 
   Scenario: Delete Groups
     Given I have the following groups
@@ -40,4 +40,4 @@ Feature: Group
       | managers  | Managers |
     Then I can delete the following groups
       | name      | label    |
-      | managers  | Managers |
+      | Managers  | Managers |
