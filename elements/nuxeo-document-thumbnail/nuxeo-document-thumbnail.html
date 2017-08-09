@@ -41,13 +41,14 @@ limitations under the License.
       }
     </style>
 
-    <img src="[[_thumbnail(document)]]">
+    <img id="img" src="[[_thumbnail(document)]]" alt="[[_title(document)]]" on-error="_error">
 
   </template>
 
   <script>
     Polymer({
       is: 'nuxeo-document-thumbnail',
+      behaviors: [Nuxeo.I18nBehavior],
       properties: {
         document: Object
       },
@@ -56,6 +57,16 @@ limitations under the License.
         if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
           doc.contextParameters.thumbnail.url) {
           return doc.contextParameters.thumbnail.url;
+        }
+      },
+
+      _error: function() {
+        this.$.img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      },
+
+      _title: function(doc) {
+        if (doc && doc.title) {
+          return this.i18n('accessibility.thumbnail', doc.title);
         }
       }
     });
