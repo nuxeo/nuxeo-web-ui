@@ -95,15 +95,9 @@ limitations under the License.
         background-color: var(--nuxeo-sidebar-background);
       }
 
-      #logo iron-icon {
+      #logo img {
         width: 52px;
         height: 53px;
-      }
-
-      /* Fix for Safari */
-      #logo iron-icon ::content img {
-        width: 52px !important;
-        height: 52px !important;
       }
 
       /* menu */
@@ -124,14 +118,14 @@ limitations under the License.
         width: 52px;
       }
 
-      #logo:hover iron-icon,
+      #logo:hover img,
       #menu ::content nuxeo-menu-icon:hover ::content paper-icon-button,
       #menu ::content nuxeo-menu-icon.selected ::content paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
-      #logo:hover iron-icon {
+      #logo:hover img {
         filter: brightness(110%);
         -webkit-filter: brightness(110%);
       }
@@ -247,7 +241,7 @@ limitations under the License.
 
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]">
-          <iron-icon src$="[[_logo(baseUrl)]]"></iron-icon>
+          <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]"/>
         </a>
 
         <!-- menu -->
