@@ -37,7 +37,7 @@ limitations under the License.
       <div class="content">
         <template is="dom-if" if="visible">
           <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
-          <template is="dom-if" if="[[_displayLatest(page)]]">
+          <template is="dom-if" if="[[_displayLatest]]">
             <nuxeo-user-group-latest></nuxeo-user-group-latest>
           </template>
         </template>
@@ -56,7 +56,8 @@ limitations under the License.
         },
         page: {
           type: String,
-          value: 'search'
+          value: 'search',
+          observer: '_observePage'
         },
         entity: {
           type: Object,
@@ -135,6 +136,10 @@ limitations under the License.
           }
         }
         this.navigateTo('administration', url);
+      },
+
+      _observePage: function() {
+        this._displayLatest = this.page === "search";
       }
     });
   </script>
