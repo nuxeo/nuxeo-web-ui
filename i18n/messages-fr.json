@@ -20,6 +20,8 @@
   "activity.workflowCanceled":"a annulé une revue",
   "activity.workflowTaskAssigned":"a démarré une revue",
   "activity.workflowTaskCompleted":"a terminé une tâche de revue",
+  "accessibility.logo":"Application Logo",
+  "accessibility.thumbnail":"Thumbnail of {0}",
   "addToCollectionDocumentsButton.dialog.add":"Ajouter à la collection",
   "addToCollectionDocumentsButton.dialog.cancel":"Annuler",
   "addToCollectionDocumentsButton.dialog.collections":"Collections",

@@ -20,6 +20,8 @@
   "activity.workflowCanceled":"avbröt en granskning",
   "activity.workflowTaskAssigned":"startade en granskning",
   "activity.workflowTaskCompleted":"slutförde en granskningsuppgift",
+  "accessibility.logo":"Application Logo",
+  "accessibility.thumbnail":"Thumbnail of {0}",
   "addToCollectionDocumentsButton.dialog.add":"Lägg till i samlingen",
   "addToCollectionDocumentsButton.dialog.cancel":"Avbryt",
   "addToCollectionDocumentsButton.dialog.collections":"Samlingar",
