@@ -48,6 +48,6 @@
     "lint": "gulp lint && polymer lint -i elements/*/*.html"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=6.4.0"
   }
 }
