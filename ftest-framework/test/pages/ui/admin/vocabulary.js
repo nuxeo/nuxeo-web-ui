@@ -51,12 +51,13 @@ export default class Vocabulary extends BasePage {
 
   waitForHasEntry(id, reverse) {
     const el = this.el;
-    driver.waitForVisible(`#table #items nuxeo-data-table-cell`);
+    driver.waitForVisible(`#table #items`);
     driver.waitUntil(() => {
+      const cells = el.elements(`#table #items nuxeo-data-table-cell`).value;
       if (reverse) {
-        return el.getText(`#table #items nuxeo-data-table-cell`).every((txt) => txt.trim() !== id);
+        return cells.every((cell) => cell.getText().trim() !== id);
       } else {
-        return el.getText(`#table #items nuxeo-data-table-cell`).some((txt) => txt.trim() === id);
+        return cells.some((cell) => cell.getText().trim() === id);
       }
     }, reverse ? `The vocabulary does have such entry` : `The vocabulary does not have such entry`);
     return true;
@@ -96,7 +97,9 @@ export default class Vocabulary extends BasePage {
   }
 
   get isVocabularyTableFilled() {
-    return !this.el.getText(`#table #items nuxeo-data-table-row`).some((txt) => txt.trim().length === 0);
+    this.el.waitForVisible(`#table #items nuxeo-data-table-row`);
+    return !this.el.elements(`#table #items nuxeo-data-table-row`).value
+               .some((row) => row.getText().trim().length === 0);
   }
 
   get hasEditDialog() {
