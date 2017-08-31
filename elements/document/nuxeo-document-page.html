@@ -26,7 +26,6 @@ limitations under the License.
 <link rel="import" href="../nuxeo-document-activity/nuxeo-document-activity.html">
 <link rel="import" href="nuxeo-document-view.html">
 <link rel="import" href="nuxeo-document-metadata.html">
-<link rel="import" href="nuxeo-document-edit.html">
 
 <!--
 `nuxeo-document-page`
@@ -96,13 +95,9 @@ limitations under the License.
           <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
         </paper-card>
 
-        <!-- metadata / edit -->
+        <!-- metadata -->
         <paper-card>
-          <div hidden$="[[edit]]">
-            <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_editMode" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
-            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
-          </div>
-          <nuxeo-document-edit id="documentEdit" document="[[document]]" hidden$="[[!edit]]"></nuxeo-document-edit>
+          <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
         </paper-card>
 
         <!-- collections -->
@@ -137,30 +132,11 @@ limitations under the License.
         document: {
           type: Object,
           observer: '_documentChanged'
-        },
-
-        edit: {
-          type: Boolean,
-          value: false
-        }
-      },
-      _documentChanged: function() {
-        if (this.document) {
-          this.edit = false;
         }
       },
 
       _isMutable: function(doc) {
         return !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && doc.state !== 'deleted';
-      },
-
-      _canEdit: function(doc) {
-        return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
-      },
-
-      _editMode: function() {
-        this.edit = true;
-        this.$.documentEdit.notifyResize();
       },
 
       _showCollections: function (doc) {

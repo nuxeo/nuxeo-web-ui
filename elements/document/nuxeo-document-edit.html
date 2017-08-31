@@ -28,17 +28,6 @@ limitations under the License.
 <dom-module id="nuxeo-document-edit">
   <template>
     <style>
-      .actions {
-        @apply(--layout-horizontal);
-        @apply(--layout-justified);
-        margin-top: 16px;
-      }
-
-      .actions paper-button {
-        @apply(--layout-flex);
-        max-width: 18em;
-      }
-
       ::content nuxeo-directory-suggestion,
       ::content paper-input-container {
         padding: 0 0 8px 0;
@@ -72,15 +61,15 @@ limitations under the License.
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]"></nuxeo-document>
-
-    <form id="form" is="iron-form">
-      <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
-      <div class="actions">
+    <nuxeo-dialog id="dialog" with-backdrop>
+      <form id="form" is="iron-form">
+        <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
+      </form>
+      <div class="buttons">
         <paper-button on-tap="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" on-tap="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
       </div>
-    </form>
-
+    </nuxeo-dialog>
   </template>
   <script>
     Polymer({
@@ -113,6 +102,10 @@ limitations under the License.
         };
       },
 
+      toggle: function() {
+        this.$.dialog.toggle();
+      },
+
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
         var valid = this.$['document-edit'].validate();
@@ -136,11 +129,16 @@ limitations under the License.
           properties: this._dirtyProperties
         };
 
-        this.$.doc.put().then(this._refresh.bind(this));
+        this.$.doc.put().then(
+            function(){
+              this._refresh();
+              this.toggle();
+            }.bind(this));
       },
 
       _cancel: function() {
         this._refresh();
+        this.toggle();
       },
 
       _refresh: function() {
