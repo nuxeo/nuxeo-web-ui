@@ -3,6 +3,7 @@ Feature: User
   As an Administrator I can create, edit, search for and delete users.
 
   Background:
+    Given user "jdoe" exists
     Given I login as "Administrator"
     And I click the "administration" button
     And I can see the administration menu
@@ -24,16 +25,13 @@ Feature: User
       | passwordConfirmation | test          |
 
   Scenario: Search for Users
-    Given user "jsmith" exists
-    Then I can search for the user "jsmith"
+    Then I can search for the user "jdoe"
 
   Scenario: Edit Users
-    Given user "jsmith" exists
-    Then I can edit the user "jsmith" with the following properties:
+    Then I can edit the user "jdoe" with the following properties:
       | name                 | value          |
       | firstname            | Jane           |
       | email                | test2@test.com |
 
   Scenario: Delete Users
-    Given user "jsmith" exists
-    Then I can delete the user "jsmith"
+    Then I can delete the user "jdoe"

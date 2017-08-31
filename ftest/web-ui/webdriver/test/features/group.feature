@@ -3,6 +3,9 @@ Feature: Group
   As an Administrator I can create, edit search for and delete groups.
 
   Background:
+    Given I have the following groups
+      | name      | label    |
+      | managers  | Managers |
     Given I login as "Administrator"
     And I click the "administration" button
     And I can see the administration menu
@@ -15,29 +18,20 @@ Feature: Group
     Then I can see the new group form
     And I can create a group with the following properties:
       | name       | value    |
-      | groupName  | managers |
-      | groupLabel | Managers |
+      | groupName  | managers2 |
+      | groupLabel | Managers2 |
 
   Scenario: Search Groups
-    Given I have the following groups
-      | name      | label    |
-      | managers  | Managers |
     Then I can search for the following groups
       | name      | label    |
       | managers  | Managers |
 
   Scenario: Edit Groups
-    Given I have the following groups
-      | name      | label    |
-      | managers  | Managers |
     Then I can edit the following groups
       | name      | newLabel       |
       | Managers  | Managers Group |
 
   Scenario: Delete Groups
-    Given I have the following groups
-      | name      | label    |
-      | managers  | Managers |
     Then I can delete the following groups
       | name      | label    |
       | Managers  | Managers |
