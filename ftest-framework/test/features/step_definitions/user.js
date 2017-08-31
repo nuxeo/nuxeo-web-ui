@@ -24,6 +24,7 @@ module.exports = function () {
     this.ui.user.searchFor(username);
     this.ui.user.searchResult(username).waitForVisible();
     this.ui.user.searchResult(username).click();
+    this.ui.user.editUserButton.waitForVisible();
     this.ui.user.editUserButton.click();
     this.ui.user.fillMultipleValues(table, this.ui.user.editUserDialog);
     this.ui.user.editUserDialogButton.click();
