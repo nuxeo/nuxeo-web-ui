@@ -63,13 +63,6 @@ limitations under the License.
         }
       }
 
-      #edit {
-        position: absolute;
-        z-index: 1;
-        top: 8px;
-        right: 8px;
-      }
-
       ::content paper-icon-button  {
         @apply(--nuxeo-action);
       }
@@ -130,8 +123,7 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         document: {
-          type: Object,
-          observer: '_documentChanged'
+          type: Object
         }
       },
 

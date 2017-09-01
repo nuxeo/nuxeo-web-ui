@@ -28,6 +28,7 @@ limitations under the License.
 <dom-module id="nuxeo-document-edit">
   <template>
     <style>
+
       ::content nuxeo-directory-suggestion,
       ::content paper-input-container {
         padding: 0 0 8px 0;
@@ -41,18 +42,6 @@ limitations under the License.
         width: 100%;
       }
 
-      ::content select {
-        background: none #fff;
-        border: 1px solid #c6c6c6;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
-        box-sizing: border-box;
-        display: block;
-        padding: 0.5em;
-        width: 100%;
-        margin-bottom: 8px;
-      }
-
       ::content *[role=widget] {
         @apply(--layout-vertical);
         box-sizing: border-box;
@@ -61,15 +50,19 @@ limitations under the License.
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]"></nuxeo-document>
+
     <nuxeo-dialog id="dialog" with-backdrop>
-      <form id="form" is="iron-form">
-        <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
-      </form>
+      <paper-dialog-scrollable>
+        <form id="form" is="iron-form">
+          <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
+        </form>
+      </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button on-tap="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" on-tap="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
   </template>
   <script>
     Polymer({
