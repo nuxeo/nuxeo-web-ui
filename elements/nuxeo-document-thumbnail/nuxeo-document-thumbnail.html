@@ -55,10 +55,8 @@ limitations under the License.
       },
 
       _thumbnail: function(doc) {
-        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-          doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
-        }
+        return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+               doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
       },
 
       _error: function() {
@@ -66,9 +64,7 @@ limitations under the License.
       },
 
       _title: function(doc) {
-        if (doc && doc.title) {
-          return this.i18n('accessibility.thumbnail', doc.title);
-        }
+        return doc && doc.title ? this.i18n('accessibility.thumbnail', doc.title) : '';
       }
     });
   </script>
