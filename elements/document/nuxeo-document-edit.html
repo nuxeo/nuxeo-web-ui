@@ -122,11 +122,10 @@ limitations under the License.
           properties: this._dirtyProperties
         };
 
-        this.$.doc.put().then(
-            function(){
-              this._refresh();
-              this.toggle();
-            }.bind(this));
+        this.$.doc.put().then(function() {
+          this._refresh();
+          this.toggle();
+        }.bind(this));
       },
 
       _cancel: function() {
