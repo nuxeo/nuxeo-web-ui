@@ -53,7 +53,7 @@ limitations under the License.
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]"></nuxeo-document>
 
-    <nuxeo-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="edit-dialog" no-auto-focus with-backdrop>
       <paper-dialog-scrollable>
         <form id="form" is="iron-form">
           <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
@@ -98,7 +98,7 @@ limitations under the License.
       },
 
       toggle: function() {
-        this.$.dialog.toggle();
+        this.$['edit-dialog'].toggle();
       },
 
       _validate: function() {
