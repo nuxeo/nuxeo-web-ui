@@ -63,29 +63,26 @@ module.exports = function () {
   });
 
   this.Then(/^I can edit the (.*) metadata$/, (docType) => {
-    const page = this.ui.browser.documentPage(docType);
-    page.metadata.waitForVisible();
-    page.edit.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
-    page.editButton.waitForVisible();
-    page.editButton.click();
-    page.edit.waitForVisible();
-    page.metadata.waitForVisible(driver._original.options.waitforTimeout, true).should.be.true;
-    page.edit.title = docType;
-    page.saveButton.waitForVisible().should.be.true;
-    page.saveButton.click();
-    page.metadata.waitForVisible();
+    const browser = this.ui.browser;
+    browser.editButton.waitForVisible();
+    browser.editButton.click();
+    browser.editDialog.waitForVisible();
+    browser.editDialog.edit(docType).waitForVisible();
+    browser.editDialog.edit.title = docType;
+    browser.editDialog.saveButton.waitForVisible().should.be.true;
+    browser.editDialog.saveButton.click();
   });
 
   this.Then(/^I can edit the following properties in the (.+) metadata:$/, (docType, table) => {
-    const page = this.ui.browser.documentPage(docType);
-    page.waitForVisible();
-    page.editButton.waitForVisible();
-    page.editButton.click();
-    page.edit.waitForVisible();
-    page.edit.layout().waitForVisible();
-    page.edit.layout().fillMultipleValues(table);
-    page.saveButton.waitForVisible();
-    page.saveButton.click();
+    const browser = this.ui.browser;
+    browser.editButton.waitForVisible();
+    browser.editButton.click();
+    browser.editDialog.waitForVisible();
+    browser.editDialog.edit(docType).waitForVisible();
+    browser.editDialog.edit(docType).layout().waitForVisible();
+    browser.editDialog.edit(docType).layout().fillMultipleValues(table);
+    browser.editDialog.saveButton.waitForVisible().should.be.true;
+    browser.editDialog.saveButton.click();
   });
 
   this.Given(/^I have a (.+) Note$/, (format) => {
