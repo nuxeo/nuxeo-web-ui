@@ -3,6 +3,7 @@
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import DocumentPermissions from './browser/document_permissions';
+import EditDialog from './edit_dialog';
 
 export default class Browser extends BasePage {
 
@@ -36,6 +37,14 @@ export default class Browser extends BasePage {
 
   _section(name) {
     return this.el.element(`iron-pages section[name='${name}']`);
+  }
+
+  get editButton() {
+    return this.el.element('#edit');
+  }
+
+  get editDialog() {
+    return new EditDialog('#edit-dialog');
   }
 
   addToCollection(name) {
