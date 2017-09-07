@@ -6,6 +6,12 @@
     <unzip from="${bundle.fileName}" to="/" prefix="web">
       <include>web/nuxeo.war/**</include>
     </unzip>
+
+     <!-- Add fallback to two-letter locales -->
+    <copy from="nuxeo.war/ui/i18n/messages-es-ES.json"
+          to="nuxeo.war/ui/i18n/messages-es.json" />
+    <copy from="nuxeo.war/ui/i18n/messages-pt-PT.json"
+          to="nuxeo.war/ui/i18n/messages-pt.json" />
   </install>
 
   <extension target="web#STD-AUTH-FILTER">
