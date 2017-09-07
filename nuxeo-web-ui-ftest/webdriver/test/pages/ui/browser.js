@@ -49,14 +49,14 @@ export default class Browser extends BasePage {
 
   addToCollection(name) {
     this.el.element(`nuxeo-add-to-collection-button paper-icon-button`).click();
-    driver.waitForVisible(`#dialog nuxeo-select2 a.select2-choice`);
-    driver.element(`#dialog nuxeo-select2 a.select2-choice`).click();
+    driver.waitForVisible(`#add-to-collection-dialog nuxeo-select2 a.select2-choice`);
+    driver.element(`#add-to-collection-dialog nuxeo-select2 a.select2-choice`).click();
     driver.waitForVisible(`#select2-drop .select2-search input`);
     driver.element(`#select2-drop .select2-search input`).setValue(name);
     driver.waitForVisible(`#select2-drop li.select2-result`);
     driver.element(`#select2-drop li.select2-result`).click();
-    driver.waitForEnabled(`#dialog paper-button[name="add"]`);
-    driver.element(`#dialog paper-button[name="add"]`).click();
+    driver.waitForEnabled(`#add-to-collection-dialog paper-button[name="add"]`);
+    driver.element(`#add-to-collection-dialog paper-button[name="add"]`).click();
     this.el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
 
