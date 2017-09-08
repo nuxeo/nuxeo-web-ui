@@ -332,7 +332,7 @@ limitations under the License.
           this.set('creating', false);
         }.bind(this)).catch(function() {
           this.set('creating', false);
-        });
+        }.bind(this));
       },
 
       _back: function() {
