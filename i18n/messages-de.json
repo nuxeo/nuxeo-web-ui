@@ -291,6 +291,7 @@
   "documentCreationForm.location":"Ort",
   "documentCreationForm.newDoc.heading":"Neues {0}",
   "documentEdit.layoutNotFound":"Bearbeitungslayout für {0} nicht gefunden.",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"Kategorie",
   "documentHistory.comment":"Kommentar",
   "documentHistory.date":"Datum",

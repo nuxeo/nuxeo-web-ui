@@ -291,6 +291,7 @@
   "documentCreationForm.location":"Ubicación",
   "documentCreationForm.newDoc.heading":"Nuevo {0}",
   "documentEdit.layoutNotFound":"No se pudo encontrar el diseño de edición para {0}.",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"Categoría",
   "documentHistory.comment":"Comentario",
   "documentHistory.date":"Fecha",

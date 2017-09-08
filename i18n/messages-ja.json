@@ -291,6 +291,7 @@
   "documentCreationForm.location":"場所",
   "documentCreationForm.newDoc.heading":"新規{0}",
   "documentEdit.layoutNotFound":"{0}用の編集レイアウトが見つかりませんでした。",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"分類",
   "documentHistory.comment":"コメント",
   "documentHistory.date":"日付",

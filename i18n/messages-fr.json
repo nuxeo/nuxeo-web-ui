@@ -291,6 +291,7 @@
   "documentCreationForm.location":"Emplacement",
   "documentCreationForm.newDoc.heading":"Nouveau document {0}",
   "documentEdit.layoutNotFound":"Aucun formulaire de modification pour {0}",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"Catégorie",
   "documentHistory.comment":"Commentaire",
   "documentHistory.date":"Date",

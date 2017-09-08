@@ -291,6 +291,7 @@
   "documentCreationForm.location":"Plats",
   "documentCreationForm.newDoc.heading":"Nytt {0}",
   "documentEdit.layoutNotFound":"Det gick inte att hitta redigeringslayout för {0}.",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"Kategori",
   "documentHistory.comment":"Kommentar",
   "documentHistory.date":"Datum",

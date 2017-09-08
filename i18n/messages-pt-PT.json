@@ -291,6 +291,7 @@
   "documentCreationForm.location":"Local",
   "documentCreationForm.newDoc.heading":"Novo {0}",
   "documentEdit.layoutNotFound":"Falha ao procurar o layout de edição para {0}.",
+  "documentEditAction.tooltip":"Edit document",
   "documentHistory.category":"Categoria",
   "documentHistory.comment":"Comentário",
   "documentHistory.date":"Data",
