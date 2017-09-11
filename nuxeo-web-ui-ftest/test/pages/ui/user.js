@@ -9,6 +9,7 @@ export default class User extends BasePage {
     const parent = opts.parent || '';
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
+    this.el.waitForVisible(parent);
     if (field === 'password' || field === 'passwordConfirmation') {
       return this.el.element(`${parent}[id="${field}"]`);
     } else {
