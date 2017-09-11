@@ -16,7 +16,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.html">
@@ -50,24 +49,53 @@ limitations under the License.
       .page .side {
         @apply(--layout-vertical);
         @apply(--layout-flex);
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .scroller {
+        @apply(--nuxeo-card);
+        margin-bottom: 0;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        overflow: auto;
+        position: absolute;
+      }
+
+      .section {
+        padding-bottom: 16px;
       }
 
       @media (max-width: 1024px) {
         .page {
           flex-direction: column;
         }
+
         .page .main {
           padding: 0;
           margin-bottom: 1rem;
           max-width: initial;
         }
+
+        .page .side {
+          padding: 0;
+          margin-bottom: 1rem;
+          max-width: initial;
+          display: block !important;
+        }
+
+        .scroller {
+          position: relative;
+        }
       }
 
-      ::content paper-icon-button  {
+      ::content paper-icon-button {
         @apply(--nuxeo-action);
       }
 
-      ::content paper-icon-button:hover  {
+      ::content paper-icon-button:hover {
         @apply(--nuxeo-action-hover);
       }
 
@@ -82,37 +110,37 @@ limitations under the License.
       </div>
 
       <div class="side">
+        <div class="scroller">
+          <!-- info -->
+          <div class="section">
+            <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
+          </div>
 
-        <!-- info -->
-        <paper-card>
-          <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
-        </paper-card>
+          <!-- metadata -->
+          <div class="section">
+            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+          </div>
 
-        <!-- metadata -->
-        <paper-card>
-          <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
-        </paper-card>
+          <!-- collections -->
+          <div class="section" hidden$="[[!_hasCollections(document)]]">
+            <h3>[[i18n('documentPage.collections')]]</h3>
+            <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
+          </div>
 
-        <!-- collections -->
-        <paper-card hidden$="[[!_showCollections(document)]]">
-          <h3>[[i18n('documentPage.collections')]]</h3>
-          <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
-        </paper-card>
+          <!-- tags -->
+          <div class="section">
+            <h3>[[i18n('documentPage.tags')]]</h3>
+            <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
+                                  placeholder="[[i18n('documentPage.tags.placeholder')]]">
+            </nuxeo-tag-suggestion>
+          </div>
 
-        <!-- tags -->
-        <paper-card>
-          <h3>[[i18n('documentPage.tags')]]</h3>
-          <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
-                                placeholder="[[i18n('documentPage.tags.placeholder')]]">
-          </nuxeo-tag-suggestion>
-        </paper-card>
-
-        <!-- activity -->
-        <paper-card>
-          <h3>[[i18n('documentPage.activity')]]</h3>
-          <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
-        </paper-card>
-
+          <!-- activity -->
+          <div class="section">
+            <h3>[[i18n('documentPage.activity')]]</h3>
+            <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -131,7 +159,7 @@ limitations under the License.
         return !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && doc.state !== 'deleted';
       },
 
-      _showCollections: function (doc) {
+      _hasCollections: function(doc) {
         return this.hasCollections(doc);
       }
     });
