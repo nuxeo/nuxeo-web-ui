@@ -27,6 +27,7 @@ module.exports = function () {
       this.ui.group.searchFor(row[0]);
       this.ui.group.searchResult(row[0]).waitForVisible();
       this.ui.group.searchResult(row[0]).click();
+      this.ui.group.editGroupButton.waitForVisible();
       this.ui.group.editGroupButton.click();
       fixtures.layouts.setValue(this.ui.group.editGroupLabel, row[1]);
       this.ui.group.editGroupDialogButton.click();
@@ -38,6 +39,7 @@ module.exports = function () {
       this.ui.group.searchFor(row[0]);
       this.ui.group.searchResult(row[0]).waitForVisible();
       this.ui.group.searchResult(row[0]).click();
+      this.ui.group.deleteGroupButton.waitForVisible();
       this.ui.group.deleteGroupButton.click();
       this.ui.group.confirmDeleteGroupButton.click();
     });
