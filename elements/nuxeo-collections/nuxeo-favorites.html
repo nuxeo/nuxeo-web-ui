@@ -180,7 +180,7 @@ limitations under the License.
         this._fetchFavorite().then(function(favorite) {
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
-          this.$.favoritesProvider.fetch();
+          this.$.favoritesList.fetch();
         }.bind(this));
       },
 

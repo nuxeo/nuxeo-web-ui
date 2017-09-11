@@ -75,7 +75,7 @@ limitations under the License.
           <!-- recently edited -->
           <paper-card>
             <h3><iron-icon icon="nuxeo:edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
-            <nuxeo-page-provider auto
+            <nuxeo-page-provider
               id="latestQuery"
               page-size="20"
               provider="domain_documents"
@@ -199,11 +199,11 @@ limitations under the License.
       },
 
       _refresh: function() {
-        this.$.latestQuery.fetch();
+        this.$.latestEditedDocs.fetch();
         this._fetchFavorite().then(function(favorite) {
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
-          this.$.favoritesProvider.fetch();
+          this.$.favoriteDocs.fetch();
         }.bind(this));
       },
 

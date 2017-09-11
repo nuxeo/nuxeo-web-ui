@@ -189,6 +189,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       observers: [
+        '_viewChanged(view)',
         '_updateStorage(name)',
         '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
       ],
@@ -212,6 +213,14 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         return (this.view && this.view.$.list) ? this.view.$.list.items : [];
       },
 
+      _viewChanged: function() {
+        if (this.view) {
+          this.view.reset();
+          this.view.fetch();
+          this.fire('search-results-view', {view: this.view});
+        }
+      },
+
       _updateViews: function() {
         var hasDisplayMode;
         this._displayModes = [];
@@ -219,6 +228,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           var name = view.getAttribute("name"),
               icon = view.getAttribute("icon");
           view.nxProvider = this.nxProvider;
+          view.fetch();
           if (this._settings && view.settings) {
             view.settings = this._settings[name];
           }
