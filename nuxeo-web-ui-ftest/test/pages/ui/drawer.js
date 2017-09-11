@@ -59,6 +59,8 @@ export default class Drawer extends BasePage {
   }
 
   open(name) {
+    this.menu.waitForVisible();
+    this.menu.waitForVisible(`nuxeo-menu-icon[name='${name}']`);
     this.menu.click(`nuxeo-menu-icon[name='${name}']`);
     const section = this._section(name);
     section.waitForVisible();

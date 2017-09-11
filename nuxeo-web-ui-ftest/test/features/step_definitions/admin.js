@@ -7,7 +7,10 @@ module.exports = function () {
       .waitForVisible(browser.options.waitForTimeout, true).should.be.true);
 
   // XXX: this.ui.drawer.administration.click()
-  this.When('I click "$text" in the administration menu', (text) => driver.click(`a=${text}`));
+  this.When('I click "$text" in the administration menu', (text) => {
+    driver.waitForVisible(`a=${text}`);
+    driver.click(`a=${text}`);
+  });
 
   this.Then('I can see the analytics page', () =>
     this.ui.administration.analytics.waitForVisible());
