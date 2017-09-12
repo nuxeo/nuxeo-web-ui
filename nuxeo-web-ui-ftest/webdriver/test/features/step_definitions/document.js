@@ -68,7 +68,7 @@ module.exports = function () {
     browser.editButton.click();
     browser.editDialog.waitForVisible();
     browser.editDialog.edit(docType).waitForVisible();
-    browser.editDialog.edit.title = docType;
+    browser.editDialog.edit(docType).title = docType;
     browser.editDialog.saveButton.waitForVisible().should.be.true;
     browser.editDialog.saveButton.click();
   });
