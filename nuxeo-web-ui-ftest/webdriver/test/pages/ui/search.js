@@ -35,7 +35,7 @@ export default class Search extends BasePage {
   }
 
   get columnsCloseButton() {
-    return driver.element('//body/nuxeo-dialog[@id="columnsSettingsPopup"]/div/paper-button');
+    return this.columnsSettingsPopup.element('//div/paper-button');
   }
 
   get saveSearchAsButton() {
