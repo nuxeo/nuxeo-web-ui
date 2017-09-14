@@ -322,7 +322,7 @@ limitations under the License.
         if (!this._validate() || !this.canCreate) {
           return;
         }
-        this.document.name = this._sanitizeName(this.document.properties['dc:title']);
+        this.document.name = this.document.name || this._sanitizeName(this.document.properties['dc:title']);
         this.set('creating', true);
         this.$.docRequest.post().then(function(response) {
           this.$.creationStats.storeType(this.selectedDocType.id);
