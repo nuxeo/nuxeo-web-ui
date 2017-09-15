@@ -425,6 +425,13 @@
 
 <!-- RESULT SELECTION ACTIONS -->
 
+<nuxeo-slot-content name="downloadSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="5">
+  <template>
+    <nuxeo-download-documents-button documents="[[selectedItems]]">
+    </nuxeo-download-documents-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="addToCollectionSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
     <nuxeo-add-to-collection-documents-button documents="[[selectedItems]]">

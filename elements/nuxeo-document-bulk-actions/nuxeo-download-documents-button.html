@@ -1,0 +1,113 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-download-documents-button`
+@group Nuxeo UI
+@element nuxeo-download-documents-button
+-->
+<dom-module id="nuxeo-download-documents-button">
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      ::content iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <nuxeo-connection id="nx"></nuxeo-connection>
+
+    <nuxeo-operation id="bulkDownloadOp" op="Blob.BulkDownload"></nuxeo-operation>
+
+    <paper-icon-button icon="nuxeo:download" id="downloadAllButtons">
+    </paper-icon-button>
+    <paper-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip">
+      [[i18n('bulkDownload.tooltip')]]
+    </paper-tooltip>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-download-documents-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        documents: {
+          type: Array,
+          notify: true,
+          value: []
+        }
+      },
+
+      listeners: {
+        'tap': 'downloadDocuments'
+      },
+
+      downloadDocuments: function() {
+        if (this.documents && this.documents.length) {
+          var uids = this.documents.map(function(doc) {
+            return doc.uid;
+          }).join(',');
+          this.$.bulkDownloadOp.input = 'docs:' + uids;
+          this.$.bulkDownloadOp.params = {
+            "filename": this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
+          }
+          this.$.bulkDownloadOp.execute().then(function(res) {
+            this.fire('notify', {"message": this.i18n('bulkDownload.preparing')});
+            window.setTimeout(this._watchDownload.bind(this), 1000, res.key);
+          }.bind(this)).catch(function(err) {
+            this.fire('notify', {"message": err});
+          }.bind(this));
+        }
+      },
+
+      _watchDownload: function(key) {
+        this.$.nx.http(this.$.nx.url + "/nxblobstatus/" + key).then(function(res) {
+          if (res.completed) {
+            this.fire('notify', {"message": this.i18n('bulkDownload.completed')});
+            var a = document.createElement('a');
+            a.style = 'display: none';
+            a.download = true;
+            a.href = this.$.nx.url + "/nxbigblob/" + key;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+          } else {
+            this.fire('notify', {"message": this.i18n('bulkDownload.preparing')});
+            window.setTimeout(this._watchDownload.bind(this), 1000, key);
+          }
+        }.bind(this)).catch(function() {
+          this.fire('notify', {"message": this.i18n('bulkDownload.error')});
+        }.bind(this));
+      }
+
+    });
+  </script>
+
+</dom-module>
