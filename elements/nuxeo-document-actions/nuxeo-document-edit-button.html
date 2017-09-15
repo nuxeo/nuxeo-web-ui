@@ -18,34 +18,46 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../document/nuxeo-document-edit.html">
 
 <!--
 `nuxeo-document-edit-action`
 @group Nuxeo UI
-@element nuxeo-document-edit-action
+@element nuxeo-document-edit-button
 -->
-<dom-module id="nuxeo-document-edit-action">
+<dom-module id="nuxeo-document-edit-button">
   <template>
     <style>
       :host {
         display: inline-block;
       }
+
+      .container {
+        margin: 0;
+        padding: 24px 0 0 0;
+      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_showEdit"></paper-icon-button>
+      <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_openDialog"></paper-icon-button>
       <paper-tooltip>[[i18n('documentEditAction.tooltip')]]</paper-tooltip>
     </template>
 
-    <nuxeo-document-edit id="dialog" document="[[document]]"></nuxeo-document-edit>
+    <nuxeo-dialog id="edit-dialog" no-auto-focus with-backdrop modal>
+      <div class="container">
+        <nuxeo-document-edit id="dialog" document="[[document]]"
+                             on-document-updated="_closeDialog"></nuxeo-document-edit>
+      </div>
+    </nuxeo-dialog>
 
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-document-edit-action',
+      is: 'nuxeo-document-edit-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
 
@@ -61,8 +73,12 @@ limitations under the License.
         return this.document;
       },
 
-      _showEdit: function() {
-        this.$.dialog.toggle();
+      _openDialog: function() {
+        this.$['edit-dialog'].open();
+      },
+
+      _closeDialog: function() {
+        this.$['edit-dialog'].close();
       }
     });
   </script>
