@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="nuxeo-search-form-layout.html">
 <link rel="import" href="nuxeo-search-results-layout.html">
@@ -89,18 +90,19 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-page-provider id="provider" auto$="[[_isAuto(auto, visible)]]"
-       provider="[[provider]]"
-       page-size="[[pageSize]]"
-       aggregations="{{aggregations}}"
-       enrichers="[[enrichers]]"
-       params="[[_params]]"
-       quick-filters="{{quickFilters}}"
-       schemas="[[schemas]]"
-       loading="{{loading}}"
-       headers="[[headers]]"
-       fetch-aggregates
-       on-error="_onError">
+    <nuxeo-page-provider id="provider"
+                         auto$="[[_isAuto(auto, visible, searchForm)]]"
+                         provider="[[provider]]"
+                         page-size="[[pageSize]]"
+                         aggregations="{{aggregations}}"
+                         enrichers="[[enrichers]]"
+                         params="[[_params]]"
+                         quick-filters="{{quickFilters}}"
+                         schemas="[[schemas]]"
+                         loading="{{loading}}"
+                         headers="[[headers]]"
+                         fetch-aggregates
+                         on-error="_onError">
     </nuxeo-page-provider>
 
     <template is="dom-if" if="[[showFilters]]">
@@ -215,7 +217,15 @@ limitations under the License.
          **/
         aggregations: {
           type: Object,
-          observer: '_aggregationsChanged'
+          observer: '_aggregationsChanged',
+          notify: true
+        },
+        /**
+         * Quick filters state of `provider`.
+         */
+        quickFilters: {
+          type: Array,
+          notify: true
         },
         /**
          * If `true`, the current element is visible.
@@ -238,13 +248,23 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-
         /*
          * If `true`, opens the collapsible top filtering panel.
          */
         opened: {
           type: Boolean,
           value: false
+        },
+        /*
+         * An external search form (containing its own page provider) will be used, instead of the embeded one.
+         * In case this is set, the following properties should be ignored, as the behavior they affect will be
+         * controlled by the search form: `provider`, `pageSize`, `params`, `schemas`, `enrichers`, `headers`,
+         * `loading`, `aggregations`, `quickFilters` and `auto`.
+         */
+        searchForm: {
+          type: Object,
+          value: null,
+          observer: '_searchFormChanged'
         },
 
         _params: Object,
@@ -257,8 +277,14 @@ limitations under the License.
         }
       },
 
+      listeners: {
+        'results.navigate' : '_navigateFromSearch'
+      },
+
       ready: function() {
-        this._nxProvider = this.$.provider;
+        if (!this._nxProvider) {
+          this._nxProvider = this.$.provider;
+        }
       },
 
       get form() {
@@ -277,7 +303,7 @@ limitations under the License.
       },
 
       _isAuto: function() {
-        return this.visible && this.auto;
+        return this.visible && this.auto && !this.searchForm;
       },
 
       _expandIcon: function(opened) {
@@ -311,8 +337,8 @@ limitations under the License.
       },
 
       _search: function() {
-        this.$.provider.page = 1;
-        return this.$.provider.fetch();
+        this._nxProvider.page = 1;
+        return this._nxProvider.fetch();
       },
 
       _aggregationsChanged: function() {
@@ -323,6 +349,7 @@ limitations under the License.
 
       _onError: function(e) {
         this.fire('notify', e.detail.error);
+        e.stopPropagation();
       },
 
       _clear: function() {
@@ -351,6 +378,20 @@ limitations under the License.
         }.bind(this));
         form.addEventListener('trigger-search', this._search.bind(this));
         this._search();
+      },
+
+      _searchFormChanged: function(searchForm) {
+        if (searchForm) {
+          this._nxProvider = searchForm.nxProvider;
+          this.provider = this._nxProvider.provider;
+          this.searchName = searchForm.searchName;
+        }
+      },
+
+      _navigateFromSearch: function(e) {
+        if (this.searchForm) {
+          this.searchForm.displayQueue(e.detail.doc);
+        }
       }
 
     });
