@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
@@ -45,11 +46,11 @@ limitations under the License.
 <dom-module id="nuxeo-document-import">
 
   <template>
-    <style>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles">
       :host {
         display: block;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
+        @apply --layout-flex;
+        @apply --layout-vertical;
       }
 
       nuxeo-path-suggestion {
@@ -83,7 +84,7 @@ limitations under the License.
       }
 
       ::content label {
-        @apply(--nuxeo-label);
+        @apply --nuxeo-label;
         padding-top: 8px;
       }
 
@@ -166,11 +167,11 @@ limitations under the License.
       }
 
       .file-overview:hover {
-        @apply(--nuxeo-block-hover);
+        @apply --nuxeo-block-hover;
       }
 
       .file-overview.selected {
-        @apply(--nuxeo-block-selected);
+        @apply --nuxeo-block-selected;
       }
 
       .file-overview iron-icon {
@@ -260,7 +261,7 @@ limitations under the License.
       }
 
       .buttons {
-        @apply(--buttons-bar);
+        @apply --buttons-bar;
       }
 
       .add-more .importActions {
@@ -706,7 +707,7 @@ limitations under the License.
             }, this);
             this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
             this.hasLocalFilesUploaded = false;
-          } else if (changeRecord.path.match(/files\.#\d+\.index/gi)) {
+          } else if (changeRecord.path.match(/files\.\d+\.index/gi)) {
             this.hasLocalFilesUploaded = this.hasLocalFiles && this.files && this.files.every(function(file) {
               return !file || file.complete;
             });

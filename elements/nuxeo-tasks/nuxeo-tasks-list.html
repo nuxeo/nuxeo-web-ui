@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
@@ -64,13 +65,13 @@ limitations under the License.
       }
 
       .list-item:hover {
-        @apply(--nuxeo-block-hover);
+        @apply --nuxeo-block-hover;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply(--nuxeo-block-selected);
+        @apply --nuxeo-block-selected;
       }
 
       nuxeo-data-list {
@@ -82,6 +83,7 @@ limitations under the License.
       /* fix IE11 tap selection not working for task list items (NXP-21833) */
       .task-box {
         pointer-events: none;
+        @apply --layout-vertical;
       }
       /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
       .task-box nuxeo-date {
@@ -92,6 +94,11 @@ limitations under the License.
         font-weight: bold;
         text-transform: uppercase;
       }
+
+      .horizontal {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
     </style>
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
       selected-item="{{_selection}}"
@@ -99,21 +106,20 @@ limitations under the License.
       selection-enabled select-on-tap>
       <template>
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-          <div class="task-box vertical layout">
+          <div class="task-box">
             <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>
             </div>
             <div class="task-detail">
-              <div class="taskDoc horizontal layout center">
+              <div class="taskDoc horizontal">
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
-              <div class="horizontal layout center">
-
+              <div class="horizontal">
                 <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
                 <span class="date"> <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
               </div>
             </div>
-            <div class="horizontal layout center">
+            <div class="horizontal">
               <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
             </div>
           </div>

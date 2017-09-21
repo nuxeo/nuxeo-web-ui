@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
@@ -57,40 +58,26 @@ limitations under the License.
         height: 20px;
       }
 
-      #list-items {
-        overflow: auto;
-        width: 200px;
-        max-height: 400px;
-        background-color: var(--paper-menu-background-color);
-      }
-
-      .list-actions {
-        @apply(--layout-vertical);
-        @apply(--layout-center);
-        @apply(--buttons-bar);
-        padding: 8px;
-      }
-
       .version {
-        @apply(--layout-vertical);
-        @apply(--layout-start);
+        @apply --layout-vertical;
+        @apply --layout-start;
         padding: 8px;
         cursor: pointer;
         border-top: 1px solid var(--divider-color);
       }
 
       .version:hover {
-        @apply(--nuxeo-block-hover);
+        @apply --nuxeo-block-hover;
       }
 
       .version .row {
-        @apply(--layout-horizontal);
-        @apply(--layout-start);
+        @apply --layout-horizontal;
+        @apply --layout-start;
         margin: 0;
         padding: 0;
       }
 
-      .version .row ::content * {
+      .version .row * {
         display: inline-block;
         text-align: left;
       }
@@ -129,8 +116,8 @@ limitations under the License.
         <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
         <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
       </nuxeo-tag>
-      <nuxeo-document-versions-list id="list" document="[[document]]">
-        <div id="list-items">
+      <nuxeo-document-versions-list id="list">
+        <div id="list-items" slot="items">
           <template is="dom-if" if="[[document.isVersion]]">
             <div id="version-latest" class="version" on-tap="_showLatest">
               <div class="row title latest">[[_labelLatest(latest)]]</div>
@@ -143,10 +130,9 @@ limitations under the License.
             </div>
           </template>
         </div>
-        <div class="list-actions" hidden$="[[_isCreateDisabled(document)]]">
-          <nuxeo-document-create-version document="[[document]]" on-dialog-closed="_hideList">
-          </nuxeo-document-create-version>
-        </div>
+        <nuxeo-document-create-version slot="actions" hidden$="[[_isCreateDisabled(document)]]" document="[[document]]"
+                                       on-dialog-closed="_hideList">
+        </nuxeo-document-create-version>
       </nuxeo-document-versions-list>
       <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500"
                              on-lower-threshold="_loadMore">

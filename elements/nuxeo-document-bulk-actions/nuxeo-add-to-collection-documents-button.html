@@ -26,7 +26,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select2.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-selectivity.html">
 
 <!--
 `nuxeo-add-to-collection-documents-button`
@@ -66,7 +66,7 @@ limitations under the License.
       <paper-dialog-scrollable>
         <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
         <label>[[i18n('addToCollectionDocumentsButton.dialog.collections')]]<span class="required">*</span></label>
-        <nuxeo-select2 id="nxSelect"
+        <nuxeo-selectivity id="nxSelect"
                        operation="Collection.Suggestion"
                        min-chars="0"
                        placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
@@ -76,7 +76,7 @@ limitations under the License.
                        result-formatter="[[resultAndSelectionFormatter]]"
                        selection-formatter="[[resultAndSelectionFormatter]]"
                        new-entry-formatter="[[newEntryFormatter]]">
-        </nuxeo-select2>
+        </nuxeo-selectivity>
         <paper-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
                         value="{{description::input}}"
                         hidden$="[[!_isNew(collection)]]"

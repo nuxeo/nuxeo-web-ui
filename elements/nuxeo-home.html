@@ -22,7 +22,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-home">
   <template>
-    <style>
+    <style include="nuxeo-styles">
 
       .flex-layout {
         display: flex;
@@ -44,8 +44,8 @@ limitations under the License.
       }
 
       h3 {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+        @apply --layout-horizontal;
+        @apply --layout-center;
       }
 
       h3 iron-icon {
@@ -53,7 +53,7 @@ limitations under the License.
         margin-right: 0.4em;
       }
 
-      nuxeo-data-table, nuxeo-tasks-list, nuxeo-tasks-list ::content nuxeo-data-list {
+      nuxeo-data-table, nuxeo-tasks-list {
         height: 350px !important;
       }
 
@@ -68,8 +68,8 @@ limitations under the License.
     </style>
 
     <nuxeo-page>
-      <div class="header">[[i18n('home.dashboard')]]</div>
-      <div class="content">
+      <div slot="header">[[i18n('home.dashboard')]]</div>
+      <div>
         <section name="dashboard" class="flex-layout">
 
           <!-- recently edited -->

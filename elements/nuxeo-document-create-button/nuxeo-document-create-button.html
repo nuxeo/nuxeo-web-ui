@@ -37,7 +37,7 @@ limitations under the License.
         color: var(--nuxeo-button-primary-text);
         --paper-fab-background: var(--nuxeo-button-primary);
         --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
-        @apply(--nuxeo-document-create-button);
+        @apply --nuxeo-document-create-button;
         transition: color 0.25s ease-in-out;
       }
 
@@ -62,7 +62,7 @@ limitations under the License.
         opacity: 1;
       }
 
-      ::content nuxeo-document-create-shortcuts {
+      nuxeo-document-create-shortcuts {
         --nuxeo-document-create-shortcut-margin: 0 0 16px 0;
       }
     </style>

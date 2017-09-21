@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
@@ -30,20 +31,23 @@ limitations under the License.
 <dom-module id="nuxeo-analytics">
   <template>
     <style>
-      .header paper-listbox {
-        @apply(--layout-horizontal);
+      .flex {
+        @apply --layout-flex;
+      }
+      paper-listbox {
+        @apply --layout-horizontal;
         --paper-listbox-background-color: transparent;
       }
     </style>
 
     <nuxeo-page>
-      <div class="header">
+      <div slot="header">
         <span class="flex">[[i18n('analytics.heading')]]</span>
         <paper-listbox selected="{{selected}}" attr-for-selected="name">
           <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
-      <div class="content">
+      <div>
         <template is="dom-if" if="[[visible]]">
           <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="ANALYTICS_PAGES"></nuxeo-slot>

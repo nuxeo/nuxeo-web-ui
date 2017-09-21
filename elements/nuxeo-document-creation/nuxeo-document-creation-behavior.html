@@ -99,6 +99,7 @@ limitations under the License.
         if (!(type in schemaRegistry)) {
           if (!schemaFetcher) {
             schemaFetcher = document.createElement('nuxeo-resource');
+            this._attachDom(schemaFetcher);
           }
           schemaFetcher.path = '/config/types/' + this.selectedDocType.type;
           return schemaFetcher.get().then(function(doctype) {

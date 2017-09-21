@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-audit-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
@@ -38,15 +39,21 @@ limitations under the License.
       }
 
       nuxeo-data-table {
-        @apply(--paper-card);
+        @apply --paper-card;
         height: calc(100vh - 24em);
+      }
+
+      .dates {
+        @apply --layout-horizontal;
+        @apply --layout-end-justified;
+        @apply --layout-flex;
       }
     </style>
 
     <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
     </nuxeo-audit-page-provider>
 
-    <paper-card class="layout horizontal end-justified flex">
+    <paper-card class="dates">
       <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]"
                    value="{{startDate::change}}">
       </nuxeo-date-picker>

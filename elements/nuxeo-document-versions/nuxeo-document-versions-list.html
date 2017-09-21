@@ -16,8 +16,9 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
-<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-styles/element-styles/paper-material-styles.html">
 
 <!--
 `nuxeo-document-versions-list`
@@ -26,22 +27,34 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-versions-list">
   <template>
+    <style include="paper-material-styles">
+      :host {
+        display: inline-block;
+        @apply --paper-material-elevation-1;
+      }
 
-    <paper-material>
-      <content></content>
-    </paper-material>
+      #list-actions {
+        @apply --layout-vertical;
+        @apply --layout-center;
+        @apply --buttons-bar;
+        padding: 8px;
+      }
+    </style>
+
+    <div id="list-items">
+      <slot name="items"></slot>
+    </div>
+
+    <div id="list-actions">
+      <slot name="actions"></slot>
+    </div>
 
   </template>
 
-</dom-module>
-
-<script>
-  (function() {
+  <script>
     Polymer({
       is: 'nuxeo-document-versions-list',
-      properties: {
-        document: Object
-      },
+
       behaviors: [
         Polymer.IronOverlayBehavior
       ],
@@ -52,5 +65,5 @@ limitations under the License.
       }
 
     });
-  })();
-</script>
+  </script>
+</dom-module>

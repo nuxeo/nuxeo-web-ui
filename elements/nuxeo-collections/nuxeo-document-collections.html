@@ -1,3 +1,4 @@
+
 <!--
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
@@ -16,6 +17,7 @@ limitations under the License.
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tags.html">
@@ -27,9 +29,14 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-collections">
   <template>
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
+      }
+
+      .item {
+        @apply --layout-horizontal;
+        @apply --layout-center;
       }
 
       iron-icon {
@@ -60,7 +67,7 @@ limitations under the License.
 
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <nuxeo-tag>
-       <div class="horizontal layout center" >
+       <div class="item">
          <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
          <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid$="[[item.uid]]"></iron-icon>
        </div>

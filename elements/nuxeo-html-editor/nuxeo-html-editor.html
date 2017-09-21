@@ -15,14 +15,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<!-- define font faces -->
 <link href="../../bower_components/alloyeditor/dist/alloy-editor/assets/alloy-editor-ocean.css" rel="stylesheet">
 <!--  XXX CKEditor causes firefox to crash when scripts are inlined, moved to index.html -->
-<!-- <script src="../../bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all.js" type="text/javascript" ></script> -->
+
+<script src="../../bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all.js"></script>
 <script type="text/javascript">
   CKEDITOR.config.customConfig = ''; // skip loading config.js
   CKEDITOR.config.language = 'en'; // force en locale since it is the only one being vulcanized
   AlloyEditor._langResourceRequested = true; // skip loading of language file
 </script>
+
 <script src="../../bower_components/alloyeditor/dist/alloy-editor/config.js" type="text/javascript" ></script>
 <script src="../../bower_components/alloyeditor/dist/alloy-editor/lang/en.js" type="text/javascript" ></script>
 <script src="../../bower_components/alloyeditor/dist/alloy-editor/lang/alloy-editor/en.js" type="text/javascript" ></script>
@@ -35,12 +38,9 @@ limitations under the License.
 -->
 
 <dom-module id="nuxeo-html-editor">
+  <link rel="import" type="css" href="../../bower_components/alloyeditor/dist/alloy-editor/assets/alloy-editor-ocean.css">
   <template>
     <style>
-      :host {
-        display: block;
-      }
-
       #editor {
         outline: none;
         height: 100%;
@@ -52,7 +52,7 @@ limitations under the License.
         font-style: italic;
       }
 
-      div#editor ::content > * {
+      div#editor > * {
         margin-top: 0;
       }
     </style>
@@ -124,6 +124,7 @@ limitations under the License.
         };
         var editor = AlloyEditor.editable(this.$.editor, {
           readOnly: this.readOnly,
+          uiNode: this.shadowRoot,
           toolbars: toolbars
         });
         this.element = editor.get('nativeEditor');

@@ -32,20 +32,20 @@ limitations under the License.
         flex-wrap: wrap;
       }
 
-      .content ::content nuxeo-theme {
+      .content nuxeo-theme {
         padding: 2px 10px;
         flex-basis: calc(50% - 20px);
       }
 
       @media (max-width: 1024px) {
-        .content ::content nuxeo-theme {
+        .content nuxeo-theme {
           flex: 1 0 calc(100% - 16px);
         }
       }
     </style>
 
     <nuxeo-page>
-      <div class="header">[[i18n('app.themes.heading')]]</div>
+      <div slot="header">[[i18n('app.themes.heading')]]</div>
       <div class="content">
         <nuxeo-slot slot="THEMES"></nuxeo-slot>
       </div>

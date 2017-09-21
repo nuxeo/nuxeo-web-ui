@@ -16,7 +16,8 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -37,11 +38,11 @@ limitations under the License.
 <dom-module id="nuxeo-document-create">
 
   <template>
-    <style>
+    <style include="iron-flex iron-flex-alignment">
       :host {
         display: block;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
+        @apply --layout-flex;
+        @apply --layout-vertical;
       }
 
       nuxeo-path-suggestion {
@@ -121,15 +122,15 @@ limitations under the License.
       }
 
       .buttons {
-        @apply(--buttons-bar);
+        @apply --buttons-bar;
       }
 
-      ::content label {
-        @apply(--nuxeo-label);
+      label {
+        @apply --nuxeo-label;
         padding-top: 8px;
       }
 
-      ::content paper-dropdown-menu {
+      paper-dropdown-menu {
         width: 100%;
       }
 
@@ -145,8 +146,8 @@ limitations under the License.
         margin: 1rem 0;
       }
 
-      ::content *[role=widget] {
-        @apply(--layout-vertical);
+      *[role=widget] {
+        @apply --layout-vertical;
         box-sizing: border-box;
         margin-bottom: .5rem;
       }
@@ -155,6 +156,15 @@ limitations under the License.
         margin-right: 8px;
       }
 
+      .vertical {
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      iron-pages {
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
     </style>
 
     <nuxeo-document id="docRequest"
@@ -164,10 +174,10 @@ limitations under the License.
                     enrichers="permissions, subtypes"
                     response="{{createResponse}}"></nuxeo-document>
 
-    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
+    <iron-pages selected="[[stage]]" attr-for-selected="name">
 
       <!--Stage: allow user to choose a doc type-->
-      <div name="choose" class="vertical layout flex">
+      <div name="choose" class="vertical">
         <div class="editor flex container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}"
@@ -214,10 +224,12 @@ limitations under the License.
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
-          <form is="iron-form" id="form" class="form vertical layout flex">
-            <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
-            <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
-          </form>
+          <iron-form id="form">
+            <form class="form vertical layout flex">
+              <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
+              <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
+            </form>
+          </iron-form>
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
@@ -309,13 +321,8 @@ limitations under the License.
         // run our custom validation function first to allow setting custom native validity
         var valid = this.$['document-create'].validate();
 
-        // fake submit to trigger native validation checks and UI
-        if (valid) {
-          this.$.form._doFakeSubmitForValidation();
-        }
-
         // XXX: could rely on onsubmit to avoid rechecking for validity
-        return this.$.form.validate() && this.$.form.checkValidity() && valid;
+        return this.$.form.validate() && valid;
       },
 
       _create: function() {

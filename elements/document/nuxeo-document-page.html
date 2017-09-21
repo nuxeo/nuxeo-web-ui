@@ -33,22 +33,22 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-page">
   <template>
-    <style>
+    <style include="nuxeo-styles">
 
       .page {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
 
       .page .main {
-        @apply(--layout-vertical);
-        @apply(--layout-flex-2);
+        @apply --layout-vertical;
+        @apply --layout-flex-2;
         padding-right: 1.3rem;
         max-width: 65%;
       }
 
       .page .side {
-        @apply(--layout-vertical);
-        @apply(--layout-flex);
+        @apply --layout-vertical;
+        @apply --layout-flex;
         position: relative;
         margin-bottom: 16px;
       }
@@ -91,12 +91,12 @@ limitations under the License.
         }
       }
 
-      ::content paper-icon-button {
-        @apply(--nuxeo-action);
+      paper-icon-button {
+        @apply --nuxeo-action;
       }
 
-      ::content paper-icon-button:hover {
-        @apply(--nuxeo-action-hover);
+      paper-icon-button:hover {
+        @apply --nuxeo-action-hover;
       }
 
     </style>

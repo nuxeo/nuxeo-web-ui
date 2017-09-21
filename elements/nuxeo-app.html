@@ -28,7 +28,7 @@ limitations under the License.
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
-<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="nuxeo-app/nuxeo-progress-indicator.html">
@@ -51,6 +51,7 @@ limitations under the License.
 <!-- themes -->
 <link rel="import" href="../themes/base.html">
 <link rel="import" href="../themes/loader.html">
+<!--link rel="import" href="../themes/default/theme.html"-->
 
 <!-- routing -->
 <link rel="import" href="routing.html">
@@ -67,9 +68,9 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-app">
   <template>
-    <style>
+    <style include="nuxeo-styles">
 
-      paper-header-panel, iron-pages::content paper-header-panel {
+      paper-header-panel, iron-pages paper-header-panel {
         --paper-header-panel-body: {
           background: var(--nuxeo-page-background);
         };
@@ -107,7 +108,7 @@ limitations under the License.
 
       /* menu */
       #menu {
-        @apply(--nuxeo-sidebar);
+        @apply --nuxeo-sidebar;
         position: fixed;
         width: var(--nuxeo-sidebar-width);
         height: calc(100% - 54px);
@@ -116,16 +117,18 @@ limitations under the License.
         overflow: auto;
       }
 
-      #menu ::content paper-icon-button {
-        color: var(--nuxeo-sidebar-menu);
-        height: 48px;
-        padding: 12px 13px;
-        width: var(--nuxeo-sidebar-width);
+      #menu nuxeo-menu-icon {
+        --nuxeo-menu-icon-button: {
+          color: var(--nuxeo-sidebar-menu);
+          height: 48px;
+          padding: 12px 13px;
+          width: var(--nuxeo-sidebar-width);
+        }
       }
 
       #logo:hover img,
-      #menu ::content nuxeo-menu-icon:hover ::content paper-icon-button,
-      #menu ::content nuxeo-menu-icon.selected ::content paper-icon-button {
+      #menu nuxeo-menu-icon:hover,
+      #menu nuxeo-menu-icon.selected {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
@@ -161,20 +164,8 @@ limitations under the License.
         width: 100%;
       }
 
-      #drawer .header,
-      #drawer ::content .header {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        font-size: 1rem;
-        height: 53px;
-        padding: 0 16px;
-        text-transform: uppercase;
-        text-overflow: ellipsis;
-        color: var(--nuxeo-drawer-header);
-      }
-
       #drawer iron-pages {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
         color: var(--nuxeo-drawer-text);
         width: 294px;
         height: 100vh;
@@ -182,30 +173,29 @@ limitations under the License.
         background-color: var(--nuxeo-drawer-background);
       }
 
-      #drawer ::content nuxeo-menu-item:hover,
-      #drawer ::content .list-item:hover {
-        @apply(--nuxeo-block-hover);
+      #drawer nuxeo-menu-item:hover,
+      #drawer list-item:hover {
+        @apply --nuxeo-block-hover;
       }
 
-      #drawer ::content .list-item.selected,
-      #drawer ::content nuxeo-menu-item.iron-selected,
-      #drawer ::content .list-item:focus,
-      #drawer ::content nuxeo-menu-item:focus,
-      #drawer ::content .list-item.selected:focus,
-      #drawer ::content nuxeo-menu-item.iron-selected:focus {
-        @apply(--nuxeo-block-selected);
+      #drawer .list-item.selected,
+      #drawer nuxeo-menu-item.iron-selected,
+      #drawer .list-item:focus,
+      #drawer nuxeo-menu-item:focus,
+      #drawer .list-item.selected:focus,
+      #drawer nuxeo-menu-item.iron-selected:focus {
+        @apply --nuxeo-block-selected;
       }
 
-      #drawer ::content nuxeo-menu-item {
-        @apply(--nuxeo-sidebar-item-theme);
-      }
-
-      #drawer ::content nuxeo-menu-item a {
-        @apply(--nuxeo-sidebar-item-link);
+      #drawer nuxeo-menu-item {
+        @apply --nuxeo-sidebar-item-theme;
+        --nuxeo-menu-item-link {
+          @apply --nuxeo-sidebar-item-link;
+        }
       }
 
       #drawer .profile nuxeo-menu-item:last-of-type {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
         border: none;
         justify-content: flex-end;
       }
@@ -222,9 +212,6 @@ limitations under the License.
         display: none;
       }
 
-      paper-drawer-panel[narrow] ::content nuxeo-page ::content .header {
-        margin-left: 32px;
-      }
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
@@ -241,8 +228,8 @@ limitations under the License.
     <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
 
     <!-- app layout -->
-    <paper-drawer-panel id="drawerPanel" drawer-width="[[drawerWidth]]" responsive-width="720px" edge-swipe-sensitivity="0">
-      <div drawer>
+    <paper-drawer-panel id="drawerPanel" narrow="{{isNarrow}}" drawer-width="[[drawerWidth]]" responsive-width="720px" edge-swipe-sensitivity="0">
+      <div slot="drawer">
 
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]">
@@ -250,7 +237,7 @@ limitations under the License.
         </a>
 
         <!-- menu -->
-        <paper-menu id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
+        <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
           <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
                            hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
@@ -260,11 +247,11 @@ limitations under the License.
             icon="nuxeo:user-settings"
             label="app.account" class="profile-icon">
           </nuxeo-menu-icon>
-        </paper-menu>
+        </paper-listbox>
 
         <!-- drawer -->
         <div id="drawer">
-          <iron-pages id="drawer-pages" selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+          <iron-pages id="drawer-pages" selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible" on-iron-items-changed="_updateSearch">
 
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -290,7 +277,7 @@ limitations under the License.
       </div>
 
       <!-- pages -->
-      <paper-header-panel main mode="seamed">
+      <paper-header-panel slot="main" mode="seamed">
         <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
 
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
@@ -314,8 +301,8 @@ limitations under the License.
           <nuxeo-themes name="themes" selected="[[selectedProfileTab]]"></nuxeo-themes>
 
           <nuxeo-page name="error">
-            <div class="header"></div>
-            <div class="content">
+            <div slot="header"></div>
+            <div>
               <paper-card>
                 <nuxeo-error id="error">
                 </nuxeo-error>
@@ -325,7 +312,7 @@ limitations under the License.
 
         </iron-pages>
 
-        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" paper-drawer-toggle></paper-icon-button>
+        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" hidden$="[[!isNarrow]]"></paper-icon-button>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
 
       </paper-header-panel>
@@ -478,11 +465,11 @@ limitations under the License.
         'navigate': '_navigate',
         'collection-loaded': '_updateCollectionMenu',
         'notify': '_notify',
-        'nx-clipboard-updated': '_clipboardUpdated',
-        'drawer-pages.iron-items-changed': '_updateSearch'
+        'nx-clipboard-updated': '_clipboardUpdated'
       },
 
       ready: function() {
+
         this.$.drawerPanel.closeDrawer();
 
         window.addEventListener('unhandledrejection', function(e) {
@@ -687,7 +674,8 @@ limitations under the License.
       },
 
       _showSearchResults: function(e) {
-        this.navigateTo('search', e.target.searchName);
+        var target = e.composedPath()[0];
+        this.navigateTo('search', target.searchName);
       },
 
       _toggleDrawer: function(e) {
@@ -879,7 +867,7 @@ limitations under the License.
             return;
           }
           // check if page is already registered (vulcanized)
-          if (!Polymer.isInstance(el)) {
+          if (!(el instanceof Polymer.Element)) {
             this.loading = true;
             var tag = el.tagName.toLowerCase();
             this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, function() {

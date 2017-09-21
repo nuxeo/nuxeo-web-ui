@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
@@ -31,9 +32,12 @@ limitations under the License.
 <dom-module id="nuxeo-cloud-services">
   <template>
     <style>
+      .flex {
+        @apply --layout-flex;
+      }
       /* document views items (pills) */
-      ::content #documentViewsItems {
-        @apply(--layout-horizontal);
+      #documentViewsItems {
+        @apply --layout-horizontal;
         --paper-listbox-background-color: transparent;
       }
 
@@ -44,14 +48,14 @@ limitations under the License.
       }
     </style>
     <nuxeo-page>
-      <div class="header">
+      <div slot="header">
         <span class="flex">[[i18n('cloudServices.heading')]]</span>
         <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
           <nuxeo-page-item name="providers" label="cloudServices.providers"></nuxeo-page-item>
           <nuxeo-page-item name="tokens" label="cloudServices.tokens"></nuxeo-page-item>
         </paper-listbox>
       </div>
-      <div class="content">
+      <div>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
           <nuxeo-cloud-providers id="providers" name="providers"></nuxeo-cloud-providers>
           <nuxeo-cloud-tokens id="tokens" name="tokens"></nuxeo-cloud-tokens>

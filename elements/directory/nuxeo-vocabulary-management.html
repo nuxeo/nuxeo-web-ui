@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
@@ -46,9 +47,9 @@ limitations under the License.
       }
 
       .top.actions {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-end-justified);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-end-justified;
         margin: 1em 0 1em 0;
       }
 
@@ -56,37 +57,37 @@ limitations under the License.
         max-width: 223px;
       }
 
-      ::content paper-dialog {
+      paper-dialog {
         min-width: 480px;
       }
 
       @media (max-width: 1024px) {
-        ::content paper-dialog {
+        paper-dialog {
           min-width: 0;
           width: 90%;
         }
       }
 
-      ::content paper-dialog ::content .buttons {
-        @apply(--layout-horizontal);
-        @apply(--layout-justified);
+      paper-dialog .buttons {
+        @apply --layout-horizontal;
+        @apply --layout-justified;
         margin-top: 16px;
         background-color: var(--nuxeo-dialog-buttons-bar, white);
       }
 
-      ::content label {
-        @apply(--nuxeo-label);
+      label {
+        @apply --nuxeo-label;
       }
     </style>
 
     <nuxeo-resource id="directory" path="/directory"></nuxeo-resource>
 
     <nuxeo-page>
-      <div class="header layout horizontal">
+      <div slot="header">
         <span>[[i18n('vocabularyManagement.heading')]]</span>
       </div>
 
-      <div class="content">
+      <div>
         <paper-card elevation="0" class="block">
           <nuxeo-select label="[[i18n('vocabularyManagement.vocabulary')]]"
                         placeholder="[[i18n('vocabularyManagement.select')]]"
@@ -285,7 +286,7 @@ limitations under the License.
 
       _deleteEntry: function(e) {
         if (confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
-          var item = e.model.dataHost.parentNode.item;
+          var item = e.target.parentNode.item;
           this.$.directory.path = '/directory/' + item.directoryName + '/' + item.properties.id;
           this.$.directory.remove().then(function() {
             this._refresh();
@@ -304,7 +305,7 @@ limitations under the License.
 
       _editEntry: function(e) {
         this._new = false;
-        this._selectedEntry = e.model.dataHost.parentNode.item;
+        this._selectedEntry = e.target.parentNode.item;
         this.$.dialog.toggle();
       },
 

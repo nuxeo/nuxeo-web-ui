@@ -36,6 +36,10 @@ limitations under the License.
         outline: none;
       }
 
+      a {
+        @apply --nuxeo-link;
+      }
+
       .bubbleBox {
         display: block;
         margin: 0 .4em .8em;
@@ -125,12 +129,12 @@ limitations under the License.
         min-height: 2.5em;
       }
 
-      .actions ::content paper-icon-button ::content iron-icon {
-        @apply(--nuxeo-action);
+      .actions paper-icon-button iron-icon {
+        @apply --nuxeo-action;
       }
 
-      .actions ::content paper-icon-button:hover ::content iron-icon {
-        @apply(--nuxeo-action-hover);
+      .actions paper-icon-button:hover iron-icon {
+        @apply --nuxeo-action-hover;
       }
 
       .bubbleBox:hover .actions,
@@ -145,19 +149,19 @@ limitations under the License.
         cursor: pointer;
       }
 
-      :host[selected] .bubbleBox .select,
-      :host[selected] .bubbleBox:hover .select:hover {
+      :host([selected]) .bubbleBox .select,
+      :host([selected]) .bubbleBox:hover .select:hover {
         border: 2px solid var(--nuxeo-grid-selected);
         background-color: var(--nuxeo-grid-selected);
         cursor: pointer;
         display: block;
       }
 
-      :host[selected] .select paper-icon-button {
+      :host([selected]) .select paper-icon-button {
         color: #fff;
       }
 
-      :host[selected] .bubbleBox {
+      :host([selected]) .bubbleBox {
         border: 2px solid var(--nuxeo-grid-selected);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }

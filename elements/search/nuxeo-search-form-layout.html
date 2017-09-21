@@ -68,7 +68,10 @@ limitations under the License.
         /**
          * The parameters passed on to `provider`.
          **/
-        params: Object,
+        params: {
+          type: Object,
+          notify: true
+        },
         /**
          * The aggregations returned by `provider`.
          **/
@@ -116,6 +119,16 @@ limitations under the License.
 
       _formChanged: function (e) {
         this.fire('search-form-layout-changed', e.detail);
+        // forward params change events
+        this.element.addEventListener('params-changed', function(e) {
+          this.notifyPath(e.detail.path, e.detail.value);
+        }.bind(this));
+      },
+
+      // stamp templates in light DOM
+      _attachDom: function(dom) {
+        this.appendChild(dom);
+        return this;
       }
 
     });

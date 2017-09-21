@@ -50,7 +50,7 @@ limitations under the License.
 
       _keysPressed: function(e) {
         if (this.target === document.body) {
-          var element = e.detail.keyboardEvent.srcElement;
+          var element = e.detail.keyboardEvent.path[0];
           switch (element.tagName) {
             case 'INPUT':
             case 'TEXTAREA':

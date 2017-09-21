@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-admin">
   <template>
     <template is="dom-if" if="[[visible]]">
-      <iron-pages selected="{{selected}}" attr-for-selected="name" fallback-selection="error" selected-attribute="visible">
+      <iron-pages selected="{{selected}}" attr-for-selected="name" selected-attribute="visible">
         <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
       </iron-pages>
     </template>
@@ -37,6 +37,7 @@ limitations under the License.
         selected: {
           type: String,
           value: 'analytics',
+          notify: true,
           observer: '_checkError'
         },
         isAdministrator: {
@@ -59,6 +60,7 @@ limitations under the License.
       },
 
       _checkError: function() {
+        // XXX: removed fallback-selection="error"
         if (this.selected === 'error') {
           this.fire('error', {code: 404});
         }

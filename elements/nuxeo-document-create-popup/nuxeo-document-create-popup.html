@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
@@ -39,11 +40,11 @@ limitations under the License.
         display: block;
       }
 
-      ::content paper-tabs {
+      paper-tabs {
         border-bottom: 1px solid var(--divider-color);
       }
 
-      ::content paper-tab {
+      paper-tab {
         text-transform: uppercase;
       }
 
@@ -64,6 +65,10 @@ limitations under the License.
         width: 65vw;
       }
 
+      iron-pages {
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
     </style>
 
     <nuxeo-document id="defaultDoc"
@@ -81,7 +86,7 @@ limitations under the License.
         <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="holder" class="vertical layout flex">
-        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="vertical layout flex" selected-attribute="visible">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
           <nuxeo-slot slot="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
           <nuxeo-document-create id="simpleCreation"
                                  name="create"
