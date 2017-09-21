@@ -55,6 +55,9 @@ limitations under the License.
 <!-- routing -->
 <link rel="import" href="routing.html">
 
+<!-- search -->
+<link rel="import" href="nuxeo-search-page.html">
+
 <script src="nuxeo-app/nuxeo-doc-types.js"></script>
 
 <!--
@@ -290,7 +293,11 @@ limitations under the License.
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
-          <nuxeo-search-results name="search" id="searchResults" search-form="[[searchForm]]"></nuxeo-search-results>
+          <nuxeo-search-page name="search"
+                             id="searchResults"
+                             heading="searchResults.results"
+                             search-form="[[searchForm]]"
+                             show-saved-search-actions></nuxeo-search-page>
 
           <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 

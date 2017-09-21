@@ -207,7 +207,8 @@ gulp.task('vulcanize', function() {
       .pipe($.vulcanize({
         stripComments: true,
         inlineCss: true,
-        inlineScripts: true
+        inlineScripts: true,
+        excludes: [dist('elements/nuxeo-search-page.html')]
       }))
       .pipe($.replace('..\/bower_components', 'bower_components'))
       //.pipe($.minifyInline())
