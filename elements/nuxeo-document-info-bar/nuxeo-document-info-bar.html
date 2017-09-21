@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
@@ -39,9 +40,9 @@ limitations under the License.
 
     <style>
       .bar {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-justified);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-justified;
         padding: 8px;
         margin-bottom: 16px;
       }
@@ -58,6 +59,12 @@ limitations under the License.
       .bar.workflow {
         background: var(--nuxeo-box);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+      }
+
+      .item {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-flex;
       }
 
       a.viewGraph {
@@ -85,7 +92,7 @@ limitations under the License.
     <!-- workflows -->
     <template is="dom-repeat" items="[[workflows]]" as="workflow">
       <div class="bar workflow">
-        <div class="layout horizontal center flex">
+        <div class="item">
           <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
           <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator, currentUser)]]">
             <nuxeo-user-tag user="[[workflow.initiator]]"></nuxeo-user-tag>
@@ -114,7 +121,7 @@ limitations under the License.
     <!-- tasks -->
     <template is="dom-repeat" items="[[tasks]]" as="task">
       <div class="bar task">
-        <div class="layout horizontal center">
+        <div class="item">
           <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
           <span>[[i18n('documentPage.to.process')]]
             <nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date>

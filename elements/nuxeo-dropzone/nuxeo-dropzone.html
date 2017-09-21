@@ -34,12 +34,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-dropzone">
   <template>
-    <style>
-      :host {
-        display: block;
-
-      }
-
+    <style include="nuxeo-styles">
       label.dragging {
         color: var(--paper-input-container-focus-color);
       }
@@ -50,10 +45,10 @@ limitations under the License.
       }
 
       #container {
-        @apply(--layout-vertical);
-        @apply(--layout-center);
-        @apply(--layout-flex);
-        @apply(--layout-center-justified);
+        @apply --layout-vertical;
+        @apply --layout-center;
+        @apply --layout-flex;
+        @apply --layout-center-justified;
         border-radius: 2px;
         border: 1px dashed var(--paper-input-container-color);
         min-height: 64px;
@@ -68,7 +63,7 @@ limitations under the License.
       #container .actions {
         text-align: center;
         opacity: .5;
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
 
       #details {
@@ -77,13 +72,13 @@ limitations under the License.
       }
 
       .file {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+        @apply --layout-horizontal;
+        @apply --layout-center;
       }
 
       .file .info {
-        @apply(--layout-vertical);
-        @apply(--layout-flex);
+        @apply --layout-vertical;
+        @apply --layout-flex;
       }
 
       .file .info .name {

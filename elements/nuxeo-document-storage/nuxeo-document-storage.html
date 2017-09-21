@@ -43,7 +43,10 @@ limitations under the License.
       is: 'nuxeo-document-storage',
 
       properties: {
-        name: 'nuxeo-document-storage',
+        name: {
+          type: String,
+          value: 'nuxeo-document-storage'
+        },
         documents: {
           type: Array,
           notify: true

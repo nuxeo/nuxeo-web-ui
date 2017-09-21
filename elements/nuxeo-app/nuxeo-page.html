@@ -36,7 +36,7 @@ limitations under the License.
         height: 100vh;
       }
 
-      paper-header-panel ::content .content {
+      #content {
         padding: 16px;
       }
 
@@ -50,31 +50,35 @@ limitations under the License.
         z-index: 3;
       }
 
-      paper-toolbar ::content .header {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+      #header {
+        margin-left: 32px;
+      }
+
+      #header::slotted(*) {
+        @apply --layout-horizontal;
+        @apply --layout-center;
         width: 100%;
         padding-right: 64px;
       }
 
       @media (max-width: 1024px) {
-        paper-toolbar ::content .header {
+        #header::slotted(*) {
           overflow-y: scroll;
         }
       }
 
       @media (max-width: 1024px) {
-        paper-header-panel ::content .content {
+        #header::slotted(*) {
           padding: 1.1rem .5rem;
         }
       }
     </style>
 
     <paper-header-panel mode="seamed">
-      <paper-toolbar>
-        <content select=".header"></content>
+      <paper-toolbar slot="header">
+        <slot id="header" slot="top" name="header"></slot>
       </paper-toolbar>
-      <content select=".content"></content>
+      <div id="content"><slot></slot></div>
     </paper-header-panel>
 
   </template>

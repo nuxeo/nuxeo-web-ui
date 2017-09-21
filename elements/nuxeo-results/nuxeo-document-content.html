@@ -38,12 +38,12 @@ limitations under the License.
 <dom-module id="nuxeo-document-content">
   <template>
 
-    <style>
+    <style include="nuxeo-styles">
 
       .results {
-        @apply(--layout-vertical);
-        @apply(--layout-flex);
-        min-height: calc(100vh - 20em - var(--nuxeo-app-top));
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        min-height: calc(100vh - 14em - var(--nuxeo-app-top));
         margin-top: 8px;
       }
 
@@ -89,8 +89,8 @@ limitations under the License.
 
     <div id="dropzone">
 
-      <nuxeo-results id="results" name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
-        <div class="selectionActions">
+      <nuxeo-results name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+        <div slot="selectionActions">
           <nuxeo-slot slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
         </div>
 
@@ -244,10 +244,7 @@ limitations under the License.
       },
 
       listeners: {
-        'document-created': '_handleDocumentCreated',
-        'dropzone.dragover': '_dragoverImport',
-        'dropzone.dragleave': '_dragleaveImport',
-        'dropzone.drop': '_dropImport'
+        'document-created': '_handleDocumentCreated'
       },
 
       observers: [
@@ -257,6 +254,10 @@ limitations under the License.
 
       ready: function() {
         this.nxProvider = this.$.nxProvider;
+
+        this.$.dropzone.addEventListener('dragover', this._dragoverImport.bind(this));
+        this.$.dropzone.addEventListener('dragleave', this._dragleaveImport.bind(this));
+        this.$.dropzone.addEventListener('drop', this._dropImport.bind(this));
       },
 
       attached: function() {

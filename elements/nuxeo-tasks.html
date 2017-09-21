@@ -23,7 +23,7 @@ limitations under the License.
 
 <dom-module id="nuxeo-tasks">
   <template>
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
@@ -35,7 +35,7 @@ limitations under the License.
       }
 
       .task-item:hover {
-        @apply(--nuxeo-block-hover);
+        @apply --nuxeo-block-hover;
       }
 
       .task-view paper-card {
@@ -115,7 +115,7 @@ limitations under the License.
                     response="{{currentTaskDocument}}"></nuxeo-document>
 
     <nuxeo-page>
-      <div class="header">
+      <div class="header" slot="header">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <nuxeo-breadcrumb document="[[currentTaskDocument]]"></nuxeo-breadcrumb>
         </template>

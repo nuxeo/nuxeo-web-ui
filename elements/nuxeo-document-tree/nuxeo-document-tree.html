@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
@@ -32,7 +33,7 @@ limitations under the License.
 
 <dom-module id="nuxeo-document-tree">
   <template>
-    <style>
+    <style include="iron-flex iron-positioning nuxeo-styles">
       :host {
         display: block;
         --nuxeo-tree-theme: {
@@ -68,12 +69,16 @@ limitations under the License.
         word-break: break-word;
       }
 
-      #root a, a:active, a:visited, a:focus {
-        color: var(--nuxeo-drawer-text);
+      a {
+        @apply --nuxeo-link;
       }
 
-      #root a:hover {
-        @apply(--nuxeo-link-hover);
+      a:hover {
+        @apply --nuxeo-link-hover;
+      }
+
+      #root a, a:active, a:visited, a:focus {
+        color: var(--nuxeo-drawer-text);
       }
 
       iron-icon {
@@ -88,7 +93,6 @@ limitations under the License.
       }
 
       .parents {
-        display: block;
         line-height: 1.5em;
       }
 
@@ -101,13 +105,10 @@ limitations under the License.
       }
 
       .parents a {
+        @apply --layout-horizontal;
         padding: .35em;
         color: var(--nuxeo-drawer-text);
         border-bottom: 1px solid var(--nuxeo-border);
-      }
-
-      .parents a:hover {
-        @apply(--nuxeo-link-hover);
       }
 
       .parents span {
@@ -130,7 +131,6 @@ limitations under the License.
 
       .noPermission {
         opacity: .5;
-        display: block;
         font-weight: 300;
         padding: 1.5em .7em;
         text-align: center;
@@ -155,7 +155,7 @@ limitations under the License.
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor('browse', item.path)]]" class="layout horizontal">
+          <a href$="[[urlFor('browse', item.path)]]">
             <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
@@ -164,7 +164,7 @@ limitations under the License.
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
-            <paper-spinner active hidden$=[[!loading]]></paper-spinner>
+            <paper-spinner active$=[[loading]]></paper-spinner>
             <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$=[[loading]]></iron-icon>
           </template>
           <span class="node-name flex">
@@ -212,6 +212,10 @@ limitations under the License.
           type: Boolean
         },
         cannotSee: {
+          type: Boolean,
+          value: false
+        },
+        _noPermission: {
           type: Boolean,
           value: false
         }

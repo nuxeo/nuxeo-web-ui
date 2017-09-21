@@ -23,25 +23,24 @@ limitations under the License.
 <dom-module id="nuxeo-browser">
   <template>
     <style>
-
       /* document actions */
       .document-actions {
-        @apply(--layout-horizontal);
-        @apply(--layout-end-justified);
+        @apply --layout-horizontal;
+        @apply --layout-end-justified;
         padding: 0 0 16px;
       }
 
-      .document-actions ::content paper-icon-button {
-        @apply(--nuxeo-action);
+      .document-actions paper-icon-button {
+        @apply --nuxeo-action;
       }
 
-      .document-actions ::content paper-icon-button:hover {
-        @apply(--nuxeo-action-hover);
+      .document-actions paper-icon-button:hover {
+        @apply --nuxeo-action-hover;
       }
 
       /* document views items (pills) */
-      ::content #documentViewsItems {
-        @apply(--layout-horizontal);
+      #documentViewsItems {
+        @apply --layout-horizontal;
         --paper-listbox-background-color: transparent;
       }
 
@@ -53,17 +52,18 @@ limitations under the License.
 
     </style>
 
+
     <!-- Main content -->
     <nuxeo-page class="main">
 
-      <div class="header">
+      <div class="header" slot="header">
         <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
         <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
           <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
         </paper-listbox>
       </div>
 
-      <div class="content">
+      <div>
 
         <div class="document-actions">
           <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
@@ -96,6 +96,9 @@ limitations under the License.
         cvParams: {
           type: Object,
           notify: true
+        },
+        toto: {
+          type: String
         },
         clipboard: {
           type: Object

@@ -32,11 +32,13 @@ limitations under the License.
 
     <style is="custom-style">
       :host {
-        display: block;
         font-family: var(--nuxeo-app-font);
       }
 
       .toolbar {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-fit;
         height: 60px;
         position: fixed;
         top: 0;
@@ -48,6 +50,13 @@ limitations under the License.
         font-weight: 300;
         color: #fff;
         box-shadow: 0 0 3px rgba(0,0,0,0.4);
+      }
+
+      .actions {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-flex;
+        @apply --layout-end-justified;
       }
 
       @media (min-width: 1280px) {
@@ -79,15 +88,15 @@ limitations under the License.
     </style>
 
     <div class="horizontal center layout" id="content">
-      <div id="selectionToolbar" class="horizontal center layout fit toolbar" hidden$="[[!_isDisplayToolbar]]">
+      <div id="selectionToolbar" class="toolbar">
         <div class="selection">
           <span class="count">[[i18n('selectionToolbar.selected.items', selectedItems.length)]]</span>
           <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
             <span>[[i18n('selectionToolbar.display.selection')]]</span>
           </a>
         </div>
-        <div class="horizontal center flex layout end-justified actions">
-          <content></content>
+        <div class="actions">
+          <slot></slot>
           <a class="selectionLink" on-tap="clearSelection">
             <span>[[i18n('command.clear')]]</span>
           </a>
@@ -116,6 +125,11 @@ limitations under the License.
       is: 'nuxeo-selection-toolbar',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
+        hidden: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
         selectedItems: {
           type: Object,
           value: [],
@@ -132,7 +146,7 @@ limitations under the License.
       ],
 
       _observeSelectedItems: function() {
-        this._isDisplayToolbar = this.selectedItems && this.selectedItems.length > 0;
+        this.hidden = !this.selectedItems || (this.selectedItems.length === 0);
       },
 
       toogleSelectedItemsPopup: function() {

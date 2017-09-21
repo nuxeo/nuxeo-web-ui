@@ -53,13 +53,13 @@ limitations under the License.
 
     <div role="widget">
       <label>[[i18n('defaultSearch.collections')]]</label>
-      <nuxeo-select2 operation="User.GetCollections"
+      <nuxeo-selectivity operation="User.GetCollections"
                      min-chars="0"
                      placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
                      value="{{params.ecm_collections}}"
                      multiple="true"
                      name="collections">
-      </nuxeo-select2>
+      </nuxeo-selectivity>
     </div>
 
     <div role="widget">
@@ -112,7 +112,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-default-search-form',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior, Nuxeo.LayoutBehavior],
       properties: {
         params: {
           type: Object,

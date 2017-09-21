@@ -20,7 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -36,8 +36,8 @@ limitations under the License.
 
     <style>
       paper-item {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+        @apply --layout-horizontal;
+        @apply --layout-center;
         cursor: pointer;
       }
       iron-icon {
@@ -51,13 +51,13 @@ limitations under the License.
       <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, searchForm.dirty)]]">
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, searchFrom.dirty)]]">
+      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, searchForm.dirty)]]">
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
       <paper-menu-button no-animations horizontal-align="right" vertical-offset="40"
                          hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, searchForm.dirty)]]">
         <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
-        <paper-menu class="dropdown-content layout vertical">
+        <paper-listbox class="dropdown-content layout vertical">
           <paper-item on-tap="_renameSearch">
             <iron-icon icon="nuxeo:edit"></iron-icon>[[i18n('app.renameSearch')]]
           </paper-item>
@@ -67,7 +67,7 @@ limitations under the License.
           <paper-item on-tap="_deleteSearch">
             <iron-icon icon="nuxeo:delete"></iron-icon>[[i18n('app.deleteSearch')]]
           </paper-item>
-        </paper-menu>
+        </paper-listbox>
       </paper-menu-button>
     </div>
 
