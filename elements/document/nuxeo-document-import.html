@@ -430,12 +430,14 @@ limitations under the License.
                           hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
           <paper-button noink
+                        id="edit"
                         class="primary"
                         on-tap="_toggleCustomize"
                         hidden$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
                         [[i18n('documentImportForm.addProperties')]]
                       </paper-button>
           <paper-button noink
+                        id="create"
                         class="primary"
                         on-tap="_import"
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
