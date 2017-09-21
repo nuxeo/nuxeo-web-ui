@@ -17,9 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="nuxeo-document-layout.html">
 
 <!--
@@ -30,6 +28,18 @@ limitations under the License.
 <dom-module id="nuxeo-document-edit">
   <template>
     <style>
+      .actions {
+        @apply(--buttons-bar);
+        @apply(--layout-horizontal);
+        @apply(--layout-flex);
+        @apply(--layout-justified);
+      }
+
+      .scrollable {
+        padding: 0 24px;
+        max-height: 60vh;
+        @apply(--layout-scroll);
+      }
 
       ::content nuxeo-directory-suggestion,
       ::content paper-input-container {
@@ -44,6 +54,18 @@ limitations under the License.
         width: 100%;
       }
 
+      ::content select {
+        background: none #fff;
+        border: 1px solid #c6c6c6;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07) inset;
+        box-sizing: border-box;
+        display: block;
+        padding: 0.5em;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
       ::content *[role=widget] {
         @apply(--layout-vertical);
         box-sizing: border-box;
@@ -53,17 +75,15 @@ limitations under the License.
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]"></nuxeo-document>
 
-    <nuxeo-dialog id="edit-dialog" no-auto-focus with-backdrop>
-      <paper-dialog-scrollable>
-        <form id="form" is="iron-form">
-          <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
-        </form>
-      </paper-dialog-scrollable>
-      <div class="buttons">
+    <form id="form" is="iron-form">
+      <div class="scrollable">
+        <nuxeo-document-layout id="document-edit" document="{{document}}" layout="edit"></nuxeo-document-layout>
+      </div>
+      <div class="actions">
         <paper-button on-tap="_cancel" noink>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" on-tap="_save" noink class="primary">[[i18n('command.save')]]</paper-button>
       </div>
-    </nuxeo-dialog>
+    </form>
 
   </template>
   <script>
@@ -97,10 +117,6 @@ limitations under the License.
         };
       },
 
-      toggle: function() {
-        this.$['edit-dialog'].toggle();
-      },
-
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
         var valid = this.$['document-edit'].validate();
@@ -124,15 +140,11 @@ limitations under the License.
           properties: this._dirtyProperties
         };
 
-        this.$.doc.put().then(function() {
-          this._refresh();
-          this.toggle();
-        }.bind(this));
+        this.$.doc.put().then(this._refresh.bind(this));
       },
 
       _cancel: function() {
         this._refresh();
-        this.toggle();
       },
 
       _refresh: function() {
