@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -36,11 +37,11 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-suggester">
   <template>
-    <style>
+    <style include="nuxeo-styles">
       :host {
-        display: block;
-        @apply(--layout-horizontal);
-        @apply(--layout-flex);
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+        @apply --layout-center;
       }
 
       paper-input {
@@ -76,7 +77,7 @@ limitations under the License.
         };
       }
 
-      ::content .input-content.paper-input-container  label {
+      .input-content.paper-input-container  label {
         left: 7px;
       }
 
@@ -106,23 +107,22 @@ limitations under the License.
         z-index: 1001;
         width: 100%;
         height: 100%;
-        @apply(--layout-vertical);
-        @apply(--layout-center);
+        @apply --layout-vertical;
+        @apply --layout-center;
       }
 
       #searchBar {
         height: 53px;
         background-color: var(--nuxeo-quicksearch-background);
         color: var(--nuxeo-quicksearch-text);
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-center-justified);
-        @apply(--layout-self-stretch);
-        @apply(--nuxeo-suggester-bar);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-center-justified;
+        @apply --layout-self-stretch;
       }
 
-      #suggester ::content .unfocused-line.paper-input-container,
-      #suggester ::content .focused-line.paper-input-container {
+      #suggester .unfocused-line.paper-input-container,
+      #suggester .focused-line.paper-input-container {
         background-color: transparent;
       }
 
@@ -133,29 +133,33 @@ limitations under the License.
         padding: 0 2em;
         box-sizing: border-box;
         overflow-y: auto;
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
       }
 
       .item {
         display: block;
         padding: 1em;
         background-color: var(--nuxeo-quicksearch-background);
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
+
+      .item.details {
+        @apply --layout-vertical;
       }
 
       .item + .item {
         border-top: 1px solid var(--nuxeo-border);
       }
 
-      .item ::content iron-icon {
+      .item iron-icon {
         margin: 0 16px 0 4px;
       }
 
       a.item:hover,
       a.iron-selected {
         color: var(--nuxeo-text-default);
-        @apply(--nuxeo-block-selected);
+        @apply --nuxeo-block-selected;
       }
 
       a .itemName {
@@ -223,38 +227,36 @@ limitations under the License.
                      response="{{items}}"
                      params='{"searchTerm":"[[searchTerm]]"}'></nuxeo-operation>
 
-    <div class="horizontal layout center flex">
-      <div id="suggester" hidden$="[[!toggled]]">
+    <div hidden$="[[!toggled]]">
+      <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar" on-tap="_focusSearch">
           <paper-input noink id="searchInput"
-                       value="{{searchTerm}}"
-                       type="search"
-                       label="[[i18n('suggester.label')]]"
-                       no-label-float></paper-input>
+                      value="{{searchTerm}}"
+                      type="search"
+                      label="[[i18n('suggester.label')]]"
+                      no-label-float></paper-input>
         </div>
         <div id="results" hidden$="[[!_canShowResults(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
               <a class="item" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
-                <div class="layout horizontal center">
-                  <div class="thumbnailContainer">
-                    <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
-                    </iron-image>
-                  </div>
-                  <div class="layout vertical">
-                    <div class="itemName">[[item.label]]</div>
-                    <div class="itemPath">[[_getUrl(item)]]</div>
-                    <nuxeo-document-highlights highlights="[[item.highlights]]"></nuxeo-document-highlights>
-                  </div>
+                <div class="thumbnailContainer">
+                  <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
+                  </iron-image>
+                </div>
+                <div class="details">
+                  <div class="itemName">[[item.label]]</div>
+                  <div class="itemPath">[[_getUrl(item)]]</div>
+                  <nuxeo-document-highlights highlights="[[item.highlights]]"></nuxeo-document-highlights>
                 </div>
               </a>
             </template>
           </iron-selector>
         </div>
       </div>
-      <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle" on-keyup="_focusSearch"></paper-icon-button>
     </div>
+    <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle" on-keyup="_focusSearch"></paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
@@ -288,6 +290,9 @@ limitations under the License.
           value: function() {
             return this;
           }
+        },
+        items: {
+          type: Array
         }
       },
 

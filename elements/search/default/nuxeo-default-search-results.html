@@ -36,7 +36,7 @@ limitations under the License.
         </template>
       </nuxeo-data-grid>
 
-      <nuxeo-data-table name="table" icon="nuxeo:view-list" class="results"
+      <nuxeo-data-table name="table" icon="nuxeo:view-list" slot="results"
                         settings-enabled
                         empty-label="[[i18n('searchResults.noResults')]]"
                         selection-enabled
@@ -108,7 +108,7 @@ limitations under the License.
 
       </nuxeo-data-table>
 
-      <nuxeo-data-list class="results" name="list" icon="nuxeo:view-headline"
+      <nuxeo-data-list name="list" icon="nuxeo:view-headline" slot="results"
                        empty-label="[[emptyLabel]]" multi-selection
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                        selection-enabled display-quick-filters

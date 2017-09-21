@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="nuxeo-search-form-layout.html">
 <link rel="import" href="nuxeo-search-results-layout.html">
@@ -27,29 +28,29 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-results-view">
   <template>
-    <style>
+    <style include="nuxeo-styles">
 
-      ::content nuxeo-data-table,
-      ::content nuxeo-data-grid,
-      ::content nuxeo-data-list {
+      nuxeo-data-table,
+      nuxeo-data-grid,
+      nuxeo-data-list {
         display: block;
         position: relative;
         min-height: calc(100vh - 130px - var(--nuxeo-app-top));
       }
 
-      ::content .ellipsis {
+      .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
         display: block;
       }
 
-      ::content .capitalize {
+      .capitalize {
         text-transform: capitalize;
       }
 
-      ::content *[role=widget] {
-        @apply(--layout-vertical);
+      *[role=widget] {
+        @apply --layout-vertical;
         box-sizing: border-box;
         margin-bottom: 1rem;
         padding: 0 1rem;
@@ -57,7 +58,7 @@ limitations under the License.
       }
 
       .form {
-        @apply(--paper-card);
+        @apply --paper-card;
         padding: 0;
       }
 
@@ -66,7 +67,7 @@ limitations under the License.
       }
 
       .buttons {
-        @apply(--buttons-bar);
+        @apply --buttons-bar;
       }
 
       .hidden {
@@ -74,9 +75,9 @@ limitations under the License.
       }
 
       .count {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-center-justified);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-center-justified;
         background: var(--nuxeo-badge-background);
         color: white;
         border-radius: 50%;
@@ -87,6 +88,10 @@ limitations under the License.
 
       .filter {
         text-transform: uppercase;
+      }
+
+      .buttons {
+        @apply --layout-horizontal;
       }
     </style>
 
@@ -128,9 +133,9 @@ limitations under the License.
                                     aggregations="[[aggregations]]"
                                     params="[[_params]]"
                                     on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
-          <paper-spinner-lite active hidden$="[[!loading]]"></paper-spinner-lite>
+          <paper-spinner-lite active="[[loading]]"></paper-spinner-lite>
         </iron-collapse>
-        <div class="buttons layout horizontal" hidden$="[[!opened]]">
+        <div class="buttons" hidden$="[[!opened]]">
           <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
             [[i18n('command.search')]]
           </paper-button>
@@ -145,7 +150,8 @@ limitations under the License.
     <div class="results">
       <nuxeo-search-results-layout id="results"
                                    search-name="[[searchName]]"
-                                   nx-provider="[[_nxProvider]]"></nuxeo-search-results-layout>
+                                   nx-provider="[[_nxProvider]]"
+                                   on-navigate="_navigateFromSearch"></nuxeo-search-results-layout>
     </div>
 
   </template>
@@ -280,10 +286,6 @@ limitations under the License.
           computed: '_computeHideCounter(opened, _params.*)',
           value: 'hidden'
         }
-      },
-
-      listeners: {
-        'results.navigate' : '_navigateFromSearch'
       },
 
       ready: function() {

@@ -35,19 +35,19 @@ limitations under the License.
   <template>
     <style>
       nuxeo-data-table {
-        @apply(--paper-card);
+        @apply --paper-card;
         height: calc(100vh - 25em);
         min-height: 15em;
       }
 
       .container {
-        @apply(--layout-vertical);
-        @apply(--layout-wrap);
+        @apply --layout-vertical;
+        @apply --layout-wrap;
       }
 
       .row-container {
-        @apply(--layout-horizontal);
-        @apply(--layout-wrap);
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
       }
 
       .item {
@@ -69,10 +69,10 @@ limitations under the License.
     <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
                                current-page="{{entries}}" auto></nuxeo-audit-page-provider>
     <nuxeo-page>
-      <div class="header">
+      <div slot="header">
         <span class="flex">[[i18n('audit.heading')]]</span>
       </div>
-      <div class="content">
+      <div>
         <paper-card class="container">
           <nuxeo-user-suggestion value="{{principalName}}" label="[[i18n('audit.username')]]"
                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>

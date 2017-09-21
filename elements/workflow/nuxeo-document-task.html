@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
@@ -34,7 +35,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-task">
   <template>
-    <style>
+    <style include="iron-flex">
       :host {
         display: block;
       }
@@ -84,10 +85,12 @@ limitations under the License.
             <div class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></div>
           </div>
 
-          <form id="task-container" action="/" is="iron-form">
-            <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]"
-                          error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
-          </form>
+          <iron-form>
+            <form id="task-container" action="/" is="iron-form">
+              <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]"
+                            error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
+            </form>
+          </iron-form>
 
           <div class="layout horizontal center">
             <content select=".buttons"></content>
@@ -166,7 +169,7 @@ limitations under the License.
 
       _toggleGraphDialog: function() {
         this.$.graphDialog.toggle();
-      },
+      }
 
     });
   </script>

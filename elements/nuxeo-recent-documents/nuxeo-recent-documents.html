@@ -30,10 +30,10 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-recent-documents">
   <template>
-    <style>
+    <style include="nuxeo-styles">
 
       .content {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
       }
 
       nuxeo-data-list {
@@ -57,13 +57,13 @@ limitations under the License.
       }
 
       .list-item:hover {
-        @apply(--nuxeo-block-hover);
+        @apply --nuxeo-block-hover;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply(--nuxeo-block-selected);
+        @apply --nuxeo-block-selected;
       }
 
       .list-item-detail {

@@ -16,17 +16,134 @@ limitations under the License.
 -->
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
-<style is="custom-style">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="nuxeo-styles">
+  <template>
+    <style>
+      /* headings */
+      h1, h2, h3, h4, h5, h6 {
+        font-weight: 400;
+      }
+
+      h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 1em;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+      }
+
+      /* links */
+      a, a:active, a:visited, a:focus {
+        @apply --nuxeo-link;
+      }
+      a:hover {
+        @apply --nuxeo-link-hover;
+      }
+
+      /* label */
+      label {
+        @apply --nuxeo-label;
+      }
+
+      /* input */
+      input,
+      textarea {
+        font-family: var(--nuxeo-app-font);
+        font-size: 1rem !important;
+      }
+
+
+      paper-input[required] .label-and-input-container::after {
+        display: block;
+        content: '*';
+        position: absolute;
+        right: 0;
+        top: -1rem;
+        color: var(--nuxeo-warn-text);
+        font-size: 1.2em;
+      }
+
+      paper-input[readonly] paper-input-container {
+        opacity: .6;
+      }
+
+      paper-input[readonly] .input-content.label-is-highlighted label {
+        color: var(--nuxeo-text-default);
+        opacity: .6;
+      }
+
+      paper-input[readonly] .unfocused-line,
+      paper-input[readonly] .focused-line {
+        border-bottom: 1px dashed var(--nuxeo-text-default);
+      }
+
+      paper-input[required][readonly] .label-and-input-container::after,
+      paper-input[required][disabled] .label-and-input-container::after {
+        display: none;
+      }
+
+      /* paper-button */
+      paper-button {
+        min-width: 96px;
+      }
+      paper-button:hover {
+        @apply --nx-button-hover;
+      }
+      paper-button.primary {
+        @apply --nx-button-primary;
+        border-color: transparent;
+      }
+      paper-button.primary:hover,
+      paper-button.primary:focus {
+        @apply --nx-button-primary-hover;
+        border-color: transparent;
+      }
+      paper-button[disabled] {
+        @apply --nx-button-disabled;
+      }
+      paper-button + paper-button {
+        margin-left: 8px;
+      }
+
+      paper-textarea {
+        word-wrap: break-word;  /* legacy property */
+        overflow-wrap: break-word;  /* css3 standard property */
+        word-break: break-word;
+
+        /* Hyphenize words */
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        -o-hyphens: auto;
+        hyphens: auto;
+      }
+
+      /* */
+      .header {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        font-size: 1rem;
+        height: 53px;
+        padding: 0 16px;
+        text-transform: uppercase;
+        text-overflow: ellipsis;
+        color: var(--nuxeo-drawer-header);
+      }
+    </style>
+  </template>
+</dom-module>
+
+<custom-style>
+
+<style include="nuxeo-styles">
 
   html {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     font-size: 13px;
     line-height: 20px;
-  }
-
-  @media (max-width: 1024px) {
-	  html { font-size: 14px; }
   }
 
   html, body {
@@ -37,138 +154,28 @@ limitations under the License.
     font-weight: 400;
   }
 
-  /* dialogs */
-  body ::content nuxeo-dialog {
-    min-width: 480px;
-  }
-
-  @media (max-width: 1024px) {
-    body ::content nuxeo-dialog {
-      min-width: 0;
-      width: 90%;
-    }
-  }
-
   /* scrollbars */
-  body ::content ::-webkit-scrollbar-track {
+  body ::-webkit-scrollbar-track {
     width: 3px;
     height: 3px;
   }
-  body ::content ::-webkit-scrollbar {
+  body ::-webkit-scrollbar {
     background-color: rgba(0, 0, 0, 0.03);
     width: 3px;
     height: 3px;
   }
-  body ::content ::-webkit-scrollbar-thumb {
+  body ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.15);
     border-radius: 2px;
   }
 
-  /* headings */
-  body ::content h1, body ::content h2, body ::content h3,
-  body ::content h4, body ::content h5, body ::content h6 {
-    font-weight: 400;
-  }
-
-  body ::content h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0 0 1em;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-  }
-
-  /* links */
-  body ::content a, body ::content a:active, body ::content a:visited, body ::content a:focus {
-    @apply(--nuxeo-link);
-  }
-  body ::content a:hover {
-    @apply(--nuxeo-link-hover);
-  }
-
-  /* label */
-  body ::content label {
-    @apply(--nuxeo-label);
-  }
-
-  /* input */
-  body ::content input,
-  body ::content textarea {
-    font-family: var(--nuxeo-app-font);
-    font-size: 1rem !important;
-  }
-
-  body ::content paper-input[required] ::content .label-and-input-container::after {
-    display: block;
-    content: '*';
-    position: absolute;
-    right: 0;
-    top: -1rem;
-    color: var(--nuxeo-warn-text);
-    font-size: 1.2em;
-  }
-
-  body ::content paper-input[readonly] ::content paper-input-container {
-    opacity: .6;
-  }
-
-  body ::content paper-input[readonly] ::content .input-content.label-is-highlighted label {
-    color: var(--nuxeo-text-default);
-    opacity: .6;
-  }
-
-  body ::content paper-input[readonly] ::content .unfocused-line,
-  body ::content paper-input[readonly] ::content .focused-line {
-    border-bottom: 1px dashed var(--nuxeo-text-default);
-  }
-
-  body ::content paper-input[required][readonly] ::content .label-and-input-container::after,
-  body ::content paper-input[required][disabled] ::content .label-and-input-container::after {
-    display: none;
-  }
-
-  /* paper-button */
-  body ::content paper-button {
-    min-width: 96px;
-  }
-  body ::content paper-button:hover {
-    @apply(--nx-button-hover);
-  }
-  body ::content paper-button.primary {
-    @apply(--nx-button-primary);
-    border-color: transparent;
-  }
-  body ::content paper-button.primary:hover,
-  body ::content paper-button.primary:focus {
-    @apply(--nx-button-primary-hover);
-    border-color: transparent;
-  }
-  body ::content paper-button[disabled] {
-    @apply(--nx-button-disabled);
-  }
-  body ::content paper-button + paper-button {
-    margin-left: 8px;
-  }
-
-  body ::content paper-textarea {
-    word-wrap: break-word;  /* legacy property */
-    overflow-wrap: break-word;  /* css3 standard property */
-    word-break: break-word;
-
-    /* Hyphenize words */
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    -ms-hyphens: auto;
-    -o-hyphens: auto;
-    hyphens: auto;
-  }
 
   /* External styles */
   body .ae-toolbar-styles {
     z-index: 105;
   }
 
-  :root {
+  html {
 
     --nuxeo-drawer-header-height: 53px;
     --nuxeo-sidebar-width: 52px;
@@ -261,6 +268,14 @@ limitations under the License.
     --nuxeo-user: {
       border-radius: 2.5em;
       text-transform: capitalize;
+    };
+
+    --nuxeo-dialog: {
+      min-width: 480px;
+    };
+
+    --nuxeo-selectivity-label: {
+      @apply --nuxeo-label;
     };
 
     --nx-actions: {
@@ -434,4 +449,16 @@ limitations under the License.
       top: var(--nuxeo-app-top);
     };
   }
+
+  @media (max-width: 1024px) {
+	  html {
+      font-size: 14px;
+
+      --nuxeo-dialog: {
+        min-width: 0;
+        width: 90%;
+      }
+    }
+  }
 </style>
+</custom-style>

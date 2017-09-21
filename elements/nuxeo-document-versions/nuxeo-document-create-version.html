@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
@@ -36,31 +37,27 @@ limitations under the License.
   <template>
 
     <style>
-      :host {
-        display: inline-block;
-      }
-
-      ::content iron-icon:hover {
+      iron-icon:hover {
         fill: var(--nuxeo-link-hover-color);
       }
 
       .dialog .content {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
         box-shadow: none
       }
 
       nuxeo-tag {
-        @apply(--nx-button-primary);
+        @apply --nx-button-primary;
       }
 
       nuxeo-tag:hover {
-        @apply(--nx-button-primary-hover);
+        @apply --nx-button-primary-hover;
       }
 
       .buttons {
-        @apply(--layout-horizontal);
-        @apply(--layout-justified);
-        @apply(--buttons-bar);
+        @apply --layout-horizontal;
+        @apply --layout-justified;
+        @apply --buttons-bar;
       }
 
       paper-radio-group {

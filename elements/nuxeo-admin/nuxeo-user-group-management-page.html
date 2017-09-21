@@ -31,10 +31,10 @@ limitations under the License.
   <template>
 
     <nuxeo-page>
-      <div class="header">
+      <div slot="header">
         <span class="flex">[[i18n('admin.usersAndGroups.heading')]]</span>
       </div>
-      <div class="content">
+      <div>
         <template is="dom-if" if="visible">
           <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
           <template is="dom-if" if="[[_displayLatest]]">
@@ -81,7 +81,7 @@ limitations under the License.
         if (!this.visible) {
           return;
         }
-        var management = this.querySelector('nuxeo-user-group-management');
+        var management = this.root.querySelector('nuxeo-user-group-management');
         if (this.entity && this.entity.id && this.entity.type) {
           if (this.entity.type === 'group') {
             management.selectedGroup = this.entity.id;

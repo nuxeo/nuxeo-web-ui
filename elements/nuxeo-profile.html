@@ -24,8 +24,8 @@ limitations under the License.
   <template>
 
     <nuxeo-page>
-      <div class="header">[[i18n('profile.heading')]]</div>
-      <div class="content">
+      <div slot="header">[[i18n('profile.heading')]]</div>
+      <div>
         <nuxeo-user-profile username="[[_username(user)]]"></nuxeo-user-profile>
       </div>
     </nuxeo-page>

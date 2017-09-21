@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="nuxeo-document-layout.html">
 
 <!--
@@ -25,16 +26,16 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-metadata">
   <template>
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
 
-      ::content div.multiline {
+      nuxeo-document-layout div.multiline {
         white-space: pre-line;
       }
 
-      ::content div {
+      nuxeo-document-layout div {
         word-wrap: break-word;  /* legacy property */
         overflow-wrap: break-word;  /* css3 standard property */
         word-break: break-word;
@@ -47,13 +48,13 @@ limitations under the License.
         hyphens: auto;
       }
 
-      ::content label {
+      nuxeo-document-layout label {
         margin: 0 !important;
         width: 90px;
         min-width: 90px;
       }
 
-      ::content div[role=widget] {
+      nuxeo-document-layout div[role=widget] {
         @apply(--layout-horizontal);
         box-sizing: border-box;
         margin-bottom: 1rem;

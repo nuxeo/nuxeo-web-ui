@@ -54,15 +54,15 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
     <style>
 
       .displayMode {
-        @apply(--nuxeo-action);
+        @apply --nuxeo-action;
       }
 
       .displayMode:hover {
-        @apply(--nuxeo-action-hover);
+        @apply --nuxeo-action-hover;
       }
 
       .main {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
       }
 
       .toolbar {
@@ -74,12 +74,12 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       .resultActions {
         display: block;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        @apply(--layout-end-justified);
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-end-justified;
       }
 
-      .resultActions ::content paper-icon-button {
+      .resultActions paper-icon-button {
         width: 2em;
         height: 2em;
         padding: .3em;
@@ -101,7 +101,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
 
-        <content select=".selectionActions"></content>
+        <slot name="selectionActions"></slot>
         <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
 
       </nuxeo-selection-toolbar>
@@ -117,7 +117,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
                              on-tap="_toggleDisplayMode"></paper-icon-button>
         </template>
 
-        <content select=".actions"></content>
+        <slot name="actions"></slot>
 
         <!-- 0.9 compatibility -->
         <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
@@ -126,8 +126,9 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       </div>
 
-      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}">
-        <content id="results" select=".results"></content>
+      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}" on-iron-items-changed="_updateViews"
+        on-iron-select="_selectView" on-iron-deselect="_deselectView">
+        <slot></slot>
       </iron-pages>
 
     </div>
@@ -195,9 +196,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       ],
 
       listeners: {
-        'views.iron-items-changed': '_updateViews',
-        'views.iron-select': '_selectView',
-        'views.iron-deselect': '_deselectView',
         'settings-changed': '_updateActionContext'
       },
 
@@ -240,7 +238,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
         // if current selected display mode is not available use the first one
         if (!hasDisplayMode) {
-          this.displayMode = this._displayModes[0].name;
+          this.displayMode = this._displayModes[0] && this._displayModes[0].name;
         }
 
       },

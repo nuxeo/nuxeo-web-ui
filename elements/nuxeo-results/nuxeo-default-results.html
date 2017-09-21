@@ -60,9 +60,10 @@ limitations under the License.
     </style>
 
     <nuxeo-results id="results" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
-      <content></content>
 
-      <nuxeo-data-grid class="results" name="grid" icon="nuxeo:view-thumbnails"
+      <slot name="selectionActions" slot="selectionActions"></slot>
+
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
                        empty-label="[[emptyLabel]]"
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                        selection-enabled display-quick-filters>
@@ -74,7 +75,7 @@ limitations under the License.
         </template>
       </nuxeo-data-grid>
 
-      <nuxeo-data-table class="results" name="table" icon="nuxeo:view-list"
+      <nuxeo-data-table name="table" icon="nuxeo:view-list"
                         settings-enabled
                         empty-label="[[emptyLabel]]"
                         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
@@ -152,7 +153,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-default-results',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
       properties: {
         nxProvider: Object,
 

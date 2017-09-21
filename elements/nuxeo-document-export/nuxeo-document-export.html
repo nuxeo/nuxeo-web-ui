@@ -32,29 +32,31 @@ limitations under the License.
         width: 1em;
         height: 1em;
         margin-right: 16px;
-        @apply(--icon-theme);
+        @apply --icon-theme;
       }
 
       .rendition-container {
         padding: 6px;
-        @apply(--rendition-container-theme);
+        @apply --rendition-container-theme;
+        @apply --layout-horizontal;
+        @apply --layout-center;
       }
 
       .rendition-container + .rendition-container {
         border-top: 1px solid #ddd;
-        @apply(--rendition-container-in-between-theme);
+        @apply --rendition-container-in-between-theme;
       }
 
       a {
         color: #00adff;
         font-weight: 700;
         text-decoration: none;
-        @apply(--rendition-name-theme)
+        @apply --rendition-name-theme;
       }
     </style>
 
   <template is="dom-repeat" items="[[_filterRenditions(document)]]">
-    <div class="rendition-container horizontal layout center">
+    <div class="rendition-container">
       <iron-icon src="[[item.icon]]"></iron-icon>
       <a href="[[item.url]]">[[i18n(item.name)]]</a>
     </div>

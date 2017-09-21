@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../nuxeo-document-creation-stats/nuxeo-document-creation-stats.html">
 
@@ -26,9 +27,11 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-document-create-shortcuts">
   <template>
-    <style is="custom-style">
-      :host {
-        display: block;
+    <style>
+      #shortcuts {
+        @apply --layout-vertical;
+        @apply --layout-center;
+        @apply --layout-end-justified;
       }
 
       nuxeo-document-create-shortcut {
@@ -36,8 +39,7 @@ limitations under the License.
       }
     </style>
 
-    <div id="shortcuts" class="vertical layout center end-justified">
-    </div>
+    <div id="shortcuts"></div>
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
