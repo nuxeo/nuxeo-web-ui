@@ -24,6 +24,35 @@ limitations under the License.
     var schemaFetcher = null;
     var schemaRegistry = {};
 
+    function createComplexObject(fieldsObject) {
+      var props = {};
+
+      Object.keys(fieldsObject.fields).forEach(function(key) {
+        var nextFieldsObject = fieldsObject.fields[key];
+
+        if (nextFieldsObject['fields']) {
+          // complex fields within complex fields that are of the same schema
+          props[key] = createComplexObject(nextFieldsObject);
+        } else {
+          props[key] = null;
+        }
+      });
+
+      return props;
+    }
+
+    function initializeFields(doc, schema) {
+      var prefix = (schema['@prefix'] ? schema['@prefix'] : schema['name']);
+      Object.keys(schema.fields).forEach(function(fieldName) {
+        var field = schema.fields[fieldName];
+        if (field !== null && typeof field === 'object' && field.type && field.type === 'complex') {
+          doc.properties[prefix + ":" + fieldName] = createComplexObject(field);
+        } else {
+          doc.properties[prefix + ":" + fieldName] = null;
+        }
+      });
+    }
+
     /**
      * `Nuxeo.DocumentCreationBehavior`
      *
@@ -114,8 +143,8 @@ limitations under the License.
       _newDocument: function(doctype, doc, properties) {
         if (doctype.schemas) {
           doctype.schemas.forEach(function(schema) {
-            this._initializeFields(doc, schema);
-          }.bind(this));
+            initializeFields(doc, schema);
+          });
         }
         if (properties) {
           for (var prop in properties) {
@@ -123,25 +152,6 @@ limitations under the License.
           }
         }
         return doc;
-      },
-
-      _initializeFields: function(doc, node, nodePath) {
-        if (typeof nodePath === 'undefined') {
-          nodePath = '';
-        }
-        var prefix = (node['@prefix'] ? node['@prefix'] : node['name']);
-        Object.keys(node.fields).forEach(function(fieldName) {
-          var field = node.fields[fieldName]
-          if (field !== null && typeof field === 'object' &&
-              field.type && field.type === 'complex') {
-            this._deepFind(doc.properties, nodePath)[prefix + ':' + fieldName] = {};
-            this._initializeFields(doc, field, field, nodePath === '' ? fieldName : nodePath + '.' + fieldName);
-          }
-        }.bind(this));
-      },
-
-      _deepFind: function(node, path) {
-        return path ? path.split('.').reduce(function(obj,p) { return obj[p]; }, node) : node;
       },
 
       _parentChanged: function() {
