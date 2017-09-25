@@ -70,7 +70,13 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="adminNxqlSearchPage" slot="ADMINISTRATION_PAGES" order="60">
   <template>
-    <nuxeo-nxql-search id="nxql" name="nxql"></nuxeo-nxql-search>
+    <nuxeo-search-page id="nxql"
+                       name="nxql"
+                       heading="nxqlSearch.heading"
+                       provider="nxql_search"
+                       schemas="common,uid,dublincore"
+                       search-name="nxql"
+                       show-filters opened stop-error-propagation></nuxeo-search-page>
   </template>
 </nuxeo-slot-content>
 
