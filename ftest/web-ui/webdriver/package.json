@@ -7,7 +7,7 @@
     "pretest": "npm run lint",
     "test:dev": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo",
     "pretest:dev": "npm run lint",
-    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --watch --tags=@watch",
+    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --tags=@watch",
     "pretest:watch": "npm run lint"
   },
   "license": "Apache-2.0",
