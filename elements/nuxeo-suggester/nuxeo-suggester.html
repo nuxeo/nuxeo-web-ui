@@ -82,13 +82,15 @@ limitations under the License.
 
       #searchButton {
         position: fixed;
-        z-index: 3;
+        z-index: 200;
         top: 0;
-        right: 0;
-        width: 60px;
-        height: 53px;
-        padding: 16px;
+        left: var(--nuxeo-suggester-button-left);
+        right: var(--nuxeo-suggester-button-right);
+        width: var(--nuxeo-suggester-button-width);
+        height: var(--nuxeo-suggester-button-height);
+        padding: var(--nuxeo-suggester-button-padding);
         color: var(--nuxeo-app-header);
+        @apply(--nuxeo-suggester-button)
       }
 
       #searchButton:hover {
@@ -117,10 +119,11 @@ limitations under the License.
         height: 53px;
         background-color: var(--nuxeo-quicksearch-background);
         color: var(--nuxeo-quicksearch-text);
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
-      @apply(--layout-center-justified);
-      @apply(--layout-self-stretch);
+        height: var(--nuxeo-suggester-button-height);
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-center-justified);
+        @apply(--layout-self-stretch);
       }
 
       #suggester ::content .unfocused-line.paper-input-container,
