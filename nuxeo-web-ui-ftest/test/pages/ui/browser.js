@@ -2,13 +2,18 @@
 
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
+import CollapsibleDocumentPage from './browser/collapsible_document_page';
 import DocumentPermissions from './browser/document_permissions';
 import EditDialog from './edit_dialog';
 
 export default class Browser extends BasePage {
 
   documentPage(docType) {
-    return new DocumentPage('nuxeo-document-page', docType);
+    if (this.el.isVisible('nuxeo-collapsible-document-page')) {
+      return new CollapsibleDocumentPage('nuxeo-collapsible-document-page', docType)
+    } else {
+      return new DocumentPage('nuxeo-document-page', docType);
+    }
   }
 
   get view() {
