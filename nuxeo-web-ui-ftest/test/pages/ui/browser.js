@@ -10,7 +10,7 @@ export default class Browser extends BasePage {
 
   documentPage(docType) {
     if (this.el.isVisible('nuxeo-collapsible-document-page')) {
-      return new CollapsibleDocumentPage('nuxeo-collapsible-document-page', docType)
+      return new CollapsibleDocumentPage('nuxeo-collapsible-document-page', docType);
     } else {
       return new DocumentPage('nuxeo-document-page', docType);
     }

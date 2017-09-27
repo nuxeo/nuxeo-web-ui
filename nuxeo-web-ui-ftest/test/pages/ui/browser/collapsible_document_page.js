@@ -1,10 +1,6 @@
 'use strict';
 
 import DocumentPage from './document_page';
-import DocumentMetadata from './document_metadata';
-import DocumentView from './document_view';
-import DocumentVersions from './document_versions';
-
 export default class CollapsibleDocumentPage extends DocumentPage {
 
   constructor(selector, docType) {
