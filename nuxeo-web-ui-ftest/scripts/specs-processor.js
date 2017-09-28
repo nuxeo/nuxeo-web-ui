@@ -6,11 +6,7 @@ module.exports = (argv) => {
   const args = require('minimist')(argv.slice(2));
   if (args['cucumberOpts']['tags']) {
     const files = Finder.from('./test/features').findFiles('*.feature');
-    files.forEach((file) => {
-      if (fs.readFileSync(file, 'utf8').includes(args.cucumberOpts.tags)) {
-        features.push(file);
-      }
-    });
+    features = files.filter(file => fs.readFileSync(file, 'utf8').includes(args.cucumberOpts.tags));
   } else {
     features = './test/features/*.feature';
   }
