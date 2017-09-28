@@ -1,4 +1,4 @@
-<!--
+|<!--
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -41,12 +41,12 @@ limitations under the License.
       }
 
       paper-toolbar {
-        --paper-toolbar-height: 53px;
-        --paper-toolbar-sm-height: 53px;
+        --paper-toolbar-height: var(--nuxeo-drawer-header-height);
+        --paper-toolbar-sm-height: var(--nuxeo-drawer-header-height);
         width: 100%;
         color: var(--nuxeo-app-header);
         background: var(--nuxeo-app-header-background);
-        box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
+        box-shadow: var(--nuxeo-app-header-box-shadow);
         z-index: 3;
       }
 
