@@ -1,5 +1,5 @@
- const Finder = require('fs-finder');
- const fs = require('fs');
+const Finder = require('fs-finder');
+const fs = require('fs');
 
 module.exports = (argv) => {
   let features = [];
