@@ -28,18 +28,6 @@ limitations under the License.
 <dom-module id="nuxeo-tasks-drawer">
   <template>
     <style>
-      .title {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        font-size: 1rem;
-        font-weight: 400;
-        height: 58px;
-        padding: 0 16px;
-        text-transform: uppercase;
-        text-overflow: ellipsis;
-        border-bottom: 1px solid var(--nuxeo-border);
-      }
-
       .tasks-dashboard {
         padding: .7em 1em;
         display: block;
@@ -47,7 +35,7 @@ limitations under the License.
       }
     </style>
 
-    <div class="title">[[i18n('app.tasks')]]</div>
+    <div class="header">[[i18n('app.tasks')]]</div>
     <nuxeo-tasks-list tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
     <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
 

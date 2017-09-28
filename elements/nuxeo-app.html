@@ -73,7 +73,7 @@ limitations under the License.
         --paper-header-panel-body: {
           background: var(--nuxeo-page-background);
         };
-        height: 100vh;
+        height: calc(100vh - var(--nuxeo-app-top));
       }
 
       paper-drawer-panel {
@@ -83,14 +83,16 @@ limitations under the License.
         --paper-drawer-panel-scrim: {
           z-index: 2;
         };
+        top: var(--nuxeo-app-top);
+        height: calc(100% - var(--nuxeo-app-top));
       }
 
       /* logo */
       #logo {
         position: fixed;
-        width: 52px;
+        width: var(--nuxeo-sidebar-width);
         height: 53px;
-        top: 0;
+        top: var(--nuxeo-app-top);
         left: 0;
         z-index: 102;
         box-sizing: border-box;
@@ -99,7 +101,7 @@ limitations under the License.
       }
 
       #logo img {
-        width: 52px;
+        width: var(--nuxeo-sidebar-width);
         height: 53px;
       }
 
@@ -107,7 +109,7 @@ limitations under the License.
       #menu {
         @apply(--nuxeo-sidebar);
         position: fixed;
-        width: 52px;
+        width: var(--nuxeo-sidebar-width);
         height: calc(100% - 54px);
         z-index: 100;
         padding: 53px 0;
@@ -118,7 +120,7 @@ limitations under the License.
         color: var(--nuxeo-sidebar-menu);
         height: 48px;
         padding: 12px 13px;
-        width: 52px;
+        width: var(--nuxeo-sidebar-width);
       }
 
       #logo:hover img,
@@ -176,7 +178,7 @@ limitations under the License.
         color: var(--nuxeo-drawer-text);
         width: 294px;
         height: 100vh;
-        margin-left: 52px;
+        margin-left: var(--nuxeo-sidebar-width);
         background-color: var(--nuxeo-drawer-background);
       }
 

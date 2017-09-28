@@ -170,6 +170,12 @@ limitations under the License.
 
   :root {
 
+    --nuxeo-drawer-header-height: 53px;
+    --nuxeo-sidebar-width: 52px;
+
+    --nuxeo-app-top: 0px;
+    --nuxeo-app-header-box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
+
     --nuxeo-link: {
       color: var(--nuxeo-link-color);
       text-decoration: none;
@@ -412,6 +418,20 @@ limitations under the License.
     --paper-transition-easing: {
       -webkit-transition: none;
       transition: none;
+    };
+
+    /* Suggester (Quick search) */
+    --nuxeo-suggester-button: {
+      top: var(--nuxeo-app-top);
+      right: 0;
+      width: 60px;
+      height: 53px;
+      padding: 16px;
+    };
+
+    --nuxeo-suggester-bar: {
+      position: relative;
+      top: var(--nuxeo-app-top);
     };
   }
 </style>
