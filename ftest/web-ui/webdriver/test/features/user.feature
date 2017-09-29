@@ -24,8 +24,9 @@ Feature: User
       | password             | test          |
       | passwordConfirmation | test          |
 
-  Scenario: Search for Users
-    Then I can search for the user "jdoe"
+# Disabled until NXP-23224 is resolved
+#  Scenario: Search for Users
+#    Then I can search for the user "jdoe"
 
   Scenario: Edit Users
     Then I can edit the user "jdoe" with the following properties:
