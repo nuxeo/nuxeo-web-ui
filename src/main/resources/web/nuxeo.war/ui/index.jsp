@@ -61,25 +61,17 @@ limitations under the License.
   <!-- Tile icon for Win8 (144x144) -->
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-  <link rel="stylesheet" href="vendor/select2.css">
+  <link rel="stylesheet" href="bower_components/select2/select2.css">
 
-  <%-- Load full polyfill in IE for compatibility --%>
-  <% if (UserAgentMatcher.isMSIE10OrMore(ua) || UserAgentMatcher.isMSEdge(ua)) { %>
-  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
-  <% } else { %>
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-  <% } %>
+  <script>if (!window.customElements) { document.write('<!--'); }</script>
+  <script type="text/javascript" src="bower_components/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+  <!--! do not remove -->
+  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script>
-    window.Polymer = {
-      lazyRegister: true
-    };
-  </script>
-
-  <script src="vendor/jquery.js"></script>
-  <script src="vendor/select2.js"></script>
-  <script src="vendor/moment-with-locales.js"></script>
-  <script src="vendor/alloy-editor.js"></script>
+  <script src="bower_components/moment/min/moment-with-locales.min.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/select2/select2.min.js"></script>
+  <script src="bower_components/alloyeditor/dist/alloy-editor/alloy-editor-all-min.js"></script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= request.getContextPath() %>/<%= resource.getURI() %>">
