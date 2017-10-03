@@ -24,15 +24,15 @@ Feature: User
       | password             | test          |
       | passwordConfirmation | test          |
 
-# Disabled until NXP-23224 is resolved
+# Disabled until NXP-19407 is resolved
 #  Scenario: Search for Users
 #    Then I can search for the user "jdoe"
 
-  Scenario: Edit Users
-    Then I can edit the user "jdoe" with the following properties:
-      | name                 | value          |
-      | firstname            | Jane           |
-      | email                | test2@test.com |
+#  Scenario: Edit Users
+#    Then I can edit the user "jdoe" with the following properties:
+#      | name                 | value          |
+#      | firstname            | Jane           |
+#      | email                | test2@test.com |
 
-  Scenario: Delete Users
-    Then I can delete the user "jdoe"
+#  Scenario: Delete Users
+#    Then I can delete the user "jdoe"
