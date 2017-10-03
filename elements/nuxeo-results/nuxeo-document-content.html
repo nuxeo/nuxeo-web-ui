@@ -98,7 +98,8 @@ limitations under the License.
         <nuxeo-data-grid class="results" name="grid" icon="nuxeo:view-thumbnails"
                          empty-label="[[emptyLabel]]"
                          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                         selection-enabled display-quick-filters>
+                         selection-enabled display-quick-filters
+                         display-sort sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
                                            tabindex$="{{tabIndex}}"
@@ -234,6 +235,10 @@ limitations under the License.
         browseActionContext: {
           type: Object,
           computed: '_browseActionContext(document, selectedItems)'
+        },
+        sortOptions: {
+          type: Array,
+          value: []
         }
       },
 
@@ -251,6 +256,17 @@ limitations under the License.
 
       ready: function() {
         this.nxProvider = this.$.nxProvider;
+      },
+
+      attached: function() {
+        this.sortOptions = [
+          {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
+          {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc', selected: true},
+          {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
+          {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
+          {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
+          {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
+        ];
       },
 
       _observeDocument: function() {
