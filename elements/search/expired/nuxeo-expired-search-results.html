@@ -25,7 +25,9 @@ limitations under the License.
   <template>
     <nuxeo-results name="expired" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
 
-      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters>
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results"
+                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters
+                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
         <template>
           <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
@@ -112,7 +114,24 @@ limitations under the License.
       is: 'nuxeo-expired-search-results',
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
-        nxProvider: Object
+        nxProvider: Object,
+        sortOptions: {
+          type: Array,
+          value: []
+        }
+      },
+
+      attached: function() {
+        this.sortOptions = [
+          {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
+          {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc'},
+          {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
+          {field: 'dc:expired', label: this.i18n('searchResults.sort.field.expired'), order: 'asc', selected: true},
+          {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
+          {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
+          {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
+          {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
+        ];
       },
 
       _navigate: function(e) {
