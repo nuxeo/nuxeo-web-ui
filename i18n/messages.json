@@ -608,6 +608,7 @@
   "pictureViewLayout.depth": "Bit Depth",
   "pictureViewLayout.description": "Description",
   "pictureViewLayout.dimensions": "Dimensions",
+  "pictureViewLayout.download.tooltip": "Download",
   "pictureViewLayout.exif": "EXIF",
   "pictureViewLayout.exposure": "Exposure",
   "pictureViewLayout.fnumber": "Aperture",
