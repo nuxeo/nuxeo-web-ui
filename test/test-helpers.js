@@ -57,6 +57,14 @@ function isHidden(el) {
 }
 
 function login(server, loginFixture) {
+  server.respondWith('GET',
+    '/dummy/json/cmis',
+    [
+      200,
+      {'Content-Type': 'application/json'},
+      '{}'
+    ]
+  );
   server.respondWith(
     'POST',
     '/dummy/api/v1/automation/login',
@@ -68,7 +76,7 @@ function login(server, loginFixture) {
   );
   server.respondWith(
     'GET',
-    '/dummy/api/v1/repo/default/user/Administrator?',
+    '/dummy/api/v1/repo/default/user/Administrator',
     [
       200,
       {'Content-Type': 'application/json'},
