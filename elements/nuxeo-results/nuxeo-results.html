@@ -379,6 +379,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
         // restore selection
         if (this.selectedItems) {
+          this.selectedItems = []; // NXP-23186: this line removes selection synchronization between view modes
           this.selectItems(this.selectedItems.slice());
         }
 
