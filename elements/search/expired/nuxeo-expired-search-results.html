@@ -27,7 +27,8 @@ limitations under the License.
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results"
                        empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters
-                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
+                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]"
+                       display-navigation>
         <template>
           <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
