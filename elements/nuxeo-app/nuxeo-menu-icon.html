@@ -45,7 +45,7 @@ limitations under the License.
    </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <paper-icon-button noink id="button" icon="[[icon]]" name="[[name]]"></paper-icon-button>
+      <paper-icon-button noink id="button" name="[[name]]"></paper-icon-button>
       <paper-tooltip id="tooltip" for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</paper-tooltip>
       <template is="dom-if" if="[[badge]]">
         <paper-badge label="[[badge]]" for="button"></paper-badge>
@@ -63,6 +63,16 @@ limitations under the License.
          */
         label: {
           type: String
+        },
+
+        icon: {
+          type: String,
+          value: ''
+        },
+
+        src: {
+          type: String,
+          value: ''
         },
 
         /**
@@ -89,8 +99,21 @@ limitations under the License.
         }
       },
 
+      observers: [
+        '_srcOrIcon(icon, src)'
+      ],
+
       ready: function() {
         document.body.appendChild(this.$.tooltip);
+      },
+
+      _srcOrIcon: function() {
+        if (this.src && this.src.length > 0) {
+          this.$.button.icon = '';
+          this.$.button.src = this.src;
+        } else if (!this.$.button.src || this.$.button.src.length === 0) {
+          this.$.button.icon = this.icon;
+        }
       },
 
       _href: function() {

@@ -255,7 +255,11 @@ limitations under the License.
           <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
                            hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
           </nuxeo-menu-icon>
-          <nuxeo-menu-icon name="profile" icon="nuxeo:user-settings" label="app.account" class="profile-icon"></nuxeo-menu-icon>
+          <nuxeo-menu-icon name="profile"
+            src="[[currentUser.contextParameters.userprofile.avatar]]"
+            icon="nuxeo:user-settings"
+            label="app.account" class="profile-icon">
+          </nuxeo-menu-icon>
         </paper-menu>
 
         <!-- drawer -->
