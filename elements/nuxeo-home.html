@@ -84,7 +84,7 @@ limitations under the License.
               params='{"queryParams": "/"}'
               headers='{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
-            <nuxeo-data-table id="latestEditedDocs"
+            <nuxeo-data-table id="latestEditedDocs" max-items="15"
               nx-provider="latestQuery"
               empty-label="[[i18n('queryWidget.noDocuments')]]"
               on-row-clicked="_navigate">
@@ -117,7 +117,7 @@ limitations under the License.
           <paper-card>
             <h3><iron-icon icon="nuxeo:recent" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
-            <nuxeo-data-table id="latestViewedDocs"
+            <nuxeo-data-table id="latestViewedDocs" max-items="15"
               items="[[recentDocuments]]"
               empty-label="[[i18n('recentDocuments.empty')]]"
               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
@@ -152,8 +152,7 @@ limitations under the License.
                headers='{"X-NXfetch.document": "properties"}'
                enrichers="thumbnail">
             </nuxeo-page-provider>
-            <nuxeo-data-table
-              id="favoriteDocs"
+            <nuxeo-data-table id="favoriteDocs" max-items="15"
               nx-provider="favoritesProvider"
               empty-label="[[i18n('favorites.empty')]]"
               on-row-clicked="_navigate">
