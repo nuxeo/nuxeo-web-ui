@@ -362,6 +362,7 @@
   "documentView.layoutNotFound": "Failed to find view layout for {0}.",
   "documentVocabularyManagement.layoutNotFound": "Failed to find edit layout for {0}.",
   "bulkDownload.completed": "Zip ready",
+  "bulkDownload.empty": "Nothing to be downloaded",
   "bulkDownload.error": "Error while Zipping files",
   "bulkDownload.filename.selection": "selection",
   "bulkDownload.preparing": "Preparing Zip",

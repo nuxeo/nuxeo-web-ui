@@ -78,6 +78,10 @@ limitations under the License.
             "filename": this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
           }
           this.$.bulkDownloadOp.execute().then(function(res) {
+            if (res.status === 204) {
+              this.fire('notify', {"message": this.i18n('bulkDownload.empty')});
+              return;
+            }
             this.fire('notify', {"message": this.i18n('bulkDownload.preparing')});
             window.setTimeout(this._watchDownload.bind(this), 1000, res.key);
           }.bind(this)).catch(function(err) {
