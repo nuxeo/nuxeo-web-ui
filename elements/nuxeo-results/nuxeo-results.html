@@ -86,6 +86,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         margin-left: 4px;
       }
 
+      paper-icon-button[active] {
+        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -108,7 +112,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           <paper-icon-button class="displayMode"
                              icon="[[item.icon]]"
                              title$="[[_displayModeTitle(item, i18n)]]"
-                             hidden$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                             active$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                             disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
                              on-tap="_toggleDisplayMode"></paper-icon-button>
         </template>
 
