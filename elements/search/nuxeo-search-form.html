@@ -597,7 +597,7 @@ limitations under the License.
       _paramsChanged: function() {
         this.$.provider.page = 1;
         this.dirty = true;
-        if (this.view) {
+        if (this.view && this.auto) {
           this.view.reset();
           this.view.fetch();
         }
@@ -649,8 +649,10 @@ limitations under the License.
       },
 
       _search: function() {
-        this.$.provider.page = 1;
-        return this.$.provider.fetch().then(this._navigateToResults.bind(this));
+        if (this.view) {
+          this.view.reset();
+          return this.view.fetch().then(this._navigateToResults.bind(this));
+        }
       },
 
       _reset: function() {
