@@ -18,7 +18,7 @@ export default class Search extends BasePage {
 
   get displayMode() {
     this.resultActions.waitForVisible();
-    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('hidden'));
+    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('disabled'));
     return displayMode[0].getAttribute('title').replace('Switch to ', '').replace(/ view| View/, '').toLowerCase();
   }
 
