@@ -485,8 +485,8 @@ limitations under the License.
       },
 
       _refreshCollections: function() {
-        this.$.collectionsProvider.page = 1;
-        this.$.collectionsProvider.fetch();
+        this.$.collectionsList.reset();
+        this.$.collectionsList.fetch();
       },
 
       loadCollection: function(collection, provider) {
