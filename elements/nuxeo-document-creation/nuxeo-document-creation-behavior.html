@@ -22,36 +22,6 @@ limitations under the License.
 
   (function() {
     var schemaFetcher = null;
-    var schemaRegistry = {};
-
-    function createComplexObject(fieldsObject) {
-      var props = {};
-
-      Object.keys(fieldsObject.fields).forEach(function(key) {
-        var nextFieldsObject = fieldsObject.fields[key];
-
-        if (nextFieldsObject['fields']) {
-          // complex fields within complex fields that are of the same schema
-          props[key] = createComplexObject(nextFieldsObject);
-        } else {
-          props[key] = null;
-        }
-      });
-
-      return props;
-    }
-
-    function initializeFields(doc, schema) {
-      var prefix = (schema['@prefix'] ? schema['@prefix'] : schema['name']);
-      Object.keys(schema.fields).forEach(function(fieldName) {
-        var field = schema.fields[fieldName];
-        if (field !== null && typeof field === 'object' && field.type && field.type === 'complex') {
-          doc.properties[prefix + ":" + fieldName] = createComplexObject(field);
-        } else {
-          doc.properties[prefix + ":" + fieldName] = null;
-        }
-      });
-    }
 
     /**
      * `Nuxeo.DocumentCreationBehavior`
@@ -115,43 +85,20 @@ limitations under the License.
       ],
 
       newDocument: function(type, properties) {
-        var doc = {
-          'entity-type': 'document',
-          'type': type,
-          'name': '',
-          'properties': {
-            'dc:title': '',
-            'dc:description': ''
-          }
-        };
-        // NXP-22300: initialize complex properties
-        if (!(type in schemaRegistry)) {
-          if (!schemaFetcher) {
-            schemaFetcher = document.createElement('nuxeo-resource');
-          }
-          schemaFetcher.path = '/config/types/' + this.selectedDocType.type;
-          return schemaFetcher.get().then(function(doctype) {
-            // cache doctype schemas
-            schemaRegistry[doctype.name] = doctype;
-            return this._newDocument(doctype, doc, properties);
-          }.bind(this));
-        } else {
-          return Promise.resolve(this._newDocument(schemaRegistry[type], doc, properties));
+        if (!schemaFetcher) {
+          schemaFetcher = document.createElement('nuxeo-resource');
         }
-      },
-
-      _newDocument: function(doctype, doc, properties) {
-        if (doctype.schemas) {
-          doctype.schemas.forEach(function(schema) {
-            initializeFields(doc, schema);
-          });
-        }
-        if (properties) {
-          for (var prop in properties) {
-            doc.properties[prop] = properties[prop];
+        schemaFetcher.path = 'path/' + this.targetPath + '/@emptyWithDefault';
+        schemaFetcher.params = { type: this.selectedDocType.type };
+        schemaFetcher.headers = { properties: '*' };
+        return schemaFetcher.get().then(function(doc) {
+          if (properties) {
+            for (var prop in properties) {
+              doc.properties[prop] = properties[prop];
+            }
           }
-        }
-        return doc;
+          return doc;
+        });
       },
 
       _parentChanged: function() {
@@ -206,6 +153,11 @@ limitations under the License.
         } else if (this.subtypes && this.subtypes.length === 0) {
           this.set('canCreate', false);
           this.set('errorMessage', this.i18n('documentCreationBehavior.error.noSubtypes'));
+        } else if (typeof this.selectedDocType === 'object' &&
+                   Object.keys(this.selectedDocType).length > 0 &&
+                   !this._isValidType(this.selectedDocType)) {
+          this.set('canCreate', false);
+          this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidSubtype'));
         } else {
           this.set('canCreate', true);
           this.set('errorMessage', '');
