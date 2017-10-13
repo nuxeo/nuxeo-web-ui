@@ -315,7 +315,8 @@ limitations under the License.
         }
 
         // XXX: could rely on onsubmit to avoid rechecking for validity
-        return this.$.form.validate() && this.$.form.checkValidity() && valid;
+        return this.$.form.validate() && this.$.form.checkValidity() &&
+               valid && this._isValidType(this.selectedDocType);
       },
 
       _create: function() {
