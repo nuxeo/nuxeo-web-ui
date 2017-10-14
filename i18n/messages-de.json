@@ -287,6 +287,7 @@
   "documentCreateVersion.minor":"Nebenversion",
   "documentCreateVersion.title":"Version für {0}-Version {1} erstellen.{2}",
   "documentCreationBehavior.error.invalidLocation":"Ungültiger Ort",
+  "documentCreationBehavior.error.invalidSubtype":"You cannot cannot create this type of document in this location.",
   "documentCreationBehavior.error.noPermission":"Sie besitzen keine Berechtigungen, an diesem Ort zu erstellen",
   "documentCreationBehavior.error.noSubtypes":"Content konnte nicht an diesem Ort erstellt werden",
   "documentCreationForm.location":"Ort",

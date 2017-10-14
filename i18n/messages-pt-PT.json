@@ -287,6 +287,7 @@
   "documentCreateVersion.minor":"Versão Menor",
   "documentCreateVersion.title":"Criar versão para {0} - Versão {1}.{2}",
   "documentCreationBehavior.error.invalidLocation":"Localização inválida",
+  "documentCreationBehavior.error.invalidSubtype":"You cannot cannot create this type of document in this location.",
   "documentCreationBehavior.error.noPermission":"Você não tem permissões para criar neste local",
   "documentCreationBehavior.error.noSubtypes":"Não é possível criar conteúdo neste local",
   "documentCreationForm.location":"Local",

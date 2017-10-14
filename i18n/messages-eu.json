@@ -287,6 +287,7 @@
   "documentCreateVersion.minor":"Minor version",
   "documentCreateVersion.title":"Create Version for {0} - Version {1}.{2}",
   "documentCreationBehavior.error.invalidLocation":"Invalid location",
+  "documentCreationBehavior.error.invalidSubtype":"You cannot cannot create this type of document in this location.",
   "documentCreationBehavior.error.noPermission":"You do not have permissions to create under this location.",
   "documentCreationBehavior.error.noSubtypes":"Select a different container to create your content.",
   "documentCreationForm.location":"Location",
