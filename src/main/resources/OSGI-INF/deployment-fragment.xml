@@ -7,7 +7,7 @@
       <include>web/nuxeo.war/**</include>
     </unzip>
 
-     <!-- Add fallback to two-letter locales -->
+    <!-- Add fallback to two-letter locales -->
     <copy from="nuxeo.war/ui/i18n/messages-es-ES.json"
           to="nuxeo.war/ui/i18n/messages-es.json" />
     <copy from="nuxeo.war/ui/i18n/messages-pt-PT.json"

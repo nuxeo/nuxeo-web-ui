@@ -41,12 +41,11 @@ limitations under the License.
 <dom-module id="nuxeo-search-form-layout">
   <template>
 
-      <nuxeo-layout id="layout"
-                    href="[[_formHref(provider, searchName)]]"
-                    model="[[_formModel(provider, aggregations, params)]]"
-                    error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
-                    on-element-changed="_formChanged"></nuxeo-layout>
-    </div>
+    <nuxeo-layout id="layout"
+                  href="[[_formHref(provider, searchName)]]"
+                  model="[[_formModel(provider, aggregations, params)]]"
+                  error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
+                  on-element-changed="_formChanged"></nuxeo-layout>
 
   </template>
 
