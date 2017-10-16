@@ -75,7 +75,7 @@ limitations under the License.
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-page-provider id="nxProvider" auto
+    <nuxeo-page-provider id="nxProvider"
                          provider="[[provider]]"
                          page-size="[[pageSize]]"
                          aggregations="{{aggregations}}"
@@ -89,7 +89,7 @@ limitations under the License.
 
     <div id="dropzone">
 
-      <nuxeo-results name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+      <nuxeo-results id="results" name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
         <div class="selectionActions">
           <nuxeo-slot slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
         </div>
@@ -276,18 +276,10 @@ limitations under the License.
         }
       },
 
-      _refreshAndFetch: function() {
-        var pn = this.nxProvider.page;
-        this._refresh();
-        if (pn === 1) {
-          // normally the page provider is on auto mode
-          // so the fetch should be triggered when changing page
-          this.nxProvider.fetch();
-        }
-      },
-
       _refresh: function() {
-        this.$.nxProvider.page = 1;
+        if (this.document && this.$.results.view) {
+          this.$.results.view.fetch();
+        }
       },
 
       _navigate: function(e) {
