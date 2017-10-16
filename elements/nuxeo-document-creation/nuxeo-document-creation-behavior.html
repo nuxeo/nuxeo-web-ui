@@ -239,7 +239,7 @@ limitations under the License.
       },
 
       _sanitizeName: function(name) {
-        return name.replace(/[^a-z0-9.]/gi, '_');
+        return name.replace(/[\\/]/gi, '-');
       },
 
       _isValidType: function(type) {
