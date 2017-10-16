@@ -110,13 +110,14 @@ limitations under the License.
     });
 
     // add #! before urls
-    page({hashbang: true, click: false});
+    page({hashbang: true, click: false, decodeURLComponents: false});
 
     Nuxeo.RoutingBehavior.useHashbang = true;
     Polymer.Base._addFeature({
       router: {
         browse: function(path) {
-          return '/browse' + path;
+          return '/browse' + path.replace(/\%/g, encodeURIComponent('%'))
+                                 .replace(/\?/g, encodeURIComponent('?'));
         },
 
         document: function(id) {
