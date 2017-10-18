@@ -103,14 +103,14 @@ limitations under the License.
               <span>+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
-          <nuxeo-data-table id="table" items="[[entries]]"
+          <nuxeo-data-table id="table"
             empty-label="[[i18n('vocabularyManagement.noEntry')]]"
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]">
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
                 <template>
                   <template is="dom-if" if="[[!_entryActions(column.key)]]">
-                    [[_value(item, column.key)]]
+                    [[_value(index, column.key)]]
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
                     <paper-icon-button id="edit-button-[[index]]" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
@@ -249,6 +249,10 @@ limitations under the License.
             });
             this.colDef = tmp;
             this.entries = resp.entries;
+
+            var table = this.$$('#table');
+            table.items = [];
+            table.items = this.entries;
           }.bind(this));
         }
       },
@@ -257,7 +261,8 @@ limitations under the License.
         return this.selectedVocabulary && this.selectedVocabulary.length > 0;
       },
 
-      _value: function(entry, prop) {
+      _value: function(index, prop) {
+        var entry = this.entries[index];
         if (entry && entry.properties && prop) {
           if (prop === 'obsolete') {
             return entry.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
