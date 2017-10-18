@@ -49,10 +49,12 @@ limitations under the License.
 
       ::content label {
         margin: 0 !important;
+        width: 90px;
+        min-width: 90px;
       }
 
-      ::content *[role=widget] {
-        @apply(--layout-vertical);
+      ::content div[role=widget] {
+        @apply(--layout-horizontal);
         box-sizing: border-box;
         margin-bottom: 1rem;
       }
