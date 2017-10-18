@@ -49,7 +49,7 @@ limitations under the License.
       },
 
       _observeParams: function() {
-        if (!this.params || !this.params.queryParams || !this.params.queryParams.length === 0) {
+        if (!this.params || !this.params.queryParams || this.params.queryParams.length !== 0) {
           if (this.params['saved:queryParams']) {
             this.set('params.queryParams', this.params['saved:queryParams']);
           } else {

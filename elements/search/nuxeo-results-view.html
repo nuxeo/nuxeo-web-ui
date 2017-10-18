@@ -267,6 +267,11 @@ limitations under the License.
           observer: '_searchFormChanged'
         },
 
+        /**
+         * Currently selected view
+         */
+        view: Object,
+
         _params: Object,
         _paramsCount: Number,
         _nxProvider: HTMLElement,
@@ -285,6 +290,9 @@ limitations under the License.
         if (!this._nxProvider) {
           this._nxProvider = this.$.provider;
         }
+        document.addEventListener('search-results-view', function(e) {
+          this.view = e.detail.view;
+        }.bind(this));
       },
 
       get form() {
@@ -337,8 +345,10 @@ limitations under the License.
       },
 
       _search: function() {
-        this._nxProvider.page = 1;
-        return this._nxProvider.fetch();
+        if (this.view) {
+          this.view.reset();
+          this.view.fetch();
+        }
       },
 
       _aggregationsChanged: function() {
@@ -353,7 +363,7 @@ limitations under the License.
       },
 
       _clear: function() {
-        if (this.form && this.form.clear != undefined && typeof this.form.clear == 'function') {
+        if (this.form && this.form.clear !== undefined && typeof this.form.clear === 'function') {
           this.form.clear();
         }
         this._paramsChanged();
@@ -361,7 +371,7 @@ limitations under the License.
           this.aggregations = {};
         }
         if (!this.auto && this.visible) {
-          this._nxProvider.fetch();
+          this._search();
         }
       },
 

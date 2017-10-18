@@ -258,22 +258,15 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _refreshAndFetch: function() {
-        var pn = this.nxProvider.page;
-        this._rewind();
-        if (pn === 1) {
-          // normally the page provider is on auto mode
-          // so the fetch should be triggered when changing page
-          this.nxProvider.fetch();
+        if (this.view) {
+          this.view.reset();
+          this.view.fetch();
         }
-      },
-
-      _rewind: function() {
-        this.nxProvider.page = 1;
       },
 
       _updateStorage: function() {
         if (this.$.nxcon.user && this.name) {
-          this._localStorageName =  this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
+          this._localStorageName = this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
         }
       },
 
