@@ -25,28 +25,12 @@ limitations under the License.
 
     <style>
       nuxeo-saved-search-actions {
-        @apply(--layout-end-justified);
-      }
-
-      ::content nuxeo-data-table, ::content nuxeo-data-grid, ::content nuxeo-data-list {
-        display: block;
-        position: relative;
-      }
-
-      ::content .ellipsis {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: block;
-      }
-
-      ::content .capitalize {
-        text-transform: capitalize;
+        @apply --layout-end-justified;
       }
     </style>
 
     <nuxeo-page>
-      <div class="header">
+      <div class="header" slot="header">
         <span class="flex">[[i18n(heading)]]</span>
         <template is="dom-if" if="[[showSavedSearchActions]]">
           <nuxeo-saved-search-actions id="actions" class="actions" search-form="[[searchForm]]"></nuxeo-saved-search-actions>

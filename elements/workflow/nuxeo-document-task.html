@@ -85,8 +85,8 @@ limitations under the License.
             <div class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></div>
           </div>
 
-          <iron-form>
-            <form id="task-container" action="/" is="iron-form">
+          <iron-form id="task-container">
+            <form>
               <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]"
                             error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
             </form>
@@ -139,18 +139,10 @@ limitations under the License.
       },
 
       validate: function() {
-        // run our custom validation function first to allow setting custom native validity
-        var valid = this.$.layout.validate();
-
         var form = this.$['task-container'];
 
-        // fake submit to trigger native validation checks and UI
-        if (valid) {
-          form._doFakeSubmitForValidation();
-        }
-
-        // XXX: could rely on onsubmit to avoid rechecking for validity
-        return valid && form.validate() && form.checkValidity();
+        // run our custom validation function first to allow setting custom native validity
+        return this.$.layout.validate() && this._doNativeValidation(form) && form.validate();
       },
 
       _processTask: function(e) {
@@ -169,6 +161,17 @@ limitations under the License.
 
       _toggleGraphDialog: function() {
         this.$.graphDialog.toggle();
+      },
+
+      // trigger native browser invalid-form UI
+      _doNativeValidation: function(form) {
+        var fakeSubmit = document.createElement('input');
+        fakeSubmit.setAttribute('type', 'submit');
+        fakeSubmit.style.display = 'none';
+        form._form.appendChild(fakeSubmit);
+        fakeSubmit.click();
+        form._form.removeChild(fakeSubmit);
+        return form._form.checkValidity();
       }
 
     });

@@ -24,12 +24,9 @@ limitations under the License.
 <dom-module id="nuxeo-task2556-layout">
 
   <template>
-    <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
-
     <nuxeo-user-suggestion role="widget" label="[[i18n('wf.parallelDocumentReview.participants')]]"
                            search-type="USER_GROUP_TYPE"
-                           multiple="true"
-                           prefixed required
+                           multiple prefixed required
                            value="{{task.variables.participants}}">
     </nuxeo-user-suggestion>
 

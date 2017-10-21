@@ -34,9 +34,9 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-collapsible-document-page">
   <template>
-    <style>
+    <style include="nuxeo-styles">
       .page {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
       }
 
       .page .main {
@@ -44,9 +44,9 @@ limitations under the License.
       }
 
       .details {
-        @apply(--layout-horizontal);
-        @apply(--layout-wrap);
-        @apply(--layout-justified);
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+        @apply --layout-justified;
       }
 
       .details .section {
@@ -56,12 +56,12 @@ limitations under the License.
         max-width: 320px;
       }
 
-      ::content paper-icon-button {
-        @apply(--nuxeo-action);
+      paper-icon-button {
+        @apply --nuxeo-action;
       }
 
-      ::content paper-icon-button:hover {
-        @apply(--nuxeo-action-hover);
+      paper-icon-button:hover {
+        @apply --nuxeo-action-hover;
       }
     </style>
 
