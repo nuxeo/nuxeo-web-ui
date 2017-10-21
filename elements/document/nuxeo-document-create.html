@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
@@ -318,11 +319,7 @@ limitations under the License.
       },
 
       _validate: function() {
-        // run our custom validation function first to allow setting custom native validity
-        var valid = this.$['document-create'].validate();
-
-        // XXX: could rely on onsubmit to avoid rechecking for validity
-        return this.$.form.validate() && valid;
+        return this.$['document-create'].validate() && this.$.form.validate() && this.$.form.checkValidity();
       },
 
       _create: function() {
@@ -383,6 +380,17 @@ limitations under the License.
 
       _canCreate: function() {
         return this.canCreate && !this.creating;
+      },
+
+      // trigger native browser invalid-form UI
+      _doNativeValidation: function(form) {
+        var fakeSubmit = document.createElement('input');
+        fakeSubmit.setAttribute('type', 'submit');
+        fakeSubmit.style.display = 'none';
+        form._form.appendChild(fakeSubmit);
+        fakeSubmit.click();
+        form._form.removeChild(fakeSubmit);
+        return form._form.checkValidity();
       }
 
     });

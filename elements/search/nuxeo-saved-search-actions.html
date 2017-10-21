@@ -113,7 +113,7 @@ limitations under the License.
       },
 
       _showSaveAs: function() {
-        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm.dirty);
+        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this.searchForm.dirty);
       },
 
       _showSave: function() {

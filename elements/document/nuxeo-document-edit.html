@@ -121,7 +121,7 @@ limitations under the License.
 
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
-        return this.$['document-edit'].validate() && this.$.form.validate();
+        return this.$['document-edit'].validate() && this.$.form.validate() && this.$.form.checkValidity();
       },
 
       _save: function() {
@@ -156,6 +156,17 @@ limitations under the License.
             this._dirtyProperties[prop] = this.document.properties[prop];
           }
         }
+      },
+
+      // trigger native browser invalid-form UI
+      _doNativeValidation: function(form) {
+        var fakeSubmit = document.createElement('input');
+        fakeSubmit.setAttribute('type', 'submit');
+        fakeSubmit.style.display = 'none';
+        form._form.appendChild(fakeSubmit);
+        fakeSubmit.click();
+        form._form.removeChild(fakeSubmit);
+        return form._form.checkValidity();
       }
     });
   </script>
