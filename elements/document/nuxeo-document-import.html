@@ -468,27 +468,29 @@ limitations under the License.
                                      always-float-label></nuxeo-path-suggestion>
               <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
             </div>
-            <form is="iron-form" id="form" class="form vertical layout flex">
-              <div class="horizontal layout center">
-                <div class="flex">
-                  <nuxeo-select id="docTypeDropdown"
-                                selected="{{selectedDocType}}" attr-for-selected="key"
-                                label="[[i18n('documentImportForm.type.label')]]"
-                                placeholder="[[i18n('documentImportForm.type.placeholder')]]"
-                                error-message="[[i18n('documentImportForm.type.error')]]"
-                                on-value-changed="_validate"
-                                required>
-                    <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
-                      <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
-                    </template>
-                  </nuxeo-select>
+            <iron-form id="form">
+              <form class="form vertical layout flex">
+                <div class="horizontal layout center">
+                  <div class="flex">
+                    <nuxeo-select id="docTypeDropdown"
+                                  selected="{{selectedDocType}}" attr-for-selected="key"
+                                  label="[[i18n('documentImportForm.type.label')]]"
+                                  placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                                  error-message="[[i18n('documentImportForm.type.error')]]"
+                                  on-value-changed="_validate"
+                                  required>
+                      <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
+                        <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
+                      </template>
+                    </nuxeo-select>
+                  </div>
                 </div>
-              </div>
-              <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
-              <template is="dom-if" if=[[document]] restamp>
-                <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
-              </template>
-            </form>
+                <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
+                <template is="dom-if" if=[[document]] restamp>
+                  <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+                </template>
+              </form>
+            </iron-form>
           </div>
           <div class="sidePanel horizontal layout">
             <div id="blobList" class="flex">
@@ -928,15 +930,9 @@ limitations under the License.
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
         var layout = this.$$('#document-import');
-        var valid = layout ? layout.validate() : false;
 
-        // fake submit to trigger native validation checks and UI
-        if (valid) {
-          this.$.form._doFakeSubmitForValidation();
-        }
-
-        // XXX: could rely on onsubmit to avoid rechecking for validity
-        return this.$.form.validate() && this.$.form.checkValidity() && valid;
+        // run our custom validation function first to allow setting custom native validity
+        return layout.validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
       },
 
       _tapLocalDoc: function(e) {
@@ -1265,6 +1261,17 @@ limitations under the License.
             this._importWithProperties();
           }
         }
+      },
+
+      // trigger native browser invalid-form UI
+      _doNativeValidation: function(form) {
+        var fakeSubmit = document.createElement('input');
+        fakeSubmit.setAttribute('type', 'submit');
+        fakeSubmit.style.display = 'none';
+        form._form.appendChild(fakeSubmit);
+        fakeSubmit.click();
+        form._form.removeChild(fakeSubmit);
+        return form._form.checkValidity();
       }
     });
   </script>

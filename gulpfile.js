@@ -104,7 +104,13 @@ gulp.task('polymer-build', function() {
       .pipe($.if(/\.html$/, htmlMinifier())) // Install gulp-html-minifier to use
       .pipe(htmlSplitter.rejoin()) // Call rejoin when you're finished
 
-      .pipe(project.bundler({rewriteUrlsInTemplates: true}))
+      .pipe(project.bundler({
+        rewriteUrlsInTemplates: true,
+        stripComments: true,
+        inlineCss: true,
+        inlineScripts: true,
+        excludes: [dist('elements/nuxeo-search-page.html')]
+      }))
       .pipe(project.addCustomElementsEs5Adapter())
       .pipe(gulp.dest(DIST))
       .on('end', resolve)
@@ -112,6 +118,10 @@ gulp.task('polymer-build', function() {
   });
 });
 
+
+gulp.task('babel-helpers', function() {
+  return gulp.src(['node_modules/@nuxeo/polymer-build/lib/babel-helpers.min.js']).pipe(gulp.dest(dist('scripts')));
+});
 
 // Move from 'elements' folder to root
 gulp.task('move-elements', function() {
@@ -151,6 +161,7 @@ gulp.task('build', ['clean'], function(cb) {
   return runSequence(
       'merge-message-files',
       'polymer-build',
+      'babel-helpers',
       'move-elements',
       'strip',
       cb);
