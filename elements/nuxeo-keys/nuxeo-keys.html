@@ -59,7 +59,7 @@ limitations under the License.
               }
               break;
             case 'DIV':
-              if (!this.invasive && element.id === 'editor') {
+              if (!this.invasive && element.isContentEditable) {
                 return;
               }
           }
