@@ -2,7 +2,6 @@
   "name": "nuxeo-web-ui",
   "private": true,
   "dependencies": {
-    "alloyeditor": "1.4.1",
     "jsPlumb": "2.0.4",
     "marked-element": "PolymerElements/marked-element#^2.0.0",
     "moment": "2.10.6",
