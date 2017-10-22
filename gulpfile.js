@@ -136,11 +136,15 @@ gulp.task('move-elements', function() {
     dist('elements/directory/**'), '!' + dist('elements/directory/*.html'),
     dist('elements/search/**'), '!' + dist('elements/search/*.html'),
     dist('elements/workflow/**'), '!' + dist('elements/workflow/*.html'),
-    dist('elements/nuxeo-*.html'),
-    dist('elements/elements.html')
+    dist('elements/nuxeo-*.html')
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 
-  return merge(layouts, userGroupManagement);
+  // fix asset path
+  var elements = gulp.src(dist('elements/elements.html'))
+    .pipe($.replace('..\/bower_components', 'bower_components'))
+    .pipe(gulp.dest(dist()));
+
+  return merge(elements, layouts, userGroupManagement);
 });
 
 // Strip unnecessary stuff
