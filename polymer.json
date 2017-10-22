@@ -15,7 +15,8 @@
     "bower_components/webcomponentsjs/*",
     "bower_components/page/page.js",
     "bower_components/moment/min/moment-with-locales.min.js",
-    "bower_components/nuxeo-ui-elements/viewers/pdfjs/*"
+    "bower_components/nuxeo-ui-elements/viewers/pdfjs/*",
+    "bower_components/nuxeo-ui-elements/widgets/alloy/**/*"
   ],
   "lint": {
     "rules": ["polymer-1"],
