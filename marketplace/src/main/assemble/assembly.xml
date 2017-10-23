@@ -20,6 +20,10 @@
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui" />
     </copy>
 
+    <nx:studioExtraction todir="${outdir}/marketplace">
+      <fileset dir="${outdir}/marketplace/install/bundles"/>
+    </nx:studioExtraction>
+
     <zip destfile="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip"
          basedir="${outdir}/marketplace" />
     <artifact:attach file="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip" type="zip" />
