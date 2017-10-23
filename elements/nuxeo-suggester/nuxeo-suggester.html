@@ -346,7 +346,9 @@ limitations under the License.
       },
 
       _enterPressed: function() {
-        this.$.selector.items[this.$.selector.selected].click();
+        if (this.$.selector.items.length > 0) {
+          this.$.selector.items[this.$.selector.selected].click();
+        }
       },
 
       _itemClicked: function() {
