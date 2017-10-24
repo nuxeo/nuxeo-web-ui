@@ -121,7 +121,7 @@ limitations under the License.
 
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
-        return this.$['document-edit'].validate() && this.$.form.validate() && this.$.form.checkValidity();
+        return this.$['document-edit'].validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
       },
 
       _save: function() {
