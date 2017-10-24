@@ -27,7 +27,7 @@ limitations under the License.
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters>
         <template>
-          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]"
+          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
           </nuxeo-document-grid-thumbnail>
         </template>
@@ -116,7 +116,7 @@ limitations under the License.
       },
 
       _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item});
+        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.detail || e.model).index});
       }
     });
   </script>

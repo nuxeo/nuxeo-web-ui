@@ -209,6 +209,10 @@ limitations under the License.
         selectedItems: {
           type: Array,
           value: []
+        },
+
+        index: {
+          type: Number
         }
       },
 
@@ -228,10 +232,10 @@ limitations under the License.
       },
 
       handleClick: function(e) {
-        if (this.selectionMode){
+        if (this.selectionMode) {
           this._toogleSelect();
-        } else if (!(e.ctrlKey||e.shiftKey||e.metaKey||e.button==1)) {
-          this.fire('navigate', {item: this.doc});
+        } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
+          this.fire('navigate', {item: this.doc, index: this.index});
         }
       },
 
@@ -245,7 +249,7 @@ limitations under the License.
       },
 
       _selectedItemsChanged: function(){
-        this.selectionMode =  this.selectedItems && this.selectedItems.length > 0;
+        this.selectionMode = this.selectedItems && this.selectedItems.length > 0;
       }
     });
   </script>

@@ -172,7 +172,7 @@ limitations under the License.
       },
 
       _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item});
+        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
         e.stopPropagation();
       }
     });

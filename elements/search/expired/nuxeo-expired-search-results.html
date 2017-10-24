@@ -30,7 +30,7 @@ limitations under the License.
                        display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]"
                        display-navigation>
         <template>
-          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]"
+          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
           </nuxeo-document-grid-thumbnail>
         </template>
@@ -136,7 +136,7 @@ limitations under the License.
       },
 
       _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item});
+        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
       }
     });
   </script>
