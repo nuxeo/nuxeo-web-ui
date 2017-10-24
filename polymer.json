@@ -7,7 +7,6 @@
     "elements/**/*",
     "themes/**/*",
     "images/**/*",
-    "i18n/**/*",
     "bower.json"
   ],
   "extraDependencies": [
