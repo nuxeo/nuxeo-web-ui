@@ -47,7 +47,9 @@ limitations under the License.
         id="removeButton"
         icon="nuxeo:remove">
       </paper-icon-button>
-      <paper-tooltip for="removeButton">[[i18n('collections.remove')]]</paper-tooltip>
+      <paper-tooltip for="removeButton" position="[[tooltipPosition]]">
+        [[i18n('collections.remove')]]
+      </paper-tooltip>
     </template>
 
   </template>
@@ -62,6 +64,11 @@ limitations under the License.
         },
         collection: {
           type: Object
+        },
+
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
         }
       },
 

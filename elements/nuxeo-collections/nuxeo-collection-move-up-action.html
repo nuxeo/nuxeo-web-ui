@@ -46,7 +46,9 @@ limitations under the License.
         id="upButton"
         icon="icons:arrow-upward">
       </paper-icon-button>
-      <paper-tooltip for="upButton">[[i18n('collections.moveUp')]]</paper-tooltip>
+      <paper-tooltip for="upButton" position="[[tooltipPosition]]">
+        [[i18n('collections.moveUp')]]
+      </paper-tooltip>
     </template>
 
   </template>
@@ -70,6 +72,11 @@ limitations under the License.
         },
         _member2Idx: {
           type: Number
+        },
+
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
         }
       },
 

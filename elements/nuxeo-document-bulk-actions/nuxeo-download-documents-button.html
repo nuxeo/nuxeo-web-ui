@@ -46,7 +46,7 @@ limitations under the License.
 
     <paper-icon-button icon="nuxeo:download" id="downloadAllButtons">
     </paper-icon-button>
-    <paper-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip">
+    <paper-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip" position="[[tooltipPosition]]">
       [[i18n('bulkDownload.tooltip')]]
     </paper-tooltip>
 
@@ -61,6 +61,11 @@ limitations under the License.
           type: Array,
           notify: true,
           value: []
+        },
+
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
         }
       },
 

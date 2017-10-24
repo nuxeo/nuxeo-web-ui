@@ -59,7 +59,9 @@ limitations under the License.
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
       <paper-icon-button noink icon="nuxeo:collections" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
-      <paper-tooltip for="addColBut" position="[[tooltipPosition]]">[[i18n('addToCollectionDocumentsButton.tooltip')]]</paper-tooltip>
+      <paper-tooltip for="addColBut" position="[[tooltipPosition]]">
+        [[i18n('addToCollectionDocumentsButton.tooltip')]]
+      </paper-tooltip>
     </template>
 
     <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup">

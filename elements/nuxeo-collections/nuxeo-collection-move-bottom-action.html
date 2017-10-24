@@ -46,7 +46,9 @@ limitations under the License.
         id="bottomButton"
         icon="editor:vertical-align-bottom">
       </paper-icon-button>
-      <paper-tooltip for="bottomButton">[[i18n('collections.moveBottom')]]</paper-tooltip>
+      <paper-tooltip for="bottomButton" position="[[tooltipPosition]]">
+        [[i18n('collections.moveBottom')]]
+      </paper-tooltip>
     </template>
 
   </template>
@@ -70,6 +72,11 @@ limitations under the License.
         },
         _member2Idx: {
           type: Number
+        },
+
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
         }
       },
 
