@@ -44,7 +44,7 @@ limitations under the License.
 
     <paper-icon-button icon="nuxeo:delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
     </paper-icon-button>
-    <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip">
+    <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip" position="[[tooltipPosition]]">
       [[i18n('deleteDocumentsButton.tooltip')]]
     </paper-tooltip>
 
@@ -59,6 +59,11 @@ limitations under the License.
           type: Array,
           notify: true,
           value: []
+        },
+
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
         }
       },
 
