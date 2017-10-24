@@ -135,7 +135,7 @@ limitations under the License.
 
       _editEntry: function(e) {
         this._isNew = false;
-        this._selectedEntry = e.model.item;
+        this._selectedEntry = e.target.parentNode.item;
         this._selectedServiceName = this._selectedEntry.serviceName;
         if (Array.isArray(this._selectedEntry.scopes)) {
           this._selectedEntry.scopes = this._selectedEntry.scopes.join();
@@ -201,7 +201,7 @@ limitations under the License.
 
       _deleteEntry: function(e) {
         if (confirm(this.i18n('cloudProviders.confirmDelete'))) {
-          var item = e.model.item;
+          var item =  e.target.parentNode.item;
           this.$.oauth.path = '/oauth2/provider/' + item.serviceName;
           this.$.oauth.remove().then(function() {
             this.refresh();
