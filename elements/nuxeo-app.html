@@ -666,7 +666,7 @@ limitations under the License.
         if (e.detail.doc) {
           this.navigateTo('browse', e.detail.doc.path);
           if (e.detail.isFromCollection) {
-            this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.doc);
+            this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.index);
           }
         }
       },

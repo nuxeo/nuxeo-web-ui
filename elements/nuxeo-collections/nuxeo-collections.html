@@ -370,12 +370,12 @@ limitations under the License.
         }
       },
 
-      displayMembers: function(collection, member) {
+      displayMembers: function(collection, index) {
         this._isDisplayMembers = true;
-        if (member && member.uid) {
+        if (typeof index === 'number') {
           if (this.selectedCollection && collection && this.selectedCollection.uid === collection.uid) {
-            this.$.membersList.selectItem(member);
-            this.$.membersList.scrollToItem(member);
+            this.$.membersList.selectItem(index);
+            this.$.membersList.scrollToItem(index);
           }
         }
       },
@@ -493,6 +493,8 @@ limitations under the License.
         if (provider) {
           this.$.membersList.nxProvider = provider;
           if (collection && this.selectedCollection && this.selectedCollection.uid === collection.uid) {
+            this.$.membersList.reset();
+            this.$.membersList.fetch();
             this.displayCollections();
           }
         }
