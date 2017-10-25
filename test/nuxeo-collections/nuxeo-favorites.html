@@ -119,7 +119,6 @@ limitations under the License.
         test('it should be able to remove a favorite document', function() {
           var element = fixture('favorites', {doc: doc});
           var table = Polymer.dom(element.root).querySelector('nuxeo-data-list');
-
           return waitForEvent(element, 'nuxeo-page-loaded', 1).then(function() {
             // Assert we have two documents in favorites
             expect(element.favorite.uid).to.be.equal('my_favorites');
@@ -135,6 +134,7 @@ limitations under the License.
             var removeButton = items[0].querySelector('.remove');
             // Remove first entry from mock response
             favoritesResponse.entries.shift();
+            favoritesResponse.resultsCount = 1;
             performFavoritesResponse();
             MockInteractions.tap(removeButton);
             return waitForEvent(element, 'nuxeo-page-loaded', 1).then(function() {
@@ -152,7 +152,16 @@ limitations under the License.
         function performFavoritesResponse() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
+            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&offset=0&pageSize=31&sortBy=&sortOrder=&queryParams=my_favorites',
+            [
+              200,
+              {'Content-Type': 'application/json'},
+              JSON.stringify(favoritesResponse)
+            ]
+          );
+          server.respondWith(
+            'GET',
+            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&offset=0&pageSize=32&sortBy=&sortOrder=&queryParams=my_favorites',
             [
               200,
               {'Content-Type': 'application/json'},
@@ -166,7 +175,7 @@ limitations under the License.
         setup(function() {
           server.respondWith(
             'GET',
-            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&pageSize=50&sortBy=&sortOrder=&queryParams=my_favorites',
+            '/dummy/api/v1/search/pp/default_content_collection/execute?currentPageIndex=0&offset=0&pageSize=31&sortBy=&sortOrder=&queryParams=my_favorites',
             [
               200,
               {'Content-Type': 'application/json'},
