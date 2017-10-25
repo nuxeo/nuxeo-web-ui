@@ -351,7 +351,7 @@
   "documentPage.info":"Info",
   "documentPage.initiated.workflow.currentUser":"Vous avez démarré un workflow {0} sur le document.",
   "documentPage.initiated.workflow":"a démarré un workflow {0} sur le document.",
-  "documentPage.metadata":"Metadata",
+  "documentPage.metadata":"Properties",
   "documentPage.tags":"Tags",
   "documentPage.tags.placeholder":"Ajoutez des tags sur le document.",
   "documentPage.to.process":"Vous avez une tâche à traiter avant le ",
