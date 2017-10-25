@@ -16,11 +16,13 @@
  */
 var emptyFavoritesResponse = {
   "entity-type": "documents",
+  "resultsCount": 0,
   "entries": []
 };
 
 var favoritesResponse = {
   "entity-type": "documents",
+  "resultsCount": 2,
   "entries": [{
     "entity-type":"document",
      "uid":"2",

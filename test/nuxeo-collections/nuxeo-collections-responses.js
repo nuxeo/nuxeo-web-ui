@@ -16,11 +16,13 @@
  */
 var emptyCollectionsResponse = {
   "entity-type": "documents",
+  "resultsCount": 0,
   "entries": []
 };
 
 var collectionsResponse = {
   "entity-type": "documents",
+  "resultsCount": 1,
   "entries": [{
     "entity-type":"document",
      "uid":"1",
@@ -31,6 +33,7 @@ var collectionsResponse = {
 
 var docsResponse = {
   "entity-type": "documents",
+  "resultsCount": 2,
   "entries": [{
     "contextParameters":{"thumbnail":{"url":null}},
     "entity-type":"document",
