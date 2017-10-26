@@ -514,8 +514,25 @@ limitations under the License.
 
       observers: [
         '_resetResults(provider, params.*, quickFilters.*, query)',
-        '_paramsChanged(params.*)'
+        '_paramsChanged(params.*)',
+        '_visibleChanged(auto, visible)'
       ],
+
+      _visibleChanged: function() {
+        if (this.visible) {
+          if (!this.searches) {
+            this.$['saved-searches'].get();
+            if (this.form.params !== undefined) {
+              this.params = this.form.params;
+            }
+          }
+          if (this.queue) {
+            this.$.list.fetch();
+          } else if (this.auto) {
+            this.$.provider.fetch();
+          }
+        }
+      },
 
       ready: function() {
         var body = document.querySelector('body');
@@ -543,10 +560,12 @@ limitations under the License.
 
       displayQueue: function(index) {
         this.queue = true;
-        if (typeof index === 'number') {
+        if (this.visible) {
           this.$.list.fetch().then(function() {
-            this.$.list.scrollToIndex(index);
-            this.$.list.selectItem(index);
+            if (typeof index === 'number') {
+              this.$.list.scrollToIndex(index);
+              this.$.list.selectItem(index);
+            }
           }.bind(this));
         }
       },
@@ -586,7 +605,7 @@ limitations under the License.
       _paramsChanged: function() {
         this.$.provider.page = 1;
         this.dirty = true;
-        if (this.view && this.auto) {
+        if (this.view && this.auto && this.visible) {
           this.view.reset();
           this.view.fetch();
         }
@@ -622,7 +641,7 @@ limitations under the License.
       _clear: function() {
         this.searchTerm = '';
         this.isSavedSearch = false;
-        this.selectedSearch = {};
+        this.selectedSearch = null;
         if (this.form && this.form.clear !== undefined && typeof this.form.clear === 'function') {
           this.form.clear();
         }
@@ -757,15 +776,11 @@ limitations under the License.
         this._clear();
 
         if (this.queue) {
-          this.displayQueue(0);
+          this.displayQueue();
         } else {
           this.displayFilters();
         }
 
-        this.$['saved-searches'].get();
-        if (this.form.params !== undefined) {
-          this.params = this.form.params;
-        }
         // setup data binding
         this.form.addEventListener('params-changed', function(e) {
           // e.detail.path is params.prop_name eg: params.ecm_fulltext
