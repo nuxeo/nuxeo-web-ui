@@ -11,7 +11,7 @@ export default class Group extends BasePage {
   }
 
   get dropdown() {
-    return this.el.element('#menu.nuxeo-user-group-management');
+    return this.el.element('#menu');
   }
 
   get groupItem() {
@@ -19,11 +19,11 @@ export default class Group extends BasePage {
   }
 
   get createGroupForm() {
-    return this.el.element(`#form.nuxeo-create-group`);
+    return this.el.element(`nuxeo-create-group #form`);
   }
 
   get createGroupButton() {
-    return this.el.element(`#createButton.nuxeo-create-group`);
+    return this.el.element(`nuxeo-create-group #createButton`);
   }
 
   get editGroupButton() {
@@ -59,12 +59,12 @@ export default class Group extends BasePage {
   searchFor(searchTerm) {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
-    const searchBox = this.el.element('paper-input.nuxeo-user-group-search');
+    const searchBox = this.el.element('nuxeo-user-group-search paper-input');
     searchBox.waitForVisible();
     return fixtures.layouts.setValue(searchBox, searchTerm);
   }
 
   searchResult(searchTerm) {
-    return this.el.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
+    return this.el.elementByTextContent('paper-card[name="groups"] .table [name="id"]', searchTerm);
   }
 }

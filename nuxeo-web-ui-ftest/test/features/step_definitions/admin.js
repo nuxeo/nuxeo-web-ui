@@ -8,8 +8,9 @@ module.exports = function () {
 
   // XXX: this.ui.drawer.administration.click()
   this.When('I click "$text" in the administration menu', (text) => {
-    driver.waitForVisible(`a=${text}`);
-    driver.click(`a=${text}`);
+    const el = driver.element(`nuxeo-menu-item[name="${text}"]`);
+    el.waitForVisible();
+    el.click();
   });
 
   this.Then('I can see the analytics page', () =>

@@ -9,19 +9,19 @@ Feature: Admin center
     Then I can see the administration menu
 
     # Analytics
-    When I click "Analytics" in the administration menu
+    When I click "analytics" in the administration menu
     Then I can see the analytics page
 
     # Users & Groups
-    When I click "Users & Groups" in the administration menu
+    When I click "user-group-management" in the administration menu
     Then I can see the users and groups page
 
     #Audit
-    When I click "Audit" in the administration menu
+    When I click "audit" in the administration menu
     Then I can see the audit page
 
     #Cloud Services
-    When I click "Cloud Services" in the administration menu
+    When I click "cloud-services" in the administration menu
     Then I can see the cloud services page
 
   Scenario: Admin center as member user

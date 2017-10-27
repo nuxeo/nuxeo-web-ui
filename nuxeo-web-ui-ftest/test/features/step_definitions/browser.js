@@ -5,16 +5,14 @@ module.exports = function () {
 
   this.Then('I can see the "$title" $tab tree node', (title, tab) => {
     this.ui.drawer._section(tab).waitForVisible();
-    this.ui.drawer._section(tab).element(`///nuxeo-tree-node//a[text()="${title}"]`).waitForVisible();
+    this.ui.drawer._section(tab).elementByTextContent(`.content a`, title).waitForVisible();
   });
 
   this.When('I click "$title" in the $tab tree', (title, tab) => {
     this.ui.drawer._section(tab).waitForVisible();
-    this.ui.drawer._section(tab)
-        .element(`///nuxeo-tree-node//a[text()="${title}"]|//*[@id="navTree"]//span[text()="${title}"]`)
-        .waitForVisible();
-    this.ui.drawer._section(tab)
-        .click(`///nuxeo-tree-node//a[text()="${title}"]|//*[@id="navTree"]//span[text()="${title}"]`);
+    const el = this.ui.drawer._section(tab).elementByTextContent(`.content a`, title);
+    el.waitForVisible();
+    el.click();
   });
 
   this.Then('I can see the "$title" document', (title) => {

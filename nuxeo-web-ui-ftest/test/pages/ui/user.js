@@ -11,14 +11,14 @@ export default class User extends BasePage {
     driver.waitForVisible(this._selector);
     this.el.waitForVisible(parent);
     if (field === 'password' || field === 'passwordConfirmation') {
-      return this.el.element(`${parent}[id="${field}"]`);
+      return this.el.element(`${parent} [id="${field}"]`);
     } else {
-      return this.el.element(`${parent}[name="${field}"]`);
+      return this.el.element(`${parent} [name="${field}"]`);
     }
   }
 
   get dropdown() {
-    return this.el.element('#menu.nuxeo-user-group-management');
+    return this.el.element('#menu');
   }
 
   get userItem() {
@@ -26,15 +26,15 @@ export default class User extends BasePage {
   }
 
   get createUserForm() {
-    return this.el.element(`#form.nuxeo-create-user`);
+    return this.el.element(`nuxeo-create-user #form`);
   }
 
   get createUserDialog() {
-    return { parent: '#form.nuxeo-create-user ' };
+    return { parent: 'nuxeo-create-user #form' };
   }
 
   get createUserButton() {
-    return this.el.element(`#createButton.nuxeo-create-user`);
+    return this.el.element(`nuxeo-create-user #createButton`);
   }
 
   get editUserButton() {
@@ -80,6 +80,6 @@ export default class User extends BasePage {
   }
 
   searchResult(searchTerm) {
-    return this.el.element(`///paper-card[contains(@class, "nuxeo-user-group-search")]//*[text()="${searchTerm}"]`);
+    return this.el.elementByTextContent('paper-card[name="users"] .table [name="id"]', searchTerm);
   }
 }
