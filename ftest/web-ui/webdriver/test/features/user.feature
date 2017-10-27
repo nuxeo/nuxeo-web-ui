@@ -7,7 +7,7 @@ Feature: User
     Given I login as "Administrator"
     And I click the "administration" button
     And I can see the administration menu
-    And I click "Users & Groups" in the administration menu
+    And I click "user-group-management" in the administration menu
     And I can see the users and groups page
 
   Scenario: Create Users

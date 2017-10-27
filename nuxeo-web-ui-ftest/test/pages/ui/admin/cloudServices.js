@@ -21,26 +21,35 @@ export default class CloudServices extends BasePage {
   }
 
   editProvider(currentName, newDetails) {
-    const rows = this.el.elements('nuxeo-data-table #list nuxeo-data-table-row').value;
-    rows.some((row) => {
+    driver.waitForVisible(`nuxeo-data-table nuxeo-data-table-row [name="serviceName"]`);
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const edited = rows.forEach((row) => {
+      console.log(`row: ${JSON.stringify(row)}`);
       if (row.getText(`[name="serviceName"]`).trim() === currentName) {
         row.click(`[name="edit"]`);
         driver.waitForVisible(`#dialog`);
         this.fillProviderDetails(newDetails);
         this.el.click('#dialog paper-button[name="save"]');
+        return row;
       }
     });
+    if (!edited) {
+      throw new Error(`now provider found with named "${currentName}"`);
+    }
   }
 
   deleteProvider(serviceName) {
-    driver.waitForVisible(`nuxeo-data-table #list nuxeo-data-table-row`);
-    const rows = this.el.elements('nuxeo-data-table #list nuxeo-data-table-row').value;
-    rows.some((row) => {
+    driver.waitForVisible(`nuxeo-data-table nuxeo-data-table-row [name="serviceName"]`);
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const deleted = rows.some((row) => {
       if (row.getText(`[name="serviceName"]`).trim() === serviceName) {
         row.click(`[name="delete"]`);
         driver.alertAccept();
       }
     });
+    if (!deleted) {
+      throw new Error(`now provider found with named "${serviceName}"`);
+    }
   }
 
   fillProviderDetails(provider) {

@@ -73,7 +73,7 @@ export default class UI extends BasePage {
   }
 
   get drawer() {
-    return new Drawer('#drawer');
+    return new Drawer('div[slot="drawer"]');
   }
 
   static get() {

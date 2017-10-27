@@ -46,7 +46,7 @@ exports.config = {
     javascriptEnabled : true,
     acceptSslCerts : true,
     chromeOptions : {
-      args : ["--no-sandbox"]
+      args : ['--no-sandbox', '--enable-experimental-web-platform-features']
     }
   }],
   //

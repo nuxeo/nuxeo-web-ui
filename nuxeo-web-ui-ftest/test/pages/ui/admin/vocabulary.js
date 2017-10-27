@@ -6,12 +6,12 @@ export default class Vocabulary extends BasePage {
 
   vocabulary(option) {
     const selection = option.toLowerCase();
-    const dropdown = this.el.element('paper-dropdown-menu #menuButton');
-    dropdown.waitForVisible('#trigger');
-    dropdown.click('#trigger');
-    const itemSelector = `#dropdown #contentWrapper div paper-menu div paper-item[name="${selection}"]`;
-    dropdown.waitForVisible(itemSelector);
-    dropdown.click(itemSelector);
+    const dropdown = this.el.element('#menuButton');
+    dropdown.waitForVisible();
+    dropdown.click();
+    const item = this.el.element(`nuxeo-select paper-item[name="${selection}"]`);
+    item.waitForVisible();
+    item.click();
   }
 
   get isAddNewEntryVisible() {
@@ -51,9 +51,9 @@ export default class Vocabulary extends BasePage {
 
   waitForHasEntry(id, reverse) {
     const el = this.el;
-    driver.waitForVisible(`#table #items`);
+    driver.waitForVisible(`#table`);
     driver.waitUntil(() => {
-      const cells = el.elements(`#table #items nuxeo-data-table-cell`).value;
+      const cells = el.elements(`#table nuxeo-data-table-cell`).value;
       if (reverse) {
         return cells.every((cell) => cell.getText().trim() !== id);
       } else {
@@ -78,8 +78,7 @@ export default class Vocabulary extends BasePage {
   }
 
   get isVocabularyTableVisible() {
-    driver.waitForVisible(`#table`);
-    return this.el.element(`#table`).isVisible();
+    return this.el.element(`#table`).waitForVisible();
   }
 
   get entryCount() {
@@ -97,9 +96,9 @@ export default class Vocabulary extends BasePage {
   }
 
   get isVocabularyTableFilled() {
-    this.el.waitForVisible(`#table #items nuxeo-data-table-row`);
-    return !this.el.elements(`#table #items nuxeo-data-table-row`).value
-        .some((row) => row.getText().trim().length === 0);
+    this.el.waitForVisible(`#table nuxeo-data-table-row`);
+    return !this.el.elements(`#table nuxeo-data-table-row`).value
+                   .some((row) => row.getText().trim().length === 0);
   }
 
   get hasEditDialog() {

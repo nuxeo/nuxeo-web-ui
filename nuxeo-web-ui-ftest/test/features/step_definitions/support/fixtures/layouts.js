@@ -95,8 +95,8 @@ global.fieldRegistry.register('nuxeo-tag-suggestion',
                                 driver.element(`//div[@class='select2-result-label']/span[text()='${value}']`).click();
                               });
 global.fieldRegistry.register('paper-input',
-                              (element) => element.element('#input').getValue(),
-                              (element, value) => { element.element('#input').setValue(value); });
+                              (element) => element.element('#nativeInput').getValue(),
+                              (element, value) => { element.element('#nativeInput').setValue(value); });
 global.fieldRegistry.register('paper-radio-button',
                               (element) => element.element('#radioContainer').getAttribute('multiple'),
                               (element, value) => {

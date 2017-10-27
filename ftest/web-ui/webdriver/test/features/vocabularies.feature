@@ -8,7 +8,7 @@ Feature: Vocabularies
   Scenario: Vocabularies menu on drawer
     When I click the "administration" button
     Then I can see the administration menu
-    When I click "Vocabularies" in the administration menu
+    When I click "vocabulary-management" in the administration menu
     Then I can see the vocabulary page
 
   Scenario: Simple vocabulary create, edit, delete
