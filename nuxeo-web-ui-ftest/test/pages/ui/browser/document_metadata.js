@@ -2,6 +2,7 @@
 
 import BasePage from '../../base';
 import DocumentLayout from './document_layout';
+import DocumentAttachments from './document_attachments';
 
 export default class DocumentMetadata extends BasePage {
 
@@ -12,5 +13,9 @@ export default class DocumentMetadata extends BasePage {
 
   layout() {
     return new DocumentLayout(`nuxeo-${this._docType.toLowerCase()}-metadata-layout`);
+  }
+
+  get attachments() {
+    return new DocumentAttachments('nuxeo-document-attachments', this.docType);
   }
 }
