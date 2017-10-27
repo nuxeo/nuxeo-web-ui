@@ -133,4 +133,26 @@ export default class Browser extends BasePage {
     return true;
   }
 
+  waitForHasChild(doc) {
+    const el = this.el;
+    el.waitForVisible('nuxeo-data-table #list nuxeo-data-table-row');
+    driver.waitUntil(() => {
+      const rows = el.elements('nuxeo-data-table #list nuxeo-data-table-row');
+      return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
+    }, 'The document does not seeem to be a child document');
+    return true;
+  }
+
+  clickChild(doc) {
+    const rows = this.el.elements('nuxeo-data-table #list nuxeo-data-table-row');
+    return rows.value.some((row) => {
+      if (row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title) {
+        row.click();
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
 }
