@@ -233,19 +233,19 @@ limitations under the License.
 
       handleClick: function(e) {
         if (this.selectionMode) {
-          this._toogleSelect();
+          this._toogleSelect(e);
         } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
           this.fire('navigate', {item: this.doc, index: this.index});
         }
       },
 
-      _onCheckBoxTap: function() {
-        this._toogleSelect();
+      _onCheckBoxTap: function(e) {
+        this._toogleSelect(e);
       },
 
-      _toogleSelect: function() {
+      _toogleSelect: function(e) {
         this.selected = !this.selected;
-        this.fire('selected');
+        this.fire('selected', {index: this.index, shiftKey: e.detail.sourceEvent.shiftKey});
       },
 
       _selectedItemsChanged: function(){
