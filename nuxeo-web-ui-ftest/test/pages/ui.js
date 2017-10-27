@@ -2,7 +2,6 @@
 
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
-import CollectionBrowser from './ui/collectionBrowser';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
 import Administration from './ui/administration.js';
@@ -100,10 +99,6 @@ export default class UI extends BasePage {
 
   get suggester() {
     return this.el.element('#mainContainer nuxeo-suggester');
-  }
-
-  get collectionBrowser() {
-    return new CollectionBrowser('nuxeo-collection-results');
   }
 
   get administration() {
