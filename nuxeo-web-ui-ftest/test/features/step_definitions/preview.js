@@ -11,8 +11,8 @@ module.exports = function () {
   this.When('I click the preview button for the attachment', () => {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
-    page.view.attachments.waitForVisible();
-    page.view.attachments.previewButton.click();
+    page.metadata.attachments.waitForVisible();
+    page.metadata.attachments.previewButton.click();
   });
 
   this.Then(/^I can see the inline ([-\w]+) previewer$/, (viewerType) => {
