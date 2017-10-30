@@ -87,6 +87,7 @@ limitations under the License.
       newDocument: function(type, properties) {
         if (!schemaFetcher) {
           schemaFetcher = document.createElement('nuxeo-resource');
+          this._attachDom(schemaFetcher);
         }
         schemaFetcher.path = 'path/' + this.targetPath + '/@emptyWithDefault';
         schemaFetcher.params = { type: this.selectedDocType.type };

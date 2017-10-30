@@ -384,14 +384,16 @@ limitations under the License.
       },
 
       // trigger native browser invalid-form UI
-      _doNativeValidation: function(form) {
+      _doNativeValidation: function(/*form*/) {
         var fakeSubmit = document.createElement('input');
         fakeSubmit.setAttribute('type', 'submit');
         fakeSubmit.style.display = 'none';
-        form._form.appendChild(fakeSubmit);
+        // TODO: this breaks fields bound to multivalued nuxeo-directory-suggestion
+        /* form._form.appendChild(fakeSubmit);
         fakeSubmit.click();
         form._form.removeChild(fakeSubmit);
-        return form._form.checkValidity();
+        return form._form.checkValidity(); */
+        return true;
       }
 
     });

@@ -39,6 +39,17 @@ limitations under the License.
   <template>
 
     <style include="nuxeo-styles">
+      nuxeo-data-table,
+      nuxeo-data-grid,
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 130px - var(--nuxeo-app-top));
+      }
+
+      nuxeo-tag {
+        margin-right: 2px;
+      }
 
       .results {
         @apply --layout-vertical;
@@ -49,15 +60,6 @@ limitations under the License.
 
       .results.dragging {
         border: 2px dashed var(--nuxeo-primary-color);
-      }
-
-      nuxeo-data-grid {
-        display: block;
-        position: relative;
-      }
-
-      nuxeo-tag {
-        margin-right: 2px;
       }
 
       .ellipsis {
@@ -89,13 +91,13 @@ limitations under the License.
 
     <div id="dropzone">
 
-      <nuxeo-results name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+      <nuxeo-results id="results" name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
         <div slot="selectionActions">
           <nuxeo-slot slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
         </div>
 
         <!-- Grid view -->
-        <nuxeo-data-grid class="results" name="grid" icon="nuxeo:view-thumbnails"
+        <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
                          empty-label="[[emptyLabel]]"
                          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                          selection-enabled display-quick-filters
@@ -112,7 +114,7 @@ limitations under the License.
         </nuxeo-data-grid>
 
         <!-- Table view -->
-        <nuxeo-data-table class="results" name="table" icon="nuxeo:view-list"
+        <nuxeo-data-table name="table" icon="nuxeo:view-list"
                           settings-enabled
                           empty-label="[[emptyLabel]]"
                           empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
