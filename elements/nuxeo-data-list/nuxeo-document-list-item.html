@@ -149,19 +149,19 @@ limitations under the License.
         cursor: pointer;
       }
 
-      :host[selected] .listBox .select,
-      :host[selected] .listBox:hover .select:hover {
+      :host([selected]) .listBox .select,
+      :host([selected]) .listBox:hover .select:hover {
         border: 2px solid var(--nuxeo-grid-selected);
         background-color: var(--nuxeo-grid-selected);
         cursor: pointer;
         display: block;
       }
 
-      :host[selected] .select paper-icon-button {
+      :host([selected]) .select paper-icon-button {
         color: #fff;
       }
 
-      :host[selected] .listBox {
+      :host([selected]) .listBox {
         border: 2px solid var(--nuxeo-grid-selected);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
