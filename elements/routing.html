@@ -119,8 +119,8 @@ limitations under the License.
       useHashbang: true,
 
       browse: function(path) {
-        return '/browse' + path.replace(/\%/g, encodeURIComponent('%'))
-                               .replace(/\?/g, encodeURIComponent('?'));
+        return '/browse' +  (path ? path.replace(/\%/g, encodeURIComponent('%'))
+                                        .replace(/\?/g, encodeURIComponent('?')) : '');
       },
 
       document: function(id) {
