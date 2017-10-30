@@ -132,16 +132,14 @@ limitations under the License.
           </div>
 
           <!-- tags -->
-          <nuxeo-filter document="[[document]]" expression="document.facets.indexOf('NXTag') !== -1">
-            <template>
-              <div class="section">
-                <h3>[[i18n('documentPage.tags')]]</h3>
-                <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
-                                      placeholder="[[i18n('documentPage.tags.placeholder')]]">
-                </nuxeo-tag-suggestion>
-              </div>
-            </template>
-          </nuxeo-filter>
+          <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
+            <div class="section">
+              <h3>[[i18n('documentPage.tags')]]</h3>
+              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
+                                    placeholder="[[i18n('documentPage.tags.placeholder')]]">
+              </nuxeo-tag-suggestion>
+            </div>
+          </template>
 
           <!-- activity -->
           <div class="section">
