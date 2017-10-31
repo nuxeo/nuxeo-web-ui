@@ -24,21 +24,20 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles">
 
-      .flex-layout {
+      .dashboard {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
       }
 
-      paper-card {
+      nuxeo-card {
         min-width: 25em;
         width: 49%;
-        height: 420px;
       }
 
       @media (max-width: 1024px) {
-        paper-card {
+        nuxeo-card {
           width: 100%;
         }
       }
@@ -54,7 +53,7 @@ limitations under the License.
       }
 
       nuxeo-data-table, nuxeo-tasks-list {
-        height: 350px !important;
+        height: 350px;
       }
 
       .ellipsis {
@@ -70,10 +69,10 @@ limitations under the License.
     <nuxeo-page>
       <div slot="header">[[i18n('home.dashboard')]]</div>
       <div>
-        <section name="dashboard" class="flex-layout">
+        <section name="dashboard" class="dashboard">
 
           <!-- recently edited -->
-          <paper-card>
+          <nuxeo-card>
             <h3><iron-icon icon="nuxeo:edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
             <nuxeo-page-provider
               id="latestQuery"
@@ -105,16 +104,16 @@ limitations under the License.
                 </template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>
-          </paper-card>
+          </nuxeo-card>
 
           <!-- tasks -->
-          <paper-card>
+          <nuxeo-card>
             <h3><iron-icon icon="nuxeo:tasks" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
             <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
-          </paper-card>
+          </nuxeo-card>
 
           <!-- recently viewed -->
-          <paper-card>
+          <nuxeo-card>
             <h3><iron-icon icon="nuxeo:recent" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
             <nuxeo-data-table id="latestViewedDocs" max-items="15"
@@ -139,10 +138,10 @@ limitations under the License.
                 </template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>
-          </paper-card>
+          </nuxeo-card>
 
           <!-- favorites -->
-          <paper-card>
+          <nuxeo-card>
             <h3><iron-icon icon="nuxeo:favorites" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
             <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
             <nuxeo-page-provider id="favoritesProvider"
@@ -173,7 +172,7 @@ limitations under the License.
                 </template>
               </nuxeo-data-table-column>
             </nuxeo-data-table>
-          </paper-card>
+          </nuxeo-card>
         </section>
       </div>
     </nuxeo-page>
