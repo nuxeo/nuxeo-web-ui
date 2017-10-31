@@ -32,6 +32,8 @@ limitations under the License.
     <style>
       :host {
         display: block;
+        position: relative;
+        height: calc(100vh - 7.7em);
       }
 
       .task-box {
@@ -76,8 +78,11 @@ limitations under the License.
 
       nuxeo-data-list {
         display: block;
-        position: relative;
-        height: calc(100vh - 7.7em);
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
       }
 
       /* fix IE11 tap selection not working for task list items (NXP-21833) */
@@ -100,6 +105,7 @@ limitations under the License.
         @apply --layout-center;
       }
     </style>
+
     <nuxeo-data-list items="[[tasks]]" id="list" as="task"
       selected-item="{{_selection}}"
       empty-label="[[i18n('tasksList.noTasks')]]"
@@ -127,6 +133,7 @@ limitations under the License.
       </template>
     </nuxeo-data-list>
   </template>
+
   <script>
     Polymer({
       is: 'nuxeo-tasks-list',
