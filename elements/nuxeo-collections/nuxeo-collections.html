@@ -393,7 +393,7 @@ limitations under the License.
           'collection': this.selectedCollection
         };
         op.execute().then(function() {
-          this._removeFromMembers(evt.target.dataset.uid)
+          this._removeFromMembers(memberId)
           this.fire('removed-from-collection',
             {
               innerRemove: true,
