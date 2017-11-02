@@ -40,7 +40,8 @@
     "run-sequence": "^1.1.5",
     "through2": "^2.0.1",
     "vulcanize": ">= 1.14.0",
-    "web-component-tester": "^4.0.0"
+    "web-component-tester": "^4.0.0",
+    "cleankill": "1.0.3"
   },
   "scripts": {
     "test": "gulp test:local",
