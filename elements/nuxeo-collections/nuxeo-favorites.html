@@ -46,35 +46,10 @@ limitations under the License.
         min-height: calc(100vh - 61px - var(--nuxeo-app-top))
       }
 
-      .favIcon {
-        --iron-icon-height: 16px;
-        --iron-icon-width: 16px;
-        padding-right: 2px;
-      }
-
-      .favRemove {
-        padding: 0;
-        width: 1.5em;
-        height: 1.5em;
-      }
-
-      .favLink.ellipsis {
-        display: inline-block;
-        width: 80%;
-        vertical-align: middle;
-        text-overflow: ellipsis;
-      }
-
       .list-item {
         cursor: pointer;
         padding: 1em;
         border-bottom: 1px solid var(--nuxeo-border);
-      }
-
-      .ellipsis {
-        vertical-align: middle;
-        text-overflow: ellipsis;
-        overflow: hidden;
       }
 
       .list-item-box {
@@ -89,6 +64,13 @@ limitations under the License.
       .list-item-thumbnail {
         @apply --layout-vertical;
         @apply --layout-center;
+      }
+
+      .list-item-title {
+        @apply --layout-flex;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .list-item:hover {
@@ -107,6 +89,7 @@ limitations under the License.
       }
 
       .list-item iron-icon {
+        display: block;
         @apply --nuxeo-action;
         color: var(--nuxeo-drawer-text);
       }
@@ -143,13 +126,13 @@ limitations under the License.
         empty-label-when-filtered="[[i18n('favorites.empty')]]">
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-            <div class="list-item-box ">
-              <div class="list-item-info" >
-                <div class="list-item-thumb ">
+            <div class="list-item-box">
+              <div class="list-item-info">
+                <div class="list-item-thumb">
                   <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
-                <span class="list-item-title ellipsis flex">[[favorite.title]]</span>
-                <iron-icon  id="removeFromFavorites" class="remove"
+                <div class="list-item-title">[[favorite.title]]</div>
+                <iron-icon id="removeFromFavorites" class="remove"
                   icon="nuxeo:remove" data-uid$="[[favorite.uid]]" on-tap="_removeFromFavorites">
                 </iron-icon>
               </div>
