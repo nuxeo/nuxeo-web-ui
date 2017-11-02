@@ -65,6 +65,7 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <!--
           <execution>
             <id>grunt-test</id>
             <phase>test</phase>
@@ -77,6 +78,7 @@
               <goal>run</goal>
             </goals>
           </execution>
+          -->
         </executions>
       </plugin>
     </plugins>
