@@ -583,7 +583,9 @@ limitations under the License.
       },
 
       _resetResults: function() {
-        this.$.list._resetResults();
+        if (this.provider && this.params && this.quickFilters && this.query) {
+          this.$.list._resetResults();
+        }
       },
 
       _displayFiltersTapped: function() {
