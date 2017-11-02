@@ -313,7 +313,7 @@ limitations under the License.
             this.displayMembers();
             this.$.membersList.fire('iron-resize');
             if (this.$.membersList.items.length > 0) {
-              this.$.membersList.selectItem(0);
+              this.$.membersList.selectIndex(0);
             }
           }
           this._tmpJustRight = true;
@@ -375,8 +375,8 @@ limitations under the License.
         this._isDisplayMembers = true;
         if (typeof index === 'number') {
           if (this.selectedCollection && collection && this.selectedCollection.uid === collection.uid) {
-            this.$.membersList.selectItem(index);
-            this.$.membersList.scrollToItem(index);
+            this.$.membersList.selectIndex(index);
+            this.$.membersList.scrollToIndex(index);
           }
         }
       },
@@ -412,9 +412,9 @@ limitations under the License.
         if (memberIndex > -1) {
           this.$.membersList.splice('items', memberIndex, 1);
           if (this.$.membersList.items.length > memberIndex) {
-            this.$.membersList.selectItem(memberIndex);
+            this.$.membersList.selectIndex(memberIndex);
           } else {
-            this.$.membersList.selectItem(this.$.membersList.items.length - 1);
+            this.$.membersList.selectIndex(this.$.membersList.items.length - 1);
           }
         }
       },
