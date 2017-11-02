@@ -576,7 +576,7 @@ limitations under the License.
           this.$.list.fetch().then(function() {
             if (typeof index === 'number') {
               this.$.list.scrollToIndex(index);
-              this.$.list.selectItem(index);
+              this.$.list.selectIndex(index);
             }
           }.bind(this));
         }
