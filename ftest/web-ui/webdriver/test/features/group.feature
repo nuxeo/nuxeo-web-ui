@@ -29,9 +29,9 @@ Feature: Group
   Scenario: Edit Groups
     Then I can edit the following groups
       | name      | newLabel       |
-      | Managers  | Managers Group |
+      | managers  | Managers Group |
 
   Scenario: Delete Groups
     Then I can delete the following groups
       | name      | label    |
-      | Managers  | Managers |
+      | managers  | Managers |

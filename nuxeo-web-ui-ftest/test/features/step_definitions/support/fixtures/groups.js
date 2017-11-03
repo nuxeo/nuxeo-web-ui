@@ -40,7 +40,8 @@ module.exports = function () {
         if (group !== 'administrators' &&
           group !== 'members' &&
           group !== 'powerusers') {
-          return fixtures.groups.delete(group);
+          return fixtures.groups.delete(group)
+                                .catch(() => {}); // eslint-disable-line arrow-body-style
         } else {
           return Promise.resolve();
         }

@@ -90,7 +90,7 @@ export default class UI extends BasePage {
   }
 
   get pages() {
-    return this.el.element('#mainContainer iron-pages');
+    return this.el.element('#pages');
   }
 
   get search() {
@@ -110,6 +110,7 @@ export default class UI extends BasePage {
   }
 
   get tasksDashboard() {
+    driver.pause(3000);
     return this.pages.element('#tasks-dashboard');
   }
 

@@ -18,7 +18,7 @@ export default class Collections extends BasePage {
   }
 
   select(name) {
-    const el = this.el.element(`nuxeo-collections #collectionsList #items span.title`);
+    const el = this.el.element(`nuxeo-collections #collectionsList span.title`);
     if (el.getText().trim() === name) {
       el.click();
       return true;
@@ -32,7 +32,7 @@ export default class Collections extends BasePage {
   }
 
   get queueCount() {
-    return this.el.elements(`#membersList #items div`).value.length;
+    return this.el.elements(`#membersList div`).value.length;
   }
 
   waitForHasMember(doc, reverse) {
@@ -49,10 +49,10 @@ export default class Collections extends BasePage {
   }
 
   removeMember(doc) {
-    const members = this.el.elements(`#membersList #items div`).value;
+    const members = this.el.elements(`#membersList`).value;
     return members.some((member) => {
-      if (member.getText(`span.list-item-title`).trim() === doc.title) {
-        member.element(`iron-icon.remove`).click();
+      if (member.isVisible(`span.list-item-title`) && member.getText(`span.list-item-title`).trim() === doc.title) {
+        member.click(`iron-icon.remove`);
         return true;
       } else {
         return false;
