@@ -117,11 +117,11 @@ limitations under the License.
 
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
 
     <div class="breadcrumb">
       <div class="current-icon">
-        <iron-icon src="[[_icon(document)]]"></iron-icon>
+        <iron-icon src="[[_icon(document, url)]]"></iron-icon>
       </div>
       <div class="doc-path">
         <div class="current breadcrumb-item breadcrumb-item-current">[[_title(document)]]</div>
@@ -176,9 +176,9 @@ limitations under the License.
         }
       },
 
-      _icon: function(document)  {
+      _icon: function(document, url)  {
         if (document && document.properties && document.properties['common:icon']) {
-          return this.$.nxcon.url + document.properties['common:icon'];
+          return url ? url + document.properties['common:icon'] : '';
         } else {
           return '';
         }
