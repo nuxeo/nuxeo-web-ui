@@ -230,10 +230,8 @@ limitations under the License.
       ],
 
       _thumbnail: function(doc) {
-        if (doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-          doc.contextParameters.thumbnail.url) {
-          return doc.contextParameters.thumbnail.url;
-        }
+        return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
+               doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
       },
 
       _docType: function() {
