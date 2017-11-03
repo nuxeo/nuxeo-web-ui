@@ -37,7 +37,9 @@ limitations under the License.
 
     <div class="header">[[i18n('app.tasks')]]</div>
     <nuxeo-tasks-list tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
-    <a href$="[[urlFor('tasks')]]" class="tasks-dashboard">[[i18n('app.viewTasksDashboard')]]</a>
+    <div class="tasks-dashboard">
+      <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTasksDashboard')]]</a>
+    </div>
 
   </template>
   <script>
