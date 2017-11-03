@@ -14,39 +14,17 @@ export default class Vocabulary extends BasePage {
     item.click();
   }
 
-  get isAddNewEntryVisible() {
-    driver.waitForVisible(`#addEntry`);
-    return this.el.element(`#addEntry`).isVisible();
-  }
-
-  get isDialogVisible() {
-    driver.waitForVisible(`#dialog`);
-    return this.el.element(`#dialog`).isVisible();
-  }
-
   addNewEntry(id, label) {
     driver.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    driver.waitForVisible(`#dialog`, 2000);
-    this.el.element(`#dialog input[name="id"]`).setValue(id);
-    this.el.element(`#dialog input[name="label"]`).setValue(label);
-    this.el.click('#dialog paper-button[name="save"]');
-  }
-
-  addNewL10nEntry(id, label, parentIds) {
-    driver.waitForVisible(`#addEntry`);
-    this.el.element(`#addEntry`).click();
-    driver.waitForVisible(`#dialog`, 2000);
-    this.el.element(`#selectParent`).click();
-    driver.waitForVisible(`#parentDialog`, 2000);
-    for (let i = 0; i < parentIds.length - 1; i++) {
-      this.el.click(`#parentDialog nuxeo-tree-node div[name="${parentIds[i].trim()}"] iron-icon`);
-    }
-    this.el.click(`#parentDialog nuxeo-tree-node div[name="${parentIds[parentIds.length - 1].trim()}"] a`);
-    this.el.element(`#dialog input[name="id"]`).setValue(id);
-    this.el.element(`#dialog input[name="label"]`).setValue(label);
-
-    this.el.click('#dialog paper-button[name="save"]');
+    const dialog = this.el.element(`paper-dialog[id="dialog"]`);
+    dialog.waitForVisible();
+    dialog.waitForVisible(`input[name="id"]`);
+    dialog.element(`input[name="id"]`).setValue(id);
+    dialog.waitForVisible(`input[name="label"]`);
+    dialog.element(`input[name="label"]`).setValue(label);
+    dialog.waitForVisible(`paper-button[name="save"]`);
+    dialog.click(`paper-button[name="save"]`);
   }
 
   waitForHasEntry(id, reverse) {
@@ -72,9 +50,11 @@ export default class Vocabulary extends BasePage {
   editEntry(index, label) {
     const selector = `#edit-button-${(index - 1)}`;
     this.el.element(selector).click();
-    driver.waitForVisible(`#dialog`);
-    this.el.element(`#dialog input[name="label"]`).setValue(label);
-    this.el.click('#dialog paper-button[name="save"]');
+    const dialog = this.el.element(`paper-dialog[id="dialog"]`);
+    dialog.waitForVisible();
+    dialog.waitForVisible(`input[name="label"]`);
+    dialog.element(`input[name="label"]`).setValue(label);
+    dialog.click('paper-button[name="save"]');
   }
 
   get isVocabularyTableVisible() {
@@ -104,35 +84,40 @@ export default class Vocabulary extends BasePage {
   get hasEditDialog() {
     driver.waitForVisible(`#edit-button-0`);
     this.el.element(`#edit-button-0`).click();
-    driver.waitForVisible(`#dialog`);
-    const visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    const dialog = this.el.element(`paper-dialog[id="dialog"]`);
+    dialog.waitForVisible();
+    const visibleLabels = dialog.isVisible(`input[name="label"]`);
     let allFieldVisible = false;
     if (visibleLabels.length) {
       allFieldVisible = visibleLabels.every((el) => el);
     } else {
       allFieldVisible = visibleLabels;
     }
-    allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
-    this.el.element(`#dialog paper-button[name="cancel"]`).click();
+    allFieldVisible = allFieldVisible && dialog.isVisible(`input[name="id"]`);
+    dialog.waitForVisible(`paper-button[name="cancel"]`);
+    dialog.element(`paper-button[name="cancel"]`).click();
     return allFieldVisible;
   }
 
   get hasCreateDialog() {
-    driver.waitForVisible(`#addEntry`);
+    this.el.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    driver.waitForVisible(`#dialog`);
-    const visibleLabels = driver.isVisible(`#dialog input[name="label"]`);
+    const dialog = this.el.element(`paper-dialog[id="dialog"]`);
+    dialog.waitForVisible();
+    const visibleLabels = dialog.isVisible(`input[name="label"]`);
     let allFieldVisible = false;
     if (visibleLabels.length) {
       allFieldVisible = visibleLabels.every((el) => el);
     } else {
       allFieldVisible = visibleLabels;
     }
-    allFieldVisible = allFieldVisible && driver.isVisible(`#dialog input[name="id"]`);
-    this.el.element(`#selectParent`).click();
-    driver.waitForVisible(`#parentDialog nuxeo-tree-node:first-child`);
-    this.el.element(`#parentDialog paper-button[name="close"]`).click();
-    this.el.element(`#dialog paper-button[name="cancel"]`).click();
+    allFieldVisible = allFieldVisible && dialog.isVisible(`input[name="id"]`);
+    dialog.element(`#selectParent`).click();
+    dialog.waitForVisible(`#parentDialog nuxeo-tree-node:first-child`);
+    dialog.waitForVisible(`#parentDialog paper-button[name="close"]`);
+    dialog.element(`#parentDialog paper-button[name="close"]`).click();
+    dialog.waitForVisible(`paper-button[name="cancel"]`);
+    dialog.element(`paper-button[name="cancel"]`).click();
     return allFieldVisible;
   }
 

@@ -45,7 +45,8 @@ module.exports = function () {
                          .catch(() => {}) // eslint-disable-line arrow-body-style
                          .then(() => nuxeo.repository().delete(userWorkspace))
                          .catch(() => {}) // eslint-disable-line arrow-body-style
-                         .then(() => fixtures.users.delete(user));
+                         .then(() => fixtures.users.delete(user))
+                         .catch(() => {}); // eslint-disable-line arrow-body-style
         } else {
           return Promise.resolve();
         }

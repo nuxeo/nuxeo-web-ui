@@ -39,7 +39,7 @@ export default class Drawer extends BasePage {
   }
 
   get tasksLink() {
-    return this.pages.element(`a.tasks-dashboard`);
+    return this.pages.element(`.tasks-dashboard a`);
   }
 
   get favorites() {

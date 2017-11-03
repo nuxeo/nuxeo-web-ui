@@ -23,9 +23,8 @@ export default class CloudServices extends BasePage {
   editProvider(currentName, newDetails) {
     driver.waitForVisible(`nuxeo-data-table nuxeo-data-table-row [name="serviceName"]`);
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
-    const edited = rows.forEach((row) => {
-      console.log(`row: ${JSON.stringify(row)}`);
-      if (row.getText(`[name="serviceName"]`).trim() === currentName) {
+    const edited = rows.some((row) => {
+      if (row.isVisible(`[name="serviceName"]`) && row.getText(`[name="serviceName"]`).trim() === currentName) {
         row.click(`[name="edit"]`);
         driver.waitForVisible(`#dialog`);
         this.fillProviderDetails(newDetails);
@@ -42,9 +41,10 @@ export default class CloudServices extends BasePage {
     driver.waitForVisible(`nuxeo-data-table nuxeo-data-table-row [name="serviceName"]`);
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
     const deleted = rows.some((row) => {
-      if (row.getText(`[name="serviceName"]`).trim() === serviceName) {
+      if (row.isVisible(`[name="serviceName"]`) && row.getText(`[name="serviceName"]`).trim() === serviceName) {
         row.click(`[name="delete"]`);
         driver.alertAccept();
+        return row;
       }
     });
     if (!deleted) {

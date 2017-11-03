@@ -54,14 +54,16 @@ export default class Browser extends BasePage {
 
   addToCollection(name) {
     this.el.element(`nuxeo-add-to-collection-button paper-icon-button`).click();
-    driver.waitForVisible(`#add-to-collection-dialog nuxeo-select2 a.select2-choice`);
-    driver.element(`#add-to-collection-dialog nuxeo-select2 a.select2-choice`).click();
-    driver.waitForVisible(`#select2-drop .select2-search input`);
-    driver.element(`#select2-drop .select2-search input`).setValue(name);
-    driver.waitForVisible(`#select2-drop li.select2-result`);
-    driver.element(`#select2-drop li.select2-result`).click();
+    const selectivity = this.el.element(`#add-to-collection-dialog nuxeo-selectivity`);
+    selectivity.waitForVisible();
+    selectivity.waitForVisible(`#input`);
+    selectivity.click(`#input`);
+    selectivity.waitForVisible(`.selectivity-search-input`);
+    selectivity.element(`.selectivity-search-input`).setValue(name);
+    selectivity.waitForVisible(`.selectivity-result-item.highlight`);
+    selectivity.click(`.selectivity-result-item.highlight`);
     driver.waitForEnabled(`#add-to-collection-dialog paper-button[name="add"]`);
-    driver.element(`#add-to-collection-dialog paper-button[name="add"]`).click();
+    driver.click(`#add-to-collection-dialog paper-button[name="add"]`);
     this.el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
   }
 
@@ -88,7 +90,7 @@ export default class Browser extends BasePage {
         return false;
       }
       try {
-        const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
+        const collections = page.elements(`nuxeo-document-collections nuxeo-tag a`).value;
         return collections.some((collection) => collection.getText().trim() === name);
       } catch (e) {
         return false;
@@ -103,11 +105,10 @@ export default class Browser extends BasePage {
     const collections = this.el.elements(`nuxeo-document-collections nuxeo-tag`).value;
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
-        collection.waitForVisible(`nuxeo-tag iron-icon[name="remove"]`);
-        driver.waitUntil(() => {
-          collection.click(`nuxeo-tag iron-icon[name="remove"]`);
-          return true;
-        }, 'Could not remove collection.');
+        const remove = collection.element(`iron-icon[name="remove"]`);
+        remove.waitForVisible();
+        this.el.scrollIntoView(`nuxeo-document-collections nuxeo-tag`);
+        remove.click();
         return true;
       }
       return false;
@@ -135,18 +136,17 @@ export default class Browser extends BasePage {
 
   waitForHasChild(doc) {
     const el = this.el;
-    el.waitForVisible('nuxeo-data-table #list nuxeo-data-table-row');
-    driver.waitUntil(() => {
-      const rows = el.elements('nuxeo-data-table #list nuxeo-data-table-row');
-      return rows.value.some((row) => row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title);
-    }, 'The document does not seeem to be a child document');
-    return true;
+    el.waitForVisible('nuxeo-data-table nuxeo-data-table-row a.title');
+    const titles = el.elements('nuxeo-data-table nuxeo-data-table-row a.title');
+    return titles.value.some((title) => title.getText().trim() === doc.title);
   }
 
   clickChild(doc) {
-    const rows = this.el.elements('nuxeo-data-table #list nuxeo-data-table-row');
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     return rows.value.some((row) => {
-      if (row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title) {
+      if (row.isVisible(`nuxeo-data-table-cell a.title`) &&
+          row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title) {
         row.click();
         return true;
       } else {
