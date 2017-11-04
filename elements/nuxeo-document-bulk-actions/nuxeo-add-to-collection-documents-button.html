@@ -155,7 +155,7 @@ limitations under the License.
       add: function() {
         if (this._isNew()) {
           var op = this.$$('#createCollectionOp');
-          var name = this.$.nxSelect.textContent.trim();
+          var name = this.$.nxSelect.selectedItem.item.displayLabel;
           op.input = undefined;
           op.params = {
             'name': name,
@@ -199,7 +199,7 @@ limitations under the License.
       },
 
       _newEntryFormatter: function(term) {
-        return {id: -1, displayLabel: '<iron-icon icon="icons:add" item-icon></iron-icon>' + term};
+        return {id: -1, displayLabel: term};
       },
 
       _isValid: function() {
@@ -207,11 +207,11 @@ limitations under the License.
       },
 
       _isNew: function() {
-        return this.collection === '-1';
+        return this.collection === -1;
       },
 
       _resetPopup: function() {
-        this.collection = '';
+        this.set('collection', null);
         this.description = '';
       }
     });
