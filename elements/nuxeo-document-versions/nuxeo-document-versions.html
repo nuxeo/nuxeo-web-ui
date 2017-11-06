@@ -205,9 +205,11 @@ limitations under the License.
             if (this.page === 1) {
               this.set('versions', []);
             }
-            results.entries.forEach(function(doc) {
-              this.push('versions', doc);
-            }.bind(this));
+            if (results) {
+              results.entries.forEach(function(doc) {
+                this.push('versions', doc);
+              }.bind(this));
+            }
           }.bind(this));
         }
       },
