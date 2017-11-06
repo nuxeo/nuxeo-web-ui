@@ -77,16 +77,16 @@ limitations under the License.
         };
       }
 
-      .input-content.paper-input-container  label {
+      .input-content.paper-input-container label {
         left: 7px;
       }
 
       #searchButton {
         position: fixed;
-        z-index: 200;
+        z-index: 100;
         top: 0;
         color: var(--nuxeo-app-header);
-        @apply(--nuxeo-suggester-button)
+        @apply --nuxeo-suggester-button
       }
 
       #searchButton:hover {
@@ -203,6 +203,7 @@ limitations under the License.
           box-shadow: -3px 0 10px 0 rgba(0,0,0,0.1);
           background-color: var(--nuxeo-app-header-background);
           width: 52px;
+          z-index: 100;
         }
 
         #searchBar {
