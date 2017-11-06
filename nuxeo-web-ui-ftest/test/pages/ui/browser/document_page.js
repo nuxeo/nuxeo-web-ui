@@ -13,7 +13,7 @@ export default class DocumentPage extends BasePage {
   }
 
   get view() {
-    return new DocumentView(`nuxeo-document-view`, this.docType);
+    return new DocumentView(`${this._selector} nuxeo-document-view #container`, this.docType);
   }
 
   get metadata() {

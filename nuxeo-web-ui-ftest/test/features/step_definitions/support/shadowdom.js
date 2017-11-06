@@ -1,4 +1,5 @@
 /**
+ * Wraps WDIO with methods to pierce Shadow Dom.
  * XXX: should be able to override commands with addCommand once this is fixed:
  * https://github.com/webdriverio/webdriverio/issues/1539
  */
@@ -53,7 +54,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`element: ${JSON.stringify(parameters)}`);
     return wrapShadow(el._element.apply(el, parameters), true);
   };
 
@@ -63,7 +63,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`elements: ${JSON.stringify(parameters)}`);
     return wrapShadow(el._elements.apply(el, parameters), true);
   };
 
@@ -73,7 +72,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`isExisting: ${JSON.stringify(parameters)}`);
     return el._isExisting.apply(el, parameters);
   };
 
@@ -83,7 +81,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`waitForExist: ${JSON.stringify(parameters)}`);
     return el._waitForExist.apply(el, parameters);
   };
 
@@ -93,7 +90,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`isVisible: ${JSON.stringify(parameters)}`);
     return el._isVisible.apply(el, parameters);
   };
 
@@ -103,7 +99,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`waitForVisible: ${JSON.stringify(parameters)}`);
     return el._waitForVisible.apply(el, parameters);
   };
 
@@ -113,7 +108,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`click: ${JSON.stringify(parameters)}`);
     return el._click.apply(el, parameters);
   };
 
@@ -123,7 +117,6 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    // console.log(`waitForEnabled: ${JSON.stringify(parameters)}`);
     return wrapShadow(el._waitForEnabled.apply(el, parameters), true);
   };
 
@@ -131,7 +124,6 @@ function wrapShadow(element, isWebElement) {
   el.getText = (...args) => {
     const parameters = [].concat(args);
     const selector = parameters.length > 0 ? parameters.shift() : undefined;
-    // console.log(`getText: ${JSON.stringify(selector)}`);
     if (selector) {
       return el.element(selector).getText();
     } else {
@@ -156,7 +148,6 @@ function wrapShadow(element, isWebElement) {
     if (!sel) {
       throw new Error(`invalid selector`);
     }
-    // console.log(`scrollIntoView: ${sel}`);
     return browser.execute((s) => {
       var e = document.querySelector(s); // eslint-disable-line no-var
       e.scrollIntoView();

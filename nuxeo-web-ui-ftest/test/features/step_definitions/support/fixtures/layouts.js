@@ -3,8 +3,8 @@ import path from 'path';
 
 global.fieldRegistry = new FieldRegistry();
 global.fieldRegistry.register('nuxeo-input',
-                              (element) => element.element('#input').getValue(),
-                              (element, value) => { element.element('#input').setValue(value); });
+                              (element) => element.element('#nativeInput').getValue(),
+                              (element, value) => { element.element('#nativeInput').setValue(value); });
 global.fieldRegistry.register('nuxeo-select',
                               (element) => {
                                 element.element('#input').getValue();
@@ -15,9 +15,9 @@ global.fieldRegistry.register('nuxeo-select',
                                 element.element(`///paper-item[text()="${value}"]`).click();
                               });
 global.fieldRegistry.register('nuxeo-date-picker',
-                              (element) => element.element('#input').getValue(),
+                              (element) => element.element('#nativeInput').getValue(),
                               (element, value) => {
-                                element.element('#input').click();
+                                element.element('#nativeInput').click();
                                 const keys = value.split('-');
                                 driver.keys(keys);
                               });
@@ -37,36 +37,28 @@ global.fieldRegistry.register('nuxeo-user-suggestion',
 global.fieldRegistry.register('nuxeo-directory-suggestion',
                               (element) => {
                                 if (element.getAttribute('multiple')) {
-                                  let multiple = '';
-                                  let i;
-                                  for (i = 1; i < element
-                                      .elements('#s2id_select2 ul li.select2-search-choice').value.length; i++) {
-                                    multiple += `${element.element(`#s2id_select2 ul
-                                                 li.select2-search-choice:nth-child(${i}) div`).getText()},`;
-                                  }
-                                  multiple += element.element(`#s2id_select2 ul
-                                              li.select2-search-choice:nth-child(${i}) div`).getText();
-                                  return multiple;
+                                  return '' + element.elements('.selectivity-multiple-selected-item')
+                                                     .value.map((v) => v.getText()).join(',');
                                 } else {
-                                  return element.element('#select2').getValue();
+                                  return element.element('.selectivity-single-selected-item').getValue();
                                 }
                               },
                               (element, value) => {
-                                if (element.getAttribute('multiple')) {
-                                  const values = value.split(',');
-                                  for (let i = 0; i < values.length; i++) {
-                                    element.element('nuxeo-select2 div#s2id_select2').click();
-                                    driver.waitForVisible(`input.select2-focused`);
-                                    driver.element(`input.select2-focused`).setValue(values[i]);
-                                    driver.waitForVisible(`#select2-drop li.select2-result`);
-                                    driver.element(`#select2-drop li.select2-result`).click();
+                                const values = element.getAttribute('multiple') ? value.split(',') : [value];
+                                element.scrollIntoView(`#input`);
+                                for (let i = 0; i < values.length; i++) {
+                                  element.waitForVisible(`#input`);
+                                  element.element('#input').click();
+                                  if (element.getAttribute('multiple')) {
+                                    element.waitForVisible(`.selectivity-multiple-input`);
+                                    element.element(`.selectivity-multiple-input`).setValue(values[i]);
+                                  } else {
+                                    element.waitForVisible(`.selectivity-search-input`);
+                                    element.element(`.selectivity-search-input`).setValue(values[i]);
                                   }
-                                } else {
-                                  element.element('nuxeo-select2 a.select2-choice').click();
-                                  driver.waitForVisible(`#select2-drop .select2-search input`);
-                                  driver.element(`#select2-drop .select2-search input`).setValue(value);
-                                  driver.waitForVisible(`#select2-drop li.select2-result`);
-                                  driver.element(`#select2-drop li.select2-result`).click();
+
+                                  element.waitForVisible(`.selectivity-result-item.highlight`);
+                                  element.click(`.selectivity-result-item.highlight`);
                                 }
                               });
 global.fieldRegistry.register('nuxeo-dropdown-aggregation',
@@ -142,4 +134,12 @@ fixtures.layouts = {
     (global.fieldRegistry.contains(fieldType) ? global.fieldRegistry.setValFunc(fieldType) :
                                                 global.fieldRegistry.setValFunc('generic'))(element, value);
   },
+  page: {
+    'Note': 'nuxeo-document-page',
+    'File': 'nuxeo-document-page',
+    'Folder': 'nuxeo-collapsible-document-page',
+    'Workspace': 'nuxeo-collapsible-document-page',
+    'Collection': 'nuxeo-collapsible-document-page'
+  }
 };
+
