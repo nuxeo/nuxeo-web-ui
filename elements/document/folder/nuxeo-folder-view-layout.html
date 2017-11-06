@@ -23,7 +23,14 @@ limitations under the License.
 <dom-module id="nuxeo-folder-view-layout">
 
   <template>
-    <nuxeo-document-content document="[[document]]"></nuxeo-document-content>
+    <nuxeo-search-page id="docContent"
+                       name="docContent"
+                       heading="Document Content"
+                       provider="advanced_document_content"
+                       schemas="common,uid,dublincore"
+                       params="[[_params(document)]]"
+                       search-name="docContent"
+                       show-filters opened stop-error-propagation></nuxeo-search-page>
   </template>
 
   <script>
@@ -36,6 +43,12 @@ limitations under the License.
         document: {
           type: Object
         }
+      },
+
+      _params: function() {
+        return {
+          "ecm_parentId": this.document.uid
+        };
       }
     });
   </script>

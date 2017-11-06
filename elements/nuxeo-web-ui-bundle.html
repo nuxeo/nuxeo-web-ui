@@ -279,17 +279,7 @@
 
 <nuxeo-slot-content name="documentViewPage" slot="DOCUMENT_VIEWS_PAGES" order="10">
   <template>
-    <nuxeo-filter document="[[document]]" expression="document.facets.indexOf('Folderish') === -1
-                                                   && document.facets.indexOf('Collection') === -1">
-      <template>
-        <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
-      </template>
-    </nuxeo-filter>
-    <nuxeo-filter document="[[document]]" facet="Folderish,Collection">
-      <template>
-        <nuxeo-collapsible-document-page name="view" document="[[document]]"></nuxeo-collapsible-document-page>
-      </template>
-    </nuxeo-filter>
+    <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
   </template>
 </nuxeo-slot-content>
 
