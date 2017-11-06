@@ -50,7 +50,12 @@ limitations under the License.
   <!-- Add to homescreen for Chrome on Android -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nuxeo">
-  <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png">
+  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <!-- Safari pinned tab icon -->
+  <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg" color="#0066ff">
 
   <!-- Add to homescreen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
