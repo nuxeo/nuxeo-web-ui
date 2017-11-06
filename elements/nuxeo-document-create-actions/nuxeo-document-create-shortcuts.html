@@ -77,7 +77,7 @@ limitations under the License.
 
         var shorcuts = [];
         types.forEach(function(type) {
-          if (this.subtypes.indexOf(type) > -1) {
+          if (this.subtypes && this.subtypes.indexOf(type) > -1) {
             var el = document.createElement('nuxeo-document-create-shortcut');
             el.type = type;
             el.icon =  'images/doctypes/' + type + '.svg';
