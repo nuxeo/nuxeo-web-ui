@@ -55,7 +55,7 @@ limitations under the License.
       .container {
         overflow: auto;
         flex: 1 1 auto;
-        height: 0px;
+        height: 0;
       }
 
       .typeSelection {
@@ -70,8 +70,12 @@ limitations under the License.
       }
 
       .typeSelection paper-button {
-        width: var(--nuxeo-document-creation-form-button-width, 128px);
-        height: var(--nuxeo-document-creation-form-button-height, 128px);
+        min-width: 128px;
+        max-width: 128px;
+        height: 128px;
+        margin: 4px;
+        border: none;
+        text-align: center;
         box-shadow: none;
         background-color: var(--nuxeo-dialog-buttons-bar);
       }
@@ -112,14 +116,9 @@ limitations under the License.
         margin-right: 8px;
       }
 
-      .typeSelection span {
+      .typeSelection div {
         margin-top: 1em;
         word-break: break-word;
-      }
-
-      .docTypeButton {
-        margin: 4px;
-        border: none;
       }
 
       .buttons {
@@ -197,7 +196,7 @@ limitations under the License.
                             on-tap="_selectType"
                             data-args$="[[type]]">
                 <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
-                <span>[[_getTypeLabel(type)]]</span>
+                <div>[[_getTypeLabel(type)]]</div>
               </paper-button>
             </template>
           </div>
