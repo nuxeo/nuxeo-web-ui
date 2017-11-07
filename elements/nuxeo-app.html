@@ -610,7 +610,10 @@ limitations under the License.
         return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
       },
 
-      showHome: function() {
+      showHome: function(e) {
+        if (e && e.detail && e.detail.keyboardEvent) {
+          e.detail.keyboardEvent.preventDefault();
+        }
         this.show('home');
       },
 
@@ -628,18 +631,25 @@ limitations under the License.
         };
       },
 
-      _focusMenu: function() {
+      _focusMenu: function(e) {
+        e.detail.keyboardEvent.preventDefault();
         this.$.menu.focus();
       },
 
-      _showSuggester: function() {
+      _showSuggester: function(e) {
+        e.detail.keyboardEvent.preventDefault();
         this.$.suggester.toggle();
       },
 
       _showDocumentCreationWizard: function(e) {
-        if (e.detail.keyboardEvent && (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey)) {
-          return;
+        if (e.detail.keyboardEvent) {
+          if (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey) {
+            return;
+          } else {
+            e.detail.keyboardEvent.preventDefault();
+          }
         }
+
         if (e.detail.files) {
           this.$.importPopup.toggleDialogImport(e.detail.files);
         } else if (e.detail.type) {

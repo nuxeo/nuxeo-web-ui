@@ -307,8 +307,9 @@ limitations under the License.
         }
       },
 
-      _navigateOnRight: function() {
+      _navigateOnRight: function(e) {
         if (!this._isDisplayMembers) {
+          e.detail.keyboardEvent.preventDefault();
           if (this.selectedCollection) {
             this.displayMembers();
             this.$.membersList.fire('iron-resize');
@@ -320,36 +321,41 @@ limitations under the License.
         }
       },
 
-      _navigateOnLeft: function() {
+      _navigateOnLeft: function(e) {
         if (this._isDisplayMembers) {
+          e.detail.keyboardEvent.preventDefault();
           this.displayCollections();
           this.$.collectionsList.fire('iron-resize');
         }
         this._tmpJustLeft = true;
       },
 
-      _navigateOnDown: function() {
+      _navigateOnDown: function(e) {
         if (this._isDisplayMembers) {
+          e.detail.keyboardEvent.preventDefault();
           if (this._tmpJustRight) {
             this.$.membersList.selectNext();
             this._tmpJustRight = false;
           }
         } else {
           if (this._tmpJustLeft) {
+            e.detail.keyboardEvent.preventDefault();
             this.$.collectionsList.selectNext();
             this._tmpJustLeft = false;
           }
         }
       },
 
-      _navigateOnUp: function() {
+      _navigateOnUp: function(e) {
         if (this._isDisplayMembers) {
           if (this._tmpJustRight) {
+            e.detail.keyboardEvent.preventDefault();
             this.$.membersList.selectPrevious();
             this._tmpJustRight = false;
           }
         } else {
           if (this._tmpJustLeft) {
+            e.detail.keyboardEvent.preventDefault();
             this.$.collectionsList.selectPrevious();
             this._tmpJustLeft = false;
           }
