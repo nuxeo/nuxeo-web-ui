@@ -5,7 +5,6 @@ import DocumentLayout from './document_layout';
 
 export default class DocumentCreate extends BasePage {
   getDoctypeButton(docType) {
-    const typeSelection = this.el.element(`div[name="typeSelection`);
     return this.el.element(`div[name="typeSelection"] paper-button[name="${docType}"]`);
   }
 
