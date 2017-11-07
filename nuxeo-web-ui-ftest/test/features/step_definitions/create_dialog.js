@@ -24,6 +24,10 @@ module.exports = function () {
     this.ui.createDialog.createButton.waitForVisible();
     this.ui.createDialog.createButton.click();
     this.ui.browser.hasTitle(title).should.be.true;
+    this.doc = {
+      type: currentDocType,
+      title: title
+    }
   });
 
   this.Then(/^I see the (.*) page$/, (docType) => {

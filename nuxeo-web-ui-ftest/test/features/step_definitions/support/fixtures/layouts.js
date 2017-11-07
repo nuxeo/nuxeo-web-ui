@@ -113,10 +113,10 @@ global.fieldRegistry.register('nuxeo-checkbox-aggregation',
                                 element.element(`///div[@id='checkboxLabel' and contains(., '${value}')]`).click();
                               });
 global.fieldRegistry.register('nuxeo-dropzone',
-                              (element) => element.element(`///input[@id='input']`).getValue(),
+                              (element) => driver.element(`nuxeo-dropzone input[id='input']`).getValue(),
                               (element, value) => {
-                                element.waitForExist(`///input[@id='input']`);
-                                browser.chooseFile(`//nuxeo-dropzone/input[@id='input']`,
+                                element.waitForExist(`nuxeo-dropzone input[id='input']`);
+                                browser.chooseFile(`nuxeo-dropzone input[id='input']`,
                                                    path.resolve(fixtures.blobs.get(value)));
                               });
 global.fieldRegistry.register('generic',
