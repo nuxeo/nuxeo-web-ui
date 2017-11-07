@@ -54,17 +54,6 @@ limitations under the License.
         font-size: 1rem !important;
       }
 
-
-      paper-input[required] .label-and-input-container::after {
-        display: block;
-        content: '*';
-        position: absolute;
-        right: 0;
-        top: -1rem;
-        color: var(--nuxeo-warn-text);
-        font-size: 1.2em;
-      }
-
       paper-input[readonly] paper-input-container {
         opacity: .6;
       }
@@ -77,11 +66,6 @@ limitations under the License.
       paper-input[readonly] .unfocused-line,
       paper-input[readonly] .focused-line {
         border-bottom: 1px dashed var(--nuxeo-text-default);
-      }
-
-      paper-input[required][readonly] .label-and-input-container::after,
-      paper-input[required][disabled] .label-and-input-container::after {
-        display: none;
       }
 
       /* paper-button */
@@ -168,7 +152,6 @@ limitations under the License.
     background-color: rgba(0, 0, 0, 0.15);
     border-radius: 2px;
   }
-
 
   /* External styles */
   body .ae-toolbar-styles {
