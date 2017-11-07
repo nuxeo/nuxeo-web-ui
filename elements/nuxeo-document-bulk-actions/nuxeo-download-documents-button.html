@@ -20,6 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
@@ -55,13 +56,20 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-download-documents-button',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         documents: {
           type: Array,
           notify: true,
           value: []
         },
+
+        document: {
+          type: Object,
+          observer: '_observeDocument'
+        },
+
+        filename: String,
 
         tooltipPosition: {
           type: String,
@@ -73,6 +81,16 @@ limitations under the License.
         'tap': 'downloadDocuments'
       },
 
+      _observeDocument: function() {
+        if (this.document) {
+          this.documents = [];
+          this.documents.push(this.document);
+          if (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish')) {
+            this.filename = this.document.title + '_' + new Date().getTime() + '.zip';
+          }
+        }
+      },
+
       downloadDocuments: function() {
         if (this.documents && this.documents.length) {
           var uids = this.documents.map(function(doc) {
@@ -80,7 +98,8 @@ limitations under the License.
           }).join(',');
           this.$.bulkDownloadOp.input = 'docs:' + uids;
           this.$.bulkDownloadOp.params = {
-            "filename": this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
+            "filename": this.filename ?
+              this.filename : this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
           }
           this.$.bulkDownloadOp.execute().then(function(res) {
             if (res.status === 204) {

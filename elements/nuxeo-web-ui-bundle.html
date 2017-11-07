@@ -234,13 +234,25 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="exportDocumentAction" slot="DOCUMENT_ACTIONS" order="90">
+
+<nuxeo-slot-content name="downloadDocumentAction" slot="DOCUMENT_ACTIONS" order="90">
+  <template>
+    <nuxeo-filter document="[[document]]" type="Folder,Collection">
+      <template>
+        <nuxeo-download-documents-button document="[[document]]">
+        </nuxeo-download-documents-button>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="exportDocumentAction" slot="DOCUMENT_ACTIONS" order="100">
   <template>
     <nuxeo-export-button document="[[document]]"></nuxeo-export-button>
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="workflowDocumentAction" slot="DOCUMENT_ACTIONS" order="100">
+<nuxeo-slot-content name="workflowDocumentAction" slot="DOCUMENT_ACTIONS" order="110">
   <template>
     <nuxeo-workflow-button document="[[document]]"></nuxeo-workflow-button>
   </template>
