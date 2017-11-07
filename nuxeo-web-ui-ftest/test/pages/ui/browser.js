@@ -9,7 +9,7 @@ import EditDialog from './edit_dialog';
 export default class Browser extends BasePage {
 
   documentPage(docType) {
-    const page = docType ? fixtures.layouts.page[docType] : 'nuxeo-document-page';
+    const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
     if (page === `nuxeo-collapsible-document-page`) {
       return new CollapsibleDocumentPage(page, docType);
     } else {

@@ -5,7 +5,7 @@
  */
 
 function shadowSelector(selector) {
-  return selector && !selector.startsWith() ? `* >>> ${selector.trim().replace(/\s+/g, ' >>> ')}` : selector;
+  return (selector && !selector.includes(`//`))  ? `* >>> ${selector.trim().replace(/\s+/g, ' >>> ')}` : selector;
 }
 
 function getMethods(obj) {
@@ -129,6 +129,15 @@ function wrapShadow(element, isWebElement) {
     } else {
       return el._getText.apply(el, parameters);
     }
+  };
+
+  el._chooseFile = el.chooseFile;
+  el.chooseFile = (...args) => {
+    const parameters = [].concat(args);
+    if (parameters.length > 0) {
+      parameters[0] = shadowSelector(parameters[0]);
+    }
+    return el._chooseFile.apply(el, parameters), true;
   };
 
   el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {
