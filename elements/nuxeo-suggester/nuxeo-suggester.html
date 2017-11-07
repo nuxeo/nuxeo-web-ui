@@ -306,7 +306,10 @@ limitations under the License.
         }
       },
 
-      closeResults: function() {
+      closeResults: function(e) {
+        if (e && e.detail && e.detail.keyboardEvent) {
+          e.detail.keyboardEvent.preventDefault();
+        }
         this.toggle();
       },
 
@@ -338,16 +341,19 @@ limitations under the License.
         return this.urlFor(item.type, item.id).replace('/#!', '');
       },
 
-      _upPressed: function() {
+      _upPressed: function(e) {
+        e.detail.keyboardEvent.preventDefault();
         this.$.selector.selectPrevious();
       },
 
-      _downPressed: function() {
+      _downPressed: function(e) {
+        e.detail.keyboardEvent.preventDefault();
         this.$.selector.selectNext();
       },
 
-      _enterPressed: function() {
+      _enterPressed: function(e) {
         if (this.$.selector.items.length > 0) {
+          e.detail.keyboardEvent.preventDefault();
           this.$.selector.items[this.$.selector.selected].click();
         }
       },
