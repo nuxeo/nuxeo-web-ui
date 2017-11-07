@@ -214,7 +214,7 @@ limitations under the License.
 
     </style>
 
-    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
+    <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
@@ -268,7 +268,7 @@ limitations under the License.
               <div class="header">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
-                <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout()]]"></nuxeo-menu-item>
+                <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>
               </iron-selector>
             </div>
 
