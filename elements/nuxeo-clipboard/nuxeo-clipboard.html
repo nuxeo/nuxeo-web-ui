@@ -68,15 +68,42 @@ limitations under the License.
         @apply --nuxeo-block-selected;
       }
 
-      .list-item-property {
-        opacity: .5;
-        margin-right: .2em;
+      .list-item-box {
+        @apply --layout-vertical;
       }
 
-      .ellipsis {
-        vertical-align: middle;
+      .list-item-info {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
+
+      .list-item-thumbnail {
+        @apply --layout-vertical;
+        @apply --layout-center;
+      }
+
+      .list-item-title {
+        @apply --layout-flex;
         text-overflow: ellipsis;
         overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .list-item iron-icon {
+        display: block;
+        @apply --nuxeo-action;
+        color: var(--nuxeo-drawer-text);
+      }
+
+      .list-item iron-icon:hover {
+        @apply --nuxeo-action-hover;
+        color: var(--nuxeo-drawer-text);
+      }
+
+      .remove {
+        padding: 0;
+        width: 1.5em;
+        height: 1.5em;
       }
 
       .toolbar {
@@ -95,35 +122,6 @@ limitations under the License.
         font-size: 1rem;
       }
 
-      .list-item-box {
-        @apply --layout-vertical;
-      }
-
-      .list-item-info {
-        @apply --layout-horizontal;
-        @apply --layout-center;
-      }
-
-      .list-item-thumbnail {
-        @apply --layout-vertical;
-        @apply --layout-center;
-      }
-
-      .list-item paper-icon-button ::content iron-icon {
-         @apply --nuxeo-action;
-         color: var(--nuxeo-drawer-text);
-      }
-
-      .list-item paper-icon-button:hover ::content iron-icon {
-        @apply --nuxeo-action-hover;
-        color: var(--nuxeo-drawer-text);
-      }
-
-      .remove {
-        padding: 0;
-        width: 1.5em;
-        height: 1.5em;
-      }
     </style>
 
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
@@ -142,11 +140,11 @@ limitations under the License.
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
-                <div class="lite-item-thumbnail">
+                <div class="list-item-thumbnail">
                   <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 </div>
-                <span class="list-item-title ellipsis flex">[[document.title]]</span>
-                <paper-icon-button noink class="remove" icon="nuxeo:remove" alt="Remove" on-tap="_remove"></paper-icon-button>
+                <div class="list-item-title">[[document.title]]</div>
+                <iron-icon class="remove" icon="nuxeo:remove" alt="Remove" on-tap="_remove"></iron-icon>
               </div>
             </div>
           </div>
