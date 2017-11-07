@@ -5,7 +5,7 @@
  */
 
 function shadowSelector(selector) {
-  return (selector && !selector.includes(`//`))  ? `* >>> ${selector.trim().replace(/\s+/g, ' >>> ')}` : selector;
+  return (selector && !selector.includes(`//`)) ? `* >>> ${selector.trim().replace(/\s+/g, ' >>> ')}` : selector;
 }
 
 function getMethods(obj) {
@@ -137,7 +137,7 @@ function wrapShadow(element, isWebElement) {
     if (parameters.length > 0) {
       parameters[0] = shadowSelector(parameters[0]);
     }
-    return el._chooseFile.apply(el, parameters), true;
+    return el._chooseFile.apply(el, parameters);
   };
 
   el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {

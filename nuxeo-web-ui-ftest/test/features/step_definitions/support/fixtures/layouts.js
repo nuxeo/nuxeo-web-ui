@@ -37,7 +37,7 @@ global.fieldRegistry.register('nuxeo-user-suggestion',
 global.fieldRegistry.register('nuxeo-directory-suggestion',
                               (element) => {
                                 if (element.getAttribute('multiple')) {
-                                  return '' + element.elements('.selectivity-multiple-selected-item')
+                                  return element.elements('.selectivity-multiple-selected-item')
                                                      .value.map((v) => v.getText()).join(',');
                                 } else {
                                   return element.element('.selectivity-single-selected-item').getValue();
@@ -113,9 +113,9 @@ global.fieldRegistry.register('nuxeo-checkbox-aggregation',
                                 element.element(`///div[@id='checkboxLabel' and contains(., '${value}')]`).click();
                               });
 global.fieldRegistry.register('nuxeo-dropzone',
-                              (element) => driver.element(`nuxeo-dropzone input[id='input']`).getValue(),
+                              () => driver.element(`nuxeo-dropzone input[id='input']`).getValue(),
                               (element, value) => {
-                                element.waitForExist(`nuxeo-dropzone input[id='input']`);
+                                browser.waitForExist(`nuxeo-dropzone input[id='input']`);
                                 browser.chooseFile(`nuxeo-dropzone input[id='input']`,
                                                    path.resolve(fixtures.blobs.get(value)));
                               });
@@ -135,11 +135,10 @@ fixtures.layouts = {
                                                 global.fieldRegistry.setValFunc('generic'))(element, value);
   },
   page: {
-    'Note': 'nuxeo-document-page',
-    'File': 'nuxeo-document-page',
-    'Folder': 'nuxeo-collapsible-document-page',
-    'Workspace': 'nuxeo-collapsible-document-page',
-    'Collection': 'nuxeo-collapsible-document-page'
-  }
+    Note: 'nuxeo-document-page',
+    File: 'nuxeo-document-page',
+    Folder: 'nuxeo-collapsible-document-page',
+    Workspace: 'nuxeo-collapsible-document-page',
+    Collection: 'nuxeo-collapsible-document-page',
+  },
 };
-
