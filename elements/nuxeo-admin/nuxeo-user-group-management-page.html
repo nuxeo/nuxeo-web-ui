@@ -35,7 +35,7 @@ limitations under the License.
         <span class="flex">[[i18n('admin.usersAndGroups.heading')]]</span>
       </div>
       <div>
-        <template is="dom-if" if="visible">
+        <template is="dom-if" if="[[visible]]">
           <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
           <template is="dom-if" if="[[_displayLatest]]">
             <nuxeo-user-group-latest></nuxeo-user-group-latest>
