@@ -31,7 +31,7 @@
       <dependency>
         <groupId>org.nuxeo.web.ui</groupId>
         <artifactId>nuxeo-web-ui-marketplace</artifactId>
-        <version>${project.version}</version>
+        <version>9.3-POLYMER2-SNAPSHOT</version>
         <type>zip</type>
       </dependency>
     </dependencies>
