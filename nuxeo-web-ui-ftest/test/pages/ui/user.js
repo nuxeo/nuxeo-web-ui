@@ -67,6 +67,7 @@ export default class User extends BasePage {
         this.el.element('paper-toggle-button[name="password-toggle"]').click();
       }
       const fieldEl = this.getField(row[0], { parent });
+      fieldEl.waitForVisible();
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }

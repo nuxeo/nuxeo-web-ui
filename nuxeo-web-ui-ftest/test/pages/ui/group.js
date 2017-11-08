@@ -52,6 +52,7 @@ export default class Group extends BasePage {
         global.groups[row[1]] = row[1];
       }
       const fieldEl = this.getField(row[0]);
+      fieldEl.waitForVisible();
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }
