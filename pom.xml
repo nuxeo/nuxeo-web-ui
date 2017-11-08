@@ -66,18 +66,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-          <execution>
-            <id>grunt-test</id>
-            <phase>test</phase>
-            <configuration>
-              <target unless="${skip.surefire.tests}">
-                <ant antfile="${basedir}/build.xml" dir="${basedir}" target="test"></ant>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
         </executions>
       </plugin>
     </plugins>
