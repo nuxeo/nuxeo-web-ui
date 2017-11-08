@@ -3,14 +3,13 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-addons-parent</artifactId>
-    <version>9.3-SNAPSHOT</version>
+    <version>9.3-POLYMER2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.nuxeo.web.ui</groupId>
   <artifactId>nuxeo-web-ui</artifactId>
   <name>Nuxeo Web UI - Web Application</name>
   <description>Nuxeo Web UI - Web application</description>
-  <version>9.3-POLYMER2-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
