@@ -38,11 +38,9 @@
     "merge-stream": "^1.0.0",
     "proxy-middleware": "^0.15.0",
     "run-sequence": "^1.1.5",
-    "through2": "^2.0.1",
-    "vulcanize": ">= 1.14.0"
+    "through2": "^2.0.1"
   },
   "scripts": {
-    "test": "gulp test:local",
     "start": "gulp serve",
     "lint": "gulp lint && polymer lint -i elements/*/*.html"
   },

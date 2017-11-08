@@ -34,7 +34,6 @@
     "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^2.0.0"
   },
   "devDependencies": {
-    "web-component-tester": "^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
   }
 }

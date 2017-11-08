@@ -206,7 +206,3 @@ gulp.task('serve', ['lint', 'merge-message-files'], function() {
   gulp.watch(['i18n/**/*'], ['merge-message-files', reload]);
 });
 
-// Load tasks for web-component-tester
-// Adds tasks for `gulp test:local` and `gulp test:remote`
-require('web-component-tester').gulp.init(gulp);
-
