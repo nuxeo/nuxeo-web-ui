@@ -24,6 +24,7 @@ export default class DocumentLayout extends BasePage {
   fillMultipleValues(table) {
     table.rows().forEach((row) => {
       const fieldEl = this.getField(row[0]);
+      fieldEl.waitForVisible();
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }
