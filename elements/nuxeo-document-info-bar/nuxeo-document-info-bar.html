@@ -143,74 +143,74 @@ limitations under the License.
     </template>
 
   </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document-info-bar',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: {
+          type: Object
+        },
+        tasks: {
+          type: Array,
+          computed: '_tasks(document)'
+        },
+        workflows: {
+          type: Array,
+          computed: '_workflows(document)'
+        },
+        _wfTasks: Array
+      },
+
+      _tasks: function(doc) {
+        return doc && doc.contextParameters && doc.contextParameters.pendingTasks
+          ? doc.contextParameters.pendingTasks : [];
+      },
+
+      _workflows: function(doc) {
+        return doc && doc.contextParameters && doc.contextParameters.runningWorkflows
+          ? doc.contextParameters.runningWorkflows : [];
+      },
+
+      _processTask: function(e) {
+        var details = {
+          id: e.model.task.id
+        };
+        this.fire('workflowTaskProcess', details);
+      },
+
+      ready: function() {
+        this.$.nxcon.connect().then(function(user) {
+          this.currentUser = user;
+        }.bind(this))
+      },
+
+      _isCurrentUser: function(userId) {
+        return this.currentUser && this.currentUser.id === userId;
+      },
+
+      _labelForInitiatedWf: function(workflow) {
+        if (this._isCurrentUser(workflow.initiator)) {
+          return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
+        } else {
+          return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
+        }
+      },
+
+      _abandonWorkflow: function(e) {
+        if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
+          this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
+          this.$.worfklow.remove().then(function() {
+            this.fire('workflowAbandoned');
+          }.bind(this));
+        }
+      },
+
+      _toggleGraphDialog: function(e) {
+        this.$$('#graphDialog-' + e.model.workflow.id).toggle();
+      }
+
+    });
+  </script>
 </dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-document-info-bar',
-    behaviors: [Nuxeo.LayoutBehavior],
-    properties: {
-      document: {
-        type: Object
-      },
-      tasks: {
-        type: Array,
-        computed: '_tasks(document)'
-      },
-      workflows: {
-        type: Array,
-        computed: '_workflows(document)'
-      },
-      _wfTasks: Array
-    },
-
-    _tasks: function(doc) {
-      return doc && doc.contextParameters && doc.contextParameters.pendingTasks
-        ? doc.contextParameters.pendingTasks : [];
-    },
-
-    _workflows: function(doc) {
-      return doc && doc.contextParameters && doc.contextParameters.runningWorkflows
-        ? doc.contextParameters.runningWorkflows : [];
-    },
-
-    _processTask: function(e) {
-      var details = {
-        id: e.model.task.id
-      };
-      this.fire('workflowTaskProcess', details);
-    },
-
-    ready: function() {
-      this.$.nxcon.connect().then(function(user) {
-        this.currentUser = user;
-      }.bind(this))
-    },
-
-    _isCurrentUser: function(userId) {
-      return this.currentUser && this.currentUser.id === userId;
-    },
-
-    _labelForInitiatedWf: function(workflow) {
-      if (this._isCurrentUser(workflow.initiator)) {
-        return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
-      } else {
-        return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
-      }
-    },
-
-    _abandonWorkflow: function(e) {
-      if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
-        this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
-        this.$.worfklow.remove().then(function() {
-          this.fire('workflowAbandoned');
-        }.bind(this));
-      }
-    },
-
-    _toggleGraphDialog: function(e) {
-      this.$$('#graphDialog-' + e.model.workflow.id).toggle();
-    }
-
-  });
-</script>
