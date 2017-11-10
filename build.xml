@@ -41,6 +41,10 @@ limitations under the License.
     <exec executable="${cmd.bower}" failonerror="true">
       <arg value="install" />
     </exec>
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="run" />
+      <arg value="lint" />
+    </exec>
   </target>
 
   <target name="build" depends="init">
