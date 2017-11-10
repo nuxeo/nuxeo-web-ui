@@ -468,6 +468,8 @@ limitations under the License.
         'nx-clipboard-updated': '_clipboardUpdated'
       },
 
+      observers: ['_computeSharedActionContext(currentUser)'],
+
       ready: function() {
 
         this.$.drawerPanel.closeDrawer();
@@ -629,6 +631,12 @@ limitations under the License.
           actionContext: this.actionContext,
           userWorkspace: this.userWorkspace
         };
+      },
+
+      _computeSharedActionContext: function() {
+        if (this.currentUser) {
+          window.nuxeo.slots.setSharedModel({user: this.currentUser});
+        }
       },
 
       _focusMenu: function(e) {
