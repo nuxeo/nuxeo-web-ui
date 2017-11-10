@@ -214,6 +214,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       _viewChanged: function() {
         if (this.view) {
+          this.view.nxProvider = this.nxProvider;
           this.view.reset();
           this.view.fetch();
           this.fire('search-results-view', {view: this.view});
@@ -227,7 +228,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           var name = view.getAttribute("name"),
               icon = view.getAttribute("icon");
           view.nxProvider = this.nxProvider;
-          view.fetch();
           if (this._settings && view.settings) {
             view.settings = this._settings[name];
           }
