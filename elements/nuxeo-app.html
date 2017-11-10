@@ -469,6 +469,8 @@ limitations under the License.
         'drawer-pages.iron-items-changed': '_updateSearch'
       },
 
+      observers: ['_computeSharedActionContext(currentUser)'],
+
       ready: function() {
         this.$.drawerPanel.closeDrawer();
 
@@ -575,6 +577,12 @@ limitations under the License.
         };
       },
 
+      _computeSharedActionContext: function() {
+        if (this.currentUser) {
+          window.nuxeo.slots.setSharedModel({user: this.currentUser});
+        }
+      },
+      
       _focusMenu: function() {
         this.$.menu.focus();
       },
