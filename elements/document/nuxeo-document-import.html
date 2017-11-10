@@ -297,7 +297,8 @@ limitations under the License.
       }
 
       iron-pages,
-      div[name="upload"] {
+      div[name="upload"] ,
+      div[name="customize"] {
         /*Firefox fix (NXP-22349)*/
         min-height: 100%;
       }
@@ -456,80 +457,82 @@ limitations under the License.
 
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
-        <div class="horizontal layout flex">
-          <div id="blobEditor" class="vertical layout flex-3">
-            <div class="suggester">
-              <nuxeo-path-suggestion id="pathSuggesterCustomize"
-                                     label="[[i18n('documentImportForm.location')]]"
-                                     value="{{targetPath}}"
-                                     parent="{{suggesterParent}}"
-                                     children="{{suggesterChildren}}"
-                                     disabled
-                                     always-float-label></nuxeo-path-suggestion>
-              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
+        <div class="drop-scrollable">
+          <div class="horizontal layout flex">
+            <div id="blobEditor" class="vertical layout flex-3">
+              <div class="suggester">
+                <nuxeo-path-suggestion id="pathSuggesterCustomize"
+                                      label="[[i18n('documentImportForm.location')]]"
+                                      value="{{targetPath}}"
+                                      parent="{{suggesterParent}}"
+                                      children="{{suggesterChildren}}"
+                                      disabled
+                                      always-float-label></nuxeo-path-suggestion>
+                <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
+              </div>
+              <iron-form id="form">
+                <form class="form vertical layout flex">
+                  <div class="horizontal layout center">
+                    <div class="flex">
+                      <nuxeo-select id="docTypeDropdown"
+                                    selected="{{selectedDocType}}" attr-for-selected="key"
+                                    label="[[i18n('documentImportForm.type.label')]]"
+                                    placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                                    error-message="[[i18n('documentImportForm.type.error')]]"
+                                    on-value-changed="_validate"
+                                    required>
+                        <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
+                          <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
+                        </template>
+                      </nuxeo-select>
+                    </div>
+                  </div>
+                  <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
+                  <template is="dom-if" if=[[document]] restamp>
+                    <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+                  </template>
+                </form>
+              </iron-form>
             </div>
-            <iron-form id="form">
-              <form class="form vertical layout flex">
-                <div class="horizontal layout center">
-                  <div class="flex">
-                    <nuxeo-select id="docTypeDropdown"
-                                  selected="{{selectedDocType}}" attr-for-selected="key"
-                                  label="[[i18n('documentImportForm.type.label')]]"
-                                  placeholder="[[i18n('documentImportForm.type.placeholder')]]"
-                                  error-message="[[i18n('documentImportForm.type.error')]]"
-                                  on-value-changed="_validate"
-                                  required>
-                      <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
-                        <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
-                      </template>
-                    </nuxeo-select>
-                  </div>
-                </div>
-                <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
-                <template is="dom-if" if=[[document]] restamp>
-                  <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+            <div class="sidePanel horizontal layout">
+              <div id="blobList" class="flex">
+                <template is="dom-repeat" items="[[localFiles]]" as="file">
+                  <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                    <div class="horizontal layout flex">
+                      <div class="vertical layout flex">
+                        <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
+                        <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                        <span class$="disclaimer [[_styleFileCheck(file.*)]]">
+                          [[i18n('documentImportForm.unchecked.disclaimer')]]
+                        </span>
+                        <template is="dom-if" if="[[!file.complete]]">
+                          <paper-progress indeterminate></paper-progress>
+                        </template>
+                      </div>
+                      <iron-icon icon="icons:check-circle"
+                                class$="blobCheck [[_styleFileCheck(file.*)]]"
+                                on-tap="_checkTappedLocal"></iron-icon>
+                    </div>
+                  </paper-button>
                 </template>
-              </form>
-            </iron-form>
-          </div>
-          <div class="sidePanel horizontal layout">
-            <div id="blobList" class="flex">
-              <template is="dom-repeat" items="[[localFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                  <div class="horizontal layout flex">
-                    <div class="vertical layout flex">
-                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer')]]
-                      </span>
-                      <template is="dom-if" if="[[!file.complete]]">
-                        <paper-progress indeterminate></paper-progress>
-                      </template>
+                <template is="dom-repeat" items="[[remoteFiles]]" as="file">
+                  <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                    <div class="horizontal layout flex">
+                      <div class="vertical layout flex">
+                        <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
+                        <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                        <span class$="disclaimer [[_styleFileCheck(file.*)]]">
+                          [[i18n('documentImportForm.unchecked.disclaimer')]]
+                        </span>
+                      </div>
+                      <iron-icon icon="icons:check-circle"
+                                class$="blobCheck [[_styleFileCheck(file.*)]]"
+                                on-tap="_checkTappedRemote"></iron-icon>
                     </div>
-                    <iron-icon icon="icons:check-circle"
-                               class$="blobCheck [[_styleFileCheck(file.*)]]"
-                               on-tap="_checkTappedLocal"></iron-icon>
-                  </div>
-                </paper-button>
-              </template>
-              <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
-                  <div class="horizontal layout flex">
-                    <div class="vertical layout flex">
-                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer')]]
-                      </span>
-                    </div>
-                    <iron-icon icon="icons:check-circle"
-                               class$="blobCheck [[_styleFileCheck(file.*)]]"
-                               on-tap="_checkTappedRemote"></iron-icon>
-                  </div>
-                </paper-button>
-              </template>
-              <span class="horizontal layout error" hidden$="[[!_importWithPropertiesError]]">[[_importWithPropertiesError]]</span>
+                  </paper-button>
+                </template>
+                <span class="horizontal layout error" hidden$="[[!_importWithPropertiesError]]">[[_importWithPropertiesError]]</span>
+              </div>
             </div>
           </div>
         </div>
