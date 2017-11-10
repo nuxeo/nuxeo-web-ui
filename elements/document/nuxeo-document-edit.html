@@ -135,7 +135,11 @@ limitations under the License.
           properties: this._dirtyProperties
         };
 
-        this.$.doc.put().then(this._refresh.bind(this));
+        this.$.doc.put().then(function() {
+          this._refresh();
+        }.bind(this), function() {
+          this.fire('notify', {message: this.i18n('documentEdit.saveError')});
+        }.bind(this));
       },
 
       _cancel: function() {
