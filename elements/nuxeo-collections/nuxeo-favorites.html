@@ -176,6 +176,9 @@ limitations under the License.
 
       _refresh: function() {
         this._fetchFavorite().then(function(favorite) {
+          if (!favorite) {
+            return;
+          }
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
           this.$.favoritesList.fetch();
@@ -188,8 +191,13 @@ limitations under the License.
         } else {
           return this.$.fetchFavOp.execute()
             .then(function(resp) {
-              this.favorite = resp;
-              return resp;
+              if (resp.status === 204) {
+                // Pas de bras, pas de chocolat.
+                this.favorite = null;
+              } else {
+                this.favorite = resp;
+              }
+              return this.favorite;
             }.bind(this));
         }
       },
