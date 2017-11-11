@@ -294,6 +294,7 @@
   "documentCreationForm.location": "Ort",
   "documentCreationForm.newDoc.heading": "Neues {0}",
   "documentEdit.layoutNotFound": "Bearbeitungslayout für {0} nicht gefunden.",
+  "documentEdit.saveError": "Failed to save.",
   "documentEditAction.tooltip": "Dokument bearbeiten",
   "documentHistory.category": "Kategorie",
   "documentHistory.comment": "Kommentar",

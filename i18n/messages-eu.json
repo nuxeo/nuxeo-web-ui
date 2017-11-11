@@ -294,6 +294,7 @@
   "documentCreationForm.location": "Location",
   "documentCreationForm.newDoc.heading": "New {0}",
   "documentEdit.layoutNotFound": "Failed to find edit layout for {0}.",
+  "documentEdit.saveError": "Failed to save.",
   "documentEditAction.tooltip": "Edit document",
   "documentHistory.category": "Category",
   "documentHistory.comment": "Comment",

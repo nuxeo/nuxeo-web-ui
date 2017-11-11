@@ -294,6 +294,7 @@
   "documentCreationForm.location": "Emplacement",
   "documentCreationForm.newDoc.heading": "Nouveau document {0}",
   "documentEdit.layoutNotFound": "Aucun formulaire de modification pour {0}",
+  "documentEdit.saveError": "Failed to save.",
   "documentEditAction.tooltip": "Modifier le document",
   "documentHistory.category": "Catégorie",
   "documentHistory.comment": "Commentaire",
