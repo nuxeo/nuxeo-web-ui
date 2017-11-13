@@ -114,27 +114,13 @@ limitations under the License.
 
       _handleUGMmanageUser: function(e) {
         this.entity = {type: 'user', id: e.detail.user};
-        var url = '';
-        if (this.selectedAdminTab) {
-          url += this.selectedAdminTab;
-          if (this.selectedAdminTab === 'user-group-management' &&
-            this.entity && this.entity.id && this.entity.type) {
-            url += '/' + this.entity.type + '/' + this.entity.id;
-          }
-        }
+        var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
         this.navigateTo('administration', url);
       },
 
       _handleUGMmanageGroup: function(e) {
         this.entity = {type: 'group', id: e.detail.group};
-        var url = '';
-        if (this.selectedAdminTab) {
-          url += this.selectedAdminTab;
-          if (this.selectedAdminTab === 'user-group-management' &&
-            this.entity && this.entity.id && this.entity.type) {
-            url += '/' + this.entity.type + '/' + this.entity.id;
-          }
-        }
+        var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
         this.navigateTo('administration', url);
       },
 
