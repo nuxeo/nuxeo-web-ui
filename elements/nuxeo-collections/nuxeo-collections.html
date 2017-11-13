@@ -396,7 +396,7 @@ limitations under the License.
         var memberId = evt.currentTarget.dataset.uid;
         op.input = memberId;
         op.params = {
-          'collection': this.selectedCollection
+          'collection': this.selectedCollection.uid
         };
         op.execute().then(function() {
           this._removeFromMembers(memberId)
