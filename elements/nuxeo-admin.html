@@ -46,12 +46,13 @@ limitations under the License.
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(user)'
-        }
+          computed: '_actionContext(user, entity)'
+        },
+        entity: Object
       },
 
       _actionContext: function() {
-        return {user: this.user};
+        return {user: this.user, entity: this.entity};
       },
 
       _errorUrl: function() {
