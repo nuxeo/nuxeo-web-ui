@@ -54,7 +54,7 @@ limitations under the License.
           switch (element.tagName) {
             case 'INPUT':
             case 'TEXTAREA':
-              if(!this.invasive) {
+              if (!this.invasive) {
                 return;
               }
               break;
@@ -62,6 +62,13 @@ limitations under the License.
               if (!this.invasive && element.id === 'editor') {
                 return;
               }
+              break;
+            case 'NUXEO-DIALOG':
+            case 'PAPER-BUTTON':
+            case 'PAPER-CHECKBOX':
+            case 'PAPER-RADIO-BUTTON':
+              e.preventDefault();
+              return;
           }
         }
         e.detail.keyboardEvent.preventDefault();
