@@ -17,10 +17,10 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-audit-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
@@ -34,64 +34,58 @@ limitations under the License.
 <dom-module id="nuxeo-document-history">
   <template>
     <style>
-      paper-input {
-        margin-left: 1em;
-      }
-
-      nuxeo-data-table {
-        @apply --paper-card;
-        height: calc(100vh - 24em);
-      }
-
-      .dates {
+      #heading {
         @apply --layout-horizontal;
         @apply --layout-end-justified;
-        @apply --layout-flex;
+      }
+
+      #table {
+        height: calc(100vh - 370px);
+      }
+
+      nuxeo-date-picker {
+        margin-left: 16px;
       }
     </style>
 
     <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
     </nuxeo-audit-page-provider>
 
-    <paper-card class="dates">
-      <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]"
-                   value="{{startDate::change}}">
-      </nuxeo-date-picker>
-      <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]"
-                   value="{{endDate::change}}">
-      </nuxeo-date-picker>
-    </paper-card>
+    <nuxeo-card>
+      <div id="heading">
+        <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate::change}}">
+        </nuxeo-date-picker>
+        <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate::change}}">
+        </nuxeo-date-picker>
+      </div>
+    </nuxeo-card>
 
-    <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
-      <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]"
-        sort-by="eventId">
-        <template>[[_formatActivity(item.eventId)]]</template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]"
-        sort-by="eventDate">
-        <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]"
-        sort-by="principalName">
-        <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]"
-        sort-by="category">
-        <template>[[_formatActivity(item.category)]]</template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
-        <template>[[item.comment]]</template>
-      </nuxeo-data-table-column>
-      <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-        <template><nuxeo-tag uppercase>[[item.docLifeCycle]]</nuxeo-tag></template>
-      </nuxeo-data-table-column>
-    </nuxeo-data-table>
+    <nuxeo-card>
+      <nuxeo-data-table id="table" nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
+        <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
+          <template>[[_formatActivity(item.eventId)]]</template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
+          <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
+          <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]" sort-by="category">
+          <template>[[_formatActivity(item.category)]]</template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
+          <template>[[item.comment]]</template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
+          <template><nuxeo-tag uppercase>[[item.docLifeCycle]]</nuxeo-tag></template>
+        </nuxeo-data-table-column>
+      </nuxeo-data-table>
+    </nuxeo-card>
 
   </template>
-</dom-module>
 
-<script>
-  (function() {
+  <script>
     Polymer({
       is: 'nuxeo-document-history',
       behaviors: [Nuxeo.FormatBehavior],
@@ -162,5 +156,6 @@ limitations under the License.
       }
 
     });
-  })();
-</script>
+  </script>
+
+</dom-module>
