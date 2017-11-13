@@ -168,8 +168,15 @@ limitations under the License.
         emptyLabelWhenFiltered: String
       },
 
+      _refreshAndFetch: function() {
+        this.$.results._refreshAndFetch();
+      },
+
       get items() {
-        return this.$.results.items;
+        if (this.shadowRoot) {
+          return this.shadowRoot.querySelector('#results').items;
+        }
+        return null;
       },
 
       _navigate: function(e) {
