@@ -18,7 +18,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
@@ -26,6 +25,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../nuxeo-dropzone/nuxeo-dropzone.html">
 
 <!--
@@ -43,7 +43,7 @@ limitations under the License.
 
       .dialog .content {
         @apply --layout-vertical;
-        box-shadow: none
+        box-shadow: none;
       }
 
       nuxeo-tag {
@@ -96,7 +96,7 @@ limitations under the License.
 
     <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('versions.create')]]</nuxeo-tag>
 
-    <paper-dialog id="dialog" class="dialog" with-backdrop
+    <nuxeo-dialog id="dialog" class="dialog" with-backdrop
                   on-iron-overlay-opened="_dialogOpened"
                   on-iron-overlay-closed="_dialogClosed">
       <h2>[[i18n('documentCreateVersion.title',
@@ -120,7 +120,7 @@ limitations under the License.
           [[i18n('documentCreateVersion.confirm')]]
         </paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 
