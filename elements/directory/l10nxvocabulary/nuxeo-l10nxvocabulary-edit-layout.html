@@ -26,7 +26,7 @@ limitations under the License.
     <div role="widget">
       <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
       <paper-button id="selectParent" on-tap="_toggleParent">[[_parentLabel]]</paper-button>
-      <paper-dialog id="parentDialog" modal no-auto-focus>
+      <nuxeo-dialog id="parentDialog" with-backdrop>
         <h2>[[i18n('vocabularyManagement.selectParent')]]</h2>
         <iron-form id="form">
           <form>
@@ -47,7 +47,7 @@ limitations under the License.
         <div class="buttons">
           <paper-button name="close" dialog-dismiss>[[i18n('command.close')]]</paper-button>
         </div>
-      </paper-dialog>
+      </nuxeo-dialog>
     </div>
 
     <nuxeo-input role="widget"

@@ -21,6 +21,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
@@ -28,7 +29,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
 
 <!--
@@ -58,18 +58,18 @@ limitations under the License.
         max-width: 223px;
       }
 
-      paper-dialog {
+      nuxeo-dialog {
         min-width: 480px;
       }
 
       @media (max-width: 1024px) {
-        paper-dialog {
+        nuxeo-dialog {
           min-width: 0;
           width: 90%;
         }
       }
 
-      paper-dialog .buttons {
+     nuxeo-dialog .buttons {
         @apply --layout-horizontal;
         @apply --layout-justified;
         margin-top: 16px;
@@ -128,7 +128,7 @@ limitations under the License.
       </div>
     </nuxeo-page>
 
-    <paper-dialog id="dialog" with-backdrop no-auto-focus>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
       <iron-form id="form">
         <form>
@@ -143,7 +143,7 @@ limitations under the License.
         <paper-button name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         <paper-button name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 
