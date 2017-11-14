@@ -17,7 +17,7 @@ export default class Vocabulary extends BasePage {
   addNewEntry(id, label) {
     driver.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="dialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
     dialog.waitForVisible();
     dialog.waitForVisible(`input[name="id"]`);
     dialog.element(`input[name="id"]`).setValue(id);
@@ -50,7 +50,7 @@ export default class Vocabulary extends BasePage {
   editEntry(index, label) {
     const selector = `#edit-button-${(index - 1)}`;
     this.el.element(selector).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="dialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
     dialog.waitForVisible();
     dialog.waitForVisible(`input[name="label"]`);
     dialog.element(`input[name="label"]`).setValue(label);
@@ -84,7 +84,7 @@ export default class Vocabulary extends BasePage {
   get hasEditDialog() {
     driver.waitForVisible(`#edit-button-0`);
     this.el.element(`#edit-button-0`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="dialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
     dialog.waitForVisible();
     const visibleLabels = dialog.isVisible(`input[name="label"]`);
     let allFieldVisible = false;
@@ -102,7 +102,7 @@ export default class Vocabulary extends BasePage {
   get hasCreateDialog() {
     this.el.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="dialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
     dialog.waitForVisible();
     const visibleLabels = dialog.isVisible(`input[name="label"]`);
     let allFieldVisible = false;
