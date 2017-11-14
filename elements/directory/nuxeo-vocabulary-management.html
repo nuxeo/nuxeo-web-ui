@@ -128,7 +128,7 @@ limitations under the License.
       </div>
     </nuxeo-page>
 
-    <nuxeo-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="vocabularyEditDialog" with-backdrop>
       <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
       <iron-form id="form">
         <form>
@@ -314,7 +314,7 @@ limitations under the License.
       _editEntry: function(e) {
         this._new = false;
         this._selectedEntry = e.target.parentNode.item;
-        this.$.dialog.toggle();
+        this.$.vocabularyEditDialog.toggle();
       },
 
       _cancel: function() {
@@ -327,7 +327,7 @@ limitations under the License.
         if (this._new) {
           this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
           this.$.directory.post().then(function() {
-            this.$.dialog.toggle();
+            this.$.vocabularyEditDialog.toggle();
             this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyCreated')});
             this._refresh();
           }.bind(this),
@@ -340,7 +340,7 @@ limitations under the License.
           this.$.directory.path = '/directory/' + this._selectedEntry.directoryName +
             '/' + this._selectedEntry.properties.id;
           this.$.directory.put().then(function() {
-            this.$.dialog.toggle();
+            this.$.vocabularyEditDialog.toggle();
             this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyEdited')});
             this._refresh();
           }.bind(this),
@@ -365,7 +365,7 @@ limitations under the License.
         }
         this._new = true;
         this._selectedEntry = emptyEntry;
-        this.$.dialog.toggle();
+        this.$.vocabularyEditDialog.toggle();
       }
 
     });
