@@ -76,7 +76,7 @@ limitations under the License.
         <template>[[item.comment]]</template>
       </nuxeo-data-table-column>
       <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-        <template><nuxeo-tag uppercase>[[item.docLifeCycle]]</nuxeo-tag></template>
+        <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
       </nuxeo-data-table-column>
     </nuxeo-data-table>
 

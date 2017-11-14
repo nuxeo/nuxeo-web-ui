@@ -6,3 +6,6 @@ bower_components
 .DS_Store
 .swp
 target
+.classpath
+.project
+.settings
