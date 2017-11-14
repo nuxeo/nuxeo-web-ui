@@ -158,7 +158,7 @@ limitations under the License.
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]"
                                    field="currentLifeCycleState" hidden>
-            <template><span class="capitalize">[[item.state]]</span></template>
+            <template><span class="capitalize">[[formatLifecycleState(item.state)]]</span></template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]"
                                    field="versionLabel" hidden>
