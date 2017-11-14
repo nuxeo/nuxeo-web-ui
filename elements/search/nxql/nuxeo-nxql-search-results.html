@@ -61,7 +61,7 @@ limitations under the License.
 
         <nuxeo-data-table-column name="[[i18n('label.state')]]" field="currentLifeCycleState" hidden>
           <template>
-            <span class="capitalize">[[item.state]]</span>
+            <span class="capitalize">[[formatLifecycleState(item.state)]]</span>
           </template>
         </nuxeo-data-table-column>
 
