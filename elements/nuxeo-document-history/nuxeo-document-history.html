@@ -48,8 +48,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-audit-page-provider id="provider" page-size="40" current-page="{{entries}}">
-    </nuxeo-audit-page-provider>
+    <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
 
     <nuxeo-card>
       <div id="heading">
@@ -61,7 +60,7 @@ limitations under the License.
     </nuxeo-card>
 
     <nuxeo-card>
-      <nuxeo-data-table id="table" nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
+      <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
         <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
           <template>[[_formatActivity(item.eventId)]]</template>
         </nuxeo-data-table-column>
@@ -91,7 +90,6 @@ limitations under the License.
       behaviors: [Nuxeo.FormatBehavior],
       properties: {
         document: Object,
-        response: Object,
         visible: {
           type: Boolean,
           value: false,
@@ -147,7 +145,7 @@ limitations under the License.
         if (this.document && this.visible) {
           this.$.provider.page = 1;
           this.$.provider.docId = this.document.uid;
-          this.$.provider.fetch();
+          this.$.table.fetch();
         }
       },
 
