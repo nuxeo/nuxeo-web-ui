@@ -111,6 +111,8 @@ limitations under the License.
 
       ready: function() {
         document.body.appendChild(this.$.tooltip);
+        this.$.tooltip._target = this.$.button;
+        this.$.tooltip._addListeners();
       },
 
       _srcOrIcon: function() {
