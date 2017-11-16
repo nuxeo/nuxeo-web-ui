@@ -21,6 +21,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
@@ -43,7 +44,11 @@ limitations under the License.
       :host {
         display: block;
         @apply --layout-flex;
-        @apply --layout-vertical;
+        @apply --layout-horizontal;
+        --paper-dialog-scrollable: {
+          padding: 0;
+          overflow-x: hidden;
+        };
       }
 
       nuxeo-path-suggestion {
@@ -52,21 +57,16 @@ limitations under the License.
          };
       }
 
-      .container {
-        overflow: auto;
-        flex: 1 1 auto;
-        height: 0;
+      paper-dialog-scrollable {
+        display: block;
+        @apply --layout-flex;
       }
 
       .typeSelection {
-        overflow-y: auto;
         margin: 1rem 0;
-        align-items: center;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        min-height: 20em;
-        justify-content: flex-start;
+        @apply --layout-wrap;
+        @apply --layout-flex;
+        @apply --layout-horizontal;
       }
 
       .typeSelection paper-button {
@@ -94,10 +94,17 @@ limitations under the License.
         -webkit-filter: brightness(1.5);
       }
 
-      .editor {
+      .container {
         margin: 0 2rem;
-        overflow-y: auto;
         padding: 0 1rem 0 0;
+        display: inline-block;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      #form {
+        @apply --layout-flex;
+        @apply --layout-horizontal;
       }
 
       #document-create {
@@ -163,7 +170,7 @@ limitations under the License.
 
       iron-pages {
         @apply --layout-flex;
-        @apply --layout-vertical;
+        @apply --layout-horizontal;
       }
     </style>
 
@@ -178,7 +185,7 @@ limitations under the License.
 
       <!--Stage: allow user to choose a doc type-->
       <div name="choose" class="vertical">
-        <div class="editor flex container">
+        <div class="container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
@@ -188,18 +195,20 @@ limitations under the License.
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
-          <div name="typeSelection" class="typeSelection">
-            <template is="dom-repeat" items="[[subtypes]]" as="type">
-              <paper-button noink
-                            name$="[[type.type]]"
-                            class="docTypeButton vertical layout"
-                            on-tap="_selectType"
-                            data-args$="[[type]]">
-                <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
-                <div>[[_getTypeLabel(type)]]</div>
-              </paper-button>
-            </template>
-          </div>
+          <paper-dialog-scrollable>
+            <div name="typeSelection" class="typeSelection">
+              <template is="dom-repeat" items="[[subtypes]]" as="type">
+                <paper-button noink
+                              name$="[[type.type]]"
+                              class="docTypeButton vertical layout"
+                              on-tap="_selectType"
+                              data-args$="[[type]]">
+                  <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
+                  <div>[[_getTypeLabel(type)]]</div>
+                </paper-button>
+              </template>
+            </div>
+          </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
@@ -214,7 +223,7 @@ limitations under the License.
           <iron-icon src="[[_getTypeIcon(selectedDocType)]]"></iron-icon>
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
-        <div id="editor" class="editor flex container">
+        <div id="editor" class="container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}"
                                    label="[[i18n('documentCreationForm.location')]]"
@@ -224,12 +233,14 @@ limitations under the License.
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
-          <iron-form id="form">
-            <form class="form vertical layout flex">
-              <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
-              <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
-            </form>
-          </iron-form>
+          <paper-dialog-scrollable>
+            <iron-form id="form">
+              <form class="form vertical layout flex">
+                <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
+                <nuxeo-document-layout id="document-create" layout="create" document="[[document]]"></nuxeo-document-layout>
+              </form>
+            </iron-form>
+          </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">

@@ -67,7 +67,12 @@ limitations under the License.
 
       iron-pages {
         @apply --layout-flex;
-        @apply --layout-vertical;
+        @apply --layout-horizontal;
+      }
+
+      /* IE11 fix (NXP-23550) */
+      *::-ms-backdrop, iron-pages * {
+        height: 80vh;
       }
     </style>
 
