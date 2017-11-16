@@ -154,6 +154,7 @@ limitations under the License.
     .remove {
       width: 1.7em;
       height: 1.7em;
+      margin-left: 1em;
     }
 
     .list-item-property {
@@ -163,6 +164,10 @@ limitations under the License.
       font-size: .8rem;
     }
 
+    .horizontal {
+      @apply --layout-flex;
+      @apply --layout-horizontal;
+    }
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
