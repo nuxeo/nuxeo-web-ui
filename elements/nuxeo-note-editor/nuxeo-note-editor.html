@@ -33,7 +33,7 @@ limitations under the License.
 <dom-module id="nuxeo-note-editor">
   <template>
 
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
@@ -48,8 +48,14 @@ limitations under the License.
         top: 10px;
       }
 
-      paper-textarea {
+      paper-textarea,
+      nuxeo-document-preview,
+      nuxeo-html-editor {
+        display: block;
         min-height: calc(80vh - 132px);
+      }
+
+      paper-textarea {
         --paper-input-container-underline: {
           border-bottom: none 0;
         };
