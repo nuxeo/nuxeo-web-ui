@@ -16,7 +16,8 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 
 <!--
 `nuxeo-page`
@@ -31,13 +32,17 @@ limitations under the License.
         display: block;
       }
 
+      paper-header-panel {
+        height: 100vh;
+      }
+
       #content {
         padding: 16px;
       }
 
-      app-toolbar {
-        --app-toolbar-font-size: 1rem;
-        height: var(--nuxeo-drawer-header-height);
+      paper-toolbar {
+        --paper-toolbar-height: var(--nuxeo-drawer-header-height);
+        --paper-toolbar-sm-height: var(--nuxeo-drawer-header-height);
         width: 100%;
         color: var(--nuxeo-app-header);
         background: var(--nuxeo-app-header-background);
@@ -49,8 +54,7 @@ limitations under the License.
         margin-left: 32px;
       }
 
-      #header::slotted(*), /* chrome, safari */
-      #toolbar::slotted(*){ /* firefox */  
+      #header::slotted(*) {
         @apply --layout-horizontal;
         @apply --layout-center;
         width: 100%;
@@ -58,21 +62,25 @@ limitations under the License.
       }
 
       @media (max-width: 1024px) {
-        #header::slotted(*),  /* chrome, safari */
-        #toolbar::slotted(*){ /* firefox */  
+        #header::slotted(*) {
           overflow-y: scroll;
         }
       }
+
+      @media (max-width: 1024px) {
+        #header::slotted(*) {
+          padding: 1.1rem .5rem;
+        }
+      }
     </style>
-    
-    <app-header-layout fullbleed>
-      <app-header fixed slot="header">
-        <app-toolbar id="toolbar">
-          <slot id="header" name="header"></slot>
-        </app-toolbar>
-      </app-header>
-      <div id="content"><slot></slot></div>      
-    </app-header-layout>
+
+    <paper-header-panel mode="seamed">
+      <paper-toolbar slot="header">
+        <slot id="header" slot="top" name="header"></slot>
+      </paper-toolbar>
+      <div id="content"><slot></slot></div>
+    </paper-header-panel>
+
   </template>
 </dom-module>
 
