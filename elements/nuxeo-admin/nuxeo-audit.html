@@ -16,7 +16,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-audit-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
@@ -24,6 +23,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-suggestion.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
+
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
 
 <!--
@@ -35,7 +36,6 @@ limitations under the License.
   <template>
     <style>
       nuxeo-data-table {
-        @apply --paper-card;
         height: calc(100vh - 25em);
         min-height: 15em;
       }
@@ -66,14 +66,13 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"
-                               current-page="{{entries}}" auto></nuxeo-audit-page-provider>
+    <nuxeo-audit-page-provider id="provider" page-size="40" provider-name="EVENTS_VIEW"></nuxeo-audit-page-provider>
     <nuxeo-page>
       <div slot="header">
         <span class="flex">[[i18n('audit.heading')]]</span>
       </div>
       <div>
-        <paper-card class="container">
+        <nuxeo-card class="container">
           <nuxeo-user-suggestion value="{{principalName}}" label="[[i18n('audit.username')]]"
                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
 
@@ -104,27 +103,29 @@ limitations under the License.
                                         min-chars="0">
             </nuxeo-directory-suggestion>
           </div>
-        </paper-card>
+        </nuxeo-card>
 
-        <nuxeo-data-table nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
-          <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
-            <template>[[_formati18n('eventType.', item.eventId)]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
-            <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
-            <template>
-              <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
-            <template>[[_formati18n('eventCategory.', item.category)]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
-            <template>[[item.comment]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
+        <nuxeo-card>
+          <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
+            <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
+              <template>[[_formati18n('eventType.', item.eventId)]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
+              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
+              <template>
+                <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
+              </template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
+              <template>[[_formati18n('eventCategory.', item.category)]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
+              <template>[[item.comment]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+      </nuxeo-card>
       </div>
     </nuxeo-page>
   </template>
@@ -188,6 +189,7 @@ limitations under the License.
       _refresh: function() {
         if (this.visible) {
           this.$.provider.params = this._buildParams();
+          this.$.table.fetch();
         }
       },
     });
