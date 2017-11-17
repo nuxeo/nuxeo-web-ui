@@ -14,7 +14,7 @@
     "bower_components/webcomponentsjs/*",
     "bower_components/page/page.js",
     "bower_components/moment/min/moment-with-locales.min.js",
-    "bower_components/nuxeo-ui-elements/viewers/pdfjs/*",
+    "bower_components/nuxeo-ui-elements/viewers/pdfjs/**/*",
     "bower_components/nuxeo-ui-elements/widgets/alloy/**/*",
     "bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html",
     "bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html"
