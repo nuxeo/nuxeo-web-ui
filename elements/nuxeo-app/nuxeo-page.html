@@ -32,54 +32,55 @@ limitations under the License.
         display: block;
       }
 
-      paper-header-panel {
+      .page {
+        @apply --vertical-layout;
         height: 100vh;
+        overflow-y: none;
       }
 
       #content {
+        @apply --layout-flex;
         padding: 16px;
+        overflow-y: auto;
       }
 
-      paper-toolbar {
-        --paper-toolbar-height: var(--nuxeo-drawer-header-height);
-        --paper-toolbar-sm-height: var(--nuxeo-drawer-header-height);
+      .toolbar {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        height: var(--nuxeo-drawer-header-height);
         width: 100%;
         color: var(--nuxeo-app-header);
         background: var(--nuxeo-app-header-background);
         box-shadow: var(--nuxeo-app-header-box-shadow);
         z-index: 3;
+        top: 0;
+        position: sticky;
       }
 
-      #header {
-        margin-left: 32px;
-      }
-
-      #header::slotted(*) {
+      #header::slotted(*), /* chrome, safari */
+      #toolbar::slotted(*){ /* firefox */  
         @apply --layout-horizontal;
         @apply --layout-center;
         width: 100%;
         padding-right: 64px;
+        padding-left: 16px;
       }
 
       @media (max-width: 1024px) {
-        #header::slotted(*) {
+        #header::slotted(*), /* chrome, safari */
+        #toolbar::slotted(*){ /* firefox */  
           overflow-y: scroll;
         }
       }
 
-      @media (max-width: 1024px) {
-        #header::slotted(*) {
-          padding: 1.1rem .5rem;
-        }
-      }
     </style>
 
-    <paper-header-panel mode="seamed">
-      <paper-toolbar slot="header">
-        <slot id="header" slot="top" name="header"></slot>
-      </paper-toolbar>
+    <div class="page">
+      <div class="toolbar" id="toolbar"> 
+          <slot id="header" slot="header" name="header"></slot>
+      </div>
       <div id="content"><slot></slot></div>
-    </paper-header-panel>
+    </div>
 
   </template>
 </dom-module>
