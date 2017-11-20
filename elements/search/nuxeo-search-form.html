@@ -729,7 +729,7 @@ limitations under the License.
             'entity-type': 'savedSearch',
             'pageProviderName': this.provider,
             'params': this.params,
-            'title': this.$$('#savedSearchTitle').value
+            'title': this.$.savedSearchTitle.value
           };
           _el.post().then(function(response) {
             this.$.saveDialog.close();

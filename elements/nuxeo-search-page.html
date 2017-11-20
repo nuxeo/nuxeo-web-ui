@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 
 <!--
@@ -26,6 +27,10 @@ limitations under the License.
   <template>
 
     <style>
+      .title {
+        @apply --layout-flex;
+      }
+
       nuxeo-saved-search-actions {
         @apply --layout-end-justified;
       }
@@ -33,7 +38,7 @@ limitations under the License.
 
     <nuxeo-page>
       <div class="header" slot="header">
-        <span class="flex">[[i18n(heading)]]</span>
+        <span class="title">[[i18n(heading)]]</span>
         <template is="dom-if" if="[[showSavedSearchActions]]">
           <nuxeo-saved-search-actions id="actions" class="actions" search-form="[[searchForm]]"></nuxeo-saved-search-actions>
         </template>
