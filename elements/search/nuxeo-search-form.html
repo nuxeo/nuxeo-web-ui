@@ -82,7 +82,7 @@ limitations under the License.
       }
 
       .filters {
-        padding: 1em 0;
+        padding: 8px 16px;
         height: calc(100vh - 61px - var(--nuxeo-app-top));
         overflow: auto;
       }
@@ -167,12 +167,6 @@ limitations under the License.
         white-space: nowrap;
       }
 
-      paper-dialog {
-        --paper-dialog: {
-          min-width: 360px;
-        };
-      }
-
       :host([loading]) .loadable {
         opacity: 0.25;
       }
@@ -221,14 +215,6 @@ limitations under the License.
 
       #checkbox.paper-checkbox {
         border: 1px solid;
-      }
-
-      *[role=widget] {
-        @apply --layout-vertical;
-        box-sizing: border-box;
-        margin-bottom: 1rem;
-        padding: 0 1rem;
-        width: 100%;
       }
     </style>
 

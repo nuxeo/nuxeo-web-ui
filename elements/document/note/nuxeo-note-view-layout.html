@@ -23,6 +23,11 @@ limitations under the License.
 <dom-module id="nuxeo-note-view-layout">
 
   <template>
+    <style>
+      nuxeo-note-editor {
+        @apply --paper-card;
+      }
+    </style>
     <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
   </template>
 

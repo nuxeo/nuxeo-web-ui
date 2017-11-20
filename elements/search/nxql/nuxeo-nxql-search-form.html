@@ -22,6 +22,15 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-nxql-search-form">
   <template>
+    <style>
+      *[role=widget] {
+        margin-bottom: 16px;
+      }
+
+      label {
+        @apply --nuxeo-label;
+      }
+    </style>
 
     <paper-textarea role="widget"
                  id="queryInput"

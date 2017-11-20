@@ -122,12 +122,6 @@ limitations under the License.
         this.element.addEventListener('params-changed', function(e) {
           this.notifyPath(e.detail.path, e.detail.value);
         }.bind(this));
-      },
-
-      // stamp templates in light DOM
-      _attachDom: function(dom) {
-        this.appendChild(dom);
-        return this;
       }
 
     });
