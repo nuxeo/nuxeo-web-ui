@@ -69,8 +69,12 @@ limitations under the License.
         }
       },
 
-      _isAvailable: function() {
-        return this.document;
+      _isAvailable: function(doc) {
+        return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
+      },
+
+      _isMutable: function(doc) {
+        return doc && !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && doc.state !== 'deleted';
       },
 
       _openDialog: function() {
