@@ -47,7 +47,7 @@ limitations under the License.
 <dom-module id="nuxeo-document-import">
 
   <template>
-    <style include="iron-flex iron-flex-alignment nuxeo-styles">
+    <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
       :host {
         display: block;
         @apply --layout-flex;
@@ -294,7 +294,6 @@ limitations under the License.
         /*Firefox fix (NXP-22349)*/
         min-height: 100%;
       }
-
       div[name="upload"] {
         outline: none;
       }
@@ -449,8 +448,7 @@ limitations under the License.
 
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
-        <div class="drop-scrollable">
-          <div class="horizontal layout flex">
+          <div class="horizontal layout flex wrap">
             <div id="blobEditor" class="vertical layout flex-3">
               <div class="suggester">
                 <nuxeo-path-suggestion id="pathSuggesterCustomize"
@@ -527,7 +525,6 @@ limitations under the License.
               </div>
             </div>
           </div>
-        </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss
