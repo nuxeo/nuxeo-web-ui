@@ -22,6 +22,15 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-vocabulary-edit-layout">
   <template>
+    <style>
+      *[role=widget] {
+        margin-bottom: 16px;
+      }
+
+      label {
+        @apply --nuxeo-label;
+      }
+    </style>
 
     <nuxeo-input role="widget"
                  label="[[i18n('vocabularyManagement.edit.id')]]"

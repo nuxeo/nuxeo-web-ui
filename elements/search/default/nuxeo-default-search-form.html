@@ -22,6 +22,15 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-default-search-form">
   <template>
+    <style>
+      *[role=widget] {
+        margin-bottom: 16px;
+      }
+
+      label {
+        @apply --nuxeo-label;
+      }
+    </style>
 
     <nuxeo-input role="widget"
                  id="searchInput"

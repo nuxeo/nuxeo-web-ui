@@ -30,35 +30,6 @@ limitations under the License.
       :host {
         display: block;
       }
-
-      nuxeo-document-layout div.multiline {
-        white-space: pre-line;
-      }
-
-      nuxeo-document-layout div {
-        word-wrap: break-word;  /* legacy property */
-        overflow-wrap: break-word;  /* css3 standard property */
-        word-break: break-word;
-
-        /* Hyphenize words */
-        -webkit-hyphens: auto;
-        -moz-hyphens: auto;
-        -ms-hyphens: auto;
-        -o-hyphens: auto;
-        hyphens: auto;
-      }
-
-      nuxeo-document-layout label {
-        margin: 0 !important;
-        width: 90px;
-        min-width: 90px;
-      }
-
-      nuxeo-document-layout div[role=widget] {
-        @apply(--layout-horizontal);
-        box-sizing: border-box;
-        margin-bottom: 1rem;
-      }
     </style>
 
     <nuxeo-document-layout document="[[document]]" layout="metadata"></nuxeo-document-layout>

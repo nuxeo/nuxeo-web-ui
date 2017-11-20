@@ -23,6 +23,13 @@ limitations under the License.
 <dom-module id="nuxeo-video-view-layout">
 
   <template>
+    <style>
+      nuxeo-document-viewer,
+      nuxeo-video-info,
+      nuxeo-video-conversions {
+        @apply --paper-card;
+      }
+    </style>
     <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
     <nuxeo-video-info role="widget" document="[[document]]"></nuxeo-video-info>
     <nuxeo-video-conversions role="widget" document="[[document]]" label="[[i18n('videoViewLayout.conversions')]]"></nuxeo-video-conversions>
