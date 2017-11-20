@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
@@ -34,7 +35,7 @@ limitations under the License.
 <dom-module id="nuxeo-saved-search-actions">
   <template>
 
-    <style>
+    <style include="iron-flex">
       paper-item {
         @apply --layout-horizontal;
         @apply --layout-center;
@@ -46,16 +47,15 @@ limitations under the License.
     </style>
 
     <nuxeo-document auto doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
-
     <div class="horizontal layout center">
-      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, searchForm.dirty)]]">
+      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]">
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, searchForm.dirty)]]">
+      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
       <paper-menu-button no-animations horizontal-align="right" vertical-offset="40"
-                         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, searchForm.dirty)]]">
+                         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
         <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-listbox class="dropdown-content layout vertical">
           <paper-item on-tap="_renameSearch">
@@ -79,12 +79,19 @@ limitations under the License.
       properties: {
         searchId: String,
         searchDoc: Object,
-        searchForm: Object
+        _searchForm: Object,
+        _dirty: Boolean
       },
 
       set searchForm(form) {
-        this.searchForm = form;
-        this.searchId = this._searchForm.selectedSearch.id;
+        this._searchForm = form;
+        this._dirty = form && form.dirty;
+        if (form) {
+          form.addEventListener('dirty-changed', function() { this._dirty = this._searchForm.dirty; }.bind(this));
+          if (form.selectedSearch) {
+            this.searchId = this._searchForm.selectedSearch.id;
+          }
+        }
         this.isSavedSearch = !!this.searchId; //this._searchForm.isSavedSearch;
       },
 
@@ -113,11 +120,11 @@ limitations under the License.
       },
 
       _showSaveAs: function() {
-        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this.searchForm.dirty);
+        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty);
       },
 
       _showSave: function() {
-        return this.isSavedSearch && this.searchForm.dirty && this._hasPermissions();
+        return this.isSavedSearch && this._dirty && this._hasPermissions();
       },
 
       _showOtherSearchActions: function() {
