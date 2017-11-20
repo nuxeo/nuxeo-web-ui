@@ -42,11 +42,13 @@ limitations under the License.
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
-    <paper-icon-button icon="nuxeo:delete" id="deleteAllButtons" disabled="[[!docsHavePermissions]]">
-    </paper-icon-button>
-    <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip" position="[[tooltipPosition]]">
-      [[i18n('deleteDocumentsButton.tooltip')]]
-    </paper-tooltip>
+    <template is="dom-if" if="[[docsHavePermissions]]">
+      <paper-icon-button icon="nuxeo:delete" id="deleteAllButtons">
+      </paper-icon-button>
+      <paper-tooltip for="deleteAllButtons" id="deleteAllButtonsTooltip" position="[[tooltipPosition]]">
+        [[i18n('deleteDocumentsButton.tooltip')]]
+      </paper-tooltip>
+    </template>
 
   </template>
 
