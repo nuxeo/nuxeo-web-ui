@@ -18,7 +18,7 @@
     "iron-localstorage": "PolymerElements/iron-localstorage#^2.0.0",
     "iron-location": "PolymerElements/iron-location#^2.0.0",
     "iron-media-query": "PolymerElements/iron-media-query#^2.0.0",
-    "iron-pages": "nuxeo/iron-pages#2.0.0-NX",
+    "iron-pages": "PolymerElements/iron-pages#^2.0.0",
     "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^2.0.0",
     "paper-header-panel": "PolymerElements/paper-header-panel#^2.0.0",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
