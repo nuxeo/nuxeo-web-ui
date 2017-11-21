@@ -713,7 +713,7 @@ limitations under the License.
             var i = this.localFiles.findIndex(function(f) {
               return f.index === this.get(changeRecord.path.replace('.index', '')).index;
             }.bind(this));
-            this.set(['localFiles', i, 'complete'].join('.'), true);
+            this.notifyPath(['localFiles', i, 'complete'].join('.'), true);
           }
         }
       },
