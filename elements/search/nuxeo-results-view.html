@@ -29,15 +29,6 @@ limitations under the License.
 <dom-module id="nuxeo-results-view">
   <template>
     <style include="nuxeo-styles">
-
-      nuxeo-data-table,
-      nuxeo-data-grid,
-      nuxeo-data-list {
-        display: block;
-        position: relative;
-        min-height: calc(100vh - 130px - var(--nuxeo-app-top));
-      }
-
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -47,14 +38,6 @@ limitations under the License.
 
       .capitalize {
         text-transform: capitalize;
-      }
-
-      *[role=widget] {
-        @apply --layout-vertical;
-        box-sizing: border-box;
-        margin-bottom: 1rem;
-        padding: 0 1rem;
-        width: 100%;
       }
 
       .form {
