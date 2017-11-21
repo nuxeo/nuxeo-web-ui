@@ -33,6 +33,12 @@ limitations under the License.
       :host {
         display: block;
         position: relative;
+        outline: none;
+      }
+
+      :host(.selected) paper-icon-button {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
       }
 
       paper-badge {
@@ -44,7 +50,15 @@ limitations under the License.
       }
 
       paper-icon-button {
-        @apply --nuxeo-menu-icon-button;
+        color: var(--nuxeo-sidebar-menu);
+        height: 48px;
+        padding: 12px 13px;
+        width: var(--nuxeo-sidebar-width);
+      }
+
+      paper-icon-button:hover {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
       }
    </style>
 
