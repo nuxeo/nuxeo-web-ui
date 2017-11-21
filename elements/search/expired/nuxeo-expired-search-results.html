@@ -23,6 +23,16 @@ limitations under the License.
 <dom-module id="nuxeo-expired-search-results">
 
   <template>
+    <style>
+      nuxeo-data-table,
+      nuxeo-data-grid,
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 130px - var(--nuxeo-app-top));
+      }
+    </style>
+
     <nuxeo-results name="expired" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results"
