@@ -44,6 +44,9 @@ limitations under the License.
       iron-icon {
         margin-right: 16px;
       }
+      paper-menu-button[hidden] {
+        display: none !important;
+      }
     </style>
 
     <nuxeo-document auto doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
@@ -56,8 +59,8 @@ limitations under the License.
       </paper-button>
       <paper-menu-button no-animations horizontal-align="right" vertical-offset="40"
                          hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
-        <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
-        <paper-listbox class="dropdown-content layout vertical">
+        <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+        <paper-listbox slot="dropdown-content">
           <paper-item on-tap="_renameSearch">
             <iron-icon icon="nuxeo:edit"></iron-icon>[[i18n('app.renameSearch')]]
           </paper-item>
@@ -87,12 +90,19 @@ limitations under the License.
         this._searchForm = form;
         this._dirty = form && form.dirty;
         if (form) {
-          form.addEventListener('dirty-changed', function() { this._dirty = this._searchForm.dirty; }.bind(this));
+          form.addEventListener('dirty-changed', function() {
+            this._dirty = this._searchForm.dirty;
+          }.bind(this));
+          form.addEventListener('selected-search-changed', function() {
+            this.searchId = this._searchForm.selectedSearch.id;
+            this.isSavedSearch = !!this.searchId;
+          }.bind(this));
+
           if (form.selectedSearch) {
             this.searchId = this._searchForm.selectedSearch.id;
           }
         }
-        this.isSavedSearch = !!this.searchId; //this._searchForm.isSavedSearch;
+        this.isSavedSearch = !!this.searchId;
       },
 
       get searchForm() {
