@@ -30,21 +30,27 @@ limitations under the License.
   <template>
     <style>
       .row {
-        padding: 4px;
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
+
+      .value {
+        margin: 0 4px 7px;
       }
 
       .datetime {
         opacity: .5;
-        font-size: 12px;
+        margin-left: 3px;
       }
-
     </style>
 
     <template is="dom-repeat" items="[[activities]]">
       <div class="row">
         <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
-        <span>[[_activity(item)]]</span>
-        <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
+        <div class="value">
+          <span>[[_activity(item)]]</span>
+          <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
+        </div>
       </div>
     </template>
   </template>
