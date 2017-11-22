@@ -57,7 +57,7 @@ limitations under the License.
       }
 
       #header::slotted(*), /* chrome, safari */
-      #toolbar::slotted(*){ /* firefox */  
+      #toolbar::slotted(*){ /* firefox */
         @apply --layout-horizontal;
         @apply --layout-center;
         width: 100%;
@@ -67,16 +67,16 @@ limitations under the License.
 
       @media (max-width: 1024px) {
         #header::slotted(*), /* chrome, safari */
-        #toolbar::slotted(*){ /* firefox */  
+        #toolbar::slotted(*){ /* firefox */
           overflow-y: scroll;
-          padding: 1.1rem .5rem;
+          padding-left: 48px;
         }
       }
-      
+
     </style>
 
     <div class="page">
-      <div class="toolbar" id="toolbar"> 
+      <div class="toolbar" id="toolbar">
           <slot id="header" slot="header" name="header"></slot>
       </div>
       <div id="content"><slot></slot></div>
