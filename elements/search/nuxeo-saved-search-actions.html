@@ -82,32 +82,31 @@ limitations under the License.
       properties: {
         searchId: String,
         searchDoc: Object,
-        _searchForm: Object,
+        searchForm: {
+          type: Object,
+          observer: '_searchFormChanged'
+        },
         _dirty: Boolean
       },
 
-      set searchForm(form) {
-        this._searchForm = form;
-        this._dirty = form && form.dirty;
-        if (form) {
-          form.addEventListener('dirty-changed', function() {
-            this._dirty = this._searchForm.dirty;
+      _searchFormChanged: function() {
+        this._dirty = this.searchForm && this.searchForm.dirty;
+        if (this.searchForm) {
+          this.searchForm.addEventListener('dirty-changed', function() {
+            this._dirty = this.searchForm.dirty;
           }.bind(this));
-          form.addEventListener('selected-search-changed', function() {
-            this.searchId = this._searchForm.selectedSearch.id;
+          this.searchForm.addEventListener('selected-search-changed', function() {
+            this.searchId = this.searchForm.selectedSearch.id;
             this.isSavedSearch = !!this.searchId;
           }.bind(this));
 
-          if (form.selectedSearch) {
-            this.searchId = this._searchForm.selectedSearch.id;
+          if (this.searchForm.selectedSearch) {
+            this.searchId = this.searchForm.selectedSearch.id;
           }
         }
         this.isSavedSearch = !!this.searchId;
       },
 
-      get searchForm() {
-        return this._searchForm;
-      },
 
       _saveSearch: function() {
         this.searchForm.save();
