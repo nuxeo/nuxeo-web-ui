@@ -34,33 +34,38 @@ global.fieldRegistry.register('nuxeo-user-suggestion',
                                 driver.waitForVisible(`#select2-drop li.select2-result`);
                                 driver.element(`#select2-drop li.select2-result`).click();
                               });
-global.fieldRegistry.register('nuxeo-directory-suggestion',
-                              (element) => {
-                                if (element.getAttribute('multiple')) {
-                                  return element.elements('.selectivity-multiple-selected-item')
-                                                     .value.map((v) => v.getText()).join(',');
-                                } else {
-                                  return element.element('.selectivity-single-selected-item').getValue();
-                                }
-                              },
-                              (element, value) => {
-                                const values = element.getAttribute('multiple') ? value.split(',') : [value];
-                                element.scrollIntoView(`#input`);
-                                for (let i = 0; i < values.length; i++) {
-                                  element.waitForVisible(`#input`);
-                                  element.element('#input').click();
-                                  if (element.getAttribute('multiple')) {
-                                    element.waitForVisible(`.selectivity-multiple-input`);
-                                    element.element(`.selectivity-multiple-input`).setValue(values[i]);
-                                  } else {
-                                    element.waitForVisible(`.selectivity-search-input`);
-                                    element.element(`.selectivity-search-input`).setValue(values[i]);
-                                  }
+const suggestionGet = (element) => {
+  if (element.getAttribute('multiple')) {
+    return element.elements('.selectivity-multiple-selected-item')
+                       .value.map((v) => v.getText()).join(',');
+  } else {
+    return element.element('.selectivity-single-selected-item').getText();
+  }
+};
+const suggestionSet = (element, value) => {
+  const values = element.getAttribute('multiple') ? value.split(',') : [value];
+  element.scrollIntoView(`#input`);
+  for (let i = 0; i < values.length; i++) {
+    element.waitForVisible(`#input`);
+    element.element('#input').click();
+    if (element.getAttribute('multiple')) {
+      element.waitForVisible(`.selectivity-multiple-input`);
+      element.element(`.selectivity-multiple-input`).setValue(values[i]);
+    } else {
+      element.waitForVisible(`.selectivity-search-input`);
+      element.element(`.selectivity-search-input`).setValue(values[i]);
+    }
 
-                                  element.waitForVisible(`.selectivity-result-item.highlight`);
-                                  element.click(`.selectivity-result-item.highlight`);
-                                }
-                              });
+    element.waitForVisible(`.selectivity-result-item.highlight`);
+    element.click(`.selectivity-result-item.highlight`);
+  }
+};
+global.fieldRegistry.register('nuxeo-directory-suggestion',
+                              suggestionGet,
+                              suggestionSet);
+global.fieldRegistry.register('nuxeo-document-suggestion',
+                              suggestionGet,
+                              suggestionSet);
 global.fieldRegistry.register('nuxeo-dropdown-aggregation',
                               (element) => element.element('nuxeo-select2 input').getValue(),
                               (element, value) => {
