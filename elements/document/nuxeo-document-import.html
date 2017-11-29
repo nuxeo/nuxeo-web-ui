@@ -928,7 +928,7 @@ limitations under the License.
         var layout = this.$$('#document-import');
 
         // run our custom validation function first to allow setting custom native validity
-        return layout.validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
+        return (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
       },
 
       _tapLocalDoc: function(e) {

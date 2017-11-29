@@ -27,7 +27,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
-<link rel="import" href="nuxeo-cloud-provider-edit.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-input.html">
 
 <!--
 `nuxeo-cloud-providers`
@@ -93,8 +93,54 @@ limitations under the License.
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-cloud-provider-edit id="edit" entry="{{_selectedEntry}}" isNew="[[_isNew]]">
-            </nuxeo-cloud-provider-edit>
+            <nuxeo-input required
+                         label="[[i18n('cloudProviderEdit.serviceName')]]"
+                         name="serviceName"
+                         value="{{_selectedEntry.serviceName}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.description')]]"
+                         name="description"
+                         value="{{_selectedEntry.description}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.clientId')]]"
+                         name="clientId"
+                         value="{{_selectedEntry.clientId}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.clientSecret')]]"
+                         name="clientSecret"
+                         value="{{_selectedEntry.clientSecret}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.authorizationServerURL')]]"
+                         name="authorizationServerURL"
+                         pattern="(http[s]?:\/\/).*"
+                         value="{{_selectedEntry.authorizationServerURL}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.tokenServerURL')]]"
+                         name="tokenServerURL"
+                         pattern="(http[s]?:\/\/).*"
+                         value="{{_selectedEntry.tokenServerURL}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.userAuthorizationURL')]]"
+                         name="userAuthorizationURL"
+                         pattern="(http[s]?:\/\/).*"
+                         value="{{_selectedEntry.userAuthorizationURL}}">
+            </nuxeo-input>
+
+            <nuxeo-input label="[[i18n('cloudProviderEdit.scopes')]]"
+                         name="scopes"
+                         value="{{_selectedEntry.scopes}}">
+            </nuxeo-input>
+
+            <paper-checkbox noink id="isEnabled"
+                           checked="{{_selectedEntry.isEnabled}}">
+              [[i18n('cloudProviderEdit.isEnabled')]]
+            </paper-checkbox>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
