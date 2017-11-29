@@ -21,6 +21,7 @@
     <profile>
       <id>ftest</id>
       <modules>
+        <module>marketplace-itests</module>
         <module>ftest/web-ui/webdriver</module>
       </modules>
     </profile>
@@ -31,6 +32,12 @@
       <dependency>
         <groupId>org.nuxeo.web.ui</groupId>
         <artifactId>nuxeo-web-ui-marketplace</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.web.ui</groupId>
+        <artifactId>nuxeo-web-ui-marketplace-itests</artifactId>
         <version>${project.version}</version>
         <type>zip</type>
       </dependency>
