@@ -27,7 +27,9 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
-<link rel="import" href="nuxeo-cloud-token-edit.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date-picker.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-input.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-suggestion.html">
 
 <!--
 `nuxeo-cloud-tokens`
@@ -96,7 +98,37 @@ limitations under the License.
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-cloud-token-edit entry="{{_selectedEntry}}"></nuxeo-cloud-token-edit>
+            <nuxeo-input disabled
+                         label="[[i18n('cloudTokenEdit.serviceName')]]"
+                         name="serviceName"
+                         value="{{_selectedEntry.serviceName}}">
+            </nuxeo-input>
+
+            <nuxeo-input disabled
+                         label="[[i18n('cloudTokenEdit.nuxeoLogin')]]"
+                         name="description"
+                         value="{{_selectedEntry.nuxeoLogin}}">
+            </nuxeo-input>
+
+            <nuxeo-input required
+                         label="[[i18n('cloudTokenEdit.serviceLogin')]]"
+                         name="clientId"
+                         value="{{_selectedEntry.serviceLogin}}">
+            </nuxeo-input>
+
+            <nuxeo-date-picker name="creationDate" required
+                               label="[[i18n('cloudTokenEdit.creationDate')]]"
+                               value="{{_selectedEntry.creationDate}}">
+            </nuxeo-date-picker>
+
+            <paper-checkbox noink checked="{{_selectedEntry.isShared}}">
+              [[i18n('cloudTokenEdit.isShared')]]
+            </paper-checkbox>
+
+            <nuxeo-user-suggestion label="[[i18n('cloudTokenEdit.shareWith')]]"
+                                   value="{{_selectedEntry.sharedWith}}"
+                                   prefixed multiple>
+            </nuxeo-user-suggestion>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
