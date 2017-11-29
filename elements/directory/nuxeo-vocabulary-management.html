@@ -318,7 +318,9 @@ limitations under the License.
       },
 
       _save: function() {
-
+        if (!this.$.layout.validate()) {
+          return;
+        }
         this.$.directory.data = this._selectedEntry;
         if (this._new) {
           this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
