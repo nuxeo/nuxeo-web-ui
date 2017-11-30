@@ -3,16 +3,16 @@ Feature: Document Suggestion
   I can edit single and multiple Document Suggestion Widgets
 
   Background:
-    Given I login as "Administrator"
+    Given I have the following documents
+      | doctype    | title | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | toto  | booklet | sciences/astronomy      | europe/Belgium       | BJones  | /default-domain                 |                  |        |            |
+      | Workspace  | pouet | booklet | sciences/astronomy      | europe/Germany       | SJones  | /default-domain                 |                  |        |            |
+    And  I login as "Administrator"
     And I click the "administration" button
     And I have a Workspace document
     And I browse to the document
-    And I have the following documents
-      | doctype    | title     |
-      | File       | toto      |
-      | File       | pouet     |
 
-  Scenario Outline: Create and Edit Document with document suggestion widget
+  Scenario: Create and Edit Document with document suggestion widget
     When I click the Create Document button
     And I select DocSuggestion from the Document Type menu
     And I create a document with the following properties:
@@ -26,3 +26,4 @@ Feature: Document Suggestion
       | title                 | mySuggestionDoc   |
       | multipleDocSuggestion | toto,pouet        |
       | singleDocSuggestion   | pouet             |
+    And I can navigate to the document selected in the "singleDocSuggestion" single document suggestion widget
