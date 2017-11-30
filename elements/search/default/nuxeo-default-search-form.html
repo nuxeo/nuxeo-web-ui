@@ -150,9 +150,9 @@ limitations under the License.
 
       _addFullTextSearch: function() {
         if (this.searchTerm && this.searchTerm.length >= this.minChars) {
-            this.set('params.ecm_fulltext', this.searchTerm + '*');
-            this.set('params.highlight',
-              'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+          this.set('params.ecm_fulltext', this.searchTerm + '*');
+          this.set('params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
         } else if (this.params.ecm_fulltext) {
           this.set('params.ecm_fulltext', '');
           delete this.params.ecm_fulltext;
