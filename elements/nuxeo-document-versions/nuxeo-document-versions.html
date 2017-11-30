@@ -108,7 +108,8 @@ limitations under the License.
       schemas="dublincore,common,uid">
     </nuxeo-page-provider>
 
-    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]">
+    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]"
+                                   label="[[_labelCreate(document)]]">
     </nuxeo-document-create-version>
 
     <div hidden$="[[!hasVersions(document)]]">
@@ -130,7 +131,7 @@ limitations under the License.
             </div>
           </template>
         </div>
-        <nuxeo-document-create-version slot="actions" hidden$="[[_isCreateDisabled(document)]]" document="[[document]]"
+        <nuxeo-document-create-version slot="actions" document="[[document]]" hidden$="[[!_isCheckedOut(document)]]"
                                        on-dialog-closed="_hideList">
         </nuxeo-document-create-version>
       </nuxeo-document-versions-list>
@@ -187,8 +188,8 @@ limitations under the License.
         }
       },
 
-      _isCreateDisabled: function(doc) {
-        return !doc || !doc.isCheckedOut;
+      _isCheckedOut: function(doc) {
+        return doc && doc.isCheckedOut;
       },
 
       _query: function(id) {
@@ -232,13 +233,18 @@ limitations under the License.
         this.navigateTo('document', e.model.item.uid);
       },
 
+      _labelCreate: function(doc) {
+        var permission = !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
+        return this.i18n(permission ? 'versions.create' : 'versions.unversioned');
+      },
+
       _labelLatest: function(doc) {
         if (doc) {
           var number = this.i18n('versions.version',
               doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
             ((doc.isCheckedOut) ? '+ ' : ' ');
           var label = (doc.isCheckedOut) ?
-            this.i18n('versions.unversioned') :
+            this.i18n('versions.unversionedChanges') :
             this.i18n('versions.latest');
           return number + label;
         }

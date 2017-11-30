@@ -47,11 +47,18 @@ limitations under the License.
       }
 
       nuxeo-tag {
+        cursor: pointer;
         @apply --nx-button-primary;
       }
 
       nuxeo-tag:hover {
         @apply --nx-button-primary-hover;
+      }
+
+      nuxeo-tag[disabled] {
+        @apply --nuxeo-tag;
+        cursor: auto;
+        font-weight: normal;
       }
 
       .buttons {
@@ -81,11 +88,6 @@ limitations under the License.
         margin: 0;
         padding: 8px 16px;
       }
-
-      .create {
-        cursor: pointer;
-      }
-
     </style>
 
     <nuxeo-document id="doc" headers="[[headers]]" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}">
@@ -94,7 +96,7 @@ limitations under the License.
     <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]"
                      response="{{version}}"></nuxeo-operation>
 
-    <nuxeo-tag class="create" on-tap="_toggleDialog" uppercase>[[i18n('versions.create')]]</nuxeo-tag>
+    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase>[[label]]</nuxeo-tag>
 
     <nuxeo-dialog id="dialog" class="dialog" with-backdrop
                   on-iron-overlay-opened="_dialogOpened"
@@ -129,6 +131,7 @@ limitations under the License.
       is: 'nuxeo-document-create-version',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
+        label: String,
         document: Object,
         version: Object,
         headers: {
@@ -140,6 +143,12 @@ limitations under the License.
           value: 'major'
         },
         response: Object
+      },
+
+      ready: function() {
+        if (!this.label) {
+          this.label = this.i18n('versions.create');
+        }
       },
 
       _dialogOpened: function(e) {
@@ -157,11 +166,7 @@ limitations under the License.
       },
 
       _isAvailable: function(doc) {
-        return this.hasFacet(doc, 'Versionable') && !doc.isVersion;
-      },
-
-      _isDisabled: function(doc) {
-        return !doc || !doc.isCheckedOut;
+        return !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
       },
 
       _nextMinor: function(doc) {
@@ -173,14 +178,18 @@ limitations under the License.
       },
 
       _toggleDialog: function() {
-        this.$.dialog.open();
+        if (this._isAvailable(this.document)) {
+          this.$.dialog.open();
+        }
       },
 
       _create: function() {
-        this.$.opCreateVersion.params = {increment: this.versionType, saveDocument: true};
-        this.$.opCreateVersion.execute().then(function() {
-          this.fire('document-updated');
-        }.bind(this));
+        if (this._isAvailable(this.document)) {
+          this.$.opCreateVersion.params = {increment: this.versionType, saveDocument: true};
+          this.$.opCreateVersion.execute().then(function () {
+            this.fire('document-updated');
+          }.bind(this));
+        }
       }
 
     });
