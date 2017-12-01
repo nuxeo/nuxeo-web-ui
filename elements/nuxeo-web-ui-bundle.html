@@ -260,7 +260,11 @@
 
 <nuxeo-slot-content name="documentPermissionsItem" slot="DOCUMENT_VIEWS_ITEMS" order="20">
   <template>
-    <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
+    <nuxeo-filter document="[[document]]" expression="!document.isVersion">
+      <template>
+        <nuxeo-page-item name="permissions" label="browser.permissions"></nuxeo-page-item>
+      </template>
+    </nuxeo-filer>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="documentPermissionsPage" slot="DOCUMENT_VIEWS_PAGES" order="20">
