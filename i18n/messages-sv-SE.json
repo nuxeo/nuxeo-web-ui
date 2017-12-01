@@ -784,6 +784,7 @@
   "versions.modified": "Ändrat {0} av {1}",
   "versions.restore": "Återställ",
   "versions.unversioned": "Versionslösa förändringar",
+  "versions.unversionedChanges": "Unversioned Changes",
   "versions.version": "{0}.{1}",
   "videoViewLayout.conversions": "Konverteringar",
   "videoViewLayout.delete.confirm.message": "Vill du verkligen ta bort denna video?",

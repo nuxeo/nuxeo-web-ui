@@ -784,6 +784,7 @@
   "versions.modified": "{1}により更新された{0}",
   "versions.restore": "復元",
   "versions.unversioned": "バージョン管理外の変更",
+  "versions.unversionedChanges": "Unversioned Changes",
   "versions.version": "{0}.{1}",
   "videoViewLayout.conversions": "変換",
   "videoViewLayout.delete.confirm.message": "このビデオを削除しますか？",

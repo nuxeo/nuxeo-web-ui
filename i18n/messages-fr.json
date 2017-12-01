@@ -784,6 +784,7 @@
   "versions.modified": "Modifié {0} par {1}",
   "versions.restore": "Restaurer",
   "versions.unversioned": "Modifications depuis la dernière version",
+  "versions.unversionedChanges": "Unversioned Changes",
   "versions.version": "{0}.{1}",
   "videoViewLayout.conversions": "Conversions",
   "videoViewLayout.delete.confirm.message": "Voulez-vous vraiment supprimer cette vidéo ?",

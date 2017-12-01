@@ -784,6 +784,7 @@
   "versions.modified": "{0} geändert von {1}",
   "versions.restore": "Wiederherstellen",
   "versions.unversioned": "Änderungen ohne Versionsangabe",
+  "versions.unversionedChanges": "Unversioned Changes",
   "versions.version": "{0}.{1}",
   "videoViewLayout.conversions": "Anpassungen",
   "videoViewLayout.delete.confirm.message": "Wollen Sie dieses Video wirklich löschen?",
