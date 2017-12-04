@@ -200,6 +200,7 @@ limitations under the License.
 
       _refresh: function() {
         this.$.latestQuery.fetch();
+        this.$.recentStorage.reload();
         this._fetchFavorite().then(function(favorite) {
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
