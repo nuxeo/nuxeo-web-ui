@@ -20,13 +20,13 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
@@ -70,14 +70,22 @@ limitations under the License.
         margin: 1rem 32px;
       }
 
+      iron-list {
+        position: absolute;
+        top: 0;
+        bottom: 36px;
+        left: 0;
+        right: 0;
+      }
+
       .file-to-import {
-        min-height: 3em;
-        margin: 0 .3em .8em;
-        width: calc(50% - 3em);
-        padding: .8em 1em;
+        width: calc(50% - 2em);
+        margin: 8px;
+        height: 80px;
+        padding: 8px;
         background-color:var(--nuxeo-box);
         border: 1px solid var(--divider-color);
-        position: relative;
+        @apply --layout-horizontal;
       }
 
       paper-progress {
@@ -96,10 +104,6 @@ limitations under the License.
         background-color: rgba(0,0,0,0.05);
         min-height: 100px;
         margin: 1em 2em 5em;
-      }
-
-      .drop-scrollable {
-        overflow: auto;
       }
 
       #form {
@@ -333,13 +337,15 @@ limitations under the License.
           <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
         </div>
 
+        <!-- dropzone -->
         <div id="dropzone" class="vertical layout flex">
           <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple>
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('documentImportForm.clickOrDrop')]]</a>
+                  [[i18n('documentImportForm.clickOrDrop')]]
+                </a>
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout">
@@ -347,68 +353,56 @@ limitations under the License.
               </div>
             </div>
           </template>
+
           <template is="dom-if" if="[[hasFiles]]">
-            <div class="drop-scrollable">
-              <div class="vertical layout flex">
-                <div class="horizontal layout wrap baseline">
-                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
-                    [[i18n('documentImportForm.localFiles')]]
-                  </span>
-                  <template is="dom-repeat" items="[[localFiles]]" as="file">
-                    <!-- local file -->
-                    <div class="file-to-import horizontal layout">
-                      <div class="vertical layout flex">
-                        <div class="horizontal layout">
-                          <div class="name">
-                            [[file.name]]
-                          </div>
-                          <span class="size">
-                            [[formatSize(file.size)]]
-                          </span>
-                        </div>
-                        <template is="dom-if" if="[[file.providerName]]">
-                          <div class="provider">
-                            [[file.providerName]]
-                          </div>
-                        </template>
-                        <template is="dom-if" if="[[!file.complete]]">
-                          <paper-progress indeterminate></paper-progress>
-                        </template>
-                      </div>
-                      <div class="clear" hidden$="[[!file.complete]]">
-                        <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
-                      </div>
-                    </div>
-                  </template>
-                  <span class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
-                    [[i18n('documentImportForm.remoteFiles')]]
-                  </span>
-                  <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                    <!-- remote file -->
-                    <div class="file-to-import horizontal layout">
-                      <div class="vertical layout flex">
-                        <div class="horizontal layout center">
-                          <div class="name">
-                            [[file.name]]
-                          </div>
-                          <span class="size">
-                            [[formatSize(file.size)]]
-                          </span>
-                        </div>
-                        <div class="provider">
-                          [[file.providerName]]
-                        </div>
-                      </div>
-                      <div class="horizontal layout center">
-                        <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </div>
+            <!-- local files -->
+            <div class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
+              [[i18n('documentImportForm.localFiles')]]
             </div>
+            <iron-list grid items="[[localFiles]]" as="file">
+              <template>
+                <div class="file-to-import">
+                  <div class="vertical layout flex">
+                    <div class="horizontal layout">
+                      <div class="name">[[file.name]]</div>
+                      <span class="size">[[formatSize(file.size)]]</span>
+                    </div>
+                    <template is="dom-if" if="[[file.providerName]]">
+                      <div class="provider">[[file.providerName]]</div>
+                    </template>
+                    <template is="dom-if" if="[[!file.complete]]">
+                      <paper-progress indeterminate></paper-progress>
+                    </template>
+                  </div>
+                  <div class="clear" title="[[i18n('command.remove')]]" hidden$="[[!file.complete]]">
+                    <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
+                  </div>
+                </div>
+              </template>
+            </iron-list>
+
+            <!-- remote files -->
+            <div class="dropzone-heading" hidden$="[[!_showDropzoneFileHeadings(hasLocalFiles,hasRemoteFiles)]]">
+              [[i18n('documentImportForm.remoteFiles')]]
+            </div>
+            <iron-list grid items="[[remoteFiles]]" as="file">
+              <template>
+                <div class="file-to-import">
+                  <div class="vertical layout flex">
+                    <div class="horizontal layout">
+                      <div class="name">[[file.name]]</div>
+                      <span class="size">[[formatSize(file.size)]]</span>
+                    </div>
+                    <div class="provider">[[file.providerName]]</div>
+                  </div>
+                  <div class="clear" title="[[i18n('command.remove')]]">
+                    <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob" ></paper-icon-button>
+                  </div>
+                </div>
+              </template>
+            </iron-list>
+
+            <!-- add more -->
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">Add more files</a>
@@ -420,33 +414,29 @@ limitations under the License.
             </div>
           </template>
         </div>
+
+        <!-- dialog actions -->
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss
-                          on-tap="_cancel"
-                          hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]">
+              [[i18n('command.cancel')]]
+            </paper-button>
           </div>
-          <paper-button noink
-                        id="edit"
-                        class="primary"
-                        on-tap="_toggleCustomize"
+          <paper-button noink id="edit" class="primary" on-tap="_toggleCustomize"
                         hidden$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
-                        [[i18n('documentImportForm.addProperties')]]
-                      </paper-button>
-          <paper-button noink
-                        id="create"
-                        class="primary"
-                        on-tap="_import"
+            [[i18n('documentImportForm.addProperties')]]
+          </paper-button>
+          <paper-button noink id="create" class="primary" on-tap="_import"
                         disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                        <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
-                          [[i18n('command.create')]]
-                        </template>
-                        <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
-                          <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
-                          <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
-                          <paper-spinner-lite active></paper-spinner-lite>
-                        </template>
-                      </paper-button>
+            <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+              [[i18n('command.create')]]
+            </template>
+            <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+              <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+              <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
+              <paper-spinner-lite active></paper-spinner-lite>
+            </template>
+          </paper-button>
         </div>
       </div>
 
