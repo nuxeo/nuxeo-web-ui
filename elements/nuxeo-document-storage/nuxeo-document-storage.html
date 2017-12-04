@@ -35,7 +35,7 @@ limitations under the License.
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <iron-localstorage name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
+    <iron-localstorage id="storage" name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
     </iron-localstorage>
   </template>
   <script>
@@ -92,6 +92,10 @@ limitations under the License.
         this.$.nxcon.connect().then(function(res) {
           this.name =  res.id + '-' + this.name;
         }.bind(this));
+      },
+
+      reload: function() {
+        this.$.storage.reload();
       }
 
     });
