@@ -124,6 +124,30 @@ global.fieldRegistry.register('nuxeo-dropzone',
                                 browser.chooseFile(`nuxeo-dropzone input[id='input']`,
                                                    path.resolve(fixtures.blobs.get(value)));
                               });
+global.fieldRegistry.register('nuxeo-data-table',
+                              (element) => {
+                                const result = [];
+                                element.elements('nuxeo-data-table-cell:not([header])').value.forEach(row => {
+                                  const txt = row.getText();
+                                  if (txt) {
+                                    result.push(txt);
+                                  }
+                                });
+                                return result.join(',');
+                              },
+                              (element, values) => {
+                                values.split(',').forEach(value => {
+                                  element.element('#addEntry').click();
+                                  const dialog = element.element('nuxeo-dialog[id="dialog"]');
+                                  dialog.waitForVisible();
+                                  const form = element.element('#editForm');
+                                  form.waitForVisible();
+                                  form.waitForVisible(`input[name="string"]`);
+                                  form.element(`input[name="string"]`).setValue(value);
+                                  dialog.waitForVisible(`paper-button[id="save"]`);
+                                  dialog.click(`paper-button[id="save"]`);
+                                });
+                              });
 global.fieldRegistry.register('generic',
                               (element) => element.getText(),
                               (element, value) => element.setValue(value));
