@@ -28,7 +28,7 @@ limitations under the License.
 <dom-module id="nuxeo-confirm-button">
 
   <template>
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
@@ -53,8 +53,8 @@ limitations under the License.
       }
     </style>
 
-    <paper-button id="button" class="primary" on-tap="_toggleDialog">
-      <content></content>
+    <paper-button noink id="button" class="primary" on-tap="_toggleDialog">
+      <slot></slot>
     </paper-button>
 
     <nuxeo-dialog id="dialog" class="dialog" no-overlap horizontal-align="auto" vertical-align="auto" on-iron-overlay-closed="_dismiss">
