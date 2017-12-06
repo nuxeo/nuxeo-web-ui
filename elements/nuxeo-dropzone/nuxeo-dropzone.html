@@ -197,8 +197,12 @@ limitations under the License.
 
       listeners: {
         'batchFinished': 'importBatch',
-        'nx-blob-picked': '_blobPicked'
+        'nx-blob-picked': '_blobPicked',
       },
+
+      observers: [
+        '_reset(document)'
+      ],
 
       ready: function() {
         this.connection = this.$.nx;
@@ -286,8 +290,12 @@ limitations under the License.
       },
 
       _deleteFile: function() {
-        this.$.input.value = '';
         this.document.properties[this.xpath] = '';
+        this._reset();
+      },
+
+      _reset: function() {
+        this.$.input.value = '';
         this._hasFiles = false;
       },
 
