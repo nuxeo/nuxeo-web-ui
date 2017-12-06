@@ -155,7 +155,7 @@ limitations under the License.
       add: function() {
         if (this._isNew()) {
           var op = this.$$('#createCollectionOp');
-          var name = this.$.nxSelect.selectedItem.item.displayLabel;
+          var name = this.$.nxSelect.selectedItem.displayLabel;
           op.input = undefined;
           op.params = {
             'name': name,
