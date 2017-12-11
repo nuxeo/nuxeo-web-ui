@@ -16,6 +16,8 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
@@ -33,7 +35,7 @@ limitations under the License.
 <dom-module id="nuxeo-document-list-item">
   <template>
 
-    <style>
+    <style include="iron-flex iron-flex-alignment">
       :host {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
