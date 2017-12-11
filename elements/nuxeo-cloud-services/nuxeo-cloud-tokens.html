@@ -171,7 +171,7 @@ limitations under the License.
 
       _deleteEntry: function(e) {
         if (confirm(this.i18n('cloudTokens.confirmDelete'))) {
-          var item = e.model.item;
+          var item = e.target.parentNode.item;
           this.$.tokens.path = '/oauth2/token/' + item.serviceName + "/" + item.nuxeoLogin;
           this.$.tokens.remove().then(function() {
             this.refresh();
@@ -185,7 +185,7 @@ limitations under the License.
       },
 
       _editEntry: function(e) {
-        this._selectedEntry = e.model.item;
+        this._selectedEntry = e.target.parentNode.item;
         this._selectedServiceName = this._selectedEntry.serviceName;
         this._selectedNuxeoLogin = this._selectedEntry.nuxeoLogin;
         this.$.dialog.toggle();
