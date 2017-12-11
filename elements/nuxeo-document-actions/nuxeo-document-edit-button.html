@@ -40,6 +40,17 @@ limitations under the License.
         margin: 0;
         padding: 24px 0 0 0;
       }
+
+      nuxeo-dialog {
+        min-width: 915px;
+      }
+
+      @media (max-width: 1024px) {
+        nuxeo-dialog {
+          min-width: 0;
+          width: 90%;
+        }
+      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
