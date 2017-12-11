@@ -34,8 +34,13 @@ limitations under the License.
         display: block;
       }
 
-      .label {
-        margin-left: 8px;
+      paper-card {
+        @apply --nuxeo-card;
+      }
+
+      paper-card[selected] {
+        border: 2px solid var(--default-primary-color);
+        border-radius: 3px;
       }
 
       iron-image {
@@ -45,18 +50,30 @@ limitations under the License.
         background-color: rgba(0,0,0,0.05);
       }
 
-      paper-card[selected] {
-        border: 2px solid var(--default-primary-color);
-        border-radius: 3px;
+      .details {
+        @apply --layout-horizontal;
+        @apply --layout-justified;
+        @apply --layout-center;
       }
 
+      .label {
+        margin-left: 8px;
+      }
+
+      paper-button {
+        @apply --nx-button-primary;
+      }
+
+      paper-button[disabled] {
+        @apply --nx-button-disabled;
+      }
     </style>
 
     <paper-card selected$="[[_selected(name)]]">
       <iron-image src="[[_image(name)]]" sizing="contain"></iron-image>
-      <div class="layout horizontal center justified">
+      <div class="details">
         <div class="label">[[_label(name)]]</div>
-        <paper-button on-tap="_apply" class="primary" noink disabled$="[[_selected(name)]]">
+        <paper-button on-tap="_apply" noink disabled$="[[_selected(name)]]">
           [[_button(name)]]
         </paper-button>
       </div>
