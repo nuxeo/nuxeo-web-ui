@@ -86,7 +86,9 @@ limitations under the License.
                                  field="dc:title" sort-by="dc:title" flex="100">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
+            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigateLink" data-index="[[index]]">
+              [[item.title]]
+            </a>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
@@ -182,6 +184,11 @@ limitations under the License.
       _navigate: function(e) {
         this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
         e.stopPropagation();
+      },
+
+      _navigateLink: function(e) {
+        e.detail = {item: this.items[e.target.dataIndex], index: e.target.dataIndex};
+        this._navigate(e);
       }
     });
   </script>
