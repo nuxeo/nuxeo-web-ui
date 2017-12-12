@@ -172,9 +172,17 @@ gulp.task('build', ['clean'], function(cb) {
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'merge-message-files'], function() {
+  var dirs = [], imports = [];
+  try {
+    var conf = require('./dev.json');
+    dirs = conf.dirs;
+    imports = conf.imports;
+  } catch(e) {
+     //
+  }
   // setup our local proxy
-  var proxyOptions = require('url').parse('http://localhost:8080/nuxeo');
-  proxyOptions.route = '/nuxeo';
+  var proxyOptions = require('url').parse('http://localhost:8080/nuxeo/');
+  proxyOptions.route = '/nuxeo/';
   browserSync({
     port: 5000,
     notify: false,
@@ -187,12 +195,20 @@ gulp.task('serve', ['lint', 'merge-message-files'], function() {
         }
       }
     },
+    rewriteRules: [
+      {
+        match: '<!-- IMPORTS -->',
+        fn: function () {
+          return imports.map(function(i) { return '<link rel="import" href="' + i + '">';}).join("\n")
+        }
+      }
+    ],
     // Run as an https by uncommenting 'https: true'
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
     server: {
-      baseDir: ['.tmp', '.'],
+      baseDir: ['.tmp', '.'].concat(dirs.map(function(d) { return d + '/'; })),
       middleware: [require('proxy-middleware')(proxyOptions)]
     }
   });
