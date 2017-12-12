@@ -20,13 +20,13 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-selectivity.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-textarea.html">
 
 <!--
 `nuxeo-add-to-collection-documents-button`
@@ -37,20 +37,12 @@ limitations under the License.
   <template>
     <style>
       :host {
-        display: inline-block;
+        display: block;
+        position: relative;
       }
 
-      nuxeo-select2, textarea {
-        width: 100%;
-      }
-
-      .required {
-        color: var(--paper-input-container-invalid-color, red);
-        padding: 4px;
-      }
-
-      ::content iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
+      :host([hidden]) {
+        display: none;
       }
     </style>
 
@@ -64,11 +56,12 @@ limitations under the License.
       </paper-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup">
+    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>
+      <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
-        <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
-        <label>[[i18n('addToCollectionDocumentsButton.dialog.collections')]]<span class="required">*</span></label>
+
         <nuxeo-selectivity id="nxSelect"
+                       label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]"
                        operation="Collection.Suggestion"
                        min-chars="0"
                        placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
@@ -77,13 +70,14 @@ limitations under the License.
                        query-results-filter="[[resultsFilter]]"
                        result-formatter="[[resultAndSelectionFormatter]]"
                        selection-formatter="[[resultAndSelectionFormatter]]"
-                       new-entry-formatter="[[newEntryFormatter]]">
+                       new-entry-formatter="[[newEntryFormatter]]"
+                       required>
         </nuxeo-selectivity>
-        <paper-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
+        <nuxeo-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
                         value="{{description::input}}"
                         hidden$="[[!_isNew(collection)]]"
                         always-float-label>
-        </paper-textarea>
+        </nuxeo-textarea>
       </paper-dialog-scrollable>
 
       <div class="buttons">
