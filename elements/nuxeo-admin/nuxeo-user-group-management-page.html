@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-user-group-management.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-user-group-latest.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
@@ -36,7 +37,7 @@ limitations under the License.
       </div>
       <div>
         <template is="dom-if" if="[[visible]]">
-          <nuxeo-user-group-management id="management" page="{{page}}" is-administrator$="[[isAdministrator]]"></nuxeo-user-group-management>
+          <nuxeo-user-group-management id="management" page="{{page}}"></nuxeo-user-group-management>
           <template is="dom-if" if="[[_displayLatest]]">
             <nuxeo-user-group-latest></nuxeo-user-group-latest>
           </template>
@@ -48,7 +49,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-user-group-management-page',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior, Nuxeo.FiltersBehavior],
       properties: {
         visible: {
           type: Boolean,
@@ -64,17 +65,15 @@ limitations under the License.
           value: {},
           observer: '_entityChanged'
         },
-        isAdministrator: {
-          type: Boolean,
-          value: false,
-          reflectToAttribute: true
+        user: {
+          type: Object
         }
       },
 
       listeners: {
         'goHome': '_handleUGMgoHome',
         'manageUser': '_handleUGMmanageUser',
-        'manageGroup': '_handleUGMmanageGroup',
+        'manageGroup': '_handleUGMmanageGroup'
       },
 
       _entityChanged: function() {
