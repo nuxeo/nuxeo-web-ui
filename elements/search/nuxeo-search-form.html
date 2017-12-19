@@ -660,6 +660,9 @@ limitations under the License.
         if (this.view) {
           this.view.reset();
           return this.view.fetch().then(this._navigateToResults.bind(this));
+        } else if (this.visible) {
+          // if the view is not initialized yet, navigating to the search will trigger a search and display the results
+          this.navigateTo('search', this.searchName);
         }
       },
 
