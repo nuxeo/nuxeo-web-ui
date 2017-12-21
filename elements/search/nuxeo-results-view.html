@@ -130,10 +130,13 @@ limitations under the License.
         </div>
       </div>
     </template>
-    <nuxeo-search-results-layout id="results"
-                                 search-name="[[searchName]]"
-                                 nx-provider="[[_nxProvider]]"
-                                 on-navigate="_navigateFromSearch"></nuxeo-search-results-layout>
+
+    <template is="dom-if" if="[[visible]]">
+      <nuxeo-search-results-layout id="results"
+                                  search-name="[[searchName]]"
+                                  nx-provider="[[_nxProvider]]"
+                                  on-navigate="_navigateFromSearch"></nuxeo-search-results-layout>
+    </template>
 
   </template>
 
