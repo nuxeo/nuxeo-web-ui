@@ -10,7 +10,7 @@ export default class DocumentEdit extends BasePage {
   }
 
   set title(title) {
-    return this.el.element('#input').setValue(title);
+    return this.el.element('#nativeInput').setValue(title);
   }
 
   layout() {
