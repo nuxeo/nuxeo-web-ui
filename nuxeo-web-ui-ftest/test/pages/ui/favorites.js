@@ -11,12 +11,11 @@ export default class Favorites extends BasePage {
 
   removeDocument(doc) {
     this.waitForVisible();
-    const favorites = this.el.elements(`#favoritesList #items div`).value;
+    const favorites = this.el.elements(`#favoritesList`).value;
     return favorites.some((favorite) => {
-      if (favorite.getText(`span.list-item-title`).trim() === doc.title) {
-        favorite.element(`iron-icon.remove`).click();
-        const el = this.el;
-        driver.waitUntil(() => !this._hasDocument(doc, el));
+      if (this._hasDocument(doc, this.el)) {
+        favorite.click(`iron-icon.remove`);
+        driver.waitUntil(() => !this._hasDocument(doc, this.el));
         return true;
       } else {
         return false;
@@ -26,10 +25,9 @@ export default class Favorites extends BasePage {
 
   // prevent usage of this.el inside waitUntil
   _hasDocument(doc, el) {
-    const favorites = el.elements(`#favoritesList #items div`).value;
-    return favorites.some((favorite) =>
-        favorite.isExisting(`span.list-item-title`) && favorite.getText(`span.list-item-title`).trim() === doc.title
-    );
+    const favorites = el.elements(`#favoritesList`).value;
+    return favorites.some((favorite) => favorite.isVisible(`.list-item-title`) &&
+                                        favorite.getText(`.list-item-title`).trim() === doc.title);
   }
 
 }
