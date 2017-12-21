@@ -139,6 +139,8 @@ limitations under the License.
     </nuxeo-dialog>
   </template>
   <script>
+    var OAUTH2_TOKENS_BASE_PATH = 'oauth2/token/';
+
     Polymer({
       is: 'nuxeo-cloud-tokens',
       behaviors: [Nuxeo.FormatBehavior],
@@ -149,7 +151,7 @@ limitations under the License.
         },
 
         _selectedEntry: {
-          type: String
+          type: Object
         },
 
         _selectedNuxeoLogin: {
@@ -163,7 +165,7 @@ limitations under the License.
       observers: ['_tokensChanged(data.*)'],
 
       refresh: function() {
-        this.$.tokens.path = "oauth2/token";
+        this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH;
         this.$.tokens.get().then(function(response) {
           this.oauth2Tokens = response.entries;
         }.bind(this));
@@ -172,7 +174,7 @@ limitations under the License.
       _deleteEntry: function(e) {
         if (confirm(this.i18n('cloudTokens.confirmDelete'))) {
           var item = e.target.parentNode.item;
-          this.$.tokens.path = '/oauth2/token/' + item.serviceName + "/" + item.nuxeoLogin;
+          this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH + item.serviceName + '/' + item.nuxeoLogin;
           this.$.tokens.remove().then(function() {
             this.refresh();
             this.fire('notify', {message: this.i18n('cloudTokens.successfullyDeleted')});
@@ -185,7 +187,7 @@ limitations under the License.
       },
 
       _editEntry: function(e) {
-        this._selectedEntry = e.target.parentNode.item;
+        this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
         this._selectedServiceName = this._selectedEntry.serviceName;
         this._selectedNuxeoLogin = this._selectedEntry.nuxeoLogin;
         this.$.dialog.toggle();
@@ -196,7 +198,7 @@ limitations under the License.
         if (valid) {
           this._selectedEntry.creationDate = this.formatDate(this._selectedEntry.creationDate, 'YYYY-MM-DD HH:MM:SS');
           this.$.tokens.data = this._selectedEntry;
-          this.$.tokens.path = 'oauth2/token/' + this._selectedServiceName + '/' + this._selectedNuxeoLogin;
+          this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH + this._selectedServiceName + '/' + this._selectedNuxeoLogin;
           this.$.tokens.put().then(function() {
             this.refresh();
             this.$.dialog.toggle();
