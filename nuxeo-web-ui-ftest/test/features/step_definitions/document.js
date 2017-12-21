@@ -106,7 +106,7 @@ module.exports = function () {
         page.view.noteEditor.waitForVisible();
         page.view.noteEditor.setContent(newContent);
         page.view.noteEditor.save();
-        page.view.noteEditor.hasContent(`<p>${newContent}<br></p>`);
+        page.view.noteEditor.hasContent(`<p>${newContent}</p>`);
         break;
       case 'Markdown':
       case 'Text':
@@ -117,8 +117,8 @@ module.exports = function () {
         page.view.noteEditor.save();
         page.view.preview.waitForVisible();
         if (format === 'Markdown') {
-          page.view.preview.waitForVisible('marked-element div.markdown-html');
-          const markedContent = page.view.preview.element('marked-element div.markdown-html');
+          page.view.preview.waitForVisible('marked-element #content');
+          const markedContent = page.view.preview.element('marked-element #content');
           markedContent.waitForVisible();
           markedContent.getText().should.equal(newContent);
         } else if (format === 'Text') {
