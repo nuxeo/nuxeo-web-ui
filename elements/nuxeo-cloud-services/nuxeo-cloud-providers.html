@@ -151,6 +151,8 @@ limitations under the License.
     </nuxeo-dialog>
   </template>
   <script>
+    var OAUTH2_PROVIDERS_BASE_PATH = 'oauth2/provider/';
+
     Polymer({
       is: 'nuxeo-cloud-providers',
       behaviors: [Nuxeo.FormatBehavior],
@@ -174,7 +176,7 @@ limitations under the License.
       },
 
       refresh: function() {
-        this.$.oauth.path = "oauth2/provider";
+        this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH;
         this.$.oauth.get().then(function(response) {
           this.oauth2Providers = response.entries;
           // ELEMENTS-322 - fix this on nuxeo-data-table
@@ -184,7 +186,7 @@ limitations under the License.
 
       _editEntry: function(e) {
         this._isNew = false;
-        this._selectedEntry = e.target.parentNode.item;
+        this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
         this._selectedServiceName = this._selectedEntry.serviceName;
         if (Array.isArray(this._selectedEntry.scopes)) {
           this._selectedEntry.scopes = this._selectedEntry.scopes.join();
@@ -217,7 +219,7 @@ limitations under the License.
       },
 
       _create: function(entry) {
-        this.$.oauth.path = 'oauth2/provider/';
+        this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH;
         this.$.oauth.data = entry;
         this.$.oauth.post().then(function() {
           this.refresh();
@@ -233,7 +235,7 @@ limitations under the License.
       },
 
       _update: function(serviceName, entry) {
-        this.$.oauth.path = 'oauth2/provider/' + serviceName;
+        this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + serviceName;
         this.$.oauth.data = entry;
         this.$.oauth.put().then(function() {
           this.$.dialog.toggle();
@@ -251,7 +253,7 @@ limitations under the License.
       _deleteEntry: function(e) {
         if (confirm(this.i18n('cloudProviders.confirmDelete'))) {
           var item =  e.target.parentNode.item;
-          this.$.oauth.path = '/oauth2/provider/' + item.serviceName;
+          this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + item.serviceName;
           this.$.oauth.remove().then(function() {
             this.refresh();
             this.fire('notify', {message: this.i18n('cloudProviders.successfullyDeleted')});
