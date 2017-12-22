@@ -8,6 +8,14 @@ function shadowSelector(selector) {
   return (selector && !selector.includes(`//`)) ? `* >>> ${selector.trim().replace(/\s+/g, ' >>> ')}` : selector;
 }
 
+function formatParameters(args) {
+  const parameters = [].concat(args);
+  if (parameters.length > 0 && typeof parameters[0] === 'string') {
+    parameters[0] = shadowSelector(parameters[0]);
+  }
+  return parameters;
+}
+
 function getMethods(obj) {
   let props = [];
   let o = obj;
@@ -49,76 +57,28 @@ class ShadowElement {
 function wrapShadow(element, isWebElement) {
   const el = isWebElement ? new ShadowElement(element) : element;
   el._element = el.element;
-  el.element = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return wrapShadow(el._element.apply(el, parameters), true);
-  };
+  el.element = (...args) => wrapShadow(el._element.apply(el, formatParameters(args)), true);
 
   el._elements = el.elements;
-  el.elements = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return wrapShadow(el._elements.apply(el, parameters), true);
-  };
+  el.elements = (...args) => wrapShadow(el._elements.apply(el, formatParameters(args)), true);
 
   el._isExisting = el.isExisting;
-  el.isExisting = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._isExisting.apply(el, parameters);
-  };
+  el.isExisting = (...args) => el._isExisting.apply(el, formatParameters(args));
 
   el._waitForExist = el.waitForExist;
-  el.waitForExist = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._waitForExist.apply(el, parameters);
-  };
+  el.waitForExist = (...args) => el._waitForExist.apply(el, formatParameters(args));
 
   el._isVisible = el.isVisible;
-  el.isVisible = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._isVisible.apply(el, parameters);
-  };
+  el.isVisible = (...args) => el._isVisible.apply(el, formatParameters(args));
 
   el._waitForVisible = el.waitForVisible;
-  el.waitForVisible = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._waitForVisible.apply(el, parameters);
-  };
+  el.waitForVisible = (...args) => el._waitForVisible.apply(el, formatParameters(args));
 
   el._click = el.click;
-  el.click = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._click.apply(el, parameters);
-  };
+  el.click = (...args) => el._click.apply(el, formatParameters(args));
 
   el._waitForEnabled = el.waitForEnabled;
-  el.waitForEnabled = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return wrapShadow(el._waitForEnabled.apply(el, parameters), true);
-  };
+  el.waitForEnabled = (...args) => wrapShadow(el._waitForEnabled.apply(el, formatParameters(args)), true);
 
   el._getText = el.getText;
   el.getText = (...args) => {
@@ -132,13 +92,7 @@ function wrapShadow(element, isWebElement) {
   };
 
   el._chooseFile = el.chooseFile;
-  el.chooseFile = (...args) => {
-    const parameters = [].concat(args);
-    if (parameters.length > 0) {
-      parameters[0] = shadowSelector(parameters[0]);
-    }
-    return el._chooseFile.apply(el, parameters);
-  };
+  el.chooseFile = (...args) => el._chooseFile.apply(el, formatParameters(args));
 
   el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {
     const els = el.elements(selector).value;
