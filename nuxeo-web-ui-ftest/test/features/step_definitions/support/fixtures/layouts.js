@@ -2,42 +2,10 @@ import { FieldRegistry } from '../services/field_registry';
 import path from 'path';
 
 global.fieldRegistry = new FieldRegistry();
-global.fieldRegistry.register('nuxeo-input',
-                              (element) => element.element('#nativeInput').getValue(),
-                              (element, value) => { element.element('#nativeInput').setValue(value); });
-global.fieldRegistry.register('nuxeo-select',
-                              (element) => {
-                                element.element('#input').getValue();
-                              },
-                              (element, value) => {
-                                element.element('#input').click();
-                                driver.waitForVisible(`//paper-item[text()="${value}"]`);
-                                element.element(`///paper-item[text()="${value}"]`).click();
-                              });
-global.fieldRegistry.register('nuxeo-date-picker',
-                              (element) => element.element('#nativeInput').getValue(),
-                              (element, value) => {
-                                element.element('#nativeInput').click();
-                                const keys = value.split('-');
-                                driver.keys(keys);
-                              });
-global.fieldRegistry.register('nuxeo-textarea',
-                              (element) => element.element('#textarea').getValue(),
-                              (element, value) => { element.element('#textarea').setValue(value); });
-global.fieldRegistry.register('nuxeo-user-suggestion',
-                              (element) => element.element(`#select2-drop div.select2-search input.select2-input`)
-                                                  .getValue(),
-                              (element, value) => {
-                                element.element('nuxeo-select2 div#s2id_select2').click();
-                                driver.waitForVisible(`#select2-drop div.select2-search input.select2-input`);
-                                driver.element(`#select2-drop div.select2-search input.select2-input`).setValue(value);
-                                driver.waitForVisible(`#select2-drop li.select2-result`);
-                                driver.element(`#select2-drop li.select2-result`).click();
-                              });
 const suggestionGet = (element) => {
   if (element.getAttribute('multiple')) {
     return element.elements('.selectivity-multiple-selected-item')
-                       .value.map((v) => v.getText()).join(',');
+        .value.map((v) => v.getText()).join(',');
   } else {
     return element.element('.selectivity-single-selected-item').getText();
   }
@@ -60,6 +28,32 @@ const suggestionSet = (element, value) => {
     element.click(`.selectivity-result-item.highlight`);
   }
 };
+global.fieldRegistry.register('nuxeo-input',
+                              (element) => element.element('#nativeInput').getValue(),
+                              (element, value) => { element.element('#nativeInput').setValue(value); });
+global.fieldRegistry.register('nuxeo-select',
+                              (element) => {
+                                element.element('#input').getValue();
+                              },
+                              (element, value) => {
+                                element.element('#input').click();
+                                const item = element.elementByTextContent('paper-item', value);
+                                item.waitForVisible();
+                                item.click();
+                              });
+global.fieldRegistry.register('nuxeo-date-picker',
+                              (element) => element.element('#nativeInput').getValue(),
+                              (element, value) => {
+                                element.element('#nativeInput').click();
+                                const keys = value.split('-');
+                                driver.keys(keys);
+                              });
+global.fieldRegistry.register('nuxeo-textarea',
+                              (element) => element.element('#textarea').getValue(),
+                              (element, value) => { element.element('#textarea').setValue(value); });
+global.fieldRegistry.register('nuxeo-user-suggestion',
+                              suggestionGet,
+                              suggestionSet);
 global.fieldRegistry.register('nuxeo-directory-suggestion',
                               suggestionGet,
                               suggestionSet);

@@ -23,23 +23,28 @@ export default class DocumentPermissions {
   }
 
   get editPermissionButton() {
-    return this.page.element('paper-icon-button.nuxeo-popup-permission[icon="nuxeo:edit"]');
+    return this.page.element('nuxeo-popup-permission paper-icon-button[icon="nuxeo:edit"]');
   }
 
   get updatePermissionButton() {
-    return this.page.element('///*[@id="popupRight"]/div/paper-button[text()="Update"]');
+    return this.page.element('nuxeo-document-acl-table #popupRight paper-button.primary');
   }
 
   get timeFrameButton() {
     return this.page.element('paper-radio-button #radioContainer');
   }
 
-  permissionUser(name) {
-    return this.page.element(`div.acl-table-row.nuxeo-document-acl-table span.user[title="${name}"]`);
-  }
-
-  permission(permission) {
-    return this.page.element(`///span[text()="${permission}"]`);
+  permission(permission, name, timeFrame) {
+    return driver.waitUntil(() => {
+      const rows = this.page.elements(`div.acl-table-row`).value;
+      return rows.find((row) => {
+        const nameCheck = name ? row.isExisting(`span.user[title="${name}"]`) : true;
+        const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;
+        // XXX should rely on a class or column header name
+        const timeFrameCheck = timeFrame ? !!row.hasElementByTextContent('span', permission)  : true;
+        return nameCheck && permissionCheck && timeFrameCheck;
+      });
+    });
   }
 
   getField(field) {
@@ -56,9 +61,9 @@ export default class DocumentPermissions {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
     if (field === 'begin' || field === 'end') {
-      return this.el.element(`nuxeo-popup-permission.nuxeo-document-acl-table [id="${field}"]`);
+      return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [id="${field}"]`);
     } else {
-      return this.el.element(`nuxeo-popup-permission.nuxeo-document-acl-table [name="${field}"]`);
+      return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
     }
   }
 
