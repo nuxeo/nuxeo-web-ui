@@ -27,6 +27,8 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-video-conversions">
   <template>
+    <style include="iron-flex"></style>
+
     <h3>[[label]]</h3>
     <div>
       <template is="dom-repeat" items="[[document.properties.vid:transcodedVideos]]" as="conversion">
