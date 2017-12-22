@@ -18,6 +18,7 @@ Feature: Permissions
     And I can edit the following properties in the Note metadata:
       | name  | value         |
       | title | changed title |
+    And I see the Note page
 
   Scenario: Edit permission
     Given "Susan" has ReadWrite permission on the document
@@ -36,6 +37,10 @@ Feature: Permissions
     And I can edit the following properties in the Note metadata:
       | name  | value         |
       | title | changed title |
+    And I see the Note page
+    And I can see Note metadata with the following properties:
+      | name  | value         |
+      | title | changed title |
     When I logout
     And I login as "Bob"
     And I browse to the document
@@ -43,6 +48,7 @@ Feature: Permissions
     And I can edit the following properties in the Note metadata:
       | name  | value                 |
       | title | another changed title |
+    And I see the Note page
     When I logout
     And I login as "Susan"
     Then I can't view the document
