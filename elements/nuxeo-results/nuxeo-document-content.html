@@ -84,7 +84,7 @@ limitations under the License.
                          enrichers="thumbnail, permissions"
                          page="[[pageNumber]]"
                          params="[[params]]"
-                         schemas="dublincore,common,uid,file"
+                         schemas="[[schemas]]"
                          headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
                          fetch-aggregates>
     </nuxeo-page-provider>
@@ -232,6 +232,10 @@ limitations under the License.
         pageSize: {
           type: Number,
           value: 40
+        },
+        schemas: {
+          type: String,
+          value: 'dublincore,common,uid,file'
         },
         currentIndex: {
           type: Number,
