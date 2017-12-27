@@ -176,6 +176,7 @@
   "cloudServices.providers": "プロバイダ",
   "cloudServices.tokens": "トークン",
   "cloudTokens.creationDate": "作成日",
+  "cloudTokens.confirmDelete": "Delete token entry?",
   "cloudTokens.delete": "削除",
   "cloudTokens.edit": "編集",
   "cloudTokens.emptyResult": "トークンが定義されていません",

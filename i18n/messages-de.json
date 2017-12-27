@@ -176,6 +176,7 @@
   "cloudServices.providers": "Anbieter",
   "cloudServices.tokens": "Token",
   "cloudTokens.creationDate": "Erstellungsdatum",
+  "cloudTokens.confirmDelete": "Delete token entry?",
   "cloudTokens.delete": "Löschen",
   "cloudTokens.edit": "Bearbeiten",
   "cloudTokens.emptyResult": "Keine Token definiert",
