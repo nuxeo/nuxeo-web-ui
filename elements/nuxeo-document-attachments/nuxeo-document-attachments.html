@@ -41,6 +41,12 @@ limitations under the License.
         border-top: 1px solid var(--nuxeo-border);
         padding: 8px 0;
       }
+
+      .empty {
+        opacity: .5;
+        padding-bottom: 8px;
+        font-size: 1.1em;
+      }
     </style>
 
     <h3>[[i18n('documentAttachments.heading')]]</h3>
@@ -49,13 +55,19 @@ limitations under the License.
       <template is="dom-repeat" items="[[document.properties.files:files]]">
         <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]/file"></nuxeo-document-blob>
       </template>
+
+      <template is="dom-if" if="[[!_hasFiles(document)]]">
+        <div class="empty">[[i18n('documentAttachments.empty')]]</div>
+      </template>
     </div>
 
-    <nuxeo-dropzone document="{{document}}"
-                    xpath="files:files"
-                    uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
-                    blob-list>
-    </nuxeo-dropzone>
+    <template is="dom-if" if="[[_hasWritePermission(document)]]">
+      <nuxeo-dropzone document="{{document}}"
+                      xpath="files:files"
+                      uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
+                      blob-list>
+      </nuxeo-dropzone>
+    </template>
 
   </template>
 
@@ -65,6 +77,15 @@ limitations under the License.
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: Object
+      },
+
+      _hasFiles: function(doc) {
+        return doc && doc.properties && doc.properties['files:files'] && doc.properties['files:files'].length > 0;
+      },
+
+      _hasWritePermission: function (doc) {
+        return doc && this.hasPermission(doc, 'Write') &&
+          !this.isImmutable(doc) && doc.type !== 'Root' && doc.state !== 'deleted';
       }
     });
   </script>
