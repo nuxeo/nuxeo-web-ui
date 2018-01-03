@@ -189,6 +189,10 @@ limitations under the License.
           type: Boolean,
           value: false
         },
+        replace: {
+          type: Boolean,
+          value: false
+        },
         _hasFiles: {
           type: Boolean,
           value: false
@@ -197,7 +201,7 @@ limitations under the License.
 
       listeners: {
         'batchFinished': 'importBatch',
-        'nx-blob-picked': '_blobPicked',
+        'nx-blob-picked': '_blobPicked'
       },
 
       observers: [
@@ -207,7 +211,7 @@ limitations under the License.
       ready: function() {
         this.connection = this.$.nx;
         this.setupDropZone(this.$.dropzone);
-        this.message = this.i18n('dropzone.message');
+        this.message = this.i18n(this.replace ? 'dropzone.replace' : 'dropzone.add');
         this.uploadedMessage = this.i18n('dropzone.uploaded');
         this.progressMessage = this.i18n('dropzone.progress');
       },
