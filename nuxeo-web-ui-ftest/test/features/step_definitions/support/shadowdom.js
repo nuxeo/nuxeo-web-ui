@@ -94,15 +94,20 @@ function wrapShadow(element, isWebElement) {
   el._chooseFile = el.chooseFile;
   el.chooseFile = (...args) => el._chooseFile.apply(el, formatParameters(args));
 
-  el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {
+  el._elementByTextContent = (selector, textContent) => {
     const els = el.elements(selector).value;
-    const result = els.find((e) => {
+    return els.find((e) => {
       const text = e.getText();
-      return typeof text === 'string' && text.trim() === textContent ? e : undefined;
+      return typeof text === 'string' && text.trim() === textContent;
     });
-    if (result) {
-      return result;
-    }
+  };
+
+  el.hasElementByTextContent = (selector, textContent) => {
+    return !!el._elementByTextContent(selector, textContent)
+  };
+
+  el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {
+    return el._elementByTextContent(selector, textContent);
   }, 'No element can be found for the given selector and text content.');
 
   // XXX: will only work on Chrome and Firefox, and requires a selector.
