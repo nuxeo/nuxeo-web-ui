@@ -266,6 +266,7 @@
   "displayModeButton.display.grid": "Alterne para modo de exibição de grade",
   "displayModeButton.display.list": "Switch to List view",
   "displayModeButton.display.table": "Alterne para modo de exibição de tabela",
+  "documentAttachments.empty": "There are no attachments",
   "documentAttachments.heading": "Anexos",
   "documentAttachments.upload.uploaded": "Anexo(s) carregado(s)",
   "documentContentView.datatable.header.author": "Autor",

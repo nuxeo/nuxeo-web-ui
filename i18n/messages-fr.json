@@ -266,6 +266,7 @@
   "displayModeButton.display.grid": "Passer en vue grille",
   "displayModeButton.display.list": "Passer en vue liste",
   "displayModeButton.display.table": "Passer en vue tableau",
+  "documentAttachments.empty": "There are no attachments",
   "documentAttachments.heading": "Fichiers complémentaires",
   "documentAttachments.upload.uploaded": "Fichier complémentaire ajouté",
   "documentContentView.datatable.header.author": "Contributeur",
