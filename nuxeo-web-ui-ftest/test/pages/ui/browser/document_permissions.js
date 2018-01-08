@@ -41,7 +41,7 @@ export default class DocumentPermissions {
         const nameCheck = name ? row.isExisting(`span.user[title="${name}"]`) : true;
         const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;
         // XXX should rely on a class or column header name
-        const timeFrameCheck = timeFrame ? !!row.hasElementByTextContent('span', permission)  : true;
+        const timeFrameCheck = timeFrame ? !!row.hasElementByTextContent('span', permission) : true;
         return nameCheck && permissionCheck && timeFrameCheck;
       });
     });

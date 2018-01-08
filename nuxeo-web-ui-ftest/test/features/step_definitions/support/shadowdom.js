@@ -102,13 +102,11 @@ function wrapShadow(element, isWebElement) {
     });
   };
 
-  el.hasElementByTextContent = (selector, textContent) => {
-    return !!el._elementByTextContent(selector, textContent)
-  };
+  el.hasElementByTextContent = (selector, textContent) => !!el._elementByTextContent(selector, textContent);
 
-  el.elementByTextContent = (selector, textContent) => browser.waitUntil(() => {
-    return el._elementByTextContent(selector, textContent);
-  }, 'No element can be found for the given selector and text content.');
+  el.elementByTextContent = (selector, textContent) =>
+    browser.waitUntil(() => el._elementByTextContent(selector, textContent),
+      'No element can be found for the given selector and text content.');
 
   // XXX: will only work on Chrome and Firefox, and requires a selector.
   el.scrollIntoView = (selector) => {
