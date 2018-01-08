@@ -31,6 +31,8 @@ limitations under the License.
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="nuxeo-app/nuxeo-progress-indicator.html">
 <link rel="import" href="nuxeo-app/nuxeo-menu-item.html">
 <link rel="import" href="nuxeo-app/nuxeo-menu-icon.html">
@@ -145,12 +147,33 @@ limitations under the License.
           position: relative;
           bottom: auto;
         }
+        #drawer .toggle {
+          display: none;
+        }
       }
 
       /* drawer */
       #drawer {
         overflow: auto;
         width: 100%;
+      }
+
+      #drawer:hover .toggle {
+        position: absolute;
+        right: -16px;
+        top: 0;
+        width: 16px;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      #drawer .toggle iron-icon {
+        color: var(--nuxeo-drawer-background);
+        background-color: var(--nuxeo-drawer-text);
+        width: 16px;
+        height: 48px;
+        top: calc(50% - 24px);
+        opacity: 0.6;
       }
 
       #drawer iron-pages {
@@ -262,6 +285,11 @@ limitations under the License.
             </div>
 
           </iron-pages>
+
+          <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
+            <iron-icon icon="icons:chevron-left" ></iron-icon>
+          </div>
+
         </div>
       </div>
 
