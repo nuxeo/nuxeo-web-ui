@@ -64,8 +64,6 @@ module.exports = function () {
     const page = this.ui.browser.documentPage(this.doc.type);
     page.waitForVisible();
     page.versions.waitForVisible();
-    // wait for invisible
-    page.versions.createVersionButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
     page.versions.toggle.waitForVisible();
     driver.waitUntil(() => page.versions.toggle.getText() === label, `No version found with label "${label}"`);
   });
