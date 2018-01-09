@@ -161,8 +161,7 @@ limitations under the License.
           type: String
         },
         message: {
-          type: String,
-          value: 'Add a file'
+          type: String
         },
         blobList: {
           type: Boolean,
@@ -189,10 +188,6 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        replace: {
-          type: Boolean,
-          value: false
-        },
         _hasFiles: {
           type: Boolean,
           value: false
@@ -211,7 +206,9 @@ limitations under the License.
       ready: function() {
         this.connection = this.$.nx;
         this.setupDropZone(this.$.dropzone);
-        this.message = this.i18n(this.replace ? 'dropzone.replace' : 'dropzone.add');
+        if (!this.message) {
+          this.message = this.i18n('dropzone.add');
+        }
         this.uploadedMessage = this.i18n('dropzone.uploaded');
         this.progressMessage = this.i18n('dropzone.progress');
       },
