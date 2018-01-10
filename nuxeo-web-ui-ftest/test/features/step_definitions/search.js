@@ -77,11 +77,10 @@ module.exports = function () {
   this.Then(/^I can see (\d+) search results$/, (numberOfResults) => {
     const displayMode = this.ui.results.displayMode;
     if (numberOfResults === '0') {
-      this.ui.searchResults.noResults.waitForVisible().should.be.true;
+      this.ui.results.noResults.waitForVisible().should.be.true;
     } else {
-      this.ui.searchResults;
-      this.ui.searchResults.getResults(displayMode).waitForVisible();
-      this.ui.searchResults.resultsCount(displayMode).toString().should.equal(numberOfResults);
+      this.ui.results.getResults(displayMode).waitForVisible();
+      this.ui.results.resultsCount(displayMode).toString().should.equal(numberOfResults);
     }
   });
   this.Then(/^I edit the results columns to show (.+)$/, (heading) => {
@@ -91,11 +90,11 @@ module.exports = function () {
     }
     this.ui.results.toggleColumnSettings.waitForVisible();
     this.ui.results.toggleColumnSettings.click();
-    this.ui.searchResults.getColumnCheckbox(heading).waitForVisible();
-    this.ui.searchResults.checkColumnCheckbox(heading);
-    this.ui.searchResults.columnsCloseButton.click();
-    this.ui.searchResults.getResultsColumn(heading).waitForVisible();
-    this.ui.searchResults.getResultsColumn(heading).isVisible().should.be.true;
+    this.ui.results.getColumnCheckbox(heading).waitForVisible();
+    this.ui.results.checkColumnCheckbox(heading);
+    this.ui.results.columnsCloseButton.click();
+    this.ui.results.getResultsColumn(heading).waitForVisible();
+    this.ui.results.getResultsColumn(heading).isVisible().should.be.true;
   });
   this.Then(/^I save my search as "(.+)"$/, (searchName) => {
     this.ui.searchResults.saveSearchAsButton.waitForVisible();
@@ -119,6 +118,7 @@ module.exports = function () {
     );
     this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
     this.ui.browser.permissionsView.createPermissionButton.click();
+    this.ui.browser.permissionsView.permission('Read', username, 'permanent').waitForVisible();
   });
   this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
     this.ui.searchForm.menuButton.waitForVisible();
