@@ -162,6 +162,11 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           notify: true
         },
 
+        /**
+         * Document available in the action context.
+         */
+        document: Object,
+
         actionContext: {
           type: Object,
           notify: true
@@ -193,7 +198,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       observers: [
         '_viewChanged(view)',
         '_updateStorage(name)',
-        '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns)'
+        '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns, document)'
       ],
 
       listeners: {
@@ -275,7 +280,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           displayMode: this.displayMode,
           nxProvider: this.nxProvider,
           selectedItems: this.selectedItems,
-          columns: this.columns
+          columns: this.columns,
+          document: this.document
         };
       },
 
