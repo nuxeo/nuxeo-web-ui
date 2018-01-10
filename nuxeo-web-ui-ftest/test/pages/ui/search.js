@@ -18,12 +18,12 @@ export default class Search extends BasePage {
 
   get displayMode() {
     this.resultActions.waitForVisible();
-    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('disabled'));
+    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('disabled') !== null);
     return displayMode[0].getAttribute('title').replace('Switch to ', '').replace(/ view| View/, '').toLowerCase();
   }
 
   get toggleTableView() {
-    return this.el.element('///*[contains(@title, "Table View")]');
+    return this.resultActions.value.find((e) => e.getAttribute('title').includes('Table View'));
   }
 
   get toggleColumnSettings() {
@@ -39,7 +39,7 @@ export default class Search extends BasePage {
   }
 
   get saveSearchAsButton() {
-    return driver.element('//paper-button[contains(., "Save As")]');
+    return driver.elementByTextContent('paper-button', 'SAVE AS');
   }
 
   get confirmSaveSearchButton() {
@@ -47,52 +47,46 @@ export default class Search extends BasePage {
   }
 
   get menuButton() {
-    return driver.element('#menuButton');
+    return this.el.element('#menuButton');
   }
 
   get savedSearchActionButton() {
-    return driver.element('paper-icon-button.nuxeo-saved-search-actions');
+    return driver.element('nuxeo-saved-search-actions paper-icon-button');
   }
 
   get shareAction() {
-    return driver.element(
-      '//paper-menu-button[contains (@class, "nuxeo-saved-search-actions")]//paper-item[contains (., "Share")]'
-    );
+    return driver.element('nuxeo-saved-search-actions').elementByTextContent('paper-item', 'Share');
   }
 
   getResults(displayMode) {
     switch (displayMode) {
       case 'grid':
-        return this.el.elements('#list #items nuxeo-document-grid-thumbnail');
+        return this.el.elements('nuxeo-document-grid-thumbnail');
       case 'list':
-        return this.el.elements('#list #items nuxeo-document-list-item');
+        return this.el.elements('nuxeo-document-list-item');
       default:
-        return this.el.elements('#list #items div.item');
+        return this.el.elements('div.item');
     }
   }
 
   getColumnCheckbox(heading) {
-    return driver.element(
-      `//td[contains(., "${heading}")]/preceding::td[1]/paper-checkbox`
-    );
+    return this.el.elementByTextContent('tr', heading).element('paper-checkbox');
   }
 
   checkColumnCheckbox(heading) {
-    const checkbox = driver.element(
-      `//td[contains(., "${heading}")]/preceding::td[1]/paper-checkbox`);
+    const checkbox = this.getColumnCheckbox(heading);
     if (checkbox.getAttribute('checked') === null) {
       return checkbox.click();
     }
   }
 
   getResultsColumn(heading) {
-    return driver.element(`//nuxeo-data-table-cell/div[text()="${heading}"]`);
+    const row = this.el.element('nuxeo-data-table-row[header]');
+    return row.elementByTextContent('nuxeo-data-table-cell', heading);
   }
 
   getSavedSearch(searchName) {
-    return driver.element(
-      `//paper-menu-button[@id="menuButton"]//paper-item[contains(., "${searchName}")]`
-    );
+    return this.el.elementByTextContent('paper-item', searchName.toUpperCase());
   }
 
   enterInput(text) {
@@ -119,35 +113,24 @@ export default class Search extends BasePage {
 
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
-      this.el.element(`#paperInput #input`).waitForVisible();
-      return this.el.element(`#paperInput #input`).setValue(searchTerm);
+      this.fulltextSearch(searchTerm);
     } else {
       this.setFieldValue(searchType, searchTerm);
     }
   }
 
   fulltextSearch(searchTerm) {
-    this.el.element(`#paperInput #input`).waitForVisible();
-    return this.el.element(`#paperInput #input`).setValue(searchTerm);
+    this.el.element(`#searchInput #nativeInput`).waitForVisible();
+    return this.el.element(`#searchInput #nativeInput`).setValue(searchTerm);
   }
 
   resultsCount(displayMode) {
     const rows = this.getResults(displayMode);
-    const res = rows.value.filter((result) => {
-      if (result.getAttribute('hidden') === null) {
-        return result;
-      }
-    });
-    return res.length;
+    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
   }
 
   quickSearchResultsCount() {
-    const rows = this.el.elements('#results #selector a');
-    const res = rows.value.filter((result) => {
-      if (result.getAttribute('hidden') === null) {
-        return result;
-      }
-    });
-    return res.length;
+    const rows = this.el.element('#results #selector').elements('//a');
+    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
   }
 }

@@ -61,13 +61,11 @@ global.fieldRegistry.register('nuxeo-document-suggestion',
                               suggestionGet,
                               suggestionSet);
 global.fieldRegistry.register('nuxeo-dropdown-aggregation',
-                              (element) => element.element('nuxeo-select2 input').getValue(),
-                              (element, value) => {
-                                element.element('nuxeo-select2 input').click();
-                                driver.element('nuxeo-select2 input').setValue(value);
-                                driver.waitForVisible(`#select2-drop li.select2-result`);
-                                driver.element(`#select2-drop li.select2-result`).click();
-                              });
+                              suggestionGet,
+                              suggestionSet);
+global.fieldRegistry.register('nuxeo-selectivity',
+                              suggestionGet,
+                              suggestionSet);
 global.fieldRegistry.register('nuxeo-select2',
                               (element) => element.element('div ul li input').getValue(),
                               (element, value) => {
@@ -77,14 +75,8 @@ global.fieldRegistry.register('nuxeo-select2',
                                 driver.element(`//div[text()='${value}' and @class='select2-result-label']`).click();
                               });
 global.fieldRegistry.register('nuxeo-tag-suggestion',
-                              (element) => element.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input')
-                                                  .getValue(),
-                              (element, value) => {
-                                element.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input').click();
-                                driver.element('nuxeo-tag-suggestion nuxeo-select2 div ul li input').setValue(value);
-                                driver.waitForVisible(`//div[@class='select2-result-label']/span[text()='${value}']`);
-                                driver.element(`//div[@class='select2-result-label']/span[text()='${value}']`).click();
-                              });
+                               suggestionGet,
+                               suggestionSet);
 global.fieldRegistry.register('paper-input',
                               (element) => element.element('#nativeInput').getValue(),
                               (element, value) => { element.element('#nativeInput').setValue(value); });
@@ -104,12 +96,15 @@ global.fieldRegistry.register('paper-checkbox',
                                 }
                               });
 global.fieldRegistry.register('nuxeo-checkbox-aggregation',
-                              (element) => element.element(
-                                  `///div[@id='checkboxLabel']/parent::paper-checkbox`
-                                ).getAttribute('aria-checked'),
+                              (element) => element.element('paper-checkbox').getAttribute('aria-checked'),
                               (element, value) => {
-                                driver.waitForVisible(`//div[@id='checkboxLabel' and contains(., '${value}')]`);
-                                element.element(`///div[@id='checkboxLabel' and contains(., '${value}')]`).click();
+                                const els = element.elements('paper-checkbox').value;
+                                const el = els.find((e) => {
+                                  const text = e.getText();
+                                  return typeof text === 'string' && text.trim().includes(value);
+                                });
+                                el.waitForVisible();
+                                el.click();
                               });
 global.fieldRegistry.register('nuxeo-dropzone',
                               () => driver.element(`nuxeo-dropzone input[id='input']`).getValue(),
