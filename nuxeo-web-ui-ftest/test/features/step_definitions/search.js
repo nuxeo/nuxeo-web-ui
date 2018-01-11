@@ -93,8 +93,7 @@ module.exports = function () {
     this.ui.results.getColumnCheckbox(heading).waitForVisible();
     this.ui.results.checkColumnCheckbox(heading);
     this.ui.results.columnsCloseButton.click();
-    this.ui.results.getResultsColumn(heading).waitForVisible();
-    this.ui.results.getResultsColumn(heading).isVisible().should.be.true;
+    this.ui.results.getResultsColumn(heading).waitForExist().should.be.true;
   });
   this.Then(/^I save my search as "(.+)"$/, (searchName) => {
     this.ui.searchResults.saveSearchAsButton.waitForVisible();
@@ -123,7 +122,7 @@ module.exports = function () {
   this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
     this.ui.searchForm.menuButton.waitForVisible();
     this.ui.searchForm.menuButton.click();
-    this.ui.searchForm.getSavedSearch(searchName).isVisible().should.be.true;
+    this.ui.searchForm.getSavedSearch(searchName).waitForExist().should.be.true;
   });
   this.When(/^I click the QuickSearch button$/, () => {
     this.ui.searchButton.waitForVisible();

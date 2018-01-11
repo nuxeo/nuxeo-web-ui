@@ -39,11 +39,13 @@ export default class Search extends BasePage {
   }
 
   get saveSearchAsButton() {
-    return driver.elementByTextContent('paper-button', 'SAVE AS');
+    driver.waitForVisible('#actions paper-button');
+    return driver.elementByTextContent('#actions paper-button', 'SAVE AS');
   }
 
   get confirmSaveSearchButton() {
-    return driver.element('//*[@id="saveDialog"]/div/paper-button[contains(., "Save")]');
+    driver.waitForVisible('#saveDialog paper-button.primary');
+    return driver.element('#saveDialog paper-button.primary');
   }
 
   get menuButton() {
@@ -55,7 +57,8 @@ export default class Search extends BasePage {
   }
 
   get shareAction() {
-    return driver.element('nuxeo-saved-search-actions').elementByTextContent('paper-item', 'Share');
+    driver.waitForVisible('nuxeo-saved-search-actions paper-item');
+    return driver.elementByTextContent('nuxeo-saved-search-actions paper-item', 'Share');
   }
 
   getResults(displayMode) {
@@ -70,6 +73,7 @@ export default class Search extends BasePage {
   }
 
   getColumnCheckbox(heading) {
+    this.el.waitForVisible('tr');
     return this.el.elementByTextContent('tr', heading).element('paper-checkbox');
   }
 
@@ -82,11 +86,24 @@ export default class Search extends BasePage {
 
   getResultsColumn(heading) {
     const row = this.el.element('nuxeo-data-table-row[header]');
+    row.waitForVisible();
+    row.waitForVisible('nuxeo-data-table-cell');
     return row.elementByTextContent('nuxeo-data-table-cell', heading);
   }
 
   getSavedSearch(searchName) {
-    return this.el.elementByTextContent('paper-item', searchName.toUpperCase());
+    driver.waitUntil(() => {
+      const els = driver.elements('nuxeo-search-form[name="defaultSearch"] #actionsDropdown paper-item').value;
+      return els.length > 1;
+    });
+    // XXX should be using driver.elementByTextContent but element returns empty text because the respective paper-item
+    // is not interactable (nor visible)
+    const e = driver.execute((name) => {
+      const dropdown = document.querySelector(`* >>> nuxeo-search-form[name="defaultSearch"] >>> #actionsDropdown`);
+      return document.evaluate(`.//paper-item[text()="${name}"]`, dropdown, null, XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null).singleNodeValue;
+    }, searchName);
+    return e;
   }
 
   enterInput(text) {

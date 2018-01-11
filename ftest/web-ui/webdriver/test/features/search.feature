@@ -53,7 +53,7 @@ Feature: Search
     When I logout
     And I login as "JSmith"
     And I click the "defaultSearch" button
-    # Then I can view my saved search "Local Search"
+    Then I can view my saved search "Local Search"
 
   Scenario Outline: Quick Search
     When I click the QuickSearch button

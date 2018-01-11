@@ -98,6 +98,7 @@ global.fieldRegistry.register('paper-checkbox',
 global.fieldRegistry.register('nuxeo-checkbox-aggregation',
                               (element) => element.element('paper-checkbox').getAttribute('aria-checked'),
                               (element, value) => {
+                                element.waitForVisible('paper-checkbox');
                                 const els = element.elements('paper-checkbox').value;
                                 const el = els.find((e) => {
                                   const text = e.getText();

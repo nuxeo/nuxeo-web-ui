@@ -1,42 +1,32 @@
 'use strict';
 
-export default class DocumentPermissions {
+import BasePage from '../../base';
 
-  constructor(selector) {
-    this._selector = selector;
-  }
-
-  get el() {
-    return driver.element(this._selector);
-  }
-
-  get page() {
-    return driver.element(this._selector);
-  }
+export default class DocumentPermissions extends BasePage {
 
   get newPermissionButton() {
-    return this.page.element('#localPermissions #newPermissionButton');
+    return this.el.element('#localPermissions #newPermissionButton');
   }
 
   get createPermissionButton() {
-    return this.page.element('#createPermissionButton');
+    return this.el.element('#createPermissionButton');
   }
 
   get editPermissionButton() {
-    return this.page.element('nuxeo-popup-permission paper-icon-button[icon="nuxeo:edit"]');
+    return this.el.element('nuxeo-popup-permission paper-icon-button[icon="nuxeo:edit"]');
   }
 
   get updatePermissionButton() {
-    return this.page.element('nuxeo-document-acl-table #popupRight paper-button.primary');
+    return this.el.element('nuxeo-document-acl-table #popupRight paper-button.primary');
   }
 
   get timeFrameButton() {
-    return this.page.element('paper-radio-button #radioContainer');
+    return this.el.element('paper-radio-button #radioContainer');
   }
 
   permission(permission, name, timeFrame) {
     return driver.waitUntil(() => {
-      const rows = this.page.elements(`div.acl-table-row`).value;
+      const rows = this.el.elements(`div.acl-table-row`).value;
       return rows.find((row) => {
         const nameCheck = name ? row.isExisting(`span.user[title="${name}"]`) : true;
         const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;
@@ -48,8 +38,7 @@ export default class DocumentPermissions {
   }
 
   getField(field) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
+    this.el.waitForVisible();
     if (field === 'begin' || field === 'end') {
       return this.el.element(`[id="${field}"]`);
     } else {
@@ -58,8 +47,7 @@ export default class DocumentPermissions {
   }
 
   getEditField(field) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
+    this.el.waitForVisible();
     if (field === 'begin' || field === 'end') {
       return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [id="${field}"]`);
     } else {
@@ -119,6 +107,6 @@ export default class DocumentPermissions {
   }
 
   waitForVisible() {
-    return this.page.waitForVisible();
+    return this.el.waitForVisible();
   }
 }
