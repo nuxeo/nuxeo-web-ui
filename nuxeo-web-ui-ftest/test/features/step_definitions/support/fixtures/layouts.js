@@ -11,19 +11,14 @@ const suggestionGet = (element) => {
   }
 };
 const suggestionSet = (element, value) => {
-  const values = element.getAttribute('multiple') ? value.split(',') : [value];
+  const isMulti = element.getAttribute('multiple');
+  const values = isMulti ? value.split(',') : [value];
   element.scrollIntoView(`#input`);
   for (let i = 0; i < values.length; i++) {
-    element.waitForVisible(`#input`);
-    element.element('#input').click();
-    if (element.getAttribute('multiple')) {
-      element.waitForVisible(`.selectivity-multiple-input`);
-      element.element(`.selectivity-multiple-input`).setValue(values[i]);
-    } else {
-      element.waitForVisible(`.selectivity-search-input`);
-      element.element(`.selectivity-search-input`).setValue(values[i]);
-    }
-
+    element.waitForVisible(isMulti ? `input` : `#input`);
+    element.element(isMulti ? `input` : `#input`).click();
+    element.waitForVisible(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`);
+    element.element(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`).setValue(values[i]);
     element.waitForVisible(`.selectivity-result-item.highlight`);
     element.click(`.selectivity-result-item.highlight`);
   }
