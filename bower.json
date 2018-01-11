@@ -19,6 +19,7 @@
     "iron-localstorage": "PolymerElements/iron-localstorage#^2.0.0",
     "iron-location": "PolymerElements/iron-location#^2.0.0",
     "iron-media-query": "PolymerElements/iron-media-query#^2.0.0",
+    "iron-overlay-behavior": "PolymerElements/iron-overlay-behavior#2.2.1",
     "iron-pages": "PolymerElements/iron-pages#^2.0.0",
     "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^2.0.0",
     "paper-header-panel": "PolymerElements/paper-header-panel#^2.0.0",
