@@ -391,6 +391,8 @@
   "documentPage.to.process": "You have a task to process before ",
   "documentPrevNextDoc.nextDocument": "Next Document",
   "documentPrevNextDoc.previousDocument": "Previous Document",
+  "documentMyTagAction.tooltip": "Tag me!",
+  "documentMyTagAction.success": "Successfully tagged!",
   "documentSearchForm.layoutNotFound": "Failed to find search layout for {0}.",
   "documentTask.dueDate": "Due",
   "documentTask.layoutNotFound": "Failed to find element layout for task {0}.",
