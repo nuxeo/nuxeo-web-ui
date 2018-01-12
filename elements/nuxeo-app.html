@@ -225,6 +225,24 @@ limitations under the License.
         background-color: var(--nuxeo-drawer-background);
       }
 
+      #toggleDrawer {
+        position: fixed;
+        z-index: 100;
+        left: 330px;
+        top: 50%;
+        cursor: pointer;
+        transition: transform .2s ease, left ease .4s;
+        transform: rotate(0deg);
+        background-color: var(--nuxeo-sidebar-background);
+        border-radius: 50%;
+        color: var(--nuxeo-button-primary-text);
+      }
+
+      #toggleDrawer.drawer-closed {
+        left: 30px;
+        transform: rotate(180deg);
+      }
+
       nuxeo-document-create-button.admin {
         display: none;
       }
@@ -296,6 +314,9 @@ limitations under the License.
           </div>
 
         </div>
+
+        <paper-icon-button icon="icons:chevron-left" id="toggleDrawer" class="drawer-closed" on-tap="_toggleDrawer"></paper-icon-button>
+
       </div>
 
       <!-- pages -->
@@ -730,6 +751,7 @@ limitations under the License.
       _openDrawer: function() {
         this.drawerWidth = '350px';
         this.drawerOpened = true;
+        this.$$('#toggleDrawer').classList.remove('drawer-closed');
         var drawerPanel = this.$.drawerPanel;
         if (drawerPanel.narrow) {
           drawerPanel.openDrawer();
@@ -744,6 +766,7 @@ limitations under the License.
       _closeDrawer: function() {
         this.drawerWidth = '52px';
         this.drawerOpened = false;
+        this.$$('#toggleDrawer').classList.add('drawer-closed');
         this.$.drawerPanel.closeDrawer();
       },
 
