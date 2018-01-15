@@ -482,7 +482,6 @@ limitations under the License.
                                   label="[[i18n('documentImportForm.type.label')]]"
                                   placeholder="[[i18n('documentImportForm.type.placeholder')]]"
                                   error-message="[[i18n('documentImportForm.type.error')]]"
-                                  on-value-changed="_validate"
                                   required>
                       <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
                         <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
@@ -617,7 +616,8 @@ limitations under the License.
         },
 
         selectedDocType: {
-          type: String
+          type: String,
+          observer: '_selectedDocTypeChanged'
         },
 
         documentBlobProperties: {
@@ -760,6 +760,10 @@ limitations under the License.
 
       _filesChanged: function(e) {
         this.uploadFiles(e.target.files);
+      },
+
+      _selectedDocTypeChanged: function() {
+        this._validate();
       },
 
       _toggleCustomize: function() {
