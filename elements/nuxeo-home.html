@@ -42,16 +42,6 @@ limitations under the License.
         }
       }
 
-      h3 {
-        @apply --layout-horizontal;
-        @apply --layout-center;
-      }
-
-      h3 iron-icon {
-        width: 1.3em;
-        margin-right: 0.4em;
-      }
-
       nuxeo-data-table, nuxeo-tasks-list {
         height: 350px;
       }
@@ -72,8 +62,7 @@ limitations under the License.
         <section name="dashboard" class="dashboard">
 
           <!-- recently edited -->
-          <nuxeo-card>
-            <h3><iron-icon icon="nuxeo:edit" name="Latest Documents Edited"></iron-icon>[[i18n('home.latestDocumentsEdited')]]</h3>
+          <nuxeo-card icon="nuxeo:edit" heading="[[i18n('home.latestDocumentsEdited')]]">
             <nuxeo-page-provider
               id="latestQuery"
               page-size="20"
@@ -107,14 +96,12 @@ limitations under the License.
           </nuxeo-card>
 
           <!-- tasks -->
-          <nuxeo-card>
-            <h3><iron-icon icon="nuxeo:tasks" name="Tasks"></iron-icon>[[i18n('home.tasks')]]</h3>
+          <nuxeo-card icon="nuxeo:tasks" heading="[[i18n('home.tasks')]]">
             <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
           </nuxeo-card>
 
           <!-- recently viewed -->
-          <nuxeo-card>
-            <h3><iron-icon icon="nuxeo:recent" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
+          <nuxeo-card icon="nuxeo:recent" heading="[[i18n('app.recentlyViewed')]]">
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
             <nuxeo-data-table id="latestViewedDocs" max-items="15"
               items="[[recentDocuments]]"
@@ -141,8 +128,7 @@ limitations under the License.
           </nuxeo-card>
 
           <!-- favorites -->
-          <nuxeo-card>
-            <h3><iron-icon icon="nuxeo:favorites" name="Favorites"></iron-icon>[[i18n('home.favorites')]]</h3>
+          <nuxeo-card icon="nuxeo:favorites" heading="[[i18n('home.favorites')]]">
             <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
             <nuxeo-page-provider id="favoritesProvider"
                provider="default_content_collection"

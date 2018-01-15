@@ -38,10 +38,6 @@ limitations under the License.
         @apply --nuxeo-block-hover;
       }
 
-      .task-view paper-card {
-        display: block;
-      }
-
       .task-box {
         padding: 1em;
         border: 1px solid var(--nuxeo-border);
@@ -128,9 +124,9 @@ limitations under the License.
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout horizontal wrap">
             <div class="flex task-view">
-              <paper-card>
+              <nuxeo-card>
                 <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
-              </paper-card>
+              </nuxeo-card>
             </div>
             <template is="dom-if" if="[[_docId(current)]]">
               <div class="vertical layout flex-2 document-view">

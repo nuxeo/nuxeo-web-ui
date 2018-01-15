@@ -20,11 +20,11 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -85,7 +85,7 @@ limitations under the License.
       </div>
 
       <div>
-        <paper-card elevation="0" class="block">
+        <nuxeo-card>
           <nuxeo-select label="[[i18n('vocabularyManagement.vocabulary')]]"
                         placeholder="[[i18n('vocabularyManagement.select')]]"
                         selected="{{selectedVocabulary}}" attr-for-selected="name">
@@ -93,7 +93,7 @@ limitations under the License.
               <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
             </template>
           </nuxeo-select>
-        </paper-card>
+        </nuxeo-card>
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">

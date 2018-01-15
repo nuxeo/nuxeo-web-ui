@@ -17,10 +17,10 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/nuxeo-dataviz-elements/nuxeo-audit-data.html">
 <link rel="import" href="../../bower_components/nuxeo-dataviz-elements/nuxeo-repository-data.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date-picker.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -41,20 +41,8 @@ limitations under the License.
         display: block;
       }
 
-      paper-card ::content .header .title-text {
-        color: var(--nuxeo-text-default, #000) !important;
-      }
-
-      .dates input {
-        border: 1px solid var(--nuxeo-border, #eee);
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
-        border-radius: 3px;
-        margin-left: .5em;
-        width: 132px;
-      }
-
       nuxeo-date-picker {
-        padding-left: 8px;
+        padding: 0 8px;
       }
 
       .flex-layout {
@@ -64,7 +52,7 @@ limitations under the License.
         padding: 0 8px;
       }
 
-      .flex-layout paper-card {
+      .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
@@ -85,10 +73,7 @@ limitations under the License.
         margin-top: 50px;
       }
 
-      chart-line,
-      ::content #canvas.chart-line,
-      chart-pie,
-      ::content #canvas.chart-pie {
+      chart-line, chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
         min-width: 30em;
@@ -97,19 +82,19 @@ limitations under the License.
       }
 
       @media (max-width: 1024px) {
-        .flex-layout paper-card {
+        .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
         }
       }
 
     </style>
 
-    <paper-card class="dates">
+    <nuxeo-card class="dates">
       <div class="horizontal flex end-justified layout">
         <nuxeo-date-picker value="{{startDate}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
         <nuxeo-date-picker value="{{endDate}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
-    </paper-card>
+    </nuxeo-card>
 
     <div class="flex-layout">
 
@@ -128,7 +113,7 @@ limitations under the License.
         current-page="{{downloadedDocs}}">
       </nuxeo-page-provider>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
         <template is="dom-if" if="[[!_isEmpty(downloads)]]">
           <nuxeo-data-table items="[[downloadedDocs]]">
             <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
@@ -142,7 +127,7 @@ limitations under the License.
         <template is="dom-if" if="[[_isEmpty(downloads)]]">
           <div class="message">[[i18n('repositoryAnalytics.noResults')]]</div>
         </template>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Number of documents -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
@@ -150,10 +135,10 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documents.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.documents.heading')]]">
         <iron-icon icon="icons:description"></iron-icon>
         <h1>[[totalCount]]</h1>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Document count per type -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
@@ -163,12 +148,12 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
         <chart-pie values="[[_values(typeCount)]]"
                    labels="[[_labels(typeCount)]]"
                    options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Top 10 creators -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
@@ -178,12 +163,12 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
         <chart-pie values="[[_values(topCreators)]]"
                    labels="[[_labels(topCreators)]]"
                    options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Documents created per week -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
@@ -193,12 +178,12 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
         <chart-line labels="[[_labels(docsCreatedPerWeek)]]"
                     values="[[_values(docsCreatedPerWeek)]]"
                     options='{ "legend": { "display": false }, "animation": false }'>
         </chart-line>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Documents modified per week -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
@@ -208,12 +193,12 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
         <chart-line labels="[[_labels(docsModifiedPerWeek)]]"
                     values="[[_values(docsModifiedPerWeek)]]"
                     options='{ "legend": { "display": false }, "animation": false }'>
         </chart-line>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Files by mime-type -->
       <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
@@ -222,12 +207,12 @@ limitations under the License.
                              index="[[index]]">
       </nuxeo-repository-data>
 
-      <paper-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
         <chart-pie values="[[_values(filesByMimeType)]]"
                    labels="[[_types(filesByMimeType)]]"
                    options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
-      </paper-card>
+      </nuxeo-card>
 
     </div>
 

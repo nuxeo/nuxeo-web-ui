@@ -40,11 +40,6 @@ limitations under the License.
         min-height: 15em;
       }
 
-      .container {
-        @apply --layout-vertical;
-        @apply --layout-wrap;
-      }
-
       .row-container {
         @apply --layout-horizontal;
         @apply --layout-wrap;
@@ -72,7 +67,7 @@ limitations under the License.
         <span class="flex">[[i18n('audit.heading')]]</span>
       </div>
       <div>
-        <nuxeo-card class="container">
+        <nuxeo-card>
           <nuxeo-user-suggestion value="{{principalName}}" label="[[i18n('audit.username')]]"
                                  placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
 
@@ -129,6 +124,7 @@ limitations under the License.
       </div>
     </nuxeo-page>
   </template>
+
   <script>
     Polymer({
       is: 'nuxeo-audit',
@@ -191,7 +187,7 @@ limitations under the License.
           this.$.provider.params = this._buildParams();
           this.$.table.fetch();
         }
-      },
+      }
     });
   </script>
 </dom-module>

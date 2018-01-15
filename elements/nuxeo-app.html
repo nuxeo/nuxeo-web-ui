@@ -42,9 +42,9 @@ limitations under the License.
 <!-- nuxeo-home -->
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 
 <!-- i18n -->
@@ -325,10 +325,9 @@ limitations under the License.
           <nuxeo-page name="error">
             <div slot="header"></div>
             <div>
-              <paper-card>
-                <nuxeo-error id="error">
-                </nuxeo-error>
-              </paper-card>
+              <nuxeo-card>
+                <nuxeo-error id="error"></nuxeo-error>
+              </nuxeo-card>
             </div>
           </nuxeo-page>
 

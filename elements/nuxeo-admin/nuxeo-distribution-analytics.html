@@ -17,8 +17,8 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/dataviz/nuxeo-document-distribution-chart.html">
 <link rel="import" href="nuxeo-chart-data-behavior.html">
@@ -67,7 +67,7 @@ limitations under the License.
 
     <div class="flex-layout">
 
-      <paper-card>
+      <nuxeo-card>
         <div class="suggestion-wrapper horizontal layout center">
           <iron-icon icon="icons:folder"></iron-icon>
           <div class="flex">
@@ -89,7 +89,7 @@ limitations under the License.
             <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
           </div>
         </div>
-      </paper-card>
+      </nuxeo-card>
 
     </div>
 

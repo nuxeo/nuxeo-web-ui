@@ -17,10 +17,10 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-dataviz-elements/nuxeo-workflow-data.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date-picker.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
@@ -44,10 +44,6 @@ limitations under the License.
         min-width: 250px;
       }
 
-      paper-card ::content .header .title-text {
-        color: var(--nuxeo-text-default, #000) !important;
-      }
-
       .dates input {
         border: 1px solid #c6c6c6;
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
@@ -57,10 +53,7 @@ limitations under the License.
       }
 
       nuxeo-date-picker {
-        padding-left: 8px;
-      }
-      paper-dropdown-menu ::content paper-input-container {
-        padding: 0;
+        padding: 0 16px;
       }
 
       nuxeo-data-table {
@@ -74,7 +67,7 @@ limitations under the License.
         padding: 0 8px;
       }
 
-      .flex-layout paper-card {
+      .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
@@ -87,10 +80,7 @@ limitations under the License.
         margin-top: 50px;
       }
 
-      chart-bar,
-      ::content #canvas.chart-bar,
-      chart-pie,
-      ::content #canvas.chart-pie {
+      chart-bar, chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
         display: block;
@@ -98,7 +88,7 @@ limitations under the License.
       }
 
       @media (max-width: 1024px) {
-        .flex-layout paper-card {
+        .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
         }
       }
@@ -110,13 +100,13 @@ limitations under the License.
                     on-response="_handleWorkflowModelResponse">
     </nuxeo-resource>
 
-    <paper-card class="dates">
+    <nuxeo-card class="dates">
       <div class="horizontal flex end-justified layout center wrap">
         <nuxeo-select label="[[i18n('analytics.workflow')]]" placeholder="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
         <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
         <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
-    </paper-card>
+    </nuxeo-card>
 
     <div class="flex-layout">
       <!-- Average wf duration -->
@@ -127,10 +117,10 @@ limitations under the License.
                            data="{{avgWorkflowLength}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]">
         <iron-icon icon="image:timer"></iron-icon>
         <h1>[[_asDuration(avgWorkflowLength)]]</h1>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Wf initiators -->
       <nuxeo-workflow-data workflow="[[workflow]]"
@@ -140,12 +130,12 @@ limitations under the License.
                            data="{{initiators}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
         <chart-pie values=[[_values(initiators)]]
                    labels=[[_series(initiators)]]
                    options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Actions per user -->
       <nuxeo-workflow-data workflow="[[workflow]]"
@@ -155,13 +145,13 @@ limitations under the License.
                            data="{{numberOfActionsPerUser}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
         <chart-bar labels=[[_labels(numberOfActionsPerUser)]]
                    series=[[_series(numberOfActionsPerUser)]]
                    values=[[_values(numberOfActionsPerUser)]]
                    options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-bar>
-      </paper-card>
+      </nuxeo-card>
 
       <!-- Average task duration per user -->
       <nuxeo-workflow-data workflow="[[workflow]]"
@@ -172,7 +162,7 @@ limitations under the License.
                            data="{{avgTaskDurationPerUser}}">
       </nuxeo-workflow-data>
 
-      <paper-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]" elevation="0">
+      <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
         <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
           <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">
             <template>[[item.key]]</template>
@@ -181,7 +171,7 @@ limitations under the License.
             <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
-      </paper-card>
+      </nuxeo-card>
 
     </div>
 
