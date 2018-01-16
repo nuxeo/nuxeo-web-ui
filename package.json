@@ -43,7 +43,8 @@
   },
   "scripts": {
     "start": "gulp serve",
-    "lint": "gulp lint && polymer lint -i elements/*/*.html"
+    "lint": "gulp lint && polymer lint -i elements/*/*.html",
+    "win-lint": "gulp lint && polymer lint -i elements\\*\\*.html"
   },
   "engines": {
     "node": ">=6.4.0"
