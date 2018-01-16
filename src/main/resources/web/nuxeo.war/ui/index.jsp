@@ -85,10 +85,6 @@ limitations under the License.
   <link rel="import" href="<%= request.getContextPath() %>/<%= resource.getURI() %>">
   <% } %>
 
-  <%--import dynamic user layouts--%>
-  <link rel="import" href="nuxeo-user-group-management/nuxeo-view-user.html">
-  <link rel="import" href="nuxeo-user-group-management/nuxeo-edit-user.html">
-
 </head>
 
 <body unresolved class="fullbleed layout vertical">
