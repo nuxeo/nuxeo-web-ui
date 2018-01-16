@@ -29,6 +29,10 @@ limitations under the License.
   <condition property="cmd.mvn" value="mvn.cmd" else="mvn">
     <os family="windows"/>
   </condition>
+  <!-- set npm script names based on OS family -->
+  <condition property="lint.script" value="win-lint" else="lint">
+    <os family="windows"/>
+  </condition>
 
   <target name="init" description="Download all node and web dependencies">
     <delete includeEmptyDirs="yes" failonerror="false">
@@ -43,7 +47,7 @@ limitations under the License.
     </exec>
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="run" />
-      <arg value="lint" />
+      <arg value="${lint.script}" />
     </exec>
   </target>
 
