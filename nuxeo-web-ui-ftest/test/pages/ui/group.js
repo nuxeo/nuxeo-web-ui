@@ -66,6 +66,6 @@ export default class Group extends BasePage {
   }
 
   searchResult(searchTerm) {
-    return this.el.elementByTextContent('paper-card[name="groups"] .table [name="id"]', searchTerm);
+    return this.el.elementByTextContent('nuxeo-card[name="groups"] .table [name="id"]', searchTerm);
   }
 }
