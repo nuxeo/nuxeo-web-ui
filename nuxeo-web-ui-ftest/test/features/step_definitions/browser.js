@@ -19,4 +19,18 @@ module.exports = function () {
     this.ui.browser.waitForVisible();
     this.ui.browser.hasTitle(title).should.be.true;
   });
+
+  this.Then('I select all child documents', () => {
+    this.ui.browser.waitForVisible();
+    this.ui.browser.selectAllChildDocuments();
+  });
+
+  this.Then('I can see the selection toolbar', () => {
+    this.ui.browser.waitForVisible();
+    this.ui.browser.selectionToolbar.waitForVisible();
+  });
+
+  this.Then('I can add selection to clipboard', () => {
+    this.ui.browser.selectionToolbar.addToClipboard();
+  });
 };
