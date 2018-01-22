@@ -1,6 +1,7 @@
 'use strict';
 
 import BasePage from '../base';
+import Clipboard from './clipboard';
 import Collections from './collections';
 import Favorites from './favorites';
 
@@ -20,6 +21,10 @@ export default class Drawer extends BasePage {
 
   get browser() {
     return this._section('browser');
+  }
+
+  get clipboard() {
+    return new Clipboard('nuxeo-clipboard');
   }
 
   get search() {

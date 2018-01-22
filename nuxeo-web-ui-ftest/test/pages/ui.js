@@ -129,4 +129,8 @@ export default class UI extends BasePage {
     dropdown.waitForVisible('#dropdown');
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
+
+  waitForToastNotVisible() {
+    driver.waitUntil(() => driver.elements('paper-toast').value.every((toast) => !toast.isVisible()));
+  }
 }

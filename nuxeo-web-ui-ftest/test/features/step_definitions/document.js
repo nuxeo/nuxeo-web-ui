@@ -40,6 +40,12 @@ module.exports = function () {
     this.ui.browser.breadcrumb.waitForVisible();
   });
 
+  this.When(/^I browse to the document with path "(.+)"$/, (path) => {
+    driver.url(`#!/browse`.concat(path));
+    this.ui.browser.waitForVisible();
+    this.ui.browser.breadcrumb.waitForVisible();
+  });
+
   this.Then(/^I can't view the document$/, () => {
     driver.url(`#!/browse${this.doc.path}`);
     this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
@@ -147,4 +153,8 @@ module.exports = function () {
   this.Then('I add the document to the favorites', () => {
     this.ui.browser.addToFavorites();
   });
+
+  this.Then('I can see the document has "$nb" children', (nb) =>
+    this.ui.browser.waitForNbChildren(parseInt(nb))
+  );
 };

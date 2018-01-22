@@ -5,6 +5,7 @@ import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
 import DocumentPermissions from './browser/document_permissions';
 import EditDialog from './edit_dialog';
+import Selection from './selection';
 
 export default class Browser extends BasePage {
 
@@ -154,6 +155,37 @@ export default class Browser extends BasePage {
         return false;
       }
     });
+  }
+
+  /*
+   * Results might vary with the viewport size as only visible items are taken into account.
+   */
+  waitForNbChildren(nb) {
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    driver.waitUntil(() => {
+      const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+      let count = 0;
+      rows.value.forEach((row) => {
+        if (row.isVisible() && row.isVisible(`nuxeo-data-table-cell a.title`)) {
+          count++;
+        }
+      });
+      return count === nb;
+    });
+  }
+
+  selectAllChildDocuments() {
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    rows.value.forEach((row) => {
+      if (row.isVisible('nuxeo-data-table-checkbox')) {
+        row.element('nuxeo-data-table-checkbox').click();
+      }
+    });
+  }
+
+  get selectionToolbar() {
+    return new Selection('nuxeo-selection-toolbar#toolbar');
   }
 
 }
