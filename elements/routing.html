@@ -125,8 +125,9 @@ limitations under the License.
       useHashbang: true,
 
       browse: function(path) {
-        return '/browse' +  (path ? path.replace(/\%/g, encodeURIComponent('%'))
-                                        .replace(/\?/g, encodeURIComponent('?')) : '');
+        return '/browse' +  (path ? path.split('/').map(function(n) {
+          return encodeURIComponent(n);
+        }).join('/') : '');
       },
 
       document: function(id) {
