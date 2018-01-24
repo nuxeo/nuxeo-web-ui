@@ -33,10 +33,8 @@ module.exports = function () {
     this.ui.browser.permissionsView.permission(permission, name).waitForVisible();
     this.ui.browser.permissionsView.editPermissionButton.waitForVisible();
     if (date === 'tomorrow') {
-      const tmp = new Date();
-      tmp.setDate(tmp.getDate() + 1);
-      const keys = tmp.toISOString().substring(0, 10).split('-');
-      date = keys[1].concat('-').concat(keys[2]).concat('-').concat('-').concat(keys[0]);
+      date = new Date();
+      date.setDate(date.getDate() + 1);
     }
     this.ui.browser.permissionsView.editPermissionButton.click();
     this.ui.browser.permissionsView.waitForVisible();

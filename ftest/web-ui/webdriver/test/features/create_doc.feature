@@ -18,7 +18,7 @@ Feature: Create Document
       | description  | my description    |
       | nature       | Application       |
       | subjects     | Gastronomy,Comics |
-      #| expired      | 02-28-2018        |
+      | expired      | February 28, 2018 |
 
     Then I see the <doctype> page
     And I can see <doctype> metadata with the following properties:
@@ -27,7 +27,7 @@ Feature: Create Document
       | description  | my description    |
       | nature       | Application       |
       | subjects     | Gastronomy,Comics |
-      #| expired      | February 28, 2018 |
+      | expired      | February 28, 2018 |
 
   Examples:
     |doctype   |
