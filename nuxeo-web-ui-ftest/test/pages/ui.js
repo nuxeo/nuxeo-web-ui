@@ -78,6 +78,13 @@ export default class UI extends BasePage {
 
   static get() {
     driver.url(process.env.NUXEO_URL ? '' : 'ui');
+    if (!global.locale) {
+      const locale = browser.execute(() => navigator.language || navigator.userLanguage || 'en');
+      if (locale.value) {
+        global.locale = locale.value;
+        moment.locale(global.locale);
+      }
+    }
     return new UI('nuxeo-app');
   }
 

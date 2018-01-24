@@ -23,16 +23,17 @@
     "eslint-config-airbnb": "^5.0.1",
     "eslint-plugin-react": "^3.16.1",
     "fs-finder": "^1.8.1",
+    "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
+    "moment": "^2.20.1",
+    "nuxeo": "~1.1.1",
+    "selenium-standalone": "~5.9.1",
     "wdio-cucumber-framework": "^0.3.1",
     "wdio-firefox-profile-service": "0.0.3",
     "wdio-json-reporter": "^0.2.1",
     "wdio-junit-reporter": "^0.3.0",
     "wdio-selenium-standalone-service": "0.0.9",
     "wdio-spec-reporter": "^0.1.0",
-    "webdriverio": "4.8.0",
-    "minimist": "^1.2.0",
-    "nuxeo": "~1.1.1",
-    "selenium-standalone": "~5.9.1"
+    "webdriverio": "4.8.0"
   }
 }

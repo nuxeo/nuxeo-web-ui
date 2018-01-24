@@ -36,11 +36,21 @@ global.fieldRegistry.register('nuxeo-select',
                                 item.waitForVisible();
                                 item.click();
                               });
+global.fieldRegistry.register('nuxeo-date',
+                              (element) => {
+                                const date = moment(element.element('#datetime').getText(), global.dateFormat)
+                                    .format(global.dateFormat);
+                                return date;
+                              },
+                              () => {
+                                throw new Error('cannot set value of a nuxeo-date element');
+                              });
 global.fieldRegistry.register('nuxeo-date-picker',
-                              (element) => element.element('#nativeInput').getValue(),
+                              (element) => moment(element.element('#nativeInput').getValue(), global.dateFormat)
+                                  .format(global.dateFormat),
                               (element, value) => {
                                 element.element('#nativeInput').click();
-                                const keys = value.split('-');
+                                const keys = moment(value, global.dateFormat).format('L').split(/[^\d\w]/);
                                 driver.keys(keys);
                               });
 global.fieldRegistry.register('nuxeo-textarea',
