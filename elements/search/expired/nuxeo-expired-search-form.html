@@ -54,7 +54,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-expired-search-form',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.I18nBehavior],
       properties: {
         params: {
           type: Object,
@@ -83,17 +83,17 @@ limitations under the License.
         }
       },
 
+      clear: function() {
+        this.searchTerm = '';
+      },
+
       _addFullTextSearch: function() {
         if (this.searchTerm && this.searchTerm.length >= this.minChars) {
-          this.set('params.title', this.searchTerm + '*');
+          this.set('params.title', this.formatFulltext(this.searchTerm) + '*');
         } else if (this.params.title) {
           this.set('params.title', '');
           delete this.params.title;
         }
-      },
-
-      clear: function() {
-        this.searchTerm = '';
       }
     });
   </script>
