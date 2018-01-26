@@ -155,7 +155,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         nxProvider: Object,
 
         /**
-         * used as key for settings in local storage
+         * Used as key for settings in local storage. Without a `name`, no settings are saved/restored.
          */
         name: String,
 
@@ -324,7 +324,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       restoreSettings: function() {
-        if (this._settings) {
+        if (this._settings && this.name) {
           if (this._settings.displayMode && this._settings.displayMode.length > 0) {
             this.displayMode = this._settings.displayMode;
           }
@@ -335,7 +335,9 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       saveSettings: function() {
-        this.$.prefStorage.save();
+        if (this.name) {
+          this.$.prefStorage.save();
+        }
       },
 
       _columnsChanged: function(e) {
