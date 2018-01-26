@@ -127,7 +127,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       </div>
 
-      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}"
+      <iron-pages id="views" attr-for-selected="name" selected="{{displayMode}}" selected-item="{{view}}"
                   on-iron-items-changed="_updateViews">
         <slot></slot>
       </iron-pages>
@@ -160,11 +160,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         name: String,
 
         /**
-         * display mode
+         * Active display mode. If no `displayMode` is specified, it will fallback to the first display mode found.
          */
         displayMode: {
           type: String,
-          value: 'table',
           notify: true
         },
 
@@ -321,16 +320,16 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       initializeSettings: function() {
-        this._settings = {displayMode: this.displayMode};
+        this._settings = {};
       },
 
       restoreSettings: function() {
         if (this._settings) {
           if (this._settings.displayMode && this._settings.displayMode.length > 0) {
             this.displayMode = this._settings.displayMode;
-            if (this._settings[this.displayMode] && this.view) {
-              this.view.settings = this._settings[this.displayMode];
-            }
+          }
+          if (this._settings[this.displayMode] && this.view) {
+            this.view.settings = this._settings[this.displayMode];
           }
         }
       },
