@@ -127,8 +127,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       </div>
 
-      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}" on-iron-items-changed="_updateViews"
-        on-iron-select="_selectView" on-iron-deselect="_deselectView">
+      <iron-pages id="views" attr-for-selected="name" selected="[[displayMode]]" selected-item="{{view}}"
+                  on-iron-items-changed="_updateViews">
         <slot></slot>
       </iron-pages>
 
@@ -149,17 +149,28 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       is: 'nuxeo-results',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
       properties: {
-        // the page provider to display results for
+        /**
+         * the page provider to display results for
+         */
         nxProvider: Object,
 
-        // used as key for settings in local storage
+        /**
+         * used as key for settings in local storage
+         */
         name: String,
 
-        // display mode
+        /**
+         * display mode
+         */
         displayMode: {
           type: String,
           value: 'table',
           notify: true
+        },
+
+        view: {
+          type: Object,
+          observer: '_viewChanged'
         },
 
         /**
@@ -196,7 +207,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       observers: [
-        '_viewChanged(view)',
         '_updateStorage(name)',
         '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns, document)'
       ],
@@ -217,12 +227,33 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         return (this.view && this.view.$.list) ? this.view.$.list.items : [];
       },
 
-      _viewChanged: function() {
-        if (this.view) {
-          this.view.nxProvider = this.nxProvider;
-          this.view.reset();
-          this.view.fetch();
-          this.fire('search-results-view', {view: this.view});
+      _viewChanged: function(view, oldView) {
+        if (oldView) {
+          this.unlisten(oldView, 'columns-changed', '_columnsChanged');
+          this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
+          this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
+        }
+        if (view) {
+          // restore settings
+          if (this._settings) {
+            this.set('_settings.displayMode', this.displayMode);
+            this.saveSettings();
+            view.settings = this._settings[this.displayMode];
+          }
+          // restore selection
+          if (this.selectedItems) {
+            this.selectedItems = []; // NXP-23186: this line removes selection synchronization between view modes
+            this.selectItems(this.selectedItems.slice());
+          }
+          // listen for columns, settings and selection changed
+          this.listen(view, 'columns-changed', '_columnsChanged');
+          this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
+          this.listen(view, 'settings-changed', '_saveViewSettings');
+          view.nxProvider = this.nxProvider;
+          // update view
+          view.reset();
+          view.fetch();
+          this.fire('search-results-view', {view: view});
         }
       },
 
@@ -354,37 +385,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.set('_settings.' + this.displayMode, this.view.settings);
           this.saveSettings();
         }
-      },
-
-      _deselectView: function(e) {
-        var view = e.detail.item;
-        this.unlisten(view, 'columns-changed', '_columnsChanged');
-        this.unlisten(view, 'selected-items-changed', '_selectedItemsChanged');
-        this.unlisten(view, 'settings-changed', '_saveViewSettings');
-      },
-
-      _selectView: function(e) {
-        var view = e.detail.item;
-
-        if (this._settings) {
-          // restore display mode
-          this.set('_settings.displayMode', this.displayMode);
-          this.saveSettings();
-
-          // restore view settings
-          this.view.settings = this._settings[this.displayMode];
-        }
-
-        // restore selection
-        if (this.selectedItems) {
-          this.selectedItems = []; // NXP-23186: this line removes selection synchronization between view modes
-          this.selectItems(this.selectedItems.slice());
-        }
-
-        // listen for columns, settings and selection changed
-        this.listen(view, 'columns-changed', '_columnsChanged');
-        this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
-        this.listen(view, 'settings-changed', '_saveViewSettings');
       }
 
     });
