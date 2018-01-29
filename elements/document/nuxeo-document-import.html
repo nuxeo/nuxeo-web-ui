@@ -543,7 +543,6 @@ limitations under the License.
                           on-tap="_cancel"
                           hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <!--<paper-button on-tap="_toggleCustomize">[[i18n('command.back')]]</paper-button>-->
 
           <paper-button noink
                         on-tap="_previousFile"
@@ -770,14 +769,12 @@ limitations under the License.
         if (this.stage === 'upload') {
           this.stage = 'customize';
           this.customizing = true;
-          if (this._importDocTypes.length > 0) {
-            this.set('selectedDocType', null);
-          }
+          this.set('selectedDocType', '');
           this.fire('nx-creation-wizard-hide-tabs');
           this._selectDoc(0);
         } else {
           this.stage = 'upload';
-          this.customizing = true;
+          this.customizing = false;
           this.fire('nx-creation-wizard-show-tabs');
         }
       },
