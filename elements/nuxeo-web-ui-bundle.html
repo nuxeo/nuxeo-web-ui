@@ -444,6 +444,19 @@
 
 <!-- RESULT SELECTION ACTIONS -->
 
+<nuxeo-slot-content name="orderSelectionActions" slot="RESULTS_SELECTION_ACTIONS" order="-50">
+  <template>
+    <nuxeo-filter document="[[document]]" type="OrderedFolder">
+      <template>
+        <nuxeo-move-documents-up-button selected-documents="[[selectedItems]]" documents="[[items]]">
+        </nuxeo-move-documents-up-button>
+        <nuxeo-move-documents-down-button selected-documents="[[selectedItems]]" documents="[[items]]">
+        </nuxeo-move-documents-down-button>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="downloadSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="5">
   <template>
     <nuxeo-download-documents-button documents="[[selectedItems]]">
