@@ -67,12 +67,14 @@ limitations under the License.
 
       _loadLayout: function(document, layout) {
         if (document) {
-          if (!this.previousDocument || (this.previousDocument && document.type === this.previousDocument.type)) {
+          if (!this.previousDocument || (document.type === this.previousDocument.type)) {
             this._model = {document: document};
+          }
+          if (!this.previousDocument || (document.uid !== this.previousDocument.uid)) {
+            this._href = null; // force layout restamp
           }
           var doctype = document.type.toLowerCase();
           var name = ['nuxeo', doctype, layout, 'layout'].join('-');
-          this._href = null; // force layout restamp
           this._href = this.resolveUrl(doctype + '/' + name + '.html');
         }
         this.previousDocument = document;
