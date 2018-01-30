@@ -1,0 +1,154 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+
+<!--
+A button element for moving documents up within an OrderedFolder.
+
+`nuxeo-move-documents-up-button`
+@group Nuxeo UI
+@element nuxeo-move-documents-up-button
+-->
+<dom-module id="nuxeo-move-documents-up-button">
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      iron-icon:hover {
+        fill: var(--nuxeo-link-hover-color);
+      }
+    </style>
+
+    <nuxeo-operation id="moveUpOp"
+      op="Document.Order"
+      params='{"before": "[[_beforeUid]]"}'
+      input="[[_sortedDocuments]]">
+    </nuxeo-operation>
+
+    <template id="availability" is="dom-if" if="[[_available]]">
+      <paper-icon-button noink
+        id="upButton"
+        icon="icons:arrow-upward"
+        on-tap="move">
+      </paper-icon-button>
+      <paper-tooltip for="upButton" position="[[tooltipPosition]]">
+        [[i18n('app.documents.moveUp')]]
+      </paper-tooltip>
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-move-documents-up-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        /**
+         * All sibling documents.
+         */
+        allDocuments: Array,
+        /**
+         * Input documents to be moved down.
+         */
+        documents: Array,
+        /**
+         * Possible positions are  top|bottom|left|right. The default position is bottom.
+         */
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
+        },
+        _available : Boolean,
+        _beforeUid: Document,
+        _sortedDocuments: Array
+      },
+
+      observers: [
+        '_isAvailable(documents.splices)'
+      ],
+
+      move: function() {
+        this.$.moveUpOp.execute().then(function() {
+          for (var i = this._sortedDocuments.length - 1; i >= 0; i--) {
+            this.allDocuments.splice(this.allDocuments.indexOf(this._sortedDocuments[i]), 1);
+            this.allDocuments.splice(this._focusIndex, 0, this._sortedDocuments[i]);
+          }
+          this._sortedDocuments = [];
+          this.fire('refresh-display', {'focusIndex': this._focusIndex});
+        }.bind(this)).catch(function() {
+          this.fire('notify', {'message': this.i18n('app.documents.move.error')});
+        });
+      },
+
+      _isAvailable: function() {
+        this._available = false;
+        if (this.documents && this.documents.length > 0) {
+          // Let's sort
+          this._sortedDocuments = this.documents.slice(0);
+          try {
+            this._sortedDocuments.sort(function(a, b) {
+              var idxa = this.allDocuments.indexOf(a);
+              var idxb = this.allDocuments.indexOf(b);
+              if (idxa < 0 || idxb < 0) {
+                throw new Error("Document is not in the list.");
+              }
+              return idxa - idxb;
+            }.bind(this));
+          } catch(e) {
+            this.fire('clear-selected-items');
+            return;
+          }
+          var sequenceBreakIdx;
+          var isSequence = this._sortedDocuments.every(function(doc, idx) {
+            if (idx > 0) {
+              if (this._sortedDocuments[idx - 1].uid === this.allDocuments[this.allDocuments.indexOf(doc) - 1].uid) {
+                return true;
+              } else {
+                sequenceBreakIdx = idx;
+                return false;
+              }
+            }
+            return true;
+          }.bind(this));
+
+          if (this._sortedDocuments[0].uid === this.allDocuments[0].uid && isSequence) {
+            return;
+          }
+
+          if (!isSequence) {
+            this._focusIndex = this.allDocuments.indexOf(this._sortedDocuments[0]) + 1;
+            this._sortedDocuments.splice(0, sequenceBreakIdx);
+          } else {
+            this._focusIndex = this.allDocuments.indexOf(this._sortedDocuments[0]) - 1;
+          }
+          this._beforeUid = this.allDocuments[this._focusIndex].uid;
+          this._available = true;
+        }
+      }
+
+    });
+  </script>
+</dom-module>
