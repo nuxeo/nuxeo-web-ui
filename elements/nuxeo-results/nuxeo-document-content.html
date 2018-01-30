@@ -102,7 +102,7 @@ limitations under the License.
                          empty-label="[[emptyLabel]]"
                          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                          selection-enabled display-quick-filters
-                         display-sort sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
+                         display-sort$="[[_canSort(document)]]" sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
                                            tabindex$="{{tabIndex}}"
@@ -124,14 +124,14 @@ limitations under the License.
                           display-quick-filters
                           on-row-clicked="_navigate">
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
-                                   field="dc:title" sort-by="dc:title" filter-by="title"  flex="100">
+                                   field="dc:title" sort-by="[[_displaySort(document, 'dc:title')]]" filter-by="title"  flex="100">
             <template>
               <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
               <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
-                                   field="dc:modified" sort-by="dc:modified"
+                                   field="dc:modified" sort-by="[[_displaySort(document, 'dc:modified')]]"
                                    filter-by="dc_modified_agg"
                                    flex="50">
             <template is="header">
@@ -146,7 +146,7 @@ limitations under the License.
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
-                                   filter-by="dc_last_contributor_agg" field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+                                   filter-by="dc_last_contributor_agg" field="dc:lastContributor" sort-by="[[_displaySort(document, 'dc:lastContributor')]]" flex="50">
             <template is="header">
               <nuxeo-dropdown-aggregation
                 placeholder="[[i18n('documentContentView.datatable.header.lastContributor')]]"
@@ -169,13 +169,13 @@ limitations under the License.
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]"
-                                   field="dc:created" sort-by="dc:created" flex="50" hidden>
+                                   field="dc:created" sort-by="[[_displaySort(document, 'dc:created')]]" flex="50" hidden>
             <template>
               <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]"
-                                   field="dc:creator" sort-by="dc:creator" hidden>
+                                   field="dc:creator" sort-by="[[_displaySort(document, 'dc:creator')]]" hidden>
             <template>
               <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
             </template>
@@ -279,6 +279,11 @@ limitations under the License.
       _observeDocument: function() {
         if (this.document) {
           this.params = {'ecm_parentId': this.document.uid};
+          if (this.hasType(this.document, 'OrderedFolder')) {
+            this.$.nxProvider.set('sort', {'ecm:pos': 'ASC'});
+          } else {
+            this.$.nxProvider.set('sort', {});
+          }
         }
       },
 
@@ -299,6 +304,14 @@ limitations under the License.
           classes += ' selected';
         }
         return classes;
+      },
+
+      _canSort: function(document) {
+        return !(document && this.hasType(document, 'OrderedFolder'));
+      },
+
+      _displaySort: function(document, field) {
+        return this._canSort(document) ? field : undefined;
       },
 
       _dragoverImport: function(e) {
