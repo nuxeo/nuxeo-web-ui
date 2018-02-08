@@ -22,10 +22,12 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-delete-document-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-untrash-document-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../nuxeo-restore-version-button/nuxeo-restore-version-button.html">
 <link rel="import" href="../nuxeo-tasks/nuxeo-tasks-list.html">
 <link rel="import" href="../nuxeo-workflow-graph/nuxeo-workflow-graph.html">
@@ -42,23 +44,15 @@ limitations under the License.
       .bar {
         @apply --layout-horizontal;
         @apply --layout-center;
-        @apply --layout-justified;
         padding: 8px;
         margin-bottom: 16px;
-      }
-
-      .version {
-        background: white;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+        background-color: var(--nuxeo-box);
       }
 
       .bar.task {
         background: black;
         color: white;
-      }
-
-      .bar.workflow {
-        background: var(--nuxeo-box);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
 
       .item {
@@ -130,6 +124,23 @@ limitations under the License.
           </span>
         </div>
         <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
+      </div>
+    </template>
+
+    <!-- trash -->
+    <template is="dom-if" if="[[isTrashed(document)]]">
+      <div id="trashedInfoBar" class="bar trashed">
+        <div class="layout horizontal center flex">
+          <iron-icon icon="icons:info"></iron-icon>
+          <span>[[i18n('documentPage.trash.info')]]</span>
+        </div>
+        <template is="dom-if" if="[[!hasPermission(document, 'Write')]]">
+          <div>[[i18n('documentPage.trash.noPermissionToRestore')]]</div>
+        </template>
+        <template is="dom-if" if="[[hasPermission(document, 'Write')]]">
+          <nuxeo-untrash-document-button document="[[document]]"></nuxeo-untrash-document-button>
+          <nuxeo-delete-document-button document="[[document]]" hard></nuxeo-delete-document-button>
+        </template>
       </div>
     </template>
 
