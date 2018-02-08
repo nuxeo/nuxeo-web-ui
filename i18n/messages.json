@@ -361,6 +361,8 @@
   "documentPage.metadata": "Properties",
   "documentPage.tags": "Tags",
   "documentPage.tags.placeholder": "Add tags to this document",
+  "documentPage.trash.info": "You are viewing a trashed document.",
+  "documentPage.trash.noPermissionToRestore": "To restore, please contact your admin.",
   "documentPage.to.process": "You have a task to process before ",
   "documentPrevNextDoc.nextDocument": "Next Document",
   "documentPrevNextDoc.previousDocument": "Previous Document",
