@@ -258,6 +258,7 @@
   "defaultSearch.subject": "Subjects",
   "defaultSearch.tags": "Tags",
   "defaultSearch.tags.placeholder": "e.g. events, boston",
+  "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Permanently delete selected document(s)?",
   "deleteDocumentsButton.tooltip": "Delete Selected Items",
   "deleteTemplateButton.dialog.confirm": "Delete Template",

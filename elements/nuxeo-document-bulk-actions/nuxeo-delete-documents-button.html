@@ -76,7 +76,7 @@ limitations under the License.
       },
 
       deleteDocuments: function() {
-        if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocumentsForever'))) {
+        if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
           if (this.documents && this.documents.length) {
             var uids = this.documents.map(function(doc) {
               return doc.uid;
