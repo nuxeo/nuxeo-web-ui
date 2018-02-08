@@ -332,6 +332,27 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="documentTrashItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
+  <template>
+    <nuxeo-filter document="[[document]]" facet="Folderish">
+      <template>
+        <nuxeo-page-item name="trash" label="browser.trash"></nuxeo-page-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentTrashPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
+  <template>
+    <nuxeo-filter document="[[document]]" facet="Folderish">
+      <template>
+        <nuxeo-document-trash-content name="trash" document="[[document]]" provider="advanced_document_trash_content">
+        </nuxeo-document-trash-content>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <!-- DRAWER -->
 
 <nuxeo-slot-content name="browseDrawerItem" slot="DRAWER_ITEMS" order="10">
