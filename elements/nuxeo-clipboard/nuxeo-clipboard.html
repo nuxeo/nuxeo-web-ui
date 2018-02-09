@@ -127,7 +127,7 @@ limitations under the License.
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
     <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
                      params="[[_opParams(targetDocument)]]"
-                     headers='{"nx_es_sync": "true"}'></nuxeo-operation>
+                     sync-indexing></nuxeo-operation>
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
