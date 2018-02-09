@@ -157,7 +157,7 @@ limitations under the License.
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
-                    headers='{"nx_es_sync": "true"}'
+                    sync-indexing
                     enrichers="permissions, subtypes"
                     response="{{createResponse}}"></nuxeo-document>
 

@@ -315,11 +315,12 @@ limitations under the License.
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="blobRemover"></nuxeo-resource>
-    <nuxeo-operation id="fileManagerImport" op="FileManager.Import"></nuxeo-operation>
+    <nuxeo-operation id="fileManagerImport" op="FileManager.Import" sync-indexing></nuxeo-operation>
     <nuxeo-document id="docRequest"
                     doc-path="[[targetPath]]"
                     data="[[document]]"
-                    headers='{"nx_es_sync": "true", "X-Batch-No-Drop": "true"}'
+                    sync-indexing
+                    headers='{"X-Batch-No-Drop": "true"}'
                     response="{{createResponse}}"></nuxeo-document>
     <nuxeo-document id="parentFetcher"
                     doc-path="[[targetPath]]"></nuxeo-document>
@@ -1076,7 +1077,6 @@ limitations under the License.
         }).join();
         this.$.fileManagerImport.params = params;
         this.$.fileManagerImport.params.noMimeTypeCheck = true;
-        this.$.fileManagerImport.headers = {'nx_es_sync': 'true'};
         return this.$.fileManagerImport.execute();
       },
 
