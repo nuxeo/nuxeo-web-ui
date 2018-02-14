@@ -469,6 +469,18 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="trashMenuButton" slot="DRAWER_ITEMS" order="100">
+  <template>
+    <nuxeo-menu-icon name="trash" icon="nuxeo:delete" label="app.trashSearch"></nuxeo-menu-icon>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="trashMenuPage" slot="DRAWER_PAGES">
+  <template>
+    <nuxeo-search-form name="trash" search-name="trash" auto
+                       provider="default_trash_search" schemas="dublincore,common,uid"></nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>
+
 <!-- RESULT SELECTION ACTIONS -->
 
 <nuxeo-slot-content name="orderSelectionActions" slot="RESULTS_SELECTION_ACTIONS" order="-50">

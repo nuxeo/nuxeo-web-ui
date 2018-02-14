@@ -1,0 +1,129 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-trash-search-form`
+@group Nuxeo UI
+@element nuxeo-trash-search-form
+-->
+<dom-module id="nuxeo-trash-search-form">
+  <template>
+    <style>
+      *[role=widget] {
+        margin-bottom: 16px;
+      }
+
+      label {
+        @apply --nuxeo-label;
+      }
+    </style>
+
+    <nuxeo-input role="widget"
+                 id="searchInput"
+                 type="search"
+                 label="[[i18n('defaultSearch.fullText')]]"
+                 value="{{searchTerm}}"
+                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+                 autofocus
+                 on-keydown="_checkForEnter">
+    </nuxeo-input>
+
+    <nuxeo-path-suggestion value="{{_path}}" label="[[i18n('defaultSearch.path')]]" role="widget"></nuxeo-path-suggestion>
+
+    <div role="widget">
+      <label>[[i18n('defaultSearch.authors')]]</label>
+      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+        data="[[aggregations.dc_creator_agg]]"
+        value="{{params.dc_creator_agg}}"
+        multiple="true"
+        name="authors">
+      </nuxeo-dropdown-aggregation>
+    </div>
+
+    <div role="widget">
+      <label>[[i18n('defaultSearch.size')]]</label>
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.common_size_agg]]"
+        value="{{params.common_size_agg}}"
+        name="size">
+      </nuxeo-checkbox-aggregation>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-trash-search-form',
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        searchTerm: {
+          type: String,
+          notify: true,
+          observer: '_addFullTextSearch'
+        },
+        minChars: {
+          type: Number,
+          value: 3
+        },
+        _path: {
+          type: String,
+          value: '/',
+          observer: '_addPathSearch'
+        }
+      },
+
+      clear: function() {
+        this.searchTerm = '';
+        this._path = '/';
+      },
+
+      _addFullTextSearch: function() {
+        if (this.searchTerm && this.searchTerm.length >= this.minChars) {
+          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm) + '*');
+          this.set('params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+        } else if (this.params.ecm_fulltext) {
+          this.set('params.ecm_fulltext', '');
+          delete this.params.ecm_fulltext;
+          delete this.params.highlight;
+        }
+      },
+
+      _addPathSearch: function() {
+        if (this._path) {
+          this.set('params.ecm_path', [this._path]);
+        }
+      },
+
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13) {
+          this.fire('trigger-search');
+        }
+      }
+
+    });
+  </script>
+</dom-module>
