@@ -486,7 +486,9 @@ limitations under the License.
         'navigate': '_navigate',
         'collection-loaded': '_updateCollectionMenu',
         'notify': '_notify',
-        'nx-clipboard-updated': '_clipboardUpdated'
+        'nx-clipboard-updated': '_clipboardUpdated',
+        'document-deleted': '_documentDeleted',
+        'document-untrashed': '_documentUntrashed'
       },
 
       observers: ['_computeSharedActionContext(currentUser)'],
@@ -845,6 +847,32 @@ limitations under the License.
 
       _documentUnlocked: function() {
         this._toast(this.i18n('app.document.unlocked'));
+      },
+
+      _documentDeleted: function(e) {
+        this._toast(this.i18n('app.document.deleted.' + (e.detail.error ? 'error' : 'success') ));
+
+        // navigate to parent
+        if (!e.detail.error) {
+          var enrichers = e.detail.doc.contextParameters;
+          if (enrichers) {
+            if (enrichers.aboveDocument) {
+              this._navigate({'detail': {'doc': enrichers.aboveDocument}});
+            } else if (enrichers.breadcrumb) {
+              var entries = breadcrumb.entries;
+              if (entries.length > 1) {
+                this._navigate({'detail': {'doc': entries[entries.length - 2]}});
+              }
+            }
+          }
+        }
+      },
+
+      _documentUntrashed: function(e) {
+        this._toast(this.i18n('app.document.untrashed.' + (e.detail.error ? 'error' : 'success') ));
+        if (e.detail.doc && !e.detail.error) {
+          this._navigate({'detail': {'doc': e.detail.doc}});
+        }
       },
 
       _documentsDeletedError: function(err, documents){
