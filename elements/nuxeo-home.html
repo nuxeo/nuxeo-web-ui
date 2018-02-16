@@ -105,7 +105,6 @@ limitations under the License.
             <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{_recentDocuments}}"></nuxeo-document-storage>
             <nuxeo-page-provider id="recentProvider" page-size="15" schemas="uid"></nuxeo-page-provider>
             <nuxeo-data-table id="latestViewedDocs"
-                              items="[[_recentDocumentsItems]]"
                               max-items="15"
                               empty-label="[[i18n('recentDocuments.empty')]]"
                               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
@@ -113,7 +112,7 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor('document', item.uid)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
@@ -181,11 +180,6 @@ limitations under the License.
           type: Array,
           value: [],
           observer: '_recentDocumentsChanged'
-        },
-
-        _recentDocumentsItems: {
-          type: Array,
-          value: []
         }
       },
 
@@ -234,19 +228,17 @@ limitations under the License.
 
       _recentDocumentsChanged: function(docs) {
         if (docs && docs.length > 0) {
-          var ids = docs.map(function(k) {return "'" + k.uid + "'"}).join(',');
-          this.$.recentProvider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ')';
-          this.$.recentProvider.fetch().then(function(result) {
-            var recents = [];
-            result.entries.forEach(function(entry) {
-              var recent = docs.filter(function(doc) {
-                return doc.uid === entry.uid;
-              });
-              if (recent && recent.length > 0) {
-                recents.push(recent[0]);
+          var storage = this.$.recentStorage;
+          var provider = this.$.recentProvider;
+          var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
+          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ')';
+          provider.fetch().then(function(result) {
+            docs.forEach(function(doc) {
+              if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
+                storage.remove(doc);
               }
             });
-            this.set('_recentDocumentsItems', recents);
+            this.$.latestViewedDocs.items = docs;
           }.bind(this));
         }
       }
