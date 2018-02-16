@@ -157,6 +157,20 @@ export default class Browser extends BasePage {
     });
   }
 
+  indexOfChild(title) {
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    let i;
+    for (i = 0; i < rows.value.length; i++) {
+      if (rows.value[i].isVisible(`nuxeo-data-table-cell a.title`) &&
+          rows.value[i].getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+        // minus 1 because of the table header
+        return i - 1;
+      }
+    }
+    return -1;
+  }
+
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
@@ -179,6 +193,17 @@ export default class Browser extends BasePage {
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     rows.value.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
+        row.element('nuxeo-data-table-checkbox').click();
+      }
+    });
+  }
+
+  selectChildDocument(title) {
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    rows.value.forEach((row) => {
+      if (row.isVisible('nuxeo-data-table-checkbox') &&
+          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
         row.element('nuxeo-data-table-checkbox').click();
       }
     });
