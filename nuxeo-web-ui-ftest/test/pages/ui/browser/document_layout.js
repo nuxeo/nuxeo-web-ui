@@ -23,8 +23,10 @@ export default class DocumentLayout extends BasePage {
 
   fillMultipleValues(table) {
     table.rows().forEach((row) => {
-      const fieldEl = this.getField(row[0]);
+      const fieldName = row[0];
+      const fieldEl = this.getField(fieldName);
       fieldEl.waitForVisible();
+      fieldEl.scrollIntoView(`${this._selector} [name="${fieldName}"]`);
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }
