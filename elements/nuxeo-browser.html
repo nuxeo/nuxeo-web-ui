@@ -65,9 +65,11 @@ limitations under the License.
 
       <div>
 
-        <div class="document-actions">
-          <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-        </div>
+        <template is="dom-if" if="[[!isTrashed(document)]]">
+          <div class="document-actions">
+            <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </div>
+        </template>
 
         <div id="nxContent">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
