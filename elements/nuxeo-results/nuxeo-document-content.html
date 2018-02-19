@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
@@ -39,6 +40,10 @@ limitations under the License.
   <template>
 
     <style include="nuxeo-styles">
+      :host {
+        display: block;
+      }
+
       nuxeo-data-table,
       nuxeo-data-grid,
       nuxeo-data-list {
@@ -85,7 +90,6 @@ limitations under the License.
                          page="[[pageNumber]]"
                          params="[[params]]"
                          schemas="dublincore,common,uid,file"
-                         auto$="[[visible]]"
                          headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
                          fetch-aggregates>
     </nuxeo-page-provider>
@@ -216,7 +220,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-document-content',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Polymer.IronResizableBehavior],
       properties: {
         document: {
           type: Object
@@ -245,15 +249,20 @@ limitations under the License.
         sortOptions: {
           type: Array,
           value: []
+        },
+        visible: {
+          type: Boolean,
+          value: false
         }
       },
 
       listeners: {
-        'document-created': '_handleDocumentCreated'
+        'document-created': '_handleDocumentCreated',
+        'iron-resize': '_computeVisible'
       },
 
       observers: [
-        '_refresh(params)',
+        '_refresh(params, visible)',
         '_observeDocument(document)'
       ],
 
@@ -289,7 +298,7 @@ limitations under the License.
       },
 
       _refresh: function() {
-        if (this.document && this.$.results.view) {
+        if (this.document && this.$.results.view && this.visible) {
           this.$.results.view.fetch();
         }
       },
@@ -347,6 +356,10 @@ limitations under the License.
 
       _browseActionContext: function() {
         return {document: this.document, selectedItems: this.selectedItems};
+      },
+
+      _computeVisible: function() {
+        this.visible = Boolean(this.offsetWidth || this.offsetHeight);
       }
 
     });
