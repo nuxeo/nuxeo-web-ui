@@ -135,10 +135,10 @@ limitations under the License.
           <iron-icon icon="icons:info"></iron-icon>
           <span>[[i18n('documentPage.trash.info')]]</span>
         </div>
-        <template is="dom-if" if="[[!hasPermission(document, 'Write')]]">
+        <template is="dom-if" if="[[!hasPermission(document, 'Everything')]]">
           <div>[[i18n('documentPage.trash.noPermissionToRestore')]]</div>
         </template>
-        <template is="dom-if" if="[[hasPermission(document, 'Write')]]">
+        <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
           <nuxeo-untrash-document-button document="[[document]]"></nuxeo-untrash-document-button>
           <nuxeo-delete-document-button document="[[document]]" hard></nuxeo-delete-document-button>
         </template>
