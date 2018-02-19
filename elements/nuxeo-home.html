@@ -112,7 +112,7 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor('document', item.uid)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
@@ -231,7 +231,7 @@ limitations under the License.
           var storage = this.$.recentStorage;
           var provider = this.$.recentProvider;
           var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
-          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ')';
+          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ') AND ecm:isTrashed = 0';
           provider.fetch().then(function(result) {
             docs.forEach(function(doc) {
               if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
