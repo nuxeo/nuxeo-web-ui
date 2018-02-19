@@ -549,6 +549,18 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="hardDeleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
+  <template>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard></nuxeo-delete-documents-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="untrashSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="40">
+  <template>
+    <nuxeo-untrash-documents-button documents="[[selectedItems]]"></nuxeo-untrash-documents-button>
+  </template>
+</nuxeo-slot-content>
+
 <!-- THEMES -->
 
 <nuxeo-slot-content name="defaultTheme" slot="THEMES" order="10">
