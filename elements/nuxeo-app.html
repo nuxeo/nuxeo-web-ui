@@ -667,7 +667,7 @@ limitations under the License.
 
       // lookup the search
       _updateSearch: function() {
-        this.searchForm = this.$$("nuxeo-search-form[search-name='" + this.searchName + "']");
+        this.searchForm = this.$$("[search-name='" + this.searchName + "']");
         if (this.searchForm && this._searchOnLoad) {
           this.searchForm._search();
           this._searchOnLoad = false;
