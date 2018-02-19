@@ -115,9 +115,11 @@ limitations under the License.
           <!-- recently viewed -->
           <nuxeo-card>
             <h3><iron-icon icon="nuxeo:recent" name="Recently Viewed"></iron-icon>[[i18n('app.recentlyViewed')]]</h3>
-            <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{recentDocuments}}"></nuxeo-document-storage>
-            <nuxeo-data-table id="latestViewedDocs" max-items="15"
-              items="[[recentDocuments]]"
+            <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{_recentDocuments}}"></nuxeo-document-storage>
+            <nuxeo-page-provider id="recentProvider" page-size="15" schemas="uid"></nuxeo-page-provider>
+            <nuxeo-data-table
+              id="latestViewedDocs"
+              max-items="15"
               empty-label="[[i18n('recentDocuments.empty')]]"
               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
               on-row-clicked="_navigate">
@@ -187,6 +189,12 @@ limitations under the License.
         visible: {
           type: Boolean,
           observer: '_visibleChanged'
+        },
+
+        _recentDocuments: {
+          type: Array,
+          value: [],
+          observer: '_recentDocumentsChanged'
         }
       },
 
@@ -230,6 +238,24 @@ limitations under the License.
               this.favorite = resp;
               return resp;
             }.bind(this));
+        }
+      },
+
+      _recentDocumentsChanged: function(docs) {
+        if (docs && docs.length > 0) {
+          var storage = this.$.recentStorage;
+          var provider = this.$.recentProvider;
+          var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
+          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ') ' +
+                           'AND ecm:currentLifeCycleState != \'deleted\'';
+          provider.fetch().then(function(result) {
+            docs.forEach(function(doc) {
+              if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
+                storage.remove(doc);
+              }
+            });
+            this.$.latestViewedDocs.items = docs;
+          }.bind(this));
         }
       }
 
