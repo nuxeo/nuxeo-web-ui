@@ -24,11 +24,11 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
-`nuxeo-delete-documents-actions`
+`nuxeo-untrash-documents-actions`
 @group Nuxeo UI
-@element nuxeo-delete-documents-actions
+@element nuxeo-untrash-documents-actions
 -->
-<dom-module id="nuxeo-delete-documents-button">
+<dom-module id="nuxeo-untrash-documents-button">
   <template>
 
     <style>
@@ -41,15 +41,12 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing></nuxeo-operation>
-
-    <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <paper-icon-button icon="[[_icon]]" id="deleteAllButton">
-      </paper-icon-button>
-      <paper-tooltip for="deleteAllButton" position="[[tooltipPosition]]">
-        [[_tooltip]]
+      <paper-icon-button icon="nuxeo:restore-deleted" id="untrashAllButton"></paper-icon-button>
+      <paper-tooltip position="[[tooltipPosition]]">
+        [[i18n('untrashDocumentsButton.tooltip')]]
       </paper-tooltip>
     </template>
 
@@ -57,7 +54,7 @@ limitations under the License.
 
   <script>
     Polymer({
-      is: 'nuxeo-delete-documents-button',
+      is: 'nuxeo-untrash-documents-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         documents: {
@@ -66,69 +63,43 @@ limitations under the License.
           value: []
         },
 
-        /**
-         * Permanently delete the documents.
-         */
-        hard: {
-          type: Boolean,
-          value: false
-        },
-
         tooltipPosition: {
           type: String,
           value: 'bottom'
-        },
-
-        _icon: {
-          type: 'String',
-          computed: '_computeIcon(hard)'
-        },
-
-        _tooltip: {
-          type: 'String',
-          computed: '_computeTooltip(hard)'
         }
       },
 
       listeners: {
-        'tap': 'deleteDocuments'
+        'tap': 'untrashDocuments'
       },
 
-      deleteDocuments: function() {
-        if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
+      untrashDocuments: function() {
+        if (this.docsHavePermissions && confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
           if (this.documents && this.documents.length) {
             var uids = this.documents.map(function(doc) {
               return doc.uid;
             }).join(',');
-            var op = this.hard ? this.$.deleteOp : this.$.trashOp;
-            op.input = 'docs:' + uids;
+            this.$.operation.input = 'docs:' + uids;
             var uidsArray = this.documents.map(function(doc) {
               return doc.uid;
             });
-            op.execute().then(function() {
-              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
+            this.$.operation.execute().then(function() {
+              this.fire('nuxeo-documents-untrashed', {documentIds: uidsArray});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),
             function(error) {
-              this.fire('nuxeo-documents-deleted', {error: error,  documents: uidsArray});
+              this.fire('nuxeo-documents-untrashed', {error: error,  documents: uidsArray});
             }.bind(this));
           }
         }
       },
 
-      /**
-       * Action is available if all selected items are not trashed and `hard` is not active OR if all selected items
-       * are trashed and `hard` is active.
-       */
       _isAvailable: function() {
-        return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-            ((!this.hard && !this._checkDocsAreTrashed() || this.hard && this._checkDocsAreTrashed()));
+        return this.documents && this.documents.length > 0 && this._checkDocsPermissions()
+            && this._checkDocsAreTrashed();
       },
 
-      /**
-       * Checks if all selected documents are trashed.
-       */
       _checkDocsAreTrashed: function() {
         return this.documents.every(function(document) {
           return this.isTrashed(document);
@@ -153,14 +124,6 @@ limitations under the License.
         return document && document.contextParameters && document.contextParameters.permissions
           ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
           document.contextParameters.permissions.indexOf('Everything') > -1) : false;
-      },
-
-      _computeIcon: function(hard) {
-        return hard ? 'nuxeo:delete-permanently' : 'nuxeo:delete';
-      },
-
-      _computeTooltip: function(hard) {
-        return this.i18n(hard ? 'deleteDocumentsButton.tooltip.permanently' : 'deleteDocumentsButton.tooltip');
       }
     });
   </script>

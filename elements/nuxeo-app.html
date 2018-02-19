@@ -488,7 +488,9 @@ limitations under the License.
         'notify': '_notify',
         'nx-clipboard-updated': '_clipboardUpdated',
         'document-deleted': '_documentDeleted',
-        'document-untrashed': '_documentUntrashed'
+        'document-untrashed': '_documentUntrashed',
+        'nuxeo-documents-deleted': '_documentsDeleted',
+        'nuxeo-documents-untrashed': '_documentsUntrashed'
       },
 
       observers: ['_computeSharedActionContext(currentUser)'],
@@ -501,14 +503,6 @@ limitations under the License.
           if (e.reason && e.reason.status === 404) {
             this.showError(404, e.reason.message, this._errorUrl());
           }
-        }.bind(this));
-
-        window.addEventListener('nuxeo-documents-deleted', function() {
-          this._fetchTasks();
-        }.bind(this));
-
-        window.addEventListener('nuxeo-documents-deleted-error', function(e) {
-          this._documentsDeletedError(e.detail.response, e.detail.documents);
         }.bind(this));
       },
 
@@ -766,7 +760,7 @@ limitations under the License.
         this.navigateTo('tasks', e.detail.id);
       },
 
-      _onAddedToClipboard: function(e){
+      _onAddedToClipboard: function(e) {
         this._toast(
           this.i18n(e.detail.docIds && e.detail.docIds.length > 1
             ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard')
@@ -859,7 +853,7 @@ limitations under the License.
             if (enrichers.aboveDocument) {
               this._navigate({'detail': {'doc': enrichers.aboveDocument}});
             } else if (enrichers.breadcrumb) {
-              var entries = breadcrumb.entries;
+              var entries = enrichers.breadcrumb.entries;
               if (entries.length > 1) {
                 this._navigate({'detail': {'doc': entries[entries.length - 2]}});
               }
@@ -875,15 +869,31 @@ limitations under the License.
         }
       },
 
-      _documentsDeletedError: function(err, documents){
+      _documentsDeletedError: function(err, documents) {
         var errorMessage = this.i18n(documents && documents.length > 1
           ? 'app.documents.deleted.error' : 'app.document.deleted.error');
 
-        switch (err.status){
-          case 403: errorMessage = errorMessage + " " +  this.i18n('error.403'); break;
-          default: break;
+        switch (err.status) {
+          case 403:
+            errorMessage = errorMessage + " " + this.i18n('error.403');
+            break;
+          default:
+            break;
         }
         this._toast(errorMessage);
+      },
+
+      _documentsDeleted: function(e) {
+        if (e.detail.error) {
+          this._documentsDeletedError(e.detail.error.response, e.detail.documents);
+        } else {
+          this._fetchTasks();
+          this._toast(this.i18n('app.documents.deleted.success'));
+        }
+      },
+
+      _documentsUntrashed: function(e) {
+        this._toast(this.i18n('app.documents.untrashed.' + (e.detail.error ? 'error' : 'success') ));
       },
 
       _documentFileDeleted: function() {
