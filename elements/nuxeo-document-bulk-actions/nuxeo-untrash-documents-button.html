@@ -121,9 +121,7 @@ limitations under the License.
        * Checks if a single given document has write permissions
        */
       _docHasPermissions: function(document) {
-        return document && document.contextParameters && document.contextParameters.permissions
-          ? (document.contextParameters.permissions.indexOf('Write') > -1 ||
-          document.contextParameters.permissions.indexOf('Everything') > -1) : false;
+        return this.hasPermission(document, 'Write') || this.hasPermission(document, 'Everything');
       }
     });
   </script>
