@@ -290,7 +290,7 @@
   "documentCreateVersion.minor": "Delversion",
   "documentCreateVersion.title": "Skapa version för {0} - Version {1}.{2}",
   "documentCreationBehavior.error.invalidLocation": "Ogiltig plats",
-  "documentCreationBehavior.error.invalidSubtype": "You cannot cannot create this type of document in this location.",
+  "documentCreationBehavior.error.invalidSubtype": "You cannot create this type of document in this location.",
   "documentCreationBehavior.error.noPermission": "Du har inte behörighet att skapa under denna plats",
   "documentCreationBehavior.error.noSubtypes": "Välj en annan behållare för att skapa ditt innehåll",
   "documentCreationForm.location": "Plats",
