@@ -6,6 +6,7 @@ import CollapsibleDocumentPage from './browser/collapsible_document_page';
 import DocumentPermissions from './browser/document_permissions';
 import EditDialog from './edit_dialog';
 import Selection from './selection';
+import Results from './results';
 
 export default class Browser extends BasePage {
 
@@ -34,6 +35,20 @@ export default class Browser extends BasePage {
     return this.el.element('nuxeo-page-item[name="permissions"]');
   }
 
+  get currentPage() {
+    // get selected pill to get it's name
+    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    // get active page
+    return this._section(pill.getAttribute('name'));
+  }
+
+  /**
+   * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
+   */
+  get currentPageResults() {
+    return new Results(`${this.currentPage.getTagName()}`);
+  }
+
   get breadcrumb() {
     return this.el.element('nuxeo-breadcrumb');
   }
@@ -43,7 +58,7 @@ export default class Browser extends BasePage {
   }
 
   _section(name) {
-    return this.el.element(`iron-pages section[name='${name}']`);
+    return this.el.element(`#nxContent [name='${name}']`);
   }
 
   get editButton() {
@@ -210,7 +225,26 @@ export default class Browser extends BasePage {
   }
 
   get selectionToolbar() {
-    return new Selection('nuxeo-selection-toolbar#toolbar');
+    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
+  }
+
+  get trashedInfobar() {
+    return this.el.element('#trashedInfoBar');
+  }
+
+  get trashDocumentButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.el.element('.document-actions nuxeo-delete-document-button #deleteButton');
+  }
+
+  get untrashDocumentButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.trashedInfobar.element('nuxeo-untrash-document-button #untrashButton');
+  }
+
+  get deleteDocumentButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.trashedInfobar.element('nuxeo-delete-document-button[hard] #deleteButton');
   }
 
 }

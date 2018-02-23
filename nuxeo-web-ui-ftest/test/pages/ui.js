@@ -46,6 +46,10 @@ export default class UI extends BasePage {
     return new Search('#suggester #suggester');
   }
 
+  get trashSearchForm() {
+    return new Search('nuxeo-search-form[name="trash"]');
+  }
+
   get searchButton() {
     return this.el.element('#searchButton');
   }

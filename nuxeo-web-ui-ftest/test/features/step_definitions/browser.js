@@ -8,6 +8,13 @@ module.exports = function () {
     this.ui.drawer._section(tab).elementByTextContent(`.content a`, title).waitForVisible();
   });
 
+  this.Then(/^I can navigate to (.*) pill$/, (pill) => {
+    this.ui.browser.waitForVisible();
+    const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+    el.waitForVisible();
+    el.click();
+  });
+
   this.When('I click "$title" in the $tab tree', (title, tab) => {
     this.ui.drawer._section(tab).waitForVisible();
     const el = this.ui.drawer._section(tab).elementByTextContent(`.content a`, title);
@@ -49,5 +56,13 @@ module.exports = function () {
 
   this.Then('I can see the "$title" child document is at position "$pos"', (title, pos) => {
     this.ui.browser.indexOfChild(title).should.equals(parseInt(pos) - 1);
+  });
+
+  this.Then(/^I can see (\d+) documents$/, (numberOfResults) => {
+    const results = this.ui.browser.currentPageResults;
+    results.waitForVisible();
+    const displayMode = results.displayMode;
+    results.getResults(displayMode).waitForVisible();
+    results.resultsCount(displayMode).toString().should.equal(numberOfResults);
   });
 };
