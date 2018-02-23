@@ -20,13 +20,13 @@ fixtures.documents = {
     return doc;
   },
   create: (parent, document) => nuxeo.repository().create(parent, document).then((doc) => {
-    liveDocuments.push(doc.path);
+    liveDocuments.push(doc.uid);
     return doc;
   }),
   createWithAuthor: (parent, document, username) => nuxeo.repository()
       .create(parent, document)
       .then((doc) => {
-        liveDocuments.push(doc.path);
+        liveDocuments.push(doc.uid);
         if (username) {
           return doc.set({
             'dc:creator': username,
@@ -52,9 +52,10 @@ fixtures.documents = {
       permission,
       username,
     }).execute(),
-  delete: (docPath) => nuxeo.repository().delete(docPath).then(() => {
-    liveDocuments.splice(liveDocuments.indexOf(docPath), 1);
+  delete: (document) => nuxeo.repository().delete(document.path).then(() => {
+    liveDocuments.splice(liveDocuments.indexOf(document.uid), 1);
   }),
+  trash: (document) => nuxeo.operation('Document.Trash').input(document.uid).execute().then(doc => doc),
   attach: (document, blobPath, asAttachment = false) => {
     const blob = BlobHelper.fromPath(blobPath);
     const uploader = nuxeo.batchUpload();
@@ -96,7 +97,7 @@ fixtures.documents = {
           .execute({ headers: { nx_es_sync: 'true' } })
           .then((docs) => {
             const doc = docs.entries[0];
-            liveDocuments.push(doc.path);
+            liveDocuments.push(doc.uid);
             return doc;
           })
     );
@@ -107,7 +108,6 @@ module.exports = function () {
   this.Before(() => nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc; }));
 
   this.After(() => Promise.all(liveDocuments
-      .filter((doc) => path.dirname(doc) === '/default-domain')
-      .map((doc) => nuxeo.repository().delete(doc)))
+      .map((docUid) => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
       .then(() => { liveDocuments = []; }));
 };
