@@ -225,7 +225,11 @@
 
 <nuxeo-slot-content name="lockToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="70">
   <template>
-    <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+    <nuxeo-filter document="[[document]]" expression="document.facets.indexOf('Folderish') === -1">
+      <template>
+        <nuxeo-lock-toggle-button document="[[document]]"></nuxeo-lock-toggle-button>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
