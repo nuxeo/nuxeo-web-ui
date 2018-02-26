@@ -235,7 +235,7 @@ limitations under the License.
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="aboveDocument, permissions, breadcrumb, preview, favorites, subscribedNotifications, thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags"
+                    enrichers="firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications, thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags"
                     headers='{"X-NXfetch.document": "lock,properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch.task": "actors"}'>
     </nuxeo-document>
 
@@ -850,8 +850,8 @@ limitations under the License.
         if (!e.detail.error) {
           var enrichers = e.detail.doc.contextParameters;
           if (enrichers) {
-            if (enrichers.aboveDocument) {
-              this._navigate({'detail': {'doc': enrichers.aboveDocument}});
+            if (enrichers.firstAccessibleAncestor) {
+              this._navigate({'detail': {'doc': enrichers.firstAccessibleAncestor}});
             } else if (enrichers.breadcrumb) {
               var entries = enrichers.breadcrumb.entries;
               if (entries.length > 1) {
