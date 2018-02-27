@@ -31,7 +31,7 @@ var mergeJson = require('gulp-merge-json');
 var mergeStream = require('merge-stream');
 var cssSlam = require('css-slam').gulp;
 var htmlMinifier = require('gulp-html-minifier');
-var polymer = require('@nuxeo/polymer-build');
+var polymer = require('polymer-build');
 var babel = require('gulp-babel');
 var babelPresetES2015 = require('babel-preset-es2015').buildPreset({}, {modules: false});
 
