@@ -17,7 +17,9 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
@@ -77,6 +79,8 @@ limitations under the License.
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
+    <nuxeo-operation id="opEmptyTrash" op="Document.EmptyTrash" params='{"parent": "[[document.uid]]"}' sync-indexing></nuxeo-operation>
+
     <nuxeo-page-provider id="nxProvider"
                          provider="[[provider]]"
                          page-size="[[pageSize]]"
@@ -90,6 +94,10 @@ limitations under the License.
     </nuxeo-page-provider>
 
     <nuxeo-results id="results" display-mode="table" name="[[document.uid]]-trashed" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" document="[[document]]">
+
+      <div slot="actions">
+        <paper-button noink on-tap="_emptyTrash">[[i18n('documentTrashContent.emptyTrash')]]</paper-button>
+      </div>
 
       <!-- Grid view -->
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
@@ -264,6 +272,14 @@ limitations under the License.
           {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
           {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'}
         ];
+      },
+
+      _emptyTrash: function() {
+        this.$.opEmptyTrash.execute().then(function() {
+          this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.success')});
+        }.bind(this)).catch(function() {
+          this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.error')});
+        }.bind(this));
       },
 
       _observeDocument: function() {

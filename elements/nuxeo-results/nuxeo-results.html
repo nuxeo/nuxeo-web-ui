@@ -109,21 +109,22 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
 
-        <template is="dom-repeat" items="[[_displayModes]]">
-          <paper-icon-button class="displayMode"
-                             icon="[[item.icon]]"
-                             title$="[[_displayModeTitle(item, i18n)]]"
-                             selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                             disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                             on-tap="_toggleDisplayMode"></paper-icon-button>
-        </template>
-
         <slot name="actions"></slot>
 
         <!-- 0.9 compatibility -->
         <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
 
         <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
+        <template is="dom-repeat" items="[[_displayModes]]">
+          <paper-icon-button class="displayMode"
+                             icon="[[item.icon]]"
+                             title$="[[_displayModeTitle(item, i18n)]]"
+                             selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                             disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                             on-tap="_toggleDisplayMode">
+          </paper-icon-button>
+        </template>
 
       </div>
 
