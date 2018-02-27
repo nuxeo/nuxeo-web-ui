@@ -43,23 +43,39 @@
 
 <nuxeo-slot-content name="adminAuditMenuItem" slot="ADMINISTRATION_MENU" order="40">
   <template>
-    <nuxeo-menu-item name="audit" label="audit.heading" route="administration:audit"></nuxeo-menu-item>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item name="audit" label="audit.heading" route="administration:audit"></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="adminAuditPage" slot="ADMINISTRATION_PAGES">
   <template>
-    <nuxeo-audit name="audit" id="audit"></nuxeo-audit>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-audit name="audit" id="audit"></nuxeo-audit>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="adminCloudServicesMenuItem" slot="ADMINISTRATION_MENU" order="50">
   <template>
-    <nuxeo-menu-item name="cloud-services" label="cloudServices.heading" route="administration:cloud-services"></nuxeo-menu-item>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item name="cloud-services" label="cloudServices.heading" route="administration:cloud-services"></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="adminCloudServicesPage" slot="ADMINISTRATION_PAGES">
   <template>
-    <nuxeo-cloud-services name="cloud-services" id="cloud-services"></nuxeo-cloud-services>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-cloud-services name="cloud-services" id="cloud-services"></nuxeo-cloud-services>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
