@@ -81,12 +81,7 @@ limitations under the License.
         },
         searchTerm: {
           type: String,
-          notify: true,
-          observer: '_addFullTextSearch'
-        },
-        minChars: {
-          type: Number,
-          value: 3
+          notify: true
         },
         _path: {
           type: String,
@@ -98,10 +93,11 @@ limitations under the License.
       clear: function() {
         this.searchTerm = '';
         this._path = '/';
+        this._search();
       },
 
-      _addFullTextSearch: function() {
-        if (this.searchTerm && this.searchTerm.length >= this.minChars) {
+      _search: function() {
+        if (this.searchTerm) {
           this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm) + '*');
           this.set('params.highlight',
             'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
@@ -120,7 +116,7 @@ limitations under the License.
 
       _checkForEnter: function(e) {
         if (e.keyCode === 13) {
-          this.fire('trigger-search');
+          this._search();
         }
       }
 
