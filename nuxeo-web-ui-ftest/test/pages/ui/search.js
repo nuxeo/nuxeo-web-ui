@@ -131,6 +131,7 @@ export default class Search extends BasePage {
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
       this.fulltextSearch(searchTerm);
+      driver.keys('Enter');
     } else {
       this.setFieldValue(searchType, searchTerm);
     }
