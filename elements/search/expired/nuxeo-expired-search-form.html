@@ -37,7 +37,8 @@ limitations under the License.
                  label="[[i18n('defaultSearch.fullText')]]"
                  value="{{searchTerm}}"
                  placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                 autofocus>
+                 autofocus
+                 on-keydown="_checkForEnter">
     </nuxeo-input>
 
     <div role="widget">
@@ -74,25 +75,27 @@ limitations under the License.
         },
         searchTerm: {
           type: String,
-          notify: true,
-          observer: '_addFullTextSearch'
-        },
-        minChars: {
-          type: Number,
-          value: 3
+          notify: true
         }
       },
 
       clear: function() {
         this.searchTerm = '';
+        this._search();
       },
 
-      _addFullTextSearch: function() {
-        if (this.searchTerm && this.searchTerm.length >= this.minChars) {
+      _search: function() {
+        if (this.searchTerm) {
           this.set('params.title', this.formatFulltext(this.searchTerm) + '*');
         } else if (this.params.title) {
           this.set('params.title', '');
           delete this.params.title;
+        }
+      },
+
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13) {
+          this._search();
         }
       }
     });
