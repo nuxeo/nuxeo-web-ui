@@ -70,16 +70,12 @@ export default class Search extends Results {
 
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
-      this.fulltextSearch(searchTerm);
+      this.el.element(`#searchInput #nativeInput`).waitForVisible();
+      this.el.element(`#searchInput #nativeInput`).setValue(searchTerm);
       driver.keys('Enter');
     } else {
       this.setFieldValue(searchType, searchTerm);
     }
-  }
-
-  fulltextSearch(searchTerm) {
-    this.el.element(`#searchInput #nativeInput`).waitForVisible();
-    return this.el.element(`#searchInput #nativeInput`).setValue(searchTerm);
   }
 
   quickSearchResultsCount() {
