@@ -92,6 +92,6 @@ module.exports = function () {
   });
 
   this.When(/^I perform a Trash Search for (.+)/, (searchTerm) => {
-    this.ui.trashSearchForm.fulltextSearch(searchTerm);
+    this.ui.trashSearchForm.search('fulltext', searchTerm);
   });
 };
