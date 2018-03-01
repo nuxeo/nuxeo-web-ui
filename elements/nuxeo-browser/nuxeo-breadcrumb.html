@@ -69,7 +69,7 @@ limitations under the License.
         border-radius: 2px;
       }
 
-      a,
+      .ancestors a,
       .breadcrumb-divider {
         opacity: .5;
         font-weight: 300;
@@ -79,7 +79,7 @@ limitations under the License.
         vertical-align: middle;
       }
 
-      a {
+      .ancestors a {
         @apply --nuxeo-link;
       }
 
@@ -124,7 +124,9 @@ limitations under the License.
         <iron-icon src="[[_icon(document, url)]]"></iron-icon>
       </div>
       <div class="doc-path">
-        <div class="current breadcrumb-item breadcrumb-item-current">[[_title(document)]]</div>
+        <a href$="[[urlFor('browse', document.path)]]" class="current breadcrumb-item breadcrumb-item-current">
+          [[_title(document)]]
+        </a>
         <div class="ancestors">
           <template is="dom-repeat" items="[[_breadcrumb(document)]]">
             <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
