@@ -1,5 +1,4 @@
 import nuxeo, { BlobHelper } from '../services/client';
-import path from 'path';
 
 global.liveDocuments = [];
 
