@@ -97,7 +97,9 @@ limitations under the License.
     <nuxeo-results id="results" display-mode="table" name="[[document.uid]]-trashed" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" document="[[document]]">
 
       <div slot="actions">
-        <paper-button noink on-tap="_emptyTrash">[[i18n('documentTrashContent.emptyTrash')]]</paper-button>
+        <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
+          <paper-button noink on-tap="_emptyTrash">[[i18n('documentTrashContent.emptyTrash')]]</paper-button>
+        </template>
       </div>
 
       <!-- Grid view -->
