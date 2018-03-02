@@ -193,7 +193,7 @@ limitations under the License.
       },
 
       _query: function(id) {
-        this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '"';
+        this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '" AND ecm:isVersion = 1';
         this.page = 0;
         this._loadMore();
       },
