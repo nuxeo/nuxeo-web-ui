@@ -136,7 +136,7 @@ limitations under the License.
             <div class="name">[[file.name]]</div>
             <div class="size">[[formatSize(file.size)]]</div>
             <template is="dom-if" if="[[progress]]">
-              <paper-progress class="progress" indeterminate></paper-progress>
+              <paper-progress class="progress" indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
             </template>
           </div>
           <div class="actions" hidden$="[[progress]]">
