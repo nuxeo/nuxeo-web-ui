@@ -375,7 +375,7 @@ limitations under the License.
                           </div>
                         </template>
                         <template is="dom-if" if="[[!file.complete]]">
-                          <paper-progress indeterminate></paper-progress>
+                          <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                         </template>
                       </div>
                       <div class="clear" hidden$="[[!file.complete]]">
