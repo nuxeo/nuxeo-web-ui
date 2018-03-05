@@ -570,6 +570,18 @@ limitations under the License.
         return this.$.layout.element;
       },
 
+      refresh: function() {
+        if (this.visible) {
+          if (this.queue) {
+            this.$.list.fetch();
+          }
+          if (this.view) {
+            this.view.reset();
+            this.view.fetch();
+          }
+        }
+      },
+
       displayQueueAndNavigateToFirst: function() {
         this.displayQueue(0);
       },

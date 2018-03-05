@@ -277,6 +277,7 @@ limitations under the License.
       _emptyTrash: function() {
         this.$.opEmptyTrash.execute().then(function() {
           this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.success')});
+          this._refresh();
         }.bind(this)).catch(function() {
           this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.error')});
         }.bind(this));
