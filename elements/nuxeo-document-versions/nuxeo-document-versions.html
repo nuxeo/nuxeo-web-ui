@@ -96,6 +96,10 @@ limitations under the License.
         display: none;
       }
 
+      nuxeo-document-versions-list {
+        max-height: 50vh;
+        overflow-y: auto;
+      }
     </style>
 
     <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
