@@ -277,7 +277,9 @@ limitations under the License.
           this._nxProvider = this.$.provider;
         }
         document.addEventListener('search-results-view', function(e) {
-          this.view = e.detail.view;
+          if (this.searchName === e.detail.name) {
+            this.view = e.detail.view;
+          }
         }.bind(this));
       },
 

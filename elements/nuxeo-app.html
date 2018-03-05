@@ -702,6 +702,17 @@ limitations under the License.
         }
       },
 
+      /**
+       * Gets current search form (if any) and refreshes it. Useful to handle file deletion/restore when the user has a
+       * search page open.
+       */
+      _refreshSearch: function() {
+        this.searchForm = this.$$("[search-name='" + this.searchName + "']");
+        if (this.searchForm) {
+          this.searchForm.refresh();
+        }
+      },
+
       _updateCollectionMenu: function(e) {
         if (e.detail.provider) {
           this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
@@ -859,6 +870,7 @@ limitations under the License.
               }
             }
           }
+          this._refreshSearch();
         }
       },
 
@@ -866,6 +878,7 @@ limitations under the License.
         this._toast(this.i18n('app.document.untrashed.' + (e.detail.error ? 'error' : 'success') ));
         if (e.detail.doc && !e.detail.error) {
           this._navigate({'detail': {'doc': e.detail.doc}});
+          this._refreshSearch();
         }
       },
 
@@ -889,11 +902,13 @@ limitations under the License.
         } else {
           this._fetchTasks();
           this._toast(this.i18n('app.documents.deleted.success'));
+          this._refreshSearch();
         }
       },
 
       _documentsUntrashed: function(e) {
         this._toast(this.i18n('app.documents.untrashed.' + (e.detail.error ? 'error' : 'success') ));
+        this._refreshSearch();
       },
 
       _documentFileDeleted: function() {

@@ -540,7 +540,9 @@ limitations under the License.
         body.appendChild(this.$.deleteDialog);
 
         document.addEventListener('search-results-view', function(e) {
-          this.view = e.detail.view;
+          if (this.searchName === e.detail.name) {
+            this.view = e.detail.view;
+          }
         }.bind(this));
       },
 
@@ -550,6 +552,18 @@ limitations under the License.
 
       get form() {
         return this.$.layout.element;
+      },
+
+      refresh: function() {
+        if (this.visible) {
+          if (this.queue) {
+            this.$.list.fetch();
+          }
+          if (this.view) {
+            this.view.reset();
+            this.view.fetch();
+          }
+        }
       },
 
       displayQueueAndNavigateToFirst: function() {
