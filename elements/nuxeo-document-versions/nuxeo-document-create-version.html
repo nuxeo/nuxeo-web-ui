@@ -94,7 +94,7 @@ limitations under the License.
     </nuxeo-document>
 
     <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]"
-                     response="{{version}}"></nuxeo-operation>
+                     response="{{version}}" sync-indexing></nuxeo-operation>
 
     <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase>[[label]]</nuxeo-tag>
 
