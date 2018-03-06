@@ -343,7 +343,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _columnsChanged: function(e) {
-        this.columns = e.srcElement.columns;
+        this.columns = e.target.columns;
       },
 
       _selectedItemsChanged: function() {
