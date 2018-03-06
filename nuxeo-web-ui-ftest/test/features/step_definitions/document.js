@@ -108,12 +108,12 @@ module.exports = function () {
 
     switch (format) {
       case 'HTML':
-      case 'XML':
         page.view.noteEditor.waitForVisible();
         page.view.noteEditor.setContent(newContent);
         page.view.noteEditor.save();
         page.view.noteEditor.hasContent(`<p>${newContent}</p>`);
         break;
+      case 'XML':
       case 'Markdown':
       case 'Text':
         page.view.noteEditor.waitForVisible();
@@ -122,7 +122,11 @@ module.exports = function () {
         page.view.noteEditor.textarea.setValue(newContent);
         page.view.noteEditor.save();
         page.view.preview.waitForVisible();
-        if (format === 'Markdown') {
+        if (format === 'XML') {
+          const xmlContent = page.view.preview.element('#xml');
+          xmlContent.waitForVisible();
+          xmlContent.getText().should.equal(newContent);
+        } else if (format === 'Markdown') {
           page.view.preview.waitForVisible('marked-element #content');
           const markedContent = page.view.preview.element('marked-element #content');
           markedContent.waitForVisible();
