@@ -75,7 +75,7 @@ export default class User extends BasePage {
   searchFor(searchTerm) {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
-    const searchBox = this.el.element('paper-input.nuxeo-user-group-search');
+    const searchBox = this.el.element('nuxeo-user-group-search nuxeo-input');
     searchBox.waitForVisible();
     return fixtures.layouts.setValue(searchBox, searchTerm);
   }
