@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Permanently delete selected document(s)?",
   "deleteDocumentsButton.tooltip": "Delete Selected Items",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Delete Template",
   "deleteTemplateButton.dialog.heading": "Delete Template?",
   "deleteTemplateButton.dialog.message": "Users will not be able to use this template anymore.",
