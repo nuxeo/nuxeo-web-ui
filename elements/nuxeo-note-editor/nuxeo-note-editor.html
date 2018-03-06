@@ -70,16 +70,16 @@ limitations under the License.
 
     <div class="main">
 
-      <template is="dom-if" if="[[_isHTMLorXML(document)]]">
+      <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]] hide-toolbars="[[_isXML(document)]]"></nuxeo-html-editor>
+          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
           <div class="layout horizontal end-justified">
             <paper-button name="editorSave" noink class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
         </div>
       </template>
 
-      <template is="dom-if" if="[[!_isHTMLorXML(document)]]">
+      <template is="dom-if" if="[[!_isHTML(document)]]">
         <template is="dom-if" if="[[_viewMode]]">
           <paper-icon-button id="editNote" class="edit" icon="nuxeo:edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
@@ -123,16 +123,8 @@ limitations under the License.
         this._value = this.document.properties['note:note'];
       },
 
-      _isXML: function() {
-        return this.document && this.document.properties['note:mime_type'] === 'text/xml';
-      },
-
       _isHTML: function() {
         return this.document && this.document.properties['note:mime_type'] === 'text/html';
-      },
-
-      _isHTMLorXML: function() {
-        return this._isHTML() || this._isXML();
       },
 
       _editorSave: function() {
