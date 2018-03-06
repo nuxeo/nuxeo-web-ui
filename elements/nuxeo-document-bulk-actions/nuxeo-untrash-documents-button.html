@@ -106,9 +106,6 @@ limitations under the License.
         }.bind(this));
       },
 
-      /*
-       * Checks if all files in the selected documents have write permission.
-       */
       _checkDocsPermissions: function() {
         this.docsHavePermissions = !(this.documents.some(
           function(document) {
@@ -118,10 +115,10 @@ limitations under the License.
       },
 
       /*
-       * Checks if a single given document has write permissions
+       * Checks if a single given document has 'Everything' permission
        */
       _docHasPermissions: function(document) {
-        return this.hasPermission(document, 'Write') || this.hasPermission(document, 'Everything');
+        return this.hasPermission(document, 'Everything');
       }
     });
   </script>
