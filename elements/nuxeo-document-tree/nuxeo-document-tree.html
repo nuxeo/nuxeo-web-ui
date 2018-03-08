@@ -230,6 +230,10 @@ limitations under the License.
           this.removeDocuments(e.detail.documentIds);
         }.bind(this));
 
+        window.addEventListener('refresh-display', function() {
+          this._fetchDocument();
+        }.bind(this));
+
         this.controller = {
           getChildren: function(node, page) {
             this.$.children.params = [node.uid];
