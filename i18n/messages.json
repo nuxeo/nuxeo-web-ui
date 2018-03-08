@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "Do you really want to delete this video?",
   "videoViewLayout.delete.tootltip": "Delete video",
   "videoViewLayout.deleted.message": "Video deleted",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "Duration",
   "videoViewLayout.format": "Format",
   "videoViewLayout.frameRate": "Frame Rate",
