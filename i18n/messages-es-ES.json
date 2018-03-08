@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "¿Eliminar permanentemente el/los documento(s) seleccionados?",
   "deleteDocumentsButton.tooltip": "Eliminar elementos seleccionados",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Eliminar plantilla",
   "deleteTemplateButton.dialog.heading": "¿Eliminar la plantilla?",
   "deleteTemplateButton.dialog.message": "Los usuarios ya no podrán usar esta plantilla.",

@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Hapus secara permanen dokumen yang dipilih?",
   "deleteDocumentsButton.tooltip": "Hapus item yang dipilih",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Hapus Template",
   "deleteTemplateButton.dialog.heading": "Hapus Template?",
   "deleteTemplateButton.dialog.message": "Pengguna tidak akan bisa menggunakan template ini lagi.",

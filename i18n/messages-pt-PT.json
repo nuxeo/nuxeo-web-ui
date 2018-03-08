@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Deseja mesmo excluir permanentemente o(s) documento(s) selecionado(s)?",
   "deleteDocumentsButton.tooltip": "Excluir itens selecionados",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Excluir o modelo",
   "deleteTemplateButton.dialog.heading": "Excluir o modelo?",
   "deleteTemplateButton.dialog.message": "Os usuários não poderão mais usar este modelo.",

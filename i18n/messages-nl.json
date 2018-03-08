@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Geselecteerd(e) document(en) voorgoed verwijderen?",
   "deleteDocumentsButton.tooltip": "Geselecteerde items verwijderen",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Sjabloon verwijderen",
   "deleteTemplateButton.dialog.heading": "Sjabloon verwijderen?",
   "deleteTemplateButton.dialog.message": "Gebruikers zullen dit sjabloon niet langer kunnen gebruiken.",

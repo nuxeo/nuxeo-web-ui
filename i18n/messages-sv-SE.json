@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "Ta bort valt eller valda dokument permanent?",
   "deleteDocumentsButton.tooltip": "Ta bort valda objekt",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "Ta bort mall",
   "deleteTemplateButton.dialog.heading": "Ta bort mall?",
   "deleteTemplateButton.dialog.message": "Användare kommer inte att kunna använda den här mallen längre.",

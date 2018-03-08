@@ -270,7 +270,7 @@
   "deleteDocumentsButton.confirm.deleteDocuments": "Delete selected document(s)?",
   "deleteDocumentsButton.confirm.deleteDocumentsForever": "選択した文書を完全に削除しますか？",
   "deleteDocumentsButton.tooltip": "選択したアイテムを削除",
-  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items permanently",
+  "deleteDocumentsButton.tooltip.permanently": "Delete Selected Items Permanently",
   "deleteTemplateButton.dialog.confirm": "テンプレートを削除",
   "deleteTemplateButton.dialog.heading": "テンプレートを削除しますか？",
   "deleteTemplateButton.dialog.message": "ユーザはこのテンプレートを使用できなくなります。",
