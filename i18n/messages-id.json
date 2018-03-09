@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "Apakah anda benar-benar ingin menghapus video ini?",
   "videoViewLayout.delete.tootltip": "Hapus video",
   "videoViewLayout.deleted.message": "Video yang dihapus",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "Durasi",
   "videoViewLayout.format": "Format",
   "videoViewLayout.frameRate": "Laju Frame",

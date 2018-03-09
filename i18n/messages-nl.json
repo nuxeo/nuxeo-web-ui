@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "Weet u zeker dat u deze video wilt wissen?",
   "videoViewLayout.delete.tootltip": "Video wissen",
   "videoViewLayout.deleted.message": "Video gewist",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "Duur",
   "videoViewLayout.format": "Indeling",
   "videoViewLayout.frameRate": "Beelden per seconde",

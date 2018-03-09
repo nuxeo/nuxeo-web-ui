@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "このビデオを削除しますか？",
   "videoViewLayout.delete.tootltip": "ビデオを削除",
   "videoViewLayout.deleted.message": "ビデオ削除済み",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "持続時間",
   "videoViewLayout.format": "フォーマット",
   "videoViewLayout.frameRate": "フレームレート",

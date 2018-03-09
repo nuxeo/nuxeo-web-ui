@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "Deseja realmente excluir este video?",
   "videoViewLayout.delete.tootltip": "Excluir vídeo",
   "videoViewLayout.deleted.message": "Vídeo excluído",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "Duração",
   "videoViewLayout.format": "Formato",
   "videoViewLayout.frameRate": "Taxa de Frames",

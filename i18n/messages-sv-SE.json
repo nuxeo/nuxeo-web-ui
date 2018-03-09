@@ -838,6 +838,7 @@
   "videoViewLayout.delete.confirm.message": "Vill du verkligen ta bort denna video?",
   "videoViewLayout.delete.tootltip": "Ta bort video",
   "videoViewLayout.deleted.message": "Video borttagen",
+  "videoViewLayout.download.tooltip": "Download",
   "videoViewLayout.duration": "Längd",
   "videoViewLayout.format": "Format",
   "videoViewLayout.frameRate": "Bildfrekvens",
