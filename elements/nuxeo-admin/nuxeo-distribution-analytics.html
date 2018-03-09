@@ -76,7 +76,7 @@ limitations under the License.
         </div>
 
         <nuxeo-document-distribution-chart id="chart" index="_all"
-         path="/default-domain/" mode="count"
+         path="[[path]]" mode="count"
          include-version include-hidden
          include-deleted>
         </nuxeo-document-distribution-chart>
@@ -123,12 +123,7 @@ limitations under the License.
           this.$.chart.path = this.path;
           this.$.chart.execute();
         }
-      },
-
-      ready: function() {
-        this.path = '/default-domain/';
       }
-
     });
   </script>
 </dom-module>
