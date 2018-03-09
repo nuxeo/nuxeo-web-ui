@@ -90,6 +90,12 @@ limitations under the License.
         height: calc(100% - var(--nuxeo-app-top));
       }
 
+      paper-header-panel {
+        --paper-header-panel-container: {
+          -webkit-overflow-scrolling: unset; /* NXP-24576: fix for selection toolbar on iOS */
+        };
+      }
+
       /* logo */
       #logo {
         position: fixed;
