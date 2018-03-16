@@ -221,12 +221,33 @@ export default class Browser extends BasePage {
     const pill = this.currentPage;
     pill.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
     const rows = pill.elements('nuxeo-data-table nuxeo-data-table-row');
-    rows.value.forEach((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox') &&
+    const found = rows.value.some((row) => {
+      if (row.isVisible('nuxeo-data-table-checkbox:not([checked])') &&
           row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
         row.element('nuxeo-data-table-checkbox').click();
+        return true;
       }
+      return false;
     });
+    if (!found) {
+      throw new Error('Cannot find document with title "${title}"');
+    }
+  }
+
+  deselectChildDocument(title) {
+    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    const found = rows.value.some((row) => {
+      if (row.isVisible('nuxeo-data-table-checkbox[checked]') &&
+        row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+        row.element('nuxeo-data-table-checkbox').click();
+        return true;
+      }
+      return false;
+    });
+    if (!found) {
+      throw new Error('Cannot find document with title "${title}"');
+    }
   }
 
   get selectionToolbar() {

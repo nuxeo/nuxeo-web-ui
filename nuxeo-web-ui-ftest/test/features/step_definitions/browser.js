@@ -32,6 +32,11 @@ module.exports = function () {
     this.ui.browser.selectAllChildDocuments();
   });
 
+  this.Then('I deselect the "$title" document', (title) => {
+    this.ui.browser.waitForVisible();
+    this.ui.browser.deselectChildDocument(title);
+  });
+
   this.Then('I select the "$title" document', (title) => {
     this.ui.browser.waitForVisible();
     this.ui.browser.selectChildDocument(title);
