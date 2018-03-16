@@ -1,0 +1,42 @@
+{
+  "name": "nuxeo-web-ui",
+  "private": true,
+  "dependencies": {
+    "jsPlumb": "2.0.4",
+    "marked-element": "PolymerElements/marked-element#^2.0.0",
+    "moment": "2.10.6",
+    "page": "nuxeo/page.js#1.6.7",
+    "polymer": "polymer/polymer#^2.0.0",
+    "chart-elements": "nuxeo/chart-elements#4.0.0",
+    "neon-animation": "PolymerElements/neon-animation#2.0.2",
+    "nuxeo-elements": "nuxeo/nuxeo-elements#2.3.1",
+    "nuxeo-ui-elements": "nuxeo/nuxeo-ui-elements#2.3.1",
+    "nuxeo-dataviz-elements": "nuxeo/nuxeo-dataviz-elements#2.3.1",
+    "iron-a11y-keys": "PolymerElements/iron-a11y-keys#^2.0.0",
+    "iron-icons": "PolymerElements/iron-icons#^2.0.0",
+    "iron-jsonp-library": "PolymerElements/iron-jsonp-library#^2.0.0",
+    "iron-label": "PolymerElements/iron-label#^2.0.0",
+    "iron-localstorage": "PolymerElements/iron-localstorage#^2.0.0",
+    "iron-location": "PolymerElements/iron-location#^2.0.0",
+    "iron-media-query": "PolymerElements/iron-media-query#^2.0.0",
+    "iron-overlay-behavior": "PolymerElements/iron-overlay-behavior#2.2.1",
+    "iron-pages": "PolymerElements/iron-pages#^2.0.0",
+    "paper-drawer-panel": "PolymerElements/paper-drawer-panel#^2.0.0",
+    "paper-header-panel": "PolymerElements/paper-header-panel#^2.0.0",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
+    "paper-radio-group": "PolymerElements/paper-radio-group#^2.0.0",
+    "paper-slider": "PolymerElements/paper-slider#^2.0.0",
+    "paper-fab": "PolymerElements/paper-fab#^2.0.0",
+    "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
+    "paper-badge": "PolymerElements/paper-badge#^2.0.0",
+    "paper-toolbar": "PolymerElements/paper-toolbar#^2.0.0",
+    "paper-radio-button": "PolymerElements/paper-radio-button#^2.0.0",
+    "app-layout": "PolymerElements/app-layout#^2.0.0",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.0.0",
+    "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^2.0.0",
+    "web-animations-js": "web-animations/web-animations-js#^2.3.1"
+  },
+  "devDependencies": {
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  }
+}
