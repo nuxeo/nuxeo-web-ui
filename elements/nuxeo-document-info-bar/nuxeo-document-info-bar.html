@@ -100,7 +100,9 @@ limitations under the License.
           <span>[[_labelForInitiatedWf(workflow, currentUser)]]</span>
         </div>
         <a class="viewGraph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</a>
-        <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
+        <template is="dom-if" if="[[_hasPermissionToAbandon(workflow.initiator, currentUser)]]">
+          <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
+        </template>
       </div>
       <nuxeo-dialog id="graphDialog-[[workflow.id]]" with-backdrop>
         <paper-dialog-scrollable>
@@ -205,6 +207,13 @@ limitations under the License.
             this.fire('workflowAbandoned');
           }.bind(this));
         }
+      },
+
+      /**
+       * Checks if current user has permission to abandon a workflow.
+       */
+      _hasPermissionToAbandon: function(initiator) {
+        return this._isCurrentUser(initiator) || (this.currentUser && this.currentUser.isAdministrator);
       },
 
       _toggleGraphDialog: function(e) {
