@@ -91,7 +91,11 @@ limitations under the License.
         }
         schemaFetcher.path = 'path/' + this.targetPath + '/@emptyWithDefault';
         schemaFetcher.params = { type: this.selectedDocType.type };
-        schemaFetcher.headers = { properties: '*' };
+        schemaFetcher.headers = {
+          properties: '*',
+          'X-NXfetch.document': 'properties',
+          'X-NXtranslate.directoryEntry': 'label'
+        };
         return schemaFetcher.get().then(function(doc) {
           if (properties) {
             for (var prop in properties) {
