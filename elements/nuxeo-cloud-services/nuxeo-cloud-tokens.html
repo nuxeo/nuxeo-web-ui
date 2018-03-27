@@ -16,20 +16,10 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date-picker.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-input.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-suggestion.html">
+<link rel="import" href="nuxeo-oauth2-tokens.html">
 
 <!--
 `nuxeo-cloud-tokens`
@@ -38,179 +28,29 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-cloud-tokens">
   <template>
-    <style>
-      nuxeo-data-table {
-        height: calc(100vh - 172px);
-      }
-    </style>
-    <nuxeo-resource id="tokens"></nuxeo-resource>
+    <nuxeo-resource id="tokens" path="oauth2/token/"></nuxeo-resource>
     <nuxeo-card heading="[[i18n('cloudTokens.OAuth2Tokens')]]">
-
-      <nuxeo-data-table name="table" icon="nuxeo:view-list"
-                        empty-label="[[i18n('cloudTokens.emptyResult')]]" items="[[oauth2Tokens]]">
-
-        <nuxeo-data-table-column name="[[i18n('cloudTokens.serviceName')]]" field="serviceName" sort-by="serviceName">
-          <template>
-            <span>[[item.serviceName]]</span>
-          </template>
-        </nuxeo-data-table-column>
-
-        <nuxeo-data-table-column name="[[i18n('cloudTokens.nuxeoLogin')]]" field="nuxeoLogin" sort-by="nuxeoLogin">
-          <template>
-            <span>[[item.nuxeoLogin]]</span>
-          </template>
-        </nuxeo-data-table-column>
-
-        <nuxeo-data-table-column name="[[i18n('cloudTokens.serviceLogin')]]" field="serviceLogin" sort-by="serviceLogin">
-          <template>
-            <span>[[item.serviceLogin]]</span>
-          </template>
-        </nuxeo-data-table-column>
-
-        <nuxeo-data-table-column name="[[i18n('cloudTokens.creationDate')]]" field="creationDate" sort-by="creationDate">
-          <template>
-            <nuxeo-date datetime="[[item.creationDate]]"></nuxeo-date>
-          </template>
-        </nuxeo-data-table-column>
-
-        <nuxeo-data-table-column name="[[i18n('cloudTokens.isShared')]]" field="isShared" sort-by="isShared">
-          <template>
-            <paper-checkbox noink checked="[[item.isShared]]" disabled></paper-checkbox>
-          </template>
-        </nuxeo-data-table-column>
-
-        <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
-          <template>
-            <paper-icon-button id="edit-button-[[index]]" name="edit" icon="nuxeo:edit"
-                               on-tap="_editEntry"></paper-icon-button>
-            <paper-tooltip for="edit-button-[[index]]">[[i18n('cloudTokens.edit')]]</paper-tooltip>
-            <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete"
-                               on-tap="_deleteEntry"></paper-icon-button>
-            <paper-tooltip for="delete-button-[[index]]">[[i18n('cloudTokens.delete')]]</paper-tooltip>
-          </template>
-        </nuxeo-data-table-column>
-      </nuxeo-data-table>
+      <nuxeo-oauth2-tokens tokens="[[tokens]]"
+                           on-oauth2-token-saved="refresh"
+                           on-oauth2-token-deleted="refresh"></nuxeo-oauth2-tokens>
     </nuxeo-card>
 
-    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
-      <h2>[[i18n('cloudTokens.popup.editEntry')]]</h2>
-      <paper-dialog-scrollable>
-        <iron-form id="form">
-          <form>
-            <nuxeo-input disabled
-                         label="[[i18n('cloudTokenEdit.serviceName')]]"
-                         name="serviceName"
-                         value="{{_selectedEntry.serviceName}}">
-            </nuxeo-input>
-
-            <nuxeo-input disabled
-                         label="[[i18n('cloudTokenEdit.nuxeoLogin')]]"
-                         name="description"
-                         value="{{_selectedEntry.nuxeoLogin}}">
-            </nuxeo-input>
-
-            <nuxeo-input required
-                         label="[[i18n('cloudTokenEdit.serviceLogin')]]"
-                         name="clientId"
-                         value="{{_selectedEntry.serviceLogin}}">
-            </nuxeo-input>
-
-            <nuxeo-date-picker name="creationDate" required
-                               label="[[i18n('cloudTokenEdit.creationDate')]]"
-                               value="{{_selectedEntry.creationDate}}">
-            </nuxeo-date-picker>
-
-            <paper-checkbox noink checked="{{_selectedEntry.isShared}}">
-              [[i18n('cloudTokenEdit.isShared')]]
-            </paper-checkbox>
-
-            <nuxeo-user-suggestion label="[[i18n('cloudTokenEdit.shareWith')]]"
-                                   value="{{_selectedEntry.sharedWith}}"
-                                   prefixed multiple>
-            </nuxeo-user-suggestion>
-          </form>
-        </iron-form>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-        <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
-      </div>
-    </nuxeo-dialog>
   </template>
   <script>
-    var OAUTH2_TOKENS_BASE_PATH = 'oauth2/token/';
-
     Polymer({
       is: 'nuxeo-cloud-tokens',
-      behaviors: [Nuxeo.FormatBehavior],
+      behaviors: [Nuxeo.I18nBehavior],
       properties: {
-        oauth2Tokens: {
+        tokens: {
           type: Array,
           value: []
-        },
-
-        _selectedEntry: {
-          type: Object
-        },
-
-        _selectedNuxeoLogin: {
-          type: String
-        },
-
-        _selectedServiceName: {
-          type: String
         }
       },
-      observers: ['_tokensChanged(data.*)'],
 
       refresh: function() {
-        this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH;
         this.$.tokens.get().then(function(response) {
-          this.oauth2Tokens = response.entries;
+          this.tokens = response.entries;
         }.bind(this));
-      },
-
-      _deleteEntry: function(e) {
-        if (confirm(this.i18n('cloudTokens.confirmDelete'))) {
-          var item = e.target.parentNode.item;
-          this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH + item.serviceName + '/' + item.nuxeoLogin;
-          this.$.tokens.remove().then(function() {
-            this.refresh();
-            this.fire('notify', {message: this.i18n('cloudTokens.successfullyDeleted')});
-          }.bind(this), function() {
-            this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
-            this.i18n('cloudTokens.errorDeleting')
-            });
-          }.bind(this));
-        }
-      },
-
-      _editEntry: function(e) {
-        this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
-        this._selectedServiceName = this._selectedEntry.serviceName;
-        this._selectedNuxeoLogin = this._selectedEntry.nuxeoLogin;
-        this.$.dialog.toggle();
-      },
-
-      _save: function() {
-        var valid = this.$.form.validate();
-        if (valid) {
-          this._selectedEntry.creationDate = this.formatDate(this._selectedEntry.creationDate, 'YYYY-MM-DD HH:MM:SS');
-          this.$.tokens.data = this._selectedEntry;
-          this.$.tokens.path = OAUTH2_TOKENS_BASE_PATH + this._selectedServiceName + '/' + this._selectedNuxeoLogin;
-          this.$.tokens.put().then(function() {
-            this.refresh();
-            this.$.dialog.toggle();
-            this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
-          }.bind(this),
-            function(err) {
-              this.fire('notify', {
-                message: this.i18n('label.error').toUpperCase() + ': ' +
-                (err.message && err.message.length > 0 ? err.message :
-                  this.i18n('cloudTokens.errorEditing'))
-              });
-            }.bind(this));
-        }
       }
     });
   </script>
