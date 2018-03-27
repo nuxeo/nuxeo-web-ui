@@ -31,10 +31,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-cloud-services">
   <template>
-    <style>
-      .flex {
-        @apply --layout-flex;
-      }
+    <style include="nuxeo-styles iron-flex">
       /* document views items (pills) */
       #documentViewsItems {
         @apply --layout-horizontal;
@@ -78,13 +75,14 @@ limitations under the License.
         },
 
         page: {
-          type: Object,
-          observer: '_pageChanged'
+          type: Object
         }
       },
 
-      _pageChanged: function(){
-        if (this.page){
+      observers: ['refresh(visible, page)'],
+
+      refresh: function() {
+        if (this.page && this.visible) {
           this.page.refresh();
         }
       }
