@@ -463,6 +463,10 @@ limitations under the License.
 
         this.$.drawerPanel.closeDrawer();
 
+        this.$.drawerPanel.$.drawer.addEventListener('transitionend', function() {
+          this.$.drawerPanel.notifyResize();
+        }.bind(this));
+
         window.addEventListener('unhandledrejection', function(e) {
           if (e.reason && e.reason.status === 404) {
             this.showError(404, e.reason.message, this._errorUrl());
