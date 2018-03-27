@@ -363,10 +363,8 @@ limitations under the License.
         });
       },
 
-      _submitKeyHandler: function(e) {
-        if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
-          this._create();
-        }
+      _submitKeyHandler: function() {
+        this._create();
       },
 
       _canCreate: function() {
