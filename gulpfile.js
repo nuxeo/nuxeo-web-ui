@@ -119,7 +119,7 @@ gulp.task('polymer-build', function() {
 
 
 gulp.task('babel-helpers', function() {
-  return gulp.src(['node_modules/@nuxeo/polymer-build/lib/babel-helpers.min.js']).pipe(gulp.dest(dist('scripts')));
+  return gulp.src(['node_modules/polymer-build/lib/babel-helpers.min.js']).pipe(gulp.dest(dist('scripts')));
 });
 
 // Move from 'elements' folder to root
