@@ -1,0 +1,154 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
+<link rel="import" href="../nuxeo-app/nuxeo-page.html">
+<link rel="import" href="nuxeo-oauth2-tokens.html">
+
+<!--
+`nuxeo-user-authorized-apps`
+@group Nuxeo UI
+@element nuxeo-user-authorized-apps
+-->
+<dom-module id="nuxeo-user-authorized-apps">
+  <template>
+    <style include="nuxeo-styles iron-flex">
+      nuxeo-data-table {
+        height: calc(100vh - 222px);
+      }
+    </style>
+
+    <nuxeo-resource id="clients" path="oauth2/client"></nuxeo-resource>
+    <nuxeo-resource id="tokens"></nuxeo-resource>
+
+    <nuxeo-page>
+      <div slot="header">
+        <span class="flex">[[i18n('authorizedApps.heading')]]</span>
+      </div>
+      <nuxeo-card>
+        <nuxeo-data-table name="table" icon="nuxeo:view-list"
+                          empty-label="[[i18n('authorizedApps.emptyResult')]]" items="[[clients]]">
+
+          <nuxeo-data-table-column name="[[i18n('authorizedApps.name')]]" flex="100">
+            <template>
+              <span>[[item.name]]</span>
+            </template>
+          </nuxeo-data-table-column>
+
+          <nuxeo-data-table-column name="[[i18n('authorizedApps.authorizationDate')]]" flex="100">
+            <template>
+              <nuxeo-date datetime="[[_authorizationDate(item)]]"></nuxeo-date>
+            </template>
+          </nuxeo-data-table-column>
+
+          <nuxeo-data-table-column>
+            <template>
+              <paper-icon-button name="revoke" icon="nuxeo:delete" on-tap="_revoke"
+                                 title="[[i18n('authorizedApps.revoke')]]"></paper-icon-button>
+            </template>
+          </nuxeo-data-table-column>
+        </nuxeo-data-table>
+        <span>[[i18n('authorizedApps.grantNotice')]]</span>
+      </nuxeo-card>
+    </nuxeo-page>
+  </template>
+  <script>
+    var OAUTH2_CLIENT_TOKEN_BASE_PATH = 'oauth2/token/client';
+
+    Polymer({
+      is: 'nuxeo-user-authorized-apps',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        },
+
+        clients: {
+          type: Array,
+          value: []
+        },
+
+        tokens: {
+          type: Array,
+          value: []
+        }
+      },
+
+      refresh: function() {
+        this.$.tokens.path = OAUTH2_CLIENT_TOKEN_BASE_PATH;
+        this.$.tokens.get().then(function(response) {
+          this.tokens = response.entries;
+          if (this.tokens.length > 0) {
+            this.$.clients.get().then(function(response) {
+              this.clients = response.entries.filter(function(client) {
+                return this.tokens.findIndex(function(token) {
+                  return token.clientId === client.id;
+                }.bind(this)) > -1;
+              }.bind(this));
+            }.bind(this));
+          } else {
+            this.clients = [];
+          }
+        }.bind(this));
+      },
+
+      _visibleChanged: function() {
+        if (this.visible) {
+          this.refresh();
+        }
+      },
+
+      _token: function(client) {
+        return this.tokens.find(function(token){
+          return token.clientId === client.id;
+        });
+      },
+
+      _authorizationDate: function(client) {
+        return this._token(client).creationDate;
+      },
+
+      _revoke: function(e) {
+        var client = e.target.parentNode.item;
+        if (confirm(this.i18n('authorizedApps.confirmRevoke', client.name))) {
+          var token = this._token(client);
+          this.$.tokens.path = [OAUTH2_CLIENT_TOKEN_BASE_PATH, client.id, 'user', token.nuxeoLogin].join('/');
+          return this.$.tokens.remove().then(function() {
+            this.refresh();
+            this.fire('authorized-app-revoked');
+            this.fire('notify', {
+              message: this.i18n('authorizedApps.successfullyRevoked', client.name)
+            });
+          }.bind(this), function() {
+            this.refresh();
+            this.fire('notify', {
+              message: this.i18n('label.error').toUpperCase() + ': ' +
+                        this.i18n('authorizedApps.errorRevoking', client.name)
+            });
+          }.bind(this));
+        }
+      }
+    });
+  </script>
+</dom-module>
