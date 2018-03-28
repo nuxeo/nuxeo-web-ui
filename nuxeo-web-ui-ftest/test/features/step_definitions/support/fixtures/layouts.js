@@ -122,23 +122,33 @@ global.fieldRegistry.register('nuxeo-dropzone',
 global.fieldRegistry.register('nuxeo-data-table',
                               (element) => {
                                 const result = [];
-                                element.elements('nuxeo-data-table-cell:not([header])').value.forEach(row => {
-                                  const txt = row.getText();
-                                  if (txt) {
-                                    result.push(txt);
-                                  }
+                                element.elements('nuxeo-data-table-row:not([header])').value.forEach(row => {
+                                  const cellValue = [];
+                                  row.elements('nuxeo-data-table-cell:not([header])').value.forEach(cell => {
+                                    const txt = cell.getText();
+                                    if (txt) {
+                                      cellValue.push(txt);
+                                    }
+                                  });
+                                  result.push(cellValue);
                                 });
-                                return result.join(',');
+                                return JSON.stringify(result);
                               },
                               (element, values) => {
-                                values.split(',').forEach(value => {
+                                const jValues = JSON.parse(values);
+                                jValues.forEach(value => {
                                   element.element('#addEntry').click();
                                   const dialog = element.element('nuxeo-dialog[id="dialog"]');
                                   dialog.waitForVisible();
                                   const form = element.element('#editForm');
                                   form.waitForVisible();
-                                  form.waitForVisible(`input[name="string"]`);
-                                  form.element(`input[name="string"]`).setValue(value);
+                                  for (const property in value) {
+                                    if (value.hasOwnProperty(property)) {
+                                      form.waitForVisible(`[name="${property}"]`);
+                                      fixtures.layouts
+                                        .setValue(form.element(`[name="${property}"]`), value[property]);
+                                    }
+                                  }
                                   dialog.waitForVisible(`paper-button[id="save"]`);
                                   dialog.click(`paper-button[id="save"]`);
                                 });

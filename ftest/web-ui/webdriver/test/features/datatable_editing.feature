@@ -12,9 +12,21 @@ Feature: Multi-valued Properties Editing
     When I click the Create Document button
     And I select MultiString from the Document Type menu
     And I create a document with the following properties:
-      | name                  | value              |
-      | title                 | myMultiStringDoc   |
-      | multiString           | toto,pouet,foo,bar |
+      | name                  | value                                                                           |
+      | title                 | myMultiStringDoc                                                                |
+      | multiString           | [{"string": "toto"}, {"string": "pouet"}, {"string": "foo"}, {"string": "bar"}] |
     And I can see MultiString metadata with the following properties:
-      | name                  | value              |
-      | multiString           | toto,pouet,foo,bar |
+      | name                  | value                                |
+      | multiString           | [["toto"],["pouet"],["foo"],["bar"]] |
+
+
+  Scenario: Create and Edit Document with a multi complex property having vocabulary, document and user suggestion widget
+    When I click the Create Document button
+    And I select MultiComplex from the Document Type menu
+    And I create a document with the following properties:
+      | name                  | value                                                                                                                                                    |
+      | title                 | myMultiComplexDoc                                                                                                                                        |
+      | multiComplex          | [{"name": "first", "nature": "Training application", "document": "Domain", "user": "Administrator"},{"name": "second", "nature": "Medical certificate"}] |
+    And I can see MultiComplex metadata with the following properties:
+      | name                  | value                                                                                        |
+      | multiComplex          | [["first","Training application","Domain","Administrator"],["second","Medical certificate"]] |
