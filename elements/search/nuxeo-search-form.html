@@ -312,7 +312,7 @@ limitations under the License.
       </div>
     </div>
 
-    <nuxeo-dialog id="saveDialog" with-backdrop>
+    <nuxeo-dialog id="saveDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.savePopup.heading')]]</h2>
       <paper-input id="savedSearchTitle"
                    label="[[i18n('searchForm.savePopup.label')]]"
@@ -325,7 +325,7 @@ limitations under the License.
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="renameDialog" with-backdrop>
+    <nuxeo-dialog id="renameDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
       <paper-input id="savedSearchRenameTitle"
                    label="[[i18n('searchForm.renamePopup.label')]]"
@@ -338,7 +338,7 @@ limitations under the License.
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="shareDialog" with-backdrop>
+    <nuxeo-dialog id="shareDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.shared.heading')]]</h2>
       <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
       <div class="buttons">
@@ -346,7 +346,7 @@ limitations under the License.
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="deleteDialog" with-backdrop>
+    <nuxeo-dialog id="deleteDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.delete.heading')]]</h2>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
@@ -533,12 +533,6 @@ limitations under the License.
       },
 
       ready: function() {
-        var body = document.querySelector('body');
-        body.appendChild(this.$.saveDialog);
-        body.appendChild(this.$.renameDialog);
-        body.appendChild(this.$.shareDialog);
-        body.appendChild(this.$.deleteDialog);
-
         document.addEventListener('search-results-view', function(e) {
           if (this.searchName === e.detail.name) {
             this.view = e.detail.view;
