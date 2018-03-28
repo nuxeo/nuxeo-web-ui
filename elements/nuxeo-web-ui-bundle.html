@@ -590,7 +590,18 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="cloudServicesUserMenuItem" slot="USER_MENU" order="20">
+<nuxeo-slot-content name="authorizedAppsUserMenuItem" slot="USER_MENU" order="20">
+  <template>
+    <nuxeo-menu-item name="user-authorized-apps" label="app.user.authorizedApps" route="page:user-authorized-apps"></nuxeo-menu-item>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="authorizedAppsUserPage" slot="PAGES">
+  <template>
+    <nuxeo-user-authorized-apps name="user-authorized-apps"></nuxeo-user-authorized-apps>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="cloudServicesUserMenuItem" slot="USER_MENU" order="30">
   <template>
     <nuxeo-menu-item name="user-cloud-services" label="app.user.cloudServices" route="page:user-cloud-services"></nuxeo-menu-item>
   </template>
@@ -602,7 +613,7 @@
 </nuxeo-slot-content>
 
 
-<nuxeo-slot-content name="themesUserMenuItem" slot="USER_MENU" order="30">
+<nuxeo-slot-content name="themesUserMenuItem" slot="USER_MENU" order="40">
   <template>
     <nuxeo-menu-item name="themes" label="app.user.themes" route="page:themes"></nuxeo-menu-item>
   </template>
