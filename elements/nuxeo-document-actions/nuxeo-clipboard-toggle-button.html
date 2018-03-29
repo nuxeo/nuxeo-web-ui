@@ -33,8 +33,8 @@ limitations under the License.
         display: inline-block;
       }
 
-      :host([in-clipboard]) iron-icon {
-        color: var(--icon-toggle-pressed-color, --nuxeo-action-color-activated);
+      :host([in-clipboard]) {
+        color: var(--icon-toggle-pressed-color, var(--nuxeo-action-color-activated));
       }
     </style>
 
