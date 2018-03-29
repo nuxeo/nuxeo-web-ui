@@ -106,18 +106,18 @@ module.exports = function () {
     this.ui.searchResults.savedSearchActionButton.click();
     this.ui.searchResults.shareAction.waitForVisible();
     this.ui.searchResults.shareAction.click();
-    this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
-    this.ui.browser.permissionsView.newPermissionButton.click();
-    this.ui.browser.permissionsView.setPermissions(username,
+    this.ui.searchForm.permissionsView.newPermissionButton.waitForVisible();
+    this.ui.searchForm.permissionsView.newPermissionButton.click();
+    this.ui.searchForm.permissionsView.setPermissions(username,
       {
         permission: 'Read',
         timeFrame: 'permanent',
         notify: false,
       }
     );
-    this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
-    this.ui.browser.permissionsView.createPermissionButton.click();
-    this.ui.browser.permissionsView.permission('Read', username, 'permanent').waitForVisible();
+    this.ui.searchForm.permissionsView.createPermissionButton.waitForVisible();
+    this.ui.searchForm.permissionsView.createPermissionButton.click();
+    this.ui.searchForm.permissionsView.permission('Read', username, 'permanent').waitForVisible();
   });
   this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
     this.ui.searchForm.menuButton.waitForVisible();
