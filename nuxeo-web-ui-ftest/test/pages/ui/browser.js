@@ -28,7 +28,7 @@ export default class Browser extends BasePage {
   }
 
   get permissionsView() {
-    return new DocumentPermissions('nuxeo-document-permissions');
+    return new DocumentPermissions('nuxeo-browser nuxeo-document-permissions');
   }
 
   get permissionsViewButton() {
