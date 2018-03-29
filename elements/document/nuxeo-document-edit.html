@@ -106,8 +106,9 @@ limitations under the License.
 
         this.$.doc.put().then(function() {
           this._refresh();
-        }.bind(this), function() {
+        }.bind(this), function(err) {
           this.fire('notify', {message: this.i18n('documentEdit.saveError')});
+          console.error(err);
         }.bind(this));
       },
 

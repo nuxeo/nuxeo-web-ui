@@ -325,8 +325,10 @@ limitations under the License.
           this.navigateTo('browse', response.path);
           this._notify(response);
           this.set('creating', false);
-        }.bind(this)).catch(function() {
+        }.bind(this)).catch(function(err) {
           this.set('creating', false);
+          this.fire('notify', {message: this.i18n('documentCreationForm.createError')});
+          console.error(err);
         }.bind(this));
       },
 
