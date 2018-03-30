@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "この場所にこのタイプの文書を作成することはできません。",
   "documentCreationBehavior.error.noPermission": "あなたはこの場所に作成することが許可されていません",
   "documentCreationBehavior.error.noSubtypes": "この場所にコンテンツを作成することができません",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "場所",
   "documentCreationForm.newDoc.heading": "新規{0}",
   "documentEdit.layoutNotFound": "{0}用の編集レイアウトが見つかりませんでした。",

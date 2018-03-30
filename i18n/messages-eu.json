@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Ezin duzu mota honetako dokumenturik sortu kokaleku honetan.",
   "documentCreationBehavior.error.noPermission": "Ez duzu kokaleku honetan sortzeko baimenik.",
   "documentCreationBehavior.error.noSubtypes": "Hautatu beste edukitzaile bat zure edukia sortzeko.",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "Kokalekua",
   "documentCreationForm.newDoc.heading": "Berria: {0}",
   "documentEdit.layoutNotFound": "Ez da editatzeko diseinurik aurkitu honentzat: {0}.",

@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Anda tidak dapat membuat dokumen jenis ini di lokasi ini.",
   "documentCreationBehavior.error.noPermission": "Anda tidak memiliki izin untuk membuat di bawah lokasi ini.",
   "documentCreationBehavior.error.noSubtypes": "Pilih sebuah wadah yang berbeda untuk membuat konten anda.",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "Lokasi",
   "documentCreationForm.newDoc.heading": "Baru {0}",
   "documentEdit.layoutNotFound": "Gagal menemukan sunting tata letak untuk {0}.",

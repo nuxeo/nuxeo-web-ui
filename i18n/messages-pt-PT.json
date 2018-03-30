@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Não pode criar este tipo de ficheiro neste local.",
   "documentCreationBehavior.error.noPermission": "Você não tem permissões para criar neste local",
   "documentCreationBehavior.error.noSubtypes": "Não é possível criar conteúdo neste local",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "Local",
   "documentCreationForm.newDoc.heading": "Novo {0}",
   "documentEdit.layoutNotFound": "Falha ao procurar o layout de edição para {0}.",

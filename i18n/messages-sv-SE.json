@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Du kan inte skapa den här typen av dokument på denna plats.",
   "documentCreationBehavior.error.noPermission": "Du har inte behörighet att skapa under denna plats",
   "documentCreationBehavior.error.noSubtypes": "Välj en annan behållare för att skapa ditt innehåll",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "Plats",
   "documentCreationForm.newDoc.heading": "Nytt {0}",
   "documentEdit.layoutNotFound": "Det gick inte att hitta redigeringslayout för {0}.",

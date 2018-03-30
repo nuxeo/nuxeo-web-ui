@@ -306,6 +306,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Vous ne pouvez pas créer ce type de document à cet endroit.",
   "documentCreationBehavior.error.noPermission": "Vous n'avez pas les permissions nécessaires pour créer des contenus à cet endroit.",
   "documentCreationBehavior.error.noSubtypes": "Impossible de créer des documents à cet endroit",
+  "documentCreationForm.createError": "Failed to create document.",
   "documentCreationForm.location": "Emplacement",
   "documentCreationForm.newDoc.heading": "Nouveau document {0}",
   "documentEdit.layoutNotFound": "Aucun formulaire de modification pour {0}",
