@@ -52,8 +52,8 @@ limitations under the License.
     <h3>[[i18n('documentAttachments.heading')]]</h3>
 
     <div class="vertical layout">
-      <template is="dom-repeat" items="[[document.properties.files:files]]">
-        <nuxeo-document-blob document="[[document]]" xpath="files:files/[[index]]/file"></nuxeo-document-blob>
+      <template is="dom-repeat" items="[[_computeFiles(document, xpath)]]">
+        <nuxeo-document-blob document="[[document]]" xpath="[[_computeBlobXpath(xpath, index)]]"></nuxeo-document-blob>
       </template>
 
       <template is="dom-if" if="[[!_hasFiles(document)]]">
@@ -63,7 +63,7 @@ limitations under the License.
 
     <template is="dom-if" if="[[_hasWritePermission(document)]]">
       <nuxeo-dropzone document="{{document}}"
-                      xpath="files:files"
+                      xpath="[[xpath]]"
                       uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
                       blob-list>
       </nuxeo-dropzone>
@@ -76,16 +76,35 @@ limitations under the License.
       is: 'nuxeo-document-attachments',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
-        document: Object
+        document: Object,
+
+        xpath: {
+          type: String,
+          value: 'files:files'
+        }
       },
 
       _hasFiles: function(doc) {
-        return doc && doc.properties && doc.properties['files:files'] && doc.properties['files:files'].length > 0;
+        return doc && doc.properties && doc.properties[this.xpath] && doc.properties[this.xpath].length > 0;
       },
 
       _hasWritePermission: function (doc) {
         return doc && this.hasPermission(doc, 'Write') &&
           !this.isImmutable(doc) && doc.type !== 'Root' && doc.state !== 'deleted';
+      },
+
+      _computeFiles: function() {
+        if (this._hasFiles(this.document)) {
+          return this.document.properties[this.xpath];
+        }
+        return [];
+      },
+
+      _computeBlobXpath: function(xpath, index) {
+        if (xpath === 'files:files') {
+          return 'files:files/' + index + '/file';
+        }
+        return xpath + '/' + index;
       }
     });
   </script>
