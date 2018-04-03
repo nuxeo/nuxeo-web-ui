@@ -1,4 +1,6 @@
 exports.config = {
+  // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
+  debug: process.env.DEBUG,
   //
   // ==================
   // Specify Test Files
@@ -141,7 +143,7 @@ exports.config = {
     profile: [],        // <string[]> (name) specify the profile to use
     strict: true,      // <boolean> fail if there are any undefined or pending steps
     tags: [],           // <string[]> (expression) only execute the features or scenarios with tags matching the expression
-    timeout: 20000,     // <number> timeout for step definitions
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 20000,     // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
 
