@@ -25,7 +25,7 @@ Feature: Multi-valued Properties Editing
     And I create a document with the following properties:
       | name                  | value                                                                                                                                                        |
       | title                 | myMultiComplexDoc                                                                                                                                            |
-      | multiComplex          | [{"name": "first", "nature": "Training application", "document": "my_document", "user": "Administrator"},{"name": "second", "nature": "Medical certificate"}] |
+      | multiComplex          | [{"name": "first", "nature": "Training application", "document": "my document", "user": "Administrator"},{"name": "second", "nature": "Medical certificate"}] |
     And I can see MultiComplex metadata with the following properties:
       | name                  | value                                                                                        |
-      | multiComplex          | [["first","Training application","my_document","Administrator"],["second","Medical certificate"]] |
+      | multiComplex          | [["first","Training application","my document","Administrator"],["second","Medical certificate"]] |
