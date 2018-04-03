@@ -29,7 +29,7 @@ const wdioBin = path.resolve('./node_modules/.bin/wdio');
 const argv = require('minimist')(process.argv.slice(2));
 const defaultDef = `./test/features/step_definitions`;
 
-let args = [argv['wdioConfig'] ? argv['wdioConfig'] : path.join(__dirname, '../wdio.conf.js')];
+const args = [argv['wdioConfig'] ? argv['wdioConfig'] : path.join(__dirname, '../wdio.conf.js')];
 
 if (argv['features']) {
   args.push(`--specs=${argv['features']}`);
@@ -70,7 +70,9 @@ if (argv['tags']) {
   args.push(`--cucumberOpts.tags=${argv['tags']}`);
 }
 
-const wdio = spawn(wdioBin, args);
+process.env.FORCE_COLOR = true;
+
+const wdio = spawn(wdioBin, args, { env: process.env });
 
 wdio.stdout.pipe(process.stdout);
 wdio.stderr.pipe(process.stderr);
