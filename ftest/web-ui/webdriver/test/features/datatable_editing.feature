@@ -19,14 +19,13 @@ Feature: Multi-valued Properties Editing
       | name                  | value                                |
       | multiString           | [["toto"],["pouet"],["foo"],["bar"]] |
 
-  @watch
   Scenario: Create and Edit Document with a multi complex property having vocabulary, document and user suggestion widget
     When I click the Create Document button
     And I select MultiComplex from the Document Type menu
     And I create a document with the following properties:
-      | name                  | value                                                                                                                                                    |
-      | title                 | myMultiComplexDoc                                                                                                                                        |
-      | multiComplex          | [{"name": "first", "nature": "Training application", "document": "myMultiComplexDoc", "user": "Administrator"},{"name": "second", "nature": "Medical certificate"}] |
+      | name                  | value                                                                                                                                                        |
+      | title                 | myMultiComplexDoc                                                                                                                                            |
+      | multiComplex          | [{"name": "first", "nature": "Training application", "document": "my_document", "user": "Administrator"},{"name": "second", "nature": "Medical certificate"}] |
     And I can see MultiComplex metadata with the following properties:
       | name                  | value                                                                                        |
-      | multiComplex          | [["first","Training application","myMultiComplexDoc","Administrator"],["second","Medical certificate"]] |
+      | multiComplex          | [["first","Training application","my_document","Administrator"],["second","Medical certificate"]] |
