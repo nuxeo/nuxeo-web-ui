@@ -11,6 +11,7 @@ import HistoryTable from './ui/history_table';
 import User from './ui/user';
 import Group from './ui/group';
 import Search from './ui/search';
+import UserCloudServices from './ui/oauth2/user_cloud_services';
 
 export default class UI extends BasePage {
 
@@ -114,6 +115,17 @@ export default class UI extends BasePage {
 
   get administration() {
     return new Administration('nuxeo-admin');
+  }
+
+  get userCloudServices() {
+    return new UserCloudServices('nuxeo-user-cloud-services');
+  }
+
+  goToUserCloudServices() {
+    if (!browser.getUrl().endsWith('user-cloud-services')) {
+      driver.url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
+    }
+    return this.userCloudServices;
   }
 
   get tasks() {
