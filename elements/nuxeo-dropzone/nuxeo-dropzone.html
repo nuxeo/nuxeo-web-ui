@@ -35,6 +35,10 @@ limitations under the License.
 <dom-module id="nuxeo-dropzone">
   <template>
     <style include="nuxeo-styles">
+      label {
+        margin-bottom: 8px;
+      }
+
       label.dragging {
         color: var(--paper-input-container-focus-color);
       }
@@ -69,6 +73,7 @@ limitations under the License.
       #details {
         border: 1px solid var(--nuxeo-border);
         padding: 16px;
+        margin-bottom: 8px;
       }
 
       .file {
@@ -116,18 +121,11 @@ limitations under the License.
     <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="preview"></nuxeo-document>
     <nuxeo-operation id="bulkAttach" op="Blob.AttachOnDocument" sync-indexing></nuxeo-operation>
 
-    <label id="label" hidden$="[[!label]]">[[label]]</label>
+    <template is="dom-if" if="[[label]]">
+      <label id="label">[[label]]</label>
+    </template>
 
     <input hidden id="input" type="file" on-change="_filesChanged">
-
-    <div id="dropzone" hidden$="[[_hasFiles]]">
-      <div id="container">
-        <a href="javascript:undefined" on-tap="open">[[message]]</a>
-        <div class="actions">
-          <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
-        </div>
-      </div>
-    </div>
 
     <div id="details" hidden$="[[!_hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
@@ -146,6 +144,15 @@ limitations under the License.
       </template>
     </div>
 
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(_hasFiles, document, blobList)]]">
+      <div id="container">
+        <a href="javascript:undefined" on-tap="open">[[message]]</a>
+        <div class="actions">
+          <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
+        </div>
+      </div>
+    </div>
+
   </template>
 
   <script>
@@ -155,7 +162,8 @@ limitations under the License.
       properties: {
         document: {
           type: Object,
-          notify: true
+          notify: true,
+          observer: '_documentChanged'
         },
         label: {
           type: String
@@ -220,10 +228,21 @@ limitations under the License.
       importBatch: function(data) {
         data.stopPropagation();
         if (this.blobList) {
-          this.batchExecute('Blob.AttachOnDocument', {
-            document: this.document,
-            xpath: this.xpath
-          }).then(this._handleBlobListUploaded.bind(this));
+          if (this.immediate) {
+            this.batchExecute('Blob.AttachOnDocument', {
+              document: this.document,
+              xpath: this.xpath
+            }).then(this._handleBlobListUploaded.bind(this));
+          } else {
+            this.document.properties[this.xpath] = [];
+            this.files.forEach(function(file, index) {
+              this.push('document.properties.' + [this.xpath], {
+                'upload-batch': data.detail.batchId,
+                'upload-fileId': index.toString()
+              });
+            }.bind(this));
+            this._handleBlobListUploaded();
+          }
         } else {
           this.document.properties[this.xpath] = {
             'upload-batch': data.detail.batchId,
@@ -280,18 +299,27 @@ limitations under the License.
       _handleBlobListUploaded: function() {
         this.fire('notify', {message: this.uploadedMessage});
         this.progress = false;
-        this._hasFiles = false;
-        this.fire('document-updated');
+        if (this.immediate) {
+          this._hasFiles = false;
+          this.fire('document-updated');
+        }
       },
 
-      _deleteFile: function() {
-        this.document.properties[this.xpath] = '';
-        this._reset();
+      _deleteFile: function(e) {
+        if (!this.immediate && this.blobList && Array.isArray(this.document.properties[this.xpath])) {
+          this.splice('document.properties.' + [this.xpath], e.model.itemsIndex, 1);
+          this.splice('files', e.model.itemsIndex, 1);
+          this._hasFiles = this.files.length > 0;
+        } else {
+          this.document.properties[this.xpath] = '';
+          this._reset();
+        }
       },
 
       _reset: function() {
         this.$.input.value = '';
         this._hasFiles = false;
+        this.files = [];
       },
 
       _filesChanged: function(e) {
@@ -323,7 +351,19 @@ limitations under the License.
         this.toggleClass('dragging', false, this.$.label);
         this.toggleClass('dragging', false, this.$.container);
         this._upload(e.dataTransfer.files);
-      }
+      },
+
+      _documentChanged: function() {
+        // `immediate` is false during document creation, meaning the user can manage the list of files when dropzone
+        // is bound to a blob list property.
+        this.immediate = !!(this.document && this.document.uid);
+      },
+
+      _isDropzoneVisible: function() {
+        // Area to drop files should stay visible when the element is attached to a blob list property and `immediate`
+        // is false (e.g during the creation of a new document). This will allow the user to manage the list of files.
+        return (!this.immediate && this.blobList) || !this._hasFiles;
+      },
 
     });
   </script>
