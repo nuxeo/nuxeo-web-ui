@@ -35,6 +35,7 @@
     "gulp-vulcanize": "^6.1.0",
     "lodash": "^4.17.4",
     "merge-stream": "^1.0.0",
+    "polymer-analyzer": "^2.7.0",
     "polymer-build": "^2.2.0",
     "polymer-cli": "^1.0.0",
     "proxy-middleware": "^0.15.0",
