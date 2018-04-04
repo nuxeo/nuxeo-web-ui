@@ -11,6 +11,7 @@ import HistoryTable from './ui/history_table';
 import User from './ui/user';
 import Group from './ui/group';
 import Search from './ui/search';
+import UserAuthorizedApps from './ui/oauth2/user_authorized_apps';
 import UserCloudServices from './ui/oauth2/user_cloud_services';
 
 export default class UI extends BasePage {
@@ -126,6 +127,17 @@ export default class UI extends BasePage {
       driver.url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
     }
     return this.userCloudServices;
+  }
+
+  get userAuthorizedApps() {
+    return new UserAuthorizedApps('nuxeo-user-authorized-apps');
+  }
+
+  goToUserAuthorizedApps() {
+    if (!browser.getUrl().endsWith('user-authorized-apps')) {
+      driver.url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
+    }
+    return this.userAuthorizedApps;
   }
 
   get tasks() {
