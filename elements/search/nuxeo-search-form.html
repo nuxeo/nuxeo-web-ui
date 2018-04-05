@@ -799,7 +799,7 @@ limitations under the License.
           if (e.detail.path) {
             var param = e.detail.path.split('.')[1];
             this.set('params.' + param, e.detail.value);
-            if (this.auto) {
+            if (this.auto && this.visible) {
               this._navigateToResults();
             }
           }

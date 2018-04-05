@@ -222,7 +222,7 @@ limitations under the License.
 
       _parentPathChanged: function(e) {
         if (e.detail.isValidTargetPath &&
-          (!this.parent || (this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
+          (!this.parent || (this.parentPath && this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
           this.$.defaultDoc.get();
         }
       },

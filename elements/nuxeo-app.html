@@ -47,6 +47,12 @@ limitations under the License.
 <link rel="import" href="../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 
+<!-- nuxeo-browser -->
+<link rel="import" href="nuxeo-browser/nuxeo-breadcrumb.html">
+
+<!-- Right panel elements -->
+<link rel="import" href="nuxeo-recent-documents/nuxeo-recent-documents.html">
+
 <!-- i18n -->
 <link rel="import" href="../i18n/i18n.html">
 
@@ -60,8 +66,15 @@ limitations under the License.
 
 <!-- search -->
 <link rel="import" href="nuxeo-search-page.html">
+<link rel="import" href="search/nuxeo-search-form.html">
+
+<!-- user group management -->
+<link rel="import" href="nuxeo-admin/nuxeo-user-group-management-page.html">
 
 <script src="nuxeo-app/nuxeo-doc-types.js"></script>
+
+<!-- animations polyfill -->
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 
 <!--
 `nuxeo-app`
@@ -968,19 +981,26 @@ limitations under the License.
             this.showError(404, '', page);
             return;
           }
+          this.loading = true;
           // check if page is already registered (vulcanized)
           if (!(el instanceof Polymer.Element)) {
-            this.loading = true;
             var tag = el.tagName.toLowerCase();
-            this.importHref(this.resolveUrl(tag + '.html'), this._pageLoaded, function() {
+            this.importHref(this.resolveUrl(tag + '.html'), this._loadElements, function() {
               this.showError(404, '', tag + '.html');
             }.bind(this), true);
+          } else {
+            // load elements if navigating directly to pages which are not lazy loaded (e.g. searches)
+            this._loadElements();
           }
         }
       },
 
-      _pageLoaded: function() {
-        this.loading = false;
+      _loadElements: function() {
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.importHref(this.resolveUrl('elements.html'), function() {
+            this.loading = false;
+          });
+        }.bind(this));
       },
 
       _notify: function(e) {

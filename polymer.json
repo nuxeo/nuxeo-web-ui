@@ -1,5 +1,6 @@
 {
   "entrypoint": "index.html",
+  "shell": "elements/nuxeo-app.html",
   "fragments": [
     "elements/elements.html"
   ],
