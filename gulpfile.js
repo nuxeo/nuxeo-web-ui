@@ -135,11 +135,11 @@ gulp.task('move-elements', function() {
     dist('elements/directory/**'), '!' + dist('elements/directory/*.html'),
     dist('elements/search/**'), '!' + dist('elements/search/*.html'),
     dist('elements/workflow/**'), '!' + dist('elements/workflow/*.html'),
-    dist('elements/nuxeo-*.html')
+    dist('elements/nuxeo-*.html'), '!' + dist('elements/nuxeo-app.html'),
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 
   // fix asset path
-  var elements = gulp.src(dist('elements/elements.html'))
+  var elements = gulp.src([dist('elements/nuxeo-app.html'), dist('elements/elements.html')])
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe(gulp.dest(dist()));
 
