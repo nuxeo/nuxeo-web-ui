@@ -89,10 +89,8 @@ limitations under the License.
         /**
          * @doctype Note
          */
-        document: {
-          type: Object,
-          observer: '_documentChanged'
-        },
+        document: Object,
+        
         formats: Array
       },
 
@@ -103,10 +101,6 @@ limitations under the License.
           {id: 'text/xml', label: this.formatMimeType('text/xml')},
           {id: 'text/x-web-markdown', label: this.formatMimeType('text/x-web-markdown')}
         ]
-      },
-
-      _documentChanged: function() {
-        this.document.properties['dc:title'] = 'Default title';
       }
     });
   </script>
