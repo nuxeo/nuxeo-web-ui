@@ -77,9 +77,9 @@ limitations under the License.
   <!--! do not remove -->
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script src="bower_components/moment/min/moment-with-locales.min.js"></script>
+  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
 
-  <script src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= request.getContextPath() %>/<%= resource.getURI() %>">
