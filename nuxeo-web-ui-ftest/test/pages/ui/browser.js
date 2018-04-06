@@ -70,7 +70,7 @@ export default class Browser extends BasePage {
   }
 
   addToCollection(name) {
-    var addToCollectionButton = this.el.element(`nuxeo-add-to-collection-button paper-icon-button`);
+    const addToCollectionButton = this.el.element(`nuxeo-add-to-collection-button paper-icon-button`);
     addToCollectionButton.waitForVisible();
     addToCollectionButton.click();
     const selectivity = this.el.element(`#add-to-collection-dialog nuxeo-selectivity`);
