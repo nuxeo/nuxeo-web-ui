@@ -38,12 +38,14 @@ module.exports = function () {
     driver.url(`#!/browse${this.doc.path}`);
     this.ui.browser.waitForVisible();
     this.ui.browser.breadcrumb.waitForVisible();
+    this.ui.browser.currentPage.waitForVisible();
   });
 
   this.When(/^I browse to the document with path "(.+)"$/, (path) => {
     driver.url(`#!/browse`.concat(path));
     this.ui.browser.waitForVisible();
     this.ui.browser.breadcrumb.waitForVisible();
+    this.ui.browser.currentPage.waitForVisible();
   });
 
   this.Then(/^I can't view the document$/, () => {
