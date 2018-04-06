@@ -46,8 +46,10 @@ limitations under the License.
     <template is="dom-if" if="[[!document.properties.file:content.data]]">
       <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
     </template>
-    <nuxeo-document-preview document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-preview>
-    <nuxeo-document-blob document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-blob>
+    <template is="dom-if" if="[[document.properties.file:content.data]]">
+      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      <nuxeo-document-blob document="[[document]]"></nuxeo-document-blob>
+    </template>
     <template is="dom-if" if="[[_hasWritePermission(document)]]">
       <nuxeo-dropzone document="{{document}}" update-document message="[[_dropzoneMessage(document.properties.file:content.data)]]"></nuxeo-dropzone>
     </template>
