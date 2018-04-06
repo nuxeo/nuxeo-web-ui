@@ -1254,11 +1254,11 @@ limitations under the License.
         });
       },
 
-      _submitKeyHandler: function(e) {
+      _submitKeyHandler: function() {
         if (this.stage === 'upload' && this._canImport()) {
           this._import();
         }
-        if (this.stage === 'customize' && e.detail.keyboardEvent.target.tagName === 'INPUT') {
+        if (this.stage === 'customize') {
           if (this._hasNextFile()) {
             this._nextFile();
           } else if (this._canImportWithMetadata()) {
