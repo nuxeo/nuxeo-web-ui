@@ -255,7 +255,7 @@ limitations under the License.
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
                     enrichers="firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications, thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags"
-                    headers='{"X-NXfetch.document": "lock,properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch.task": "actors"}'>
+                    headers='{"X-NXfetch.document": "lock,properties", "X-NXfetch.directoryEntry": "parent", "X-NXtranslate.directoryEntry": "label", "X-NXfetch.task": "actors"}'>
     </nuxeo-document>
 
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
