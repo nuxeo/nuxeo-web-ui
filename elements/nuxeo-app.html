@@ -38,6 +38,7 @@ limitations under the License.
 <link rel="import" href="nuxeo-app/nuxeo-menu-icon.html">
 <link rel="import" href="nuxeo-app/nuxeo-page.html">
 <link rel="import" href="nuxeo-app/nuxeo-page-item.html">
+<link rel="import" href="nuxeo-app/nuxeo-offline-banner.html">
 
 <!-- nuxeo-home -->
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
@@ -253,6 +254,8 @@ limitations under the License.
       }
 
     </style>
+
+    <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
