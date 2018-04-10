@@ -46,7 +46,8 @@ export default class Browser extends BasePage {
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get currentPageResults() {
-    return new Results(`${this.currentPage.getTagName()}`);
+    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
   }
 
   get breadcrumb() {
@@ -206,8 +207,9 @@ export default class Browser extends BasePage {
   }
 
   selectAllChildDocuments() {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    const pill = this.currentPage;
+    pill.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    const rows = pill.elements('nuxeo-data-table nuxeo-data-table-row');
     rows.value.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
         row.element('nuxeo-data-table-checkbox').click();
@@ -216,8 +218,9 @@ export default class Browser extends BasePage {
   }
 
   selectChildDocument(title) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    const pill = this.currentPage;
+    pill.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    const rows = pill.elements('nuxeo-data-table nuxeo-data-table-row');
     rows.value.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox') &&
           row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {

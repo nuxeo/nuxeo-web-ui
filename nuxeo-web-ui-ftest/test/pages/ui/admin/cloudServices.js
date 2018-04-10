@@ -15,7 +15,7 @@ export default class CloudServices extends BasePage {
   addProvider(provider) {
     driver.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    driver.waitForVisible(`#dialog`);
+    driver.waitForVisible(`#dialog:not([aria-hidden])`);
     this.fillProviderDetails(provider);
     this.clickElementName(`save`);
   }
@@ -26,9 +26,9 @@ export default class CloudServices extends BasePage {
     const edited = rows.some((row) => {
       if (row.isVisible(`[name="serviceName"]`) && row.getText(`[name="serviceName"]`).trim() === currentName) {
         row.click(`[name="edit"]`);
-        driver.waitForVisible(`#dialog`);
+        driver.waitForVisible(`#dialog:not([aria-hidden])`);
         this.fillProviderDetails(newDetails);
-        this.el.click('#dialog paper-button[name="save"]');
+        this.el.click('#dialog:not([aria-hidden]) paper-button[name="save"]');
         return row;
       }
     });
@@ -54,7 +54,7 @@ export default class CloudServices extends BasePage {
 
   fillProviderDetails(provider) {
     provider.rows().forEach((row) => {
-      this.el.element(`#dialog input[name="${row[0]}"`).setValue(row[1]);
+      this.el.element(`#dialog:not([aria-hidden]) input[name="${row[0]}"`).setValue(row[1]);
     });
   }
 
