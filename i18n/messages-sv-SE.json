@@ -70,6 +70,7 @@
   "app.favorites": "Favoriter",
   "app.homeNotFound": "Startlayout hittades inte",
   "app.nxqlSearch": "NXQL Search",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "Personligt utrymme",
   "app.recentlyViewed": "Nyligen visade",
   "app.renameSearch": "Byt namn",

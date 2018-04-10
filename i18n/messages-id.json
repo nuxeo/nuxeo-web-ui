@@ -70,6 +70,7 @@
   "app.favorites": "Favorit",
   "app.homeNotFound": "Tata letak beranda tidak ditemukan",
   "app.nxqlSearch": "Pencarian NXQL",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "Ruang Pribadi",
   "app.recentlyViewed": "Baru saja dilihat",
   "app.renameSearch": "Mengubah nama",

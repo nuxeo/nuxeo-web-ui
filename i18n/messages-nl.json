@@ -70,6 +70,7 @@
   "app.favorites": "Favorieten",
   "app.homeNotFound": "Indeling beginpagina niet gevonden",
   "app.nxqlSearch": "NXQL-zoekopdracht",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "Persoonlijke ruimte",
   "app.recentlyViewed": "Onlangs weergegeven",
   "app.renameSearch": "Naam wijzigen",

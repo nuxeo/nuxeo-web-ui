@@ -70,6 +70,7 @@
   "app.favorites": "お気に入り",
   "app.homeNotFound": "ホームのレイアウトが見つかりません",
   "app.nxqlSearch": "NXQL検索",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "パーソナルスペース",
   "app.recentlyViewed": "最近の表示",
   "app.renameSearch": "名前の変更",

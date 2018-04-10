@@ -70,6 +70,7 @@
   "app.favorites": "Gogokoak",
   "app.homeNotFound": "Ez da hasierarako diseinua aurkitu",
   "app.nxqlSearch": "NXQL bilaketa",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "Area pertsonala",
   "app.recentlyViewed": "Oraintsu ikusiak",
   "app.renameSearch": "Aldatu izena",

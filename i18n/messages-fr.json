@@ -70,6 +70,7 @@
   "app.favorites": "Favoris",
   "app.homeNotFound": "Page d'accueil introuvable",
   "app.nxqlSearch": "Recherche NXQL",
+  "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
   "app.personalSpace": "Espace personnel",
   "app.recentlyViewed": "Consultés récemment",
   "app.renameSearch": "Renommer",
