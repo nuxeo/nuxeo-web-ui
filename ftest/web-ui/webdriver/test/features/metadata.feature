@@ -21,13 +21,13 @@ Feature: Edit metadata
 
     Then I see the <doctype> page
     And I can see <doctype> metadata with the following properties:
-      | name         | value                |
-      | title        | my title             |
-      | description  | my description       |
-      | nature       | Internship report    |
-      | subjects     | Medicine,Video games |
-      | coverage     | Canada               |
-      | expired      | April 12, 2082       |
+      | name         | value                                   |
+      | title        | my title                                |
+      | description  | my description                          |
+      | nature       | Internship report                       |
+      | subjects     | Science/Medicine,Daily life/Video games |
+      | coverage     | North-america/Canada                    |
+      | expired      | April 12, 2082                          |
 
   Examples:
     | doctype  |

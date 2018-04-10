@@ -22,12 +22,12 @@ Feature: Create Document
 
     Then I see the <doctype> page
     And I can see <doctype> metadata with the following properties:
-      | name         | value             |
-      | title        | my title          |
-      | description  | my description    |
-      | nature       | Application       |
-      | subjects     | Gastronomy,Comics |
-      | expired      | February 28, 2018 |
+      | name         | value                            |
+      | title        | my title                         |
+      | description  | my description                   |
+      | nature       | Application                      |
+      | subjects     | Daily life/Gastronomy,Art/Comics |
+      | expired      | February 28, 2018                |
 
   Examples:
     |doctype   |
