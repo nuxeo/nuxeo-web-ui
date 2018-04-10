@@ -179,7 +179,7 @@ module.exports = function () {
     documentPage.processWorkflowButton.waitForVisible();
     // assert that document info says a process is running
     documentPage.info.waitForVisible();
-    documentPage.info.element('[name="process"]').isVisible().should.be.true;
+    documentPage.info.waitForVisible('[name="process"]');
   });
 
   this.Then(/^I cannot start a workflow$/, () => {
@@ -199,10 +199,11 @@ module.exports = function () {
     driver.alertAccept();
     const documentPage = this.ui.browser.documentPage();
     // check info bar in the document is not visible
-    documentPage.infoBar.isVisible().should.be.false;
+    documentPage.infoBar.waitForVisible(browser.options.waitforTimeout, true);
     // assert that info bar displays a task is running
-    documentPage.taskInfo.isVisible().should.be.false;
+    documentPage.taskInfo.waitForVisible(browser.options.waitforTimeout, true);
     // assert that document info says a process is running
-    documentPage.info.element('[name="process"]').isVisible().should.be.false;
+    documentPage.info.waitForVisible();
+    documentPage.info.waitForVisible('[name="process"]', browser.options.waitforTimeout, true);
   });
 };

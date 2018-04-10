@@ -27,6 +27,7 @@ module.exports = function () {
     this.ui.browser.selectionToolbar.waitForVisible();
     this.ui.browser.selectionToolbar.trashDocuments();
     driver.alertAccept();
+    this.ui.browser.selectionToolbar.waitForNotVisible();
   });
 
   this.Then('I cannot trash selected documents', () => {
@@ -38,6 +39,7 @@ module.exports = function () {
     this.ui.browser.selectionToolbar.waitForVisible();
     this.ui.browser.selectionToolbar.deleteDocuments();
     driver.alertAccept();
+    this.ui.browser.selectionToolbar.waitForNotVisible();
   });
 
   this.Then('I cannot permanently delete selected documents', () => {
@@ -49,6 +51,7 @@ module.exports = function () {
     this.ui.browser.selectionToolbar.waitForVisible();
     this.ui.browser.selectionToolbar.untrashDocuments();
     driver.alertAccept();
+    this.ui.browser.selectionToolbar.waitForNotVisible();
   });
 
   this.Then('I cannot untrash selected documents', () => {

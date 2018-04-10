@@ -90,7 +90,7 @@ module.exports = function () {
     }
     this.ui.results.toggleColumnSettings.waitForVisible();
     this.ui.results.toggleColumnSettings.click();
-    this.ui.results.getColumnCheckbox(heading).waitForVisible();
+    this.ui.results.getColumnCheckbox(heading).waitForExist();
     this.ui.results.checkColumnCheckbox(heading);
     this.ui.results.columnsCloseButton.click();
     this.ui.results.getResultsColumn(heading).waitForExist().should.be.true;

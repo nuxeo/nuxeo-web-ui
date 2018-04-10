@@ -32,8 +32,9 @@ global.fieldRegistry.register('nuxeo-select',
                               },
                               (element, value) => {
                                 element.element('#input').click();
+                                element.waitForExist('paper-item');
                                 const item = element.elementByTextContent('paper-item', value);
-                                item.waitForVisible();
+                                item.waitForExist();
                                 item.click();
                               });
 global.fieldRegistry.register('nuxeo-date',
@@ -109,7 +110,6 @@ global.fieldRegistry.register('nuxeo-checkbox-aggregation',
                                   const text = e.getText();
                                   return typeof text === 'string' && text.trim().includes(value);
                                 });
-                                el.waitForVisible();
                                 el.click();
                               });
 global.fieldRegistry.register('nuxeo-dropzone',
@@ -138,7 +138,7 @@ global.fieldRegistry.register('nuxeo-data-table',
                                 const jValues = JSON.parse(values);
                                 jValues.forEach(value => {
                                   element.element('#addEntry').click();
-                                  const dialog = element.element('nuxeo-dialog[id="dialog"]');
+                                  const dialog = element.element('nuxeo-dialog[id="dialog"]:not([aria-hidden])');
                                   dialog.waitForVisible();
                                   const form = element.element('#editForm');
                                   form.waitForVisible();

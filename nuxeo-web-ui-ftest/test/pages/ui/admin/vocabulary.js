@@ -17,7 +17,7 @@ export default class Vocabulary extends BasePage {
   addNewEntry(id, label) {
     driver.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
     dialog.waitForVisible();
     dialog.waitForVisible(`input[name="id"]`);
     dialog.element(`input[name="id"]`).setValue(id);
@@ -50,7 +50,7 @@ export default class Vocabulary extends BasePage {
   editEntry(index, label) {
     const selector = `#edit-button-${(index - 1)}`;
     this.el.element(selector).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
     dialog.waitForVisible();
     dialog.waitForVisible(`input[name="label"]`);
     dialog.element(`input[name="label"]`).setValue(label);
@@ -84,16 +84,9 @@ export default class Vocabulary extends BasePage {
   get hasEditDialog() {
     driver.waitForVisible(`#edit-button-0`);
     this.el.element(`#edit-button-0`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
-    dialog.waitForVisible();
-    const visibleLabels = dialog.isVisible(`input[name="label"]`);
-    let allFieldVisible = false;
-    if (visibleLabels.length) {
-      allFieldVisible = visibleLabels.every((el) => el);
-    } else {
-      allFieldVisible = visibleLabels;
-    }
-    allFieldVisible = allFieldVisible && dialog.isVisible(`input[name="id"]`);
+    this.el.waitForVisible(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
+    const allFieldVisible = dialog.waitForVisible(`input[name="label"]`) && dialog.waitForVisible(`input[name="id"]`);
     dialog.waitForVisible(`paper-button[name="cancel"]`);
     dialog.element(`paper-button[name="cancel"]`).click();
     return allFieldVisible;
@@ -102,21 +95,15 @@ export default class Vocabulary extends BasePage {
   get hasCreateDialog() {
     this.el.waitForVisible(`#addEntry`);
     this.el.element(`#addEntry`).click();
-    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]`);
-    dialog.waitForVisible();
-    const visibleLabels = dialog.isVisible(`input[name="label"]`);
-    let allFieldVisible = false;
-    if (visibleLabels.length) {
-      allFieldVisible = visibleLabels.every((el) => el);
-    } else {
-      allFieldVisible = visibleLabels;
-    }
-    allFieldVisible = allFieldVisible && dialog.isVisible(`input[name="id"]`);
+    this.el.waitForVisible(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
+    const dialog = this.el.element(`nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])`);
+    const allFieldVisible = dialog.waitForVisible(`input[name="label"]`) && dialog.waitForVisible(`input[name="id"]`);
     dialog.element(`#selectParent`).click();
     dialog.waitForVisible(`#parentDialog nuxeo-tree-node:first-child`);
     dialog.waitForVisible(`#parentDialog paper-button[name="close"]`);
     dialog.element(`#parentDialog paper-button[name="close"]`).click();
     dialog.waitForVisible(`paper-button[name="cancel"]`);
+    dialog.scrollIntoView(`paper-button[name="cancel"]`);
     dialog.element(`paper-button[name="cancel"]`).click();
     return allFieldVisible;
   }

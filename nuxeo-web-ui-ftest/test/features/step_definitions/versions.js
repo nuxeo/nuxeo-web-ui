@@ -28,8 +28,8 @@ module.exports = function () {
     page.waitForVisible();
     page.versions.waitForVisible();
     page.versions.dialog.waitForVisible();
-    page.versions.dialogDismissButton.waitForVisible();
-    page.versions.dialogConfirmButton.waitForVisible();
+    page.versions.dialog.waitForVisible('paper-button[dialog-dismiss]');
+    page.versions.dialog.waitForVisible('paper-button[dialog-confirm]');
   });
 
   this.When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, (v1, v2, v3, v4) => {

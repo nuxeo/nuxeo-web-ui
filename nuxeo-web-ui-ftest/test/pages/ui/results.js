@@ -46,8 +46,10 @@ export default class Results extends BasePage {
   }
 
   getColumnCheckbox(heading) {
-    this.el.waitForVisible('tr');
-    return this.el.elementByTextContent('tr', heading).element('paper-checkbox');
+    this.el.waitForVisible('nuxeo-dialog[id="columnsSettingsPopup"]');
+    const tr = this.el.elementByTextContent('nuxeo-dialog[id="columnsSettingsPopup"] tr', heading);
+    tr.waitForVisible('paper-checkbox');
+    return tr.element('paper-checkbox');
   }
 
   checkColumnCheckbox(heading) {
@@ -58,10 +60,10 @@ export default class Results extends BasePage {
   }
 
   getResultsColumn(heading) {
+    this.el.waitForVisible('nuxeo-data-table-row[header]');
     const row = this.el.element('nuxeo-data-table-row[header]');
-    row.waitForVisible();
-    row.waitForVisible('nuxeo-data-table-cell');
-    return row.elementByTextContent('nuxeo-data-table-cell', heading);
+    row.waitForVisible('nuxeo-data-table-cell:not([hidden])');
+    return row.elementByTextContent('nuxeo-data-table-cell:not([hidden])', heading);
   }
 
   resultsCount(displayMode) {
