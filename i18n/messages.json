@@ -101,6 +101,8 @@
   "app.title.search.trash": "Trash",
   "app.title.tasks": "Tasks",
   "app.title.themes": "Themes",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Trash",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",
