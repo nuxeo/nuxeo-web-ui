@@ -12,6 +12,9 @@
           to="nuxeo.war/ui/i18n/messages-es.json" />
     <copy from="nuxeo.war/ui/i18n/messages-pt-PT.json"
           to="nuxeo.war/ui/i18n/messages-pt.json" />
+    <!-- Add fallback to four-letter locales -->
+    <copy from="nuxeo.war/ui/i18n/messages-fr.json"
+          to="nuxeo.war/ui/i18n/messages-fr-FR.json" />
   </install>
 
   <extension target="web#STD-AUTH-FILTER">
