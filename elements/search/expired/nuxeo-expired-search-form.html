@@ -59,13 +59,8 @@ limitations under the License.
       properties: {
         params: {
           type: Object,
-          value: function() {
-            var oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            return {
-              "expired_max" : oneWeekAgo.toJSON()
-            }
-          },
+          value: {},
+          observer: '_paramsChanged',
           notify: true
         },
         aggregations: {
@@ -82,6 +77,13 @@ limitations under the License.
       clear: function() {
         this.searchTerm = '';
         this._search();
+      },
+
+      _paramsChanged: function() {
+        var currentDate = new Date();
+        if (!this.params.expired_max) {
+          this.set('params.expired_max', currentDate.toJSON());
+        }
       },
 
       _search: function() {
