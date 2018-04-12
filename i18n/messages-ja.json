@@ -101,6 +101,8 @@
   "app.title.search.trash": "ゴミ箱",
   "app.title.tasks": "タスク",
   "app.title.themes": "テーマ",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "ゴミ箱",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

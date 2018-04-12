@@ -101,6 +101,8 @@
   "app.title.search.trash": "Prullenbak",
   "app.title.tasks": "Taken",
   "app.title.themes": "Thema's",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Prullenbak",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

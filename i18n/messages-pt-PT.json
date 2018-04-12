@@ -101,6 +101,8 @@
   "app.title.search.trash": "Lixo",
   "app.title.tasks": "Tarefas",
   "app.title.themes": "Temas",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Lixo",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

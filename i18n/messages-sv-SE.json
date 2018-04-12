@@ -101,6 +101,8 @@
   "app.title.search.trash": "Papperskorg",
   "app.title.tasks": "Uppgifter",
   "app.title.themes": "Teman",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Papperskorg",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

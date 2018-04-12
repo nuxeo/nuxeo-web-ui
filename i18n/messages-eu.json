@@ -101,6 +101,8 @@
   "app.title.search.trash": "Zakarrontzia",
   "app.title.tasks": "Zereginak",
   "app.title.themes": "Gaiak",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Zakarrontzia",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

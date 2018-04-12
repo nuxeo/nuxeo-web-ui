@@ -101,6 +101,8 @@
   "app.title.search.trash": "Papierkorb",
   "app.title.tasks": "Aufgaben",
   "app.title.themes": "Themen",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Papierkorb",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",

@@ -101,6 +101,8 @@
   "app.title.search.trash": "Corbeille",
   "app.title.tasks": "Tâches",
   "app.title.themes": "Thèmes",
+  "app.title.user-authorized-apps": "Authorized Applications",
+  "app.title.user-cloud-services": "Cloud Services",
   "app.trashSearch": "Corbeille",
   "app.user.authorizedApps": "Authorized Applications",
   "app.user.cloudServices": "Cloud Services",
