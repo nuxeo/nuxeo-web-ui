@@ -41,4 +41,24 @@ export default class DocumentPage extends BasePage {
   get restoreVersionButtonConfirm() {
     return this.versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
   }
+
+  get info() {
+    return this.el.element('nuxeo-document-info');
+  }
+
+  get infoBar() {
+    return this.el.element('nuxeo-document-info-bar');
+  }
+
+  get taskInfo() {
+    return this.el.element('nuxeo-document-info-bar .task');
+  }
+
+  get processWorkflowButton() {
+    return this.el.element('nuxeo-document-info-bar .task paper-button');
+  }
+
+  get abandonWorkflowButton() {
+    return this.el.element('nuxeo-document-info-bar .workflow paper-button');
+  }
 }

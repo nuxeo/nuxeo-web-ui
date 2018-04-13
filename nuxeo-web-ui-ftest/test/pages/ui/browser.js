@@ -249,4 +249,22 @@ export default class Browser extends BasePage {
     return this.trashedInfobar.element('nuxeo-delete-document-button[hard] #deleteButton');
   }
 
+  get startWorkflowButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.el.element('.document-actions nuxeo-workflow-button #startButton');
+  }
+
+  startWorkflow(workflow) {
+    // click the action to trigger the dialog
+    const workflowButton = this.el.element('.document-actions nuxeo-workflow-button paper-icon-button');
+    workflowButton.waitForExist();
+    workflowButton.waitForVisible();
+    workflowButton.click();
+    // select the workflow
+    const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
+    workflowSelect.waitForVisible();
+    fixtures.layouts.setValue(workflowSelect, workflow);
+    // click the start button
+    this.el.element('.document-actions nuxeo-workflow-button #startButton').click();
+  }
 }
