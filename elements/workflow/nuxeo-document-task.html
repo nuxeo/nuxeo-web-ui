@@ -94,7 +94,6 @@ limitations under the License.
           </iron-form>
 
           <div class="layout horizontal center">
-            <content select=".buttons"></content>
             <div class="layout horizontal end-justified flex">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
                 <paper-button noink dialog-confirm on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
