@@ -77,7 +77,7 @@ if (argv['debug']) {
 
 process.env.FORCE_COLOR = true;
 
-const wdio = spawn(wdioBin, args, { env: process.env });
+const wdio = spawn(wdioBin, args, { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
 
 wdio.stdout.pipe(process.stdout);
 wdio.stderr.pipe(process.stderr);
