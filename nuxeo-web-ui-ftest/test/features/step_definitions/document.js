@@ -28,6 +28,9 @@ module.exports = function () {
         });
   });
 
+  this.Given(/^This document has a workflow running$/, () =>
+      fixtures.workflows.start(this.doc, 'SerialDocumentReview', this.username));
+
   this.Given(/^this document has file "(.+)" for content$/, (file) =>
       fixtures.documents.attach(this.doc, fixtures.blobs.get(file)));
 
@@ -163,4 +166,45 @@ module.exports = function () {
   this.Then('I can see the document has "$nb" children', (nb) =>
     this.ui.browser.waitForNbChildren(parseInt(nb))
   );
+
+  this.When(/^I start a (.+)$/, (workflow) => {
+    this.ui.browser.startWorkflow(workflow);
+  });
+
+  this.Then(/^I can see a process is running in the document$/, () => {
+    const documentPage = this.ui.browser.documentPage();
+    // check info bar in the document is visible
+    documentPage.infoBar.waitForVisible();
+    // assert that info bar displays a task is running
+    documentPage.taskInfo.waitForVisible();
+    // assert that there's a button to process the task
+    documentPage.processWorkflowButton.waitForVisible();
+    // assert that document info says a process is running
+    documentPage.info.waitForVisible();
+    documentPage.info.element('[name="process"]').isVisible().should.be.true;
+  });
+
+  this.Then(/^I cannot start a workflow$/, () => {
+    this.ui.browser.startWorkflowButton.isExisting().should.be.false;
+  });
+
+  this.When(/^I click the process button$/, () => {
+    const processWorkflowButton = this.ui.browser.documentPage().processWorkflowButton;
+    processWorkflowButton.waitForVisible();
+    processWorkflowButton.click();
+  });
+
+  this.Then(/^I can abandon the workflow$/, () => {
+    const abandonWorkflowButton = this.ui.browser.documentPage().abandonWorkflowButton;
+    abandonWorkflowButton.waitForVisible();
+    abandonWorkflowButton.click();
+    driver.alertAccept();
+    const documentPage = this.ui.browser.documentPage();
+    // check info bar in the document is not visible
+    documentPage.infoBar.isVisible().should.be.false;
+    // assert that info bar displays a task is running
+    documentPage.taskInfo.isVisible().should.be.false;
+    // assert that document info says a process is running
+    documentPage.info.element('[name="process"]').isVisible().should.be.false;
+  });
 };
