@@ -44,6 +44,14 @@ limitations under the License.
       :host([hidden]) {
         display: none;
       }
+
+      /* Fix known stacking issue in iOS (NXP-24600)
+         https://github.com/PolymerElements/paper-dialog-scrollable/issues/72 */
+      paper-dialog-scrollable {
+        --paper-dialog-scrollable: {
+          -webkit-overflow-scrolling: auto;
+        };
+      }
     </style>
 
     <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
