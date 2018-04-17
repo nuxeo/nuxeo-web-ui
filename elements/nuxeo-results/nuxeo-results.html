@@ -252,7 +252,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           // update view
           view.reset();
           view.fetch();
-          this.fire('search-results-view', {view: view});
+          this.fire('search-results-view', {view: view, name: this.name});
         }
       },
 
