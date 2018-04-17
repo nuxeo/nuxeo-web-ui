@@ -262,6 +262,7 @@ limitations under the License.
     </nuxeo-document>
 
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
+    <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
     <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
     <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
@@ -512,7 +513,8 @@ limitations under the License.
         'document-deleted': '_documentDeleted',
         'document-untrashed': '_documentUntrashed',
         'nuxeo-documents-deleted': '_documentsDeleted',
-        'nuxeo-documents-untrashed': '_documentsUntrashed'
+        'nuxeo-documents-untrashed': '_documentsUntrashed',
+        'nuxeo-documents-dropped': '_documentsDropped'
       },
 
       observers: ['_computeSharedActionContext(currentUser)'],
@@ -954,6 +956,18 @@ limitations under the License.
         } else {
           this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
         }
+      },
+
+      _documentsDropped: function(e) {
+        this.$.moveDocumentsOp.op = 'Document.Move';
+        this.$.moveDocumentsOp.params = {target: e.detail.targetDocument.uid};
+        this.$.moveDocumentsOp.input = 'docs:' + e.detail.documents.map(function(doc) {
+          return doc.uid;
+        }).join(',');
+        this.$.moveDocumentsOp.execute().then(function() {
+          this.fire('document-updated');
+          this._toast(this.i18n('app.documents.dropped', e.detail.documents.length, e.detail.targetDocument.title));
+        }.bind(this));
       },
 
       _hasAdministrationPermissions: function(user) {

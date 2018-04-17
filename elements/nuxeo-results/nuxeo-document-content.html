@@ -107,7 +107,8 @@ limitations under the License.
                          empty-label="[[emptyLabel]]"
                          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                          selection-enabled display-quick-filters
-                         display-sort$="[[_canSort(document)]]" sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
+                         display-sort$="[[_canSort(document)]]" sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]"
+                         draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
                                            tabindex$="{{tabIndex}}"
@@ -127,7 +128,8 @@ limitations under the License.
                           empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                           selection-enabled
                           display-quick-filters
-                          on-row-clicked="_navigate">
+                          on-row-clicked="_navigate"
+                          draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
                                    field="dc:title" sort-by="[[_displaySort(document, 'dc:title')]]" filter-by="title"  flex="100">
             <template>
@@ -225,7 +227,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-document-content',
-      behaviors: [Nuxeo.LayoutBehavior, Polymer.IronResizableBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
       properties: {
         document: {
           type: Object
@@ -262,6 +264,12 @@ limitations under the License.
         visible: {
           type: Boolean,
           value: false
+        },
+        _dropTargetFilter: {
+          type: Function,
+          value: function() {
+            return this._dropTargetFilter.bind(this);
+          }
         }
       },
 
@@ -277,7 +285,6 @@ limitations under the License.
 
       ready: function() {
         this.nxProvider = this.$.nxProvider;
-
         this.$.dropzone.addEventListener('dragover', this._dragoverImport.bind(this));
         this.$.dropzone.addEventListener('dragleave', this._dragleaveImport.bind(this));
         this.$.dropzone.addEventListener('drop', this._dropImport.bind(this));
@@ -369,6 +376,15 @@ limitations under the License.
 
       _computeVisible: function() {
         this.visible = Boolean(this.offsetWidth || this.offsetHeight);
+      },
+
+      // function used by nuxeo-data-grid and nuxeo-data-table to check if a list item is a drop target
+      _dropTargetFilter: function(el, model) {
+        return model && this.hasFacet(model.item, 'Folderish');
+      },
+
+      _hasWritePermission: function (doc) {
+        return doc && this.hasPermission(doc, 'Write');
       }
 
     });
