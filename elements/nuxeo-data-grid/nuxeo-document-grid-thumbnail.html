@@ -39,6 +39,7 @@ limitations under the License.
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        cursor: pointer;
       }
 
       a {
@@ -61,7 +62,6 @@ limitations under the License.
 
       .bubbleBox:hover,
       .bubbleBox:focus {
-        cursor: pointer;
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
@@ -151,14 +151,12 @@ limitations under the License.
       .bubbleBox:hover .select:hover {
         border: 2px solid var(--nuxeo-button-primary);
         background-color: var(--nuxeo-button-primary);
-        cursor: pointer;
       }
 
       :host([selected]) .bubbleBox .select,
       :host([selected]) .bubbleBox:hover .select:hover {
         border: 2px solid var(--nuxeo-grid-selected);
         background-color: var(--nuxeo-grid-selected);
-        cursor: pointer;
         display: block;
       }
 
@@ -169,6 +167,10 @@ limitations under the License.
       :host([selected]) .bubbleBox {
         border: 2px solid var(--nuxeo-grid-selected);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+      }
+
+      :host(.droptarget-hover) .bubbleBox {
+        border: 2px dashed var(--nuxeo-grid-selected);
       }
 
     </style>

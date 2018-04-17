@@ -42,6 +42,7 @@ limitations under the License.
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        cursor: pointer;
       }
 
       .listBox {
@@ -58,7 +59,6 @@ limitations under the License.
 
       .listBox:hover,
       .listBox:focus {
-        cursor: pointer;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
       }
@@ -148,14 +148,12 @@ limitations under the License.
       .listBox:hover .select:hover {
         border: 2px solid var(--nuxeo-button-primary);
         background-color: var(--nuxeo-button-primary);
-        cursor: pointer;
       }
 
       :host([selected]) .listBox .select,
       :host([selected]) .listBox:hover .select:hover {
         border: 2px solid var(--nuxeo-grid-selected);
         background-color: var(--nuxeo-grid-selected);
-        cursor: pointer;
         display: block;
       }
 
@@ -166,6 +164,10 @@ limitations under the License.
       :host([selected]) .listBox {
         border: 2px solid var(--nuxeo-grid-selected);
         box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+      }
+
+      :host(.droptarget-hover) .listBox {
+        border: 2px dashed var(--nuxeo-grid-selected);
       }
 
       .typeSelection paper-button {
