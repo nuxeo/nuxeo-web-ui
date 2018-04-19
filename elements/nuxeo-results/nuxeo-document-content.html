@@ -380,7 +380,7 @@ limitations under the License.
 
       // function used by nuxeo-data-grid and nuxeo-data-table to check if a list item is a drop target
       _dropTargetFilter: function(el, model) {
-        return model && this.hasFacet(model.item, 'Folderish');
+        return model && (this.hasFacet(model.item, 'Folderish') || this.hasFacet(model.item, 'Collection'));
       },
 
       _hasWritePermission: function (doc) {
