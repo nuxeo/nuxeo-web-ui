@@ -959,14 +959,36 @@ limitations under the License.
       },
 
       _documentsDropped: function(e) {
+        if (this.hasFacet(e.detail.targetDocument, 'Collection')) {
+          this._addDocumentsToCollection(e.detail.documents, e.detail.targetDocument);
+        } else {
+          this._moveDocumentsToContainer(e.detail.documents, e.detail.targetDocument);
+        }
+      },
+
+      _moveDocumentsToContainer: function(documents, target) {
         this.$.moveDocumentsOp.op = 'Document.Move';
-        this.$.moveDocumentsOp.params = {target: e.detail.targetDocument.uid};
-        this.$.moveDocumentsOp.input = 'docs:' + e.detail.documents.map(function(doc) {
+        this.$.moveDocumentsOp.params = {target: target.uid};
+        this.$.moveDocumentsOp.input = 'docs:' + documents.map(function(doc) {
           return doc.uid;
         }).join(',');
         this.$.moveDocumentsOp.execute().then(function() {
           this.fire('document-updated');
-          this._toast(this.i18n('app.documents.dropped', e.detail.documents.length, e.detail.targetDocument.title));
+          this._toast(this.i18n('app.documents.moved', documents.length, target.title));
+        }.bind(this));
+      },
+
+      _addDocumentsToCollection: function(documents, target) {
+        this.$.moveDocumentsOp.op = 'Document.AddToCollection';
+        this.$.moveDocumentsOp.params = {collection: target.uid};
+        this.$.moveDocumentsOp.input = 'docs:' + documents.map(function(doc) {
+          return doc.uid;
+        }).join(',');
+        this.$.moveDocumentsOp.execute().then(function() {
+          this.fire('document-updated');
+          this._toast(
+              this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection')
+          );
         }.bind(this));
       },
 
