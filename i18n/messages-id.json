@@ -64,6 +64,7 @@
   "app.documents.addedToCollection": "Dokumen ditambahkan ke koleksi",
   "app.documents.deleted.error": "Kesalahan saat menghapus dokumen.",
   "app.documents.deleted.success": "Documents successfully deleted",
+  "app.documents.moved": "{0} document(s) moved to \"{1}\".",
   "app.documents.untrashed.error": "Error while restoring the documents",
   "app.documents.untrashed.success": "Documents successfully restored",
   "app.expiredSearch": "Kadaluarsa",

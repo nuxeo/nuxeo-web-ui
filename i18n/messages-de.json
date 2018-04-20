@@ -64,6 +64,7 @@
   "app.documents.addedToCollection": "Dokumente zur Sammlung hinzugefügt.",
   "app.documents.deleted.error": "Fehler beim Löschen der Dokumente.",
   "app.documents.deleted.success": "Dokumente erfolgreich gelöscht",
+  "app.documents.moved": "{0} document(s) moved to \"{1}\".",
   "app.documents.untrashed.error": "Fehler beim Wiederherstellen der Dokumente",
   "app.documents.untrashed.success": "Dokumente erfolgreich wiederhergestellt",
   "app.expiredSearch": "Abgelaufen",

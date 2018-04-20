@@ -64,6 +64,7 @@
   "app.documents.addedToCollection": "Documenten toegevoegd aan collectie",
   "app.documents.deleted.error": "Fout bij het wissen van documenten.",
   "app.documents.deleted.success": "Documenten met succes verwijderd",
+  "app.documents.moved": "{0} document(s) moved to \"{1}\".",
   "app.documents.untrashed.error": "Fout bij het herstellen van de documenten",
   "app.documents.untrashed.success": "Documenten met succes hersteld",
   "app.expiredSearch": "Verlopen",

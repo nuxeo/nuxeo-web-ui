@@ -64,6 +64,7 @@
   "app.documents.addedToCollection": "Dokument las till i samling.",
   "app.documents.deleted.error": "Fel när dokument skulle tas bort.",
   "app.documents.deleted.success": "Dokumentet togs bort",
+  "app.documents.moved": "{0} document(s) moved to \"{1}\".",
   "app.documents.untrashed.error": "Fel när dokumenten återställdes",
   "app.documents.untrashed.success": "Dokumenten återställdes",
   "app.expiredSearch": "Har gått ut",

@@ -64,6 +64,7 @@
   "app.documents.addedToCollection": "Dokumentuak bildumara gehituta",
   "app.documents.deleted.error": "Errorea dokumentuak ezabatzean.",
   "app.documents.deleted.success": "Dokumentuak behar bezala ezabatuta",
+  "app.documents.moved": "{0} document(s) moved to \"{1}\".",
   "app.documents.untrashed.error": "Errorea dokumentuak leheneratzean",
   "app.documents.untrashed.success": "Dokumentuak behar bezala leheneratuta",
   "app.expiredSearch": "Iraungita",
