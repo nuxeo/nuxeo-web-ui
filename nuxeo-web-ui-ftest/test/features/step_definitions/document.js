@@ -131,13 +131,11 @@ module.exports = function () {
           const xmlContent = page.view.preview.element('#xml');
           xmlContent.waitForVisible();
           xmlContent.getText().should.equal(newContent);
-        } else if (format === 'Markdown') {
+        } else if (format === 'Markdown' || format === 'Text') {
           page.view.preview.waitForVisible('marked-element #content');
           const markedContent = page.view.preview.element('marked-element #content');
           markedContent.waitForVisible();
           markedContent.getText().should.equal(newContent);
-        } else if (format === 'Text') {
-          page.view.preview.element('iframe').waitForVisible();
         }
         break;
       default:
