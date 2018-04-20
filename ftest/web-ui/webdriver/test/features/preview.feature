@@ -21,7 +21,7 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | iframe             |
+      | sample.txt | marked-element     |
 
   Scenario Outline: Previewer for File document with different types of blobs as content
     When I have a File document
@@ -37,7 +37,7 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | iframe             |
+      | sample.txt | marked-element     |
 
   Scenario Outline: Previewer for File document with different types of blobs as attachment
     When I have a File document
@@ -53,4 +53,4 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | iframe             |
+      | sample.txt | marked-element     |
