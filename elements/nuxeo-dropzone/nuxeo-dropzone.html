@@ -68,6 +68,7 @@ limitations under the License.
         text-align: center;
         opacity: .5;
         @apply --layout-horizontal;
+        @apply --layout-wrap;
       }
 
       #details {
@@ -104,16 +105,8 @@ limitations under the License.
         margin-left: 16px;
       }
 
-      .actions > *,
-      .actions::content > * {
+      .actions > * {
         margin-left: 8px;
-      }
-
-      .actions > *:first-child,
-      .actions > nuxeo-slot,
-      .actions::content > *:first-child,
-      .actions::content > nuxeo-slot {
-        margin-left: 0;
       }
     </style>
 
