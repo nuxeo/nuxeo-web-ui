@@ -336,7 +336,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       saveSettings: function() {
-        if (this.name) {
+        if (this.name && this._localStorageName) {
           this.$.prefStorage.save();
         }
       },
