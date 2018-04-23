@@ -245,6 +245,16 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="myTagDocumentAction" slot="DOCUMENT_ACTIONS" order="0">
+  <template>
+    <nuxeo-filter document="[[document]]" facet="NXTag">
+      <template>
+        <nuxeo-my-tag-action document="[[document]]"></nuxeo-my-tag-action>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="lockToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="70">
   <template>
     <nuxeo-filter document="[[document]]" expression="document.facets.indexOf('Folderish') === -1">
