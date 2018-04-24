@@ -34,17 +34,26 @@ limitations under the License.
     <os family="windows"/>
   </condition>
 
-  <target name="init" description="Download all node and web dependencies">
+  <target name="clean" description="Clean npm and bower dependencies">
     <delete includeEmptyDirs="yes" failonerror="false">
       <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />
       <fileset dir="bower_components" defaultexcludes="no" followsymlinks="false" />
     </delete>
+  </target>
+
+  <target name="npmInstall" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
+  </target>
+
+  <target name="bowerInstall" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.bower}" failonerror="true">
       <arg value="install" />
     </exec>
+  </target>
+
+  <target name="init" description="Download all node and web dependencies" depends="npmInstall,bowerInstall">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="run" />
       <arg value="${lint.script}" />
