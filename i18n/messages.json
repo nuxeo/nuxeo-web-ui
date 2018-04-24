@@ -267,7 +267,7 @@
   "csv.import.report.line": "Line",
   "csv.import.new" : "New CSV Import",
   "dam.assets.heading": "Assets",
-  "defaultSearch.authors.placeholder": "Search for contributors...",
+  "defaultSearch.authors.placeholder": "Search for authors...",
   "defaultSearch.authors": "Authors",
   "defaultSearch.collections.placeholder": "Select a value.",
   "defaultSearch.collections": "Collections",
