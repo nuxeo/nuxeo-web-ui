@@ -466,7 +466,7 @@
 
 <nuxeo-slot-content name="orderSelectionActions" slot="RESULTS_SELECTION_ACTIONS" order="-50">
   <template>
-    <nuxeo-filter document="[[document]]" type="OrderedFolder">
+    <nuxeo-filter document="[[document]]" facet="Orderable">
       <template>
         <nuxeo-move-documents-up-button selected-documents="[[selectedItems]]" documents="[[items]]">
         </nuxeo-move-documents-up-button>
