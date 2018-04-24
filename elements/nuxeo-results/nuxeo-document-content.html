@@ -305,7 +305,7 @@ limitations under the License.
       _observeDocument: function() {
         if (this.document) {
           this.params = {'ecm_parentId': this.document.uid};
-          if (this.hasType(this.document, 'OrderedFolder')) {
+          if (this.hasFacet(this.document, 'Orderable')) {
             this.$.nxProvider.set('sort', {'ecm:pos': 'ASC'});
           } else {
             this.$.nxProvider.set('sort', {});
@@ -333,7 +333,7 @@ limitations under the License.
       },
 
       _canSort: function(document) {
-        return !(document && this.hasType(document, 'OrderedFolder'));
+        return !(document && this.hasFacet(document, 'Orderable'));
       },
 
       _displaySort: function(document, field) {
