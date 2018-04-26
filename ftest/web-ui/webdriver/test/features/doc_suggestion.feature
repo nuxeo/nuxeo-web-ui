@@ -16,14 +16,16 @@ Feature: Document Suggestion
     When I click the Create Document button
     And I select DocSuggestion from the Document Type menu
     And I create a document with the following properties:
-      | name                  | value             |
-      | title                 | mySuggestionDoc   |
-      | multipleDocSuggestion | toto,pouet        |
-      | singleDocSuggestion   | pouet             |
+      | name                            | value             |
+      | title                           | mySuggestionDoc   |
+      | multipleDocSuggestion           | toto,pouet        |
+      | singleDocSuggestion             | pouet             |
+      | multipleDocSuggestionNoResolver | toto,pouet        |
     Then I see the DocSuggestion page
     And I can see DocSuggestion metadata with the following properties:
-      | name                  | value             |
-      | title                 | mySuggestionDoc   |
-      | multipleDocSuggestion | toto,pouet        |
-      | singleDocSuggestion   | pouet             |
+      | name                            | value             |
+      | title                           | mySuggestionDoc   |
+      | multipleDocSuggestion           | toto,pouet        |
+      | singleDocSuggestion             | pouet             |
+      | multipleDocSuggestionNoResolver | toto,pouet        |
     And I can navigate to the document selected in the "singleDocSuggestion" single document suggestion widget
