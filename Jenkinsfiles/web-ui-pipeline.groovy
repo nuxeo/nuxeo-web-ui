@@ -76,7 +76,7 @@ timestamps {
     node(SLAVE) {
         try {
             deleteDir()
-            def el, uiel, webui, plugin
+            def el, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
                 sh 'npm cache clean && bower cache clean'
             }
@@ -138,10 +138,24 @@ timestamps {
                         }
                     }
                 }
+                stage('nuxeo-web-ui-itests') {
+                    timeout(30) {
+                        webuiitests = cloneRebaseAndDir('nuxeo-web-ui-itests')
+                        if (webuiitests) {
+                            echo 'Need to nuxeo-web-ui-itests'
+                            dir('nuxeo-web-ui-itests') {
+                                sh 'mvn clean install'
+                                archive 'target/*.jar'
+                            }
+                        } else {
+                            echo 'No need to build nuxeo-web-ui-itests'
+                        }
+                    }
+                }
                 stage('plugin-nuxeo-web-ui') {
                     timeout(60) {
                         plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui')
-                        if (plugin || el || uiel || plugin) {
+                        if (plugin || el || uiel || webuiitests || plugin) {
                             echo 'Need to plugin-nuxeo-web-ui'
                             dir('plugin-nuxeo-web-ui') {
                                 if (!params.SKIP_IT_TESTS) {
@@ -166,6 +180,9 @@ timestamps {
                         }
                         if (webui) {
                             createPullRequest('nuxeo-web-ui')
+                        }
+                        if (webuiitests) {
+                            createPullRequest('nuxeo-web-ui-itests')
                         }
                         if (plugin) {
                             createPullRequest('plugin-nuxeo-web-ui')
