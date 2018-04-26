@@ -21,7 +21,7 @@ def runSauceLabTests(repo, sauceCredentialId) {
         echo 'Tests are skipped'
     } else {
         withCredentials([usernamePassword(credentialsId: "$sauceCredentialId", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-            sh "npm install && npm run lint && ./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
+            sh "./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
         }
     }
 }
@@ -65,104 +65,119 @@ def cloneRebaseAndDir(repo, branch = BRANCH, fallback = PARENT_BRANCH) {
 }
 
 def replaceVersion(dep, branch = BRANCH, base = PARENT_BRANCH) {
-    sh "sed -i 's/${dep}#${base}/${dep}#${branch}/g' bower.json"
+    def bower_folder = 'bower_components'
+    if (fileExists("${bower_folder}/${dep}/bower.json")) {
+        sh "rm -rf ${bower_folder}/${dep}"
+        sh "rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../${dep}/ ${bower_folder}/${dep}"
+    }
 }
 
 timestamps {
     node(SLAVE) {
-        deleteDir()
-        def el, uiel, webui, plugin
-        if (params.CLEAN) {
-            sh 'npm cache clean && bower cache clean'
-        }
-        stage('nuxeo-elements') {
-            timeout(30) {
-                el = cloneRebaseAndDir('nuxeo-elements')
-                if (el) {
-                    echo 'Need to build nuxeo-elements'
-                    dir('nuxeo-elements') {
-                        sh 'bower install'
-                        runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
-                    }
-                } else {
-                    echo 'No need to build nuxeo-elements'
-                }
+        try {
+            deleteDir()
+            def el, uiel, webui, plugin
+            if (params.CLEAN) {
+                sh 'npm cache clean && bower cache clean'
             }
-        }
-        stage('nuxeo-ui-elements') {
-            timeout(30) {
-                uiel = cloneRebaseAndDir('nuxeo-ui-elements')
-                if (uiel || el) {
-                    echo 'Need to build nuxeo-ui-elements'
-                    dir('nuxeo-ui-elements') {
-                        sh 'bower install'
-                        if (el) {
-                            replaceVersion('nuxeo-elements')
+            stage('nuxeo-elements') {
+                timeout(30) {
+                    el = cloneRebaseAndDir('nuxeo-elements')
+                    if (el) {
+                        echo 'Need to build nuxeo-elements'
+                        dir('nuxeo-elements') {
+                            sh 'bower install'
+                            sh 'npm install && npm run lint'
+                            runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
                         }
-                        runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
+                    } else {
+                        echo 'No need to build nuxeo-elements'
                     }
-                } else {
-                    echo 'No need to build nuxeo-ui-elements'
                 }
             }
-        }
-        def mvnHome = tool 'maven-3.3'
-        def javaHome = tool 'java-8-oracle'
-        withEnv(["JAVA_HOME=${javaHome}", "MAVEN=${mvnHome}/bin", "PATH=${env.JAVA_HOME}/bin:${env.MAVEN}:${env.PATH}"]) {
-            stage('nuxeo-web-ui') {
-                timeout(60) {
-                    webui = cloneRebaseAndDir('nuxeo-web-ui')
-                    if (webui || el || uiel) {
-                        echo 'Need to build nuxeo-web-ui'
-                        dir('nuxeo-web-ui') {
+            stage('nuxeo-ui-elements') {
+                timeout(30) {
+                    uiel = cloneRebaseAndDir('nuxeo-ui-elements')
+                    if (uiel || el) {
+                        echo 'Need to build nuxeo-ui-elements'
+                        dir('nuxeo-ui-elements') {
+                            sh 'bower install'
                             if (el) {
                                 replaceVersion('nuxeo-elements')
                             }
-                            if (uiel) {
-                                replaceVersion('nuxeo-ui-elements')
-                            }
-                            sh 'mvn clean install'
-                            archive 'target/*.jar'
+                            sh 'npm install && npm run lint'
+                            runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
                         }
                     } else {
-                        echo 'No need to build nuxeo-web-ui'
+                        echo 'No need to build nuxeo-ui-elements'
                     }
                 }
             }
-            stage('plugin-nuxeo-web-ui') {
-                timeout(60) {
-                    plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui')
-                    if (plugin || el || uiel || plugin) {
-                        echo 'Need to plugin-nuxeo-web-ui'
-                        dir('plugin-nuxeo-web-ui') {
-                            if (!params.SKIP_IT_TESTS) {
-                                sh 'mvn clean install -Pftest'
-                            } else {
-                                sh 'mvn clean install'
+            def mvnHome = tool 'maven-3.3'
+            def javaHome = tool 'java-8-oracle'
+            withEnv(["JAVA_HOME=${javaHome}", "MAVEN=${mvnHome}/bin", "PATH=${env.JAVA_HOME}/bin:${env.MAVEN}:${env.PATH}"]) {
+                stage('nuxeo-web-ui') {
+                    timeout(60) {
+                        webui = cloneRebaseAndDir('nuxeo-web-ui')
+                        if (webui || el || uiel) {
+                            echo 'Need to build nuxeo-web-ui'
+                            dir('nuxeo-web-ui') {
+                                sh 'bower install'
+                                if (el) {
+                                    replaceVersion('nuxeo-elements')
+                                }
+                                if (uiel) {
+                                    replaceVersion('nuxeo-ui-elements')
+                                }
+                                sh 'npm install'
+                                sh 'mvn install -DskipInstall'
+                                archive 'target/*.jar'
                             }
-                            archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip'
+                        } else {
+                            echo 'No need to build nuxeo-web-ui'
                         }
-                    } else {
-                        echo 'No need to build plugin-nuxeo-web-ui'
                     }
                 }
-            }
-            stage('post-build') {
-                if (params.CREATE_PR) {
-                    if (el) {
-                        createPullRequest('nuxeo-elements')
-                    }
-                    if (uiel) {
-                        createPullRequest('nuxeo-ui-elements')
-                    }
-                    if (webui) {
-                        createPullRequest('nuxeo-web-ui')
-                    }
-                    if (plugin) {
-                        createPullRequest('plugin-nuxeo-web-ui')
+                stage('plugin-nuxeo-web-ui') {
+                    timeout(60) {
+                        plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui')
+                        if (plugin || el || uiel || plugin) {
+                            echo 'Need to plugin-nuxeo-web-ui'
+                            dir('plugin-nuxeo-web-ui') {
+                                if (!params.SKIP_IT_TESTS) {
+                                    sh 'mvn clean install -Pftest'
+                                } else {
+                                    sh 'mvn clean install'
+                                }
+                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip'
+                            }
+                        } else {
+                            echo 'No need to build plugin-nuxeo-web-ui'
+                        }
                     }
                 }
+                stage('post-build') {
+                    if (params.CREATE_PR) {
+                        if (el) {
+                            createPullRequest('nuxeo-elements')
+                        }
+                        if (uiel) {
+                            createPullRequest('nuxeo-ui-elements')
+                        }
+                        if (webui) {
+                            createPullRequest('nuxeo-web-ui')
+                        }
+                        if (plugin) {
+                            createPullRequest('plugin-nuxeo-web-ui')
+                        }
+                    }
+                    slackSend channel: '#webui-qa-ci', color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} - $BRANCH Build success (<${env.BUILD_URL}|Open>)"
+                }
             }
+        } catch(e) {
+            currentBuild.result = "FAILURE"
+            slackSend channel: '#webui-qa-ci', color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} - $BRANCH Failure (<${env.BUILD_URL}|Open>)"
+            throw e
         }
     }
 }
