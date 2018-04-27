@@ -3,7 +3,7 @@ properties([
     [$class: 'ParametersDefinitionProperty', parameterDefinitions:
         [
             [$class: 'StringParameterDefinition', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', name: 'BRANCH'],
-            [$class: 'ChoiceParameterDefinition', choices: ['master', '9.10'], description: 'The branch to fallback on when $BRANCH is not found.', name: 'BASE_BRANCH'],
+            [$class: 'ChoiceParameterDefinition', choices: 'master\n9.10', description: 'The branch to fallback on when $BRANCH is not found.', name: 'BASE_BRANCH'],
             [$class: 'StringParameterDefinition', defaultValue: 'SLAVE', description: 'Slave label to be used.', name: 'SLAVE'],
             [$class: 'BooleanParameterDefinition', defaultValue: false,  description: 'Run npm and bower cache clean?', name: 'CLEAN'],
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
