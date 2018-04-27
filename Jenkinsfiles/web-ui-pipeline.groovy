@@ -2,8 +2,8 @@ properties([
     [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     [$class: 'ParametersDefinitionProperty', parameterDefinitions:
         [
-            [$class: 'StringParameterDefinition', defaultValue: '', description: 'Branch to test, fall-backs on $PARENT_BRANCH if not found.', name: 'BRANCH'],
-            [$class: 'StringParameterDefinition', defaultValue: 'master', description: 'The branch to fallback on when $BRANCH is not found.', name: 'PARENT_BRANCH'],
+            [$class: 'StringParameterDefinition', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', name: 'BRANCH'],
+            [$class: 'ChoiceParameterDefinition', choices: ['master', '9.10'], description: 'The branch to fallback on when $BRANCH is not found.', name: 'BASE_BRANCH'],
             [$class: 'StringParameterDefinition', defaultValue: 'SLAVE', description: 'Slave label to be used.', name: 'SLAVE'],
             [$class: 'BooleanParameterDefinition', defaultValue: false,  description: 'Run npm and bower cache clean?', name: 'CLEAN'],
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
@@ -14,7 +14,7 @@ properties([
     pipelineTriggers([])
 ])
 
-currentBuild.setDescription("Branch: $BRANCH -> $PARENT_BRANCH")
+currentBuild.setDescription("Branch: $BRANCH -> $BASE_BRANCH")
 
 def runSauceLabTests(repo, sauceCredentialId) {
     if (params.SKIP_UNIT_TESTS) {
@@ -26,20 +26,20 @@ def runSauceLabTests(repo, sauceCredentialId) {
     }
 }
 
-def createPullRequest(repo) {
+def createPullRequest(repo, branch = BRANCH, base = BASE_BRANCH) {
     withCredentials([usernamePassword(credentialsId: 'eea4e470-2c5e-468f-ab3a-e6c81fde94c0', passwordVariable: 'GITHUB_PASSWD', usernameVariable: 'GITHUB_TOKEN')]) {
-        sh "curl -u \"$GITHUB_TOKEN:$GITHUB_PASSWD\" -H \"Accept: application/vnd.github.symmetra-preview+json\" -d '{\"title\":\"$BRANCH\",\"base\":\"$PARENT_BRANCH\", \"head\":\"$BRANCH\", \"body\": \"This Pull Request looks good!\"}'  https://api.github.com/repos/nuxeo/${repo}/pulls"
+        sh "curl -u \"$GITHUB_TOKEN:$GITHUB_PASSWD\" -H \"Accept: application/vnd.github.symmetra-preview+json\" -d '{\"title\":\"${branch}\",\"base\":\"${base}\", \"head\":\"${branch}\", \"body\": \"This Pull Request looks good!\"}'  https://api.github.com/repos/nuxeo/${repo}/pulls"
     }
 }
 
-def rebase_and_merge(branch = BRANCH, base = PARENT_BRANCH) {
+def rebase_and_merge(branch = BRANCH, base = BASE_BRANCH) {
     sh "git rebase origin/${base}"
     sh "git checkout ${base}"
     sh "git pull --rebase"
     sh "git merge --no-ff origin/${branch} --log"
 }
 
-def cloneRebaseAndDir(repo, branch = BRANCH, fallback = PARENT_BRANCH) {
+def cloneRebaseAndDir(repo, branch = BRANCH, fallback = BASE_BRANCH) {
     try {
         checkout([
                 $class: 'GitSCM',
@@ -64,7 +64,7 @@ def cloneRebaseAndDir(repo, branch = BRANCH, fallback = PARENT_BRANCH) {
     }
 }
 
-def replaceVersion(dep, branch = BRANCH, base = PARENT_BRANCH) {
+def replaceVersion(dep) {
     def bower_folder = 'bower_components'
     if (fileExists("${bower_folder}/${dep}/bower.json")) {
         sh "rm -rf ${bower_folder}/${dep}"
@@ -76,13 +76,15 @@ timestamps {
     node(SLAVE) {
         try {
             deleteDir()
+            def ELEMENTS_BASE_BRANCH = BASE_BRANCH == '9.10' ? 'maintenance-2.2.x' : BASE_BRANCH
+            def MP_BASE_BRANCH = BASE_BRANCH == '9.10' ? '2.2_9.10' : BASE_BRANCH
             def el, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
                 sh 'npm cache clean && bower cache clean'
             }
             stage('nuxeo-elements') {
                 timeout(30) {
-                    el = cloneRebaseAndDir('nuxeo-elements')
+                    el = cloneRebaseAndDir('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                     if (el) {
                         echo 'Need to build nuxeo-elements'
                         dir('nuxeo-elements') {
@@ -97,7 +99,7 @@ timestamps {
             }
             stage('nuxeo-ui-elements') {
                 timeout(30) {
-                    uiel = cloneRebaseAndDir('nuxeo-ui-elements')
+                    uiel = cloneRebaseAndDir('nuxeo-ui-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                     if (uiel || el) {
                         echo 'Need to build nuxeo-ui-elements'
                         dir('nuxeo-ui-elements') {
@@ -154,7 +156,7 @@ timestamps {
                 }
                 stage('plugin-nuxeo-web-ui') {
                     timeout(60) {
-                        plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui')
+                        plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui', BRANCH, MP_BASE_BRANCH)
                         if (plugin || el || uiel || webuiitests || plugin) {
                             echo 'Need to plugin-nuxeo-web-ui'
                             dir('plugin-nuxeo-web-ui') {
@@ -173,10 +175,10 @@ timestamps {
                 stage('post-build') {
                     if (params.CREATE_PR) {
                         if (el) {
-                            createPullRequest('nuxeo-elements')
+                            createPullRequest('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                         }
                         if (uiel) {
-                            createPullRequest('nuxeo-ui-elements')
+                            createPullRequest('nuxeo-ui-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                         }
                         if (webui) {
                             createPullRequest('nuxeo-web-ui')
@@ -185,7 +187,7 @@ timestamps {
                             createPullRequest('nuxeo-web-ui-itests')
                         }
                         if (plugin) {
-                            createPullRequest('plugin-nuxeo-web-ui')
+                            createPullRequest('plugin-nuxeo-web-ui', BRANCH, MP_BASE_BRANCH)
                         }
                     }
                     slackSend channel: '#webui-qa-ci', color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} - $BRANCH Build success (<${env.BUILD_URL}|Open>)"
