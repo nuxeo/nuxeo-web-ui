@@ -23,6 +23,18 @@ limitations under the License.
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 
 <!--
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property                        | Description                        | Default
+---------------------------------------|------------------------------------|-----------------------
+`--nuxeo-selection-toolbar-background` | Background color                   | #000
+`--nuxeo-selection-toolbar-text`       | Text color                         | #fff
+`--nuxeo-selection-toolbar-link`       | Link color                         | #fff
+`--nuxeo-selection-toolbar-link-hover` | Link hover color                   | #000
+`--nuxeo-selection-toolbar`            | Mixin applied to the toolbar       | `{}`
+
 `nuxeo-selection-toolbar`
 @group Nuxeo UI
 @element nuxeo-selection-toolbar
@@ -45,11 +57,12 @@ limitations under the License.
         left: 0;
         right: 0;
         z-index: 201;
-        background: var(--nuxeo-toolbar);
         padding: 0 2em;
         font-weight: 300;
-        color: #fff;
         box-shadow: 0 0 3px rgba(0,0,0,0.4);
+        background: var(--nuxeo-selection-toolbar-background, #000);
+        color: var(--nuxeo-selection-toolbar-text, #fff);
+        @apply --nuxeo-selection-toolbar;
       }
 
       .actions {
@@ -59,27 +72,8 @@ limitations under the License.
         @apply --layout-end-justified;
       }
 
-      @media (min-width: 1280px) {
-        .toolbar {
-          padding-left: 4.5rem;
-        }
-      }
-
       .count {
         font-weight: 600;
-      }
-
-      a.selectionLink {
-        display: inline-block;
-        vertical-align: bottom;
-        text-decoration: underline;
-        margin-left: 1em;
-        color: #fff;
-      }
-
-      a.selectionLink:hover {
-        cursor: pointer;
-        color: var(--nuxeo-link-hover-color);
       }
 
       #selectedItemsPopup {
@@ -90,6 +84,19 @@ limitations under the License.
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
+
+      /* links */
+      a, a:active, a:visited, a:focus {
+        display: inline-block;
+        vertical-align: bottom;
+        text-decoration: underline;
+        margin-left: 1em;
+        color: var(--nuxeo-selection-toolbar-link, #fff);
+        cursor: pointer;
+      }
+      a:hover {
+        color: var(--nuxeo-selection-toolbar-link-hover, #000);
+      }
     </style>
 
     <div class="horizontal center layout" id="content">
@@ -99,12 +106,12 @@ limitations under the License.
           <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
             <span>[[i18n('selectionToolbar.display.selection')]]</span>
           </a>
-        </div>
-        <div class="actions">
-          <slot></slot>
           <a class="selectionLink" on-tap="clearSelection">
             <span>[[i18n('command.clear')]]</span>
           </a>
+        </div>
+        <div class="actions">
+          <slot></slot>
         </div>
       </div>
     </div>
