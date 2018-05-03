@@ -227,7 +227,7 @@ limitations under the License.
 
       ready: function() {
         window.addEventListener('nuxeo-documents-deleted', function(e) {
-          this.removeDocuments(e.detail.documentIds);
+          this.removeDocuments(e.detail.documents);
         }.bind(this));
 
         window.addEventListener('refresh-display', function() {
@@ -329,8 +329,11 @@ limitations under the License.
         return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
       },
 
-      removeDocuments: function(documentIds) {
-        this.$.tree.removeNodes(documentIds);
+      removeDocuments: function(documents) {
+        var uids = documents.map(function(doc) {
+          return doc.uid;
+        });
+        this.$.tree.removeNodes(uids);
       }
     });
   </script>
