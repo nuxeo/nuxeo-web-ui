@@ -324,6 +324,11 @@
         <nuxeo-document-page name="view" document="[[document]]"></nuxeo-document-page>
       </template>
     </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentCollapsiblePage" slot="DOCUMENT_VIEWS_PAGES" order="10">
+  <template>
     <nuxeo-filter document="[[document]]" facet="Folderish,Collection">
       <template>
         <nuxeo-collapsible-document-page name="view" document="[[document]]"></nuxeo-collapsible-document-page>
