@@ -102,16 +102,13 @@ limitations under the License.
             }).join(',');
             var op = this.hard ? this.$.deleteOp : this.$.trashOp;
             op.input = 'docs:' + uids;
-            var uidsArray = this.documents.map(function(doc) {
-              return doc.uid;
-            });
             op.execute().then(function() {
-              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
+              this.fire('nuxeo-documents-deleted', {documents: this.documents});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),
             function(error) {
-              this.fire('nuxeo-documents-deleted', {error: error,  documents: uidsArray});
+              this.fire('nuxeo-documents-deleted', {error: error, documents: this.documents});
             }.bind(this));
           }
         }

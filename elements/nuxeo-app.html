@@ -887,6 +887,8 @@ limitations under the License.
       _documentDeleted: function(e) {
         this._toast(this.i18n('app.document.deleted.' + (e.detail.error ? 'error' : 'success') ));
 
+        this._removeFromClipboard([e.detail.doc]);
+
         // navigate to parent
         if (!e.detail.error) {
           var enrichers = e.detail.doc.contextParameters;
@@ -912,24 +914,16 @@ limitations under the License.
         }
       },
 
-      _documentsDeletedError: function(err, documents) {
-        var errorMessage = this.i18n(documents && documents.length > 1
-          ? 'app.documents.deleted.error' : 'app.document.deleted.error');
-
-        switch (err.status) {
-          case 403:
-            errorMessage = errorMessage + " " + this.i18n('error.403');
-            break;
-          default:
-            break;
-        }
-        this._toast(errorMessage);
-      },
-
       _documentsDeleted: function(e) {
         if (e.detail.error) {
-          this._documentsDeletedError(e.detail.error.response, e.detail.documents);
+          var docs = e.detail.documents;
+          var msg = this.i18n(docs && docs.length > 1 ? 'app.documents.deleted.error' : 'app.document.deleted.error');
+          if (e.detail.error.response.status === 403) {
+            msg = msg + ' ' + this.i18n('error.403');
+          }
+          this._toast(msg);
         } else {
+          this._removeFromClipboard(e.detail.documents);
           this._fetchTasks();
           this._toast(this.i18n('app.documents.deleted.success'));
           this._refreshSearch();
@@ -1063,6 +1057,14 @@ limitations under the License.
       _clipboardUpdated: function(e) {
         this.clipboard = this.clipboard || this.$$('#clipboard');
         this.set('clipboardDocCount', e.detail.docCount);
+      },
+
+      _removeFromClipboard: function(docs) {
+        if (Array.isArray(docs)) {
+          docs.forEach(function(doc) {
+            this.clipboard.remove(doc);
+          }.bind(this));
+        }
       }
 
     });
