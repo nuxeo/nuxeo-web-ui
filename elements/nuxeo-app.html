@@ -473,7 +473,8 @@ limitations under the License.
           }
         }.bind(this));
 
-        window.addEventListener('nuxeo-documents-deleted', function() {
+        window.addEventListener('nuxeo-documents-deleted', function(e) {
+          this._removeFromClipboard(e.detail.documents);
           this._fetchTasks();
         }.bind(this));
 
@@ -911,6 +912,14 @@ limitations under the License.
       _clipboardUpdated: function(e) {
         this.clipboard = this.clipboard || this.$$('#clipboard');
         this.set('clipboardDocCount', e.detail.docCount);
+      },
+
+      _removeFromClipboard: function(docs) {
+        if (Array.isArray(docs)) {
+          docs.forEach(function(doc) {
+            this.clipboard.remove(doc);
+          }.bind(this));
+        }
       }
 
     });

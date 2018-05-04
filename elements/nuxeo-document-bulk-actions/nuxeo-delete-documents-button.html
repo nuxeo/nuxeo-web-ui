@@ -86,7 +86,7 @@ limitations under the License.
               return doc.uid;
             });
             this.$.deleteOp.execute().then(function() {
-              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray});
+              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray, documents: this.documents});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),

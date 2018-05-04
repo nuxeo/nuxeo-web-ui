@@ -79,7 +79,10 @@ limitations under the License.
       },
 
       remove: function(doc) {
-        this.splice('documents', this._indexOf(doc), 1);
+        var index = this._indexOf(doc);
+        if (index !== -1) {
+          this.splice('documents', index, 1);
+        }
       },
 
       _indexOf: function(doc) {
@@ -90,7 +93,7 @@ limitations under the License.
 
       ready: function() {
         this.$.nxcon.connect().then(function(res) {
-          this.name =  res.id + '-' + this.name;
+          this.name = res.id + '-' + this.name;
         }.bind(this));
       },
 
