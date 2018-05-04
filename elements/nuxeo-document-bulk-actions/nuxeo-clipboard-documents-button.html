@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-clipboard-documents-button`
@@ -38,18 +39,20 @@ limitations under the License.
       }
     </style>
 
-    <paper-icon-button noink
-      id="clipboardButton"
-      icon="icons:content-paste">
-    </paper-icon-button>
-    <paper-tooltip for="clipboardButton" position="[[tooltipPosition]]">[[i18n('clipboardDocumentsButton.addToClipboard')]]</paper-tooltip>
+    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
+      <paper-icon-button noink
+        id="clipboardButton"
+        icon="icons:content-paste">
+      </paper-icon-button>
+      <paper-tooltip for="clipboardButton" position="[[tooltipPosition]]">[[i18n('clipboardDocumentsButton.addToClipboard')]]</paper-tooltip>
+    </template>
 
   </template>
 
   <script>
     Polymer({
       is: 'nuxeo-clipboard-documents-button',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         documents: {
           type: Array,
@@ -70,6 +73,12 @@ limitations under the License.
       addToClipBoard: function() {
         this.fire('add-to-clipboard', {documents: this.documents});
         this.fire ('clear-selected-items');
+      },
+
+      _isAvailable: function() {
+        return this.documents.every(function(doc) {
+          return this.isCollectionMember(doc);
+        }.bind(this));
       }
 
     });
