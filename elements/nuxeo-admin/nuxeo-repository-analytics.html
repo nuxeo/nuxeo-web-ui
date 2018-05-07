@@ -186,7 +186,7 @@ limitations under the License.
       </paper-card>
 
       <!-- Documents created per week -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[_formatDate(startDate)]]" end-date="[[_extendEndDate(endDate)]]"
                              with-date-intervals="week"
                              date-field="dc:created"
                              data="{{docsCreatedPerWeek}}"
@@ -201,7 +201,7 @@ limitations under the License.
       </paper-card>
 
       <!-- Documents modified per week -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[endDate]]"
+      <nuxeo-repository-data start-date="[[_formatDate(startDate)]]" end-date="[[_extendEndDate(endDate)]]"
                              with-date-intervals="week"
                              date-field="dc:modified"
                              data="{{docsModifiedPerWeek}}"
