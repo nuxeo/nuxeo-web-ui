@@ -49,9 +49,13 @@ limitations under the License.
     },
     _extendEndDate: function(date) {
       if (date && moment) {
-        return moment(date).add(1, 'days').subtract(1,'ms').toJSON();
+        return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());
       }
       return date;
+    },
+
+    _formatDate: function(date) {
+      return moment(date).format('YYYY-MM-DD');
     }
   };
 </script>
