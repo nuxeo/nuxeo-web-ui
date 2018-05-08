@@ -35,8 +35,8 @@ limitations under the License.
   </condition>
 
   <target name="clean" description="Clean npm and bower dependencies">
+    <delete dir="node_modules" />
     <delete includeEmptyDirs="yes" failonerror="false">
-      <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />
       <fileset dir="bower_components" defaultexcludes="no" followsymlinks="false" />
     </delete>
   </target>
