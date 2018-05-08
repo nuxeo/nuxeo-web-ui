@@ -1,0 +1,373 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
+<link rel="import" href="nuxeo-property-diff.html">
+
+<!-- we can just store it locally or install it via npm -->
+<script type='text/javascript' src="../../node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js"></script>
+
+<!--
+`nuxeo-diff`
+@group Nuxeo UI
+@element nuxeo-diff
+-->
+<dom-module id="nuxeo-diff">
+  <template>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles">
+      :host {
+        display: block;
+        --paper-input-container-underline: {
+          display: none;
+        };
+      }
+
+      nuxeo-property-diff ~ nuxeo-property-diff {
+        margin-top: 12px;
+      }
+
+      paper-checkbox ~ paper-checkbox {
+        margin-left: 8px;
+      }
+
+      #controls {
+        @apply --layout-horizontal;
+        @apply --layout-end-justified;
+        margin-bottom: 8px;
+      }
+
+      #diffContainer {
+        @apply --layout-vertical;
+      }
+
+      #diffPickerPane, #diffPane {
+        @apply --layout-vertical;
+      }
+
+      .diffPicker {
+        @apply --paper-card;
+        padding: 4px 4px 4px 8px; /* TODO: styling needed */
+      }
+
+      .deltaPane {
+        @apply --layout-vertical;
+      }
+
+      :host(:not([unified-view])) #diffPickerPane {
+        @apply --layout-horizontal;
+      }
+
+      :host(:not([unified-view])) .diffPicker ~ .diffPicker {
+        margin-left: 16px; /* TODO: styling needed */
+      }
+
+      :host(:not([unified-view])) .diffPicker {
+          @apply --layout-flex; /* TODO: not working */
+      }
+
+      .column {
+        @apply --layout-vertical;
+        @apply --layout-flex;
+      }
+
+      .side-by-side {
+        @apply --layout-horizontal;
+      }
+
+    </style>
+
+    <nuxeo-document id="doc" headers="[[headers]]"></nuxeo-document>
+    <nuxeo-resource id="schema"></nuxeo-resource>
+
+    <div id="diffContainer">
+      <div id="controls">
+        <template is="dom-if" if="[[_showUnifiedViewCheckbox]]">
+            <paper-checkbox checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-checkbox>
+        </template>
+        <paper-checkbox checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
+      </div>
+      <div id="diffPickerPane">
+        <div class="diffPicker">
+          <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
+            <template is="dom-repeat" items="[[_documents]]" filter="[[_filterUid(_rightUid)]]">
+              <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+            </template>
+          </nuxeo-select>
+        </div>
+        <div class="diffPicker">
+          <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
+            <template is="dom-repeat" items="[[_documents]]" filter="[[_filterUid(_leftUid)]]">
+              <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+            </template>
+          </nuxeo-select>
+        </div>
+      </div>
+      <div id="diffPane">
+        <template is="dom-repeat" items="[[_getCommonSchemas(_schemas, showAll, _delta)]]" as="schema" sort="_sortSchemas">
+          <nuxeo-card heading="[[schema.name]]" collapsible opened>
+            <div class="deltaPane">
+              <template is="dom-repeat" items="[[_getCommonSchemaProperties(schema, showAll, _delta)]]" as=property>
+                <!-- unified view -->
+                <template is="dom-if" if="[[unifiedView]]">
+                  <nuxeo-property-diff property="[[_getPropertyName(schema, property)]]"
+                                       schema-fields="[[schema.fields]]"
+                                       delta="[[_getPropertyDiff(_delta, property)]]"
+                                       original-value="[[_getDocumentProperty(property, _left)]]"></nuxeo-property-diff>
+                </template>
+                <!-- side-by-side view -->
+                <template is="dom-if" if="[[!unifiedView]]">
+                  <div class="side-by-side">
+                    <!-- <nuxeo-property-diff class="column"
+                                          property="[[_getPropertyName(schema, property)]]"
+                                          schema-fields="[[schema.fields]]"
+                                          delta="[[_getPropertyDiff(_delta, property)]]"
+                                          original-value="[[_getDocumentProperty(property, _left)]]"
+                                          hide-additions></nuxeo-property-diff>
+                    <nuxeo-property-diff class="column"
+                                          property="[[_getPropertyName(schema, property)]]"
+                                          schema-fields="[[schema.fields]]"
+                                          delta="[[_getPropertyDiff(_delta, property)]]"
+                                          original-value="[[_getDocumentProperty(property, _left)]]"
+                                          hide-deletions></nuxeo-property-diff> -->
+                  </div>
+                </template>
+              </template>
+            </div>
+          </nuxeo-card>
+        </template>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    (function() {
+      var typeDataCache = {};
+      Polymer({
+        is: 'nuxeo-diff',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
+        properties: {
+          headers: Object,
+          docIds: {
+            type: Array,
+            value: []
+          },
+          visible: {
+            type: Boolean,
+            value: false
+          },
+          showAll: {
+            type: Boolean,
+            value: false,
+          },
+          unifiedView: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+            readOnly: true
+          },
+          _unifiedView: {
+            type: Boolean,
+            value: false,
+            observer: '_resize'
+          },
+          _showUnifiedViewCheckbox: Boolean,
+          _documents: {
+            type: Array,
+            value: []
+          },
+          _leftUid: String,
+          _rightUid: String,
+          _schemas: Array,
+          _left: Object,
+          _right: Object,
+          _delta: Object
+        },
+
+        observers: [
+          '_fetchDocuments(visible, docIds.*)',
+          'diff(_leftUid, _rightUid)'
+        ],
+
+        listeners: {
+          'iron-resize': '_resize'
+        },
+
+        _resize: function() {
+          if (document.body.offsetWidth <= 720) {
+            this._setUnifiedView(true);
+            this.set('_showUnifiedViewCheckbox', false);
+          } else {
+            this._setUnifiedView(this._unifiedView);
+            this.set('_showUnifiedViewCheckbox', true);
+          }
+        },
+
+        /* DOM-repeat filters and sort functions */
+
+        _filterUid: function(uid) {
+          return function(document) {
+            return document.uid != uid;
+          }
+        },
+
+        _sortSchemas: function(schema1, schema2) {
+          var schema1properties = this._getCommonProperties(this._left, this._right, schema1, this._delta);
+          var schema2properties = this._getCommonProperties(this._left, this._right, schema2, this._delta);
+          if ((schema1properties.length === 0 && schema1properties.length === schema2properties.length) ||
+              (schema1properties.length > 0 && schema2properties.length > 0))  {
+            return schema1.name > schema2.name;
+          } else {
+            return schema1properties.length < schema2properties.length;
+          }
+        },
+
+        /* helpers */
+
+        _promiseSequencer: function(promises) {
+          return promises.reduce(function(current, next) {
+            return current.then(next);
+          }, Promise.resolve([]));
+        },
+
+        _sameType: function(left, right) {
+          return left && right && left.type === right.type
+        },
+
+        /* fetchers */
+
+        _fetchDocuments: function() {
+          if (this.visible && this.docIds && this.docIds.length > 1) {
+            var promises = [];
+            this._documents = [];
+            this.docIds.forEach(function(id) {
+              promises.push(function() {
+                this.$.doc.docId = id;
+                return this.$.doc.get().then(function(response) {
+                  this.push('_documents', response);
+                }.bind(this));
+              }.bind(this));
+            }.bind(this));
+            return this._promiseSequencer(promises).then(function() {
+              this._rightUid = null; // let's prevent a diff between one valid and one invalid document
+              this.set('_leftUid', this._documents[0].uid);
+              this.set('_rightUid', this._documents[1].uid);
+            }.bind(this));
+          }
+        },
+
+        _fetchSchemas: function(document) {
+          var type = document.type;
+          if (typeDataCache[type]) {
+            return Promise.resolve(typeDataCache[type]);
+          }
+          this.$.schema.path = 'config/types/' + type;
+          return this.$.schema.get().then(function(response) {
+            typeDataCache[response.name] = response; // cache response
+            return response;
+          });
+        },
+
+        _fetchCommonSchemas: function(left, right) {
+          if (this._sameType(left, right)) {
+            return this._fetchSchemas(left).then(function(response) {
+              return response.schemas;
+            });
+          }
+          return this._fetchSchemas(left).then(function(response1) {
+            return this._fetchSchemas(right).then(function(response2) {
+              return response1.schemas.filter(function(schema1) {
+                return !!response2.schemas.find(function(schema2) {
+                  return schema1.name === schema2.name;
+                });
+              });
+            });
+          }.bind(this));
+        },
+
+        _getCommonProperties: function(left, right, schema, delta) {
+          return Object.keys(left.properties).filter(function(leftPropName) {
+            return !!Object.keys(right.properties).find(function(rightPropName) {
+              return leftPropName === rightPropName &&
+                     (schema ? leftPropName.startsWith((schema.prefix ? schema.prefix : schema.name) + ':') : true) &&
+                     (delta ? delta[leftPropName] : true);
+            });
+          });
+        },
+
+        _getCommonSchemaProperties: function(schema, showAll) {
+          return this._getCommonProperties(this._left, this._right, schema, showAll ? null : this._delta);
+        },
+
+        _getCommonSchemas: function(schemas, showAll) {
+          if (!schemas) {
+            return;
+          }
+          return showAll ? schemas : schemas.filter(function(schema) {
+            return this._getCommonProperties(this._left, this._right, schema, showAll ? null : this._delta).length > 0;
+          }.bind(this));
+        },
+
+        /* comparison */
+
+        _getPropertyDiff: function(delta, property) {
+          return delta[property];
+        },
+
+        _getDocumentProperty: function(property, document) {
+          return document.properties[property];
+        },
+
+        _getPropertyName: function(schema, property) {
+          if (!property || !schema) {
+            return;
+          }
+          return property.replace(new RegExp('^' + (schema.prefix ? schema.prefix : schema.name) + ':'), '');
+        },
+
+        diff: function(leftUid, rightUid) {
+          if (!leftUid || !rightUid) {
+            return;
+          }
+          var left = this._documents.find(function(doc) {
+            return doc.uid === leftUid;
+          }.bind(this));
+          var right = this._documents.find(function(doc) {
+            return doc.uid === rightUid;
+          }.bind(this));
+          this.set('_left', left);
+          this.set('_right', right);
+          console.time('jsondiffpatch.diff');
+          var delta = jsondiffpatch.diff(left.properties, right.properties);
+          console.timeEnd('jsondiffpatch.diff');
+          this._fetchCommonSchemas(left, right).then(function(schemas) {
+            this.set('_schemas', schemas);
+          }.bind(this));
+          this.set('_delta', delta);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>

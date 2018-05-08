@@ -34,6 +34,7 @@
     "AlloyEditor": true,
     "CKEDITOR": true,
     "jQuery": true,
-    "confirm": true
+    "confirm": true,
+    "jsondiffpatch": true
   }
 }
