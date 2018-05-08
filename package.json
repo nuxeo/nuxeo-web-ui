@@ -49,5 +49,8 @@
   },
   "engines": {
     "node": ">=6.4.0"
+  },
+  "dependencies": {
+    "jsondiffpatch": "^0.3.9"
   }
 }

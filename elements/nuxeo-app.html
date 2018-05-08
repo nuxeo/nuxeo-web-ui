@@ -347,6 +347,8 @@ limitations under the License.
 
           <nuxeo-themes name="themes" selected="[[selectedProfileTab]]"></nuxeo-themes>
 
+          <nuxeo-diff-page id="diff" name="diff"></nuxeo-diff-page>
+
           <nuxeo-page name="error">
             <div slot="header"></div>
             <div>
@@ -516,7 +518,8 @@ limitations under the License.
         'document-untrashed': '_documentUntrashed',
         'nuxeo-documents-deleted': '_documentsDeleted',
         'nuxeo-documents-untrashed': '_documentsUntrashed',
-        'nuxeo-documents-dropped': '_documentsDropped'
+        'nuxeo-documents-dropped': '_documentsDropped',
+        'nuxeo-diff-documents': '_diffDocuments'
       },
 
       observers: ['_computeSharedActionContext(currentUser)'],
@@ -597,6 +600,12 @@ limitations under the License.
       show: function(page) {
         this.page = page;
         this._updateTitle();
+      },
+
+      _diffDocuments: function(e) {
+        this.$.diff.docIds = e.detail.documents;
+        this.navigateTo('page', 'diff');
+
       },
 
       _updateTitle: function() {
