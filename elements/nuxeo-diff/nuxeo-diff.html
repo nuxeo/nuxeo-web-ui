@@ -43,7 +43,20 @@ limitations under the License.
         };
       }
 
-      nuxeo-property-diff ~ nuxeo-property-diff {
+      :host(:not([unified-view])) #diffPickerPane {
+        @apply --layout-horizontal;
+      }
+
+      :host(:not([unified-view])) .diffPicker ~ .diffPicker {
+        margin-left: 16px; /* TODO: styling needed */
+      }
+
+      :host(:not([unified-view])) .diffPicker {
+        @apply --layout-flex; /* TODO: not working */
+      }
+
+      nuxeo-property-diff.unified ~ nuxeo-property-diff.unified,
+      .side-by-side ~ .side-by-side {
         margin-top: 12px;
       }
 
@@ -74,50 +87,40 @@ limitations under the License.
         @apply --layout-vertical;
       }
 
-      :host(:not([unified-view])) #diffPickerPane {
+      .side-by-side {
         @apply --layout-horizontal;
       }
 
-      :host(:not([unified-view])) .diffPicker ~ .diffPicker {
-        margin-left: 16px; /* TODO: styling needed */
-      }
-
-      :host(:not([unified-view])) .diffPicker {
-          @apply --layout-flex; /* TODO: not working */
+      .side-by-side .column:not(:first-child) {
+        margin-left: 16px;
       }
 
       .column {
         @apply --layout-vertical;
         @apply --layout-flex;
       }
-
-      .side-by-side {
-        @apply --layout-horizontal;
-      }
-
     </style>
 
-    <nuxeo-document id="doc" headers="[[headers]]"></nuxeo-document>
     <nuxeo-resource id="schema"></nuxeo-resource>
 
     <div id="diffContainer">
       <div id="controls">
         <template is="dom-if" if="[[_showUnifiedViewCheckbox]]">
-            <paper-checkbox checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-checkbox>
+          <paper-checkbox checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-checkbox>
         </template>
         <paper-checkbox checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
       </div>
       <div id="diffPickerPane">
         <div class="diffPicker">
           <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
-            <template is="dom-repeat" items="[[_documents]]" filter="[[_filterUid(_rightUid)]]">
+            <template is="dom-repeat" items="[[documents]]" filter="[[_filterUid(_rightUid)]]">
               <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
             </template>
           </nuxeo-select>
         </div>
         <div class="diffPicker">
           <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
-            <template is="dom-repeat" items="[[_documents]]" filter="[[_filterUid(_leftUid)]]">
+            <template is="dom-repeat" items="[[documents]]" filter="[[_filterUid(_leftUid)]]">
               <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
             </template>
           </nuxeo-select>
@@ -130,26 +133,30 @@ limitations under the License.
               <template is="dom-repeat" items="[[_getCommonSchemaProperties(schema, showAll, _delta)]]" as=property>
                 <!-- unified view -->
                 <template is="dom-if" if="[[unifiedView]]">
-                  <nuxeo-property-diff property="[[_getPropertyName(schema, property)]]"
+                  <nuxeo-property-diff class="unified"
+                                       property="[[_getPropertyName(schema, property)]]"
                                        schema-fields="[[schema.fields]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
-                                       original-value="[[_getDocumentProperty(property, _left)]]"></nuxeo-property-diff>
+                                       original-value="[[_getDocumentProperty(property, _left)]]"
+                                       show-all="[[showAll]]"></nuxeo-property-diff>
                 </template>
                 <!-- side-by-side view -->
                 <template is="dom-if" if="[[!unifiedView]]">
                   <div class="side-by-side">
-                    <!-- <nuxeo-property-diff class="column"
-                                          property="[[_getPropertyName(schema, property)]]"
-                                          schema-fields="[[schema.fields]]"
-                                          delta="[[_getPropertyDiff(_delta, property)]]"
-                                          original-value="[[_getDocumentProperty(property, _left)]]"
-                                          hide-additions></nuxeo-property-diff>
                     <nuxeo-property-diff class="column"
-                                          property="[[_getPropertyName(schema, property)]]"
-                                          schema-fields="[[schema.fields]]"
-                                          delta="[[_getPropertyDiff(_delta, property)]]"
-                                          original-value="[[_getDocumentProperty(property, _left)]]"
-                                          hide-deletions></nuxeo-property-diff> -->
+                                         property="[[_getPropertyName(schema, property)]]"
+                                         schema-fields="[[schema.fields]]"
+                                         delta="[[_getPropertyDiff(_delta, property)]]"
+                                         original-value="[[_getDocumentProperty(property, _left)]]"
+                                         show-all="[[showAll]]"
+                                         hide-additions></nuxeo-property-diff>
+                    <nuxeo-property-diff class="column"
+                                         property="[[_getPropertyName(schema, property)]]"
+                                         schema-fields="[[schema.fields]]"
+                                         delta="[[_getPropertyDiff(_delta, property)]]"
+                                         original-value="[[_getDocumentProperty(property, _left)]]"
+                                         show-all="[[showAll]]"
+                                         hide-deletions></nuxeo-property-diff>
                   </div>
                 </template>
               </template>
@@ -169,7 +176,7 @@ limitations under the License.
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
         properties: {
           headers: Object,
-          docIds: {
+          documents: {
             type: Array,
             value: []
           },
@@ -193,10 +200,6 @@ limitations under the License.
             observer: '_resize'
           },
           _showUnifiedViewCheckbox: Boolean,
-          _documents: {
-            type: Array,
-            value: []
-          },
           _leftUid: String,
           _rightUid: String,
           _schemas: Array,
@@ -206,8 +209,8 @@ limitations under the License.
         },
 
         observers: [
-          '_fetchDocuments(visible, docIds.*)',
-          'diff(_leftUid, _rightUid)'
+          '_documentsChanged(documents.*)',
+          '_diff(_leftUid, _rightUid)'
         ],
 
         listeners: {
@@ -257,26 +260,6 @@ limitations under the License.
 
         /* fetchers */
 
-        _fetchDocuments: function() {
-          if (this.visible && this.docIds && this.docIds.length > 1) {
-            var promises = [];
-            this._documents = [];
-            this.docIds.forEach(function(id) {
-              promises.push(function() {
-                this.$.doc.docId = id;
-                return this.$.doc.get().then(function(response) {
-                  this.push('_documents', response);
-                }.bind(this));
-              }.bind(this));
-            }.bind(this));
-            return this._promiseSequencer(promises).then(function() {
-              this._rightUid = null; // let's prevent a diff between one valid and one invalid document
-              this.set('_leftUid', this._documents[0].uid);
-              this.set('_rightUid', this._documents[1].uid);
-            }.bind(this));
-          }
-        },
-
         _fetchSchemas: function(document) {
           var type = document.type;
           if (typeDataCache[type]) {
@@ -316,8 +299,8 @@ limitations under the License.
           });
         },
 
-        _getCommonSchemaProperties: function(schema, showAll) {
-          return this._getCommonProperties(this._left, this._right, schema, showAll ? null : this._delta);
+        _getCommonSchemaProperties: function(schema, showAll, delta) {
+          return this._getCommonProperties(this._left, this._right, schema, showAll ? null : delta);
         },
 
         _getCommonSchemas: function(schemas, showAll) {
@@ -332,7 +315,7 @@ limitations under the License.
         /* comparison */
 
         _getPropertyDiff: function(delta, property) {
-          return delta[property];
+          return delta && delta[property];
         },
 
         _getDocumentProperty: function(property, document) {
@@ -346,26 +329,88 @@ limitations under the License.
           return property.replace(new RegExp('^' + (schema.prefix ? schema.prefix : schema.name) + ':'), '');
         },
 
-        diff: function(leftUid, rightUid) {
+        /* comparison */
+
+        _documentsChanged: function() {
+          if (this.visible && this.documents && this.documents.length > 1) {
+            this.set('_leftUid', this.documents[0].uid);
+            this.set('_rightUid', this.documents[1].uid);
+          }
+        },
+
+        _diff: function(leftUid, rightUid) {
           if (!leftUid || !rightUid) {
             return;
           }
-          var left = this._documents.find(function(doc) {
+          var left = this.documents.find(function(doc) {
             return doc.uid === leftUid;
           }.bind(this));
-          var right = this._documents.find(function(doc) {
+          var right = this.documents.find(function(doc) {
             return doc.uid === rightUid;
           }.bind(this));
           this.set('_left', left);
           this.set('_right', right);
-          console.time('jsondiffpatch.diff');
-          var delta = jsondiffpatch.diff(left.properties, right.properties);
-          console.timeEnd('jsondiffpatch.diff');
           this._fetchCommonSchemas(left, right).then(function(schemas) {
             this.set('_schemas', schemas);
+            var delta = jsondiffpatch.diff(left.properties, right.properties);
+            this._schemas.forEach(function(schema) {
+              this._filterDelta(delta, schema);
+            }.bind(this));
+            this.set('_delta', delta);
           }.bind(this));
-          this.set('_delta', delta);
+        },
+
+        _filterDelta: function(delta, schema, parentPath, parentSchema) {
+          var path = parentPath || '';
+          // if it's an array diff
+          if (delta['_t'] && delta['_t'] == 'a') {
+            Object.keys(delta).filter(function(key) {
+              return key !== '_t';
+            }).forEach(function(key) {
+              var subpath = path ? [path, key].join('.') : properties[i];
+              var deltaObj = (Array.isArray(delta[key]) && delta[key].length > 0) ? delta[key][0] : delta[key];
+              this._filterDelta(deltaObj, schema, subpath);
+              if (Object.keys(delta[key]).length === 0) {
+                delete delta[key];
+              }
+            }.bind(this));
+          } else {
+            var deltaObj = (Array.isArray(delta) && delta.length > 0) ? delta[0] : delta;
+            var properties = parentPath ? Object.keys(deltaObj) : this._getCommonSchemaProperties(schema, false, deltaObj);
+            for (var i = 0; i < properties.length; i++) {
+              var key = properties[i];
+              var subpath = path ? [path, key].join('.') : properties[i];
+              var type;
+              var subSchema;
+              if (typeof schema === 'string') {
+                type = schema.replace(/\[\]$/, '');
+              } else {
+                subSchema = schema.fields[this._getPropertyName(schema, key)];
+                type = subSchema.type || subSchema;
+              }
+              switch (type) {
+                case 'string':
+                case 'date':
+                case 'long':
+                case 'integer':
+                case 'boolean':
+                case 'double':
+                  break;
+                case 'blob':
+                  if (!deltaObj[key].digest) {
+                    delete deltaObj[key];
+                  }
+                  break;
+                default:
+                  if (deltaObj) {
+                    this._filterDelta(deltaObj[key], subSchema, subpath, schema);
+                  }
+                  break;
+              }
+            }
+          }
         }
+
       });
     })();
   </script>
