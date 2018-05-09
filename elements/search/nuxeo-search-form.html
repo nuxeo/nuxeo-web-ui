@@ -758,13 +758,14 @@ limitations under the License.
           _el.put().then(function() {
             if (this._renaming) {
               this.$.renameDialog.close();
-
-              this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
-              // hack required to update the paper-input inside the paper-dropdown-menu
-              var idx = this.selectedSearchIdx;
-              this.selectedSearchIdx = 0;
-              this.selectedSearchIdx = idx;
-              this._renaming = false;
+              this.$['saved-searches'].get().then(function() {
+                this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
+                // hack required to update the paper-input inside the paper-dropdown-menu
+                var idx = this.selectedSearchIdx;
+                this.selectedSearchIdx = 0;
+                this.selectedSearchIdx = idx;
+                this._renaming = false;
+              }.bind(this));
             }
             this.dirty = false;
           }.bind(this));
