@@ -251,7 +251,9 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           view.nxProvider = this.nxProvider;
           // update view
           view.reset();
-          view.fetch();
+          this.debounce('fetch', function() {
+            view.fetch();
+          }, 100);
           this.fire('search-results-view', {view: view, name: this.name});
         }
       },
