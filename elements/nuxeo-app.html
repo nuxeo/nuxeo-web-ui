@@ -602,10 +602,17 @@ limitations under the License.
         this._updateTitle();
       },
 
-      _diffDocuments: function(e) {
-        this.$.diff.documents = e.detail.documents;
-        this.navigateTo('page', 'diff');
+      showDiff: function(id1, id2) {
+        this.show('diff');
+        this.$.diff.docIds = [id1, id2];
+      },
 
+      _diffDocuments: function(e) {
+        this.navigateTo('page', 'diff');
+        this.$.diff.docIds = null;
+        this.$.diff.docIds = e.detail.documents.map(function(doc) {
+          return doc.uid;
+        });
       },
 
       _updateTitle: function() {

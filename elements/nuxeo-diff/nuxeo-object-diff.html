@@ -1,0 +1,650 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+
+<!--
+`nuxeo-object-diff`
+@group Nuxeo UI
+@element nuxeo-object-diff
+-->
+<dom-module id="nuxeo-object-diff">
+  <template>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles">
+      :host {
+        display: block;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 12px;
+        list-style: none;
+      }
+
+      ul.array.simple {
+        padding-left: 0px;
+      }
+
+      span {
+        word-break: break-all;
+      }
+
+      span.added {
+        display: inline;
+        background-color: #B4EFCB;
+        word-break: break-all;
+        @apply --nuxeo-object-diff-added;
+      }
+
+      span.deleted {
+        display: inline;
+        text-decoration: line-through;
+        background-color: #E6B1B1;
+        word-break: break-all;
+        @apply --nuxeo-object-diff-deleted;
+      }
+
+      li ~ li {
+        margin-top: 12px;
+      }
+
+      .array.simple li ~ li {
+        margin-top: 0;
+      }
+
+      .addition nuxeo-object-diff {
+        border-left: 4px solid #B4EFCB;
+        @apply --nuxeo-complex-item-diff-added;
+      }
+
+      .deletion nuxeo-object-diff {
+        border-left: 4px solid #E6B1B1;
+        @apply --nuxeo-complex-item-diff-deleted;
+      }
+
+      .label {
+        @apply --layout-flex;
+        color: #D4D4D9;
+        word-break: break-all;
+        @apply --nuxeo-diff-property;
+      }
+
+      .default.simple {
+        @apply --layout-horizontal;
+      }
+
+      .default.complex {
+        @apply --layout-vertical;
+      }
+
+      .default.complex .label {
+        margin-bottom: 12px;
+      }
+
+      .value.simple {
+        display: inherit;
+      }
+
+      :host([unified]:not([is-array-item])) .value.simple {
+        width: 70vw;
+      }
+
+      :host(:not([unified]):not([is-array-item])) .value.simple {
+        width: 30vw;
+      }
+
+      .value.complex {
+        @apply --layout-flex;
+      }
+
+      .array {
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+      }
+
+      .text.diff {
+        word-break: break-all;
+      }
+
+      /* .object nuxeo-object-diff {
+        margin-top: 12px;
+      } */
+
+      .array.complex {
+        @apply --layout-vertical;
+        display: block;
+      }
+
+      .array.simple {
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+      }
+
+      .array.diff.simple .sep {
+        margin: 0 8px 0 4px;
+      }
+
+      .array.simple .item ~ .item {
+        margin-left: 4px;
+      }
+
+      .array.simple .item ~ .item::before {
+        content: ",";
+        margin-right: 8px;
+      }
+
+      .item {
+        @apply --layout-horizontal;
+      }
+
+      .item .label {
+        margin-right: 8px;
+        @apply --layout-flex-none;
+      }
+
+      .array.complex .item ~ .item {
+        margin-top: 12px;
+      }
+
+      .array.complex .item nuxeo-object-diff {
+        @apply --layout-flex;
+      }
+
+      /*.item nuxeo-object-diff {
+        @apply --layout-self-stretch;
+      } */
+
+      /* .item nuxeo-object-diff:first-of-type {
+        margin-top: 0;
+      } */
+    </style>
+
+    <!-- custom types -->
+    <!-- <template is="dom-if" if="[[_isOfType(type, 'blob')]]">
+      <nuxeo-object-diff delta="[[delta.name]]"
+                        type="string"
+                        original-value="[[originalValue.name]]"
+                        hide-deletions="[[hideDeletions]]"
+                        hide-additions="[[hideAdditions]]"></nuxeo-object-diff>
+    </template>
+    <template is="dom-if" if="[[!_isOfType(type, 'blob')]]"> -->
+    <div class$="default [[_computeDefaultClass(delta, originalValue)]]">
+      <template is="dom-if" if="[[displayLabel]]">
+        <span class="label">[[_computeLabel(property, propertyName)]]</span>
+      </template>
+      <div class$="value [[_computeDefaultClass(delta, originalValue)]]">
+        <!-- no changes -->
+        <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+          <template is="dom-if" if="[[_isNotObjectNorArray(originalValue)]]">
+            <span>[[originalValue]]</span>
+          </template>
+          <template is="dom-if" if="[[_isArray(originalValue)]]">
+            <ul class$="array [[_computeArrayClass(delta, originalValue, hideAdditions, hideDeletions)]]">
+              <template is="dom-repeat" items="[[originalValue]]" as="value">
+                <li class="item">
+                  <nuxeo-object-diff original-value="[[value]]"
+                                     schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"
+                                     unified="[[unified]]"
+                                     is-array-item>
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template is="dom-if" if="[[_isObject(originalValue)]]">
+            <ul class="object">
+              <template is="dom-repeat" items="[[_getKeys(originalValue)]]" as="subproperty">
+                <li>
+                  <nuxeo-object-diff property="[[subproperty]]"
+                                     original-value="[[_getValue(originalValue, subproperty)]]"
+                                     schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"
+                                     unified="[[unified]]"
+                                     display-label></nuxeo-object-diff>
+                </li>
+              </template>
+            </ul>
+          </template>
+        </template>
+        <!-- additions -->
+        <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
+          <div class="addition">
+            <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+              <span class="added">[[_getAdded(delta)]]</span>
+            </template>
+            <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+              <nuxeo-object-diff original-value="[[_getAdded(delta)]]"
+                                 unified="[[unified]]"
+                                 schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"></nuxeo-object-diff>
+            </template>
+          </div>
+        </template>
+        <!-- modifications -->
+        <template is="dom-if" if="[[_modified(delta)]]">
+          <template is="dom-if" if="[[!hideDeletions]]">
+            <div class="deletion">
+              <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+                <span class="deleted">[[_getModifiedOldValue(delta)]]</span>
+              </template>
+              <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+                <nuxeo-object-diff original-value="[[_getModifiedOldValue(delta)]]"
+                                   unified="[[unified]]"
+                                   schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"></nuxeo-object-diff>
+              </template>
+            </div>
+          </template>
+          <template is="dom-if" if="[[!hideAdditions]]">
+            <div class="addition">
+              <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+                <span class="added">[[_getModifiedNewValue(delta)]]</span>
+              </template>
+              <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+                <nuxeo-object-diff original-value="[[_getModifiedNewValue(delta)]]"
+                                   unified="[[unified]]"
+                                   schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"></nuxeo-object-diff>
+              </template>
+            </div>
+          </template>
+        </template>
+        <!-- deletions -->
+        <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
+          <div class="deletion">
+            <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+              <span class="deleted">[[_getDeleted(delta)]]</span>
+            </template>
+            <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+              <nuxeo-object-diff original-value="[[_getDeleted(delta)]]"
+                                 unified="[[unified]]"
+                                 schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"></nuxeo-object-diff>
+            </template>
+          </div>
+        </template>
+        <!-- text diff -->
+        <template is="dom-if" if="[[_textDiff(delta)]]">
+          <div class="text diff" inner-H-T-M-L="[[_getTextDiff(delta, originalValue, hideAdditions, hideDeletions)]]"></div>
+        </template>
+        <!-- object with inner changes -->
+        <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+          <ul class="object diff">
+            <template is="dom-repeat" items="[[_getAllKeys(delta, originalValue, showAll)]]" as="subproperty">
+              <li>
+                <nuxeo-object-diff property="[[subproperty]]"
+                                   delta="[[_getValue(delta, subproperty)]]"
+                                   unified="[[unified]]"
+                                   schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"
+                                   original-value="[[_getValue(originalValue, subproperty)]]"
+                                   show-all="[[showAll]]"
+                                   hide-deletions="[[hideDeletions]]"
+                                   hide-additions="[[hideAdditions]]"
+                                   display-label></nuxeo-object-diff>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <!-- arrays with inner changes -->
+        <template is="dom-if" if="[[_arrayInnerChanges(delta)]]">
+          <ul class$="array diff [[_computeArrayClass(delta, originalValue, hideAdditions, hideDeletions)]]">
+            <template is="dom-repeat" items="[[_getArrayDelta(delta, originalValue, hideAdditions, hideDeletions)]]" as="arrdelta">
+              <template is="dom-if" if="[[_showArrayItem(arrdelta, showAll)]]">
+                <li class$="item [[arrdelta.change]]">
+                  <span class="label">[[arrdelta.index]]:</span>
+                  <nuxeo-object-diff delta="[[arrdelta.value]]"
+                                     original-value="[[arrdelta.originalValue]]"
+                                     unified="[[unified]]"
+                                     schema-fields="[[_getPropertySchemaFields(schemaFields, property)]]"
+                                     type="[[_arrayItemType(type)]]"
+                                     show-all="[[showAll]]"
+                                     hide-deletions="[[hideDeletions]]"
+                                     hide-additions="[[hideAdditions]]"
+                                     is-array-item></nuxeo-object-diff>
+                </li>
+              </template>
+            </template>
+          </ul>
+        </template>
+      </div>
+    </div>
+    <!-- </template> -->
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-object-diff',
+
+      behaviors: [Nuxeo.I18nBehavior],
+
+      properties: {
+        property: {
+          type: String,
+          reflectToAttribute: true
+        },
+        type: {
+          type: String,
+          value: 'string',
+          reflectToAttribute: true
+        },
+        unified: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        hideDeletions: {
+          type: Boolean,
+          value: false
+        },
+        hideAdditions: {
+          type: Boolean,
+          value: false
+        },
+        propertyName: {
+          type: String
+        },
+        schemaFields: Object,
+        delta: Object,
+        originalValue: String,
+        showAll: {
+          type: Boolean,
+          value: false
+        },
+        displayLabel: {
+          type: Boolean,
+          value: false
+        },
+        isArrayItem: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      observers: ['_computeType(property, schemaFields, delta, originalValue)'],
+
+      _computeType: function(property, schemaFields, delta, originalValue) {
+        var type = this.type;
+        if (property && schemaFields) {
+          type = schemaFields[property];
+          type = type.type || type;
+        }
+        // handle resolved types
+        if (type === 'string' || type === 'string[]') {
+          var aValue;
+          // try to infer entity type from the original value
+          if (this._isObject(originalValue) || (Array.isArray(originalValue) && originalValue.length > 0)) {
+            aValue = Array.isArray(originalValue) ? originalValue[0] : originalValue;
+          } else if (delta) {
+            // no original value? let's try to find an entity type form the delta
+            if (type === 'string[]') {
+              var aKey = Object.keys(delta)[0];
+              aValue = Array.isArray(delta[aKey]) ? delta[aKey][0] : delta[aKey];
+            } else {
+              aValue = Array.isArray(delta) ? delta[0] || delta[1] : delta;
+            }
+          }
+          if (aValue && aValue['entity-type']) {
+            type = aValue['entity-type'] + (type.endsWith('[]') ? '[]' : '');
+          }
+        }
+        this.set('type', type);
+      },
+
+      _computeLabel: function(property, propertyName) {
+        return propertyName || property;
+      },
+
+      _computeDefaultClass: function(delta, originalValue) {
+        return this._isSimple(delta, originalValue) ? 'simple' : 'complex';
+      },
+
+      _computeArrayClass: function(delta, originalValue, hideAdditions, hideDeletions) {
+        if (delta) {
+          var arrdelta = this._getArrayDelta(delta, originalValue, hideAdditions, hideDeletions)[0];
+          return arrdelta ? this._computeDefaultClass(arrdelta.value, arrdelta.originalValue) : 'simple';
+        } else {
+          return this._computeDefaultClass(undefined, originalValue);
+        }
+      },
+
+      _showArrayItem: function(arrdelta, showAll) {
+        return showAll || arrdelta.modified;
+      },
+
+      /* misc helpers */
+
+      _isOfType: function(type, target) {
+        return type === target;
+      },
+
+      _isArray: function(value) {
+        return Array.isArray(value);
+      },
+
+      _isObject: function(value) {
+        return value && typeof value === 'object' && value.constructor === Object;
+      },
+
+      _isNotObjectNorArray: function(value) {
+        return !this._isArray(value) && !this._isObject(value);
+      },
+
+      _getKeys: function(delta) {
+        return Object.keys(delta);
+      },
+
+      _getValue: function(delta, property) {
+        return delta && delta[property];
+      },
+
+      _getPropertySchemaFields: function(schemaFields, property) {
+        return property ? (schemaFields && schemaFields[property] && schemaFields[property].fields) : schemaFields;
+      },
+
+      _isSimpleDelta: function(delta) {
+        var value = delta;
+        if (this._added(delta)) {
+          value = this._getAdded(delta);
+        } else if (this._deleted(delta)) {
+          value = this._getDeleted(delta);
+        } else if (this._modified(delta)) {
+          value = this._getModifiedOldValue(delta) || this._getModifiedNewValue(delta);
+        } else if (this._textDiff(delta)) {
+          value = delta[0];
+        } else if (this._arrayInnerChanges(delta)) {
+          var aKey = Object.keys(delta).filter(function(key) {
+            return key !== '_t';
+          })[0];
+          value = Array.isArray(delta[aKey]) ? delta[aKey][0] : delta[aKey];
+        }
+        return this._isNotObjectNorArray(value);
+      },
+
+      _isSimple: function(delta, originalValue) {
+        var simple;
+        if (delta) {
+          simple = this._isSimpleDelta(delta);
+        } else {
+          simple = !this._isObject((Array.isArray(originalValue) && originalValue.length > 0) ?
+            originalValue[0] : originalValue);
+        }
+        return simple;
+      },
+
+      _getAllKeys: function(delta, originalValue, showAll) {
+        if (showAll) {
+          return this._getKeys(originalValue);
+        } else {
+          return this._getKeys(delta);
+        }
+      },
+
+      _arrayItemType: function(type) {
+        return type ? type.replace(/\[\]$/, '') : 'string';
+      },
+
+      /* delta helpers */
+
+      _nochanges: function(delta) {
+        return !delta;
+      },
+
+      _added: function(delta, hideAdditions) {
+        return !hideAdditions && Array.isArray(delta) && delta.length === 1;
+      },
+
+      _getAdded: function(delta) {
+        return delta[0];
+      },
+
+      _modified: function(delta) {
+        return Array.isArray(delta) && delta.length === 2;
+      },
+
+      _getModifiedOldValue: function(delta) {
+        return delta[0];
+      },
+
+      _getModifiedNewValue: function(delta) {
+        return delta[1];
+      },
+
+      _deleted: function(delta, hideDeletions) {
+        return !hideDeletions && Array.isArray(delta) && delta.length === 3 && delta[2] === 0;
+      },
+
+      _getDeleted: function(delta) {
+        return delta[0];
+      },
+
+      _moved: function(delta) {
+        return Array.isArray(delta) && delta.length === 3 && delta[2] === 3;
+      },
+
+      _textDiff: function(delta) {
+        return Array.isArray(delta) && delta.length === 3 && delta[2] === 2;
+      },
+
+      _arrayInnerChanges: function(delta) {
+        return this._isObject(delta) && delta._t === 'a';
+      },
+
+      _objectInnerChanges: function(delta) {
+        return this._isObject(delta) && !delta._t;
+      },
+
+      /* delta helpers: unidiff */
+
+      _generateTextDiffHunks: function(text) {
+        return text[0].split(/(@@[\s-+,\d]+@@)/).filter(Boolean).reduce(function(result, value, index, array) {
+          if (index % 2 === 0) {
+            var pair = array.slice(index, index + 2);
+            var range = pair[0].match(/\d+,\d+/g);
+            range = {
+              original: range[0].split(',').map(Number),
+              new: range[1].split(',').map(Number)
+            }
+            result.push({
+              range: range,
+              context: pair[1],
+              hasAdditions: !!pair[1].match(/^\+(.*)$/gm),
+              hasDeletions: !!pair[1].match(/^\-(.*)$/gm)
+            });
+          }
+          return result;
+        }, []);
+      },
+
+      _getTextDiff: function(text, originalValue, hideAdditions, hideDeletions) {
+        if (!text || !originalValue) {
+          return;
+        }
+        var hunks = this._generateTextDiffHunks(text);
+        var result = '';
+        var offset = 0;
+        var start = 0;
+        hunks.forEach(function(hunk){
+          var end = hunk.range.original[0] - 1 + offset;
+          result += originalValue.substring(start, end) + hunk.context
+            .replace(/^\-(.*)$/gm, hideDeletions ? '' : '<span class="deleted">$1</span>') // removals
+            .replace(/^\+(.*)$/gm, hideAdditions ? '' : '<span class="added">$1</span>') // deletions
+            .replace(/^\s/gm, '') // modifier, which will by a black space for unmodified lines
+            .replace(/(\r\n|\r|\n)/gm, ''); // new lines
+          offset += hunk.range.original[1] - hunk.range.new[1];
+          start += hunk.range.original[1] + (end - start);
+        }.bind(this));
+        return result;
+      },
+
+      /* delta helpers: arrays */
+
+      _getArrayDelta: function(delta, originalValue, hideAdditions, hideDeletions) {
+        if (!delta || !originalValue) {
+          return;
+        }
+        var deltas = originalValue.map(function(val, index) {
+          return { originalValue: val, modified: false, index: String(index), change: 'unchanged' };
+        });
+        // sort and reversing assures that we'll deal first with deletions
+        Object.keys(delta).filter(function(key) { return key !== '_t' }).sort().reverse().forEach(function(index) {
+          var i;
+          if (index.startsWith('_')) {
+            i = Number(index.replace('_', ''));
+            if (hideDeletions) {
+              deltas.splice(i, 1);
+            } else {
+              deltas.splice(i, 1, {
+                value: delta[index],
+                modified: true,
+                change: 'deleted',
+                originalValue: originalValue[i],
+                index: String(i)
+              });
+            }
+          } else {
+            i = Number(index);
+            if (this._isObject(delta[index])) {
+              deltas.splice(i, 1, {
+                value: delta[index],
+                modified: true,
+                change: 'modified',
+                originalValue: originalValue[i],
+                index: String(i)
+              });
+            } else if (!hideAdditions) {
+              deltas.splice(i, 0, {
+                value: delta[index],
+                modified: true,
+                change: 'added',
+                originalValue: originalValue[i],
+                index: String(i)
+              });
+            }
+          }
+        }.bind(this));
+        deltas.sort(function(a, b) {
+          if (a.index === b.index) {
+            if (a.change === b.change) {
+              return 0;
+            }
+            return a.change === 'added' ? 1 : -1;
+          } else {
+            return a.index > b.index;
+          }
+        });
+        return deltas;
+      }
+    });
+  </script>
+
+</dom-module>

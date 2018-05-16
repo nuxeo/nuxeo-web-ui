@@ -101,6 +101,10 @@ limitations under the License.
       app.loadTask();
     });
 
+    page('/diff/:id1/:id2', function(data) {
+      app.showDiff(data.params.id1, data.params.id2);
+    });
+
     page('/:page', function(ctx) {
       app.show(ctx.params.page);
     });
@@ -154,6 +158,10 @@ limitations under the License.
 
       group: function(name) {
         return '/group/' + name;
+      },
+
+      diff: function(id1, id2) {
+        return '/diff/' + id1 + '/' + id2;
       },
 
       page: function(name) {

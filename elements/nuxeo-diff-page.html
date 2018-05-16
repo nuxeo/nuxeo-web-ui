@@ -30,11 +30,11 @@ limitations under the License.
       <span class="title">Diff</span>
     </div>
     <div class="content">
-      <template is="dom-if" if="[[!documents.length]]">
+      <template is="dom-if" if="[[!docIds.length]]">
         <span>[[i18n('diffPage.noDocuments')]]</span>
       </template>
-      <template is="dom-if" if="[[documents.length]]">
-        <nuxeo-diff documents="[[documents]]" visible="[[visible]]"></nuxeo-diff>
+      <template is="dom-if" if="[[docIds.length]]">
+        <nuxeo-diff doc-ids="[[docIds]]" visible="[[visible]]"></nuxeo-diff>
       </template>
     </div>
   </nuxeo-page>
@@ -46,7 +46,7 @@ limitations under the License.
       is: 'nuxeo-diff-page',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
-        documents: {
+        docIds: {
           type: Array,
           value: []
         },
