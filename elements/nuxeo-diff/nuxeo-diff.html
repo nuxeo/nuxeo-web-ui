@@ -17,6 +17,8 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -43,12 +45,8 @@ limitations under the License.
         };
       }
 
-      :host(:not([unified-view])) #diffPickerPane {
+      :host(:not([unified-view])) .diffPickers {
         @apply --layout-horizontal;
-      }
-
-      :host(:not([unified-view])) .diffPicker ~ .diffPicker {
-        margin-left: 16px; /* TODO: styling needed */
       }
 
       :host(:not([unified-view])) .diffPicker {
@@ -65,7 +63,7 @@ limitations under the License.
         @apply --layout-flex;
       }
 
-      paper-checkbox ~ paper-checkbox {
+      .control ~ .control {
         margin-left: 8px;
       }
 
@@ -79,13 +77,30 @@ limitations under the License.
         @apply --layout-vertical;
       }
 
-      #diffPickerPane, #diffPane {
+      #diffPickerPane {
+        @apply --layout-horizontal;
+      }
+
+      .diffPickers, #diffPane {
         @apply --layout-vertical;
+      }
+
+      .diffPickers {
+        @apply --layout-flex;
       }
 
       .diffPicker {
         @apply --paper-card;
         padding: 4px 4px 4px 8px; /* TODO: styling needed */
+      }
+
+      .switchSides {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
+
+      .switchSides paper-icon-button {
+        margin: 0 4px 16px 4px;
       }
 
       .deltaPane {
@@ -106,25 +121,33 @@ limitations under the License.
 
     <div id="diffContainer">
       <div id="controls">
+        <paper-checkbox class="control" checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
         <template is="dom-if" if="[[_showUnifiedViewCheckbox]]">
-          <paper-checkbox checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-checkbox>
+          <paper-toggle-button class="control" checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-toggle-button>
         </template>
-        <paper-checkbox checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
       </div>
       <div id="diffPickerPane">
-        <div class="diffPicker">
-          <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
-            <template is="dom-repeat" items="[[documents]]" filter="[[_filterUid(_rightUid)]]">
-              <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
-            </template>
-          </nuxeo-select>
+        <div class="diffPickers">
+          <div class="diffPicker">
+            <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
+              <template is="dom-repeat" items="[[documents]]">
+                <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+              </template>
+            </nuxeo-select>
+          </div>
+          <div class="switchSides" hidden$="[[unifiedView]]">
+            <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" ></paper-icon-button>
+          </div>
+          <div class="diffPicker">
+            <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
+              <template is="dom-repeat" items="[[documents]]">
+                <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+              </template>
+            </nuxeo-select>
+          </div>
         </div>
-        <div class="diffPicker">
-          <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
-            <template is="dom-repeat" items="[[documents]]" filter="[[_filterUid(_leftUid)]]">
-              <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
-            </template>
-          </nuxeo-select>
+        <div class="switchSides" hidden$="[[!unifiedView]]">
+          <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" ></paper-icon-button>
         </div>
       </div>
       <div id="diffPane">
@@ -135,6 +158,7 @@ limitations under the License.
                 <!-- unified view -->
                 <template is="dom-if" if="[[unifiedView]]">
                   <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
+                                     label="[[_computeLabel(schema, property)]]"
                                      schema-fields="[[schema.fields]]"
                                      delta="[[_getPropertyDiff(_delta, property)]]"
                                      original-value="[[_getDocumentProperty(property, _left)]]"
@@ -146,6 +170,7 @@ limitations under the License.
                 <template is="dom-if" if="[[!unifiedView]]">
                   <div class="side-by-side">
                     <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
+                                       label="[[_computeLabel(property)]]"
                                        schema-fields="[[schema.fields]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
                                        original-value="[[_getDocumentProperty(property, _left)]]"
@@ -207,8 +232,14 @@ limitations under the License.
             observer: '_resize'
           },
           _showUnifiedViewCheckbox: Boolean,
-          _leftUid: String,
-          _rightUid: String,
+          _leftUid: {
+            type: String,
+            observer: '_leftUidChanged'
+          },
+          _rightUid: {
+            type: String,
+            observer: '_rightUidChanged'
+          },
           _schemas: Array,
           _left: Object,
           _right: Object,
@@ -216,8 +247,7 @@ limitations under the License.
         },
 
         observers: [
-          '_docIdsChanged(docIds.*)',
-          '_diff(_leftUid, _rightUid)'
+          '_docIdsChanged(docIds.*)'
         ],
 
         listeners: {
@@ -232,6 +262,36 @@ limitations under the License.
             this._setUnifiedView(this._unifiedView);
             this.set('_showUnifiedViewCheckbox', true);
           }
+        },
+
+        _switchSides: function() {
+          var left = this._leftUid;
+          var right = this._rightUid;
+          //this._leftUid = null; // prevent diff with the same id
+          this.set('_rightUid', left);
+          this.set('_leftUid', right);
+        },
+
+        _leftUidChanged: function(newValue, oldValue) {
+          if (newValue === this._rightUid) {
+            this.set('_rightUid', oldValue);
+          } else {
+            this.diff();
+          }
+        },
+
+        _rightUidChanged: function(newValue, oldValue) {
+          if (newValue === this._leftUid) {
+            this.set('_leftUid', oldValue);
+          } else {
+            this.diff();
+          }
+        },
+
+        _computeLabel: function(schema, property) {
+          var key = 'diffObject.property.label.' + property;
+          var translation = this.i18n(key);
+          return key !== translation ? translation : this._getPropertyName(schema, property);
         },
 
         /* DOM-repeat filters and sort functions */
@@ -253,7 +313,7 @@ limitations under the License.
           }
         },
 
-        /* helpers */
+        /* fetchers */
 
         _sequencer: function(promises) {
           return promises.reduce(function(current, next) {
@@ -261,11 +321,25 @@ limitations under the License.
           }, Promise.resolve([]));
         },
 
-        _sameType: function(left, right) {
-          return left && right && left.type === right.type
+        _docIdsChanged: function() {
+          if (this.visible && this.docIds && this.docIds.length > 1) {
+            var calls = [];
+            this.documents = [];
+            this.docIds.forEach(function(uid) {
+              calls.push(function() {
+                this.$.doc.docId = uid;
+                return this.$.doc.get().then(function(response) {
+                  this.push('documents', response);
+                }.bind(this));
+              }.bind(this));
+            }.bind(this));
+            this._sequencer(calls).then(function() {
+              this.set('_rightUid', null);
+              this.set('_leftUid', this.documents[0].uid);
+              this.set('_rightUid', this.documents[1].uid);
+            }.bind(this));
+          }
         },
-
-        /* fetchers */
 
         _fetchSchemas: function(document) {
           var type = document.type;
@@ -280,7 +354,8 @@ limitations under the License.
         },
 
         _fetchCommonSchemas: function(left, right) {
-          if (this._sameType(left, right)) {
+          // if both have the same type, only do a single fetch
+          if (left && right && left.type === right.type) {
             return this._fetchSchemas(left).then(function(response) {
               return response.schemas;
             });
@@ -338,36 +413,16 @@ limitations under the License.
 
         /* comparison */
 
-        _docIdsChanged: function() {
-          if (this.visible && this.docIds && this.docIds.length > 1) {
-            var calls = [];
-            this.documents = [];
-            this.docIds.forEach(function(uid) {
-              calls.push(function() {
-                this.$.doc.docId = uid;
-                return this.$.doc.get().then(function(response) {
-                  this.push('documents', response);
-                }.bind(this));
-              }.bind(this));
-            }.bind(this));
-            this._sequencer(calls).then(function() {
-              this.set('_rightUid', null);
-              this.set('_leftUid', this.documents[0].uid);
-              this.set('_rightUid', this.documents[1].uid);
-            }.bind(this));
-          }
-        },
-
-        _diff: function(leftUid, rightUid) {
-          if (!leftUid || !rightUid) {
+        diff: function() {
+          if (!this._leftUid || !this._rightUid || this._leftUid === this._rightUid) {
             return;
           }
-          this._updateUrl(leftUid, rightUid);
+          this._updateUrl(this._leftUid, this._rightUid);
           var left = this.documents.find(function(doc) {
-            return doc.uid === leftUid;
+            return doc.uid === this._leftUid;
           }.bind(this));
           var right = this.documents.find(function(doc) {
-            return doc.uid === rightUid;
+            return doc.uid === this._rightUid;
           }.bind(this));
           this.set('_left', left);
           this.set('_right', right);

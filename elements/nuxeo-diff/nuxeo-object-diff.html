@@ -121,10 +121,6 @@ limitations under the License.
         word-break: break-all;
       }
 
-      /* .object nuxeo-object-diff {
-        margin-top: 12px;
-      } */
-
       .array.complex {
         @apply --layout-vertical;
         display: block;
@@ -139,12 +135,12 @@ limitations under the License.
         margin: 0 8px 0 4px;
       }
 
-      .array.simple .item ~ .item {
+      .array.simple .item:not(:last-of-type)::after {
+        content: ",";
         margin-left: 4px;
       }
 
-      .array.simple .item ~ .item::before {
-        content: ",";
+      .array.simple .item:not(:first-child) {
         margin-right: 8px;
       }
 
@@ -164,14 +160,6 @@ limitations under the License.
       .array.complex .item nuxeo-object-diff {
         @apply --layout-flex;
       }
-
-      /*.item nuxeo-object-diff {
-        @apply --layout-self-stretch;
-      } */
-
-      /* .item nuxeo-object-diff:first-of-type {
-        margin-top: 0;
-      } */
     </style>
 
     <!-- custom types -->
@@ -185,7 +173,7 @@ limitations under the License.
     <template is="dom-if" if="[[!_isOfType(type, 'blob')]]"> -->
     <div class$="default [[_computeDefaultClass(delta, originalValue)]]">
       <template is="dom-if" if="[[displayLabel]]">
-        <span class="label">[[_computeLabel(property, propertyName)]]</span>
+        <span class="label">[[_computeLabel(property, label)]]</span>
       </template>
       <div class$="value [[_computeDefaultClass(delta, originalValue)]]">
         <!-- no changes -->
@@ -350,7 +338,7 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        propertyName: {
+        label: {
           type: String
         },
         schemaFields: Object,
@@ -400,8 +388,8 @@ limitations under the License.
         this.set('type', type);
       },
 
-      _computeLabel: function(property, propertyName) {
-        return propertyName || property;
+      _computeLabel: function(property, label) {
+        return label || property;
       },
 
       _computeDefaultClass: function(delta, originalValue) {
