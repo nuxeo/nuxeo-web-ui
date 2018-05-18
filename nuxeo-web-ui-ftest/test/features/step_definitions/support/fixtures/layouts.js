@@ -47,12 +47,13 @@ global.fieldRegistry.register('nuxeo-date',
                                 throw new Error('cannot set value of a nuxeo-date element');
                               });
 global.fieldRegistry.register('nuxeo-date-picker',
-                              (element) => moment(element.element('#nativeInput').getValue(), global.dateFormat)
+                              (element) => moment(element.element('vaadin-text-field').getValue(), global.dateFormat)
                                   .format(global.dateFormat),
                               (element, value) => {
-                                element.element('#nativeInput').click();
-                                const keys = moment(value, global.dateFormat).format('L').split(/[^\d\w]/);
+                                element.element('vaadin-text-field').click();
+                                const keys = moment(value, global.dateFormat).format('L');
                                 driver.keys(keys);
+                                driver.keys('Enter');
                               });
 global.fieldRegistry.register('nuxeo-textarea',
                               (element) => element.element('#textarea').getValue(),
