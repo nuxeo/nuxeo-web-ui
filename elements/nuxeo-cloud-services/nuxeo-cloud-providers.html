@@ -22,12 +22,12 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-input.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
 `nuxeo-cloud-providers`
@@ -79,10 +79,10 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
           <template>
             <paper-icon-button id="edit-button-[[index]]" name="edit" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
-            <paper-tooltip for="edit-button-[[index]]">[[i18n('cloudProviders.edit')]]</paper-tooltip>
+            <nuxeo-tooltip for="edit-button-[[index]]">[[i18n('cloudProviders.edit')]]</nuxeo-tooltip>
             <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete"
                                on-tap="_deleteEntry"></paper-icon-button>
-            <paper-tooltip for="delete-button-[[index]]">[[i18n('cloudProviders.delete')]]</paper-tooltip>
+            <nuxeo-tooltip for="delete-button-[[index]]">[[i18n('cloudProviders.delete')]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>

@@ -17,11 +17,11 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../document/nuxeo-document-edit.html">
 
 <!--
@@ -55,7 +55,7 @@ limitations under the License.
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <paper-icon-button noink id="edit" icon="nuxeo:edit" on-tap="_openDialog"></paper-icon-button>
-      <paper-tooltip>[[i18n('documentEditAction.tooltip')]]</paper-tooltip>
+      <nuxeo-tooltip>[[i18n('documentEditAction.tooltip')]]</nuxeo-tooltip>
     </template>
 
     <nuxeo-dialog id="edit-dialog" no-auto-focus with-backdrop modal>
