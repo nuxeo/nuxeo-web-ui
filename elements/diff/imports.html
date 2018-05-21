@@ -1,0 +1,15 @@
+<link rel="import" href="elements/nuxeo-default-diff.html">
+<link rel="import" href="elements/nuxeo-blob-diff.html">
+<link rel="import" href="elements/nuxeo-date-diff.html">
+<link rel="import" href="elements/nuxeo-directory-diff.html">
+<link rel="import" href="elements/nuxeo-directory-arr-diff.html">
+<link rel="import" href="elements/nuxeo-user-diff.html">
+<link rel="import" href="elements/nuxeo-user-arr-diff.html">
+<script>
+  Nuxeo.Diff.registerElement('nuxeo-blob-diff', {type: 'blob'});
+  Nuxeo.Diff.registerElement('nuxeo-dete-diff', {type: 'date'});
+  Nuxeo.Diff.registerElement('nuxeo-directory-diff', {type: 'directoryEntry'});
+  Nuxeo.Diff.registerElement('nuxeo-directory-arr-diff', {type: 'directoryEntry[]'});
+  Nuxeo.Diff.registerElement('nuxeo-user-diff', {type: 'user'});
+  Nuxeo.Diff.registerElement('nuxeo-user-arr-diff', {type: 'user[]'});
+</script>

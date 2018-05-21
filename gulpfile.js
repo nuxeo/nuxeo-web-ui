@@ -130,6 +130,11 @@ gulp.task('move-elements', function() {
     dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
     .pipe(gulp.dest(dist('nuxeo-user-group-management')));
 
+  // copy diff elements
+  var diff = gulp.src(
+    dist('elements/diff'))
+    .pipe(gulp.dest(dist()));
+
   var layouts = gulp.src([
     dist('elements/document/**'), '!' + dist('elements/document/*.html'),
     dist('elements/directory/**'), '!' + dist('elements/directory/*.html'),
@@ -143,7 +148,8 @@ gulp.task('move-elements', function() {
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe(gulp.dest(dist()));
 
-  return merge(elements, layouts, userGroupManagement);
+
+  return merge(elements, layouts, userGroupManagement, diff);
 });
 
 // Strip unnecessary stuff
