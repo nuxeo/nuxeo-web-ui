@@ -17,8 +17,8 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
 `nuxeo-document-create-shortcut`
@@ -50,7 +50,7 @@ limitations under the License.
     </style>
 
     <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
-    <paper-tooltip for="createBtn" position="left">[[i18n(label)]]</paper-tooltip>
+    <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
 
   </template>
 

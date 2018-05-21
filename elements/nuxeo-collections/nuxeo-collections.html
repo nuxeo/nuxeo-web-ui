@@ -18,7 +18,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/neon-animation/neon-animatable.html">
 <link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
@@ -30,6 +29,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 <link rel="import" href="../nuxeo-keys/nuxeo-keys.html">
 
@@ -177,7 +177,7 @@ limitations under the License.
         [[selectedCollection.title]]
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
-        <paper-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</paper-tooltip>
+        <nuxeo-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</nuxeo-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
         [[i18n('collections.heading')]]

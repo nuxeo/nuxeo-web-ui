@@ -17,10 +17,10 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
 `nuxeo-menu-icon`
@@ -64,7 +64,7 @@ limitations under the License.
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]"></paper-icon-button>
-      <paper-tooltip id="tooltip" for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</paper-tooltip>
+      <nuxeo-tooltip for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</nuxeo-tooltip>
       <template is="dom-if" if="[[badge]]">
         <paper-badge label="[[badge]]" for="button"></paper-badge>
       </template>
@@ -122,12 +122,6 @@ limitations under the License.
       observers: [
         '_srcOrIcon(icon, src)'
       ],
-
-      ready: function() {
-        document.body.appendChild(this.$.tooltip);
-        this.$.tooltip._target = this.$.button;
-        this.$.tooltip._addListeners();
-      },
 
       _srcOrIcon: function() {
         if (this.src && this.src.length > 0) {
