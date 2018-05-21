@@ -21,11 +21,11 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 <link rel="import" href="../nuxeo-document-storage/nuxeo-document-storage.html">
 
@@ -163,13 +163,13 @@ limitations under the License.
             <iron-icon icon="nuxeo:copy"></iron-icon>
             [[i18n('clipboard.copy')]]
           </paper-button>
-          <paper-tooltip for="paste">[[i18n('clipboard.copy')]]</paper-tooltip>
+          <nuxeo-tooltip for="paste">[[i18n('clipboard.copy')]]</nuxeo-tooltip>
           <paper-button id="move" on-tap="execute" data-op="Document.Move"
                         disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
             <iron-icon icon="nuxeo:move"></iron-icon>
             [[i18n('clipboard.move')]]
           </paper-button>
-          <paper-tooltip for="move">[[i18n('clipboard.move')]]</paper-tooltip>
+          <nuxeo-tooltip for="move">[[i18n('clipboard.move')]]</nuxeo-tooltip>
         </div>
       </div>
     </div>

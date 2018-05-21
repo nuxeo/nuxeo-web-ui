@@ -23,7 +23,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-search.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
@@ -33,6 +32,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-document-permissions/nuxeo-document-permissions.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 <link rel="import" href="nuxeo-search-form-layout.html">
 
@@ -247,12 +247,12 @@ limitations under the License.
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button class="switch" icon="nuxeo:filter" id="toogleFilter" on-tap="_displayFiltersTapped">
             </paper-icon-button>
-            <paper-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</paper-tooltip>
+            <nuxeo-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</nuxeo-tooltip>
           </template>
           <template is="dom-if" if="[[!queue]]">
             <paper-icon-button class="switch" icon="nuxeo:view-list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
             </paper-icon-button>
-            <paper-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</paper-tooltip>
+            <nuxeo-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</nuxeo-tooltip>
           </template>
         </template>
         <template is="dom-if" if="[[onlyQueue]]">
@@ -270,7 +270,7 @@ limitations under the License.
                                     on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
-            <paper-tooltip>[[i18n('searchForm.auto.description')]]</paper-tooltip>
+            <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
           </div>
           <div class="actions">
             <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">

@@ -19,7 +19,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
@@ -27,6 +26,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="nuxeo-document-versions-list.html">
 <link rel="import" href="nuxeo-document-create-version.html">
 
@@ -145,10 +145,10 @@ limitations under the License.
     </div>
 
     <template is="dom-if" if="[[document.isVersion]]">
-      <paper-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</paper-tooltip>
+      <nuxeo-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</nuxeo-tooltip>
     </template>
     <template is="dom-repeat" items="[[versions]]" as="item">
-      <paper-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</paper-tooltip>
+      <nuxeo-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</nuxeo-tooltip>
     </template>
 
   </template>

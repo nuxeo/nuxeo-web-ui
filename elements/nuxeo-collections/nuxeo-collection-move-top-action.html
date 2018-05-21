@@ -17,9 +17,9 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
 `nuxeo-collection-move-top-action`
@@ -46,9 +46,9 @@ limitations under the License.
         id="topButton"
         icon="editor:vertical-align-top">
       </paper-icon-button>
-      <paper-tooltip for="topButton" position="[[tooltipPosition]]">
+      <nuxeo-tooltip for="topButton" position="[[tooltipPosition]]">
         [[i18n('collections.moveTop')]]
-      </paper-tooltip>
+      </nuxeo-tooltip>
     </template>
 
   </template>

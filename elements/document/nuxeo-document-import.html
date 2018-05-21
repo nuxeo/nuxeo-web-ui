@@ -27,7 +27,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
@@ -36,6 +35,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../nuxeo-document-creation/nuxeo-document-creation-behavior.html">
 <link rel="import" href="../nuxeo-document-creation-stats/nuxeo-document-creation-stats.html">
 <link rel="import" href="nuxeo-document-layout.html">
@@ -373,7 +373,7 @@ limitations under the License.
                       </div>
                       <div class="clear" hidden$="[[!file.complete]]">
                         <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
+                        <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>
@@ -398,7 +398,7 @@ limitations under the License.
                       </div>
                       <div class="horizontal layout center">
                         <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
+                        <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>

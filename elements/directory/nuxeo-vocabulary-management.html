@@ -23,12 +23,12 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page.html">
 
 <!--
@@ -112,9 +112,9 @@ limitations under the License.
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
                     <paper-icon-button id="edit-button-[[index]]" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
-                    <paper-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry')]]</paper-tooltip>
+                    <nuxeo-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry')]]</nuxeo-tooltip>
                     <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete" on-tap="_deleteEntry"></paper-icon-button>
-                    <paper-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry')]]</paper-tooltip>
+                    <nuxeo-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry')]]</nuxeo-tooltip>
                   </template>
                 </template>
               </nuxeo-data-table-column>
