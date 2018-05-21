@@ -117,7 +117,7 @@ limitations under the License.
     </style>
 
     <nuxeo-resource id="schema"></nuxeo-resource>
-    <nuxeo-document id="doc" headers="[[headers]]"></nuxeo-document>
+    <nuxeo-document id="doc" headers="[[headers]]" enrichers="[[enrichers]]" schemas="[[schemas]]"></nuxeo-document>
 
     <div id="diffContainer">
       <div id="controls">
@@ -159,9 +159,10 @@ limitations under the License.
                 <template is="dom-if" if="[[unifiedView]]">
                   <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
                                      label="[[_computeLabel(schema, property)]]"
-                                     schema-fields="[[schema.fields]]"
+                                     schema="[[schema]]"
                                      delta="[[_getPropertyDiff(_delta, property)]]"
                                      original-value="[[_getDocumentProperty(property, _left)]]"
+                                     new-value="[[_getDocumentProperty(property, _right)]]"
                                      show-all="[[showAll]]"
                                      unified
                                      display-label></nuxeo-object-diff>
@@ -171,15 +172,17 @@ limitations under the License.
                   <div class="side-by-side">
                     <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
                                        label="[[_computeLabel(property)]]"
-                                       schema-fields="[[schema.fields]]"
+                                       schema="[[schema]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
                                        original-value="[[_getDocumentProperty(property, _left)]]"
+                                       new-value="[[_getDocumentProperty(property, _right)]]"
                                        show-all="[[showAll]]"
                                        hide-additions display-label></nuxeo-object-diff>
                     <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
-                                       schema-fields="[[schema.fields]]"
+                                       schema="[[schema]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
                                        original-value="[[_getDocumentProperty(property, _left)]]"
+                                       new-value="[[_getDocumentProperty(property, _right)]]"
                                        show-all="[[showAll]]"
                                        hide-deletions display-label></nuxeo-object-diff>
                   </div>
@@ -195,6 +198,7 @@ limitations under the License.
 
   <script>
     (function() {
+      var _customLoadPromise;
       var typeDataCache = {};
       Polymer({
         is: 'nuxeo-diff',
@@ -222,9 +226,26 @@ limitations under the License.
             reflectToAttribute: true,
             readOnly: true
           },
+          /**
+           * List of content enrichers passed on to `provider`.
+           * Already set by default are thumbnail, permissions and highlight.
+           */
+          enrichers: {
+            type: String
+          },
+          /**
+           * The headers passed on to `provider`.
+           * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
+           */
           headers: {
             type: String,
-            value: '{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+            value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+          },
+          /**
+           * The schemas passed on to `provider`.
+           **/
+          schemas: {
+            type: String
           },
           _unifiedView: {
             type: Boolean,
@@ -252,6 +273,14 @@ limitations under the License.
 
         listeners: {
           'iron-resize': '_resize'
+        },
+
+        created: function() {
+          if (!_customLoadPromise) {
+            _customLoadPromise = new Promise(function(resolve, reject) {
+              this.importHref(this.resolveUrl('imports.html'), resolve, reject);
+            }.bind(this));
+          }
         },
 
         _resize: function() {
@@ -413,7 +442,7 @@ limitations under the License.
 
         /* comparison */
 
-        diff: function() {
+        _diff: function() {
           if (!this._leftUid || !this._rightUid || this._leftUid === this._rightUid) {
             return;
           }
@@ -434,6 +463,10 @@ limitations under the License.
             }.bind(this));
             this.set('_delta', delta);
           }.bind(this));
+        },
+
+        diff: function() {
+          _customLoadPromise.then(this._diff.bind(this));
         },
 
         _updateUrl: function(leftUid, rightUid) {

@@ -24,20 +24,19 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles">
     </style>
-
-  <nuxeo-page>
-    <div class="header" slot="header">
-      <span class="title">Diff</span>
-    </div>
-    <div class="content">
-      <template is="dom-if" if="[[!docIds.length]]">
-        <span>[[i18n('diffPage.noDocuments')]]</span>
-      </template>
-      <template is="dom-if" if="[[docIds.length]]">
-        <nuxeo-diff doc-ids="[[docIds]]" visible="[[visible]]"></nuxeo-diff>
-      </template>
-    </div>
-  </nuxeo-page>
+    <nuxeo-page>
+      <div class="header" slot="header">
+        <span class="title">[[i18n('app.title.diff')]]</span>
+      </div>
+      <div class="content">
+        <template is="dom-if" if="[[!docIds.length]]">
+          <span>[[i18n('diffPage.noDocuments')]]</span>
+        </template>
+        <template is="dom-if" if="[[docIds.length]]">
+          <nuxeo-diff doc-ids="[[docIds]]" visible="[[visible]]"></nuxeo-diff>
+        </template>
+      </div>
+    </nuxeo-page>
 
   </template>
 

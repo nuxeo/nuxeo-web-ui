@@ -1,0 +1,95 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-user-diff`
+@group Nuxeo UI
+@element nuxeo-user-diff
+-->
+<dom-module id="nuxeo-user-diff">
+  <template>
+    <style include="nuxeo-diff-styles">
+    </style>
+    <div class="horizontal layout">
+      <template is="dom-if" if="[[displayLabel]]">
+        <span class="label">[[_computeLabel(property, label)]]</span>
+      </template>
+      <div class="value simple">
+        <!-- no changes -->
+        <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+          <nuxeo-user-tag user="[[originalValue.id]]"></nuxeo-user-tag>
+        </template>
+        <!-- additions -->
+        <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
+          <template is="dom-if" if="[[_getAdded(delta)]]">
+            <div class="addition">
+              <nuxeo-user-tag user="[[_getAdded(delta)]]"></nuxeo-user-tag>
+            </div>
+          </template>
+        </template>
+        <!-- modifications -->
+        <template is="dom-if" if="[[_modified(delta)]]">
+          <template is="dom-if" if="[[!hideDeletions]]">
+            <!-- old value -->
+            <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
+              <div class="deletion">
+                <nuxeo-user-tag user="[[_getModifiedOldValue(delta)]]"></nuxeo-user-tag>
+              </div>
+            </template>
+          </template>
+          <template is="dom-if" if="[[!hideAdditions]]">
+            <!-- new value -->
+            <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
+              <div class="addition">
+                <nuxeo-user-tag user="[[_getModifiedNewValue(delta)]]"></nuxeo-user-tag>
+              </div>
+            </template>
+          </template>
+        </template>
+        <!-- deletions -->
+        <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
+          <template is="dom-if" if="[[_getDeleted(delta)]]">
+            <div class="deletion">
+              <nuxeo-user-tag user="[[_getDeleted(delta)]]"></nuxeo-user-tag>
+            </div>
+          </template>
+        </template>
+        <!-- object with inner changes -->
+        <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+          <template is="dom-if" if="[[!hideDeletions]]">
+            <div class="deletion">
+              <nuxeo-user-tag user="[[delta.id.0]]"></nuxeo-user-tag>
+            </div>
+          </template>
+          <template is="dom-if" if="[[!hideAdditions]]">
+            <div class="addition">
+              <nuxeo-user-tag user="[[delta.id.1]]"></nuxeo-user-tag>
+            </div>
+          </template>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-user-diff',
+      behaviors: [Nuxeo.DiffBehavior]
+    });
+  </script>
+
+</dom-module>
