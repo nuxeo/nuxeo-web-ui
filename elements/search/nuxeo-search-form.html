@@ -338,9 +338,9 @@ limitations under the License.
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="shareDialog" with-backdrop reparent>
+    <nuxeo-dialog id="shareDialog" with-backdrop reparent opened="{{permissionsVisible}}">
       <h2>[[i18n('searchForm.shared.heading')]]</h2>
-      <nuxeo-document-permissions doc-id="[[selectedSearch.id]]"></nuxeo-document-permissions>
+      <nuxeo-document-permissions doc-id="[[selectedSearch.id]]" visible="[[permissionsVisible]]"></nuxeo-document-permissions>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
