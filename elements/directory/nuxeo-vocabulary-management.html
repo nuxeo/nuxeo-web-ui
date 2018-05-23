@@ -131,7 +131,8 @@ limitations under the License.
           <nuxeo-layout id="layout"
                         href="[[_layoutHref(_selectedSchema)]]"
                         model="[[_layoutModel(_selectedEntry)]]"
-                        error="[[i18n('documentVocabularyManagement.layoutNotFound', _selectedSchema)]]">
+                        error="[[i18n('documentVocabularyManagement.layoutNotFound', _selectedSchema)]]"
+                        on-element-changed="_elementChanged">
           </nuxeo-layout>
         </form>
       </iron-form>
@@ -313,8 +314,10 @@ limitations under the License.
         this.$.vocabularyEditDialog.toggle();
       },
 
-      _cancel: function() {
-        //this._refresh();
+      _elementChanged: function() {
+        if (this.$.vocabularyEditDialog.opened) {
+          this.async(this.$.vocabularyEditDialog.notifyResize.bind(this.$.vocabularyEditDialog));
+        }
       },
 
       _save: function() {
