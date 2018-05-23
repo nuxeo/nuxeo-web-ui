@@ -125,6 +125,7 @@
   "audit.category": "Category",
   "audit.comment": "Comment",
   "audit.date": "Date",
+  "audit.document": "Document",
   "audit.empty": "No Results",
   "audit.eventTypes": "Performed Actions",
   "audit.eventCategory": "Event Category",
