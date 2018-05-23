@@ -116,6 +116,9 @@ limitations under the License.
             <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
               <template>[[_formati18n('eventCategory.', item.category)]]</template>
             </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.document')]]">
+              <template>[[_formatDocument(item)]]</template>
+            </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
               <template>[[item.comment]]</template>
             </nuxeo-data-table-column>
@@ -164,6 +167,12 @@ limitations under the License.
 
       _formati18n: function(path, key) {
         return this.i18n(path + key);
+      },
+
+      _formatDocument: function(item) {
+        if (item) {
+          return (item.docUUID || '') + (item.docType ? ' (' + item.docType + ') ' : '') + (item.docPath || '');
+        }
       },
 
       /* Builds the parameters object to be used on the query */
