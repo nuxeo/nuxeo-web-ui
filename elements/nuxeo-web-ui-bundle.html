@@ -209,12 +209,6 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="deleteDocumentAction" slot="DOCUMENT_ACTIONS" order="15">
-  <template>
-    <nuxeo-delete-document-button document="[[document]]"></nuxeo-delete-document-button>
-  </template>
-</nuxeo-slot-content>
-
 <nuxeo-slot-content name="addToColDocumentAction" slot="DOCUMENT_ACTIONS" order="20">
   <template>
     <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
@@ -363,27 +357,6 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="documentTrashItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
-  <template>
-    <nuxeo-filter document="[[document]]" facet="Folderish">
-      <template>
-        <nuxeo-page-item name="trash" label="browser.trash"></nuxeo-page-item>
-      </template>
-    </nuxeo-filter>
-  </template>
-</nuxeo-slot-content>
-
-<nuxeo-slot-content name="documentTrashPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
-  <template>
-    <nuxeo-filter document="[[document]]" facet="Folderish">
-      <template>
-        <nuxeo-document-trash-content name="trash" document="[[document]]" provider="advanced_document_trash_content">
-        </nuxeo-document-trash-content>
-      </template>
-    </nuxeo-filter>
-  </template>
-</nuxeo-slot-content>
-
 <!-- DRAWER -->
 
 <nuxeo-slot-content name="browseDrawerItem" slot="DRAWER_ITEMS" order="10">
@@ -494,18 +467,6 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="trashMenuButton" slot="DRAWER_ITEMS" order="100">
-  <template>
-    <nuxeo-menu-icon name="trash" icon="nuxeo:delete" label="app.trashSearch"></nuxeo-menu-icon>
-  </template>
-</nuxeo-slot-content>
-<nuxeo-slot-content name="trashMenuPage" slot="DRAWER_PAGES">
-  <template>
-    <nuxeo-search-form name="trash" search-name="trash" auto
-                       provider="default_trash_search" schemas="dublincore,common,uid"></nuxeo-search-form>
-  </template>
-</nuxeo-slot-content>
-
 <!-- RESULT SELECTION ACTIONS -->
 
 <nuxeo-slot-content name="orderSelectionActions" slot="RESULTS_SELECTION_ACTIONS" order="-50">
@@ -544,20 +505,8 @@
 
 <nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]">
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard>
     </nuxeo-delete-documents-button>
-  </template>
-</nuxeo-slot-content>
-
-<nuxeo-slot-content name="hardDeleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
-  <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard></nuxeo-delete-documents-button>
-  </template>
-</nuxeo-slot-content>
-
-<nuxeo-slot-content name="untrashSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="40">
-  <template>
-    <nuxeo-untrash-documents-button documents="[[selectedItems]]"></nuxeo-untrash-documents-button>
   </template>
 </nuxeo-slot-content>
 
