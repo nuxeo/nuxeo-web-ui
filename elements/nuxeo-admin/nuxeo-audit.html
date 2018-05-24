@@ -166,7 +166,7 @@ limitations under the License.
       ],
 
       _formati18n: function(path, key) {
-        return this.i18n(path + key);
+        return key ? this.i18n(path + key) : '';
       },
 
       _formatDocument: function(item) {
@@ -178,10 +178,14 @@ limitations under the License.
       /* Builds the parameters object to be used on the query */
       _buildParams: function() {
         var params = {
-          endDate: this.endDate,
-          startDate: this.startDate,
           principalName: this.principalName
         };
+        if (this.startDate) {
+          params.startDate = this.startDate;
+        }
+        if (this.endDate) {
+          params.endDate = this.endDate;
+        }
         if (this.selectedEventTypes && this.selectedEventTypes.length > 0) {
           params.eventIds = this.selectedEventTypes.join();
         }
