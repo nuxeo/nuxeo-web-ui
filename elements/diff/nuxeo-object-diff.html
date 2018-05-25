@@ -43,8 +43,8 @@ limitations under the License.
     /**
      * Registers a custom diff element.
      *
-     * Expects and element id and a set of rules, were rules follow the format:
-     * `{type: 'type', property: 'propertname', 'default': true}`.
+     * Expects and element id and a set of rules, where rules follow the format:
+     * `{type: 'type', property: 'propertname'}`.
      **/
     Nuxeo.Diff.registerElement = function(id, rules) {
       if (rules.type) {
@@ -63,15 +63,11 @@ limitations under the License.
 
     Nuxeo.Diff.getElement = function(rules) {
       var id = null;
-      if (Nuxeo.Diff.registry.types && rules.type) {
-        id = Nuxeo.Diff.registry.types[rules.type];
-      }
       if (Nuxeo.Diff.registry.properties && rules.property) {
-        if (id) {
-          id = id === Nuxeo.Diff.registry.properties[rules.property] ? id : null;
-        } else {
-          id = Nuxeo.Diff.registry.properties[rules.property]
-        }
+        id = Nuxeo.Diff.registry.properties[rules.property];
+      }
+      if (!id && Nuxeo.Diff.registry.types && rules.type) {
+        id = Nuxeo.Diff.registry.types[rules.type];
       }
       return id || Nuxeo.Diff.registry.default;
     }
@@ -94,7 +90,8 @@ limitations under the License.
       },
 
       _updateContainer: function(type, property) {
-        this._instance = document.createElement(Nuxeo.Diff.getElement({type: type, property: property}));
+        this._instance = document.createElement(Nuxeo.Diff.getElement({type: type,
+          property: [this.schema.prefix || this.schema.name, property].filter(Boolean).join(':')}));
 
         for (var prop in this.properties) {
           this._instance[prop] = this[prop];
