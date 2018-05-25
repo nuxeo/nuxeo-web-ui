@@ -27,24 +27,6 @@ limitations under the License.
         }
       }
 
-      :host([unified]:not([is-array-item])) .value.simple {
-        width: 70vw;
-      }
-
-      :host(:not([unified]):not([is-array-item])) .value.simple {
-        width: 30vw;
-      }
-
-      ul {
-        margin: 0;
-        padding-left: 12px;
-        list-style: none;
-      }
-
-      ul.array.simple {
-        padding-left: 0px;
-      }
-
       span {
         word-break: break-all;
       }
@@ -63,14 +45,6 @@ limitations under the License.
         @apply --nuxeo-object-diff-deleted;
       }
 
-      li ~ li {
-        margin-top: 12px;
-      }
-
-      .array.simple li ~ li {
-        margin-top: 0;
-      }
-
       .addition, .deletion {
         display: inherit;
       }
@@ -79,13 +53,15 @@ limitations under the License.
         margin-left: 8px;
       }
 
-      .addition > :not(span):not(div):not(ul):not(li):not(a) {
+      .addition > :not(span):not(div):not(a) {
+        box-sizing: border-box;
         border-left: 4px solid #B4EFCB;
         padding-left: 2px;
         @apply --nuxeo-complex-item-diff-added;
       }
 
-      .deletion > :not(span):not(div):not(ul):not(li):not(a) {
+      .deletion > :not(span):not(div):not(a) {
+        box-sizing: border-box;
         border-left: 4px solid #E6B1B1;
         padding-left: 2px;
         @apply --nuxeo-complex-item-diff-deleted;
@@ -98,11 +74,13 @@ limitations under the License.
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        max-width: 150px;
         @apply --nuxeo-diff-property;
       }
 
       .value.simple {
         display: inherit;
+        @apply --layout-flex-3;
       }
 
       .array {

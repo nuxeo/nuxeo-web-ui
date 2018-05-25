@@ -68,6 +68,10 @@ limitations under the License.
       isArrayItem: {
         type: Boolean,
         value: false
+      },
+      level: {
+        type: Number,
+        value: 0
       }
     },
 
@@ -121,6 +125,14 @@ limitations under the License.
 
     _showArrayItem: function(arrdelta, showAll) {
       return showAll || arrdelta.modified;
+    },
+
+    _incLevel: function(level) {
+      return level + 1;
+    },
+
+    _computeIndentStyle: function(level) {
+      return 'margin-left: ' + (level * 12) + 'px;'
     },
 
     /* misc helpers */
