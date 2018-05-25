@@ -162,7 +162,7 @@ timestamps {
                 stage('plugin-nuxeo-web-ui') {
                     timeout(60) {
                         plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui', BRANCH, MP_BASE_BRANCH)
-                        if (plugin || el || uiel || webuiitests || plugin) {
+                        if (plugin || el || uiel || webuiitests || webui) {
                             echo 'Need to plugin-nuxeo-web-ui'
                             dir('plugin-nuxeo-web-ui') {
                                 if (!params.SKIP_IT_TESTS) {
