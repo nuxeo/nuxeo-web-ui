@@ -220,7 +220,7 @@ limitations under the License.
         data.stopPropagation();
         if (this.blobList) {
           this.batchExecute('Blob.AttachOnDocument', {
-            document: this.document,
+            document: this.document.uid,
             xpath: this.xpath
           }).then(this._handleBlobListUploaded.bind(this));
         } else {
@@ -238,7 +238,7 @@ limitations under the License.
         if (this.blobList) {
           this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
           this.$.bulkAttach.params = {
-            document: this.document,
+            document: this.document.uid,
             xpath: this.xpath
           };
           this.$.bulkAttach.headers = {'nx_es_sync': 'true'};
