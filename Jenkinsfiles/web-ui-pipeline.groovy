@@ -6,6 +6,7 @@ properties([
             [$class: 'ChoiceParameterDefinition', choices: 'master\n9.10', description: 'The branch to fallback on when $BRANCH is not found.', name: 'BASE_BRANCH'],
             [$class: 'StringParameterDefinition', defaultValue: 'SLAVE', description: 'Slave label to be used.', name: 'SLAVE'],
             [$class: 'BooleanParameterDefinition', defaultValue: false,  description: 'Run npm and bower cache clean?', name: 'CLEAN'],
+            [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?', name: 'SAUCE_LAB'],
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
             [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the functionnal tests be skipped?', name: 'SKIP_IT_TESTS'],
             [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the element\'s tests be skipped?', name: 'SKIP_UNIT_TESTS']
@@ -20,8 +21,12 @@ def runSauceLabTests(repo, sauceCredentialId) {
     if (params.SKIP_UNIT_TESTS) {
         echo 'Tests are skipped'
     } else {
-        withCredentials([usernamePassword(credentialsId: "$sauceCredentialId", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-            sh "./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
+        if (params.SAUCE_LAB) {
+            withCredentials([usernamePassword(credentialsId: "$sauceCredentialId", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
+                sh "./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
+            }
+        } else {
+            sh 'npm run test'
         }
     }
 }
