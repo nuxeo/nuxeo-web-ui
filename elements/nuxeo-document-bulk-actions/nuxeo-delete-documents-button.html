@@ -43,7 +43,7 @@ limitations under the License.
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
-    <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="trashOp" op="Document.Trash" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <paper-icon-button icon="[[_icon]]" id="deleteAllButton">
