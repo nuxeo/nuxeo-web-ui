@@ -226,7 +226,6 @@ limitations under the License.
        params="[[params]]"
        quick-filters="{{quickFilters}}"
        schemas="[[schemas]]"
-       loading="{{loading}}"
        headers="[[headers]]"
        fetch-aggregates
        on-error="_onError">
@@ -543,7 +542,7 @@ limitations under the License.
           if (this.queue) {
             this.$.list.fetch();
           } else if (this.auto) {
-            this.$.provider.fetch();
+            this._fetch(this.$.provider);
           }
         }
       },
@@ -571,7 +570,7 @@ limitations under the License.
           }
           if (this.view) {
             this.view.reset();
-            this.view.fetch();
+            this._fetch(this.view);
           }
         }
       },
@@ -631,7 +630,7 @@ limitations under the License.
         this.dirty = true;
         if (this.view && this.auto && this.visible) {
           this.view.reset();
-          this.view.fetch();
+          this._fetch(this.view);
         }
       },
 
@@ -684,7 +683,7 @@ limitations under the License.
       _search: function() {
         if (this.view) {
           this.view.reset();
-          return this.view.fetch().then(this._navigateToResults.bind(this));
+          return this._fetch(this.view).then(this._navigateToResults.bind(this));
         } else if (this.visible) {
           // if the view is not initialized yet, navigating to the search will trigger a search and display the results
           this.navigateTo('search', this.searchName);
@@ -826,6 +825,19 @@ limitations under the License.
 
       _onError: function(e) {
         this.fire('notify', e.detail.error);
+      },
+
+      /**
+       * Performs a fetch using the element passed as argument and controls the visibility of the loading spinner.
+       */
+      _fetch: function(el) {
+        this.loading = true;
+        return el.fetch().then(function() {
+          this.loading = false;
+        }.bind(this)).catch(function(err) {
+          this.loading = false;
+          throw err;
+        }.bind(this));
       }
 
     });
