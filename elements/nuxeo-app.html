@@ -885,10 +885,8 @@ limitations under the License.
       },
 
       _documentDeleted: function(e) {
-        this._toast(this.i18n('app.document.deleted.' + (e.detail.error ? 'error' : 'success') ));
-
         this._removeFromClipboard([e.detail.doc]);
-
+        this._toast(this.i18n('app.document.deleted.' + (e.detail.error ? 'error' : 'success') ));
         // navigate to parent
         if (!e.detail.error) {
           var enrichers = e.detail.doc.contextParameters;
