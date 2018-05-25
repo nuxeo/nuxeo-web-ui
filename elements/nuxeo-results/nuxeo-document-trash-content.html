@@ -79,7 +79,8 @@ limitations under the License.
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-operation id="opEmptyTrash" op="Document.EmptyTrash" params='{"parent": "[[document.uid]]"}' sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="opEmptyTrash" op="Document.EmptyTrash" params='{"parent": "[[document.uid]]"}' headers='{"nx_es_sync": "true"}'>
+    </nuxeo-operation>
 
     <nuxeo-page-provider id="nxProvider"
                          provider="[[provider]]"

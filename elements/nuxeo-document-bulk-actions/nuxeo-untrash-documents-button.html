@@ -41,7 +41,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="operation" op="Document.Untrash" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <paper-icon-button icon="nuxeo:restore-deleted" id="untrashAllButton"></paper-icon-button>
