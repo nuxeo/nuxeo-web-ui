@@ -23,54 +23,55 @@ limitations under the License.
 <dom-module id="nuxeo-date-diff">
   <template>
     <style include="nuxeo-diff-styles">
+      :host {
+        @apply --layout-horizontal;
+      }
     </style>
-    <div class="horizontal layout">
-      <template is="dom-if" if="[[displayLabel]]">
-        <div class="label">
-          <span style$="[[_computeIndentStyle(level)]]">[[_computeLabel(property, label)]]</span>
-        </div>
+    <template is="dom-if" if="[[displayLabel]]">
+      <div class="label">
+        <span style$="[[_computeIndentStyle(level, isArrayItem)]]">[[_computeLabel(property, label)]]</span>
+      </div>
+    </template>
+    <div class="value simple">
+      <!-- no changes -->
+      <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+        <nuxeo-date datetime="[[originalValue]]"></nuxeo-date>
       </template>
-      <div class="value simple">
-        <!-- no changes -->
-        <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
-          <nuxeo-date datetime="[[originalValue]]"></nuxeo-date>
+      <!-- additions -->
+      <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
+        <template is="dom-if" if="[[_getAdded(delta)]]">
+          <div class="addition">
+            <span class="added"><nuxeo-date datetime="[[newValue]]"></nuxeo-date></span>
+          </div>
         </template>
-        <!-- additions -->
-        <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
-          <template is="dom-if" if="[[_getAdded(delta)]]">
-            <div class="addition">
-              <span class="added"><nuxeo-date datetime="[[newValue]]"></nuxeo-date></span>
-            </div>
-          </template>
-        </template>
-        <!-- modifications -->
-        <template is="dom-if" if="[[_modified(delta)]]">
-          <template is="dom-if" if="[[!hideDeletions]]">
-            <!-- old value -->
-            <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
-              <div class="deletion">
-                <span class="deleted"><nuxeo-date datetime="[[originalValue]]"></nuxeo-date></span>
-              </div>
-            </template>
-          </template>
-          <template is="dom-if" if="[[!hideAdditions]]">
-            <!-- new value -->
-            <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
-              <div class="addition">
-                <span class="added"><nuxeo-date datetime="[[newValue]]"></nuxeo-date></span>
-              </div>
-            </template>
-          </template>
-        </template>
-        <!-- deletions -->
-        <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
-          <template is="dom-if" if="[[_getDeleted(delta)]]">
+      </template>
+      <!-- modifications -->
+      <template is="dom-if" if="[[_modified(delta)]]">
+        <template is="dom-if" if="[[!hideDeletions]]">
+          <!-- old value -->
+          <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
             <div class="deletion">
               <span class="deleted"><nuxeo-date datetime="[[originalValue]]"></nuxeo-date></span>
             </div>
           </template>
         </template>
-      </div>
+        <template is="dom-if" if="[[!hideAdditions]]">
+          <!-- new value -->
+          <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
+            <div class="addition">
+              <span class="added"><nuxeo-date datetime="[[newValue]]"></nuxeo-date></span>
+            </div>
+          </template>
+        </template>
+      </template>
+      <!-- deletions -->
+      <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
+        <template is="dom-if" if="[[_getDeleted(delta)]]">
+          <div class="deletion">
+            <span class="deleted"><nuxeo-date datetime="[[originalValue]]"></nuxeo-date></span>
+          </div>
+        </template>
+      </template>
     </div>
   </template>
 

@@ -27,7 +27,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="nuxeo-object-diff.html">
 
-<!-- we can just store it locally or install it via npm -->
 <script type='text/javascript' src="../../node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js"></script>
 
 <!--
@@ -45,14 +44,6 @@ limitations under the License.
         };
       }
 
-      :host(:not([unified-view])) .diffPickers {
-        @apply --layout-horizontal;
-      }
-
-      :host(:not([unified-view])) .diffPicker {
-        @apply --layout-flex; /* TODO: not working */
-      }
-
       nuxeo-object-diff[unified] ~ nuxeo-object-diff[unified],
       .side-by-side ~ .side-by-side {
         margin-top: 12px;
@@ -63,17 +54,13 @@ limitations under the License.
         @apply --layout-flex;
       }
 
-      .control ~ .control {
-        margin-left: 8px;
-      }
-
       #controls {
         @apply --layout-horizontal;
         @apply --layout-end-justified;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
       }
 
-      #diffContainer {
+      #diffContainer, #diffPane {
         @apply --layout-vertical;
       }
 
@@ -81,17 +68,8 @@ limitations under the License.
         @apply --layout-horizontal;
       }
 
-      .diffPickers, #diffPane {
-        @apply --layout-vertical;
-      }
-
-      .diffPickers {
-        @apply --layout-flex;
-      }
-
-      .diffPicker {
-        @apply --paper-card;
-        padding: 4px 4px 4px 8px; /* TODO: styling needed */
+      .control ~ .control {
+        margin-left: 8px;
       }
 
       .switchSides {
@@ -114,6 +92,50 @@ limitations under the License.
       .side-by-side nuxeo-object-diff:not([unified]):not(:first-child) {
         margin-left: 16px;
       }
+
+      .diffPickers {
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+        overflow: hidden;
+      }
+
+      .diffPicker {
+        @apply --paper-card;
+        @apply --layout-flex;
+        overflow: hidden;
+        padding: 4px 4px 4px 8px;
+      }
+
+      .diffPickers > .switchSides {
+        display: flex;
+      }
+
+      #diffPickerPane > .switchSides {
+        display: none;
+      }
+
+      @media (max-width: 720px) {
+        .diffPickers {
+          @apply --layout-vertical;
+          @apply --layout-flex;
+        }
+
+        .diffPicker {
+          @apply --layout-flex-none;
+        }
+
+        .diffPickers > .switchSides {
+          display: none;
+        }
+
+        #diffPickerPane > .switchSides {
+          display: flex;
+        }
+
+        .switchSides paper-icon-button {
+          transform: rotate(90deg);
+        }
+      }
     </style>
 
     <nuxeo-resource id="schema"></nuxeo-resource>
@@ -122,7 +144,7 @@ limitations under the License.
     <div id="diffContainer">
       <div id="controls">
         <paper-checkbox class="control" checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
-        <template is="dom-if" if="[[_showUnifiedViewCheckbox]]">
+        <template is="dom-if" if="[[_showUnifiedViewControl]]">
           <paper-toggle-button class="control" checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-toggle-button>
         </template>
       </div>
@@ -135,8 +157,8 @@ limitations under the License.
               </template>
             </nuxeo-select>
           </div>
-          <div class="switchSides" hidden$="[[unifiedView]]">
-            <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" ></paper-icon-button>
+          <div class="switchSides">
+            <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" title$="[[i18n('diff.controls.switchSides.tooltip')]]"></paper-icon-button>
           </div>
           <div class="diffPicker">
             <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
@@ -146,8 +168,8 @@ limitations under the License.
             </nuxeo-select>
           </div>
         </div>
-        <div class="switchSides" hidden$="[[!unifiedView]]">
-          <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" ></paper-icon-button>
+        <div class="switchSides">
+          <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" title$="[[i18n('diff.controls.switchSides.tooltip')]]"></paper-icon-button>
         </div>
       </div>
       <div id="diffPane">
@@ -204,22 +226,31 @@ limitations under the License.
         is: 'nuxeo-diff',
         behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
         properties: {
+          /**
+           * The list of ids of the documents to compare.
+           */
           docIds: {
             type: Array,
             value: []
           },
+          /**
+           * The list of documents in `docIds`, fetched using the `enrichers`, `schemas`and `headers` specified in the
+           * element.
+           */
           documents: {
             type: Array,
             value: []
           },
-          visible: {
-            type: Boolean,
-            value: false
-          },
+          /**
+           * If `true`, the element will display all properties including those without any differences.
+           */
           showAll: {
             type: Boolean,
             value: false,
           },
+          /**
+           *  If `true`, the element will display content in a single column.
+           */
           unifiedView: {
             type: Boolean,
             value: false,
@@ -252,7 +283,7 @@ limitations under the License.
             value: false,
             observer: '_resize'
           },
-          _showUnifiedViewCheckbox: Boolean,
+          _showUnifiedViewControl: Boolean,
           _leftUid: {
             type: String,
             observer: '_leftUidChanged'
@@ -290,10 +321,10 @@ limitations under the License.
         _resize: function() {
           if (document.body.offsetWidth <= 720) {
             this._setUnifiedView(true);
-            this.set('_showUnifiedViewCheckbox', false);
+            this.set('_showUnifiedViewControl', false);
           } else {
             this._setUnifiedView(this._unifiedView);
-            this.set('_showUnifiedViewCheckbox', true);
+            this.set('_showUnifiedViewControl', true);
           }
         },
 
@@ -361,7 +392,7 @@ limitations under the License.
         },
 
         _docIdsChanged: function() {
-          if (this.visible && this.docIds && this.docIds.length > 1) {
+          if (this.docIds && this.docIds.length > 1) {
             var calls = [];
             this.documents = [];
             this.docIds.forEach(function(uid) {
@@ -523,7 +554,6 @@ limitations under the License.
                 subSchema = schema.fields[this._getPropertyName(schema, key)];
                 type = subSchema.type || subSchema;
               }
-              // TODO: pluggability
               switch (type) {
                 case 'string':
                 case 'date':

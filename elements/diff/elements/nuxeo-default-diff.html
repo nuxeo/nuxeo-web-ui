@@ -32,14 +32,13 @@ limitations under the License.
       }
 
       .default.complex > .label {
-        @apply --layout-flex-none;
         margin-bottom: 12px;
       }
     </style>
     <div class$="default [[_computeDefaultClass(delta, originalValue)]]">
       <template is="dom-if" if="[[displayLabel]]">
         <div class="label">
-          <span style$="[[_computeIndentStyle(level)]]">[[_computeLabel(property, label)]]</span>
+          <span style$="[[_computeIndentStyle(level, isArrayItem)]]">[[_computeLabel(property, label)]]</span>
         </div>
       </template>
       <div class$="value [[_computeDefaultClass(delta, originalValue)]]">
@@ -57,10 +56,12 @@ limitations under the License.
                   <nuxeo-object-diff original-value="[[value]]"
                                      schema="[[_getPropertySchema(schema, property)]]"
                                      type="[[_arrayItemType(type)]]"
-                                     level="[[_incLevel(level)]]"
+                                     level="[[level]]"
                                      unified="[[unified]]"
                                      show-all="[[showAll]]"
-                                     is-array-item></nuxeo-object-diff>
+                                     label="[[index]]:"
+                                     is-array-item
+                                     display-label></nuxeo-object-diff>
                 </div>
               </template>
             </div>
@@ -181,7 +182,7 @@ limitations under the License.
                                      unified="[[unified]]"
                                      schema="[[_getPropertySchema(schema, property)]]"
                                      type="[[_arrayItemType(type)]]"
-                                     level="[[_incLevel(level)]]"
+                                     level="[[level]]"
                                      show-all="[[showAll]]"
                                      hide-deletions="[[hideDeletions]]"
                                      hide-additions="[[hideAdditions]]"

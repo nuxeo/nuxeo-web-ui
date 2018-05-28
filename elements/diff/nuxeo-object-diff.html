@@ -41,11 +41,11 @@ limitations under the License.
     };
 
     /**
-     * Registers a custom diff element.
+     * Registers a custom diff element for a set of rules to condition when the element is to be displayed.
      *
-     * Expects and element id and a set of rules, where rules follow the format:
-     * `{type: 'type', property: 'propertname'}`.
-     **/
+     * @param {string} id - The element id.
+     * @param {Object} rules - A set of rules, following the format: `{type: 'type', property: 'propertname'}`.
+     */
     Nuxeo.Diff.registerElement = function(id, rules) {
       if (rules.type) {
         if (!Nuxeo.Diff.registry.types) {
@@ -61,6 +61,9 @@ limitations under the License.
       }
     },
 
+    /**
+     * Retrieves a custom element for a given set of rules, or the default element if none is found.
+     */
     Nuxeo.Diff.getElement = function(rules) {
       var id = null;
       if (Nuxeo.Diff.registry.properties && rules.property) {
@@ -79,6 +82,9 @@ limitations under the License.
 
       created: function() {
         for (var prop in this.properties) {
+          // XXX: use a method observer per property to keep databinding between the object diff and it's child
+          // Note: we're not using a property observer here because we need to pass not only the value but also the
+          // property name, in order to be able to set it on the child.
           this._createMethodObserver('_forwardProp("' + prop + '", ' + prop + ')');
         }
       },
@@ -90,8 +96,10 @@ limitations under the License.
       },
 
       _updateContainer: function(type, property) {
+        // retrieve a custom element for the given type and property combination,
+        // or the default element if none is found.
         this._instance = document.createElement(Nuxeo.Diff.getElement({type: type,
-          property: [this.schema.prefix || this.schema.name, property].filter(Boolean).join(':')}));
+          property: [this.schema && (this.schema.prefix || this.schema.name), property].filter(Boolean).join(':')}));
 
         for (var prop in this.properties) {
           this._instance[prop] = this[prop];

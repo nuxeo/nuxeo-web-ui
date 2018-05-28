@@ -296,6 +296,7 @@
   "displayModeButton.display.list": "Switch to List view",
   "displayModeButton.display.table": "Switch to Table View",
   "diff.controls.showAll": "View All Data",
+  "diff.controls.switchSides.tooltip": "Switch Sides",
   "diff.controls.unifiedView": "Unified View",
   "diffPage.noDocuments": "No documents were selected for comparison.",
   "documentAttachments.empty": "There are no attachments",
