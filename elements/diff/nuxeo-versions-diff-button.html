@@ -1,0 +1,92 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+
+<!--
+`nuxeo-versions-diff-button`
+@group Nuxeo UI
+@element nuxeo-versions-diff-button
+-->
+<dom-module id="nuxeo-versions-diff-button">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+    </style>
+
+    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]">
+    </nuxeo-operation>
+
+    <paper-icon-button noink id="diff" icon="nuxeo:compare" on-tap="_doDiff"></paper-icon-button>
+    <paper-tooltip for="diff" position="[[tooltipPosition]]">[[i18n('versionsDiffButton.tooltip')]]</paper-tooltip>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-versions-diff-button',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        document: {
+          type: Object
+        },
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
+        }
+      },
+
+      _isAvailable: function() {
+        return this.selectedDocuments && this.selectedDocuments.length > 1;
+      },
+
+      _doDiff: function() {
+        this.$.opGetVersions.execute().then(function(result) {
+          var versions = result.entries.reverse();
+          var currentIndex = versions.findIndex(function(doc) {
+            return this._getMajor(doc) === this._getMajor(this.document) &&
+                   this._getMinor(doc) === this._getMinor(this.document);
+          }.bind(this));
+          if (currentIndex > 0) {
+            var current = versions[currentIndex];
+            versions.splice(currentIndex, 1);
+            versions.unshift(current);
+          }
+          this.fire('nuxeo-diff-documents', {
+            documents: versions
+          });
+        }.bind(this));
+      },
+
+      _getMajor: function(document) {
+        return document.properties['uid:major_version'];
+      },
+
+      _getMinor: function(document) {
+        return document.properties['uid:minor_version'];
+      }
+
+    });
+  </script>
+
+</dom-module>

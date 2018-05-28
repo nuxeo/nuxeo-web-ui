@@ -20,7 +20,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 
 <!--
 `nuxeo-document-diff-button`
@@ -45,7 +44,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-document-diff-button',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         selectedDocuments: {
           type: Array,

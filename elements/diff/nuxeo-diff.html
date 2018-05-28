@@ -131,7 +131,7 @@ limitations under the License.
           <div class="diffPicker">
             <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
               <template is="dom-repeat" items="[[documents]]">
-                <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+                <paper-item uid="[[item.uid]]">[[_title(item, _hasVersions)]]</paper-item>
               </template>
             </nuxeo-select>
           </div>
@@ -141,7 +141,7 @@ limitations under the License.
           <div class="diffPicker">
             <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
               <template is="dom-repeat" items="[[documents]]">
-                <paper-item uid="[[item.uid]]">[[item.title]]</paper-item>
+                <paper-item uid="[[item.uid]]">[[_title(item, _hasVersions)]]</paper-item>
               </template>
             </nuxeo-select>
           </div>
@@ -264,7 +264,11 @@ limitations under the License.
           _schemas: Array,
           _left: Object,
           _right: Object,
-          _delta: Object
+          _delta: Object,
+          _hasVersions: {
+            type: Boolean,
+            value: false
+          }
         },
 
         observers: [
@@ -323,6 +327,12 @@ limitations under the License.
           return key !== translation ? translation : this._getPropertyName(schema, property);
         },
 
+        _title: function(document) {
+          return document && (document.title + (this._hasVersions ?
+            (' (v' + document.properties['uid:major_version'] + '.' + document.properties['uid:minor_version'] + ')')
+            : ''));
+        },
+
         /* DOM-repeat filters and sort functions */
 
         _filterUid: function(uid) {
@@ -363,6 +373,9 @@ limitations under the License.
               }.bind(this));
             }.bind(this));
             this._sequencer(calls).then(function() {
+              this.set('_hasVersions', this.documents.some(function(doc) {
+                return doc.isVersion;
+              }));
               this.set('_rightUid', null);
               this.set('_leftUid', this.documents[0].uid);
               this.set('_rightUid', this.documents[1].uid);
@@ -439,8 +452,6 @@ limitations under the License.
           }
           return property.replace(new RegExp('^' + (schema.prefix ? schema.prefix : schema.name) + ':'), '');
         },
-
-        /* comparison */
 
         _diff: function() {
           if (!this._leftUid || !this._rightUid || this._leftUid === this._rightUid) {

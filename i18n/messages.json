@@ -857,6 +857,7 @@
   "versions.unversioned": "Unversioned",
   "versions.unversionedChanges": "Unversioned Changes",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.tooltip": "Compare Versions",
   "videoViewLayout.conversions": "Conversions",
   "videoViewLayout.delete.confirm.message": "Do you really want to delete this video?",
   "videoViewLayout.delete.tootltip": "Delete video",
