@@ -28,47 +28,90 @@ limitations under the License.
    */
   Nuxeo.DiffBehavior = [Nuxeo.I18nBehavior, {
     properties: {
+      /**
+       * The property being represented
+       */
       property: {
         type: String,
         reflectToAttribute: true
       },
+      /**
+       * The property's type.
+       */
       type: {
         type: String,
         value: 'string',
         reflectToAttribute: true
       },
+      /**
+       * If `true`, the element is being used in single column mode.
+       */
       unified: {
         type: Boolean,
         value: false,
         reflectToAttribute: true
       },
+      /**
+       * If `true`, deletions will not be displayed.
+       */
       hideDeletions: {
         type: Boolean,
         value: false
       },
+      /**
+       * If `true`, additions will not be displayed.
+       */
       hideAdditions: {
         type: Boolean,
         value: false
       },
+      /**
+       * The label to be displayed.
+       */
       label: {
         type: String
       },
+      /**
+       * The schema to which the property belongs to.
+       */
       schema: Object,
+      /**
+       * The difference delta.
+       */
       delta: Object,
+      /**
+       * The original value.
+       */
       originalValue: Object,
+      /**
+       * The new value.
+       */
       newValue: Object,
+      /**
+       * If `true`, the element should display all information, including that not covered by `delta`.
+       */
       showAll: {
         type: Boolean,
         value: false
       },
+      /**
+       * If `true`, the `label` will be displayed.
+       */
       displayLabel: {
         type: Boolean,
         value: false
       },
+      /**
+       * If `true`, this element is part of an array. This is mostly used to condition styling.
+       */
       isArrayItem: {
         type: Boolean,
-        value: false
+        value: false,
+        reflectToAttribute: true
       },
+      /**
+       * The depth level, used to indent labels. Please override `_computeIndentStyle` to change indentation styling.
+       */
       level: {
         type: Number,
         value: 0
@@ -79,7 +122,7 @@ limitations under the License.
 
     _computeType: function(property, schema, delta, originalValue) {
       var type = this.type;
-      if (property && schema && schema.fields) {
+      if (property && schema && schema.fields && schema.fields[property]) {
         type = schema.fields[property];
         type = type.type || type;
       }
@@ -131,15 +174,14 @@ limitations under the License.
       return level + 1;
     },
 
-    _computeIndentStyle: function(level) {
-      return 'margin-left: ' + (level * 12) + 'px;'
+    /**
+     * Computes the indentatio style for labels.
+     */
+    _computeIndentStyle: function(level, isArrayItem) {
+      return 'margin-left: ' + (isArrayItem ? 0 : level * 12) + 'px;'
     },
 
     /* misc helpers */
-
-    _isOfType: function(type, target) {
-      return type === target;
-    },
 
     _isArray: function(value) {
       return Array.isArray(value);

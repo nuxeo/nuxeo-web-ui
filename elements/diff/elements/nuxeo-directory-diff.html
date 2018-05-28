@@ -23,67 +23,68 @@ limitations under the License.
 <dom-module id="nuxeo-directory-diff">
   <template>
     <style include="nuxeo-diff-styles">
+      :host {
+        @apply --layout-horizontal;
+      }
     </style>
-    <div class="horizontal layout">
-      <template is="dom-if" if="[[displayLabel]]">
-        <div class="label">
-          <span style$="[[_computeIndentStyle(level)]]">[[_computeLabel(property, label)]]</span>
-        </div>
+    <template is="dom-if" if="[[displayLabel]]">
+      <div class="label">
+        <span style$="[[_computeIndentStyle(level, isArrayItem)]]">[[_computeLabel(property, label)]]</span>
+      </div>
+    </template>
+    <div class="value simple">
+      <!-- no changes -->
+      <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+        <span>[[formatDirectory(originalValue)]]</span>
       </template>
-      <div class="value simple">
-        <!-- no changes -->
-        <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
-          <span>[[formatDirectory(originalValue)]]</span>
+      <!-- additions -->
+      <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
+        <template is="dom-if" if="[[_getAdded(delta)]]">
+          <div class="addition">
+            <span class="added">[[formatDirectory(newValue)]]</span>
+          </div>
         </template>
-        <!-- additions -->
-        <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
-          <template is="dom-if" if="[[_getAdded(delta)]]">
-            <div class="addition">
-              <span class="added">[[formatDirectory(newValue)]]</span>
-            </div>
-          </template>
-        </template>
-        <!-- modifications -->
-        <template is="dom-if" if="[[_modified(delta)]]">
-          <template is="dom-if" if="[[!hideDeletions]]">
-            <!-- old value -->
-            <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
-              <div class="deletion">
-                <span class="deleted">[[formatDirectory(originalValue)]]</span>
-              </div>
-            </template>
-          </template>
-          <template is="dom-if" if="[[!hideAdditions]]">
-            <!-- new value -->
-            <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
-              <div class="addition">
-                <span class="added">[[formatDirectory(newValue)]]</span>
-              </div>
-            </template>
-          </template>
-        </template>
-        <!-- deletions -->
-        <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
-          <template is="dom-if" if="[[_getDeleted(delta)]]">
+      </template>
+      <!-- modifications -->
+      <template is="dom-if" if="[[_modified(delta)]]">
+        <template is="dom-if" if="[[!hideDeletions]]">
+          <!-- old value -->
+          <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
             <div class="deletion">
               <span class="deleted">[[formatDirectory(originalValue)]]</span>
             </div>
           </template>
         </template>
-        <!-- object with inner changes -->
-        <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
-          <template is="dom-if" if="[[!hideDeletions]]">
-            <div class="deletion">
-              <span class="deleted">[[formatDirectory(delta.id.0)]]</span>
-            </div>
-          </template>
-          <template is="dom-if" if="[[!hideAdditions]]">
+        <template is="dom-if" if="[[!hideAdditions]]">
+          <!-- new value -->
+          <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
             <div class="addition">
-              <span class="added">[[formatDirectory(delta.id.1)]]</span>
+              <span class="added">[[formatDirectory(newValue)]]</span>
             </div>
           </template>
         </template>
-      </div>
+      </template>
+      <!-- deletions -->
+      <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
+        <template is="dom-if" if="[[_getDeleted(delta)]]">
+          <div class="deletion">
+            <span class="deleted">[[formatDirectory(originalValue)]]</span>
+          </div>
+        </template>
+      </template>
+      <!-- object with inner changes -->
+      <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+        <template is="dom-if" if="[[!hideDeletions]]">
+          <div class="deletion">
+            <span class="deleted">[[formatDirectory(delta.id.0)]]</span>
+          </div>
+        </template>
+        <template is="dom-if" if="[[!hideAdditions]]">
+          <div class="addition">
+            <span class="added">[[formatDirectory(delta.id.1)]]</span>
+          </div>
+        </template>
+      </template>
     </div>
   </template>
 

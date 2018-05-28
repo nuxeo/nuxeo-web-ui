@@ -16,15 +16,31 @@ limitations under the License.
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<!--
+  Styles module to be used by elements extending `Nuxeo.DiffBehavior`, providing styles to represent arrays and both
+  simple and complex objects.
+
+  Custom property | Description | Default
+  ----------------|-------------|----------
+  `--nuxeo-diff-label-color` | Text color for the label | #D4D4D9
+  `--nuxeo-diff-added-color` | Background color of added values | #B4EFCB
+  `--nuxeo-diff-deleted-color` | Background color of deleted values | #E6B1B1
+  `--nuxeo-diff-label` | Mixin applied to label | {}
+  `--nuxeo-string-diff-added` | Mixin applied to the additions of strings | {}
+  `--nuxeo-string-diff-deleted` | Mixin applied to the deletions of strings | {}
+  `--nuxeo-complex-diff-added` | Mixin applied to the additions of complex objects | {}
+  `--nuxeo-complex-diff-deleted` | Mixin applied to the deletions of complex objects | {}
+-->
 <dom-module id="nuxeo-diff-styles">
   <template>
     <style include="iron-flex iron-flex-alignment nuxeo-styles">
       :host {
         display: block;
-        --nuxeo-tag: {
-          display: block;
-          margin-bottom: 0;
-        }
+      }
+
+      :host([is-array-item]) .label {
+        margin-right: 8px;
+        @apply --layout-flex-none;
       }
 
       span {
@@ -33,16 +49,16 @@ limitations under the License.
 
       span.added {
         display: inline;
-        background-color: #B4EFCB;
         word-break: break-all;
-        @apply --nuxeo-object-diff-added;
+        background-color: var(--nuxeo-diff-added-color, #B4EFCB);
+        @apply --nuxeo-string-diff-added;
       }
 
       span.deleted {
         display: inline;
-        background-color: #E6B1B1;
         word-break: break-all;
-        @apply --nuxeo-object-diff-deleted;
+        background-color: var(--nuxeo-diff-deleted-color, #E6B1B1);
+        @apply --nuxeo-string-diff-deleted;
       }
 
       .addition, .deletion {
@@ -54,38 +70,36 @@ limitations under the License.
       }
 
       .addition > :not(span):not(div):not(a) {
-        box-sizing: border-box;
-        border-left: 4px solid #B4EFCB;
+        border-left: 4px solid var(--nuxeo-diff-added-color, #B4EFCB);
         padding-left: 2px;
-        @apply --nuxeo-complex-item-diff-added;
+        @apply --nuxeo-complex-diff-added;
       }
 
       .deletion > :not(span):not(div):not(a) {
-        box-sizing: border-box;
-        border-left: 4px solid #E6B1B1;
+        border-left: 4px solid var(--nuxeo-diff-deleted-color, #E6B1B1);
         padding-left: 2px;
-        @apply --nuxeo-complex-item-diff-deleted;
+        @apply --nuxeo-complex-diff-deleted;
       }
 
       .label {
         @apply --layout-flex;
-        color: #D4D4D9;
-        /* word-break: break-all; */
+        max-width: 150px;
+        color: var(--nuxeo-diff-label-color, #D4D4D9);
+        @apply --nuxeo-diff-label;
+      }
+
+      .simple .label {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        max-width: 150px;
-        @apply --nuxeo-diff-property;
       }
 
       .value.simple {
         display: inherit;
-        @apply --layout-flex-3;
       }
 
-      .array {
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
+      :host(:not([is-array-item])) .value.simple {
+        @apply --layout-flex-2;
       }
 
       .text.diff {
@@ -99,6 +113,7 @@ limitations under the License.
 
       .array.simple {
         @apply --layout-horizontal;
+        @apply --layout-flex;
         @apply --layout-wrap;
       }
 
@@ -119,16 +134,11 @@ limitations under the License.
         @apply --layout-horizontal;
       }
 
-      .item > .label {
-        margin-right: 8px;
-        @apply --layout-flex-none;
-      }
-
       .array.complex .item ~ .item {
         margin-top: 12px;
       }
 
-      .array.complex .item nuxeo-object-diff {
+      .array .item nuxeo-object-diff {
         @apply --layout-flex;
       }
     </style>
