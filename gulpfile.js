@@ -132,8 +132,8 @@ gulp.task('move-elements', function() {
 
   // copy diff elements
   var diff = gulp.src(
-    dist('elements/diff'))
-    .pipe(gulp.dest(dist()));
+    dist('elements/diff/**'))
+    .pipe(gulp.dest(dist('diff')));
 
   var layouts = gulp.src([
     dist('elements/document/**'), '!' + dist('elements/document/*.html'),
