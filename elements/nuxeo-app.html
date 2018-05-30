@@ -604,7 +604,18 @@ limitations under the License.
 
       showDiff: function(id1, id2) {
         this.show('diff');
-        this.$.diff.docIds = [id1, id2];
+        var params = [id1, id2];
+        // let's keep current context only if it includes the ids already in the params
+        if (this.$.diff.docIds &&
+            params.every(function(el) { return this.$.diff.docIds.indexOf(el) > -1; }.bind(this))) {
+          var otherIds = this.$.diff.docIds.find(function(id) {
+            return params.indexOf(id) === -1;
+          });
+          this.$.diff.docIds = null;
+          this.$.diff.docIds = params.concat(otherIds);
+        } else {
+          this.$.diff.docIds = [id1, id2];
+        }
       },
 
       _diffDocuments: function(e) {

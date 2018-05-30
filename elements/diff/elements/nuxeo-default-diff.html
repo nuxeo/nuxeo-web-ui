@@ -43,7 +43,7 @@ limitations under the License.
       </template>
       <div class$="value [[_computeDefaultClass(delta, originalValue)]]">
         <!-- no changes -->
-        <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+        <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
           <!-- simple value-->
           <template is="dom-if" if="[[_isNotObjectNorArray(originalValue)]]">
             <span>[[originalValue]]</span>
@@ -82,13 +82,13 @@ limitations under the License.
           </template>
         </template>
         <!-- additions -->
-        <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
+        <template is="dom-if" if="[[_hasAddition(delta, hideAdditions)]]">
           <div class="addition">
             <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
-              <span class="added">[[_getAdded(delta)]]</span>
+              <span class="added">[[_getAddition(delta)]]</span>
             </template>
             <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
-              <nuxeo-object-diff original-value="[[_getAdded(delta)]]"
+              <nuxeo-object-diff original-value="[[_getAddition(delta)]]"
                                  level="[[level]]"
                                  type="[[type]]"
                                  unified="[[unified]]"
@@ -98,15 +98,15 @@ limitations under the License.
           </div>
         </template>
         <!-- modifications -->
-        <template is="dom-if" if="[[_modified(delta)]]">
+        <template is="dom-if" if="[[_hasModification(delta)]]">
           <template is="dom-if" if="[[!hideDeletions]]">
             <!-- old value -->
             <div class="deletion">
               <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
-                <span class="deleted">[[_getModifiedOldValue(delta)]]</span>
+                <span class="deleted">[[_getModificationOldValue(delta)]]</span>
               </template>
               <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
-                <nuxeo-object-diff original-value="[[_getModifiedOldValue(delta)]]"
+                <nuxeo-object-diff original-value="[[_getModificationOldValue(delta)]]"
                                    level="[[level]]"
                                    type="[[type]]"
                                    unified="[[unified]]"
@@ -119,10 +119,10 @@ limitations under the License.
             <!-- new value -->
             <div class="addition">
               <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
-                <span class="added">[[_getModifiedNewValue(delta)]]</span>
+                <span class="added">[[_getModificationNewValue(delta)]]</span>
               </template>
               <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
-                <nuxeo-object-diff original-value="[[_getModifiedNewValue(delta)]]"
+                <nuxeo-object-diff original-value="[[_getModificationNewValue(delta)]]"
                                    level="[[level]]"
                                    type="[[type]]"
                                    unified="[[unified]]"
@@ -133,13 +133,13 @@ limitations under the License.
           </template>
         </template>
         <!-- deletions -->
-        <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
+        <template is="dom-if" if="[[_hasDeletion(delta, hideDeletions)]]">
           <div class="deletion">
             <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
-              <span class="deleted">[[_getDeleted(delta)]]</span>
+              <span class="deleted">[[_getDeletion(delta)]]</span>
             </template>
             <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
-              <nuxeo-object-diff original-value="[[_getDeleted(delta)]]"
+              <nuxeo-object-diff original-value="[[_getDeletion(delta)]]"
                                  level="[[level]]"
                                  type="[[type]]"
                                  unified="[[unified]]"
@@ -149,11 +149,11 @@ limitations under the License.
           </div>
         </template>
         <!-- text diff -->
-        <template is="dom-if" if="[[_textDiff(delta)]]">
+        <template is="dom-if" if="[[_hasTextDiff(delta)]]">
           <div class="text diff" inner-H-T-M-L="[[_getTextDiff(delta, originalValue, hideAdditions, hideDeletions)]]"></div>
         </template>
         <!-- object with inner changes -->
-        <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+        <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
           <div class="object diff">
             <template is="dom-repeat" items="[[_getAllKeys(delta, originalValue, showAll)]]" as="subproperty">
               <nuxeo-object-diff property="[[subproperty]]"
@@ -171,7 +171,7 @@ limitations under the License.
           </div>
         </template>
         <!-- arrays with inner changes -->
-        <template is="dom-if" if="[[_arrayInnerChanges(delta)]]">
+        <template is="dom-if" if="[[_hasArrayInnerChanges(delta)]]">
           <div class$="array diff [[_computeArrayClass(delta, originalValue, newValue, hideAdditions, hideDeletions)]]">
             <template is="dom-repeat" items="[[_getArrayDelta(delta, originalValue, newValue, hideAdditions, hideDeletions)]]" as="arrdelta">
               <template is="dom-if" if="[[_showArrayItem(arrdelta, showAll)]]">

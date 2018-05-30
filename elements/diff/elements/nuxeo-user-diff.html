@@ -42,46 +42,46 @@ limitations under the License.
     </template>
     <div class="value simple">
       <!-- no changes -->
-      <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+      <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
         <nuxeo-user-tag user="[[originalValue.id]]"></nuxeo-user-tag>
       </template>
       <!-- additions -->
-      <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
-        <template is="dom-if" if="[[_getAdded(delta)]]">
+      <template is="dom-if" if="[[_hasAddition(delta, hideAdditions)]]">
+        <template is="dom-if" if="[[_getAddition(delta)]]">
           <div class="addition">
-            <nuxeo-user-tag user="[[_getAdded(delta)]]"></nuxeo-user-tag>
+            <nuxeo-user-tag user="[[_getAddition(delta)]]"></nuxeo-user-tag>
           </div>
         </template>
       </template>
       <!-- modifications -->
-      <template is="dom-if" if="[[_modified(delta)]]">
+      <template is="dom-if" if="[[_hasModification(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <!-- old value -->
-          <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
+          <template is="dom-if" if="[[_getModificationOldValue(delta)]]">
             <div class="deletion">
-              <nuxeo-user-tag user="[[_getModifiedOldValue(delta)]]"></nuxeo-user-tag>
+              <nuxeo-user-tag user="[[_getModificationOldValue(delta)]]"></nuxeo-user-tag>
             </div>
           </template>
         </template>
         <template is="dom-if" if="[[!hideAdditions]]">
           <!-- new value -->
-          <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
+          <template is="dom-if" if="[[_getModificationNewValue(delta)]]">
             <div class="addition">
-              <nuxeo-user-tag user="[[_getModifiedNewValue(delta)]]"></nuxeo-user-tag>
+              <nuxeo-user-tag user="[[_getModificationNewValue(delta)]]"></nuxeo-user-tag>
             </div>
           </template>
         </template>
       </template>
       <!-- deletions -->
-      <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
-        <template is="dom-if" if="[[_getDeleted(delta)]]">
+      <template is="dom-if" if="[[_hasDeletion(delta, hideDeletions)]]">
+        <template is="dom-if" if="[[_getDeletion(delta)]]">
           <div class="deletion">
-            <nuxeo-user-tag user="[[_getDeleted(delta)]]"></nuxeo-user-tag>
+            <nuxeo-user-tag user="[[_getDeletion(delta)]]"></nuxeo-user-tag>
           </div>
         </template>
       </template>
       <!-- object with inner changes -->
-      <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+      <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <div class="deletion">
             <nuxeo-user-tag user="[[delta.id.0]]"></nuxeo-user-tag>

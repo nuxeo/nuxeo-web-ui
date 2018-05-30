@@ -22,7 +22,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="nuxeo-object-diff.html">
@@ -151,7 +150,7 @@ limitations under the License.
       <div id="diffPickerPane">
         <div class="diffPickers">
           <div class="diffPicker">
-            <nuxeo-select selected="{{_leftUid}}" attr-for-selected="uid">
+            <nuxeo-select selected="{{leftUid}}" attr-for-selected="uid">
               <template is="dom-repeat" items="[[documents]]">
                 <paper-item uid="[[item.uid]]">[[_title(item, _hasVersions)]]</paper-item>
               </template>
@@ -161,7 +160,7 @@ limitations under the License.
             <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" title$="[[i18n('diff.controls.switchSides.tooltip')]]"></paper-icon-button>
           </div>
           <div class="diffPicker">
-            <nuxeo-select selected="{{_rightUid}}" attr-for-selected="uid">
+            <nuxeo-select selected="{{rightUid}}" attr-for-selected="uid">
               <template is="dom-repeat" items="[[documents]]">
                 <paper-item uid="[[item.uid]]">[[_title(item, _hasVersions)]]</paper-item>
               </template>
@@ -224,7 +223,7 @@ limitations under the License.
       var typeDataCache = {};
       Polymer({
         is: 'nuxeo-diff',
-        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
+        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
         properties: {
           /**
            * The list of ids of the documents to compare.
@@ -239,7 +238,8 @@ limitations under the License.
            */
           documents: {
             type: Array,
-            value: []
+            value: [],
+            readOnly: true
           },
           /**
            * If `true`, the element will display all properties including those without any differences.
@@ -278,20 +278,28 @@ limitations under the License.
           schemas: {
             type: String
           },
+          /**
+           * The id of the document on the left, where deletions occurred.
+           */
+          leftUid: {
+            type: String,
+            observer: 'leftUidChanged',
+            notify: true
+          },
+          /**
+           * The id of the document on the right, where additions occurred.
+           */
+          rightUid: {
+            type: String,
+            observer: 'rightUidChanged',
+            notify: true
+          },
           _unifiedView: {
             type: Boolean,
             value: false,
             observer: '_resize'
           },
           _showUnifiedViewControl: Boolean,
-          _leftUid: {
-            type: String,
-            observer: '_leftUidChanged'
-          },
-          _rightUid: {
-            type: String,
-            observer: '_rightUidChanged'
-          },
           _schemas: Array,
           _left: Object,
           _right: Object,
@@ -319,34 +327,32 @@ limitations under the License.
         },
 
         _resize: function() {
-          if (document.body.offsetWidth <= 720) {
+          if (window.matchMedia('(max-width: 720px)').matches) {
             this._setUnifiedView(true);
-            this.set('_showUnifiedViewControl', false);
+            this._showUnifiedViewControl = false;
           } else {
             this._setUnifiedView(this._unifiedView);
-            this.set('_showUnifiedViewControl', true);
+            this._showUnifiedViewControl = true;
           }
         },
 
         _switchSides: function() {
-          var left = this._leftUid;
-          var right = this._rightUid;
-          //this._leftUid = null; // prevent diff with the same id
-          this.set('_rightUid', left);
-          this.set('_leftUid', right);
+          var right = this.rightUid;
+          this.rightUid = this.leftUid;
+          this.leftUid = right;
         },
 
-        _leftUidChanged: function(newValue, oldValue) {
-          if (newValue === this._rightUid) {
-            this.set('_rightUid', oldValue);
+        leftUidChanged: function(newValue, oldValue) {
+          if (newValue === this.rightUid) {
+            this.rightUid = oldValue;
           } else {
             this.diff();
           }
         },
 
-        _rightUidChanged: function(newValue, oldValue) {
-          if (newValue === this._leftUid) {
-            this.set('_leftUid', oldValue);
+        rightUidChanged: function(newValue, oldValue) {
+          if (newValue === this.leftUid) {
+            this.leftUid = oldValue;
           } else {
             this.diff();
           }
@@ -394,7 +400,7 @@ limitations under the License.
         _docIdsChanged: function() {
           if (this.docIds && this.docIds.length > 1) {
             var calls = [];
-            this.documents = [];
+            this._setDocuments([]);
             this.docIds.forEach(function(uid) {
               calls.push(function() {
                 this.$.doc.docId = uid;
@@ -404,12 +410,12 @@ limitations under the License.
               }.bind(this));
             }.bind(this));
             this._sequencer(calls).then(function() {
-              this.set('_hasVersions', this.documents.some(function(doc) {
+              this._hasVersions = this.documents.some(function(doc) {
                 return doc.isVersion;
-              }));
-              this.set('_rightUid', null);
-              this.set('_leftUid', this.documents[0].uid);
-              this.set('_rightUid', this.documents[1].uid);
+              });
+              this.rightUid = null; // prevent accidental comparison with an old document
+              this.leftUid = this.documents[0].uid;
+              this.rightUid = this.documents[1].uid;
             }.bind(this));
           }
         },
@@ -485,45 +491,29 @@ limitations under the License.
         },
 
         _diff: function() {
-          if (!this._leftUid || !this._rightUid || this._leftUid === this._rightUid) {
+          if (!this.leftUid || !this.rightUid || this.leftUid === this.rightUid) {
             return;
           }
-          this._updateUrl(this._leftUid, this._rightUid);
           var left = this.documents.find(function(doc) {
-            return doc.uid === this._leftUid;
+            return doc.uid === this.leftUid;
           }.bind(this));
           var right = this.documents.find(function(doc) {
-            return doc.uid === this._rightUid;
+            return doc.uid === this.rightUid;
           }.bind(this));
-          this.set('_left', left);
-          this.set('_right', right);
+          this._left = left;
+          this._right = right;
           this._fetchCommonSchemas(left, right).then(function(schemas) {
-            this.set('_schemas', schemas);
+            this._schemas = schemas;
             var delta = jsondiffpatch.diff(left.properties, right.properties);
             this._schemas.forEach(function(schema) {
               this._filterDelta(delta, schema);
             }.bind(this));
-            this.set('_delta', delta);
+            this._delta = delta;
           }.bind(this));
         },
 
         diff: function() {
           _customLoadPromise.then(this._diff.bind(this));
-        },
-
-        _updateUrl: function(leftUid, rightUid) {
-          var matches = window.location.href.match(/^.*\/#!\/diff/g);
-          if (matches.length) {
-            var needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
-            if (needsReplace) {
-              history.replaceState(null, window.title, [matches[0], leftUid, rightUid].join('/'));
-            } else {
-              var newUrl = [matches[0], leftUid, rightUid].join('/');
-              if (newUrl !== window.location.href) {
-                history.pushState(null, window.title, [matches[0], leftUid, rightUid].join('/'));
-              }
-            }
-          }
         },
 
         _filterDelta: function(delta, schema, parentPath) {

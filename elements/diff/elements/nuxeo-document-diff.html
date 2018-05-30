@@ -34,22 +34,22 @@ limitations under the License.
     </template>
     <div class="value simple">
       <!-- no changes -->
-      <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+      <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
         <a href$="[[urlFor('browse', originalValue.path)]]">[[originalValue.title]]</a>
       </template>
       <!-- additions -->
-      <template is="dom-if" if="[[_added(delta, hideAdditions)]]">
-        <template is="dom-if" if="[[_getAdded(delta)]]">
+      <template is="dom-if" if="[[_hasAddition(delta, hideAdditions)]]">
+        <template is="dom-if" if="[[_getAddition(delta)]]">
           <div class="addition">
             <a href$="[[urlFor('browse', newValue.path)]]"><span class="added">[[newValue.title]]</span></a>
           </div>
         </template>
       </template>
       <!-- modifications -->
-      <template is="dom-if" if="[[_modified(delta)]]">
+      <template is="dom-if" if="[[_hasModification(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <!-- old value -->
-          <template is="dom-if" if="[[_getModifiedOldValue(delta)]]">
+          <template is="dom-if" if="[[_getModificationOldValue(delta)]]">
             <div class="deletion">
               <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
             </div>
@@ -57,7 +57,7 @@ limitations under the License.
         </template>
         <template is="dom-if" if="[[!hideAdditions]]">
           <!-- new value -->
-          <template is="dom-if" if="[[_getModifiedNewValue(delta)]]">
+          <template is="dom-if" if="[[_getModificationNewValue(delta)]]">
             <div class="addition">
               <a href$="[[urlFor('browse', newValue.path)]]"><span class="added">[[newValue.title]]</span></a>
             </div>
@@ -65,15 +65,15 @@ limitations under the License.
         </template>
       </template>
       <!-- deletions -->
-      <template is="dom-if" if="[[_deleted(delta, hideDeletions)]]">
-        <template is="dom-if" if="[[_getDeleted(delta)]]">
+      <template is="dom-if" if="[[_hasDeletion(delta, hideDeletions)]]">
+        <template is="dom-if" if="[[_getDeletion(delta)]]">
           <div class="deletion">
             <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
           </div>
         </template>
       </template>
       <!-- object with inner changes -->
-      <template is="dom-if" if="[[_objectInnerChanges(delta)]]">
+      <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <div class="deletion">
             <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
