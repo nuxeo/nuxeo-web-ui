@@ -33,7 +33,7 @@ limitations under the License.
           <span>[[i18n('diffPage.noDocuments')]]</span>
         </template>
         <template is="dom-if" if="[[docIds.length]]">
-          <nuxeo-diff doc-ids="[[docIds]]"></nuxeo-diff>
+          <nuxeo-diff doc-ids="[[docIds]]" left-uid="{{_leftUid}}" right-uid="{{_rightUid}}"></nuxeo-diff>
         </template>
       </div>
     </nuxeo-page>
@@ -43,13 +43,36 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-diff-page',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
       properties: {
         docIds: {
           type: Array,
           value: []
         },
-        visible: Boolean
+        visible: Boolean,
+        _leftUid: String,
+        _rightUid: String
+      },
+
+      observers: ['_updateUrl(_leftUid, _rightUid)'],
+
+      /**
+       * Update url with the left and right documents' ids
+       */
+      _updateUrl: function(leftUid, rightUid) {
+        if (!leftUid || !rightUid || leftUid === rightUid) {
+          return;
+        }
+        var matches = window.location.href.match(/^.*\/#!\/diff/g);
+        if (matches.length) {
+          var needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
+          var newUrl = [matches[0], leftUid, rightUid].join('/');
+          if (needsReplace) {
+            history.replaceState(null, window.title, newUrl);
+          } else if (newUrl !== window.location.href) {
+            history.pushState(null, window.title, newUrl);
+          }
+        }
       }
     });
   </script>

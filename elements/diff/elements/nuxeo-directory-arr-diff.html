@@ -34,7 +34,7 @@ limitations under the License.
     </template>
     <div class="value simple">
       <!-- arrays with inner changes -->
-      <template is="dom-if" if="[[_arrayInnerChanges(delta)]]">
+      <template is="dom-if" if="[[_hasArrayInnerChanges(delta)]]">
         <div class="array diff simple">
           <template is="dom-repeat" items="[[_getArrayDelta(delta, originalValue, newValue, hideAdditions, hideDeletions)]]" as="arrdelta">
             <template is="dom-if" if="[[_showArrayItem(arrdelta, showAll)]]">
@@ -58,7 +58,7 @@ limitations under the License.
         </div>
       </template>
       <!-- array with no changes -->
-      <template is="dom-if" if="[[_nochanges(delta, originalValue)]]">
+      <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
         <template is="dom-if" if="[[_isArray(delta)]]">
           <div class="array simple">
             <template is="dom-repeat" items="[[originalValue]]" as="value">

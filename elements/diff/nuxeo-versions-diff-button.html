@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 
 <!--
@@ -34,18 +35,19 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]">
-    </nuxeo-operation>
-
-    <paper-icon-button noink id="diff" icon="nuxeo:compare" on-tap="_doDiff"></paper-icon-button>
-    <paper-tooltip for="diff" position="[[tooltipPosition]]">[[i18n('versionsDiffButton.tooltip')]]</paper-tooltip>
+    <template is="dom-if" if="[[hasVersions(document)]]">
+      <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]">
+      </nuxeo-operation>
+      <paper-icon-button noink id="diff" icon="nuxeo:compare" on-tap="_doDiff"></paper-icon-button>
+      <paper-tooltip for="diff" position="[[tooltipPosition]]">[[i18n('versionsDiffButton.tooltip')]]</paper-tooltip>
+    </template>
 
   </template>
 
   <script>
     Polymer({
       is: 'nuxeo-versions-diff-button',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: {
           type: Object
@@ -56,12 +58,8 @@ limitations under the License.
         }
       },
 
-      _isAvailable: function() {
-        return this.selectedDocuments && this.selectedDocuments.length > 1;
-      },
-
       _doDiff: function() {
-        this.$.opGetVersions.execute().then(function(result) {
+        this.$$('#opGetVersions').execute().then(function(result) {
           // sort the versions from the most to the least recent
           var versions = result.entries.reverse();
           var currentIndex = versions.findIndex(function(doc) {

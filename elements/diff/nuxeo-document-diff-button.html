@@ -18,8 +18,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 
 <!--
 `nuxeo-document-diff-button`
@@ -34,7 +34,7 @@ limitations under the License.
       }
     </style>
 
-    <template id="availability" is="dom-if" if="[[_isAvailable(selectedDocuments)]]">
+    <template is="dom-if" if="[[_isAvailable(selectedDocuments)]]">
       <paper-icon-button noink id="diff" icon="nuxeo:compare" on-tap="_doDiff"></paper-icon-button>
       <paper-tooltip for="diff" position="[[tooltipPosition]]">[[i18n('documentDiffButton.tooltip')]]</paper-tooltip>
     </template>
