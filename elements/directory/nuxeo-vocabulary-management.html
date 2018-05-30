@@ -188,7 +188,8 @@ limitations under the License.
        * Returns the href for the current layout element
        */
       _layoutHref: function(schema) {
-        return this.resolveUrl(schema + '/nuxeo-' + schema + '-edit-layout.html');
+        var lowerCaseSchema = schema.toLowerCase();
+        return this.resolveUrl(lowerCaseSchema + '/nuxeo-' + lowerCaseSchema + '-edit-layout.html');
       },
 
       _layoutModel: function() {
