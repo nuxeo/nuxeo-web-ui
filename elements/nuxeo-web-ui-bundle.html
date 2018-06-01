@@ -627,12 +627,8 @@
 
 <nuxeo-slot-content name="diffDocumentAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-filter document="[[document]]" facet="Folderish">
-      <template>
-        <nuxeo-document-diff-button selected-documents="[[selectedItems]]"></nuxeo-document-diff-button>
-      </template>
-    </nuxeo-filter>
-  </template>
+    <nuxeo-document-diff-button selected-documents="[[selectedItems]]"></nuxeo-document-diff-button>
+  </template>>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="diffVersionsAction" slot="DOCUMENT_ACTIONS" order="10">

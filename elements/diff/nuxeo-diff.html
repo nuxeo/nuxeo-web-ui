@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="nuxeo-object-diff.html">
 
 <script type='text/javascript' src="../../node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js"></script>
@@ -157,7 +158,8 @@ limitations under the License.
             </nuxeo-select>
           </div>
           <div class="switchSides">
-            <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" title$="[[i18n('diff.controls.switchSides.tooltip')]]"></paper-icon-button>
+            <paper-icon-button id="switchSidesButtonH" icon="nuxeo:switch-sides" on-tap="_switchSides"></paper-icon-button>
+            <nuxeo-tooltip for="switchSidesButtonH">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
           </div>
           <div class="diffPicker">
             <nuxeo-select selected="{{rightUid}}" attr-for-selected="uid">
@@ -168,7 +170,8 @@ limitations under the License.
           </div>
         </div>
         <div class="switchSides">
-          <paper-icon-button icon="nuxeo:switch-sides" on-tap="_switchSides" title$="[[i18n('diff.controls.switchSides.tooltip')]]"></paper-icon-button>
+          <paper-icon-button id="switchSidesButtonV" icon="nuxeo:switch-sides" on-tap="_switchSides"></paper-icon-button>
+          <nuxeo-tooltip for="switchSidesButtonV">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
         </div>
       </div>
       <div id="diffPane">
