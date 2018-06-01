@@ -556,7 +556,7 @@ limitations under the License.
                 case 'double':
                   break;
                 case 'blob':
-                  if (!deltaObj[key].digest) {
+                  if (deltaObj[key] && !deltaObj[key].digest) {
                     delete deltaObj[key];
                   }
                   break;
