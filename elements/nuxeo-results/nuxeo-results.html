@@ -319,7 +319,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _clearSelectedItems: function() {
-        this.view.clearSelection();
+        this.clearSelection();
       },
 
       initializeSettings: function() {
@@ -356,9 +356,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         this.refresh();
 
         if (this.selectedItems && this.selectedItems.length > 0) {
+          var tmp = this.selectedItems.slice();
           this.selectedItems = [];
           if (e.detail.focusIndex || e.detail.focusIndex === 0) {
-            this.selectedItems = this.view.selectedItems;
+            this.selectItems(tmp);
             if (e.detail.focusIndex > -1) {
               this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
             }
