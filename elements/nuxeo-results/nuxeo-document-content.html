@@ -285,9 +285,13 @@ limitations under the License.
 
       ready: function() {
         this.nxProvider = this.$.nxProvider;
-        this.$.dropzone.addEventListener('dragover', this._dragoverImport.bind(this));
-        this.$.dropzone.addEventListener('dragleave', this._dragleaveImport.bind(this));
-        this.$.dropzone.addEventListener('drop', this._dropImport.bind(this));
+        this._dragoverHandler = this._dragoverImport.bind(this);
+        this._dragleaveHandler = this._dragleaveImport.bind(this);
+        this._dropHandler = this._dropImport.bind(this);
+        this.$.dropzone.addEventListener('dragover', this._dragoverHandler);
+        this.$.dropzone.addEventListener('dragleave', this._dragleaveHandler);
+        this.$.dropzone.addEventListener('drop', this._dropHandler);
+
       },
 
       attached: function() {
@@ -300,6 +304,16 @@ limitations under the License.
           {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
           {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
         ];
+      },
+
+      detached: function() {
+        this.$.dropzone.removeEventListener('dragover', this._dragoverHandler);
+        this.$.dropzone.removeEventListener('dragleave', this._dragleaveHandler);
+        this.$.dropzone.removeEventListener('drop', this._dropHandler);
+        this.nxProvider = null;
+        this._dragoverHandler = null;
+        this._dragleaveHandler = null;
+        this._dropHandler = null;
       },
 
       _observeDocument: function() {

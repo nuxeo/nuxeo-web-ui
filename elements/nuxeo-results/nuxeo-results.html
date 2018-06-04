@@ -226,6 +226,16 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         return (this.view && this.view.$.list) ? this.view.$.list.items : [];
       },
 
+      detached: function() {
+        if (this.view) {
+          this.unlisten(this.view, 'columns-changed', '_columnsChanged');
+          this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
+          this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
+        }
+        this.columns = null;
+        this.view = null;
+      },
+
       _viewChanged: function(view, oldView) {
         if (oldView) {
           this.unlisten(oldView, 'columns-changed', '_columnsChanged');
