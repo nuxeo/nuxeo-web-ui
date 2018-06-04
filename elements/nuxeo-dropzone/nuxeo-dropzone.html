@@ -212,6 +212,11 @@ limitations under the License.
         this.progressMessage = this.i18n('dropzone.progress');
       },
 
+      detached: function() {
+        this.connection = null;
+        this.teardownDropZone();
+      },
+
       open: function() {
         this.$$('input').click();
       },
