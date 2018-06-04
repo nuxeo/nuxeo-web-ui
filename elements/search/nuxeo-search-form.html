@@ -621,7 +621,10 @@ limitations under the License.
 
       _selectedDocChanged: function(doc, old) {
         if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
-          this.navigateTo('browse', doc.path);
+          this.__renderDebouncer = Polymer.Debouncer.debounce(this.__renderDebouncer, Polymer.Async.timeOut.after(150),
+            function() {
+              this.navigateTo('browse', doc.path);
+            }.bind(this));
         }
       },
 
