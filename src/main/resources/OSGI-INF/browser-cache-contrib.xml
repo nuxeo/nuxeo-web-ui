@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.web.ui.request.contrib">
+
+  <extension target="org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService"
+    point="filterConfig">
+    <filterConfig name="ui_static" cached="true" cacheTime="3600">
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\.(js|html|css)</pattern>
+    </filterConfig>
+    <filterConfig name="ui_18n" cached="true" cacheTime="3600">
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/i18n/.*</pattern>
+    </filterConfig>
+    <filterConfig name="ui_images" cached="true" cacheTime="3600">
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/images/.*</pattern>
+    </filterConfig>
+    <filterConfig name="ui_themes" cached="true" cacheTime="3600">
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/themes/.*</pattern>
+    </filterConfig>
+  </extension>
+
+</component>
