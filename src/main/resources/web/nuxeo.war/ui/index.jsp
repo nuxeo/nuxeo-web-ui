@@ -82,7 +82,7 @@ limitations under the License.
   <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
-  <link rel="import" href="<%= request.getContextPath() %>/<%= resource.getURI() %>">
+  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
   <% } %>
 
 </head>
