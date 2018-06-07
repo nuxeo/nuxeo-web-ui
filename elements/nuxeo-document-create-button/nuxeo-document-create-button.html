@@ -86,6 +86,8 @@ limitations under the License.
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
+    <nuxeo-keys keys="c" on-pressed="_displayWizard"></nuxeo-keys>
+
   </template>
 
   <script>
@@ -171,7 +173,9 @@ limitations under the License.
       },
 
       _displayWizard: function() {
-        this.fire('create-document');
+        if (!this.hidden) {
+          this.fire('create-document');
+        }
       },
 
       _animateOpen: function() {
