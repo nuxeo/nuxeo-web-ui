@@ -571,18 +571,16 @@ limitations under the License.
           if (this.docId && !doc.isVersion) {
             this.docId = '';
             this.docPath = doc.path;
-            this.navigateTo('browse', doc.path);
-          } else {
-            var recent = this.$$('#recent');
-            if (recent) {
-              recent.add(doc);
-            }
-            this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
-              doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-            this.set('currentDocument', doc);
-            this.loading = false;
-            this.show(page);
           }
+          var recent = this.$$('#recent');
+          if (recent) {
+            recent.add(doc);
+          }
+          this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
+            doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+          this.set('currentDocument', doc);
+          this.loading = false;
+          this.show(page);
         }.bind(this)).catch(function(err) {
           this.showError(err.status, this.i18n('browse.error'), err.message)
         }.bind(this));
