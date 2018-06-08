@@ -32,8 +32,6 @@ var mergeStream = require('merge-stream');
 var cssSlam = require('css-slam').gulp;
 var htmlMinifier = require('gulp-html-minifier');
 var polymer = require('polymer-build');
-var babel = require('gulp-babel');
-var babelPresetES2015 = require('babel-preset-es2015').buildPreset({}, {modules: false});
 
 var DIST = 'target/classes/web/nuxeo.war/ui';
 
@@ -95,10 +93,6 @@ gulp.task('polymer-build', function() {
       // pull any inline styles and scripts out of their HTML files and
       // into separate CSS and JS files in the build stream.
       .pipe(htmlSplitter.split())
-      .pipe($.if(/\.js$/, babel({
-        presets: babelPresetES2015,
-        compact: false,
-        ignore: 'custom-elements-es5-adapter.js,webcomponents-*.js'})))
       .pipe($.if(/\.css$/, cssSlam())) // Install css-slam to use
       .pipe($.if(/\.html$/, htmlMinifier())) // Install gulp-html-minifier to use
       .pipe(htmlSplitter.rejoin()) // Call rejoin when you're finished
@@ -110,16 +104,10 @@ gulp.task('polymer-build', function() {
         inlineScripts: true,
         excludes: [dist('elements/nuxeo-search-page.html')]
       }))
-      .pipe(project.addCustomElementsEs5Adapter())
       .pipe(gulp.dest(DIST))
       .on('end', resolve)
       .on('error', reject);
   });
-});
-
-
-gulp.task('babel-helpers', function() {
-  return gulp.src(['node_modules/polymer-build/lib/babel-helpers.min.js']).pipe(gulp.dest(dist('scripts')));
 });
 
 // Move from 'elements' folder to root
@@ -170,7 +158,6 @@ gulp.task('build', ['clean'], function(cb) {
   return runSequence(
       'merge-message-files',
       'polymer-build',
-      'babel-helpers',
       'move-elements',
       'strip',
       cb);
