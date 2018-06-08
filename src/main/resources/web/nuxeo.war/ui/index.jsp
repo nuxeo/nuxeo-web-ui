@@ -66,15 +66,9 @@ limitations under the License.
   <!-- Tile icon for Win8 (144x144) -->
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-  <!-- External Babel helpers -->
-  <script src="scripts/babel-helpers.min.js"></script>
-
   <!-- load page.js before polyfills to ensure window event listener work -->
   <script src="bower_components/page/page.js"></script>
 
-  <script>if (!window.customElements) { document.write('<!--'); }</script>
-  <script type="text/javascript" src="bower_components/webcomponentsjs/custom-elements-es5-adapter.js"></script>
-  <!--! do not remove -->
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
   <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
