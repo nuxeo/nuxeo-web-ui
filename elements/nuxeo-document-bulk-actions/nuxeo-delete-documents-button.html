@@ -48,7 +48,7 @@ limitations under the License.
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <paper-icon-button icon="[[_icon]]" id="deleteAllButton">
       </paper-icon-button>
-      <nuxeo-tooltip for="deleteAllButtons" position="[[tooltipPosition]]">
+      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">
         [[_tooltip]]
       </nuxeo-tooltip>
     </template>
@@ -77,6 +77,14 @@ limitations under the License.
         tooltipPosition: {
           type: String,
           value: 'bottom'
+        },
+
+        /**
+         * Force availability of the action even if documents are not trashed.
+         */
+        forceDisplay: {
+          type: Boolean,
+          value: false
         },
 
         _icon: {
@@ -123,7 +131,9 @@ limitations under the License.
        */
       _isAvailable: function() {
         return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-            ((!this.hard && !this._checkDocsAreTrashed() || this.hard && this._checkDocsAreTrashed()));
+            ((this.forceDisplay
+              || !this.hard && !this._checkDocsAreTrashed()
+              || this.hard && this._checkDocsAreTrashed()));
       },
 
       /**
