@@ -20,15 +20,15 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
-`nuxeo-delete-documents-button`
+`nuxeo-trash-documents-button`
 @group Nuxeo UI
-@element nuxeo-delete-documents-button
+@element nuxeo-trash-documents-button
 -->
-<dom-module id="nuxeo-delete-documents-button">
+<dom-module id="nuxeo-trash-documents-button">
   <template>
 
     <style>
@@ -41,13 +41,13 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="deleteOp" op="Document.Delete" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
+    <nuxeo-operation id="trashOp" op="Document.Trash" headers='{"nx_es_sync": "true"}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <paper-icon-button icon="[[icon]]" id="deleteAllButton">
+      <paper-icon-button icon="[[icon]]" id="trashAllButton">
       </paper-icon-button>
-      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">
-        [[i18n('deleteDocumentsButton.tooltip.permanently')]]
+      <nuxeo-tooltip for="trashAllButton" position="[[tooltipPosition]]">
+        [[i18n('deleteDocumentsButton.tooltip')]]
       </nuxeo-tooltip>
     </template>
 
@@ -55,7 +55,7 @@ limitations under the License.
 
   <script>
     Polymer({
-      is: 'nuxeo-delete-documents-button',
+      is: 'nuxeo-trash-documents-button',
       behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         documents: {
@@ -74,44 +74,40 @@ limitations under the License.
          */
         icon: {
           type: 'String',
-          value: 'nuxeo:delete-permanently'
-        },
+          value: 'nuxeo:delete'
+        }
 
-        /**
-         * If true, action will be available only if documents are already trashed.
-         */
-        onlyIfTrashed: Boolean
       },
 
       listeners: {
-        'tap': 'deleteDocuments'
+        'tap': 'trashDocuments'
       },
 
-      deleteDocuments: function() {
+      trashDocuments: function() {
         if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
           if (this.documents && this.documents.length) {
             var uids = this.documents.map(function(doc) {
               return doc.uid;
             }).join(',');
-            this.$.deleteOp.input = 'docs:' + uids;
-            this.$.deleteOp.execute().then(function() {
+            this.$.trashOp.input = 'docs:' + uids;
+            this.$.trashOp.execute().then(function() {
               this.fire('nuxeo-documents-deleted', {documents: this.documents});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),
             function(error) {
-              this.fire('nuxeo-documents-deleted', {error: error,  documents: uids});
+              this.fire('nuxeo-documents-deleted', {error: error, documents: this.documents});
             }.bind(this));
           }
         }
       },
 
       /**
-       * If `onlyIfTrashed` is active, the action is available if all selected items are not trashed.
+       * Action is available if all selected items are not trashed.
        */
       _isAvailable: function() {
         return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-            (!this.onlyIfTrashed || this._checkDocsAreTrashed());
+            !this._checkDocsAreTrashed();
       },
 
       /**
