@@ -29,10 +29,10 @@ Feature: Search
       | File       | My_File          | memo    | art/culture             | europe/France        | SJones  | /default-domain/My_Workspace    | Nuxeo_Collection | urgent | sample.png |
       | File       | Nuxeo_File       | invoice | art/culture             | europe/France        | BJones  | /default-domain/My_Workspace    | Test_Collection  | urgent | sample.mp4 |
     And I login as "Administrator"
-    And I click the "defaultSearch" button
 
-  Scenario Outline: Searches
-    When I perform a <searchType> search for <searchTerm>
+  Scenario Outline: Default Search
+    When I click the "defaultSearch" button
+    And I perform a <searchType> search for <searchTerm> on defaultSearch
     Then I can see <resultsCount> search results
     Examples:
     | searchType  | searchTerm              | resultsCount |
@@ -45,15 +45,16 @@ Feature: Search
     | coverage    | Europe/Portugal         | 5            |
     #| size        | Between 100 KB and 1 MB | 1            | disabled until scroll works in shadow dom
 
-  Scenario: Saved Search
-    When I perform a coverage search for Europe/France
+  Scenario: Default Saved Search
+    When I click the "defaultSearch" button
+    And I perform a coverage search for Europe/France on defaultSearch
     Then I edit the results columns to show Subjects
     And I save my search as "Local Search"
-    And I share my search with JSmith
+    And I share my "defaultSearch" search with JSmith
     When I logout
     And I login as "JSmith"
     And I click the "defaultSearch" button
-    Then I can view my saved search "Local Search"
+    Then I can view my saved search "Local Search" on "defaultSearch"
 
   Scenario Outline: Quick Search
     When I click the QuickSearch button
@@ -66,3 +67,10 @@ Feature: Search
     | BJones     | 1               |
     | managers   | 1               |
     | Test       | 5               |
+
+  Scenario: Default Search
+    When I click the "test_search" button
+    And I perform a author search for Bob on test_search
+    Then I can see 5 search results
+    When I clear the author search on test_search
+    Then I can see more than 5 search results

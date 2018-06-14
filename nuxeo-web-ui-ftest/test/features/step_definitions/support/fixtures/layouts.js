@@ -12,15 +12,35 @@ const suggestionGet = (element) => {
 };
 const suggestionSet = (element, value) => {
   const isMulti = element.getAttribute('multiple');
-  const values = isMulti ? value.split(',') : [value];
-  element.scrollIntoView(`#input`);
-  for (let i = 0; i < values.length; i++) {
-    element.waitForVisible(isMulti ? `input` : `#input`);
-    element.element(isMulti ? `input` : `#input`).click();
-    element.waitForVisible(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`);
-    element.element(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`).setValue(values[i]);
-    element.waitForVisible(`.selectivity-result-item.highlight`);
-    element.click(`.selectivity-result-item.highlight`);
+  if (value) {
+    const values = isMulti ? value.split(',') : [value];
+    element.scrollIntoView(`#input`);
+    for (let i = 0; i < values.length; i++) {
+      element.waitForVisible(isMulti ? `input` : `#input`);
+      // sometimes the caret is not clickable (e.g. in dialog ...)
+      // and clicking the input does not open suggestion (e.g. in search drawer content)
+      // ¯\_(ツ)_/¯
+      try {
+        element.element(isMulti ? `input` : `.selectivity-caret`).click();
+      } catch (err) {
+        element.element(isMulti ? `input` : `#input`).click();
+      }
+      element.waitForVisible(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`);
+      element.element(isMulti ? `.selectivity-multiple-input` : `.selectivity-search-input`).setValue(values[i]);
+      element.waitForVisible(`.selectivity-result-item.highlight`);
+      element.click(`.selectivity-result-item.highlight`);
+    }
+  } else {
+    // it's a reset
+    if (element.getAttribute('multiple')) {
+      element.elements('.selectivity-multiple-selected-item')
+          .value.forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
+    } else {
+      const item = element.element('.selectivity-single-selected-item');
+      if (item) {
+        item.element('.selectivity-single-selected-item-remove').click();
+      }
+    }
   }
 };
 global.fieldRegistry.register('nuxeo-input',

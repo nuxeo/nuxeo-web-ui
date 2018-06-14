@@ -35,3 +35,25 @@ Feature: Edit metadata
     | File     |
     | Folder   |
     | Workspace|
+
+  Scenario: Clear selectivity widget
+    Given I have a File document
+    When I browse to the document
+    Then I can edit the following properties in the File metadata:
+      | name         | value                |
+      | nature       | Internship report    |
+      | subjects     | Medicine,Video games |
+    Then I see the File page
+    And I can see File metadata with the following properties:
+      | name         | value                                   |
+      | nature       | Internship report                       |
+      | subjects     | Science/Medicine,Daily life/Video games |
+    Then I can edit the following properties in the File metadata:
+      | name         | value |
+      | nature       |       |
+      | subjects     |       |
+    Then I see the File page
+    And I can see File metadata with the following properties:
+      | name         | value |
+      | nature       |       |
+      | subjects     |       |
