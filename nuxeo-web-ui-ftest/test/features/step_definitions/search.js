@@ -71,8 +71,11 @@ module.exports = function () {
     });
     return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
   });
-  this.When(/^I perform a (.+) search for (.+)$/, (searchType, searchTerm) => {
-    this.ui.searchForm.search(searchType, searchTerm);
+  this.When(/^I clear the (.+) search on (.+)$/, (searchType, searchName) => {
+    this.ui.searchForm(searchName).search(searchType);
+  });
+  this.When(/^I perform a (.+) search for (.+) on (.+)$/, (searchType, searchTerm, searchName) => {
+    this.ui.searchForm(searchName).search(searchType, searchTerm);
   });
   this.Then(/^I can see (\d+) search results$/, (numberOfResults) => {
     const displayMode = this.ui.results.displayMode;
@@ -81,6 +84,15 @@ module.exports = function () {
     } else {
       this.ui.results.getResults(displayMode).waitForVisible();
       this.ui.results.resultsCount(displayMode).toString().should.equal(numberOfResults);
+    }
+  });
+  this.Then(/^I can see more than (\d+) search results$/, (minNumberOfResults) => {
+    const displayMode = this.ui.results.displayMode;
+    if (minNumberOfResults === '0') {
+      this.ui.results.noResults.waitForVisible().should.be.true;
+    } else {
+      this.ui.results.getResults(displayMode).waitForVisible();
+      this.ui.results.resultsCount(displayMode).should.be.above(parseInt(minNumberOfResults));
     }
   });
   this.Then(/^I edit the results columns to show (.+)$/, (heading) => {
@@ -101,28 +113,28 @@ module.exports = function () {
     this.ui.searchResults.enterInput(searchName);
     this.ui.searchResults.confirmSaveSearchButton.click();
   });
-  this.Then(/^I share my search with (.+)/, (username) => {
+  this.Then(/^I share my "(.+)" search with (.+)/, (searchName, username) => {
     this.ui.searchResults.savedSearchActionButton.waitForVisible();
     this.ui.searchResults.savedSearchActionButton.click();
     this.ui.searchResults.shareAction.waitForVisible();
     this.ui.searchResults.shareAction.click();
-    this.ui.searchForm.permissionsView.newPermissionButton.waitForVisible();
-    this.ui.searchForm.permissionsView.newPermissionButton.click();
-    this.ui.searchForm.permissionsView.setPermissions(username,
+    this.ui.searchForm(searchName).permissionsView.newPermissionButton.waitForVisible();
+    this.ui.searchForm(searchName).permissionsView.newPermissionButton.click();
+    this.ui.searchForm(searchName).permissionsView.setPermissions(username,
       {
         permission: 'Read',
         timeFrame: 'permanent',
         notify: false,
       }
     );
-    this.ui.searchForm.permissionsView.createPermissionButton.waitForVisible();
-    this.ui.searchForm.permissionsView.createPermissionButton.click();
-    this.ui.searchForm.permissionsView.permission('Read', username, 'permanent').waitForVisible();
+    this.ui.searchForm(searchName).permissionsView.createPermissionButton.waitForVisible();
+    this.ui.searchForm(searchName).permissionsView.createPermissionButton.click();
+    this.ui.searchForm(searchName).permissionsView.permission('Read', username, 'permanent').waitForVisible();
   });
-  this.Then(/^I can view my saved search "(.+)"$/, (searchName) => {
-    this.ui.searchForm.menuButton.waitForVisible();
-    this.ui.searchForm.menuButton.click();
-    this.ui.searchForm.getSavedSearch(searchName).waitForExist().should.be.true;
+  this.Then(/^I can view my saved search "(.+)" on "(.+)"$/, (savedSearchName, searchName) => {
+    this.ui.searchForm(searchName).menuButton.waitForVisible();
+    this.ui.searchForm(searchName).menuButton.click();
+    this.ui.searchForm(searchName).getSavedSearch(savedSearchName).waitForExist().should.be.true;
   });
   this.When(/^I click the QuickSearch button$/, () => {
     this.ui.searchButton.waitForVisible();

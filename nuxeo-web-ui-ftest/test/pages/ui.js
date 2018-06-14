@@ -40,8 +40,8 @@ export default class UI extends BasePage {
     return new Group('nuxeo-user-group-management');
   }
 
-  get searchForm() {
-    return new Search('nuxeo-search-form[name="defaultSearch"]');
+  searchForm(name = 'defaultSearch') {
+    return new Search(`nuxeo-search-form[name="${name}"]`);
   }
 
   get quickSearch() {
