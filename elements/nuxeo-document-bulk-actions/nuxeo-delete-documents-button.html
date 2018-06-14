@@ -120,7 +120,7 @@ limitations under the License.
        */
       _isAvailable: function() {
         return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-            ((!this.hard && !this._checkDocsAreTrashed() || this.hard && this._checkDocsAreTrashed()));
+            (this.hard || !this._checkDocsAreTrashed());
       },
 
       /**
