@@ -66,22 +66,6 @@ Feature: Trash Management
     When I select the "TrashedFile1" document
     Then I cannot untrash selected documents
 
-  Scenario: I can permanently delete documents
-    Given I have the following documents
-      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
-      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
-    And I have the following trashed documents
-      | doctype       | title            | path                      |
-      | File          | TrashedFile1     | /default-domain/ws        |
-      | File          | TrashedFile2     | /default-domain/ws        |
-    When I login as "Administrator"
-    And I browse to the document with path "/default-domain/ws"
-    Then I can navigate to trash pill
-    And I can see 2 documents
-    When I select the "TrashedFile2" document
-    Then I can permanently delete selected documents
-    And I can see 1 documents
-
   Scenario: I cannot permanently delete documents
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
@@ -140,4 +124,3 @@ Feature: Trash Management
     When I login as "John"
     And I browse to the document
     Then I cannot permanently delete current document
-
