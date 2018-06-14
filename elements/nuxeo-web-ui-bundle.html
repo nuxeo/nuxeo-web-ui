@@ -211,7 +211,7 @@
 
 <nuxeo-slot-content name="deleteDocumentAction" slot="DOCUMENT_ACTIONS" order="15">
   <template>
-    <nuxeo-delete-document-button document="[[document]]"></nuxeo-delete-document-button>
+    <nuxeo-trash-document-button document="[[document]]"></nuxeo-trash-document-button>
   </template>
 </nuxeo-slot-content>
 
@@ -544,14 +544,15 @@
 
 <nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]">
-    </nuxeo-delete-documents-button>
+    <nuxeo-trash-documents-button documents="[[selectedItems]]">
+    </nuxeo-trash-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="hardDeleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard></nuxeo-delete-documents-button>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" only-if-trashed>
+    </nuxeo-delete-documents-button>
   </template>
 </nuxeo-slot-content>
 
