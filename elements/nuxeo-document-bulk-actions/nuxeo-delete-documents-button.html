@@ -48,7 +48,7 @@ limitations under the License.
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <paper-icon-button icon="[[_icon]]" id="deleteAllButton">
       </paper-icon-button>
-      <nuxeo-tooltip for="deleteAllButtons" position="[[tooltipPosition]]">
+      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">
         [[_tooltip]]
       </nuxeo-tooltip>
     </template>
@@ -102,16 +102,13 @@ limitations under the License.
             }).join(',');
             var op = this.hard ? this.$.deleteOp : this.$.trashOp;
             op.input = 'docs:' + uids;
-            var uidsArray = this.documents.map(function(doc) {
-              return doc.uid;
-            });
             op.execute().then(function() {
-              this.fire('nuxeo-documents-deleted', {documentIds: uidsArray, documents: this.documents});
+              this.fire('nuxeo-documents-deleted', {documentIds: uids, documents: this.documents});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),
             function(error) {
-              this.fire('nuxeo-documents-deleted', {error: error,  documents: uidsArray});
+              this.fire('nuxeo-documents-deleted', {error: error,  documents: uids});
             }.bind(this));
           }
         }
@@ -123,7 +120,7 @@ limitations under the License.
        */
       _isAvailable: function() {
         return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-            ((!this.hard && !this._checkDocsAreTrashed() || this.hard && this._checkDocsAreTrashed()));
+            (this.hard || !this._checkDocsAreTrashed());
       },
 
       /**
