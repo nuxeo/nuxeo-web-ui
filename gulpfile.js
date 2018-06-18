@@ -21,8 +21,6 @@ var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var del = require('del');
 var runSequence = require('run-sequence');
-var browserSync = require('browser-sync');
-var reload = browserSync.reload;
 var merge = require('merge-stream');
 var path = require('path');
 var fs = require('fs');
@@ -32,6 +30,8 @@ var mergeStream = require('merge-stream');
 var cssSlam = require('css-slam').gulp;
 var htmlMinifier = require('gulp-html-minifier');
 var polymer = require('polymer-build');
+var polyserve = require('polyserve');
+var log = require('fancy-log');
 
 var DIST = 'target/classes/web/nuxeo.war/ui';
 
@@ -46,11 +46,6 @@ gulp.task('lint', function() {
     'elements/**/*.html',
     'gulpfile.js'
   ])
-      .pipe(reload({
-        stream: true,
-        once: true
-      }))
-
       .pipe($.eslint())
       .pipe($.eslint.format())
       .pipe($.eslint.failAfterError());
@@ -165,36 +160,22 @@ gulp.task('build', ['clean'], function(cb) {
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'merge-message-files'], function() {
-  // setup our local proxy
-  var proxyOptions = require('url').parse('http://localhost:8080/nuxeo');
-  proxyOptions.route = '/nuxeo';
-  browserSync({
+
+  var options = {
+    hostname: '0.0.0.0',
     port: 5000,
-    notify: false,
-    logPrefix: 'WEBUI',
-    snippetOptions: {
-      rule: {
-        match: '<span id="browser-sync-binding"></span>',
-        fn: function(snippet) {
-          return snippet;
-        }
-      }
-    },
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
-    server: {
-      baseDir: ['.tmp', '.'],
-      middleware: [require('proxy-middleware')(proxyOptions)]
+    proxy: {
+      path: '/nuxeo',
+      target: 'http://localhost:8080/nuxeo'
     }
+  };
+
+  polyserve.startServers(options).then(function(serverInfos) {
+    var urls = polyserve.getServerUrls(options, serverInfos.server);
+    log('Web UI running at ' + require('url').format(urls.serverUrl));
   });
 
-  gulp.watch(['**/*.html'], reload);
-  gulp.watch(['styles/**/*.css'], ['styles', reload]);
-  gulp.watch(['elements/**/*.css'], ['elements', reload]);
   gulp.watch(['{scripts,elements}/**/{*.js,*.html}'], ['lint']);
-  gulp.watch(['images/**/*'], reload);
-  gulp.watch(['i18n/**/*'], ['merge-message-files', reload]);
+  gulp.watch(['i18n/**/*'], ['merge-message-files']);
 });
 
