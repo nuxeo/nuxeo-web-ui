@@ -1,6 +1,7 @@
 exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
+  execArgv: process.env.DEBUG ? ['--inspect'] : [],
   //
   // ==================
   // Specify Test Files
@@ -232,7 +233,7 @@ exports.config = {
   // possible to defer the end of the process using a promise.
   onComplete: function(exitCode) {
     const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
-    const junitReport = process.env.JUNIT_REPORT_PATH
+    const junitReport = process.env.JUNIT_REPORT_PATH;
     if (reportFilePath && junitReport){
       const path = require('path'),
           fs = require('fs'),
