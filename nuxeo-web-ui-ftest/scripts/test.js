@@ -20,7 +20,7 @@
  *   --tags: only scenarios containing these tags will be ran
  *   --watch: watch for changes in tests and rerun them
  *   --wdioConfig: pass a custom wdio config file
- *   --debug: allow node instpector to be attached
+ *   --debug: allow node inspector to be attached
  */
 
 const fs = require('fs');
