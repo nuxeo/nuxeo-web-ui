@@ -539,6 +539,8 @@ limitations under the License.
             this.showError(404, e.reason.message, this._errorUrl());
           }
         }.bind(this));
+
+        this.removeAttribute('unresolved');
       },
 
       refresh: function() {
