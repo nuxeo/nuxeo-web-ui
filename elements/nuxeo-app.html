@@ -1067,9 +1067,10 @@ limitations under the License.
         var options = e.detail;
         if (options.close) {
           this.$.toast.close();
-        } else if (options.message) {
+        }
+        if (options.message) {
           this.$.toast.text = options.message;
-          this.$.toast.duration = options.duration ? options.duration : 3000;
+          this.$.toast.duration = options.duration !== undefined ? options.duration : 3000;
           this.set('_dismissible', !!options.dismissible);
           this.$.toast.open();
         }

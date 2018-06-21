@@ -106,7 +106,10 @@ limitations under the License.
               this.fire('notify', {"message": this.i18n('bulkDownload.empty')});
               return;
             }
-            this.fire('notify', {"message": this.i18n('bulkDownload.preparing')});
+            this.fire('notify', {
+              'message': this.i18n('bulkDownload.preparing'),
+              'duration': 0
+            });
             window.setTimeout(this._watchDownload.bind(this), 1000, res.key);
           }.bind(this)).catch(function(err) {
             this.fire('notify', {"message": err});
@@ -117,7 +120,10 @@ limitations under the License.
       _watchDownload: function(key) {
         this.$.nx.http(this.$.nx.url + "/nxblobstatus/" + key).then(function(res) {
           if (res.completed) {
-            this.fire('notify', {"message": this.i18n('bulkDownload.completed')});
+            this.fire('notify', {
+              'message': this.i18n('bulkDownload.completed'),
+              'close': true
+            });
             var a = document.createElement('a');
             a.style = 'display: none';
             a.download = true;
@@ -127,7 +133,6 @@ limitations under the License.
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
           } else {
-            this.fire('notify', {"message": this.i18n('bulkDownload.preparing')});
             window.setTimeout(this._watchDownload.bind(this), 1000, key);
           }
         }.bind(this)).catch(function() {
