@@ -66,101 +66,8 @@ limitations under the License.
   <!-- Tile icon for Win8 (144x144) -->
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-  <!-- load page.js before polyfills to ensure window event listener work -->
-  <script src="bower_components/page/page.js"></script>
-
-  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-
-  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
-
-  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
-
-  <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
-  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
-  <% } %>
-
   <style>
-    body {
-      margin: 0;
-    }
-
-    nuxeo-app[unresolved] {
-      display: block;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      filter: grayscale(100%);
-    }
-
-    [unresolved] #sidebar {
-      background-color: #060606;
-      width: 52px;
-      height: 100%;
-      float: left;
-    }
-
-    [unresolved] #sidebar img {
-      width: 100%;
-      animation: glow 1s infinite alternate;
-    }
-
-    [unresolved] #container {
-      background-color: #f5f5f5;
-      float: left;
-      width: calc(100% - 52px);
-      height: 100%;
-    }
-
-    [unresolved] #toolbar {
-      background-color: white;
-      width: 100%;
-      height: 53px;
-      box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0,0,0,0.1);
-    }
-
-    [unresolved] #loading {
-      position: fixed;
-      top: 45%;
-      left: 50%;
-    }
-
-    [unresolved] #loading:after {
-      overflow: hidden;
-      display: inline-block;
-      -webkit-animation: ellipsis steps(4,end) 1s infinite;
-      animation: ellipsis steps(4,end) 1s infinite;
-      content: '\2026'; /* ascii code for the ellipsis character */
-      width: 0px;
-      font-size: 64pt;
-      font-family: 'Courier New';
-      opacity: 0.2;
-      line-height: 1em;
-    }
-
-    @keyframes glow {
-      from {
-        opacity: 1;
-      }
-      to {
-        opacity: 0.4;
-      }
-    }
-
-    @keyframes ellipsis {
-      to {
-        width: 48pt;
-      }
-    }
-
-    @media (max-width: 720px) {
-      [unresolved] #sidebar {
-        display: none;
-      }
-
-      [unresolved] #container {
-        width: 100%;
-      }
-    }
+    <%@include file="index.css"%>
   </style>
 </head>
 
@@ -178,6 +85,18 @@ limitations under the License.
       <span id="loading"></span>
     </div>
   </nuxeo-app>
+  <!-- load page.js before polyfills to ensure window event listener work -->
+  <script src="bower_components/page/page.js"></script>
+
+  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
+  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
+
+  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+
+  <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
+  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
+  <% } %>
 </body>
 
 </html>

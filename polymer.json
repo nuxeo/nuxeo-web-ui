@@ -12,6 +12,7 @@
   ],
   "extraDependencies": [
     "manifest.json",
+    "index.css",
     "bower_components/webcomponentsjs/*",
     "bower_components/page/page.js",
     "bower_components/moment/min/moment-with-locales.min.js",

@@ -17,7 +17,7 @@ limitations under the License.
 
 <!--script src="../bower_components/page/page.js"></script-->
 <script>
-  window.addEventListener('WebComponentsReady', function() {
+  customElements.whenDefined('nuxeo-app').then(function() {
 
     var app = document.querySelector('nuxeo-app');
 
