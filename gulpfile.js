@@ -131,8 +131,9 @@ gulp.task('move-elements', function() {
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe(gulp.dest(dist()));
 
+  var indexCss = gulp.src('index.css').pipe(gulp.dest(dist()));
 
-  return merge(elements, layouts, userGroupManagement, diff);
+  return merge(elements, layouts, userGroupManagement, diff, indexCss);
 });
 
 // Strip unnecessary stuff
