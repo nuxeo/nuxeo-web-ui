@@ -123,6 +123,10 @@ limitations under the License.
         'removed-from-collection': '_documentUpdated'
       },
 
+      ready: function() {
+        performance && performance.mark && performance.mark('nuxeo-browser');
+      },
+
       _documentUpdated: function() {
         this.fire('document-updated');
       },

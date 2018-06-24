@@ -199,6 +199,10 @@ limitations under the License.
         currentTaskDocument: Object
       },
 
+      ready: function() {
+        performance && performance.mark && performance.mark('nuxeo-tasks');
+      },
+
       _process: function(e) {
         this.navigateTo('tasks', e.model.task.id);
       },

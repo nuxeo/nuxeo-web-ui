@@ -541,6 +541,8 @@ limitations under the License.
         }.bind(this));
 
         this.removeAttribute('unresolved');
+
+        performance && performance.mark && performance.mark('nuxeo-app');
       },
 
       refresh: function() {
