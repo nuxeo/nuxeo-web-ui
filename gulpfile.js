@@ -107,6 +107,9 @@ gulp.task('polymer-build', function() {
 
 // Move from 'elements' folder to root
 gulp.task('move-elements', function() {
+  // copy perf.js
+  var perf = gulp.src('performance-analyzer.js').pipe(gulp.dest(dist()));
+
   // copy user-group-management layouts
   var userGroupManagement = gulp.src([
     dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
@@ -133,7 +136,7 @@ gulp.task('move-elements', function() {
 
   var indexCss = gulp.src('index.css').pipe(gulp.dest(dist()));
 
-  return merge(elements, layouts, userGroupManagement, diff, indexCss);
+  return merge(elements, layouts, userGroupManagement, diff, indexCss, perf);
 });
 
 // Strip unnecessary stuff

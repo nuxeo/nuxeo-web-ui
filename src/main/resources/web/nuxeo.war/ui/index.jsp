@@ -97,6 +97,40 @@ limitations under the License.
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
   <% } %>
+
+  <script>
+    performance && performance.mark && performance.mark('index.html');
+  </script>
+
+  <!-- Conditionally load performance analyzer with perf query param -->
+  <script>
+    function getParameterByName(name, url) {
+      if (!url) {
+        url = window.location.href;
+      }
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+      var results = regex.exec(url);
+      if (!results) {
+        return null;
+      }
+      if (!results[2]) {
+        return '';
+      }
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    var perf = getParameterByName('perf');
+    if (perf != null) {
+      var script = document.createElement('script')
+      script.type = 'text/javascript';
+      script.src = 'performance-analyzer.js';
+      script.onload = function() {
+        // display report widget
+        Nuxeo.Performance.displayReportWidget();
+      }
+      document.getElementsByTagName('head')[0].appendChild(script);
+    }
+  </script>
 </body>
 
 </html>
