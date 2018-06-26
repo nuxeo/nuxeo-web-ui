@@ -185,7 +185,8 @@ limitations under the License.
           notify: true
         },
         targetDocument: {
-          type: Object
+          type: Object,
+          observer: '_documentChanged'
         },
         selectedDocument: {
           type: Object
@@ -200,6 +201,15 @@ limitations under the License.
       _observeDocuments: function() {
         if (this.documents) {
           this.fire('nx-clipboard-updated', {docCount: this.documents.length});
+        }
+      },
+
+      _documentChanged: function(newValue) {
+        if (newValue && this.contains(newValue)) {
+          var document = this.$.storage.get(newValue);
+          if (document && document.title !== newValue.title) {
+            this.$.storage.update(document, { title: newValue.title })
+          }
         }
       },
 
@@ -248,9 +258,7 @@ limitations under the License.
       },
 
       _indexOf: function(doc) {
-        return this.documents.findIndex(function(e) {
-          return e.uid === doc.uid;
-        });
+        return this.$.storage._indexOf(doc);
       },
 
       _uids: function() {

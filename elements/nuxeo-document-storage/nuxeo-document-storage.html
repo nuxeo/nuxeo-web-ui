@@ -85,6 +85,25 @@ limitations under the License.
         }
       },
 
+      update: function(doc, properties) {
+        var index = this._indexOf(doc);
+        if (index !== -1) {
+          for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+              this.set("documents." + index + "." + key, properties[key]);
+            }
+          }
+        }
+      },
+
+      get: function(doc) {
+        var index = this._indexOf(doc);
+        if (index !== -1) {
+          return this.documents[index];
+        }
+        return null;
+      },
+
       _indexOf: function(doc) {
         return this.documents.findIndex(function(e) {
           return e.uid === doc.uid;
