@@ -71,19 +71,22 @@ limitations under the License.
     });
 
     page('/admin/:tab?', function(data) {
-      // block access to admin center to non-admin/non-power users
-      var hasPermission = app.currentUser.isAdministrator || app.currentUser.extendedGroups.find(function(grp) {
-        return grp.name === 'powerusers';
-      });
-      if (hasPermission) {
-        if (data.params.tab) {
-          app.selectedAdminTab = data.params.tab;
+      // prevent currentUser from being undefined
+      app.$.nxcon.connect().then(function() {
+        // block access to admin center to non-admin/non-power users
+        var hasPermission = app.currentUser.isAdministrator || app.currentUser.extendedGroups.find(function(grp) {
+          return grp.name === 'powerusers';
+        });
+        if (hasPermission) {
+          if (data.params.tab) {
+            app.selectedAdminTab = data.params.tab;
+          }
+          app.entity = {};
+          app.show('admin');
+        } else {
+          app.showError(404, '', data.path);
         }
-        app.entity = {};
-        app.show('admin');
-      } else {
-        app.showError(404, '', data.path);
-      }
+      });
     });
 
     page('/admin/user-group-management/:type/:id', function(data) {
