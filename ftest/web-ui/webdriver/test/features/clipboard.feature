@@ -1,33 +1,68 @@
 Feature: Clipboard
 
-  I can move and copy from clipboard
+  I can add, remove, move and copy items from/to the clipboard
 
-  Scenario Outline: <action> from clipboard
+  Background:
     Given I have the following documents
-    | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
-    | Workspace  | Src              | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
-    | Workspace  | Dest             | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
-    | File       | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Src             |                  |        |            |
-    | File       | File2            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Src             |                  |        |            |
-    | File       | File3            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Src             |                  |        |            |
-    | File       | File4            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Src             |                  |        |            |
-    | File       | File5            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/Src             |                  |        |            |
-    And I login as "Administrator"
-    When I browse to the document with path "/default-domain/Src"
-    And I select all child documents
+      | doctype   | title | nature  | subjects           | coverage        | creator | path                | collections | tag | file |
+      | Workspace | Src   | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain     |             |     |      |
+      | Workspace | Dest  | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain     |             |     |      |
+      | File      | File1 | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/Src |             |     |      |
+      | File      | File2 | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/Src |             |     |      |
+      | File      | File3 | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/Src |             |     |      |
+    And user "John" exists in group "members"
+    And I login as "John"
+    And I have a clean clipboard
+
+  Scenario: Add documents to the clipboard
+    Given I browse to the document with path "/default-domain/Src"
+    And I select the "File1" document
     Then I can see the selection toolbar
     And I can add selection to clipboard
     When I click the "clipboard" button
-    Then I can see the clipboard has "5" items
-    When I browse to the document with path "/default-domain/Dest"
+    Then I can see the clipboard has "1" items
+    And I can see the clipboard has "File1" document
+
+  Scenario: Remove documents from the clipboard
+    Given I have document with path "/default-domain/Src/File1" on clipboard
+    When I click the "clipboard" button
+    Then I can see the clipboard has "File1" document
+    When I click remove button for "File1" document
+    Then I can see the clipboard has "0" items
+
+  Scenario Outline: <action> from clipboard
+    Given I have the following documents on clipboard
+      | path                      |
+      | /default-domain/Src/File1 |
+      | /default-domain/Src/File2 |
+      | /default-domain/Src/File3 |
+    And I have the following permissions to the documents
+      | permission | path                 |
+      | ReadWrite  | /default-domain/Src  |
+      | ReadWrite  | /default-domain/Dest |
+    And I browse to the document with path "/default-domain/Dest"
     Then I can see the document has "0" children
     When I click the clipboard <action> action
-    Then I can see the document has "5" children
+    Then I can see the document has "3" children
     And I can see the clipboard has "0" items
     When I browse to the document with path "/default-domain/Src"
     Then I can see the document has "<srcNbDocs>" children
 
-    Examples:
-      | action  | srcNbDocs |
-      | move    | 0         |
-      | paste   | 5         |
+   Examples:
+     | action | srcNbDocs |
+     | move   | 0         |
+     | paste  | 3         |
+
+  Scenario: Clipboard is updated when document's title changes
+    Given I have document with path "/default-domain/Src/File1" on clipboard
+    And I have permission ReadWrite for the document with path "/default-domain/Src/File1"
+    When I click the "clipboard" button
+    Then I can see the clipboard has "1" items
+    And I can see the clipboard has "File1" document
+    When I browse to the document with path "/default-domain/Src/File1"
+    Then I can edit the following properties in the File metadata:
+      | name  | value    |
+      | title | newTitle |
+    When I click the "clipboard" button
+    Then I can see the clipboard has "1" items
+    And I can see the clipboard has "newTitle" document

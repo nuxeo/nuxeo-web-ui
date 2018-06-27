@@ -29,4 +29,16 @@ export default class Clipboard extends BasePage {
     copyBtn.click();
   }
 
+  removeItem(title) {
+    const items = this.el.elements('nuxeo-data-list#list .list-item').value;
+    return items.some((item) => {
+      if (item.isVisible() && item.getText(`.list-item-title`).trim() === title) {
+        item.click(`iron-icon.remove`);
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
 }

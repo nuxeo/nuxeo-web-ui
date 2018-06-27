@@ -16,6 +16,17 @@ module.exports = function () {
   this.Given(/^I have permission (\w+) for this document$/, (permission) =>
       fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => { this.doc = d; }));
 
+  this.Given(/^I have permission (\w+) for the document with path "(.+)"$/, (permission, path) =>
+      fixtures.documents.setPermissions(path, permission, this.username).then((d) => { this.doc = d; }));
+
+  this.Given(/^I have the following permissions to the documents$/, (table) => {
+    const promises = [];
+    table.rows().map((row) => {
+      promises.push(fixtures.documents.setPermissions(row[1], row[0], this.username));
+    });
+    return Promise.all(promises);
+  });
+
   this.Given(/^This document has a (major|minor) version$/, (versionType) =>
       fixtures.documents.createVersion(this.doc, versionType).then((d) => { this.doc = d; }));
 
