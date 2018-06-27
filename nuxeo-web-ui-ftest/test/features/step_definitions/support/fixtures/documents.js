@@ -47,10 +47,10 @@ fixtures.documents = {
     saveDocument: true,
   }).execute(),
   setPermissions: (document, permission, username) => nuxeo.operation('Document.AddPermission')
-    .input(document.uid).params({
-      permission,
-      username,
-    }).execute(),
+      .input(typeof document === 'string' ? document : document.uid).params({
+        permission,
+        username,
+      }).execute(),
   delete: (document) => nuxeo.repository().delete(document.path).then(() => {
     liveDocuments.splice(liveDocuments.indexOf(document.uid), 1);
   }),
@@ -89,24 +89,60 @@ fixtures.documents = {
     };
     const uploader = nuxeo.batchUpload();
     return uploader.upload(blob).then(() =>
-      nuxeo.operation('FileManager.Import')
-          .input(uploader)
-          .context(params.context)
-          .params(params)
-          .execute({ headers: { nx_es_sync: 'true' } })
-          .then((docs) => {
-            const doc = docs.entries[0];
-            liveDocuments.push(doc.uid);
-            return doc;
-          })
+        nuxeo.operation('FileManager.Import')
+             .input(uploader)
+             .context(params.context)
+             .params(params)
+             .execute({ headers: { nx_es_sync: 'true' } })
+             .then((docs) => {
+               const doc = docs.entries[0];
+               liveDocuments.push(doc.uid);
+               return doc;
+             })
     );
   },
+  addToClipboard: (document, username) => {
+    (typeof document === 'string' ? fixtures.documents.getDocument(document) : Promise.resolve(document))
+        .then((docObject) => {
+          if (docObject) {
+            const key = `${username}-nuxeo-clipboard`;
+
+            const clipboardDocument = {
+              uid: docObject.uid,
+              title: docObject.title,
+              type: docObject.type,
+              path: docObject.path,
+              lastViewed: new Date(),
+            };
+            if (docObject.contextParameters && docObject.contextParameters.thumbnail &&
+                docObject.contextParameters.thumbnail.url) {
+              clipboardDocument.contextParameters = { thumbnail: { url: docObject.contextParameters.thumbnail.url } };
+            }
+
+            browser.execute((doc, storageKey) => {
+              const clipboard = JSON.parse(localStorage.getItem(storageKey)) || [];
+              clipboard.push(doc);
+              localStorage.setItem(storageKey, JSON.stringify(clipboard));
+            }, clipboardDocument, key);
+          }
+        });
+  },
+  clearClipboard: (username) => {
+    const key = `${username}-nuxeo-clipboard`;
+    browser.execute((storageKey) => {
+      localStorage.removeItem(storageKey);
+    }, key);
+  },
+  getDocument: (ref) => nuxeo.repository().fetch(ref),
 };
 
 module.exports = function () {
-  this.Before(() => nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc; }));
+  this.Before(() => nuxeo.repository().fetch('/default-domain').then((doc) => {
+    this.doc = doc;
+  }));
 
   this.After(() => Promise.all(liveDocuments
-      .map((docUid) => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
-      .then(() => { liveDocuments = []; }));
+          .map((docUid) => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
+          .then(() => {liveDocuments = [];})
+  );
 };

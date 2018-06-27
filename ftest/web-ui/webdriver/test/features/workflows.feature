@@ -17,7 +17,6 @@ Feature: Workflows
 
   Scenario: I cannot start a workflow
     Given I have a File document
-    And I have permission Write for this document
     When I browse to the document
     Then I cannot start a workflow
 
