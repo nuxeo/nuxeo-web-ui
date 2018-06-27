@@ -189,13 +189,13 @@ limitations under the License.
           observer: '_documentChanged'
         },
         selectedDocument: {
-          type: Object
+          type: Object,
+          observer: '_observeSelectedDocument'
         }
       },
 
       observers: [
-        '_observeDocuments(documents.splices)',
-        '_observeSelectedDocument(selectedDocument)'
+        '_observeDocuments(documents.splices)'
       ],
 
       _observeDocuments: function() {
@@ -255,10 +255,6 @@ limitations under the License.
       _remove: function(evt) {
         evt.stopImmediatePropagation();
         this.remove(evt.model.document);
-      },
-
-      _indexOf: function(doc) {
-        return this.$.storage._indexOf(doc);
       },
 
       _uids: function() {
