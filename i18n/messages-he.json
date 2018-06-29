@@ -161,6 +161,7 @@
   "browse.noDocumentWhenFiltered": "There are no documents within these search criteria.",
   "browse.root": "Root",
   "browse.tree.noDocument": "There are no items to display in this location.",
+  "browser.annotations": "Annotations",
   "browser.edit": "Edit",
   "browser.history": "History",
   "browser.permissions": "Permissions",

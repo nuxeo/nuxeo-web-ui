@@ -161,6 +161,7 @@
   "browse.noDocumentWhenFiltered": "Det finns inga dokument med dessa sökkriterier.",
   "browse.root": "Rot",
   "browse.tree.noDocument": "Det finns inga objekt att visa på denna plats.",
+  "browser.annotations": "Annotations",
   "browser.edit": "Redigera",
   "browser.history": "Historik",
   "browser.permissions": "Behörigheter",

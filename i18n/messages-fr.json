@@ -161,6 +161,7 @@
   "browse.noDocumentWhenFiltered": "Aucun document ne correspond à ces critères de recherches.",
   "browse.root": "Racine",
   "browse.tree.noDocument": "Il n'y a aucun élément à afficher à cet endroit.",
+  "browser.annotations": "Annotations",
   "browser.edit": "Modifier",
   "browser.history": "Historique",
   "browser.permissions": "Permissions",

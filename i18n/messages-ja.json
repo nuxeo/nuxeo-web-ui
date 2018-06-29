@@ -161,6 +161,7 @@
   "browse.noDocumentWhenFiltered": "これらの検索条件に合う文書はありません。",
   "browse.root": "ルート",
   "browse.tree.noDocument": "この場所には表示するアイテムがありません。",
+  "browser.annotations": "Annotations",
   "browser.edit": "編集",
   "browser.history": "履歴",
   "browser.permissions": "アクセス許可",
