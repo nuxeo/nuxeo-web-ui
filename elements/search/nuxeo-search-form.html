@@ -636,8 +636,11 @@ limitations under the License.
         this.$.provider.page = 1;
         this.dirty = true;
         if (this.view && this.auto && this.visible) {
-          this.view.reset();
-          this.view.fetch();
+          this.__fetchDebouncer = Polymer.Debouncer.debounce(this.__fetchDebouncer, Polymer.Async.timeOut.after(300),
+            function() {
+              this.view.reset();
+              this.view.fetch();
+            }.bind(this));
         }
       },
 
