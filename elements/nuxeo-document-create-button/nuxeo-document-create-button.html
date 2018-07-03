@@ -21,6 +21,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../nuxeo-document-creation-stats/nuxeo-document-creation-stats.html">
 
 <!--
@@ -81,7 +82,8 @@ limitations under the License.
       <paper-fab id="createBtn"
                  noink icon="nuxeo:add"
                  on-tap="_displayWizard"></paper-fab>
-       <nuxeo-tooltip for="createBtn" position="left">[[i18n('documentCreateButton.tooltip')]]</nuxeo-tooltip>
+       <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
+       <paper-tooltip for="createBtn" position="left">[[i18n('documentCreateButton.tooltip')]]</paper-tooltip>
     </div>
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
