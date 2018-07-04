@@ -4,8 +4,9 @@ Feature: Group
 
   Background:
     Given I have the following groups
-      | name      | label    |
-      | managers  | Managers |
+      | name           | label    |
+      | managers       | Managers |
+      | managers/webui |          |
     Given I login as "Administrator"
     And I click the "administration" button
     And I can see the administration menu
@@ -28,8 +29,9 @@ Feature: Group
 
   Scenario: Edit Groups
     Then I can edit the following groups
-      | name      | newLabel       |
-      | managers  | Managers Group |
+      | name           | newLabel                  |
+      | managers       | Managers Group            |
+      | managers/webui | Managers Group for web ui |
 
   Scenario: Delete Groups
     Then I can delete the following groups
