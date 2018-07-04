@@ -31,6 +31,7 @@ module.exports = function () {
       this.ui.group.editGroupButton.click();
       fixtures.layouts.setValue(this.ui.group.editGroupLabel, row[1]);
       this.ui.group.editGroupDialogButton.click();
+      browser.back();
     });
   });
 
