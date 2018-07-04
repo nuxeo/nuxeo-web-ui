@@ -86,7 +86,7 @@ limitations under the License.
       }
     });
 
-    page('/admin/user-group-management/:type/:id', function(data) {
+    page('/admin/user-group-management/:type/:id(.*)', function(data) {
       app.selectedAdminTab = 'user-group-management';
       app.entity = {type: data.params.type, id: data.params.id};
       app.show('admin');
@@ -96,7 +96,7 @@ limitations under the License.
       page.redirect('/admin/user-group-management/user/' + data.params.id);
     });
 
-    page('/group/:id', function(data) {
+    page('/group/:id(.*)', function(data) {
       app.entity = {type: 'group', id: data.params.id};
       page.redirect('/admin/user-group-management/group/' + data.params.id);
     });
