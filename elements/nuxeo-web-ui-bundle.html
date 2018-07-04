@@ -235,7 +235,11 @@
 
 <nuxeo-slot-content name="clipboardToggleDocumentAction" slot="DOCUMENT_ACTIONS" order="60">
   <template>
-    <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
+    <nuxeo-filter document="[[document]]" expression="document.facets.indexOf('NotCollectionMember') === -1">
+      <template>
+        <nuxeo-clipboard-toggle-button document="[[document]]" clipboard="[[clipboard]]"></nuxeo-clipboard-toggle-button>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 

@@ -79,7 +79,7 @@ limitations under the License.
       },
 
       _isAvailable: function(doc) {
-        return this.isCollectionMember(doc) && !doc.isVersion;
+        return !doc.isVersion;
       },
 
       toggle: function() {
