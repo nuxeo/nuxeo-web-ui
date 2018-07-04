@@ -77,7 +77,9 @@ limitations under the License.
 
     <div id="tray" on-mouseenter="_onMouseEnter" on-mouseleave="_onMouseLeave">
       <div id="shortcuts" class$="[[_animateOpen(shortcutsVisible)]]">
-        <nuxeo-slot slot="DOCUMENT_CREATE_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        <div hidden$="[[!shortcutsVisible]]">
+          <nuxeo-slot slot="DOCUMENT_CREATE_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        </div>
       </div>
 
       <paper-fab id="createBtn"
