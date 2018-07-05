@@ -70,10 +70,6 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <!-- webcomponents polyfill swallows window events: https://github.com/webcomponents/webcomponentsjs/issues/836 -->
-  <!-- load page.js before them to ensure window.load listener works -->
-  <script src="bower_components/page/page.js"></script>
-
   <script>
     // Force all polyfills on
     // window.ShadyDOM = { force: true };
