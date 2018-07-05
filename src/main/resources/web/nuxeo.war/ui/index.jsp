@@ -85,8 +85,6 @@ limitations under the License.
       <span id="loading"></span>
     </div>
   </nuxeo-app>
-  <!-- load page.js before polyfills to ensure window event listener work -->
-  <script src="bower_components/page/page.js"></script>
 
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 

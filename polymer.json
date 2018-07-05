@@ -14,7 +14,6 @@
     "manifest.json",
     "index.css",
     "bower_components/webcomponentsjs/*",
-    "bower_components/page/page.js",
     "bower_components/moment/min/moment-with-locales.min.js",
     "bower_components/jquery/dist/jquery.min.js",
     "bower_components/nuxeo-ui-elements/viewers/pdfjs/**/*",
