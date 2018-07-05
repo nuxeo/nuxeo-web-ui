@@ -36,6 +36,7 @@ limitations under the License.
 <link rel="import" href="nuxeo-app/nuxeo-menu-icon.html">
 <link rel="import" href="nuxeo-app/nuxeo-page.html">
 <link rel="import" href="nuxeo-app/nuxeo-page-item.html">
+<link rel="import" href="nuxeo-app/nuxeo-expired-session.html">
 
 <!-- nuxeo-home -->
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
@@ -202,6 +203,8 @@ limitations under the License.
       }
 
     </style>
+
+    <nuxeo-expired-session message="[[i18n('app.expiredSession.message')]]"></nuxeo-expired-session>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
