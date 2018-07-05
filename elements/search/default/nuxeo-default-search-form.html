@@ -150,9 +150,8 @@ limitations under the License.
           this.set('params.highlight',
             'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
         } else if (this.params.ecm_fulltext) {
-          this.set('params.ecm_fulltext', '');
-          delete this.params.ecm_fulltext;
-          delete this.params.highlight;
+          this.set('params.ecm_fulltext', null);
+          this.set('params.highlight', null);
         }
       },
 

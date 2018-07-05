@@ -90,8 +90,7 @@ limitations under the License.
         if (this.searchTerm) {
           this.set('params.title', this.formatFulltext(this.searchTerm) + '*');
         } else if (this.params.title) {
-          this.set('params.title', '');
-          delete this.params.title;
+          this.set('params.title', null);
         }
       },
 

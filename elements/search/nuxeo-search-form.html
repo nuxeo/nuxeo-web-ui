@@ -228,6 +228,7 @@ limitations under the License.
        schemas="[[schemas]]"
        headers="[[headers]]"
        fetch-aggregates
+       no-param-no-agg$="[[noParamNoAgg]]"
        on-error="_onError">
     </nuxeo-page-provider>
 
@@ -508,6 +509,14 @@ limitations under the License.
          * If `true`, automatically execute the search each time a param is changed.
          */
         auto: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * If `true`, aggregations are not computed if params are empty.
+         * This option speeds the search initialization up in case of big result set.
+         */
+        noParamNoAgg: {
           type: Boolean,
           value: false
         },
