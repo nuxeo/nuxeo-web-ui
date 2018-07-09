@@ -53,10 +53,12 @@ limitations under the License.
 
     <nuxeo-card>
       <div id="heading">
-        <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate}}">
-        </nuxeo-date-picker>
-        <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate}}">
-        </nuxeo-date-picker>
+        <template is="dom-if" if="[[visible]]">
+          <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate}}">
+          </nuxeo-date-picker>
+          <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate}}">
+          </nuxeo-date-picker>
+        </template>
       </div>
     </nuxeo-card>
 
