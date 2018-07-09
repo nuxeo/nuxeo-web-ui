@@ -72,6 +72,9 @@ limitations under the License.
             versions.splice(currentIndex, 1);
             versions.unshift(current);
           }
+          if (this.document.isCheckedOut) {
+            versions.unshift(this.document);
+          }
           this.fire('nuxeo-diff-documents', {
             documents: versions
           });
