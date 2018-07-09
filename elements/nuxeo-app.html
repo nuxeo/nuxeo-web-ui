@@ -540,6 +540,11 @@ limitations under the License.
           }
         }.bind(this));
 
+        // NXP-25311: stop loading bar if an error occures
+        window.onerror = function() {
+          this.loading = false;
+        }.bind(this);
+
         this.removeAttribute('unresolved');
       },
 
