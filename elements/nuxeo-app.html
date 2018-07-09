@@ -619,7 +619,7 @@ limitations under the License.
             return params.indexOf(id) === -1;
           });
           this.$.diff.docIds = null;
-          this.$.diff.docIds = params.concat(otherIds);
+          this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
         } else {
           this.$.diff.docIds = [id1, id2];
         }
