@@ -368,7 +368,7 @@ limitations under the License.
         },
 
         _title: function(document) {
-          return document && (document.title + (this._hasVersions ?
+          return document && (document.title + (this._hasVersions && !document.isCheckedOut ?
             (' (v' + document.properties['uid:major_version'] + '.' + document.properties['uid:minor_version'] + ')')
             : ''));
         },
