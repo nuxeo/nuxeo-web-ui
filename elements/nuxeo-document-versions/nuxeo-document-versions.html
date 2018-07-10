@@ -124,13 +124,13 @@ limitations under the License.
       <nuxeo-document-versions-list id="list">
         <div id="list-items" slot="items">
           <template is="dom-if" if="[[document.isVersion]]">
-            <div id="version-latest" class="version" on-tap="_showLatest">
-              <div class="row title latest">[[_labelLatest(latest)]]</div>
+            <div class="version" on-tap="_showLatest">
+              <div id="version-latest" class="row title latest">[[_labelLatest(latest)]]</div>
             </div>
           </template>
           <template is="dom-repeat" items="[[versions]]" as="item">
-            <div id="version-id-[[index]]" name="version-item" class="version" on-tap="_showVersion">
-              <div class="row title">[[_labelTitle(item)]]</div>
+            <div name="version-item" class="version" on-tap="_showVersion">
+              <div id="version-id-[[index]]" class="row title">[[_labelTitle(item)]]</div>
               <div class="row modified">[[_labelModified(item)]]</div>
             </div>
           </template>
@@ -145,10 +145,10 @@ limitations under the License.
     </div>
 
     <template is="dom-if" if="[[document.isVersion]]">
-      <nuxeo-tooltip for="version-latest" position="left" offset="0">[[latest.title]]</nuxeo-tooltip>
+      <nuxeo-tooltip for="version-latest" position="right">[[latest.title]]</nuxeo-tooltip>
     </template>
     <template is="dom-repeat" items="[[versions]]" as="item">
-      <nuxeo-tooltip for="version-id-[[index]]" position="left" offset="0">[[item.title]]</nuxeo-tooltip>
+      <nuxeo-tooltip for="version-id-[[index]]" position="right">[[item.title]]</nuxeo-tooltip>
     </template>
 
   </template>
