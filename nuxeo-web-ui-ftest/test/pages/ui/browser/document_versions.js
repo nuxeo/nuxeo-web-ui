@@ -65,6 +65,6 @@ export default class DocumentVersions extends BasePage {
   }
 
   listItemTitle(index) {
-    return this.list.element(`#version-id-${index} .title`);
+    return this.list.element(`#version-id-${index}.title`);
   }
 }
