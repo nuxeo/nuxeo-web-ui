@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "Error while restoring the documents",
   "app.documents.untrashed.success": "Documents successfully restored",
   "app.expiredSearch": "Kadaluarsa",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Favorit",
   "app.homeNotFound": "Tata letak beranda tidak ditemukan",
   "app.nxqlSearch": "Pencarian NXQL",

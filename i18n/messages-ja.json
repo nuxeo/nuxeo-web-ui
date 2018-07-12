@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "文書を復元中のエラー",
   "app.documents.untrashed.success": "文書が正常に復元されました",
   "app.expiredSearch": "期限切れ",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "お気に入り",
   "app.homeNotFound": "ホームのレイアウトが見つかりません",
   "app.nxqlSearch": "NXQL検索",

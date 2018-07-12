@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "Errorea dokumentuak leheneratzean",
   "app.documents.untrashed.success": "Dokumentuak behar bezala leheneratuta",
   "app.expiredSearch": "Iraungita",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Gogokoak",
   "app.homeNotFound": "Ez da hasierarako diseinua aurkitu",
   "app.nxqlSearch": "NXQL bilaketa",

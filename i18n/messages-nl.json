@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "Fout bij het herstellen van de documenten",
   "app.documents.untrashed.success": "Documenten met succes hersteld",
   "app.expiredSearch": "Verlopen",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Favorieten",
   "app.homeNotFound": "Indeling beginpagina niet gevonden",
   "app.nxqlSearch": "NXQL-zoekopdracht",
