@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "Errore durante il ripristino dei documenti",
   "app.documents.untrashed.success": "Documenti ripristinati",
   "app.expiredSearch": "Scaduto",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Preferiti",
   "app.homeNotFound": "Disposizione pagina iniziale non trovata",
   "app.nxqlSearch": "Ricerca NXQL",

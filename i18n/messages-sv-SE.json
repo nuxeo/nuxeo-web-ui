@@ -68,6 +68,7 @@
   "app.documents.untrashed.error": "Fel när dokumenten återställdes",
   "app.documents.untrashed.success": "Dokumenten återställdes",
   "app.expiredSearch": "Har gått ut",
+  "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Favoriter",
   "app.homeNotFound": "Startlayout hittades inte",
   "app.nxqlSearch": "NXQL Search",
