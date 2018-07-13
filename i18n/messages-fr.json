@@ -68,7 +68,7 @@
   "app.documents.untrashed.error": "Erreur lors de la restauration des documents",
   "app.documents.untrashed.success": "Documents restaurés avec succès",
   "app.expiredSearch": "Documents expirés",
-  "app.expiredSession.message": "Your session has expired! Click here to login again.",
+  "app.expiredSession.message": "Votre session a expiré. Cliquez ici pour vous identifier à nouveau.",
   "app.favorites": "Favoris",
   "app.homeNotFound": "Page d'accueil introuvable",
   "app.nxqlSearch": "Recherche NXQL",
