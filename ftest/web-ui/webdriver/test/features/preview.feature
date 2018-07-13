@@ -21,7 +21,12 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | marked-element     |
+      | sample.txt | iframe             |
+
+  Scenario: Previewer for Note document
+    When I have a Text Note
+    And I browse to the document
+    Then I can see the inline marked-element previewer
 
   Scenario Outline: Previewer for File document with different types of blobs as content
     When I have a File document
@@ -37,7 +42,7 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | marked-element     |
+      | sample.txt | iframe             |
 
   Scenario Outline: Previewer for File document with different types of blobs as attachment
     When I have a File document
@@ -53,4 +58,4 @@ Feature: Content Preview
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
       | sample.odt | iframe             |
-      | sample.txt | marked-element     |
+      | sample.txt | iframe             |
