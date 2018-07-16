@@ -16,7 +16,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-download-button.html">
@@ -79,6 +78,20 @@ limitations under the License.
         background-color: rgba(0,0,0,0.1);
         width: 100%;
         height: 190px;
+        position: relative;
+      }
+
+      .thumbnailContainer img {
+        height: auto;
+        width: auto;
+        max-height: 100%;
+        max-width: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
       }
 
       .dataContainer {
@@ -176,9 +189,9 @@ limitations under the License.
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
-        on-tap="handleClick">
-      </iron-image>
+      <div class="thumbnailContainer" on-tap="handleClick">
+        <img src="[[_thumbnail(doc)]]">
+      </div>
       <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
         <div class="dataContainer">
           <div class="title">[[doc.title]]</div>
