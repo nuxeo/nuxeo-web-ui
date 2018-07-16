@@ -18,7 +18,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-download-button.html">
@@ -74,6 +73,20 @@ limitations under the License.
         background-color: rgba(0,0,0,0.1);
         width: 10rem;
         height: 10rem;
+        position: relative;
+      }
+
+      .thumbnailContainer img {
+        height: auto;
+        width: auto;
+        max-height: 100%;
+        max-width: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
       }
 
       .dataContainer {
@@ -186,10 +199,8 @@ limitations under the License.
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
-        <div class="vignette">
-            <iron-image src="[[_thumbnail(doc)]]" sizing="cover" position="center" class="thumbnailContainer"
-              on-tap="handleClick">
-          </iron-image>
+        <div class="vignette thumbnailContainer" on-tap="handleClick">
+          <img src="[[_thumbnail(doc)]]">
         </div>
         <div class="dataContainer flex" on-tap="handleClick">
           <div class="horizontal layout center">
