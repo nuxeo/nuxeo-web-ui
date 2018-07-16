@@ -29,14 +29,23 @@ limitations under the License.
     <style>
       :host {
         height: 32px;
+        width: 32px;
+        position: relative;
       }
 
       img {
+        height: auto;
+        width: auto;
+        max-height: 100%;
+        max-width: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto 8px auto auto;
         box-sizing: border-box;
-        height: 32px;
-        width: 32px;
         border-radius: 3px;
-        margin-right: 8px;
         filter: brightness(1.2);
         -webkit-filter: brightness(1.2);
       }
