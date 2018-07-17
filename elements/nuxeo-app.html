@@ -479,6 +479,10 @@ limitations under the License.
             this.showError(404, e.reason.message, this._errorUrl());
           }
         }.bind(this));
+
+        window.onerror = function() {
+          this.loading = false;
+        }.bind(this);
       },
 
       refresh: function() {
