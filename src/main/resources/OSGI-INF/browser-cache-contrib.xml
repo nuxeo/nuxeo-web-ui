@@ -6,7 +6,7 @@
     <!-- All Web UI resources cached for 24 hours -->
     <!-- Trade off between agressive caching and HF applying within 24 hours -->
     <filterConfig name="ui_static" cached="true" cacheTime="86400">
-      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*</pattern>
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/.+</pattern>
     </filterConfig>
   </extension>
 </component>
