@@ -8,4 +8,5 @@
     <filterConfig name="ui_static" cached="true" cacheTime="86400">
       <pattern>${org.nuxeo.ecm.contextPath}/ui/.*</pattern>
     </filterConfig>
+  </extension>
 </component>
