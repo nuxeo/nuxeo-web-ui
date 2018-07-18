@@ -223,12 +223,12 @@ limitations under the License.
        provider="[[provider]]"
        page-size="[[pageSize]]"
        aggregations="{{aggregations}}"
-       enrichers="thumbnail, permissions"
+       enrichers="[[enrichers]]"
        params="[[params]]"
        quick-filters="{{quickFilters}}"
        schemas="[[schemas]]"
        loading="{{loading}}"
-       headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+       headers="[[headers]]"
        fetch-aggregates
        on-error="_onError">
     </nuxeo-page-provider>
@@ -395,6 +395,22 @@ limitations under the License.
          **/
         params: {
           type: Object
+        },
+        /**
+         * List of content enrichers passed on to `provider`.
+         * Already set by default are thumbnail and permissions.
+         */
+        enrichers: {
+          type: String,
+          value: 'thumbnail, permissions'
+        },
+        /**
+         * The headers passed on to `provider`.
+         * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
+         */
+        headers: {
+          type: Object,
+          value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
         },
         /**
          * The schemas passed on to `provider`.
