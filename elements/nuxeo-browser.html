@@ -93,7 +93,8 @@ limitations under the License.
         selectedTab: {
           type: String,
           value: 'view',
-          notify: true
+          notify: true,
+          observer: '_updateUrl'
         },
         cvParams: {
           type: Object,
@@ -151,6 +152,34 @@ limitations under the License.
 
       _navigateToView: function() {
         this.navigateTo('browse', this.document.path);
+      },
+
+      _updateUrl: function() {
+        var currentUrl = window.location.href;
+        var newUrl;
+        var queryParamsIdx = currentUrl.lastIndexOf('?');
+        var queryParams;
+        if (queryParamsIdx > -1) {
+          newUrl = currentUrl.slice(0, queryParamsIdx);
+          queryParams = new URLSearchParams(currentUrl.substring(queryParamsIdx));
+        } else {
+          newUrl = currentUrl;
+          queryParams = new URLSearchParams();
+        }
+        // remove 'p' queryParam if current tab is the default one
+        if (this.selectedTab === this.properties.selectedTab.value) {
+          queryParams.delete('p');
+        } else {
+          queryParams.set('p', this.selectedTab);
+        }
+        if (queryParams.toString().length > 0) {
+          newUrl += '?' + queryParams.toString();
+        }
+        if (newUrl !== currentUrl) {
+          history.pushState(null, window.title, newUrl);
+        } else {
+          history.replaceState(null, window.title, newUrl);
+        }
       }
 
     });
