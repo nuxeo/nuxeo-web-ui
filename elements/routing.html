@@ -51,7 +51,8 @@ limitations under the License.
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
-      app.load('browse', '', '/' + data.params[0], 'view');
+      var searchParams = new URLSearchParams(data.querystring);
+      app.load('browse', '', '/' + data.params[0], searchParams.get('p') || 'view');
     });
 
     page('/search/:searchName', function(data) {
