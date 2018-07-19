@@ -827,6 +827,16 @@ limitations under the License.
           }
         }.bind(this));
         this.form.addEventListener('trigger-search', this._search.bind(this));
+        if (!this.auto) {
+          this.form.addEventListener("keypress", this._keyPressedListener.bind(this));
+        }
+      },
+
+      _keyPressedListener: function(e) {
+        // When Enter is pressed on an input element, the search should be triggered.
+        if (e.keyCode === 13 && e.composedPath()[0].tagName.toLowerCase() === 'input') {
+          this._search();
+        }
       },
 
       _onError: function(e) {
