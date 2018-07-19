@@ -26,8 +26,10 @@ limitations under the License.
       /* document actions */
       .document-actions {
         @apply --layout-horizontal;
-        @apply --layout-end-justified;
-        padding: 0 0 16px;
+        @apply --layout-center;
+        @apply --layout-justified;
+        height: var(--nuxeo-drawer-header-height);
+        padding: 0 16px;
       }
 
       .document-actions paper-icon-button {
@@ -38,6 +40,10 @@ limitations under the License.
         @apply --nuxeo-action-hover;
       }
 
+      paper-listbox {
+        padding: 0;
+      }
+
       /* document views items (pills) */
       #documentViewsItems {
         @apply --layout-horizontal;
@@ -45,11 +51,10 @@ limitations under the License.
       }
 
       @media (max-width: 1024px) {
-        paper-listbox {
-          padding-right: 7rem;
+        .document-actions {
+          padding-right: 32px;
         }
       }
-
     </style>
 
 
@@ -58,25 +63,23 @@ limitations under the License.
 
       <div slot="header">
         <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
-        <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-          <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
-        </paper-listbox>
-      </div>
-
-      <div>
-
         <template is="dom-if" if="[[!isTrashed(document)]]">
           <div class="document-actions">
             <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </div>
         </template>
-
+      </div>
+      <div slot="tabs">
+        <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+          <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+        </paper-listbox>
+      </div>
+      <div>
         <div id="nxContent">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
           </iron-pages>
         </div>
-
       </div>
     </nuxeo-page>
 
