@@ -23,13 +23,17 @@ Nuxeo.Performance = {
   /** metrics **/
 
   getFirstPaint: function() {
-    if (typeof PerformancePaintTiming === 'undefined') {
-      return null;
+    if (typeof PerformancePaintTiming !== 'undefined') {
+      var fp = performance.getEntriesByType('paint').find(function(entry) {
+        return entry.name === 'first-paint';
+      });
+      return fp ? Math.round(fp.startTime) : null;
+    } else {
+      // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
+      var fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
+      return fpt ? fpt - performance.timing.fetchStart : null;
     }
-    var fp = performance.getEntriesByType('paint').find(function(entry) {
-      return entry.name === 'first-paint';
-    });
-    return fp ? Math.round(fp.startTime) : null;
+
   },
 
   getFirstContentfulPaint: function() {
@@ -54,20 +58,6 @@ Nuxeo.Performance = {
       return null;
     }
     return performance.timing.domContentLoadedEventEnd - performance.timing.fetchStart;
-  },
-
-  getDomInteractive: function() {
-    if (!performance || !performance.timing) {
-      return null;
-    }
-    return performance.timing.domInteractive - performance.timing.fetchStart;
-  },
-
-  getDomComplete: function() {
-    if (!performance || !performance.timing) {
-      return null;
-    }
-    return performance.timing.domComplete - performance.timing.fetchStart;
   },
 
   /** optional metrics **/
@@ -144,7 +134,8 @@ Nuxeo.Performance = {
         return {
           url: entry.name,
           type: entry.initiatorType,
-          size: entry.transferSize,
+          transfered: entry.transferSize,
+          size: entry.decodedBodySize,
           startTime: Math.round(entry.startTime),
           duration: Math.round(entry.duration)
         }
@@ -163,18 +154,62 @@ Nuxeo.Performance = {
     });
   },
 
-  /** reporting **/
-
-  mark: function(name) {
-    if (performance && performance.mark) {
-      performance.mark(name);
+  getNetworkStats: function() {
+    var resources = this.getResources();
+    var lastResource = this.getResources().sort(function(a, b) {
+      return a.startTime > b.startTime;
+    }).pop();
+    return {
+      finish: lastResource && (lastResource.startTime + lastResource.duration),
+      requestCount: resources.length,
+      transferSize: resources.map(function(resource) {
+        return resource.transfered;
+      }).reduce(function(a, b) {
+        return a + b;
+      }),
+      size: resources.map(function(resource) {
+        return resource.size;
+      }).reduce(function(a, b) {
+        return a + b;
+      })
     }
   },
 
-  measure: function(name, starMark, endMark) {
-    if (performance && performance.measure) {
-      performance.measure(name, starMark, endMark);
+  /** reporting **/
+
+  mark: function() {
+    if (performance && performance.mark) {
+      performance.mark.apply(performance, arguments);
     }
+  },
+
+  clearMarks: function() {
+    if (performance && performance.clearMarks) {
+      performance.clearMarks.apply(performance, arguments);
+    }
+  },
+
+  markUnique: function() {
+    this.clearMarks(arguments[0]);
+    this.mark.apply(this, arguments);
+  },
+
+  measure: function() {
+    if (performance && performance.measure) {
+      // temporary fix for Edge: https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/4933422/
+      performance.measure.apply(performance, Array.from(arguments).filter(Boolean));
+    }
+  },
+
+  clearMeasures: function() {
+    if (performance && performance.clearMarks) {
+      performance.clearMeasures.apply(performance, arguments);
+    }
+  },
+
+  measureUnique: function() {
+    this.clearMeasures(arguments[0]);
+    this.measure.apply(this, arguments);
   },
 
   report: function(options) {
@@ -182,12 +217,12 @@ Nuxeo.Performance = {
       options = {};
     }
     var result = {
-      firstPaint: this.getFirstPaint(),
-      firstContentfulPaint: this.getFirstContentfulPaint(),
       domContentLoaded: this.getDomContentLoaded(),
+      firstContentfulPaint: this.getFirstContentfulPaint(),
+      firstPaint: this.getFirstPaint(),
       onLoad: this.getOnLoad(),
-      domInteractive: this.getDomInteractive(),
-      domComplete: this.getDomComplete()
+      userAgent: this.getUserAgent(),
+      userTiming: this.getUserTiming()
     }
     if (options.deviceType || options.all) {
       result.deviceType = this.getDeviceType();
@@ -198,17 +233,14 @@ Nuxeo.Performance = {
     if (options.url || options.all) {
       result.url = this.getUrl();
     }
-    if (options.userAgent || options.all) {
-      result.userAgent = this.getUserAgent();
-    }
-    if (options.userTiming || options.all) {
-      result.userTiming = this.getUserTiming();
-    }
     if (options.longTasks || options.all) {
       result.longTasks = this.getLongTasks();
     }
     if (options.resources || options.all) {
       result.resources = this.getResources();
+    }
+    if (options.networkStats || options.all) {
+      result.networkStats = this.getNetworkStats();
     }
     return result;
   }
