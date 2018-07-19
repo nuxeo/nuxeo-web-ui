@@ -556,6 +556,8 @@ limitations under the License.
         }.bind(this);
 
         this.removeAttribute('unresolved');
+
+        Nuxeo.Performance.mark('nuxeo-app.ready');
       },
 
       refresh: function() {
@@ -1046,7 +1048,7 @@ limitations under the License.
         return this.$.nxcon.url + '/logout';
       },
 
-      _pageChanged: function(page) {
+      _pageChanged: function(page, oldPage) {
         if (page !== null) {
           var el = this.$.pages.selectedItem;
           // selectItem might be undefined
@@ -1058,6 +1060,23 @@ limitations under the License.
             this.showError(404, '', page);
             return;
           }
+          // if we are switching from a previous page, then we need to remove the performance listener from it
+          // and create a mark to be used for next measurements
+          if (oldPage !== undefined) {
+            var oldPageEl = Polymer.dom(this.$.pages).querySelector('[name=' + oldPage + ']');
+            oldPageEl.removeEventListener('dom-change', this.__performanceListener);
+            Nuxeo.Performance.markUnique('nuxeo-app.page-changed');
+          }
+          // add performance listener to current page to track the last dom-change event
+          this.__performanceListener = function() {
+            var name = el.tagName.toLocaleLowerCase() + '.dom-changed';
+            // a measure will be performed from the last page switch or, if this is the first page load,
+            // from when navigation started to the current moment
+            var mark = performance.getEntriesByName('nuxeo-app.page-changed', 'mark').pop();
+            Nuxeo.Performance.measureUnique(name, mark && mark.name);
+            Nuxeo.Performance.markUnique('nuxeo-app.page-loaded');
+          }.bind(this);
+          el.addEventListener('dom-change', this.__performanceListener);
           this.loading = true;
           // check if page is already registered (vulcanized)
           if (!(el instanceof Polymer.Element)) {
