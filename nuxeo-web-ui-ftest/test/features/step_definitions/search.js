@@ -92,7 +92,9 @@ module.exports = function () {
       this.ui.results.noResults.waitForVisible().should.be.true;
     } else {
       this.ui.results.getResults(displayMode).waitForVisible();
-      this.ui.results.resultsCount(displayMode).should.be.above(parseInt(minNumberOfResults));
+      driver.waitUntil(() =>
+        this.ui.results.resultsCount(displayMode) > parseInt(minNumberOfResults)
+      );
     }
   });
   this.Then(/^I edit the results columns to show (.+)$/, (heading) => {
