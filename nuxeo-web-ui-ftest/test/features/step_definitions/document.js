@@ -48,19 +48,11 @@ module.exports = function () {
   this.Given(/^this document has file "(.+)" for attachment/, (file) =>
       fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true));
 
-  this.When(/^I browse to the document$/, () => {
-    driver.url(`#!/browse${this.doc.path}`);
-    this.ui.browser.waitForVisible();
-    this.ui.browser.breadcrumb.waitForVisible();
-    this.ui.browser.currentPage.waitForVisible();
-  });
+  this.When(/^I browse to the document$/, () => this.ui.browser.browseTo(this.doc.path));
 
-  this.When(/^I browse to the document with path "(.+)"$/, (path) => {
-    driver.url(`#!/browse`.concat(path));
-    this.ui.browser.waitForVisible();
-    this.ui.browser.breadcrumb.waitForVisible();
-    this.ui.browser.currentPage.waitForVisible();
-  });
+  this.When(/^I browse to the "(.*)" document page$/, (page) => this.ui.browser.browseTo(`${this.doc.path}?p=${page}`));
+
+  this.When(/^I browse to the document with path "(.+)"$/, (path) => this.ui.browser.browseTo(path));
 
   this.Then(/^I can't view the document$/, () => {
     driver.url(`#!/browse${this.doc.path}`);

@@ -70,4 +70,6 @@ module.exports = function () {
     results.getResults(displayMode).waitForVisible();
     results.resultsCount(displayMode).toString().should.equal(numberOfResults);
   });
+
+  this.Then(/^I can see the permissions page$/, () => this.ui.browser.permissionsView.waitForVisible());
 };
