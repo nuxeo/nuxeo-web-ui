@@ -31,21 +31,22 @@ limitations under the License.
       :host {
         outline: none;
         user-select: none;
-        border-radius: 16px;
         text-transform: uppercase;
         cursor: pointer;
-        color: var(--nuxeo-app-header);
-        margin: 0 0 0 8px;
-        padding: 5px 16px;
-        border: 1px solid var(--nuxeo-app-header-pill);
+        color: var(--disabled-text-color);
+        margin: 0 0 0 16px;
+        padding: 12px 6px 8px 6px;
+        border-bottom: 2px solid transparent;
       }
 
       :host(:hover) {
-        border: 1px solid var(--nuxeo-app-header-pill-hover);
+        border-bottom: 2px solid var(--nuxeo-app-header-pill-hover);
+        color: var(--nuxeo-app-header-pill-hover);
       }
 
       :host(.iron-selected) {
-        border: 1px solid var(--nuxeo-app-header-pill-active);
+        border-bottom: 2px solid var(--nuxeo-app-header-pill-active);
+        color: var(--nuxeo-app-header-pill-active);
       }
     </style>
 

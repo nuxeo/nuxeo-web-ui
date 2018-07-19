@@ -37,12 +37,15 @@ limitations under the License.
       paper-listbox {
         @apply --layout-horizontal;
         --paper-listbox-background-color: transparent;
+        padding: 0;
       }
     </style>
 
     <nuxeo-page>
       <div slot="header">
         <span class="flex">[[i18n('analytics.heading')]]</span>
+      </div>
+      <div slot="tabs">
         <paper-listbox selected="{{selected}}" attr-for-selected="name">
           <nuxeo-slot slot="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>

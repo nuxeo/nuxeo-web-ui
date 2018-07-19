@@ -38,6 +38,10 @@ limitations under the License.
         --paper-listbox-background-color: transparent;
       }
 
+      paper-listbox {
+        padding: 0;
+      }
+
       @media (max-width: 1024px) {
         paper-listbox {
           padding-right: 7rem;
@@ -47,6 +51,8 @@ limitations under the License.
     <nuxeo-page>
       <div slot="header">
         <span class="flex">[[i18n('cloudServices.heading')]]</span>
+      </div>
+      <div slot="tabs">
         <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
           <nuxeo-page-item name="providers" label="cloudServices.providers"></nuxeo-page-item>
           <nuxeo-page-item name="tokens" label="cloudServices.tokens"></nuxeo-page-item>

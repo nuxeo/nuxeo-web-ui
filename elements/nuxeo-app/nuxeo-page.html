@@ -53,7 +53,16 @@ limitations under the License.
         color: var(--nuxeo-app-header);
         background: var(--nuxeo-app-header-background);
         box-shadow: var(--nuxeo-app-header-box-shadow);
-        z-index: 3;
+        overflow-x: auto;
+      }
+
+      #tabs {
+        flex: 0 0 auto;
+        background: var(--nuxeo-app-header-background);
+        box-shadow: var(--nuxeo-app-header-box-shadow);
+        margin-top: 1px;
+        overflow-x: auto;
+        z-index: 1;
       }
 
       #header::slotted(*), /* chrome, safari */
@@ -77,9 +86,14 @@ limitations under the License.
 
     <div class="page">
       <div class="toolbar" id="toolbar">
-          <slot id="header" slot="header" name="header"></slot>
+        <slot id="header" slot="header" name="header"></slot>
       </div>
-      <div id="content"><slot></slot></div>
+      <div id="tabs">
+        <slot name="tabs"></slot>
+      </div>
+      <div id="content">
+        <slot></slot>
+      </div>
     </div>
 
   </template>
