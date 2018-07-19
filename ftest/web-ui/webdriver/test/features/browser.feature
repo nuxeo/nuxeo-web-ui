@@ -22,3 +22,8 @@ Feature: Browser
     Then I can see the "Templates" browser tree node
     When I click "Templates" in the browser tree
     Then I can see the "Templates" document
+
+  Scenario: Browse to a document page
+    Given I have a File document
+    When I browse to the "permissions" document page
+    Then I can see the permissions page

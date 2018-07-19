@@ -19,6 +19,13 @@ export default class Browser extends BasePage {
     }
   }
 
+  browseTo(path) {
+    driver.url(`#!/browse${path}`);
+    this.waitForVisible();
+    this.breadcrumb.waitForVisible();
+    this.currentPage.waitForVisible();
+  }
+
   get view() {
     return this._section('view');
   }
