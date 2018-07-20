@@ -74,3 +74,8 @@ Feature: Search
     Then I can see 5 search results
     When I clear the author search on test_search
     Then I can see more than 5 search results
+
+  Scenario: Manual Search Fulltext
+    When I click the "manualSearch" button
+    And I perform a fulltext search for hello on manualSearch
+    Then I can see 2 search results
