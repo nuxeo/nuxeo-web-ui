@@ -75,8 +75,8 @@ export default class Search extends Results {
 
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
-      this.el.element(`#searchInput #nativeInput`).waitForVisible();
-      this.el.element(`#searchInput #nativeInput`).setValue(searchTerm);
+      this.el.element(`#searchInput .input-element input`).waitForVisible();
+      this.el.element(`#searchInput .input-element input`).setValue(searchTerm);
       driver.keys('Enter');
     } else {
       this.setFieldValue(searchType, searchTerm);
