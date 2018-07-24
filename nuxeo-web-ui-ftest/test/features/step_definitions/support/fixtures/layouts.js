@@ -44,14 +44,16 @@ const suggestionSet = (element, value) => {
   }
 };
 global.fieldRegistry.register('nuxeo-input',
-                              (element) => element.element('#nativeInput').getValue(),
-                              (element, value) => { element.element('#nativeInput').setValue(value); });
+                              (element) => element.element('.input-element input').getValue(),
+                              (element, value) => {
+                                element.element('.input-element input').setValue(value);
+                              });
 global.fieldRegistry.register('nuxeo-select',
                               (element) => {
-                                element.element('#input').getValue();
+                                element.element('.input-element input').getValue();
                               },
                               (element, value) => {
-                                element.element('#input').click();
+                                element.element('.input-element input').click();
                                 element.waitForExist('paper-item');
                                 const item = element.elementByTextContent('paper-item', value);
                                 item.waitForExist();
@@ -105,8 +107,10 @@ global.fieldRegistry.register('nuxeo-tag-suggestion',
                                suggestionGet,
                                suggestionSet);
 global.fieldRegistry.register('paper-input',
-                              (element) => element.element('#nativeInput').getValue(),
-                              (element, value) => { element.element('#nativeInput').setValue(value); });
+                              (element) => element.element('.input-element input').getValue(),
+                              (element, value) => {
+                                element.element('.input-element input').setValue(value);
+                              });
 global.fieldRegistry.register('paper-radio-button',
                               (element) => element.element('#radioContainer').getAttribute('multiple'),
                               (element, value) => {
