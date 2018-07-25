@@ -242,10 +242,10 @@ limitations under the License.
             this._handleBlobListUploaded();
           }
         } else {
-          this.document.properties[this.xpath] = {
+          this.set('document.properties.' + this.xpath, {
             'upload-batch': data.detail.batchId,
             'upload-fileId': '0'
-          };
+          });
           this._handleBlobUploaded();
         }
       },
@@ -299,7 +299,9 @@ limitations under the License.
         this.progress = false;
         if (this.immediate) {
           this._hasFiles = false;
-          this.fire('document-updated');
+          this.$.doc.get().then(function(response) {
+            this.set('document.properties.' + this.xpath, response.properties[this.xpath]);
+          }.bind(this));
         }
       },
 
