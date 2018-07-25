@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "未选择要进行比较的文档。",
   "documentAttachments.empty": "沒有附件",
   "documentAttachments.heading": "附件",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "附件已上传",
   "documentContentView.datatable.header.author": "作者",
   "documentContentView.datatable.header.coverage": "覆盖范围",

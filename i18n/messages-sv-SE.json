@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "Inga dokument har valts för jämförelse.",
   "documentAttachments.empty": "Det finns inga bilagor",
   "documentAttachments.heading": "Bilagor",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Bilaga/bilagor laddades upp",
   "documentContentView.datatable.header.author": "Författare",
   "documentContentView.datatable.header.coverage": "Täckning",

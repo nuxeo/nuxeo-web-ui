@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "No documents were selected for comparison.",
   "documentAttachments.empty": "Tidak ada lampiran",
   "documentAttachments.heading": "Lampiran",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Lampiran(s) yang diunggah",
   "documentContentView.datatable.header.author": "Penulis",
   "documentContentView.datatable.header.coverage": "Cakupan",

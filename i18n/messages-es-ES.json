@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "No se han seleccionado documentos para la comparación.",
   "documentAttachments.empty": "No hay archivos adjuntos",
   "documentAttachments.heading": "Ficheros adjuntos",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Anexo(s) subido(s)",
   "documentContentView.datatable.header.author": "Autor",
   "documentContentView.datatable.header.coverage": "Cobertura",

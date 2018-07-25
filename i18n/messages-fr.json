@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "Aucun document à comparer.",
   "documentAttachments.empty": "Il n'y a pas de pièces jointes.",
   "documentAttachments.heading": "Fichiers complémentaires",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Fichier complémentaire ajouté",
   "documentContentView.datatable.header.author": "Contributeur",
   "documentContentView.datatable.header.coverage": "Couverture",

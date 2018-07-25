@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "Es wurden keine Dokumente zum Vergleich ausgewählt.",
   "documentAttachments.empty": "Es sind keine Anhänge vorhanden",
   "documentAttachments.heading": "Anhänge",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Anlage(n) hochgeladen",
   "documentContentView.datatable.header.author": "Autor",
   "documentContentView.datatable.header.coverage": "Abdeckung",

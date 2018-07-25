@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "比較する文書が選択されませんでした。",
   "documentAttachments.empty": "添付ファイルがありません。",
   "documentAttachments.heading": "添付ファイル",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "添付ファイルアップロード済み",
   "documentContentView.datatable.header.author": "作成者",
   "documentContentView.datatable.header.coverage": "地域",

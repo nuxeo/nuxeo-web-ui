@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "Nessun documento selezionato per il confronto.",
   "documentAttachments.empty": "Nessun allegato",
   "documentAttachments.heading": "Allegati",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Allegati caricati",
   "documentContentView.datatable.header.author": "Autore",
   "documentContentView.datatable.header.coverage": "Copertura",

@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "Er zijn geen documenten geselecteerd voor vergelijking.",
   "documentAttachments.empty": "Er zijn geen bijlagen",
   "documentAttachments.heading": "Bijlagen",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Bijlage(n) geüpload",
   "documentContentView.datatable.header.author": "Auteur",
   "documentContentView.datatable.header.coverage": "Dekking",

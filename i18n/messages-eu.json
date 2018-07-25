@@ -303,6 +303,7 @@
   "diffPage.noDocuments": "No documents were selected for comparison.",
   "documentAttachments.empty": "Ez dago eranskinik",
   "documentAttachments.heading": "Eranskinak",
+  "documentAttachments.upload.add": "Add attachment",
   "documentAttachments.upload.uploaded": "Eranskina(k) igota",
   "documentContentView.datatable.header.author": "Egilea",
   "documentContentView.datatable.header.coverage": "Estaldura",
