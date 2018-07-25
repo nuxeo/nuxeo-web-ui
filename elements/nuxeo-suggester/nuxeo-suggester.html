@@ -231,10 +231,11 @@ limitations under the License.
     <div hidden$="[[!toggled]]">
       <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
-        <div id="searchBar" on-tap="_focusSearch">
+        <div id="searchBar">
           <paper-input noink id="searchInput"
                       value="{{searchTerm}}"
                       type="search"
+                      auto-focus
                       label="[[i18n('suggester.label')]]"
                       no-label-float></paper-input>
         </div>
@@ -257,7 +258,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle" on-keyup="_focusSearch"></paper-icon-button>
+    <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle"></paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
@@ -360,10 +361,6 @@ limitations under the License.
 
       _itemClicked: function() {
         this.toggle();
-      },
-
-      _focusSearch: function() {
-        this.$.searchInput.focus();
       }
     });
   </script>
