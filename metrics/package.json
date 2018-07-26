@@ -1,0 +1,15 @@
+{
+  "name": "nuxeo-web-ui-metrics",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ."
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "cleankill": "^2.0.0",
+    "sauce-connect-launcher": "^1.2.4",
+    "uuid": "^3.3.2",
+    "webdriverio": "^4.13.0"
+  }
+}

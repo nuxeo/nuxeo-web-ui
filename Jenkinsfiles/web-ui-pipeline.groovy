@@ -9,7 +9,8 @@ properties([
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?', name: 'SAUCE_LAB'],
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
             [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the functionnal tests be skipped?', name: 'SKIP_IT_TESTS'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the element\'s tests be skipped?', name: 'SKIP_UNIT_TESTS']
+            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the element\'s tests be skipped?', name: 'SKIP_UNIT_TESTS'],
+            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the metrics report be generated?', name: 'GENERATE_METRICS']
         ]
     ],
     pipelineTriggers([])
@@ -165,12 +166,13 @@ timestamps {
                         if (plugin || el || uiel || webuiitests || webui) {
                             echo 'Need to plugin-nuxeo-web-ui'
                             dir('plugin-nuxeo-web-ui') {
-                                if (!params.SKIP_IT_TESTS) {
-                                    sh 'mvn clean install -Pftest'
-                                } else {
-                                    sh 'mvn clean install'
+                                def profiles = []
+                                if (!params.SKIP_IT_TESTS) profiles.add('ftest')
+                                if (params.GENERATE_METRICS) profiles.add('metrics')
+                                withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
+                                    sh "mvn clean install ${profiles.empty ? "" : "-P" + profiles.join(",")}"
                                 }
-                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip'
+                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip, metrics/target/report/*'
                             }
                         } else {
                             echo 'No need to build plugin-nuxeo-web-ui'
