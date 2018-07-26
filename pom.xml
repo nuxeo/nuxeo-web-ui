@@ -25,6 +25,12 @@
         <module>ftest/web-ui/webdriver</module>
       </modules>
     </profile>
+    <profile>
+      <id>metrics</id>
+      <modules>
+        <module>metrics</module>
+      </modules>
+    </profile>
   </profiles>
 
   <dependencyManagement>

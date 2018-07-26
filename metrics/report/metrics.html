@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+      body {
+        height: 100%
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div id="table_div"></div>
+    <div id="chart_div"></div>
+
+    <script type="text/javascript">
+
+      google.charts.load('current', {'packages':['corechart', 'bar', 'table']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(init);
+
+      function init() {
+        fetch(`metrics.json`)
+        .then((response) => response.json())
+        .then(draw);
+      }
+
+      function draw(data) {
+
+        var table = new google.visualization.DataTable();
+
+        table.addColumn('string', 'Browser');
+        table.addColumn('number', 'First paint');
+        table.addColumn('number', 'First contentful paint');
+        table.addColumn('number', 'DOM content loaded');
+        // onLoad is not consistent across browsers :(
+        // table.addColumn('number', 'Loaded');
+        table.addColumn('number', 'App ready');
+        table.addColumn('number', 'Page loaded');
+
+        var rows = Object.keys(data).map((browser) => [
+          browser,
+          data[browser].firstPaint / 1000.0,
+          data[browser].firstContentfulPaint / 1000.0,
+          data[browser].domContentLoaded / 1000.0,
+          data[browser].userTiming.find((e) => e.name == 'nuxeo-app.ready').startTime / 1000.0,
+          data[browser].userTiming.find((e) => e.name == 'nuxeo-app.page-loaded').startTime / 1000.0
+        ]);
+
+        table.addRows(rows);
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.charts.Bar(document.getElementById('chart_div'));
+        chart.draw(table, {'width': 1024});
+
+        var t = new google.visualization.Table(document.getElementById('table_div'));
+
+        t.draw(table);
+
+      }
+    </script>
+  </body>
+</html>
