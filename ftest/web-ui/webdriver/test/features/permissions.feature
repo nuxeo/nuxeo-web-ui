@@ -52,3 +52,11 @@ Feature: Permissions
     When I logout
     And I login as "Susan"
     Then I can't view the document
+
+  Scenario: Set a permission to multiple users at the same time
+    When I give ReadWrite permission on the document to the following users:
+      | name  |
+      | John  |
+      | Susan |
+    Then I can see that "John" has the ReadWrite permission
+    And I can see that "Susan" has the ReadWrite permission

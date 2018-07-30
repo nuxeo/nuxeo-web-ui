@@ -18,6 +18,26 @@ module.exports = function () {
     this.ui.browser.permissionsView.permission(permission, name, 'permanent').waitForVisible();
   });
 
+  this.When(/^I give (\w+) permission on the document to the following users:$/, (permission, table) => {
+    this.ui.browser.permissionsViewButton.waitForVisible();
+    this.ui.browser.permissionsViewButton.click();
+    this.ui.browser.permissionsView.waitForVisible();
+    this.ui.browser.permissionsView.newPermissionButton.click();
+
+    table.rows().map((row) => {
+      this.ui.browser.permissionsView.setPermissions(row[0],
+        {
+          permission,
+          timeFrame: 'permanent',
+          notify: false,
+        }
+      );
+    });
+
+    this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
+    this.ui.browser.permissionsView.createPermissionButton.click();
+  });
+
   this.Given(/^"([^"]*)" has (\w+) permission on the document$/, (name, permission) => {
     fixtures.documents.setPermissions(this.doc, permission, name).then((d) => { this.doc = d; });
   });
