@@ -25,6 +25,7 @@
     "__dirname": false,
     "require": false,
     "Polymer": false,
+    "nxStartTime": false,
     "Promise": false,
     "Nuxeo": false,
     "Platform": true,

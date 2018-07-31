@@ -16,6 +16,7 @@ limitations under the License.
 -->
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.List"%>
+<%@ page import="java.lang.management.ManagementFactory"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
@@ -27,6 +28,7 @@ limitations under the License.
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
 <% String ua = request.getHeader("user-agent"); %>
+<% long startTime = ManagementFactory.getRuntimeMXBean().getStartTime(); %>
 
 <!DOCTYPE html>
 <html lang="">
@@ -42,7 +44,7 @@ limitations under the License.
   <meta name="theme-color" content="#2E3AA1">
 
   <!-- Web Application Manifest -->
-  <link rel="manifest" href="manifest.json" crossOrigin="use-credentials">
+  <link rel="manifest" href="manifest.json?ts=<%= startTime %>" crossOrigin="use-credentials">
 
   <!-- Tile color for Win8 -->
   <meta name="msapplication-TileColor" content="#3372DF">
@@ -51,20 +53,19 @@ limitations under the License.
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nuxeo">
 
-  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png">
-  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png">
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png?ts=<%= startTime %>">
+  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png?ts=<%= startTime %>">
   <!-- Safari pinned tab icon -->
-  <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg" color="#0066ff">
+  <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg?ts=<%= startTime %>" color="#0066ff">
 
   <!-- Add to homescreen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Nuxeo">
-  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png?ts=<%= startTime %>">
 
   <!-- Tile icon for Win8 (144x144) -->
-  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png?ts=<%= startTime %>">
 
   <style>
     <%@include file="index.css"%>
@@ -72,12 +73,15 @@ limitations under the License.
 </head>
 
 <body>
+  <script>
+   window.nxStartTime = <%= startTime %>;
+  </script>
   <nuxeo-connection url="<%= request.getContextPath() %>"
                     repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= request.getRequestURI() %>"
              product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
     <div id="sidebar">
-      <img src="themes/default/logo.png">
+      <img src="themes/default/logo.png?ts=<%= startTime %>">
     </div>
     <div id="container">
       <div id="toolbar">
@@ -86,14 +90,14 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="bower_components/webcomponentsjs/webcomponents-loader.js?ts=<%= startTime %>"></script>
 
-  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
+  <script defer src="bower_components/moment/min/moment-with-locales.min.js?ts=<%= startTime %>"></script>
 
-  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js?ts=<%= startTime %>"></script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
-  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
+  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>?ts=<%= startTime %>">
   <% } %>
 </body>
 

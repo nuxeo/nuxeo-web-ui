@@ -17,6 +17,9 @@ limitations under the License.
 <script>
   (function () {
     var url = 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html';
+    if (window.nxStartTime) {
+      url += '?ts=' + window.nxStartTime;
+    }
     var xhr = new XMLHttpRequest();
     xhr.open('HEAD', url, false);
     xhr.onreadystatechange = function() {
@@ -27,7 +30,11 @@ limitations under the License.
         }
         var link = document.createElement('link');
         link.setAttribute('rel', 'import');
-        link.setAttribute('href', 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html');
+        var url = 'themes/' + (localStorage.getItem('theme') || 'default') + '/theme.html';
+        if (window.nxStartTime) {
+          url += '?ts=' + window.nxStartTime;
+        }
+        link.setAttribute('href', url);
         document.head.appendChild(link);
       }
     };
