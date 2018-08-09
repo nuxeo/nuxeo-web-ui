@@ -27,8 +27,16 @@ limitations under the License.
       nuxeo-document-viewer {
         @apply --paper-card;
       }
+      img {
+        max-width:50vw;
+      }
     </style>
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <template is="dom-if" if="[[_isPicture]]">
+      <img src="[[document.properties.file:content.data]]"/>
+    </template>
+    <template is="dom-if" if="[[!_isPicture]]">
+      <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    </template>
   </template>
 
   <script>
@@ -39,7 +47,18 @@ limitations under the License.
         /**
          * @doctype File
          */
-        document: Object
+        document: Object,
+
+        _isPicture: {
+          type: Boolean,
+          computed: '_computePicture(document)'
+        }
+      },
+
+      _computePicture: function() {
+        return this.document && this.document.properties
+          && this.document.properties['file:content']
+          && this.document.properties['file:content']['mime-type'].indexOf('image') > -1;
       }
     });
   </script>
