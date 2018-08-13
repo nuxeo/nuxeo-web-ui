@@ -1,7 +1,10 @@
 import Nuxeo from 'nuxeo';
+import nuxeo from '../services/client';
+
+global.runningWorkflows = [];
 
 fixtures.workflows = {
-  start: (document, workflowId, initiator) => {
+  start: (document, workflowModelName, initiator) => {
     // creating a different client to make sure the initiator of the workflow is the logged-in user
     const client = new Nuxeo({
       auth: {
@@ -10,11 +13,31 @@ fixtures.workflows = {
         password: fixtures.users.DEFAULT_PASSWORD,
       },
     });
-    return client.operation('Context.StartWorkflow')
-        .input(document)
-        .params({
-          id: workflowId,
-        })
-        .execute();
+
+    const workflowOptions = {
+      attachedDocumentIds: [document.uid],
+    };
+
+    return client.workflows().start(workflowModelName, workflowOptions).then((workflowInstance) => {
+      runningWorkflows.push(workflowInstance.id);
+      return workflowInstance;
+    });
   },
+
+  delete: (workflowInstanceId) => nuxeo.workflows().delete(workflowInstanceId),
+
+  removeInstance: (workflowInstanceId) => {
+    const index = runningWorkflows.indexOf(workflowInstanceId);
+    if (index !== -1) {
+      runningWorkflows.splice(index, 1);
+    }
+  },
+};
+
+module.exports = function () {
+  this.After(() => Promise.all(Object.keys(runningWorkflows)
+      .map((index) => {
+        const workflowInstanceId = runningWorkflows[index];
+        fixtures.workflows.delete(workflowInstanceId).then(() => fixtures.workflows.removeInstance(workflowInstanceId));
+      })));
 };
