@@ -27,6 +27,7 @@
     'fixtures': true,
     'liveCollections': true,
     'liveDocuments': true,
+    'runningWorkflows': true,
     'users': true,
     'groups': true,
     'browser': true,

@@ -22,7 +22,7 @@ Feature: Workflows
 
   Scenario: I can process a workflow
     Given I have a File document
-    And This document has a workflow running
+    And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
     When I click the process button
@@ -30,7 +30,7 @@ Feature: Workflows
 
   Scenario: I can abandon a workflow
     Given I have a File document
-    And This document has a workflow running
+    And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
     And I can abandon the workflow

@@ -144,11 +144,6 @@ export default class UI extends BasePage {
     return this.pages.element('nuxeo-tasks');
   }
 
-  get tasksDashboard() {
-    driver.pause(3000);
-    return this.pages.element('#tasks-dashboard');
-  }
-
   get isConnectionActive() {
     return driver.execute(() => document.querySelector('nuxeo-connection').active).value;
   }

@@ -4,6 +4,7 @@ import BasePage from '../base';
 import Clipboard from './clipboard';
 import Collections from './collections';
 import Favorites from './favorites';
+import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
 
@@ -40,11 +41,7 @@ export default class Drawer extends BasePage {
   }
 
   get tasks() {
-    return this._section('tasks');
-  }
-
-  get tasksLink() {
-    return this.pages.element(`.tasks-dashboard a`);
+    return new Tasks('nuxeo-tasks-drawer');
   }
 
   get favorites() {

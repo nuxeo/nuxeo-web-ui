@@ -4,6 +4,7 @@ import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
 import DocumentPermissions from './browser/document_permissions';
+import DocumentTask from './browser/document_task';
 import EditDialog from './edit_dialog';
 import Selection from './selection';
 import Results from './results';
@@ -40,6 +41,10 @@ export default class Browser extends BasePage {
 
   get permissionsViewButton() {
     return this.el.element('nuxeo-page-item[name="permissions"]');
+  }
+
+  get documentTaskView() {
+    return new DocumentTask('nuxeo-document-task');
   }
 
   get currentPage() {
