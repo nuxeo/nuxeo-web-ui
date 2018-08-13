@@ -438,6 +438,7 @@ limitations under the License.
         'document-created': '_handleDocumentCreated',
         'workflowStarted': '_refreshAndFetchTasks',
         'workflowAbandoned': '_refreshAndFetchTasks',
+        'workflowTaskAssignment': '_workflowTaskAssigned',
         'workflowTaskProcess': '_workflowTaskProcess',
         'workflowTaskProcessed': '_refreshAndFetchTasks',
         'added-to-clipboard': '_onAddedToClipboard',
@@ -498,14 +499,21 @@ limitations under the License.
           this.loading = true;
           this.currentTaskId = id;
           this.$.task.get().then(function(task) {
-            this.currentTask = task;
-            this.show('tasks');
+            this._defineTaskAndNavigate(task);
             this.loading = false;
+          }.bind(this)).catch(function(error) {
+            if(error.status === 403){
+              this._defineTaskAndNavigate();
+            }
           }.bind(this));
         } else {
-          this.currentTask = null;
-          this.show('tasks');
+          this._defineTaskAndNavigate();
         }
+      },
+
+      _defineTaskAndNavigate: function(task) {
+        this.currentTask = task;
+        this.show('tasks');
       },
 
       load: function(page, id, path, action) {
@@ -748,6 +756,10 @@ limitations under the License.
 
       _workflowTaskProcess: function(e) {
         this.navigateTo('tasks', e.detail.id);
+      },
+
+      _workflowTaskAssigned: function() {
+        this.loadTask(this.currentTaskId);
       },
 
       _onAddedToClipboard: function(e) {
