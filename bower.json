@@ -34,6 +34,7 @@
     "app-layout": "PolymerElements/app-layout#^2.0.0",
     "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.0.0",
     "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^2.0.0",
+    "vaadin-button": "2.0.0",
     "web-animations-js": "web-animations/web-animations-js#^2.3.1"
   },
   "devDependencies": {
