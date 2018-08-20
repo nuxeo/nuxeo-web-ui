@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-document-preview.html">
@@ -44,8 +45,24 @@ limitations under the License.
 
       .edit {
         position: absolute;
+      }
+
+      #editNote.edit {
         right: 10px;
         top: 10px;
+      }
+
+      #editHtml.edit {
+        left: 0;
+        bottom: 0;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        z-index: 1;
+      }
+
+      .html-editor-container paper-textarea {
+        padding: 0;
       }
 
       paper-textarea,
@@ -72,7 +89,14 @@ limitations under the License.
 
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
+          <paper-icon-button id="editHtml" class="edit" icon="[[_computeHtmlEditIcon(_viewMode)]]" on-tap="_toggleHtmlSource" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <paper-tooltip for="editHtml" position="right">[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip>
+          <template is="dom-if" if="[[_viewMode]]">
+            <nuxeo-html-editor value="{{_value}}" read-only=[[!_canEdit(document)]]></nuxeo-html-editor>
+          </template>
+          <template is="dom-if" if="[[!_viewMode]]">
+            <paper-textarea value="{{_value}}" no-label-float placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
+          </template>
           <div class="layout horizontal end-justified">
             <paper-button name="editorSave" noink class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
@@ -82,6 +106,7 @@ limitations under the License.
       <template is="dom-if" if="[[!_isHTML(document)]]">
         <template is="dom-if" if="[[_viewMode]]">
           <paper-icon-button id="editNote" class="edit" icon="nuxeo:edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
+          <paper-tooltip for="editNote" position="bottom">[[i18n('command.edit')]]</paper-tooltip>
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>
         <template is="dom-if" if="[[!_viewMode]]">
@@ -127,6 +152,14 @@ limitations under the License.
         return this.document && this.document.properties['note:mime_type'] === 'text/html';
       },
 
+      _computeHtmlEditIcon: function() {
+        return this._viewMode ? 'icons:code' : 'nuxeo:edit';
+      },
+
+      _computeHtmlEditLabel: function() {
+        return this._viewMode ? this.i18n('noteEditor.editSource') : this.i18n('noteEditor.editRich');
+      },
+
       _editorSave: function() {
         this.$.note.data = {
           'entity-type': 'document',
@@ -158,6 +191,10 @@ limitations under the License.
       _cancel: function() {
         this._value = '';
         this._viewMode = true;
+      },
+
+      _toggleHtmlSource: function() {
+        this._viewMode = !this._viewMode;
       }
     });
   })();
