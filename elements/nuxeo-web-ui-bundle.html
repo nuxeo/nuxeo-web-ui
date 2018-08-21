@@ -268,7 +268,10 @@
 
 <nuxeo-slot-content name="downloadDocumentAction" slot="DOCUMENT_ACTIONS" order="90">
   <template>
-    <nuxeo-filter document="[[document]]" type="Folder,Collection">
+    <nuxeo-filter document="[[document]]" expression="(document.facets.indexOf('Folderish') !== -1
+                                                   || document.facets.indexOf('Collection') !== -1)
+                                                   && document.contextParameters
+                                                   && document.contextParameters.hasContent">
       <template>
         <nuxeo-download-documents-button document="[[document]]">
         </nuxeo-download-documents-button>
