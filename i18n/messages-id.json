@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Penurunan Harga",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "Format",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "Format",
   "noteViewLayout.note.saved": "Catatan sudah disimpan.",
   "noteViewLayout.placeholder": "Ketik di sini...",

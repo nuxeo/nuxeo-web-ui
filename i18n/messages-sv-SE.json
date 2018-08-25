@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Markdown",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "Format",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "Format",
   "noteViewLayout.note.saved": "Anteckning har sparats.",
   "noteViewLayout.placeholder": "Skriv här...",

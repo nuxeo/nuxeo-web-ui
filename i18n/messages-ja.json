@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "マークダウン",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "フォーマット",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "フォーマット",
   "noteViewLayout.note.saved": "注記が保存されました。",
   "noteViewLayout.placeholder": "ここに入力...",

@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Descuento",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "Formato",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "Formato",
   "noteViewLayout.note.saved": "Se ha guardado la nota.",
   "noteViewLayout.placeholder": "Escriba aquí...",

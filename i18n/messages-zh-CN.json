@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Markdown",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "格式",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "格式",
   "noteViewLayout.note.saved": "注释已保存。",
   "noteViewLayout.placeholder": "请在此输入...",

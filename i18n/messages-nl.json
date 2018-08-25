@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Markdown",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "Indeling",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "Indeling",
   "noteViewLayout.note.saved": "Aantekening is opgeslagen.",
   "noteViewLayout.placeholder": "Hier typen ...",

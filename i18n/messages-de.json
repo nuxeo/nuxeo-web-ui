@@ -654,6 +654,8 @@
   "mimetype.text/x-web-markdown": "Markdown",
   "mimetype.text/xml": "XML",
   "noteEditLayout.format": "Formate",
+  "noteEditor.editRich": "Edit in rich text mode",
+  "noteEditor.editSource": "Edit source code",
   "noteMetadataLayout.format": "Formate",
   "noteViewLayout.note.saved": "Notiz wurde gespeichert.",
   "noteViewLayout.placeholder": "Hier eingeben...",
