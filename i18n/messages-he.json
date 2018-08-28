@@ -940,7 +940,7 @@
   "wf.serialDocumentReview.SerialDocumentReview": "Serial Document Review",
   "wf.serialDocumentReview.simpleReview": "Simple Review",
   "wf.serialDocumentReview.startReview": "Start Review",
-  "wf.serialDocumentReview.submit": "Submit Modificiations",
+  "wf.serialDocumentReview.submit": "Submit Modifications",
   "wf.serialDocumentReview.updateRequest.directive": "The document was refused. Please update it before going back to the validation flow, or cancel the review.",
   "wf.serialDocumentReview.updateRequest": "Update Document",
   "wf.serialDocumentReview.Validate": "Validate",
