@@ -265,6 +265,7 @@
   "displayModeButton.display.grid": "Switch to Grid View",
   "displayModeButton.display.list": "Switch to List view",
   "displayModeButton.display.table": "Switch to Table View",
+  "documentAttachments.empty": "Ez dago eranskinik",
   "documentAttachments.heading": "Attachments",
   "documentAttachments.upload.uploaded": "Attachment(s) uploaded",
   "documentContentView.datatable.header.author": "Author",

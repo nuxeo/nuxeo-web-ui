@@ -277,6 +277,7 @@
   "displayModeButton.display.grid": "Zu Rasteransicht wechseln",
   "displayModeButton.display.list": "Auf Listenansicht wechseln",
   "displayModeButton.display.table": "Zu Tabellenansicht wechseln",
+  "documentAttachments.empty": "Es sind keine Anhänge vorhanden",
   "documentAttachments.heading": "Anhänge",
   "documentAttachments.upload.uploaded": "Anlage(n) hochgeladen",
   "documentContentView.datatable.header.author": "Autor",

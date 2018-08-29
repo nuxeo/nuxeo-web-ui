@@ -277,6 +277,7 @@
   "displayModeButton.display.grid": "グリッドビューに切り替える",
   "displayModeButton.display.list": "一覧表示に切り替え",
   "displayModeButton.display.table": "表ビューに切り替える",
+  "documentAttachments.empty": "添付ファイルがありません。",
   "documentAttachments.heading": "添付ファイル",
   "documentAttachments.upload.uploaded": "添付ファイルアップロード済み",
   "documentContentView.datatable.header.author": "作成者",
