@@ -88,6 +88,13 @@ limitations under the License.
 
 <script>
   Polymer.setPassiveTouchGestures(true);
+  if (window.nxStartTime) {
+    Polymer._originalImportHref = Polymer.importHref;
+    Polymer.importHref = function (href, loadFn, errorFn, optAsync) {
+      var nHref = href + (href.indexOf('?') >= 0 ? "&" : '?') + "ts=" + window.nxStartTime;
+      Polymer._originalImportHref(nHref, loadFn, errorFn, optAsync);
+    }
+  }
 </script>
 
 <!--
