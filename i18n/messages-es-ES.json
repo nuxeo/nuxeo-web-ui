@@ -277,6 +277,7 @@
   "displayModeButton.display.grid": "Cambiar a vista de cuadrícula",
   "displayModeButton.display.list": "Switch to List view",
   "displayModeButton.display.table": "Cambiar a la vista de tabla",
+  "documentAttachments.empty": "No hay archivos adjuntos",
   "documentAttachments.heading": "Ficheros adjuntos",
   "documentAttachments.upload.uploaded": "Anexo(s) subido(s)",
   "documentContentView.datatable.header.author": "Autor",

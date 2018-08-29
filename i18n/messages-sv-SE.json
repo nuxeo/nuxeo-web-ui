@@ -277,6 +277,7 @@
   "displayModeButton.display.grid": "Växla till rutnätsvy",
   "displayModeButton.display.list": "Switch to List view",
   "displayModeButton.display.table": "Växla till tabellvy",
+  "documentAttachments.empty": "Det finns inga bilagor",
   "documentAttachments.heading": "Bilagor",
   "documentAttachments.upload.uploaded": "Bilaga/bilagor laddades upp",
   "documentContentView.datatable.header.author": "Författare",
