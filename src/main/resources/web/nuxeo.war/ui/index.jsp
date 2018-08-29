@@ -19,6 +19,7 @@ limitations under the License.
 <%@ page import="java.lang.management.ManagementFactory"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
+<%@ page import="org.nuxeo.runtime.reload.ReloadService"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
@@ -28,7 +29,11 @@ limitations under the License.
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
 <% String ua = request.getHeader("user-agent"); %>
-<% long startTime = ManagementFactory.getRuntimeMXBean().getStartTime(); %>
+<%
+  long jvmStartTime = ManagementFactory.getRuntimeMXBean().getStartTime();
+  Long lastFlushed = Framework.getService(ReloadService.class).lastFlushed();
+  Long startTime = lastFlushed != null ? lastFlushed : jvmStartTime;
+%>
 
 <!DOCTYPE html>
 <html lang="">
