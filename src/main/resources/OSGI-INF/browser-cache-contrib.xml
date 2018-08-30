@@ -1,12 +1,19 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.web.ui.request.contrib">
 
+  <require>org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService.defaultContrib</require>
+
   <extension target="org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService"
     point="filterConfig">
-    <!-- All Web UI resources cached for 24 hours -->
-    <!-- Trade off between agressive caching and HF applying within 24 hours -->
+    <filterConfig name="cached_ui_static" cached="true" cacheTime="31536000">
+      <!-- if url contains a timestamp param: approximately one year -->
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\\?.*ts=.+</pattern>
+    </filterConfig>
     <filterConfig name="ui_static" cached="true" cacheTime="86400">
-      <pattern>${org.nuxeo.ecm.contextPath}/ui/.+</pattern>
+      <!-- For other web ui resources: trade off between agressive caching and HF applying within 24 hours -->
+      <!-- Exclude JS and HTML files due to: https://jira.nuxeo.com/browse/NXP-25595 -->
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\.(?!(html|js)$).*</pattern>
     </filterConfig>
   </extension>
+
 </component>

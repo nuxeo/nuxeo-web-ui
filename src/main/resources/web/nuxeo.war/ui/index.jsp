@@ -16,6 +16,7 @@ limitations under the License.
 -->
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.List"%>
+<%@ page import="java.lang.management.ManagementFactory"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
@@ -27,7 +28,6 @@ limitations under the License.
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
 <% String ua = request.getHeader("user-agent"); %>
-
 <!DOCTYPE html>
 <html lang="">
 
@@ -94,6 +94,16 @@ limitations under the License.
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
+  <% } %>
+
+  <% if (!Framework.isDevModeSet()) { %>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js?ts=<%= ManagementFactory.getRuntimeMXBean().getStartTime() %>');
+      });
+    }
+  </script>
   <% } %>
 </body>
 

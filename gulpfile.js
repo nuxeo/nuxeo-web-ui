@@ -105,6 +105,10 @@ gulp.task('polymer-build', function() {
   });
 });
 
+gulp.task('workbox-sw', function() {
+  return gulp.src('workbox/**').pipe(gulp.dest(dist('workbox')));
+});
+
 // Move from 'elements' folder to root
 gulp.task('move-elements', function() {
   // copy user-group-management layouts
@@ -154,6 +158,7 @@ gulp.task('build', ['clean'], function(cb) {
       'merge-message-files',
       'polymer-build',
       'move-elements',
+      'workbox-sw',
       'strip',
       cb);
 });
