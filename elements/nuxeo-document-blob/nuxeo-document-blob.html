@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-actions-menu.html">
 
 <!--
 `nuxeo-document-blob`
@@ -56,6 +57,11 @@ limitations under the License.
         width: 36px;
         height: 36px;
       }
+
+      nuxeo-actions-menu {
+        height: 100%;
+        max-width: var(--nuxeo-document-blob-actions-menu-max-width, 160px);
+      }
     </style>
 
     <nuxeo-connection user="{{user}}"></nuxeo-connection>
@@ -67,7 +73,9 @@ limitations under the License.
           <div class="detail">[[formatSize(blob.length)]]</div>
         </div>
         <div class="actions">
-          <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          <nuxeo-actions-menu>
+            <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </nuxeo-actions-menu>
         </div>
       </div>
     </template>
