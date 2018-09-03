@@ -25,11 +25,8 @@ limitations under the License.
     <style include="nuxeo-styles">
       /* document actions */
       .document-actions {
-        @apply --layout-horizontal;
-        @apply --layout-center;
-        @apply --layout-justified;
+        overflow: auto;
         height: var(--nuxeo-drawer-header-height);
-        padding: 0 16px;
       }
 
       .document-actions paper-icon-button {
@@ -50,10 +47,9 @@ limitations under the License.
         --paper-listbox-background-color: transparent;
       }
 
-      @media (max-width: 1024px) {
-        .document-actions {
-          padding-right: 32px;
-        }
+      nuxeo-actions-menu {
+        height: 100%;
+        max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
     </style>
 
@@ -65,7 +61,9 @@ limitations under the License.
         <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
         <template is="dom-if" if="[[!isTrashed(document)]]">
           <div class="document-actions">
-            <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-actions-menu>
+              <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            </nuxeo-actions-menu>
           </div>
         </template>
       </div>
