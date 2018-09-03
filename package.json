@@ -37,13 +37,12 @@
     "polyserve": "^0.27.11",
     "run-sequence": "^1.1.5",
     "through2": "^2.0.1",
-    "workbox-cli": "^3.4.1"
+    "workbox-build": "^3.4.1"
   },
   "scripts": {
     "start": "gulp serve",
     "lint": "gulp lint && polymer lint -i elements/*/*.html",
-    "win-lint": "gulp lint && polymer lint -i elements\\*\\*.html",
-    "postinstall": "workbox copyLibraries . && mv workbox-v`npm view workbox-cli version` workbox"
+    "win-lint": "gulp lint && polymer lint -i elements\\*\\*.html"
   },
   "engines": {
     "node": ">=6.4.0"
