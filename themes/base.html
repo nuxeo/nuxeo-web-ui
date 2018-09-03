@@ -271,6 +271,8 @@ limitations under the License.
       flex: 1;
     };
 
+    --nuxeo-browser-actions-menu-max-width: 240px;
+
     --nx-button-hover: {
       color: var(--nuxeo-link-hover-color);
     };
@@ -442,6 +444,12 @@ limitations under the License.
         min-width: 0;
         width: 90%;
       }
+    }
+  }
+
+  @media (max-width: 720px) {
+    html {
+      --nuxeo-browser-actions-menu-max-width: 160px;
     }
   }
 </style>
