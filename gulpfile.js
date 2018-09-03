@@ -105,8 +105,13 @@ gulp.task('polymer-build', function() {
   });
 });
 
+// copy workbox libraries to <dist>/workbox
 gulp.task('workbox-sw', function() {
-  return gulp.src('workbox/**').pipe(gulp.dest(dist('workbox')));
+  var workboxBuild = require('workbox-build');
+  return workboxBuild.copyWorkboxLibraries(dist()).then(function(dir) {
+    del.sync(dist('workbox'));
+    fs.renameSync(dist(dir), dist('workbox'));
+  });
 });
 
 // Move from 'elements' folder to root
