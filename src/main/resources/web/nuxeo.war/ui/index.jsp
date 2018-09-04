@@ -19,6 +19,7 @@ limitations under the License.
 <%@ page import="java.lang.management.ManagementFactory"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
+<%@ page import="org.nuxeo.runtime.services.config.ConfigurationService"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
@@ -27,7 +28,9 @@ limitations under the License.
 
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
+<% ConfigurationService cs = Framework.getService(ConfigurationService.class); %>
 <% String ua = request.getHeader("user-agent"); %>
+
 <!DOCTYPE html>
 <html lang="">
 
@@ -91,6 +94,12 @@ limitations under the License.
   <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
 
   <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+
+  <script>
+    var Nuxeo = Nuxeo || {};
+    Nuxeo.UI = Nuxeo.UI || {};
+    Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;
+  </script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
