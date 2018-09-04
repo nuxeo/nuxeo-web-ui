@@ -272,8 +272,8 @@ limitations under the License.
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
                     response="{{currentDocument}}"
-                    enrichers="hasContent, firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications, thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags"
-                    headers='{"X-NXfetch.document": "lock,properties", "X-NXfetch.directoryEntry": "parent", "X-NXtranslate.directoryEntry": "label", "X-NXfetch.task": "actors"}'>
+                    enrichers="[[enrichers]]"
+                    headers="[[headers]]">
     </nuxeo-document>
 
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
@@ -497,6 +497,20 @@ limitations under the License.
         _dismissible: {
           type: Boolean,
           value: false
+        },
+
+        enrichers: {
+          type: String,
+          value: function() {
+            return this._computeEnrichers.bind(this);
+          }
+        },
+
+        headers: {
+          type: Object,
+          value: function() {
+            return this._computeHeaders.bind(this);
+          }
         }
       },
 
@@ -1139,6 +1153,21 @@ limitations under the License.
             this.clipboard.remove(doc);
           }.bind(this));
         }
+      },
+
+      _computeEnrichers: function() {
+        return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.join(',')) ||
+        'hasContent, firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications,' +
+        ' thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags';
+      },
+
+      _computeHeaders: function() {
+        return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.headers) || {
+          'X-NXfetch.directoryEntry': 'parent',
+          'X-NXfetch.document': 'lock,properties',
+          'X-NXfetch.task': 'actors',
+          'X-NXtranslate.directoryEntry': 'label'
+        };
       }
 
     });

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.web.ui.properties.contrib">
+  <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
+    <!-- enrichers -->
+    <property name="org.nuxeo.web.ui.enrichers">hasContent</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">firstAccessibleAncestor</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">permissions</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">breadcrumb</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">preview</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">favorites</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">subscribedNotifications</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">thumbnail</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">renditions</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">pendingTasks</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">runnableWorkflows</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">runningWorkflows</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">collections</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">audit</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">subtypes</property>
+    <property name="org.nuxeo.web.ui.enrichers" append="true">tags</property>
+
+    <!-- http headers -->
+    <property name="org.nuxeo.web.ui.headers.X-NXfetch.document">lock</property>
+    <property name="org.nuxeo.web.ui.headers.X-NXfetch.document" append="true">properties</property>
+    <property name="org.nuxeo.web.ui.headers.X-NXfetch.directoryEntry">parent</property>
+    <property name="org.nuxeo.web.ui.headers.X-NXtranslate.directoryEntry">label</property>
+    <property name="org.nuxeo.web.ui.headers.X-NXfetch.task">actors</property>
+
+    <!-- Date (time) format -->
+    <property name="org.nuxeo.web.ui.dateFormat">MMMM D, YYYY</property>
+    <property name="org.nuxeo.web.ui.dateTimeFormat">MMMM D, YYYY HH:mm</property>
+  </extension>
+</component>

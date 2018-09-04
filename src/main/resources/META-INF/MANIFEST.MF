@@ -10,4 +10,5 @@ Nuxeo-Component: OSGI-INF/auth-config.xml,
   OSGI-INF/login-startup-page-web-contrib.xml
   OSGI-INF/webresources-contrib.xml,
   OSGI-INF/url-codecs-web-contrib.xml,
-  OSGI-INF/browser-cache-contrib.xml
+  OSGI-INF/browser-cache-contrib.xml,
+  OSGI-INF/web-ui-properties.xml
