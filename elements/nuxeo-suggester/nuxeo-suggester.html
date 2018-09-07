@@ -307,9 +307,7 @@ limitations under the License.
       },
 
       closeResults: function(e) {
-        if (e && e.detail && e.detail.keyboardEvent) {
-          e.detail.keyboardEvent.preventDefault();
-        }
+        e.detail.keyboardEvent.preventDefault();
         this.toggle();
       },
 

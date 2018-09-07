@@ -177,9 +177,9 @@ limitations under the License.
         this._hideShortcuts();
       },
 
-      _displayWizard: function() {
+      _displayWizard: function(e) {
         if (!this.hidden) {
-          this.fire('create-document');
+          this.fire('create-document', e.detail);
         }
       },
 
