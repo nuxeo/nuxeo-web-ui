@@ -25,7 +25,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-keys">
   <template>
-    <iron-a11y-keys keys="[[keys]]" target="[[target]]" on-keys-pressed="_keysPressed"></iron-a11y-keys>
+    <iron-a11y-keys id="a11y" keys="[[keys]]" target="[[target]]" on-keys-pressed="_keysPressed"></iron-a11y-keys>
   </template>
 </dom-module>
 
@@ -35,22 +35,38 @@ limitations under the License.
       is: 'nuxeo-keys',
 
       properties: {
-        keys: String,
+        /**
+         * Space delimited list of keys to listen.
+         */
+        keys: {
+          type: String,
+        },
+
+        /**
+         * Target node where keys will be listened.
+         * By default: body
+         */
         target: {
           type: Object,
           value: function() {
             return document.body;
           }
         },
+
         invasive: {
           type: Boolean,
-          value: false
-        }
+          value: false,
+        },
       },
 
       _keysPressed: function(e) {
+        var keyboardEvent = e.detail.keyboardEvent;
+        if (this._getMatchingKeyBindings(keyboardEvent).length === 0) {
+          return;
+        }
+
         if (this.target === document.body) {
-          var element = e.detail.keyboardEvent.composedPath()[0];
+          var element = keyboardEvent.composedPath()[0];
           switch (element.tagName) {
             case 'INPUT':
             case 'TEXTAREA':
@@ -77,6 +93,40 @@ limitations under the License.
           }
         }
         this.fire('pressed', e.detail, {});
+      },
+
+      _getMatchingKeyBindings: function(keyboardEvent) {
+        return this.$.a11y._keyBindings[keyboardEvent.type].filter(function(entry) {
+          var bind = entry[0];
+          return bind.key.toLowerCase() === this._transformKey(keyboardEvent.key)
+            && keyboardEvent.altKey === !!bind.altKey && keyboardEvent.ctrlKey === !!bind.ctrlKey
+            && keyboardEvent.metaKey === !!bind.metaKey && keyboardEvent.shiftKey === !!bind.shiftKey;
+        }.bind(this));
+      },
+
+      /**
+       * Transforms the key to match iron-a11y-keys logic.
+       * @param {string} key The KeyBoardEvent.key
+       *
+       * @see https://github.com/PolymerElements/iron-a11y-keys-behavior/blob/v2.1.1/iron-a11y-keys-behavior.html#L102-L130
+       */
+      _transformKey: function(key) {
+        var validKey = '';
+        if (key) {
+          var lKey = key.toLowerCase();
+          if (lKey === ' ' || /^space(bar)?/.test(lKey)) {
+            validKey = 'space';
+          } else if (/^escape$/.test(lKey)) {
+            validKey = 'esc';
+          } else if (/^arrow/.test(lKey)) {
+            validKey = lKey.replace('arrow', '');
+          } else if (lKey === 'multiply') {
+            validKey = '*';
+          } else {
+            validKey = lKey;
+          }
+        }
+        return validKey;
       }
 
     });

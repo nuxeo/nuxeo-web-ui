@@ -728,9 +728,7 @@ limitations under the License.
       },
 
       showHome: function(e) {
-        if (e && e.detail && e.detail.keyboardEvent) {
-          e.detail.keyboardEvent.preventDefault();
-        }
+        e.detail.keyboardEvent.preventDefault();
         this.show('home');
       },
 
@@ -765,14 +763,7 @@ limitations under the License.
       },
 
       _showDocumentCreationWizard: function(e) {
-        if (e.detail.keyboardEvent) {
-          if (e.detail.keyboardEvent.ctrlKey || e.detail.keyboardEvent.metaKey) {
-            return;
-          } else {
-            e.detail.keyboardEvent.preventDefault();
-          }
-        }
-
+        e.detail.keyboardEvent.preventDefault();
         if (e.detail.files) {
           this.$.importPopup.toggleDialogImport(e.detail.files);
         } else if (e.detail.type) {
