@@ -19,12 +19,8 @@
     <property name="org.nuxeo.web.ui.enrichers">subtypes</property>
     <property name="org.nuxeo.web.ui.enrichers">tags</property>
 
-    <!-- http headers -->
-    <property name="org.nuxeo.web.ui.headers.X-NXfetch.document" list="true">lock</property>
-    <property name="org.nuxeo.web.ui.headers.X-NXfetch.document">properties</property>
-    <property name="org.nuxeo.web.ui.headers.X-NXfetch.directoryEntry">parent</property>
-    <property name="org.nuxeo.web.ui.headers.X-NXtranslate.directoryEntry">label</property>
-    <property name="org.nuxeo.web.ui.headers.X-NXfetch.task">actors</property>
+    <!-- Properties to be fetched when loading current document, default is 'properties' meaning all -->
+    <property name="org.nuxeo.web.ui.fetchedProperties">properties</property>
 
     <!-- Date (time) format -->
     <property name="org.nuxeo.web.ui.dateFormat">MMMM D, YYYY</property>

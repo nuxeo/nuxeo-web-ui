@@ -502,14 +502,14 @@ limitations under the License.
         enrichers: {
           type: String,
           value: function() {
-            return this._computeEnrichers.bind(this);
+            return this._computeEnrichers();
           }
         },
 
         headers: {
           type: Object,
           value: function() {
-            return this._computeHeaders.bind(this);
+            return this._computeHeaders();
           }
         }
       },
@@ -1162,9 +1162,10 @@ limitations under the License.
       },
 
       _computeHeaders: function() {
-        return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.headers) || {
+        var fProps = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetchedProperties) || 'properties';
+        return {
           'X-NXfetch.directoryEntry': 'parent',
-          'X-NXfetch.document': 'lock,properties',
+          'X-NXfetch.document': 'lock,' + fProps,
           'X-NXfetch.task': 'actors',
           'X-NXtranslate.directoryEntry': 'label'
         };
