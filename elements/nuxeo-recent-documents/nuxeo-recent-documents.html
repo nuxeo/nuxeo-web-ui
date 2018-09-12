@@ -118,6 +118,10 @@ limitations under the License.
         }
       },
 
+      remove: function(doc) {
+        this.$.storage.remove(doc);
+      },
+
       _computedClass: function(isSelected) {
         var classes = 'list-item';
         if (isSelected) {
