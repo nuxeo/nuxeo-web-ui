@@ -23,7 +23,7 @@
     <property name="org.nuxeo.web.ui.fetchedProperties">properties</property>
 
     <!-- Date (time) format -->
-    <property name="org.nuxeo.web.ui.dateFormat">MMMM D, YYYY</property>
-    <property name="org.nuxeo.web.ui.dateTimeFormat">MMMM D, YYYY HH:mm</property>
+    <property name="org.nuxeo.web.ui.dateFormat">LL</property>
+    <property name="org.nuxeo.web.ui.dateTimeFormat">LLL</property>
   </extension>
 </component>
