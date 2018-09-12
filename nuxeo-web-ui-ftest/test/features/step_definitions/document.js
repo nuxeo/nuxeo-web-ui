@@ -116,9 +116,13 @@ module.exports = function () {
     table.rows().forEach((row) => {
       this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
       if (row[0] === 'subjects') {
-        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.include(row[1]);
+        driver.waitUntil(() =>
+          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.include(row[1])
+        );
       } else {
-        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1]);
+        driver.waitUntil(() =>
+          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1])
+        );
       }
     });
   });
