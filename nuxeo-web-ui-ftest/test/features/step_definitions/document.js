@@ -117,11 +117,11 @@ module.exports = function () {
       this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
       if (row[0] === 'subjects') {
         driver.waitUntil(() =>
-          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.include(row[1])
+          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).indexOf(row[1]) > -1
         );
       } else {
         driver.waitUntil(() =>
-          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).should.equal(row[1])
+          this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]) === row[1]
         );
       }
     });
