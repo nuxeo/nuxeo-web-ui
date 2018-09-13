@@ -101,37 +101,42 @@ fixtures.documents = {
              })
     );
   },
-  addToClipboard: (document, username) => {
+  addToLocalStorage: (document, username, storageName) =>
     (typeof document === 'string' ? fixtures.documents.getDocument(document) : Promise.resolve(document))
-        .then((docObject) => {
-          if (docObject) {
-            const key = `${username}-nuxeo-clipboard`;
+          .then((docObject) => {
+            if (docObject) {
+              const key = `${username}-${storageName}`;
 
-            const clipboardDocument = {
-              uid: docObject.uid,
-              title: docObject.title,
-              type: docObject.type,
-              path: docObject.path,
-              lastViewed: new Date(),
-            };
-            if (docObject.contextParameters && docObject.contextParameters.thumbnail &&
-                docObject.contextParameters.thumbnail.url) {
-              clipboardDocument.contextParameters = { thumbnail: { url: docObject.contextParameters.thumbnail.url } };
+              const storageDocument = {
+                uid: docObject.uid,
+                title: docObject.title,
+                type: docObject.type,
+                path: docObject.path,
+                lastViewed: new Date(),
+              };
+              if (docObject.contextParameters && docObject.contextParameters.thumbnail &&
+                      docObject.contextParameters.thumbnail.url) {
+                storageDocument.contextParameters = { thumbnail: { url: docObject.contextParameters.thumbnail.url } };
+              }
+
+              browser.execute((doc, storageKey) => {
+                const store = JSON.parse(localStorage.getItem(storageKey)) || [];
+                store.push(doc);
+                localStorage.setItem(storageKey, JSON.stringify(store));
+              }, storageDocument, key);
             }
+          }),
 
-            browser.execute((doc, storageKey) => {
-              const clipboard = JSON.parse(localStorage.getItem(storageKey)) || [];
-              clipboard.push(doc);
-              localStorage.setItem(storageKey, JSON.stringify(clipboard));
-            }, clipboardDocument, key);
-          }
-        });
-  },
-  clearClipboard: (username) => {
-    const key = `${username}-nuxeo-clipboard`;
+  clearLocalStorage: (username, storageName) => {
+    const key = `${username}-${storageName}`;
     browser.execute((storageKey) => {
       localStorage.removeItem(storageKey);
     }, key);
+  },
+  reloadLocalStorage: (selector) => {
+    browser.execute((storageSelector) => {
+      document.querySelector(storageSelector).reload();
+    }, selector);
   },
   getDocument: (ref) => nuxeo.repository().fetch(ref),
 };

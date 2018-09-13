@@ -4,6 +4,7 @@ import BasePage from '../base';
 import Clipboard from './clipboard';
 import Collections from './collections';
 import Favorites from './favorites';
+import Recents from './recents';
 import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
@@ -37,7 +38,7 @@ export default class Drawer extends BasePage {
   }
 
   get recents() {
-    return this._section('recents');
+    return new Recents('nuxeo-recent-documents');
   }
 
   get tasks() {
