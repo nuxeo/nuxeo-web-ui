@@ -763,7 +763,9 @@ limitations under the License.
       },
 
       _showDocumentCreationWizard: function(e) {
-        e.detail.keyboardEvent.preventDefault();
+        if (e.detail.keyboardEvent) {
+          e.detail.keyboardEvent.preventDefault();
+        }
         if (e.detail.files) {
           this.$.importPopup.toggleDialogImport(e.detail.files);
         } else if (e.detail.type) {
