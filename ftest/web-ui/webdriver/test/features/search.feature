@@ -68,7 +68,7 @@ Feature: Search
     | managers   | 1               |
     | Test       | 5               |
 
-  Scenario: Default Search
+  Scenario: Test Search
     When I click the "test_search" button
     And I perform a author search for Bob on test_search
     Then I can see 5 search results
