@@ -528,7 +528,7 @@ limitations under the License.
             this.navigateTo('browse', doc.path);
           } else {
             var recent = this.$$('#recent');
-            if (recent) {
+            if (recent && !doc.isTrashed) {
               recent.add(doc);
             }
             this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
@@ -850,6 +850,7 @@ limitations under the License.
 
         // navigate to parent
         if (!e.detail.error) {
+          this._removeFromRecentlyViewed([e.detail.doc]);
           var enrichers = e.detail.doc.contextParameters;
           if (enrichers) {
             if (enrichers.firstAccessibleAncestor) {
@@ -891,6 +892,7 @@ limitations under the License.
         if (e.detail.error) {
           this._documentsDeletedError(e.detail.error.response, e.detail.documents);
         } else {
+          this._removeFromRecentlyViewed(e.detail.documents);
           this._fetchTasks();
           this._toast(this.i18n('app.documents.deleted.success'));
           this._refreshSearch();
@@ -991,7 +993,16 @@ limitations under the License.
             this.clipboard.remove(doc);
           }.bind(this));
         }
-      }
+      },
+
+      _removeFromRecentlyViewed: function(docs) {
+        if (Array.isArray(docs)) {
+          var recent = this.$$('#recent');
+          docs.forEach(function(doc) {
+            recent.remove(doc);
+          }.bind(this));
+        }
+      },
 
     });
   </script>
