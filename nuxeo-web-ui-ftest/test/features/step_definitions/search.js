@@ -83,7 +83,7 @@ module.exports = function () {
       this.ui.results.noResults.waitForVisible().should.be.true;
     } else {
       this.ui.results.getResults(displayMode).waitForVisible();
-      this.ui.results.resultsCount(displayMode).toString().should.equal(numberOfResults);
+      driver.waitUntil(() => this.ui.results.resultsCount(displayMode).toString() === numberOfResults);
     }
   });
   this.Then(/^I can see more than (\d+) search results$/, (minNumberOfResults) => {
