@@ -39,10 +39,10 @@ module.exports = function () {
 
   this.Then('I can see the clipboard has "$title" document', (title) => {
     this.ui.drawer.clipboard.waitForVisible();
-    this.ui.drawer.clipboard.el.hasElementByTextContent('#list .list-item-title', title).should.be.true;
+    driver.waitUntil(() => this.ui.drawer.clipboard.el.hasElementByTextContent('#list .list-item-title', title));
   });
   this.Then('I can see the clipboard has "$nb" items', (nb) => {
     this.ui.drawer.clipboard.waitForVisible();
-    this.ui.drawer.clipboard.nbItems.should.be.equals(parseInt(nb));
+    driver.waitUntil(() => this.ui.drawer.clipboard.nbItems === parseInt(nb));
   });
 };
