@@ -370,7 +370,28 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="documentTrashItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
+<nuxeo-slot-content name="documentPublicationItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
+  <template>
+    <nuxeo-filter document="[[document]]" expression="!document.isProxy
+                                                        && document.facets.indexOf('Publishable') > -1">
+      <template>
+        <nuxeo-page-item name="publication" label="browser.publications"></nuxeo-page-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="documentPublicationPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
+  <template>
+    <nuxeo-filter document="[[document]]" expression="!document.isProxy
+                                                        && document.facets.indexOf('Publishable') > -1">
+      <template>
+        <nuxeo-document-publications name="publication" document="[[document]]"></nuxeo-document-publications>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentTrashItem" slot="DOCUMENT_VIEWS_ITEMS" order="50">
   <template>
     <nuxeo-filter document="[[document]]" facet="Folderish">
       <template>
@@ -380,7 +401,7 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="documentTrashPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
+<nuxeo-slot-content name="documentTrashPage" slot="DOCUMENT_VIEWS_PAGES" order="50">
   <template>
     <nuxeo-filter document="[[document]]" facet="Folderish">
       <template>

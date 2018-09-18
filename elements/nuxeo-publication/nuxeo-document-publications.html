@@ -1,0 +1,154 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
+<link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
+
+<dom-module id="nuxeo-document-publications">
+  <template>
+    <style include="nuxeo-styles">
+      :host {
+        display: block;
+      }
+
+      .results {
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 17em - var(--nuxeo-app-top));
+        margin-top: 8px;
+      }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        width: calc(100% - 38px);
+      }
+
+      .capitalize {
+        text-transform: capitalize;
+      }
+
+      .uppercase {
+        text-transform: uppercase;
+      }
+
+    </style>
+
+    <nuxeo-page-provider id="provider"
+      page-size="40"
+      query="[[_computeQuery(document)]]"
+      sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
+      enrichers="thumbnail, permissions"
+      headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+      schemas="dublincore,common,uid,rendition">
+    </nuxeo-page-provider>
+
+    <nuxeo-card heading="[[i18n('publication.details')]]">
+      <nuxeo-data-table id="table" nx-provider="provider" class="results"
+                        empty-label="[[i18n('publication.noPublications')]]">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
+          <template>
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
+            <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" flex="10">
+          <template>
+            [[formatVersion(item)]]
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('publication.rendition')]]" flex="10">
+          <template>
+            <span class="uppercase ellipsis">
+              [[item.properties.rend:renditionName]]
+            </span>
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('publication.publisher')]]" flex="40">
+          <template>
+            <!-- TODO check it is indeed the publisher -->
+            <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('publication.publishDate')]]" flex="30">
+          <template>
+            <!-- TODO check it is indeed the publish date -->
+            <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column flex="10">
+          <template>
+            <paper-button class="uppercase">[[i18n('publication.unpublish')]]</paper-button>
+          </template>
+        </nuxeo-data-table-column>
+        <nuxeo-data-table-column flex="10">
+          <template>
+            <paper-button class="uppercase primary">[[i18n('publication.republish')]]</paper-button>
+          </template>
+        </nuxeo-data-table-column>
+      </nuxeo-data-table>
+    </nuxeo-card>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document-publications',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        document: Object,
+        visible: Boolean
+      },
+
+      observers: [
+        '_fetchPublications(document, visible)'
+      ],
+
+      _navigate: function(e) {
+        this.fire('navigate', {doc: e.detail.item});
+      },
+
+      _computeQuery: function() {
+        if (this.document) {
+          var uid = this.document.uid;
+          return 'SELECT * FROM Document WHERE ecm:isProxy = 1 AND (rend:sourceVersionableId = "' +
+            uid +
+            '" OR ecm:proxyVersionableId = "' +
+            uid +
+            '")';
+        }
+      },
+
+      _fetchPublications: function() {
+        if (this.visible && this.document) {
+          this.$.table.fetch();
+        }
+      }
+
+    });
+  </script>
+</dom-module>
