@@ -98,7 +98,7 @@ limitations under the License.
 
       _search: function() {
         if (this.searchTerm) {
-          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm) + '*');
+          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
           this.set('params.highlight',
             'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
         } else if (this.params.ecm_fulltext) {
