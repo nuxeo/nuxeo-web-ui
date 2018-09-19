@@ -107,7 +107,9 @@ limitations under the License.
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
           <template>
-            <paper-button class="uppercase" on-tap="_unpublish">[[i18n('publication.unpublish')]]</paper-button>
+            <template is="dom-if" if="[[_canUnpublish(item)]]">
+              <paper-button class="uppercase" on-tap="_unpublish">[[i18n('publication.unpublish')]]</paper-button>
+            </template>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
@@ -172,6 +174,10 @@ limitations under the License.
       _republish: function(e) {
         console.log('_republish');
         console.log(e);
+      },
+
+      _canUnpublish: function(doc) {
+        return doc && this.hasPermission(doc, 'Write');
       }
 
     });
