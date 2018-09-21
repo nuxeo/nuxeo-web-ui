@@ -15,7 +15,12 @@ module.exports = function () {
     table.rows().map((row) => {
       promises.push(fixtures.documents.addToLocalStorage(row[0], this.username, 'nuxeo-clipboard'));
     });
-    return Promise.all(promises).then(() => this.ui.drawer.clipboard.reload());
+    let reloaded = false;
+    Promise.all(promises).then(() => {
+      this.ui.drawer.clipboard.reload();
+      reloaded = true;
+    });
+    driver.waitUntil(() => reloaded);
   });
 
   this.When('I click remove button for "$title" document', (title) => {
