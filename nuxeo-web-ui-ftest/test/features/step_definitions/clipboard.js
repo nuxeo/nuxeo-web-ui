@@ -21,7 +21,6 @@ module.exports = function () {
       reloaded = true;
     });
     driver.waitUntil(() => reloaded);
-    this.ui.reload();
   });
 
   this.When('I click remove button for "$title" document', (title) => {
