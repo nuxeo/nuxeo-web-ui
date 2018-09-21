@@ -118,12 +118,15 @@ fixtures.documents = {
                       docObject.contextParameters.thumbnail.url) {
                 storageDocument.contextParameters = { thumbnail: { url: docObject.contextParameters.thumbnail.url } };
               }
-
+              let done = false;
               browser.execute((doc, storageKey) => {
                 const store = JSON.parse(localStorage.getItem(storageKey)) || [];
                 store.push(doc);
                 localStorage.setItem(storageKey, JSON.stringify(store));
-              }, storageDocument, key);
+              }, storageDocument, key).then(() => {
+                done = true;
+              });
+              driver.waitUntil(() => done);
             }
           }),
 
