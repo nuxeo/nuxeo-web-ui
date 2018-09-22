@@ -25,6 +25,7 @@ Feature: Clipboard
 
   Scenario: Remove documents from the clipboard
     Given I have document with path "/default-domain/Src/File1" on clipboard
+    And I refresh the UI
     When I click the "clipboard" button
     Then I can see the clipboard has "File1" document
     When I click remove button for "File1" document
