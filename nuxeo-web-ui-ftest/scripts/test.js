@@ -21,6 +21,7 @@
  *   --watch: watch for changes in tests and rerun them
  *   --wdioConfig: pass a custom wdio config file
  *   --debug: allow node inspector to be attached
+ *   --browser: the browser to be used (defaults to chrome)
  */
 
 const fs = require('fs');
@@ -74,6 +75,8 @@ if (argv['tags']) {
 if (argv['debug']) {
   process.env.DEBUG = true;
 }
+
+process.env.BROWSER = argv['browser'] || 'chrome';
 
 process.env.FORCE_COLOR = true;
 
