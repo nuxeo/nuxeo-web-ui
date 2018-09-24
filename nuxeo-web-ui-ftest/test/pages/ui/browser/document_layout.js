@@ -26,7 +26,7 @@ export default class DocumentLayout extends BasePage {
       const fieldName = row[0];
       const fieldEl = this.getField(fieldName);
       fieldEl.waitForVisible();
-      fieldEl.scrollIntoView(`${this._selector} [name="${fieldName}"]`);
+      fieldEl.scrollIntoView();
       return fixtures.layouts.setValue(fieldEl, row[1]);
     });
   }

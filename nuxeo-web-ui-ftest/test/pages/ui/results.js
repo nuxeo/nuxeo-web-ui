@@ -31,7 +31,7 @@ export default class Results extends BasePage {
   }
 
   get columnsCloseButton() {
-    return this.columnsSettingsPopup.element('//div/paper-button');
+    return this.columnsSettingsPopup.element('paper-button.primary');
   }
 
   getResults(displayMode) {

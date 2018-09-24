@@ -16,7 +16,7 @@ Feature: Ordered Folder
     And I select the "File2" document
     And I select the "File4" document
     And I can move selection <direction>
-    And I refresh the UI
+    And I reload the page
     Then I can see the "File2" child document is at position "<newPosFile2>"
     And I can see the "File4" child document is at position "<newPosFile4>"
 

@@ -85,6 +85,7 @@ export default class UI extends BasePage {
   static get() {
     driver.url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
+      browser.waitForVisible('nuxeo-app:not([unresolved])');
       const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
       if (locale.value) {
         global.locale = locale.value;

@@ -42,7 +42,7 @@ export default class Clipboard extends BasePage {
   }
 
   reload() {
-    fixtures.documents.reloadLocalStorage('* >>> nuxeo-clipboard >>> #storage');
+    return fixtures.documents.reloadLocalStorage('nuxeo-clipboard #storage');
   }
 
 }

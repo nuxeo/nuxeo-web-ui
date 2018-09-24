@@ -16,8 +16,10 @@ module.exports = function () {
   });
 
   this.When('I click "$title" in the $tab tree', (title, tab) => {
-    this.ui.drawer._section(tab).waitForVisible();
-    const el = this.ui.drawer._section(tab).elementByTextContent(`.content a`, title);
+    const section = this.ui.drawer._section(tab);
+    section.waitForVisible();
+    section.waitForVisible(`.content a`);
+    const el = section.elementByTextContent(`.content a`, title);
     el.waitForVisible();
     el.click();
   });
