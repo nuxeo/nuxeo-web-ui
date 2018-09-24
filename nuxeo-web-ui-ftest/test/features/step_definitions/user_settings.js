@@ -70,8 +70,8 @@ module.exports = function () {
   });
 
   this.Then(/^I can only see (\d+) authorized application[s]?$/, (numberOfApps) => {
-    this.ui.userAuthorizedApps.waitForVisible();
-    const apps = this.ui.userAuthorizedApps.getApps();
+    const a = this.ui.userAuthorizedApps;
+    const apps = a.getApps();
     apps.length.toString().should.equal(numberOfApps);
   });
 

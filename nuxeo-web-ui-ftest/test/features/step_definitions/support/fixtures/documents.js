@@ -132,15 +132,11 @@ fixtures.documents = {
 
   clearLocalStorage: (username, storageName) => {
     const key = `${username}-${storageName}`;
-    browser.execute((storageKey) => {
+    return browser.execute((storageKey) => {
       localStorage.removeItem(storageKey);
     }, key);
   },
-  reloadLocalStorage: (selector) => {
-    browser.execute((storageSelector) => {
-      document.querySelector(storageSelector).reload();
-    }, selector);
-  },
+  reloadLocalStorage: (selector) => browser.shadowExecute(selector, (element) => element.reload()),
   getDocument: (ref) => nuxeo.repository().fetch(ref),
 };
 

@@ -1,3 +1,6 @@
+const path = require('path');
+const plugins = {};
+plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
 exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
@@ -100,16 +103,7 @@ exports.config = {
   // WebdriverCSS: https://github.com/webdriverio/webdrivercss
   // WebdriverRTC: https://github.com/webdriverio/webdriverrtc
   // Browserevent: https://github.com/webdriverio/browserevent
-  // plugins: {
-  //     webdrivercss: {
-  //         screenshotRoot: 'my-shots',
-  //         failedComparisonsRoot: 'diffs',
-  //         misMatchTolerance: 0.05,
-  //         screenWidth: [320,480,640,1024]
-  //     },
-  //     webdriverrtc: {},
-  //     browserevent: {}
-  // },
+  plugins: plugins,
   //
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
@@ -138,7 +132,7 @@ exports.config = {
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: ['./node_modules/@nuxeo/nuxeo-web-ui-ftest/test/features/step_definitions'],        // <string[]> (file/dir) require files before executing features
+    require: [path.join(__dirname, 'test/features/step_definitions')],        // <string[]> (file/dir) require files before executing features
     backtrace: true,   // <boolean> show full backtrace for errors
     compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
     dryRun: false,      // <boolean> invoke formatters without executing steps
@@ -240,9 +234,8 @@ exports.config = {
     const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
     const junitReport = process.env.JUNIT_REPORT_PATH;
     if (reportFilePath && junitReport){
-      const path = require('path'),
-          fs = require('fs'),
-          mkdirp = require('mkdirp');
+      const fs = require('fs'),
+            mkdirp = require('mkdirp');
       const jUnitReporter = require('cucumber-junit');
       mkdirp.sync(path.dirname(junitReport));
       fs.writeFileSync(junitReport, jUnitReporter(fs.readFileSync(reportFilePath)));

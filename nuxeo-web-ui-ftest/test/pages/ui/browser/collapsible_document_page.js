@@ -25,14 +25,14 @@ export default class CollapsibleDocumentPage extends DocumentPage {
   expandDetailsCard() {
     this.detailsCard.waitForVisible();
     if (this.detailsCard.getAttribute('opened') === 'false') {
-      this.detailsCard.click('h3');
+      this.detailsCard.click('h3.header');
     }
   }
 
   collapseDetailsCard() {
     this.detailsCard.waitForVisible();
     if (this.detailsCard.getAttribute('opened')) {
-      this.detailsCard.click('h3');
+      this.detailsCard.click('h3.header');
     }
   }
 }

@@ -25,7 +25,7 @@ Feature: Clipboard
 
   Scenario: Remove documents from the clipboard
     Given I have document with path "/default-domain/Src/File1" on clipboard
-    And I refresh the UI
+    And I reload the page
     When I click the "clipboard" button
     Then I can see the clipboard has "File1" document
     When I click remove button for "File1" document
@@ -41,7 +41,7 @@ Feature: Clipboard
       | permission | path                 |
       | ReadWrite  | /default-domain/Src  |
       | ReadWrite  | /default-domain/Dest |
-    And I refresh the UI
+    And I reload the page
     And I browse to the document with path "/default-domain/Dest"
     Then I can see the document has "0" children
     When I click the clipboard <action> action
@@ -58,7 +58,7 @@ Feature: Clipboard
   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
     And I have document with path "/default-domain/Src/File1" on clipboard
-    And I refresh the UI
+    And I reload the page
     When I click the "clipboard" button
     Then I can see the clipboard has "1" items
     And I can see the clipboard has "File1" document

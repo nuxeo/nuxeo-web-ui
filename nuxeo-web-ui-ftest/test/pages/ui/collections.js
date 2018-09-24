@@ -18,7 +18,7 @@ export default class Collections extends BasePage {
   }
 
   select(name) {
-    const el = this.el.element(`nuxeo-collections #collectionsList span.title`);
+    const el = this.el.element(`#collectionsList span.title`);
     if (el.getText().trim() === name) {
       el.click();
       return true;

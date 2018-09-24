@@ -49,6 +49,7 @@ export default class Browser extends BasePage {
 
   get currentPage() {
     // get selected pill to get it's name
+    this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
     const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
     // get active page
     return this._section(pill.getAttribute('name'));
@@ -139,7 +140,7 @@ export default class Browser extends BasePage {
       if (collection.getText().trim() === name) {
         const remove = collection.element(`iron-icon[name="remove"]`);
         remove.waitForVisible();
-        this.el.scrollIntoView(`nuxeo-document-collections nuxeo-tag`);
+        this.el.scrollIntoView();
         remove.click();
         return true;
       }
@@ -174,7 +175,7 @@ export default class Browser extends BasePage {
   }
 
   clickChild(doc) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
+    this.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     return rows.value.some((row) => {
       if (row.isVisible(`nuxeo-data-table-cell a.title`) &&
