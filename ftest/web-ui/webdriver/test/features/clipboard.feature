@@ -56,9 +56,9 @@ Feature: Clipboard
      | paste  | 3         |
 
   Scenario: Clipboard is updated when document's title changes
-    Given I have document with path "/default-domain/Src/File1" on clipboard
+    Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
+    And I have document with path "/default-domain/Src/File1" on clipboard
     And I refresh the UI
-    And I have permission ReadWrite for the document with path "/default-domain/Src/File1"
     When I click the "clipboard" button
     Then I can see the clipboard has "1" items
     And I can see the clipboard has "File1" document
