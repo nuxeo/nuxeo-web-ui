@@ -1,0 +1,256 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-avatar.html">
+<link rel="import" href="./nuxeo-document-comments.html">
+
+<!--
+`nuxeo-document-comment-thread`
+@group Nuxeo UI
+@element nuxeo-document-comment-thread
+-->
+<dom-module id="nuxeo-document-comment-thread">
+  <template>
+    <style include="nuxeo-styles">
+      :host {
+        display: block;
+      }
+
+      .horizontal {
+        @apply --layout-horizontal;
+      }
+
+      .thread {
+        margin-top: 5px;
+      }
+
+      .smaller {
+        font-size: 0.86em;
+      }
+
+      .opaque {
+        opacity: 0.5;
+      }
+
+      .content {
+        margin-left: 10px;
+        @apply --layout-vertical;
+        @apply --layout-flex;
+      }
+
+      .author {
+        text-shadow: -0.1px 0 rgba(0, 0, 0, 0.2), 0 0.1px rgba(0, 0, 0, 0.2), 0.1px 0 rgba(0, 0, 0, 0.2), 0 -0.1px rgba(0, 0, 0, 0.2);
+        margin-right: 5px;
+      }
+
+      .main-option {
+        height: 1.5em;
+        width: 1.5em;
+        cursor: pointer;
+      }
+
+      .more-content {
+        cursor: pointer;
+      }
+
+      .text {
+        display: inline;
+      }
+
+      paper-menu-button {
+        --paper-menu-button: {
+          padding: 0;
+        };
+      }
+
+      paper-listbox {
+        --paper-listbox: {
+          padding: 0;
+        };
+      }
+
+      paper-icon-button {
+        --paper-icon-button: {
+          padding: 0;
+        };
+      }
+
+      paper-icon-item {
+        --paper-icon-item: {
+          padding: 5px 5px;
+          display: flex;
+          cursor: pointer;
+        };
+
+        --paper-item-min-height: 24px;
+
+        --paper-item-icon: {
+          width: 1.75em;
+          margin-right: 10px;
+        };
+      }
+
+    </style>
+
+    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
+    <div class="thread horizontal">
+      <nuxeo-user-avatar user="[[comment.author]]"
+                         height="[[_computeAvatarDimensions(level)]]"
+                         width="[[_computeAvatarDimensions(level)]]"
+                         border-radius="50"
+                         font-size="[[_computeAvatarFontSize(level)]]">
+      </nuxeo-user-avatar>
+      <div class="content">
+        <div class="horizontal">
+          <span class="author">[[comment.author]]</span>
+          <span class="smaller opaque">[[_computeDateLabel(comment)]]</span>
+          <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
+            <paper-menu-button no-animations>
+              <paper-icon-button class="main-option opaque"
+                                 icon="more-vert"
+                                 slot="dropdown-trigger"
+                                 alt="menu">
+              </paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-icon-item class="smaller">
+                  <iron-icon icon="nuxeo:edit" slot="item-icon"></iron-icon>
+                  <span>[[i18n('comments.options.edit')]]</span>
+                </paper-icon-item>
+                <paper-icon-item class="smaller">
+                  <iron-icon icon="nuxeo:delete" slot="item-icon"></iron-icon>
+                  <span>[[i18n('comments.options.delete')]]</span>
+                </paper-icon-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </template>
+        </div>
+
+        <div class="text">
+          <span>[[_computeTextToDisplay(comment, maxChars, truncated)]]</span>
+          <template is="dom-if" if="[[truncated]]">
+            <span class="smaller opaque more-content" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
+          </template>
+          <template is="dom-if" if="[[!truncated]]">
+            <iron-icon class="main-option opaque" icon="reply" on-tap="_reply" hidden$="[[!_isRootElement(level)]]"></iron-icon>
+          </template>
+        </div>
+        <template is="dom-if" if="[[_isRootElement(level)]]">
+          <nuxeo-document-comments id="replies"
+                                   uid="[[comment.id]]"
+                                   page-size="[[pageSize]]"
+                                   level="[[_computeSubLevel(level)]]"
+                                   expanded="[[comment.expanded]]">
+          </nuxeo-document-comments>
+        </template>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document-comment-thread',
+
+      behaviors: [Nuxeo.FormatBehavior],
+
+      properties: {
+        comment: {
+          type: Object,
+        },
+
+        pageSize: {
+          type: Number,
+        },
+
+        level: {
+          type: Number,
+        },
+
+        truncated: {
+          type: Boolean,
+          computed: '_computeTruncatedFlag(comment.showFull, comment.text,  maxChars)'
+        },
+
+        maxChars: {
+          type: Number,
+          readOnly: true,
+          value: 256,
+        },
+      },
+
+      _reply: function() {
+        this.$$('#replies')._focusInput();
+      },
+
+      _showFullComment: function() {
+        this.set('comment.showFull', true);
+      },
+
+      _computeAvatarDimensions: function(level) {
+        return level === 1 ? 24 : 20;
+      },
+
+      _computeAvatarFontSize: function(level) {
+        return level === 1 ? 13 : 11;
+      },
+
+      _computeDateLabel: function (item) {
+        if (item) {
+          var creationDate = this.formatDate(item.creationDate, 'relative');
+          if (item.modificationDate) {
+            return this.i18n('comments.edited', creationDate)
+          }
+          return creationDate;
+        }
+      },
+
+      _computeSubLevel: function (level) {
+        return level + 1;
+      },
+
+      _computeTextToDisplay: function(comment, maxChars, truncated) {
+        if(!truncated){
+          return comment.text;
+        }
+        return comment.text.substring(0, maxChars - 1) + '…';
+      },
+
+      _computeTruncatedFlag: function(showFull, text, limit) {
+        return !showFull && text.length > limit;
+      },
+
+      /** Visibility Methods **/
+
+      _areExtendedOptionsAvailable: function (author, currentUser) {
+        return currentUser && currentUser.properties.username === author;
+      },
+
+      _isRootElement: function (level) {
+        return level === 1;
+      },
+
+    });
+  </script>
+</dom-module>
