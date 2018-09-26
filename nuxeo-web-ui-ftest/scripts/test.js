@@ -76,7 +76,7 @@ if (argv['debug']) {
   process.env.DEBUG = true;
 }
 
-process.env.BROWSER = argv['browser'] || 'chrome';
+process.env.BROWSER = argv['browser'] || process.env.BROWSER || 'chrome';
 
 process.env.FORCE_COLOR = true;
 

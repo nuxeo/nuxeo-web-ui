@@ -1,3 +1,9 @@
+/**
+ * Inspired by:
+ * - https://github.com/diego-fernandez-santos/wdio-shadow
+ * - https://www.npmjs.com/package/query-selector-shadow-dom
+ */
+
 function findDeep(selector, multiple, baseElement, filterBy) {
   const reference = baseElement || document.documentElement;
 
@@ -84,7 +90,7 @@ function findDeep(selector, multiple, baseElement, filterBy) {
   function querySelectorDeep(sel) {
     return _querySelectorDeep(sel);
   }
-
+  
   let result;
   if (selector) {
     result = multiple ? querySelectorAllDeep(selector) : querySelectorDeep(selector);
@@ -139,6 +145,10 @@ exports.init = function (browser) {
     let baseElement = this.lastResult && this.lastResult.value;
     if (Array.isArray(baseElement) && baseElement.length > 0) {
       baseElement = baseElement[0];
+    }
+    if (baseElement && !baseElement.ELEMENT) {
+      // with firefox, some results other then elements are stored and break when passed as a parameter to execute
+      baseElement = null;
     }
     return this
         .execute(findDeep, selector, multiple === true, baseElement, filterBy)
