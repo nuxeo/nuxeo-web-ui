@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = function () {
-
   this.When('I click remove button for "$title" document', (title) => {
     this.ui.drawer.clipboard.waitForVisible();
     this.ui.drawer.clipboard.removeItem(title);
