@@ -41,8 +41,4 @@ export default class Clipboard extends BasePage {
     });
   }
 
-  reload() {
-    return fixtures.documents.reloadLocalStorage('nuxeo-clipboard #storage');
-  }
-
 }

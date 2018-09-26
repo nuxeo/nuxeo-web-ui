@@ -1,3 +1,4 @@
+@cleanupLocalStorage
 Feature: Recents
 
   I can view recent documents
@@ -21,7 +22,6 @@ Feature: Recents
     Then I can see the list of recently viewed documents has "2" items
     And I can see the list of recently viewed documents has "ws" document
     And I can see the list of recently viewed documents has "file" document
-    And I have a clean recently viewed documents list
 
   Scenario: Document is removed from Recently Viewed list when it's deleted
     Given I browse to the document with path "/default-domain/ws"
@@ -31,4 +31,3 @@ Feature: Recents
     When I can trash current document
     Then I can see the list of recently viewed documents has "1" items
     And I can see the list of recently viewed documents has "ws" document
-    And I have a clean recently viewed documents list

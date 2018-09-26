@@ -55,7 +55,11 @@ exports.config = {
     };
     if (cap.browserName === 'chrome') {
       cap.chromeOptions = {
-        args: ['--no-sandbox'],
+        args: ['--no-sandbox',
+          // '--auto-open-devtools-for-tabs',
+          // '--window-size=1920,1080',
+          // '--headless',
+        ],
       };
     }
     return cap;
