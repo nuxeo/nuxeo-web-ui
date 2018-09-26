@@ -1,3 +1,4 @@
+@cleanupLocalStorage
 Feature: Clipboard
 
   I can add, remove, move and copy items from/to the clipboard
@@ -12,7 +13,6 @@ Feature: Clipboard
       | File      | File3 | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/Src |             |     |      |
     And user "John" exists in group "members"
     And I login as "John"
-    And I have a clean clipboard
 
   Scenario: Add documents to the clipboard
     Given I browse to the document with path "/default-domain/Src"
@@ -24,24 +24,24 @@ Feature: Clipboard
     And I can see the clipboard has "File1" document
 
   Scenario: Remove documents from the clipboard
-    Given I have document with path "/default-domain/Src/File1" on clipboard
-    And I reload the page
+    Given I browse to the document with path "/default-domain/Src"
+    And I select the "File1" document
+    And I can see the selection toolbar
+    And I can add selection to clipboard
     When I click the "clipboard" button
     Then I can see the clipboard has "File1" document
     When I click remove button for "File1" document
     Then I can see the clipboard has "0" items
 
   Scenario Outline: <action> from clipboard
-    Given I have the following documents on clipboard
-      | path                      |
-      | /default-domain/Src/File1 |
-      | /default-domain/Src/File2 |
-      | /default-domain/Src/File3 |
+    Given I browse to the document with path "/default-domain/Src"
+    And I select all child documents
+    And I can see the selection toolbar
+    And I can add selection to clipboard
     And I have the following permissions to the documents
       | permission | path                 |
       | ReadWrite  | /default-domain/Src  |
       | ReadWrite  | /default-domain/Dest |
-    And I reload the page
     And I browse to the document with path "/default-domain/Dest"
     Then I can see the document has "0" children
     When I click the clipboard <action> action
@@ -57,8 +57,10 @@ Feature: Clipboard
 
   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
-    And I have document with path "/default-domain/Src/File1" on clipboard
-    And I reload the page
+    And I browse to the document with path "/default-domain/Src"
+    And I select the "File1" document
+    And I can see the selection toolbar
+    And I can add selection to clipboard
     When I click the "clipboard" button
     Then I can see the clipboard has "1" items
     And I can see the clipboard has "File1" document

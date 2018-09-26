@@ -101,42 +101,6 @@ fixtures.documents = {
              })
     );
   },
-  addToLocalStorage: (document, username, storageName) =>
-    (typeof document === 'string' ? fixtures.documents.getDocument(document) : Promise.resolve(document))
-          .then((docObject) => {
-            if (docObject) {
-              const key = `${username}-${storageName}`;
-
-              const storageDocument = {
-                uid: docObject.uid,
-                title: docObject.title,
-                type: docObject.type,
-                path: docObject.path,
-                lastViewed: new Date(),
-              };
-              if (docObject.contextParameters && docObject.contextParameters.thumbnail &&
-                      docObject.contextParameters.thumbnail.url) {
-                storageDocument.contextParameters = { thumbnail: { url: docObject.contextParameters.thumbnail.url } };
-              }
-              let done = false;
-              browser.execute((doc, storageKey) => {
-                const store = JSON.parse(localStorage.getItem(storageKey)) || [];
-                store.push(doc);
-                localStorage.setItem(storageKey, JSON.stringify(store));
-              }, storageDocument, key).then(() => {
-                done = true;
-              });
-              driver.waitUntil(() => done);
-            }
-          }),
-
-  clearLocalStorage: (username, storageName) => {
-    const key = `${username}-${storageName}`;
-    return browser.execute((storageKey) => {
-      localStorage.removeItem(storageKey);
-    }, key);
-  },
-  reloadLocalStorage: (selector) => browser.shadowExecute(selector, (element) => element.reload()),
   getDocument: (ref) => nuxeo.repository().fetch(ref),
 };
 

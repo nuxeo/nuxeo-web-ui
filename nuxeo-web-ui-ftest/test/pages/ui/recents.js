@@ -14,8 +14,4 @@ export default class Recents extends BasePage {
     });
     return count;
   }
-
-  reload() {
-    return fixtures.documents.reloadLocalStorage('nuxeo-recent-documents #storage');
-  }
 }
