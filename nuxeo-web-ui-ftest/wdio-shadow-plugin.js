@@ -32,7 +32,8 @@ function findDeep(selector, multiple, baseElement, filterBy) {
     if (reference.shadowRoot) {
       findAllElements(reference.shadowRoot.querySelectorAll('*'));
     }
-    return sel ? allElements.filter(el => el.matches(sel)) : allElements;
+    // cleanup any duplicates
+    return Array.from(new Set(sel ? allElements.filter(el => el.matches(sel)) : allElements));
   }
 
   function findMatchingElement(splitSelector, possibleElementsIndex) {
@@ -63,7 +64,7 @@ function findDeep(selector, multiple, baseElement, filterBy) {
       if (!findMany && lightElement) {
         return lightElement;
       }
-      // do best to support complex selectors and split the query
+      // do the best to support complex selectors and split the query
       const splitSelector = sel.match(/(([^\s\"']+\s*[,>+~]\s*)+|\'[^']*\'+|\"[^\"]*\"+|[^\s\"']+)+/g);
 
       const possibleElementsIndex = splitSelector.length - 1;
@@ -123,8 +124,27 @@ exports.init = function (browser) {
       state: 'failure',
       sessionId: result.sessionId,
       value: null,
-      selector: result.selector
+      selector: result.selector,
     };
+  }
+
+  function fixResult(result) {
+    if (browser.desiredCapabilities.browserName !== 'safari' || !result || !result.value) {
+      return;
+    }
+    if (Array.isArray(result.value)) {
+      result.value = result.value.map((r) => fixElement(r));
+    } else {
+      fixElement(result.value);
+    }
+  }
+
+  function fixElement(element) {
+    if (!element.ELEMENT) {
+      const el = Object.keys(element).find((k) => k.startsWith('element-'));
+      element.ELEMENT = element[el];
+    }
+    return element;
   }
 
   browser.addCommand('shadowElement', function (selector, multiple, filterBy) {
@@ -154,6 +174,8 @@ exports.init = function (browser) {
         .execute(findDeep, selector, multiple === true, baseElement, filterBy)
         .then((result) => {
           const myResult = Object.assign({}, result, { selector });
+          // make object compliant with protocol on safari
+          fixResult(myResult);
           return (myResult.value !== null) ? myResult : noSuchElement(myResult);
         });
   });
