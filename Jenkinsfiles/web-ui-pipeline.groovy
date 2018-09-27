@@ -10,7 +10,9 @@ properties([
             [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
             [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the functionnal tests be skipped?', name: 'SKIP_IT_TESTS'],
             [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the element\'s tests be skipped?', name: 'SKIP_UNIT_TESTS'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the metrics report be generated?', name: 'GENERATE_METRICS']
+            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the metrics report be generated?', name: 'GENERATE_METRICS'],
+            [$class: 'StringParameterDefinition', defaultValue: 'chrome', description: 'The browser to use for functional tests.', name: 'BROWSER'],
+            [$class: 'StringParameterDefinition', defaultValue: '', description: 'The path to the browser binary.', name: 'BROWSER_BINARY']
         ]
     ],
     pipelineTriggers([])
