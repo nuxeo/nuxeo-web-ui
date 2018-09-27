@@ -670,3 +670,23 @@
     <nuxeo-versions-diff-button document="[[document]]"></nuxeo-versions-diff-button>
   </template>
 </nuxeo-slot-content>
+
+<!-- PUBLISHING -->
+<nuxeo-slot-content name="internalPublishItem" slot="PUBLISH_ITEMS" order="10">
+  <template>
+    <paper-tab name="internal">[[i18n('publication.internal.title')]]</paper-tab>
+  </template>
+</nuxeo-slot-content>
+<!--
+<nuxeo-slot-content name="mediaPublishItem" slot="PUBLISH_ITEMS" order="20">
+  <template>
+    <paper-tab name="media">Media Publishing</paper-tab>
+  </template>
+</nuxeo-slot-content>
+-->
+<nuxeo-slot-content name="internalPublishPage" slot="PUBLISH_PAGES" order="10">
+  <template>
+    <nuxeo-internal-publish id="internalPublish" name="internal" document="[[document]]">
+    </nuxeo-internal-publish>
+  </template>
+</nuxeo-slot-content>
