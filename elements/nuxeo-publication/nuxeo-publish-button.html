@@ -1,0 +1,155 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-element.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
+
+<dom-module id="nuxeo-publish-button">
+  <template>
+    <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
+      :host {
+        --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
+        display: block;
+      }
+
+      paper-tabs {
+        border-bottom: 1px solid var(--divider-color);
+      }
+
+      paper-tab {
+        text-transform: uppercase;
+      }
+
+      paper-tabs,
+      #container {
+        margin: 0;
+        padding: 0;
+      }
+
+      iron-pages,
+      nuxeo-document-import {
+        /*Firefox fix (NXP-22349)*/
+        min-height: 100%;
+      }
+
+      #container {
+        height: 30vh;
+        width: 50vw;
+      }
+
+      iron-pages {
+        @apply --layout-flex;
+        @apply --layout-horizontal;
+      }
+
+      /* IE11 fix (NXP-23550) */
+      *::-ms-backdrop, iron-pages * {
+        height: 80vh;
+      }
+    </style>
+
+    <dom-if if="[[_isAvailable(document)]]">
+      <template>
+        <paper-icon-button icon="[[icon]]" on-click="_toggleDialog" noink></paper-icon-button>
+        <nuxeo-tooltip>[[i18n('publication.button.tooltip')]]</nuxeo-tooltip>
+      </template>
+    </dom-if>
+
+    <paper-dialog id="pusblishDialog"
+                  modal
+                  no-auto-focus>
+      <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
+        <nuxeo-slot slot="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
+      </paper-tabs>
+      <div id="container" class="vertical layout flex">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+          <nuxeo-slot slot="PUBLISH_PAGES" model="[[publishContext]]"></nuxeo-slot>
+        </iron-pages>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-publish-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        /**
+         * Input document.
+         */
+        document: Object,
+
+        /**
+         * Icon to use (iconset_name:icon_name).
+         */
+        icon: {
+          type: String,
+          value: 'editor:publish',
+        },
+
+        selectedTab: {
+          type: String,
+          value: 'internal'
+        },
+        publishContext: {
+          type: Object,
+          computed: '_publishContext(document, i18n)'
+        }
+      },
+
+      listeners: {
+        'nx-publish-cancel': '_close',
+        'nx-publish-success': '_close',
+        'nx-publish-error': '_close'
+      },
+
+
+      _isAvailable: function(document) {
+        return document && !document.isProxy
+                    && this.hasFacet(document, 'Publishable')
+                    && this.hasPermission(document, 'Write');
+      },
+
+      _toggleDialog: function() {
+        this.$.pusblishDialog.toggle();
+      },
+
+      _close: function() {
+        this.$.pusblishDialog.close();
+      },
+
+      _publishContext: function() {
+        return {document: this.document, i18n: this.i18n};
+      }
+
+    });
+  </script>
+
+</dom-module>
