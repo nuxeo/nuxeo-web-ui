@@ -1,15 +1,18 @@
-'use strict';
+const {
+  Then,
+  When,
+} = require('cucumber');
 
-module.exports = function () {
-  this.When('I click the "$button" button', (button) => this.ui.drawer.open(button));
-  this.When('I select "$option" from the View menu', (option) => this.ui.view(option));
-  this.When('I reload the page', () => {
-    this.ui.reload();
-  });
-  this.Then('I can see "$activity" in the Activity feed', (activity) => {
-    // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
-    driver.pause(3000);
-    this.ui.activityFeed.waitForVisible();
-    this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
-  });
-};
+When('I click the {string} button', function (button) { return this.ui.drawer.open(button); });
+When('I select {string} from the View menu', function (option) { return this.ui.view(option); });
+When('I reload the page', function () {
+  // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
+  driver.pause(3000);
+  this.ui.reload();
+});
+Then('I can see {string} in the Activity feed', function (activity) {
+  // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
+  driver.pause(3000);
+  this.ui.activityFeed.waitForVisible();
+  this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
+});

@@ -1,97 +1,102 @@
-'use strict';
+const {
+  Then,
+  When,
+} = require('cucumber');
 
-module.exports = function () {
-  this.Then('I can see the $tab tree', (tab) => this.ui.drawer._section(tab).waitForVisible().should.be.true);
+Then('I can see the {word} tree', function (tab) {
+  this.ui.drawer._section(tab).waitForVisible().should.be.true;
+});
 
-  this.Then('I can see the "$title" $tab tree node', (title, tab) => {
-    this.ui.drawer._section(tab).waitForVisible();
-    this.ui.drawer._section(tab).elementByTextContent(`.content a`, title).waitForVisible();
+Then('I can see the {string} {word} tree node', function (title, tab) {
+  this.ui.drawer._section(tab).waitForVisible();
+  this.ui.drawer._section(tab).elementByTextContent(`.content a`, title).waitForVisible();
+});
+
+Then('I can navigate to {word} pill', function (pill) {
+  this.ui.browser.waitForVisible();
+  const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  el.waitForVisible();
+  el.click();
+});
+
+When('I click {string} in the {word} tree', function (title, tab) {
+  const section = this.ui.drawer._section(tab);
+  section.waitForVisible();
+  section.waitForVisible(`.content a`);
+  const el = section.elementByTextContent(`.content a`, title);
+  el.waitForVisible();
+  el.click();
+});
+
+Then('I can see the {string} document', function (title) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.hasTitle(title).should.be.true;
+});
+
+Then('I select all child documents', function () {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectAllChildDocuments();
+});
+
+Then('I deselect the {string} document', function (title) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.deselectChildDocument(title);
+});
+
+Then('I select the {string} document', function (title) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectChildDocument(title);
+});
+
+Then('I can see the selection toolbar', function () {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.waitForVisible();
+});
+
+Then('I can add selection to clipboard', function () {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.addToClipboard();
+});
+
+Then('I can move selection down', function () {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.moveDown();
+});
+
+Then('I can move selection up', function () {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.moveUp();
+});
+
+Then('I can see the {string} child document is at position "{int}"', function (title, pos) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.indexOfChild(title).should.equals(pos - 1);
+});
+
+Then('I can see {int} document(s)', function (numberOfResults) {
+  const results = this.ui.browser.currentPageResults;
+  results.waitForVisible();
+  const displayMode = results.displayMode;
+  results.getResults(displayMode).waitForVisible();
+  results.resultsCount(displayMode).should.equal(numberOfResults);
+});
+
+Then(/^I can see the permissions page$/, function () {
+  this.ui.browser.permissionsView.waitForVisible();
+});
+
+Then(/^I can perform the following publications$/, function (table) {
+  table.rows().forEach((row) => {
+    this.ui.browser.publishDocument(row[0], row[1], row[2], row[3]);
   });
+});
 
-  this.Then(/^I can navigate to (.*) pill$/, (pill) => {
-    this.ui.browser.waitForVisible();
-    const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
-    el.waitForVisible();
-    el.click();
+Then(/^I can see the document has (\d+) publications$/, function (nbPublications) {
+  driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications)
+});
+
+Then(/^I can see the document has the following publication$/, function (table) {
+  table.rows().forEach((row) => {
+    this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
   });
-
-  this.When('I click "$title" in the $tab tree', (title, tab) => {
-    const section = this.ui.drawer._section(tab);
-    section.waitForVisible();
-    section.waitForVisible(`.content a`);
-    const el = section.elementByTextContent(`.content a`, title);
-    el.waitForVisible();
-    el.click();
-  });
-
-  this.Then('I can see the "$title" document', (title) => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.hasTitle(title).should.be.true;
-  });
-
-  this.Then('I select all child documents', () => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectAllChildDocuments();
-  });
-
-  this.Then('I deselect the "$title" document', (title) => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.deselectChildDocument(title);
-  });
-
-  this.Then('I select the "$title" document', (title) => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectChildDocument(title);
-  });
-
-  this.Then('I can see the selection toolbar', () => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectionToolbar.waitForVisible();
-  });
-
-  this.Then('I can add selection to clipboard', () => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectionToolbar.addToClipboard();
-  });
-
-  this.Then('I can move selection down', () => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectionToolbar.moveDown();
-  });
-
-  this.Then('I can move selection up', () => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.selectionToolbar.moveUp();
-  });
-
-  this.Then('I can see the "$title" child document is at position "$pos"', (title, pos) => {
-    this.ui.browser.waitForVisible();
-    this.ui.browser.indexOfChild(title).should.equals(parseInt(pos) - 1);
-  });
-
-  this.Then(/^I can see (\d+) documents$/, (numberOfResults) => {
-    const results = this.ui.browser.currentPageResults;
-    results.waitForVisible();
-    const displayMode = results.displayMode;
-    results.getResults(displayMode).waitForVisible();
-    results.resultsCount(displayMode).toString().should.equal(numberOfResults);
-  });
-
-  this.Then(/^I can see the permissions page$/, () => this.ui.browser.permissionsView.waitForVisible());
-
-  this.Then(/^I can perform the following publications$/, (table) => {
-    table.rows().forEach((row) => {
-      this.ui.browser.publishDocument(row[0], row[1], row[2], row[3]);
-    });
-  });
-
-  this.Then(/^I can see the document has (\d+) publications$/, (nbPublications) =>
-    driver.waitUntil(() => this.ui.browser.publicationView.count.toString() === nbPublications)
-  );
-
-  this.Then(/^I can see the document has the following publication$/, (table) => {
-    table.rows().forEach((row) => {
-      this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
-    });
-  });
-};
+});

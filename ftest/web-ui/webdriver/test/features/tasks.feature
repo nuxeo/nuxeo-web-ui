@@ -32,11 +32,11 @@ Feature: Tasks
     When I logout
     And I login as "Bob"
     And I click the "tasks" button
-    Then I can see the my task list has "1" items
+    Then I can see the my task list has 1 item
     When I logout
     And I login as "Susan"
     And I click the "tasks" button
-    Then I can see the my task list has "1" items
+    Then I can see the my task list has 1 item
 
   Scenario: I cannot reassign a task
     Given I login as "John"
@@ -69,7 +69,7 @@ Feature: Tasks
     When I logout
     And I login as "Susan"
     And I click the "tasks" button
-    Then I can see the my task list has "1" items
+    Then I can see the my task list has 1 item
 
   Scenario: I can reassign a task with Admin privileges
     Given I login as "Joe"
@@ -91,4 +91,4 @@ Feature: Tasks
     When I logout
     And I login as "Bob"
     And I click the "tasks" button
-    Then I can see the my task list has "1" items
+    Then I can see the my task list has 1 item

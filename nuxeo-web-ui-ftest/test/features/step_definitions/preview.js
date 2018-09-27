@@ -1,29 +1,30 @@
-'use strict';
+const {
+  Then,
+  When,
+} = require('cucumber');
 
-module.exports = function () {
-  this.When('I click the preview button', () => {
-    const page = this.ui.browser.documentPage(this.doc.type);
-    page.waitForVisible();
-    page.previewButton.waitForVisible();
-    page.previewButton.click();
-  });
+When('I click the preview button', function () {
+  const page = this.ui.browser.documentPage(this.doc.type);
+  page.waitForVisible();
+  page.previewButton.waitForVisible();
+  page.previewButton.click();
+});
 
-  this.When('I click the preview button for the attachment', () => {
-    const page = this.ui.browser.documentPage(this.doc.type);
-    page.waitForVisible();
-    page.metadata.attachments.waitForVisible();
-    page.metadata.attachments.previewButton.click();
-  });
+When('I click the preview button for the attachment', function () {
+  const page = this.ui.browser.documentPage(this.doc.type);
+  page.waitForVisible();
+  page.metadata.attachments.waitForVisible();
+  page.metadata.attachments.previewButton.click();
+});
 
-  this.Then(/^I can see the inline ([-\w]+) previewer$/, (viewerType) => {
-    const page = this.ui.browser.documentPage(this.doc.type);
-    page.view.waitForVisible();
-    const preview = page.view.preview;
-    preview.waitForVisible();
-    preview.element(viewerType).waitForVisible();
-  });
+Then(/^I can see the inline ([-\w]+) previewer$/, function (viewerType) {
+  const page = this.ui.browser.documentPage(this.doc.type);
+  page.view.waitForVisible();
+  const preview = page.view.preview;
+  preview.waitForVisible();
+  preview.element(viewerType).waitForVisible();
+});
 
-  this.Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
-    driver.waitForVisible(`#dialog ${viewerType}`);
-  });
-};
+Then(/^I can see a ([-\w]+) previewer$/, function (viewerType) {
+  driver.waitForVisible(`#dialog ${viewerType}`);
+});

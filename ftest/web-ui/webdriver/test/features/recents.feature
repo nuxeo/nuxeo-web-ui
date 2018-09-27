@@ -19,7 +19,7 @@ Feature: Recents
     Given I browse to the document with path "/default-domain/ws"
     And I browse to the document with path "/default-domain/ws/file"
     When I click the "recents" button
-    Then I can see the list of recently viewed documents has "2" items
+    Then I can see the list of recently viewed documents has 2 items
     And I can see the list of recently viewed documents has "ws" document
     And I can see the list of recently viewed documents has "file" document
 
@@ -27,7 +27,7 @@ Feature: Recents
     Given I browse to the document with path "/default-domain/ws"
     And I browse to the document with path "/default-domain/ws/file"
     When I click the "recents" button
-    Then I can see the list of recently viewed documents has "2" items
+    Then I can see the list of recently viewed documents has 2 items
     When I can trash current document
-    Then I can see the list of recently viewed documents has "1" items
+    Then I can see the list of recently viewed documents has 1 items
     And I can see the list of recently viewed documents has "ws" document

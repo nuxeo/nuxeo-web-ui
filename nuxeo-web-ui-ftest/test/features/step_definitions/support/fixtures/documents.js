@@ -1,5 +1,7 @@
 import nuxeo, { BlobHelper } from '../services/client';
 
+const {After, Before} = require('cucumber');
+
 global.liveDocuments = [];
 
 fixtures.documents = {
@@ -104,13 +106,13 @@ fixtures.documents = {
   getDocument: (ref) => nuxeo.repository().fetch(ref),
 };
 
-module.exports = function () {
-  this.Before(() => nuxeo.repository().fetch('/default-domain').then((doc) => {
-    this.doc = doc;
-  }));
+Before(function() { 
+  return nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc});
+});
 
-  this.After(() => Promise.all(liveDocuments
+After(function() {
+  return Promise.all(liveDocuments
           .map((docUid) => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
-          .then(() => {liveDocuments = [];})
-  );
-};
+          .then(() => {liveDocuments = [];});
+  }
+);

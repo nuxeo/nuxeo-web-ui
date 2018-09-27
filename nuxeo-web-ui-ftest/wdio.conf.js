@@ -1,5 +1,50 @@
 const path = require('path');
 
+const plugins = {};
+plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
+
+const capability = {
+  // maxInstances can get overwritten per capability. So if you have an in-house Selenium
+  // grid with only 5 firefox instance available you can make sure that not more than
+  // 5 instance gets started at a time.
+  maxInstances: 1,
+  browserName: process.env.BROWSER,
+  javascriptEnabled: true,
+  acceptSslCerts: true,
+};
+
+switch (capability.browserName) {
+  case 'chrome':
+  capability.chromeOptions = {
+      args: [
+        '--no-sandbox',
+        // '--auto-open-devtools-for-tabs',
+        // '--window-size=1920,1080',
+        // '--headless',
+      ],
+    };
+    if (process.env.BROWSER_BINARY) {
+      capability.chromeOptions.binary = process.env.BROWSER_BINARY;
+    }
+    break;
+  case 'firefox':
+    capability['moz:firefoxOptions'] = {
+      args: [
+        // '-headless',
+      ],
+    };
+    if (process.env.BROWSER_BINARY) {
+      capability['moz:firefoxOptions'].binary = process.env.BROWSER_BINARY;
+    }
+    break;
+  case 'safari':
+    capability['safari.options'] = {
+      technologyPreview: false,
+    };
+    break;
+  // no default
+}
+
 exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
@@ -40,50 +85,7 @@ exports.config = {
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
   // https://docs.saucelabs.com/reference/platforms-configurator
   //
-  capabilities: (() => {
-    const cap = {
-      // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-      // grid with only 5 firefox instance available you can make sure that not more than
-      // 5 instance gets started at a time.
-      // maxInstances: 1,
-      //x
-      maxInstances: 1,
-      browserName: process.env.BROWSER,
-      javascriptEnabled: true,
-      acceptSslCerts: true,
-    };
-    switch (cap.browserName) {
-      case 'chrome':
-        cap.chromeOptions = {
-          args: [
-            '--no-sandbox',
-            // '--auto-open-devtools-for-tabs',
-            // '--window-size=1920,1080',
-            // '--headless',
-          ],
-        };
-        if (process.env.BROWSER_BINARY) {
-          cap.chromeOptions.binary = process.env.BROWSER_BINARY;
-        }
-        break;
-      case 'firefox':
-        cap['moz:firefoxOptions'] = {
-          args: [
-            // '-headless',
-          ],
-        };
-        if (process.env.BROWSER_BINARY) {
-          cap['moz:firefoxOptions'].binary = process.env.BROWSER_BINARY;
-        }
-        break;
-      case 'safari':
-        cap['safari.options'] = {
-          technologyPreview: false,
-        };
-        break;
-    }
-    return [cap];
-  })(),
+  capabilities: [capability],
   //
   // ===================
   // Test Configurations
@@ -127,11 +129,7 @@ exports.config = {
   // WebdriverCSS: https://github.com/webdriverio/webdrivercss
   // WebdriverRTC: https://github.com/webdriverio/webdriverrtc
   // Browserevent: https://github.com/webdriverio/browserevent
-  plugins: (() => {
-    const plugins = {};
-    plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
-    return plugins;
-  })(),
+  plugins,
   //
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
@@ -151,16 +149,16 @@ exports.config = {
   reporters: ['spec', 'json'],
 
   reporterOptions: {
-    json :{
+    json: {
       outputDir: './target/json-reports/',
       combined: true,
-      filename: 'report'
-    }
+      filename: 'report',
+    },
   },
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: [path.join(__dirname, 'test/features/step_definitions')],        // <string[]> (file/dir) require files before executing features
+    require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')],        // <string[]> (file/dir) require files before executing features
     backtrace: true,   // <boolean> show full backtrace for errors
     compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
     dryRun: false,      // <boolean> invoke formatters without executing steps
@@ -185,9 +183,9 @@ exports.config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: function (config, capabilities) {
+  onPrepare: () => {
     const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
-    if (reportFilePath){
+    if (reportFilePath) {
       const fs = require('fs');
       if (fs.existsSync(reportFilePath)) {
         fs.unlinkSync(reportFilePath);
@@ -197,7 +195,7 @@ exports.config = {
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
-  before: function () {
+  before: () => {
     /*
      * Increase window size to avoid hidden buttons
      */
@@ -210,7 +208,7 @@ exports.config = {
     /**
      * Setup the Chai assertion framework
      */
-    var chai = require('chai');
+    const chai = require('chai');
     global.expect = chai.expect;
     global.assert = chai.assert;
     global.should = chai.should();
@@ -258,15 +256,15 @@ exports.config = {
   //
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
-  onComplete: function(exitCode) {
+  onComplete: () => {
     const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
     const junitReport = process.env.JUNIT_REPORT_PATH;
-    if (reportFilePath && junitReport){
-      const fs = require('fs'),
-            mkdirp = require('mkdirp');
+    if (reportFilePath && junitReport) {
+      const fs = require('fs');
+      const mkdirp = require('mkdirp');
       const jUnitReporter = require('cucumber-junit');
       mkdirp.sync(path.dirname(junitReport));
       fs.writeFileSync(junitReport, jUnitReporter(fs.readFileSync(reportFilePath)));
     }
-  }
+  },
 };

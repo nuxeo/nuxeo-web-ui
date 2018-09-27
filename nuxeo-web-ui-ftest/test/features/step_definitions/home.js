@@ -1,9 +1,10 @@
-'use strict';
+const {
+  Then,
+  When,
+} = require('cucumber');
 
-module.exports = function () {
-  this.When('I click the Nuxeo logo', () => this.ui.goHome());
+When('I click the Nuxeo logo', function () { return this.ui.goHome(); });
 
-  this.Then('I can see my home', () => this.ui.home.waitForVisible().should.be.true);
+Then('I can see my home', function () { this.ui.home.waitForVisible().should.be.true; });
 
-  this.Then('I have a "$title" card', (title) => this.ui.home.card(title).waitForVisible().should.be.true);
-};
+Then('I have a {string} card', function (title) { this.ui.home.card(title).waitForVisible().should.be.true; });
