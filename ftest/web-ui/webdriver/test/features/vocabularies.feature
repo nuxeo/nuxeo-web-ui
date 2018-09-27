@@ -20,9 +20,9 @@ Feature: Vocabularies
     And I cannot see "Breizh" entry
     And I can add "Brittany" entry
     And I can see "Brittany" entry
-    And I can edit entry with index "8" and new label "Breizh"
+    And I can edit entry with index 8 and new label "Breizh"
     And I can see "Breizh" entry
-    And I can delete entry with index "8"
+    And I can delete entry with index 8
     And I cannot see "Breizh" entry
     And I cannot see "Brittany" entry
 

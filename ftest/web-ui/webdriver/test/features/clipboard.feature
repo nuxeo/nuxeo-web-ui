@@ -20,7 +20,7 @@ Feature: Clipboard
     Then I can see the selection toolbar
     And I can add selection to clipboard
     When I click the "clipboard" button
-    Then I can see the clipboard has "1" items
+    Then I can see the clipboard has 1 item
     And I can see the clipboard has "File1" document
 
   Scenario: Remove documents from the clipboard
@@ -31,7 +31,7 @@ Feature: Clipboard
     When I click the "clipboard" button
     Then I can see the clipboard has "File1" document
     When I click remove button for "File1" document
-    Then I can see the clipboard has "0" items
+    Then I can see the clipboard has 0 items
 
   Scenario Outline: <action> from clipboard
     Given I browse to the document with path "/default-domain/Src"
@@ -43,12 +43,12 @@ Feature: Clipboard
       | ReadWrite  | /default-domain/Src  |
       | ReadWrite  | /default-domain/Dest |
     And I browse to the document with path "/default-domain/Dest"
-    Then I can see the document has "0" children
+    Then I can see the document has 0 children
     When I click the clipboard <action> action
-    Then I can see the document has "3" children
-    And I can see the clipboard has "0" items
+    Then I can see the document has 3 children
+    And I can see the clipboard has 0 items
     When I browse to the document with path "/default-domain/Src"
-    Then I can see the document has "<srcNbDocs>" children
+    Then I can see the document has <srcNbDocs> children
 
    Examples:
      | action | srcNbDocs |
@@ -62,12 +62,12 @@ Feature: Clipboard
     And I can see the selection toolbar
     And I can add selection to clipboard
     When I click the "clipboard" button
-    Then I can see the clipboard has "1" items
+    Then I can see the clipboard has 1 item
     And I can see the clipboard has "File1" document
     When I browse to the document with path "/default-domain/Src/File1"
     Then I can edit the following properties in the File metadata:
       | name  | value    |
       | title | newTitle |
     When I click the "clipboard" button
-    Then I can see the clipboard has "1" items
+    Then I can see the clipboard has 1 item
     And I can see the clipboard has "newTitle" document

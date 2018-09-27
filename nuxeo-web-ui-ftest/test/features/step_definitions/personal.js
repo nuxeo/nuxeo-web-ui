@@ -1,5 +1,5 @@
-'use strict';
+const {
+  Then,
+} = require('cucumber');
 
-module.exports = function () {
-  this.Then('I can see my personal workspace', () => this.ui.drawer.personal.waitForVisible().should.be.true);
-};
+Then('I can see my personal workspace', function () { this.ui.drawer.personal.waitForVisible().should.be.true; });

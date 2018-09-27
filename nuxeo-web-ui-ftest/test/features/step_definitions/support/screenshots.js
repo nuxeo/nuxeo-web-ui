@@ -29,7 +29,7 @@ module.exports = function screenshotHook() {
    */
   this.After((scenario) => {
     Object.keys(screenshots).forEach((key) => {
-      const decodedImage = new Buffer(screenshots[key], 'base64');
+      const decodedImage = Buffer.from(screenshots[key], 'base64');
       scenario.attach(decodedImage, 'image/png');
     });
   });
