@@ -1,51 +1,5 @@
 const path = require('path');
 
-function initPlugins() {
-  const plugins = {};
-  plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
-  return plugins;
-}
-
-function initCapabilities() {
-  const cap = {
-    // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-    // grid with only 5 firefox instance available you can make sure that not more than
-    // 5 instance gets started at a time.
-    // maxInstances: 1,
-    //x
-    maxInstances: 1,
-    browserName: process.env.BROWSER,
-    javascriptEnabled: true,
-    acceptSslCerts: true,
-  };
-  switch (cap.browserName) {
-    case 'chrome':
-      cap.chromeOptions = {
-        args: [
-          '--no-sandbox',
-          // '--auto-open-devtools-for-tabs',
-          // '--window-size=1920,1080',
-          // '--headless',
-        ],
-      };
-      if (process.env.BROWSER_BINARY) {
-        cap.chromeOptions.binary = process.env.BROWSER_BINARY;
-      }
-      break;
-    case 'firefox':
-      cap['moz:firefoxOptions'] = {
-        args: [
-          // '-headless',
-        ],
-      };
-      if (process.env.BROWSER_BINARY) {
-        cap['moz:firefoxOptions'].binary = process.env.BROWSER_BINARY;
-      }
-      break;
-  }
-  return [cap];
-}
-
 exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
@@ -86,7 +40,50 @@ exports.config = {
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
   // https://docs.saucelabs.com/reference/platforms-configurator
   //
-  capabilities: initCapabilities(),
+  capabilities: (() => {
+    const cap = {
+      // maxInstances can get overwritten per capability. So if you have an in-house Selenium
+      // grid with only 5 firefox instance available you can make sure that not more than
+      // 5 instance gets started at a time.
+      // maxInstances: 1,
+      //x
+      maxInstances: 1,
+      browserName: process.env.BROWSER,
+      javascriptEnabled: true,
+      acceptSslCerts: true,
+    };
+    switch (cap.browserName) {
+      case 'chrome':
+        cap.chromeOptions = {
+          args: [
+            '--no-sandbox',
+            // '--auto-open-devtools-for-tabs',
+            // '--window-size=1920,1080',
+            // '--headless',
+          ],
+        };
+        if (process.env.BROWSER_BINARY) {
+          cap.chromeOptions.binary = process.env.BROWSER_BINARY;
+        }
+        break;
+      case 'firefox':
+        cap['moz:firefoxOptions'] = {
+          args: [
+            // '-headless',
+          ],
+        };
+        if (process.env.BROWSER_BINARY) {
+          cap['moz:firefoxOptions'].binary = process.env.BROWSER_BINARY;
+        }
+        break;
+      case 'safari':
+        cap['safari.options'] = {
+          technologyPreview: false,
+        };
+        break;
+    }
+    return [cap];
+  })(),
   //
   // ===================
   // Test Configurations
@@ -130,7 +127,11 @@ exports.config = {
   // WebdriverCSS: https://github.com/webdriverio/webdrivercss
   // WebdriverRTC: https://github.com/webdriverio/webdriverrtc
   // Browserevent: https://github.com/webdriverio/browserevent
-  plugins: initPlugins(),
+  plugins: (() => {
+    const plugins = {};
+    plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
+    return plugins;
+  })(),
   //
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
