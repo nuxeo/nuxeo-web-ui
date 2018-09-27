@@ -6,6 +6,7 @@ import DocumentPermissions from './browser/document_permissions';
 export default class Search extends Results {
 
   get quickSearchResults() {
+    this.waitForVisible('#results #selector a');
     return this.el.elements('#results #selector a');
   }
 
@@ -41,10 +42,7 @@ export default class Search extends Results {
       const els = driver.elements(`${this._selector} #actionsDropdown paper-item`).value;
       return els.length > 1;
     });
-    // XXX should be using driver.elementByTextContent but element returns empty text because the respective paper-item
-    // is not interactable (nor visible)
-    const e = this.el.elementByTextContent('#actionsDropdown paper-item', savedSearchName);
-    return e;
+    return this.el.elementByTextContent('#actionsDropdown paper-item', savedSearchName);
   }
 
   enterInput(text) {

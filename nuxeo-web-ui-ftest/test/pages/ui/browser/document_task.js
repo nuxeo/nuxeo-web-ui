@@ -38,6 +38,7 @@ export default class DocumentTask extends BasePage {
     }
 
     actorExists(element, actor) {
+      element.waitForVisible('nuxeo-user-tag .tag a');
       const users = element.elements('nuxeo-user-tag .tag a').value;
       return users.some(user => user.getText() === `${actor} undefined`);
     }

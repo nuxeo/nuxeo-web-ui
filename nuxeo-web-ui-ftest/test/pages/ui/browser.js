@@ -83,6 +83,14 @@ export default class Browser extends BasePage {
     return new EditDialog('#edit-dialog');
   }
 
+  get rows() {
+    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row');
+  }
+
+  waitForChildren() {
+    this.currentPage.waitForExist('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+  }
+
   addToCollection(name) {
     const addToCollectionButton = this.el.element(`nuxeo-add-to-collection-button paper-icon-button`);
     addToCollectionButton.waitForVisible();
@@ -175,9 +183,8 @@ export default class Browser extends BasePage {
   }
 
   clickChild(doc) {
-    this.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    return rows.value.some((row) => {
+    this.waitForChildren();
+    return this.rows.value.some((row) => {
       if (row.isVisible(`nuxeo-data-table-cell a.title`) &&
           row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title) {
         row.click();
@@ -189,8 +196,8 @@ export default class Browser extends BasePage {
   }
 
   indexOfChild(title) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-cell a.title');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+    this.waitForChildren();
+    const rows = this.rows;
     let i;
     for (i = 0; i < rows.value.length; i++) {
       if (rows.value[i].isVisible(`nuxeo-data-table-cell a.title`) &&
@@ -206,9 +213,9 @@ export default class Browser extends BasePage {
    * Results might vary with the viewport size as only visible items are taken into account.
    */
   waitForNbChildren(nb) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    this.currentPage.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     driver.waitUntil(() => {
-      const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
+      const rows = this.rows;
       let count = 0;
       rows.value.forEach((row) => {
         if (row.isVisible() && row.isVisible(`nuxeo-data-table-cell a.title`)) {
@@ -220,10 +227,8 @@ export default class Browser extends BasePage {
   }
 
   selectAllChildDocuments() {
-    const pill = this.currentPage;
-    pill.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
-    const rows = pill.elements('nuxeo-data-table nuxeo-data-table-row');
-    rows.value.forEach((row) => {
+    this.waitForChildren();
+    this.rows.value.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
         row.element('nuxeo-data-table-checkbox').click();
       }
@@ -231,36 +236,11 @@ export default class Browser extends BasePage {
   }
 
   selectChildDocument(title) {
-    const pill = this.currentPage;
-    pill.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
-    const rows = pill.elements('nuxeo-data-table nuxeo-data-table-row');
-    const found = rows.value.some((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox:not([checked])') &&
-          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
-        row.element('nuxeo-data-table-checkbox').click();
-        return true;
-      }
-      return false;
-    });
-    if (!found) {
-      throw new Error('Cannot find document with title "${title}"');
-    }
+    return this._selectChildDocument(title);
   }
 
   deselectChildDocument(title) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    const found = rows.value.some((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox[checked]') &&
-        row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
-        row.element('nuxeo-data-table-checkbox').click();
-        return true;
-      }
-      return false;
-    });
-    if (!found) {
-      throw new Error('Cannot find document with title "${title}"');
-    }
+    return this._selectChildDocument(title, true);
   }
 
   get selectionToolbar() {
@@ -303,5 +283,21 @@ export default class Browser extends BasePage {
     fixtures.layouts.setValue(workflowSelect, workflow);
     // click the start button
     this.el.element('.document-actions nuxeo-workflow-button #startButton').click();
+  }
+
+  _selectChildDocument(title, deselect) {
+    this.waitForChildren();
+    const found = this.rows.value.some((row) => {
+      if ((deselect ? row.isVisible('nuxeo-data-table-checkbox[checked]') :
+          row.isVisible('nuxeo-data-table-checkbox:not([checked])')) &&
+          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+        row.element('nuxeo-data-table-checkbox').click();
+        return true;
+      }
+      return false;
+    });
+    if (!found) {
+      throw new Error('Cannot find document with title "${title}"');
+    }
   }
 }
