@@ -70,13 +70,13 @@ module.exports = function () {
   });
 
   this.Then(/^I can only see (\d+) authorized application[s]?$/, (numberOfApps) => {
-    const a = this.ui.userAuthorizedApps;
-    const apps = a.getApps();
+    const apps = this.ui.userAuthorizedApps.getApps();
     apps.length.toString().should.equal(numberOfApps);
   });
 
   this.Then(/^I can revoke access for "(.+)" application$/, (appName) => {
     this.ui.userAuthorizedApps.waitForVisible();
+    browser.waitUntil(() => this.ui.userAuthorizedApps.getApps().length > 0);
     const apps = this.ui.userAuthorizedApps.getApps(appName);
     apps.length.should.equal(1);
     const revokeButton = apps[0].revokeButton();

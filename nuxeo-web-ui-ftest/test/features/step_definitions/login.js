@@ -32,6 +32,7 @@ module.exports = function () {
     login.submit();
     this.username = username;
     this.ui = UI.get();
+    this.ui.home.waitForVisible(); // let's wait for home to be visible before moving on
   });
 
   this.When(/^I visit (.*)$/, (url) => driver.url(url));

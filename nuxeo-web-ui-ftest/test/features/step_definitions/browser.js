@@ -50,18 +50,22 @@ module.exports = function () {
   });
 
   this.Then('I can add selection to clipboard', () => {
+    this.ui.browser.waitForVisible();
     this.ui.browser.selectionToolbar.addToClipboard();
   });
 
   this.Then('I can move selection down', () => {
+    this.ui.browser.waitForVisible();
     this.ui.browser.selectionToolbar.moveDown();
   });
 
   this.Then('I can move selection up', () => {
+    this.ui.browser.waitForVisible();
     this.ui.browser.selectionToolbar.moveUp();
   });
 
   this.Then('I can see the "$title" child document is at position "$pos"', (title, pos) => {
+    this.ui.browser.waitForVisible();
     this.ui.browser.indexOfChild(title).should.equals(parseInt(pos) - 1);
   });
 

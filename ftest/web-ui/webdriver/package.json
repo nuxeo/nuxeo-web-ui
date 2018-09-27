@@ -12,7 +12,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@nuxeo/nuxeo-web-ui-ftest": "file:../../../nuxeo-web-ui-ftest",
-    "nuxeo": "~1.1.1"
+    "@nuxeo/nuxeo-web-ui-ftest": "file:../../../nuxeo-web-ui-ftest"
   }
 }
