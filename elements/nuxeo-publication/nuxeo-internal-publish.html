@@ -21,6 +21,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-element.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
@@ -59,8 +60,8 @@ limitations under the License.
         @apply --layout-vertical;
       }
 
-      .versions {
-        margin-left: 1em;
+      .versions, .options {
+        margin-left: 3em;
       }
 
       label {
@@ -68,7 +69,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="op" op="Document.PublishRenditionToSection">
+    <nuxeo-operation id="op" op="Document.PublishToSection">
     </nuxeo-operation>
 
     <div class="container">
@@ -95,6 +96,12 @@ limitations under the License.
           <div class="versions">
             <label>[[i18n('documentInfo.version')]]</label>
             <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+          </div>
+          <div class="options">
+            <label>[[i18n('publication.internal.options')]]</label>
+            <paper-checkbox checked="{{override}}">
+              [[i18n('publication.internal.override')]]
+            </paper-checkbox>
           </div>
         </div>
       </paper-dialog-scrollable>
@@ -123,9 +130,11 @@ limitations under the License.
         publishSpace: Object,
 
         selectedRendition: {
-          String,
+          type: String,
           value: 'none'
-        }
+        },
+
+        keepAlreadyPublished: Boolean
       },
 
       _computeRenditionOptions: function() {
@@ -140,7 +149,14 @@ limitations under the License.
       _publish: function() {
         this.$.op.params = {
           'target': this.publishSpace.uid,
-          'renditionName': this.rendition
+          'override': this.override
+        }
+        if (this.selectedRendition) {
+          if (this.selectedRendition === 'default') {
+            this.$.op.params.defaultRendition = true;
+          } else if (this.selectedRendition !== 'none') {
+            this.$.op.params.renditionName = this.selectedRendition;
+          }
         }
         this.$.op.input = this.document.uid;
         this.$.op.execute().then(function(publishedDoc) {

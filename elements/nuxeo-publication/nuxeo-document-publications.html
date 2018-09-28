@@ -57,6 +57,18 @@ limitations under the License.
         text-transform: uppercase;
       }
 
+      .resultActions {
+        display: block;
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-end-justified;
+      }
+
+      .resultActions paper-icon-button, nuxeo-publish-button {
+        padding: .3em;
+        margin-left: 4px;
+      }
+
     </style>
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing>
@@ -65,13 +77,20 @@ limitations under the License.
     <nuxeo-page-provider id="provider"
       page-size="40"
       query="[[_computeQuery(document)]]"
-      sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
+      sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
       enrichers="thumbnail, permissions"
       headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
       schemas="dublincore,common,uid,rendition">
     </nuxeo-page-provider>
 
     <nuxeo-card heading="[[i18n('publication.details')]]">
+
+      <div class="resultActions">
+        <nuxeo-publish-button class="uppercase" document="[[document]]">
+        </nuxeo-publish-button>
+        <paper-button class="uppercase" on-tap="_unpublishAll">[[i18n('publication.unpublishAll')]]</paper-button>
+        <paper-button class="uppercase primary" on-tap="_republishAll">[[i18n('publication.republishAll')]]</paper-button>
+      </div>
       <nuxeo-data-table id="table" nx-provider="provider" class="results"
                         empty-label="[[i18n('publication.noPublications')]]">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
@@ -134,6 +153,10 @@ limitations under the License.
         '_fetchPublications(document, visible)'
       ],
 
+      listeners: {
+        'nx-publish-success': '_fetchPublications'
+      },
+
       _navigate: function(e) {
         this.fire('navigate', {doc: e.detail.item});
       },
@@ -178,6 +201,14 @@ limitations under the License.
 
       _canUnpublish: function(doc) {
         return doc && this.hasPermission(doc, 'Write');
+      },
+
+      _unpublishAll: function() {
+        console.log('_unpublishAll');
+      },
+
+      _republishAll: function() {
+        console.log('_republishAll');
       }
 
     });
