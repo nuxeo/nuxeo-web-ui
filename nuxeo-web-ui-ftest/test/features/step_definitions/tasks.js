@@ -13,7 +13,7 @@ When(/^I (\w+) the task for following actors:$/, function (option, table) {
     this.ui.browser.documentTaskView.reassignOption.click();
   }
   this.ui.browser.documentTaskView.assignmentDialog.waitForVisible();
-  table.rows().map((row) => this.ui.browser.documentTaskView.setUserOrGroup(row[0]));
+  table.rows().map(row => this.ui.browser.documentTaskView.setUserOrGroup(row[0]));
 
   this.ui.browser.documentTaskView.confirmButton.waitForVisible();
   this.ui.browser.documentTaskView.confirmButton.click();
@@ -21,7 +21,7 @@ When(/^I (\w+) the task for following actors:$/, function (option, table) {
 
 Then('I can see the list of tasks', function () { this.ui.drawer.tasks.waitForVisible().should.be.true; });
 Then('I can see the View Tasks Dashboard link', function () {
-    this.ui.drawer.tasks.dashboardLink.waitForVisible().should.be.true;
+  this.ui.drawer.tasks.dashboardLink.waitForVisible().should.be.true;
 });
 Then('I can see the Tasks Dashboard', function () { this.ui.tasks.waitForVisible().should.be.true; });
 Then(/^I can process the workflow$/, function () { this.ui.browser.documentTaskView.waitForVisible(); });

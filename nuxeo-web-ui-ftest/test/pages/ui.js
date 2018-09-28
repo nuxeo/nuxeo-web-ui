@@ -1,10 +1,10 @@
-'use strict';
+
 
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
 import Home from './ui/home';
-import Administration from './ui/administration.js';
+import Administration from './ui/administration';
 import BasePage from './base';
 import ActivityFeed from './ui/activity_feed';
 import HistoryTable from './ui/history_table';
@@ -15,7 +15,6 @@ import UserAuthorizedApps from './ui/oauth2/user_authorized_apps';
 import UserCloudServices from './ui/oauth2/user_cloud_services';
 
 export default class UI extends BasePage {
-
   goHome() {
     this.drawer.logo.click();
   }
@@ -86,6 +85,7 @@ export default class UI extends BasePage {
     driver.url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
       browser.waitForVisible('nuxeo-app:not([unresolved])');
+      /* global window */
       const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
       if (locale.value) {
         global.locale = locale.value;
@@ -146,6 +146,7 @@ export default class UI extends BasePage {
   }
 
   get isConnectionActive() {
+    /* global document */
     return driver.execute(() => document.querySelector('nuxeo-connection').active).value;
   }
 
@@ -162,6 +163,6 @@ export default class UI extends BasePage {
   }
 
   waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('paper-toast').value.every((toast) => !toast.isVisible()));
+    driver.waitUntil(() => driver.elements('paper-toast').value.every(toast => !toast.isVisible()));
   }
 }

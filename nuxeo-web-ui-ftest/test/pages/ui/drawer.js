@@ -1,4 +1,4 @@
-'use strict';
+
 
 import BasePage from '../base';
 import Clipboard from './clipboard';
@@ -8,7 +8,6 @@ import Recents from './recents';
 import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
-
   get menu() {
     return this.el.element('#menu');
   }
@@ -50,7 +49,7 @@ export default class Drawer extends BasePage {
   }
 
   get collections() {
-    return new Collections(`nuxeo-collections`);
+    return new Collections('nuxeo-collections');
   }
 
   get personal() {

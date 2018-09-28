@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class Recents extends BasePage {
-
   get nbItems() {
     const items = this.el.elements('#recentDocumentsList .list-item').value;
     let count = 0;

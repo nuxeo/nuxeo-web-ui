@@ -4,15 +4,15 @@ const {
   When,
 } = require('cucumber');
 
-Given(/^I have the following trashed documents$/, function (table) {
-  const tasks = table.rows().map((row) => () => {
+Given(/^I have the following trashed documents$/, (table) => {
+  const tasks = table.rows().map(row => () => {
     const doc = fixtures.documents.init(row[0]);
     doc.name = row[1];
     doc.properties = {
       'dc:title': row[1],
     };
     // create the document
-    return fixtures.documents.create(row[2], doc).then((docCreated) => fixtures.documents.trash(docCreated));
+    return fixtures.documents.create(row[2], doc).then(docCreated => fixtures.documents.trash(docCreated));
   });
   return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
@@ -21,7 +21,7 @@ Given(/^I have a (.*) document trashed/, function (docType) {
   docType = docType || 'File';
   const doc = fixtures.documents.init(docType);
   // create the document
-  return fixtures.documents.create(this.doc.path, doc).then((d) => fixtures.documents.trash(d).then(trashedDoc => {
+  return fixtures.documents.create(this.doc.path, doc).then(d => fixtures.documents.trash(d).then((trashedDoc) => {
     this.doc = trashedDoc;
   }));
 });

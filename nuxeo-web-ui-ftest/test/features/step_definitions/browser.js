@@ -9,7 +9,7 @@ Then('I can see the {word} tree', function (tab) {
 
 Then('I can see the {string} {word} tree node', function (title, tab) {
   this.ui.drawer._section(tab).waitForVisible();
-  this.ui.drawer._section(tab).elementByTextContent(`.content a`, title).waitForVisible();
+  this.ui.drawer._section(tab).elementByTextContent('.content a', title).waitForVisible();
 });
 
 Then('I can navigate to {word} pill', function (pill) {
@@ -22,8 +22,8 @@ Then('I can navigate to {word} pill', function (pill) {
 When('I click {string} in the {word} tree', function (title, tab) {
   const section = this.ui.drawer._section(tab);
   section.waitForVisible();
-  section.waitForVisible(`.content a`);
-  const el = section.elementByTextContent(`.content a`, title);
+  section.waitForVisible('.content a');
+  const el = section.elementByTextContent('.content a', title);
   el.waitForVisible();
   el.click();
 });
@@ -76,7 +76,7 @@ Then('I can see the {string} child document is at position "{int}"', function (t
 Then('I can see {int} document(s)', function (numberOfResults) {
   const results = this.ui.browser.currentPageResults;
   results.waitForVisible();
-  const displayMode = results.displayMode;
+  const { displayMode } = results;
   results.getResults(displayMode).waitForVisible();
   results.resultsCount(displayMode).should.equal(numberOfResults);
 });
@@ -92,7 +92,7 @@ Then(/^I can perform the following publications$/, function (table) {
 });
 
 Then(/^I can see the document has (\d+) publications$/, function (nbPublications) {
-  driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications)
+  driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications);
 });
 
 Then(/^I can see the document has the following publication$/, function (table) {

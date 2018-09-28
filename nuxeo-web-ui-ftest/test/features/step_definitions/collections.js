@@ -1,6 +1,6 @@
 const {
-    Then,
-  } = require('cucumber');
+  Then,
+} = require('cucumber');
 
 Then('I can see the {string} collection', function (name) {
   this.ui.drawer.collections.waitForHasCollection(name).should.be.true;

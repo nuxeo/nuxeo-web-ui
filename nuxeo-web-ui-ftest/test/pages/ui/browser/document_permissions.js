@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../../base';
 
 export default class DocumentPermissions extends BasePage {
-
   get newPermissionButton() {
     return this.el.element('#localPermissions #newPermissionButton');
   }
@@ -26,7 +25,7 @@ export default class DocumentPermissions extends BasePage {
 
   permission(permission, name, timeFrame) {
     return driver.waitUntil(() => {
-      const rows = this.el.elements(`div.acl-table-row`).value;
+      const rows = this.el.elements('div.acl-table-row').value;
       return rows.find((row) => {
         const nameCheck = name ? row.isExisting(`span.user[title="${name}"]`) : true;
         const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;

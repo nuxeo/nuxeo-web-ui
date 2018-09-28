@@ -1,6 +1,8 @@
 import Nuxeo from 'nuxeo';
 import nuxeo from '../services/client';
 
+const { After } = require('cucumber');
+
 global.runningWorkflows = [];
 
 fixtures.workflows = {
@@ -24,7 +26,7 @@ fixtures.workflows = {
     });
   },
 
-  delete: (workflowInstanceId) => nuxeo.workflows().delete(workflowInstanceId),
+  delete: workflowInstanceId => nuxeo.workflows().delete(workflowInstanceId),
 
   removeInstance: (workflowInstanceId) => {
     const index = runningWorkflows.indexOf(workflowInstanceId);
@@ -34,10 +36,9 @@ fixtures.workflows = {
   },
 };
 
-module.exports = function () {
-  this.After(() => Promise.all(Object.keys(runningWorkflows)
-      .map((index) => {
-        const workflowInstanceId = runningWorkflows[index];
-        fixtures.workflows.delete(workflowInstanceId).then(() => fixtures.workflows.removeInstance(workflowInstanceId));
-      })));
-};
+After(() => Promise.all(Object.keys(runningWorkflows)
+  .map((index) => {
+    const workflowInstanceId = runningWorkflows[index];
+    return fixtures.workflows.delete(workflowInstanceId)
+      .then(() => fixtures.workflows.removeInstance(workflowInstanceId));
+  })));

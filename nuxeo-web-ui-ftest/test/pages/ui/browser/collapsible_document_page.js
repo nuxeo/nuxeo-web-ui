@@ -1,8 +1,8 @@
-'use strict';
+
 
 import DocumentPage from './document_page';
-export default class CollapsibleDocumentPage extends DocumentPage {
 
+export default class CollapsibleDocumentPage extends DocumentPage {
   constructor(selector, docType) {
     super(selector);
     this.docType = docType;

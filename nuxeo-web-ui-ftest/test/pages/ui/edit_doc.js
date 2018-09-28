@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class EditDoc extends BasePage {
-
   submit() {
     this.el.waitForVisible('paper-button.primary');
     this.el.element('paper-button.primary').click();
@@ -19,5 +18,4 @@ export default class EditDoc extends BasePage {
       this.el.setValue(`input.nuxeo-${doctype}-edit`, `New_Test_${docType}`);
     }
   }
-
 }

@@ -26,11 +26,7 @@ Given(/^I have permission (\w+) for the document with path "(.+)"$/, function (p
 });
 
 Given(/^I have the following permissions to the documents$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.documents.setPermissions(row[1], row[0], this.username));
-  });
-  return Promise.all(promises);
+  return Promise.all(table.rows().map(row => fixtures.documents.setPermissions(row[1], row[0], this.username)));
 });
 
 Given(/^This document has a (major|minor) version$/, function (versionType) {
@@ -41,48 +37,48 @@ Given(/^I have a document added to "([^"]*)" collection$/, function (colName) {
   const docFile = fixtures.documents.init('File');
   // create the document
   return fixtures.documents.create(this.doc.path, docFile)
-    .then((doc) => fixtures.collections.addToNewCollection(doc, colName)).then((d) => {
+    .then(doc => fixtures.collections.addToNewCollection(doc, colName)).then((d) => {
       this.doc = d;
     });
 });
 
 Given(/^This document has a "([^"]*)" workflow running$/, function (workflowName) {
   return fixtures.workflows.start(this.doc, workflowName, this.username)
-      .then(workflowInstance => this.workflowInstance = workflowInstance)
+    .then(workflowInstance => this.workflowInstance = workflowInstance);
 });
 
 Given(/^The workflow running for this document will proceed with "([^"]*)" action and the following variables:$/,
   function (action, table) {
     this.workflowInstance.should.not.be.undefined;
     return this.workflowInstance.fetchTasks()
-        .then(tasks => {
-          tasks.entries.length.should.be.equal(1);
-          const task = tasks.entries[0];
-          table.rows().map((row) => {
-            row[2].should.to.be.oneOf(['list', 'text'], 'An unknown type was passed as argument');
-            let value;
-            switch (row[2]) {
-              case 'list':
-                value = row[1].split(',');
-                break;
-              case 'text':
-                value = row[1];
-                break;
-              default:
+      .then((tasks) => {
+        tasks.entries.length.should.be.equal(1);
+        const task = tasks.entries[0];
+        table.rows().forEach((row) => {
+          row[2].should.to.be.oneOf(['list', 'text'], 'An unknown type was passed as argument');
+          let value;
+          switch (row[2]) {
+            case 'list':
+              value = row[1].split(',');
+              break;
+            case 'text':
+              value = row[1];
+              break;
+            default:
                 // do nothing
-            }
-            task.variable(row[0], value);
-          });
-          return task.complete(action);
+          }
+          task.variable(row[0], value);
         });
+        return task.complete(action);
+      });
   });
 
 Given(/^This document has file "(.+)" for content$/, function (file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file))
+  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
 });
 
 Given(/^This document has file "(.+)" for attachment/, function (file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true)
+  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
 });
 
 Given(/^I have a (.+) Note$/, function (format) {
@@ -131,13 +127,10 @@ Then(/I can see (.+) metadata with the following properties:/, function (docType
   table.rows().forEach((row) => {
     this.ui.browser.documentPage(docType).metadata.layout().waitForVisible();
     if (row[0] === 'subjects') {
-      driver.waitUntil(() =>
-        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]).indexOf(row[1]) > -1
-      );
+      driver.waitUntil(() => this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0])
+        .indexOf(row[1]) > -1);
     } else {
-      driver.waitUntil(() =>
-        this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]) === row[1]
-      );
+      driver.waitUntil(() => this.ui.browser.documentPage(docType).metadata.layout().getFieldValue(row[0]) === row[1]);
     }
   });
 });

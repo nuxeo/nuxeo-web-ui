@@ -1,10 +1,9 @@
-'use strict';
+
 
 import Results from './results';
 import DocumentPermissions from './browser/document_permissions';
 
 export default class Search extends Results {
-
   get quickSearchResults() {
     this.waitForVisible('#results #selector a');
     return this.el.elements('#results #selector a');
@@ -69,8 +68,8 @@ export default class Search extends Results {
 
   search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
-      this.el.element(`#searchInput .input-element input`).waitForVisible();
-      this.el.element(`#searchInput .input-element input`).setValue(searchTerm);
+      this.el.element('#searchInput .input-element input').waitForVisible();
+      this.el.element('#searchInput .input-element input').setValue(searchTerm);
       driver.keys('Enter');
     } else {
       this.setFieldValue(searchType, searchTerm);
@@ -79,6 +78,6 @@ export default class Search extends Results {
 
   quickSearchResultsCount() {
     const rows = this.el.element('#results #selector').elements('a.item');
-    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
+    return rows.value.filter(result => result.getAttribute('hidden') === null).length;
   }
 }

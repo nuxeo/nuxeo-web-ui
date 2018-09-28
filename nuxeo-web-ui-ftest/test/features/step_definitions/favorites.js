@@ -1,6 +1,6 @@
 const {
-    Then,
-  } = require('cucumber');
+  Then,
+} = require('cucumber');
 
 Then('I can see the document belongs to the favorites', function () {
   this.ui.drawer.favorites.hasDocument(this.doc).should.be.true;

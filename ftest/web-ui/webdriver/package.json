@@ -2,13 +2,9 @@
   "name": "nuxeo-web-ui-webdriverio",
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint test",
     "test": "nuxeo-web-ui-ftest --report --screenshots",
-    "pretest": "npm run lint",
     "test:dev": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo",
-    "pretest:dev": "npm run lint",
-    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --tags=@watch --debug",
-    "pretest:watch": "npm run lint"
+    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --tags=@watch --debug"
   },
   "license": "Apache-2.0",
   "dependencies": {

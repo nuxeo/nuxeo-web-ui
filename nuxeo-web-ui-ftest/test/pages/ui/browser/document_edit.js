@@ -1,4 +1,4 @@
-'use strict';
+
 
 import BasePage from '../../base';
 import DocumentLayout from './document_layout';
@@ -16,5 +16,4 @@ export default class DocumentEdit extends BasePage {
   layout() {
     return new DocumentLayout(`nuxeo-${this._docType.toLowerCase()}-edit-layout`);
   }
-
 }

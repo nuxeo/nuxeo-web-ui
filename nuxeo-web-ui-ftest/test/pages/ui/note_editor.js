@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class NoteEditor extends BasePage {
-
   setContent(content) {
     this.el.element('#editor').waitForVisible();
     this.el.element('#editor').setValue(content);

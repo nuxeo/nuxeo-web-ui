@@ -1,4 +1,4 @@
-'use strict';
+
 
 import BasePage from '../../base';
 import DocumentMetadata from './document_metadata';
@@ -6,7 +6,6 @@ import DocumentView from './document_view';
 import DocumentVersions from './document_versions';
 
 export default class DocumentPage extends BasePage {
-
   constructor(selector, docType) {
     super(selector);
     this.docType = docType;

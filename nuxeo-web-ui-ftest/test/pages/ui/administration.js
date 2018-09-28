@@ -1,11 +1,10 @@
-'use strict';
+
 
 import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
 import CloudServices from './admin/cloudServices';
 
 export default class Administration extends BasePage {
-
   get analytics() {
     return this.el.element('nuxeo-analytics');
   }
@@ -46,5 +45,4 @@ export default class Administration extends BasePage {
     }
     return this.cloudServices;
   }
-
 }

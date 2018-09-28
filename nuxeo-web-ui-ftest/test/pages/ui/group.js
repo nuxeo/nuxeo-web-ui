@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class Group extends BasePage {
-
   getField(field) {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
@@ -15,19 +14,19 @@ export default class Group extends BasePage {
   }
 
   get groupItem() {
-    return this.el.element(`paper-icon-item[name="group"]`);
+    return this.el.element('paper-icon-item[name="group"]');
   }
 
   get createGroupForm() {
-    return this.el.element(`nuxeo-create-group #form`);
+    return this.el.element('nuxeo-create-group #form');
   }
 
   get createGroupButton() {
-    return this.el.element(`nuxeo-create-group #createButton`);
+    return this.el.element('nuxeo-create-group #createButton');
   }
 
   get editGroupButton() {
-    return this.el.element(`#editGroupButton`);
+    return this.el.element('#editGroupButton');
   }
 
   get editGroupLabel() {
@@ -35,7 +34,7 @@ export default class Group extends BasePage {
   }
 
   get editGroupDialogButton() {
-    return this.el.element(`#editGroupDialog paper-button`);
+    return this.el.element('#editGroupDialog paper-button');
   }
 
   get deleteGroupButton() {

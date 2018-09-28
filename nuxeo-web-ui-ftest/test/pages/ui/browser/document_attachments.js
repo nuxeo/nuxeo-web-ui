@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../../base';
 
 export default class DocumentAttachments extends BasePage {
-
   constructor(selector, docType) {
     super(selector);
     this.docType = docType;

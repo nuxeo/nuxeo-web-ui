@@ -1,11 +1,10 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
-
   get nbItems() {
-    const items = this.el.elements(`#list .list-item`).value;
+    const items = this.el.elements('#list .list-item').value;
     let count = 0;
     items.forEach((item) => {
       if (item.isVisible()) {
@@ -16,14 +15,14 @@ export default class Clipboard extends BasePage {
   }
 
   move() {
-    const moveBtn = this.el.element(`#move`);
+    const moveBtn = this.el.element('#move');
     moveBtn.waitForVisible();
     moveBtn.waitForEnabled();
     moveBtn.click();
   }
 
   paste() {
-    const copyBtn = this.el.element(`#paste`);
+    const copyBtn = this.el.element('#paste');
     copyBtn.waitForVisible();
     copyBtn.waitForEnabled();
     copyBtn.click();
@@ -32,13 +31,12 @@ export default class Clipboard extends BasePage {
   removeItem(title) {
     const items = this.el.elements('nuxeo-data-list#list .list-item').value;
     return items.some((item) => {
-      if (item.isVisible() && item.getText(`.list-item-title`).trim() === title) {
-        item.click(`iron-icon.remove`);
+      if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
+        item.click('iron-icon.remove');
         return true;
       } else {
         return false;
       }
     });
   }
-
 }

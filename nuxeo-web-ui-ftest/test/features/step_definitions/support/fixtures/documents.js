@@ -1,6 +1,6 @@
 import nuxeo, { BlobHelper } from '../services/client';
 
-const {After, Before} = require('cucumber');
+const { After, Before } = require('cucumber');
 
 global.liveDocuments = [];
 
@@ -25,38 +25,38 @@ fixtures.documents = {
     return doc;
   }),
   createWithAuthor: (parent, document, username) => nuxeo.repository()
-      .create(parent, document)
-      .then((doc) => {
-        liveDocuments.push(doc.uid);
-        if (username) {
-          return doc.set({
-            'dc:creator': username,
-          }).save();
-        }
-        return doc;
-      }),
+    .create(parent, document)
+    .then((doc) => {
+      liveDocuments.push(doc.uid);
+      if (username) {
+        return doc.set({
+          'dc:creator': username,
+        }).save();
+      }
+      return doc;
+    }),
   addTag: (document, tag) => nuxeo.operation('Services.TagDocument')
-      .input(document)
-      .params({
-        tags: tag,
-      })
-      .execute()
-      .catch((error) => {
-        throw new Error(error);
-      }),
+    .input(document)
+    .params({
+      tags: tag,
+    })
+    .execute()
+    .catch((error) => {
+      throw new Error(error);
+    }),
   createVersion: (document, versionType) => nuxeo.operation('Document.CreateVersion').input(document.uid).params({
     increment: versionType,
     saveDocument: true,
   }).execute(),
   setPermissions: (document, permission, username) => nuxeo.operation('Document.AddPermission')
-      .input(typeof document === 'string' ? document : document.uid).params({
-        permission,
-        username,
-      }).execute(),
-  delete: (document) => nuxeo.repository().delete(document.path).then(() => {
+    .input(typeof document === 'string' ? document : document.uid).params({
+      permission,
+      username,
+    }).execute(),
+  delete: document => nuxeo.repository().delete(document.path).then(() => {
     liveDocuments.splice(liveDocuments.indexOf(document.uid), 1);
   }),
-  trash: (document) => nuxeo.operation('Document.Trash').input(document.uid).execute().then(doc => doc),
+  trash: document => nuxeo.operation('Document.Trash').input(document.uid).execute().then(doc => doc),
   attach: (document, blobPath, asAttachment = false) => {
     const blob = BlobHelper.fromPath(blobPath);
     const uploader = nuxeo.batchUpload();
@@ -69,10 +69,10 @@ fixtures.documents = {
           },
         };
         return nuxeo.operation('BlobHolder.AttachOnCurrentDocument')
-            .input(uploader)
-            .context(params.context)
-            .params(params)
-            .execute({ headers: { nx_es_sync: 'true' } });
+          .input(uploader)
+          .context(params.context)
+          .params(params)
+          .execute({ headers: { nx_es_sync: 'true' } });
       } else {
         document.properties['file:content'] = {
           'upload-batch': result.blob['upload-batch'],
@@ -90,29 +90,24 @@ fixtures.documents = {
       },
     };
     const uploader = nuxeo.batchUpload();
-    return uploader.upload(blob).then(() =>
-        nuxeo.operation('FileManager.Import')
-             .input(uploader)
-             .context(params.context)
-             .params(params)
-             .execute({ headers: { nx_es_sync: 'true' } })
-             .then((docs) => {
-               const doc = docs.entries[0];
-               liveDocuments.push(doc.uid);
-               return doc;
-             })
-    );
+    return uploader.upload(blob).then(() => nuxeo.operation('FileManager.Import')
+      .input(uploader)
+      .context(params.context)
+      .params(params)
+      .execute({ headers: { nx_es_sync: 'true' } })
+      .then((docs) => {
+        const doc = docs.entries[0];
+        liveDocuments.push(doc.uid);
+        return doc;
+      }));
   },
-  getDocument: (ref) => nuxeo.repository().fetch(ref),
+  getDocument: ref => nuxeo.repository().fetch(ref),
 };
 
-Before(function() { 
-  return nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc});
+Before(function () {
+  return nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc; });
 });
 
-After(function() {
-  return Promise.all(liveDocuments
-          .map((docUid) => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
-          .then(() => {liveDocuments = [];});
-  }
-);
+After(() => Promise.all(liveDocuments
+  .map(docUid => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
+  .then(() => { liveDocuments = []; }));

@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../base';
 
 export default class User extends BasePage {
-
   getField(field, opts) {
     opts = opts || {};
     const parent = opts.parent || '';
@@ -22,11 +21,11 @@ export default class User extends BasePage {
   }
 
   get userItem() {
-    return this.el.element(`paper-icon-item[name="user"]`);
+    return this.el.element('paper-icon-item[name="user"]');
   }
 
   get createUserForm() {
-    return this.el.element(`nuxeo-create-user #form`);
+    return this.el.element('nuxeo-create-user #form');
   }
 
   get createUserDialog() {
@@ -34,11 +33,11 @@ export default class User extends BasePage {
   }
 
   get createUserButton() {
-    return this.el.element(`nuxeo-create-user #createButton`);
+    return this.el.element('nuxeo-create-user #createButton');
   }
 
   get editUserButton() {
-    return this.el.element(`#editUserButton`);
+    return this.el.element('#editUserButton');
   }
 
   get editUserDialog() {
@@ -46,7 +45,7 @@ export default class User extends BasePage {
   }
 
   get editUserDialogButton() {
-    return this.el.element(`#editUserDialog paper-button`);
+    return this.el.element('#editUserDialog paper-button');
   }
 
   get deleteUserButton() {
