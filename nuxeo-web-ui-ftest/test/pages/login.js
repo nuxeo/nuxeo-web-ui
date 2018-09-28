@@ -1,7 +1,6 @@
-'use strict';
+
 
 export default class Login {
-
   set username(username) {
     driver.waitForVisible('#username');
     driver.element('#username').setValue(username);
@@ -22,5 +21,4 @@ export default class Login {
     driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
     return new this();
   }
-
 }

@@ -4,12 +4,10 @@ const {
   When,
 } = require('cucumber');
 
-Given('provider {string} exists in providers', function (provider) {
-  return fixtures.providers.create({
-    'entity-type': 'nuxeoOAuth2ServiceProvider',
-    serviceName: provider,
-  });
-});
+Given('provider {string} exists in providers', provider => fixtures.providers.create({
+  'entity-type': 'nuxeoOAuth2ServiceProvider',
+  serviceName: provider,
+}));
 
 Then('I can see the nuxeo-cloud-providers page', function () {
   this.ui.administration.cloudServices.waitForVisible();

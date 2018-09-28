@@ -1,5 +1,7 @@
 import nuxeo from '../services/client';
 
+const { After } = require('cucumber');
+
 const endPoint = '/oauth2/provider/';
 
 global.providers = {
@@ -30,10 +32,8 @@ fixtures.providers = {
       }
     });
   },
-  delete: (provider) => nuxeo.request(`${endPoint}${provider}`).delete().then(() => delete global.providers[provider]),
+  delete: provider => nuxeo.request(`${endPoint}${provider}`).delete().then(() => delete global.providers[provider]),
 };
 
-module.exports = function () {
-  this.After(() => Promise.all(Object.keys(global.providers)
-      .map((provider) => fixtures.providers.delete(provider))));
-};
+After(() => Promise.all(Object.keys(global.providers)
+  .map(provider => fixtures.providers.delete(provider))));

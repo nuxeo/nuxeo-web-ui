@@ -1,9 +1,8 @@
-'use strict';
+
 
 import BasePage from '../../base';
 
 export default class DocumentVersions extends BasePage {
-
   get createVersionButton() {
     return this.el.element('nuxeo-document-create-version');
   }
@@ -76,6 +75,7 @@ export default class DocumentVersions extends BasePage {
         item.click();
         return true;
       }
+      return false;
     });
     if (!itemClicked) {
       throw Error(`Could not find version ${label}`);

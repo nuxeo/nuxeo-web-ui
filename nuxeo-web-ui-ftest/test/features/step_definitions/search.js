@@ -7,43 +7,33 @@ const {
 Then('I can see the {string} search panel', function (name) { this.ui.drawer._search(name).waitForVisible(); });
 Then('I can see the search results', function () { this.ui.search.waitForVisible().should.be.true; });
 Then('I cannot see the search results', function () {
-  this.ui.search.waitForVisible(browser.options.waitforTimeout, true).should.be.true; 
+  this.ui.search.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
 });
 
-Given(/^I have the following groups$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.groups.create(
-      {
-        'entity-type': 'group',
-        groupname: row[0],
-        grouplabel: row[1],
-      }));
-  });
-  return Promise.all(promises);
-});
+Given(/^I have the following groups$/, table => Promise.all(
+  table.rows().map(row => fixtures.groups.create({
+    'entity-type': 'group',
+    groupname: row[0],
+    grouplabel: row[1],
+  }))
+));
 
-Given(/^I have the following users$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.users.create(
-      {
-        'entity-type': 'user',
-        properties: {
-          username: row[0],
-          firstName: row[1],
-          lastName: row[2],
-          password: fixtures.users.DEFAULT_PASSWORD,
-          groups: row[3],
-        },
-      }));
-  });
-  return Promise.all(promises);
-});
+Given(/^I have the following users$/, table => Promise.all(
+  table.rows().map(row => fixtures.users.create({
+    'entity-type': 'user',
+    properties: {
+      username: row[0],
+      firstName: row[1],
+      lastName: row[2],
+      password: fixtures.users.DEFAULT_PASSWORD,
+      groups: row[3],
+    },
+  }))
+));
 
-Given(/^I have the following documents$/, function (table) {
+Given(/^I have the following documents$/, (table) => {
   browser.pause(1000);
-  const tasks = table.rows().map((row) => () => {
+  const tasks = table.rows().map(row => () => {
     const doc = fixtures.documents.init(row[0]);
     doc.name = row[1];
     doc.properties = {
@@ -103,9 +93,7 @@ Then(/^I can see more than (\d+) search results$/, function (minNumberOfResults)
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(() =>
-      this.ui.results.resultsCount(displayMode) > parseInt(minNumberOfResults)
-    );
+    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) > parseInt(minNumberOfResults));
   }
 });
 
@@ -141,8 +129,7 @@ Then(/^I share my "(.+)" search with (.+)/, function (searchName, username) {
       permission: 'Read',
       timeFrame: 'permanent',
       notify: false,
-    }
-  );
+    });
   this.ui.searchForm(searchName).permissionsView.createPermissionButton.waitForVisible();
   this.ui.searchForm(searchName).permissionsView.createPermissionButton.click();
   this.ui.searchForm(searchName).permissionsView.permission('Read', username, 'permanent').waitForVisible();

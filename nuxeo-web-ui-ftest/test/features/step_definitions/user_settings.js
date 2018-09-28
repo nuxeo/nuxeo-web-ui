@@ -6,20 +6,12 @@ const {
 
 /* Cloud Services */
 
-Given(/^the following OAuth2 providers exist$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.oauth2Providers.create(row[0]));
-  });
-  return Promise.all(promises);
-});
+Given(/^the following OAuth2 providers exist$/, table => Promise.all(
+  table.rows().map(row => fixtures.oauth2Providers.create(row[0]))
+));
 
 Given(/^I have tokens for the following OAuth2 providers$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.oauth2Providers.createToken(row[0], this.username));
-  });
-  return Promise.all(promises);
+  return Promise.all(table.rows().map((row => fixtures.oauth2Providers.createToken(row[0], this.username))));
 });
 
 When(/^I am on user cloud services page$/, function () {
@@ -46,20 +38,12 @@ Then(/^I can delete token for provider "(.+)" that belongs to me$/, function (pr
 
 /* Authorized Applications */
 
-Given(/^the following OAuth2 clients exist$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.oauth2Clients.create(row[0]));
-  });
-  return Promise.all(promises);
-});
+Given(/^the following OAuth2 clients exist$/, table => Promise.all(
+  table.rows().map(row => fixtures.oauth2Clients.create(row[0]))
+));
 
 Given(/^I have tokens for the following OAuth2 clients$/, function (table) {
-  const promises = [];
-  table.rows().map((row) => {
-    promises.push(fixtures.oauth2Clients.createToken(row[0], this.username));
-  });
-  return Promise.all(promises);
+  return Promise.all(table.rows().map(row => fixtures.oauth2Clients.createToken(row[0], this.username)));
 });
 
 When(/^I am on user authorized applications page$/, function () {

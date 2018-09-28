@@ -1,5 +1,4 @@
 const {
-  Given,
   Then,
 } = require('cucumber');
 

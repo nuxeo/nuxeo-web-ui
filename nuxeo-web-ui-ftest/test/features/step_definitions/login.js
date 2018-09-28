@@ -1,12 +1,13 @@
-'use strict';
+
+
+import Login from '../../pages/login';
+import UI from '../../pages/ui';
 
 const {
   Given,
   Then,
   When,
 } = require('cucumber');
-import Login from '../../pages/login';
-import UI from '../../pages/ui';
 
 Given('user {string} exists in group {string}', (username, group) => fixtures.users.create(
   {
@@ -17,9 +18,10 @@ Given('user {string} exists in group {string}', (username, group) => fixtures.us
       password: fixtures.users.DEFAULT_PASSWORD,
       groups: [group],
     },
-  }));
+  },
+));
 
-Given('user {string} exists', (username) => fixtures.users.create(
+Given('user {string} exists', username => fixtures.users.create(
   {
     'entity-type': 'user',
     properties: {
@@ -27,7 +29,8 @@ Given('user {string} exists', (username) => fixtures.users.create(
       firstName: username,
       password: fixtures.users.DEFAULT_PASSWORD,
     },
-  }));
+  },
+));
 
 When('I login as {string}', function (username) {
   const login = Login.get();
@@ -38,7 +41,7 @@ When('I login as {string}', function (username) {
   this.ui = UI.get();
 });
 
-When(/^I visit (.*)$/, (url) => driver.url(url));
+When(/^I visit (.*)$/, url => driver.url(url));
 
 When('I logout', () => Login.get());
 

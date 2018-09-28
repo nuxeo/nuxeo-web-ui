@@ -1,7 +1,6 @@
-'use strict';
+
 
 export default class BasePage {
-
   constructor(selector) {
     this._selector = selector;
   }
@@ -11,16 +10,15 @@ export default class BasePage {
     return driver.element(this._selector);
   }
 
-  isVisible() {
-    return this.el.isVisible.apply(this, arguments);
+  isVisible(...args) {
+    return this.el.isVisible(...args);
   }
 
-  waitForVisible() {
-    return this.el.waitForVisible.apply(this, arguments);
+  waitForVisible(...args) {
+    return this.el.waitForVisible(...args);
   }
 
   waitForNotVisible(selector) {
-    return this.waitForVisible.apply(this, [selector].filter(Boolean).concat([browser.options.waitForTimeout, true]));
+    return this.waitForVisible(...[selector].filter(Boolean).concat([browser.options.waitForTimeout, true]));
   }
-
 }

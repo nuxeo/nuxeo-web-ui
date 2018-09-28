@@ -1,4 +1,4 @@
-'use strict';
+
 
 import BasePage from '../../base';
 import DocumentLayout from './document_layout';

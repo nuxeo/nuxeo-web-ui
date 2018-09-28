@@ -1,12 +1,9 @@
-'use strict';
-
 import BasePage from '../../base';
 
 export default class DocumentPermissions extends BasePage {
-
   get count() {
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
-    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
+    return rows.value.filter(result => result.getAttribute('hidden') === null).length;
   }
 
   hasPublication(path, rendition, version) {
@@ -28,6 +25,7 @@ export default class DocumentPermissions extends BasePage {
         }
         return true;
       }
+      return false;
     });
     return found;
   }

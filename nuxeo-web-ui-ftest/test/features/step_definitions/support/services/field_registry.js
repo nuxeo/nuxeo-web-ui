@@ -1,4 +1,4 @@
-export class FieldRegistry {
+export default class FieldRegistry {
   constructor() {
     this._registry = {};
   }

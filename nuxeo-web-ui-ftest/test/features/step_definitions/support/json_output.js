@@ -1,4 +1,4 @@
-const { JsonFormatter } = require('cucumber'); // eslint-disable-line new-cap
+const { JsonFormatter } = require('cucumber');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const fs = require('fs');

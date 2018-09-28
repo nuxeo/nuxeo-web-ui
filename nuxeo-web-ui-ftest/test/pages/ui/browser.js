@@ -1,4 +1,4 @@
-'use strict';
+
 
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
@@ -12,10 +12,9 @@ import Selection from './selection';
 import Results from './results';
 
 export default class Browser extends BasePage {
-
   documentPage(docType) {
     const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
-    if (page === `nuxeo-collapsible-document-page`) {
+    if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
     } else {
       return new DocumentPage(page, docType);
@@ -102,20 +101,20 @@ export default class Browser extends BasePage {
   }
 
   addToCollection(name) {
-    const addToCollectionButton = this.el.element(`nuxeo-add-to-collection-button paper-icon-button`);
+    const addToCollectionButton = this.el.element('nuxeo-add-to-collection-button paper-icon-button');
     addToCollectionButton.waitForVisible();
     addToCollectionButton.click();
-    const selectivity = this.el.element(`#add-to-collection-dialog nuxeo-selectivity`);
+    const selectivity = this.el.element('#add-to-collection-dialog nuxeo-selectivity');
     selectivity.waitForVisible();
-    selectivity.waitForVisible(`#input`);
-    selectivity.click(`#input`);
-    selectivity.waitForVisible(`.selectivity-search-input`);
-    selectivity.element(`.selectivity-search-input`).setValue(name);
-    selectivity.waitForVisible(`.selectivity-result-item.highlight`);
-    selectivity.click(`.selectivity-result-item.highlight`);
-    driver.waitForEnabled(`#add-to-collection-dialog paper-button[name="add"]`);
-    driver.click(`#add-to-collection-dialog paper-button[name="add"]`);
-    this.el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
+    selectivity.waitForVisible('#input');
+    selectivity.click('#input');
+    selectivity.waitForVisible('.selectivity-search-input');
+    selectivity.element('.selectivity-search-input').setValue(name);
+    selectivity.waitForVisible('.selectivity-result-item.highlight');
+    selectivity.click('.selectivity-result-item.highlight');
+    driver.waitForEnabled('#add-to-collection-dialog paper-button[name="add"]');
+    driver.click('#add-to-collection-dialog paper-button[name="add"]');
+    this.el.waitForVisible('nuxeo-document-collections nuxeo-tag');
   }
 
   doesNotHaveCollection(name) {
@@ -125,12 +124,12 @@ export default class Browser extends BasePage {
         return true;
       }
       try {
-        const collections = page.elements(`nuxeo-document-collections nuxeo-tag`).value;
-        return collections.every((collection) => collection.getText().trim() !== name);
+        const collections = page.elements('nuxeo-document-collections nuxeo-tag').value;
+        return collections.every(collection => collection.getText().trim() !== name);
       } catch (e) {
         return false;
       }
-    }, `The document does belong to the collection`);
+    }, 'The document does belong to the collection');
     return true;
   }
 
@@ -141,22 +140,22 @@ export default class Browser extends BasePage {
         return false;
       }
       try {
-        const collections = page.elements(`nuxeo-document-collections nuxeo-tag a`).value;
-        return collections.some((collection) => collection.getText().trim() === name);
+        const collections = page.elements('nuxeo-document-collections nuxeo-tag a').value;
+        return collections.some(collection => collection.getText().trim() === name);
       } catch (e) {
         return false;
       }
-    }, `The document does not belong to the collection`);
+    }, 'The document does not belong to the collection');
     return true;
   }
 
   removeFromCollection(name) {
     const el = this.el;
-    el.waitForVisible(`nuxeo-document-collections nuxeo-tag`);
-    const collections = this.el.elements(`nuxeo-document-collections nuxeo-tag`).value;
+    el.waitForVisible('nuxeo-document-collections nuxeo-tag');
+    const collections = this.el.elements('nuxeo-document-collections nuxeo-tag').value;
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
-        const remove = collection.element(`iron-icon[name="remove"]`);
+        const remove = collection.element('iron-icon[name="remove"]');
         remove.waitForVisible();
         this.el.scrollIntoView();
         remove.click();
@@ -167,12 +166,12 @@ export default class Browser extends BasePage {
   }
 
   get isFavorite() {
-    this.el.waitForExist(`nuxeo-favorites-toggle-button[favorite]`);
+    this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
     return true;
   }
 
   addToFavorites() {
-    this.el.click(`nuxeo-favorites-toggle-button`);
+    this.el.click('nuxeo-favorites-toggle-button');
     return this.isFavorite;
   }
 
@@ -180,7 +179,7 @@ export default class Browser extends BasePage {
     driver.waitForVisible('.breadcrumb-item-current');
     driver.waitUntil(
       () => driver.getText('.breadcrumb-item-current').trim() === title,
-      `The document does not have such title`
+      'The document does not have such title',
     );
     return true;
   }
@@ -189,14 +188,14 @@ export default class Browser extends BasePage {
     const el = this.el;
     el.waitForVisible('nuxeo-data-table nuxeo-data-table-row a.title');
     const titles = el.elements('nuxeo-data-table nuxeo-data-table-row a.title');
-    return titles.value.some((title) => title.getText().trim() === doc.title);
+    return titles.value.some(title => title.getText().trim() === doc.title);
   }
 
   clickChild(title) {
     this.waitForChildren();
     return this.rows.value.some((row) => {
-      if (row.isVisible(`nuxeo-data-table-cell a.title`) &&
-          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+      if (row.isVisible('nuxeo-data-table-cell a.title')
+          && row.getText('nuxeo-data-table-cell a.title').trim() === title) {
         row.click();
         return true;
       } else {
@@ -210,8 +209,8 @@ export default class Browser extends BasePage {
     const rows = this.rows;
     let i;
     for (i = 0; i < rows.value.length; i++) {
-      if (rows.value[i].isVisible(`nuxeo-data-table-cell a.title`) &&
-          rows.value[i].getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+      if (rows.value[i].isVisible('nuxeo-data-table-cell a.title')
+          && rows.value[i].getText('nuxeo-data-table-cell a.title').trim() === title) {
         // minus 1 because of the table header
         return i - 1;
       }
@@ -228,7 +227,7 @@ export default class Browser extends BasePage {
       const rows = this.rows;
       let count = 0;
       rows.value.forEach((row) => {
-        if (row.isVisible() && row.isVisible(`nuxeo-data-table-cell a.title`)) {
+        if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
           count++;
         }
       });
@@ -310,16 +309,16 @@ export default class Browser extends BasePage {
   _selectChildDocument(title, deselect) {
     this.waitForChildren();
     const found = this.rows.value.some((row) => {
-      if ((deselect ? row.isVisible('nuxeo-data-table-checkbox[checked]') :
-          row.isVisible('nuxeo-data-table-checkbox:not([checked])')) &&
-          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
+      if ((deselect ? row.isVisible('nuxeo-data-table-checkbox[checked]')
+        : row.isVisible('nuxeo-data-table-checkbox:not([checked])'))
+          && row.getText('nuxeo-data-table-cell a.title').trim() === title) {
         row.element('nuxeo-data-table-checkbox').click();
         return true;
       }
       return false;
     });
     if (!found) {
-      throw new Error('Cannot find document with title "${title}"');
+      throw new Error(`Cannot find document with title "${title}"`);
     }
   }
 
@@ -339,7 +338,7 @@ export default class Browser extends BasePage {
     fixtures.layouts.setValue(renditionSelect, rendition);
     // set version
     if (version) {
-      const versionsList = new DocumentVersions(`${this._selector } #version`);
+      const versionsList = new DocumentVersions(`${this._selector} #version`);
       versionsList.toggle.waitForVisible();
       versionsList.toggle.click();
       versionsList.listItems.waitForVisible();
