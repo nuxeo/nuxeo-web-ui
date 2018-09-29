@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "文書のセキュリティが更新されました",
   "eventType.documentTrashed": "文書が破棄されました",
   "eventType.documentUnlocked": "文書のロックが解除されました",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "公開待ち",
   "eventType.download": "ダウンロード",
   "eventType.lifecycle_transition_event": "ライフサイクル移行",

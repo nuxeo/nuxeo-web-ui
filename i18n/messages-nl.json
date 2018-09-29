@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "Beveiliging document bijgewerkt",
   "eventType.documentTrashed": "Document in de prullenbak",
   "eventType.documentUnlocked": "Document ontgrendeld",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "In afwachting van publicatie",
   "eventType.download": "Downloaden",
   "eventType.lifecycle_transition_event": "Overgang levenscyclus",

@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "Segurança do documento atualizada",
   "eventType.documentTrashed": "Document trashed",
   "eventType.documentUnlocked": "Documento desbloqueado",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "Aguardando publicação",
   "eventType.download": "Download",
   "eventType.lifecycle_transition_event": "Transição de ciclo de vida",

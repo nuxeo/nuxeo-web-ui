@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "安全性已更新的文档",
   "eventType.documentTrashed": "放入垃圾箱的文档",
   "eventType.documentUnlocked": "未锁定的文档",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "等待发布",
   "eventType.download": "下载",
   "eventType.lifecycle_transition_event": "生命周期过渡",

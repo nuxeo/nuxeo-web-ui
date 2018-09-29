@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "Keamanan dokumen diperbarui",
   "eventType.documentTrashed": "Document trashed",
   "eventType.documentUnlocked": "Dokumen dibuka",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "Menunggu publikasi",
   "eventType.download": "Unduh",
   "eventType.lifecycle_transition_event": "Transisi siklus kehidupan",

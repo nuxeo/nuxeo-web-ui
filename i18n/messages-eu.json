@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "Dokumentuaren segurtasuna eguneratuta",
   "eventType.documentTrashed": "Dokumentua zakarrontzira bidalita",
   "eventType.documentUnlocked": "Dokumentua desblokeatuta",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "Argitaratu zain",
   "eventType.download": "Deskarga",
   "eventType.lifecycle_transition_event": "Bizi-zikloko trantsizioa",

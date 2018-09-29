@@ -469,6 +469,7 @@
   "eventType.documentSecurityUpdated": "Dokumentsäkerhet uppdaterad",
   "eventType.documentTrashed": "Dokumentet har slängts",
   "eventType.documentUnlocked": "Dokument upplåst",
+  "eventType.documentUntrashed": "Document untrashed",
   "eventType.documentWaitingPublication": "Väntar på publicering",
   "eventType.download": "Ladda ned",
   "eventType.lifecycle_transition_event": "Livscykelövergång",
