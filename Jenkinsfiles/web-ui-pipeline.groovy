@@ -125,7 +125,8 @@ timestamps {
             }
             def mvnHome = tool 'maven-3.3'
             def javaHome = tool 'java-8-oracle'
-            withEnv(["JAVA_HOME=${javaHome}", "MAVEN=${mvnHome}/bin", "PATH=${env.JAVA_HOME}/bin:${env.MAVEN}:${env.PATH}"]) {
+            def nodeHome = '/opt/build/tools/node-v8.11.3-linux-x64'
+            withEnv(["JAVA_HOME=${javaHome}", "MAVEN=${mvnHome}/bin", "PATH=${nodeHome}/bin:${env.JAVA_HOME}/bin:${env.MAVEN}:${env.PATH}"]) {
                 stage('nuxeo-web-ui') {
                     timeout(60) {
                         webui = cloneRebaseAndDir('nuxeo-web-ui')
