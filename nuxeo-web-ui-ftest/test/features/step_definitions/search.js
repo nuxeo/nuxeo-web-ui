@@ -70,30 +70,30 @@ Given(/^I have the following documents$/, (table) => {
 });
 
 When(/^I clear the (.+) search on (.+)$/, function (searchType, searchName) {
-  this.ui.searchForm(searchName).search(searchType);
+  return this.ui.searchForm(searchName).search(searchType);
 });
 
 When(/^I perform a (.+) search for (.+) on (.+)$/, function (searchType, searchTerm, searchName) {
-  this.ui.searchForm(searchName).search(searchType, searchTerm);
+  return this.ui.searchForm(searchName).search(searchType, searchTerm);
 });
 
 Then(/^I can see (\d+) search results$/, function (numberOfResults) {
   const displayMode = this.ui.results.displayMode;
-  if (numberOfResults === '0') {
+  if (numberOfResults === 0) {
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(() => this.ui.results.resultsCount(displayMode).toString() === numberOfResults);
+    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) === numberOfResults);
   }
 });
 
 Then(/^I can see more than (\d+) search results$/, function (minNumberOfResults) {
   const displayMode = this.ui.results.displayMode;
-  if (minNumberOfResults === '0') {
+  if (minNumberOfResults === 0) {
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) > parseInt(minNumberOfResults));
+    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) > minNumberOfResults);
   }
 });
 
@@ -152,5 +152,5 @@ When(/^I perform a QuickSearch for (.+)/, function (searchTerm) {
 
 Then(/^I can see (\d+) QuickSearch results$/, function (numberOfResults) {
   this.ui.quickSearch.quickSearchResults.waitForVisible();
-  this.ui.quickSearch.quickSearchResultsCount().toString().should.equal(numberOfResults);
+  this.ui.quickSearch.quickSearchResultsCount().should.equal(numberOfResults);
 });
