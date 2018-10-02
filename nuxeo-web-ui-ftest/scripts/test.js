@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-'use strict';
+
 
 /*
  * supported cli arguments:
@@ -27,36 +27,37 @@
 const fs = require('fs');
 const path = require('path');
 const spawn = require('child_process').spawn;
+
 const wdioBin = path.resolve(__dirname, '..', 'node_modules', '.bin', 'wdio');
 const argv = require('minimist')(process.argv.slice(2));
-const defaultDef = `./test/features/step_definitions`;
 
-const args = [argv['wdioConfig'] ? argv['wdioConfig'] : path.join(__dirname, '../wdio.conf.js')];
+const defaultDef = './test/features/step_definitions';
 
-if (argv['features']) {
-  args.push(`--specs=${argv['features']}`);
+const args = [argv.wdioConfig ? argv.wdioConfig : path.join(__dirname, '../wdio.conf.js')];
+
+if (argv.features) {
+  args.push(`--specs=${argv.features}`);
 }
 
-if (argv['nuxeoUrl']) {
-  process.env.NUXEO_URL = argv['nuxeoUrl'];
+if (argv.nuxeoUrl) {
+  process.env.NUXEO_URL = argv.nuxeoUrl;
 }
 
-if (argv['report']) {
-  process.env.CUCUMBER_REPORT_PATH = argv['cucumberReport'] ? argv['cucumberReport']
-                                                            : `./target/cucumber-reports/report.json`;
-  process.env.JUNIT_REPORT_PATH = argv['junitReport'] ? argv['junitReport']
-                                                      : `./target/surefire-reports/TEST-report.xml`;
+if (argv.report) {
+  process.env.CUCUMBER_REPORT_PATH = argv.cucumberReport ? argv.cucumberReport
+    : './target/cucumber-reports';
+  process.env.JUNIT_REPORT_PATH = argv.junitReport ? argv.junitReport
+    : './target/surefire-reports';
 }
 
-if (argv['screenshots']) {
-  process.env.SCREENSHOTS_PATH = argv['screenshotPath'] ? argv['screenshotPath'] : `./target/screenshots`;
+if (argv.screenshots) {
+  process.env.SCREENSHOTS_PATH = argv.screenshotPath ? argv.screenshotPath : './target/screenshots';
 }
 
 let def = '';
-if (argv['stepDefinitions']) {
-  def = argv['stepDefinitions'];
-}
-else if (fs.existsSync(defaultDef)) {
+if (argv.stepDefinitions) {
+  def = argv.stepDefinitions;
+} else if (fs.existsSync(defaultDef)) {
   def = defaultDef;
 }
 if (def) {
@@ -64,19 +65,19 @@ if (def) {
 }
 
 
-if (argv['watch']) {
+if (argv.watch) {
   args.push('--watch');
 }
 
-if (argv['tags']) {
-  args.push(`--cucumberOpts.tags=${argv['tags']}`);
+if (argv.tags) {
+  args.push(`--cucumberOpts.tags=${argv.tags}`);
 }
 
-if (argv['debug']) {
+if (argv.debug) {
   process.env.DEBUG = true;
 }
 
-process.env.BROWSER = argv['browser'] || process.env.BROWSER || 'chrome';
+process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
 
 process.env.FORCE_COLOR = true;
 
