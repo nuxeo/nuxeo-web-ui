@@ -100,7 +100,7 @@ When(/^Versions count is (\d+)$/, function (count) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
-  page.versions.listCount.should.equal(parseInt(count));
+  page.versions.listCount.should.equal(count);
 });
 
 When(/^I click the Create Version button in versions list$/, function () {

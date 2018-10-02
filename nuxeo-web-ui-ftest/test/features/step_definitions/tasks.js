@@ -54,5 +54,5 @@ Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, function (user, optio
 });
 Then('I can see the my task list has {int} item(s)', function (nb) {
   this.ui.drawer.tasks.waitForVisible();
-  this.ui.drawer.tasks.nbItems.should.be.equals(parseInt(nb));
+  this.ui.drawer.tasks.nbItems.should.be.equals(nb);
 });
