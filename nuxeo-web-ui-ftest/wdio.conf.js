@@ -1,4 +1,5 @@
 const path = require('path');
+const mkdirp = require('mkdirp');
 
 const plugins = {};
 plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
@@ -146,11 +147,14 @@ exports.config = {
   framework: 'cucumber',
   //
   // Test reporter for stdout.
-  reporters: ['spec', 'json'],
+  reporters: ['spec', 'junit', 'json'],
 
   reporterOptions: {
+    junit: {
+      outputDir: process.env.JUNIT_REPORT_PATH
+    },
     json: {
-      outputDir: './target/json-reports/',
+      outputDir: process.env.CUCUMBER_REPORT_PATH,
       combined: true,
       filename: 'report',
     },
@@ -183,15 +187,8 @@ exports.config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
-    const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
-    if (reportFilePath) {
-      const fs = require('fs');
-      if (fs.existsSync(reportFilePath)) {
-        fs.unlinkSync(reportFilePath);
-      }
-    }
-  },
+  // onPrepare: () => {
+  // },
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
@@ -256,15 +253,16 @@ exports.config = {
   //
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
-  onComplete: () => {
-    const reportFilePath = process.env.CUCUMBER_REPORT_PATH;
-    const junitReport = process.env.JUNIT_REPORT_PATH;
-    if (reportFilePath && junitReport) {
-      const fs = require('fs');
-      const mkdirp = require('mkdirp');
-      const jUnitReporter = require('cucumber-junit');
-      mkdirp.sync(path.dirname(junitReport));
-      fs.writeFileSync(junitReport, jUnitReporter(fs.readFileSync(reportFilePath)));
+  // onComplete: () => {
+  // },
+
+  // Cucumber specific hooks
+  afterStep: (step) => {
+    if (step.status === 'failed' && process.env.SCREENSHOTS_PATH) {
+      mkdirp.sync(process.env.SCREENSHOTS_PATH);
+      const filename = path.join(process.env.SCREENSHOTS_PATH,
+        `${step.keyword} ${step.text} (${step.status}).png`);
+      return browser.saveScreenshot(filename);
     }
   },
 };

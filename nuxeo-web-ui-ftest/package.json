@@ -28,7 +28,7 @@
     "nuxeo": "^3.6.0",
     "wdio-cucumber-framework": "^2.2.7",
     "wdio-json-reporter": "^0.3.1",
-    "wdio-junit-reporter": "^0.4.2",
+    "wdio-junit-reporter": "^0.4.4",
     "wdio-selenium-standalone-service": "^0.0.10",
     "wdio-spec-reporter": "^0.1.4",
     "webdriverio": "^4.13.0"
