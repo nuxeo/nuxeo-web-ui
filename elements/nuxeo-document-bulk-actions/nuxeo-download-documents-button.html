@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -30,27 +31,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-download-documents-button">
   <template>
-
-    <style>
-      :host {
-        display: inline-block;
-      }
-
-      ::content iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
-      }
-    </style>
+    <style include="nuxeo-action-button-styles"></style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
 
     <nuxeo-operation id="bulkDownloadOp" op="Blob.BulkDownload"></nuxeo-operation>
 
-    <paper-icon-button icon="nuxeo:download" id="downloadAllButtons">
-    </paper-icon-button>
-    <nuxeo-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip" position="[[tooltipPosition]]">
-      [[i18n('bulkDownload.tooltip')]]
-    </nuxeo-tooltip>
-
+    <div class="action" on-tap="downloadDocuments">
+      <paper-icon-button icon="nuxeo:download" id="downloadAllButtons"></paper-icon-button>
+      <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+    </div>
+    <nuxeo-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
   </template>
 
   <script>
@@ -74,11 +65,20 @@ limitations under the License.
         tooltipPosition: {
           type: String,
           value: 'bottom'
-        }
-      },
+        },
 
-      listeners: {
-        'tap': 'downloadDocuments'
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)'
+        }
       },
 
       _observeDocument: function() {
@@ -138,6 +138,10 @@ limitations under the License.
         }.bind(this)).catch(function() {
           this.fire('notify', {"message": this.i18n('bulkDownload.error')});
         }.bind(this));
+      },
+
+      _computeLabel: function() {
+        return this.i18n('bulkDownload.tooltip');
       }
 
     });

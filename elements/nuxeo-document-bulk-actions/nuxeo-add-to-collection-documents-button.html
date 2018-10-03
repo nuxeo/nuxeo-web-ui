@@ -21,6 +21,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
@@ -35,12 +36,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-add-to-collection-documents-button">
   <template>
-    <style>
-      :host {
-        display: block;
-        position: relative;
-      }
-
+    <style include="nuxeo-action-button-styles">
       :host([hidden]) {
         display: none;
       }
@@ -58,10 +54,11 @@ limitations under the License.
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
-      <paper-icon-button noink icon="nuxeo:collections" id="addColBut" on-tap="_toggleDialog"></paper-icon-button>
-      <nuxeo-tooltip for="addColBut" position="[[tooltipPosition]]">
-        [[i18n('addToCollectionDocumentsButton.tooltip')]]
-      </nuxeo-tooltip>
+      <div class="action" on-tap="_toggleDialog">
+        <paper-icon-button noink icon="nuxeo:collections" id="addColBut"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip for="addColBut" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
 
     <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>
@@ -138,6 +135,19 @@ limitations under the License.
         tooltipPosition: {
           type: String,
           value: 'bottom'
+        },
+
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)'
         }
       },
 
@@ -215,6 +225,10 @@ limitations under the License.
       _resetPopup: function() {
         this.set('collection', null);
         this.description = '';
+      },
+
+      _computeLabel: function() {
+        return this.i18n('addToCollectionDocumentsButton.tooltip');
       }
     });
   </script>

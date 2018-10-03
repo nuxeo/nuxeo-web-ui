@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
@@ -28,29 +29,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-collection-move-top-action">
   <template>
-
-    <style is="custom-style">
-      :host {
-        display: inline-block;
-      }
-
-      ::content iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
-      }
-    </style>
+    <style include="nuxeo-action-button-styles"></style>
 
     <nuxeo-operation op="Document.MoveCollectionMember" id="moveTopOp"></nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
-      <paper-icon-button noink
-        id="topButton"
-        icon="editor:vertical-align-top">
-      </paper-icon-button>
-      <nuxeo-tooltip for="topButton" position="[[tooltipPosition]]">
-        [[i18n('collections.moveTop')]]
-      </nuxeo-tooltip>
+      <div class="action" on-tap="moveUp">
+        <paper-icon-button noink id="topButton" icon="editor:vertical-align-top"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip for="topButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-
   </template>
 
   <script>
@@ -67,21 +56,28 @@ limitations under the License.
         collection: {
           type: Object
         },
+        tooltipPosition: {
+          type: String,
+          value: 'bottom'
+        },
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)'
+        },
         _member1Idx: {
           type: Number
         },
         _member2Idx: {
           type: Number
-        },
-
-        tooltipPosition: {
-          type: String,
-          value: 'bottom'
         }
-      },
-
-      listeners: {
-        'tap': 'moveUp'
       },
 
       moveUp: function() {
@@ -122,6 +118,10 @@ limitations under the License.
           return true;
         }
         return false;
+      },
+
+      _computeLabel: function() {
+        return this.i18n('collections.moveTop');
       }
 
     });

@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
@@ -29,19 +30,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-versions-diff-button">
   <template>
-    <style>
-      :host {
-        display: inline-block;
-      }
-    </style>
+    <style include="nuxeo-action-button-styles"></style>
 
     <template is="dom-if" if="[[hasVersions(document)]]">
       <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]">
       </nuxeo-operation>
-      <paper-icon-button noink id="diff" icon="nuxeo:compare" on-tap="_doDiff"></paper-icon-button>
-      <nuxeo-tooltip for="diff" position="[[tooltipPosition]]">[[i18n('versionsDiffButton.tooltip')]]</nuxeo-tooltip>
+      <div class="action" on-tap="_doDiff">
+        <paper-icon-button noink id="diff" icon="nuxeo:compare"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip for="diff" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-
   </template>
 
   <script>
@@ -55,6 +54,18 @@ limitations under the License.
         tooltipPosition: {
           type: String,
           value: 'bottom'
+        },
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)'
         }
       },
 
@@ -87,6 +98,10 @@ limitations under the License.
 
       _getMinor: function(document) {
         return document.properties['uid:minor_version'];
+      },
+
+      _computeLabel: function() {
+        return this.i18n('versionsDiffButton.tooltip');
       }
 
     });
