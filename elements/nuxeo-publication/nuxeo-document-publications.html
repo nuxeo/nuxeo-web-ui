@@ -64,7 +64,7 @@ limitations under the License.
         @apply --layout-end-justified;
       }
 
-      .resultActions paper-icon-button, nuxeo-publish-button {
+      .resultActions paper-icon-button {
         padding: .3em;
         margin-left: 4px;
       }
@@ -90,8 +90,6 @@ limitations under the License.
     <nuxeo-card heading="[[i18n('publication.details')]]">
 
       <div class="resultActions">
-        <nuxeo-publish-button class="uppercase" document="[[document]]">
-        </nuxeo-publish-button>
         <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!_canUnpublishAll(publishedDocs)]]">[[i18n('publication.unpublishAll')]]</paper-button>
         <paper-button class="uppercase primary" on-tap="_republishAll">[[i18n('publication.republishAll')]]</paper-button>
       </div>
