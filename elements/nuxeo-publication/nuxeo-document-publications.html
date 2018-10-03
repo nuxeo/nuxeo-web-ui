@@ -90,8 +90,8 @@ limitations under the License.
     <nuxeo-card heading="[[i18n('publication.details')]]">
 
       <div class="resultActions">
-        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!_canUnpublishAll(publishedDocs)]]">[[i18n('publication.unpublishAll')]]</paper-button>
-        <paper-button class="uppercase primary" on-tap="_republishAll">[[i18n('publication.republishAll')]]</paper-button>
+        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]">[[i18n('publication.unpublishAll')]]</paper-button>
+        <paper-button class="uppercase primary" on-tap="_republishAll" disabled$="[[!hasPublications]]">[[i18n('publication.republishAll')]]</paper-button>
       </div>
       <nuxeo-data-table id="table" nx-provider="provider" class="results" items="{{publishedDocs}}"
                         empty-label="[[i18n('publication.noPublications')]]">
@@ -149,20 +149,30 @@ limitations under the License.
       properties: {
         document: Object,
         _src: Object,
-        visible: Boolean
+        visible: Boolean,
+        hasPublications: {
+          type: Boolean,
+          computed: '_hasPublications(publishedDocs)'
+        }
       },
 
       observers: [
         '_fetchPublications(_src, visible)',
-        '_observeDocument(document)'
+        '_observeDocument(document, visible)'
       ],
 
-      listeners: {
-        'nx-publish-success': '_fetchPublications'
+      ready: function() {
+        // XXX :( I wish I could avoid that, may firing a `navigate` with `publication` tab in detail
+        // could allow to refresh % a small refactoring
+        // But it will mean we'll navigate to the publication tab after publishing
+        // to be validated with PO
+        document.addEventListener('nx-publish-success', function(e) {
+          this._fetchPublications();
+        }.bind(this));
       },
 
       _observeDocument: function() {
-        if (this.document) {
+        if (this.document && this.visible) {
           if (!this.document.isVersion) {
             this._src = this.document;
           } else {
@@ -221,7 +231,7 @@ limitations under the License.
         return doc && this.hasPermission(doc, 'Write');
       },
 
-      _canUnpublishAll: function(docs) {
+      _hasPublications: function(docs) {
         return docs && docs.length > 0;
       },
 
