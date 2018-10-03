@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
@@ -30,26 +31,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-untrash-documents-button">
   <template>
-
-    <style>
-      :host {
-        display: inline-block;
-      }
-
-      iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
-      }
-    </style>
+    <style include="nuxeo-action-button-styles"></style>
 
     <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <paper-icon-button icon="nuxeo:restore-deleted" id="untrashAllButton"></paper-icon-button>
-      <nuxeo-tooltip position="[[tooltipPosition]]">
-        [[i18n('untrashDocumentsButton.tooltip')]]
-      </nuxeo-tooltip>
+      <div class="action" on-tap="untrashDocuments">
+        <paper-icon-button icon="nuxeo:restore-deleted" id="untrashAllButton"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip position="[[tooltipPosition]]">[[i18n(_label)]]</nuxeo-tooltip>
     </template>
-
   </template>
 
   <script>
@@ -66,11 +58,20 @@ limitations under the License.
         tooltipPosition: {
           type: String,
           value: 'bottom'
-        }
-      },
+        },
 
-      listeners: {
-        'tap': 'untrashDocuments'
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)'
+        }
       },
 
       untrashDocuments: function() {
@@ -119,6 +120,10 @@ limitations under the License.
        */
       _docHasPermissions: function(document) {
         return this.hasPermission(document, 'Write');
+      },
+
+      _computeLabel: function() {
+        return this.i18n('untrashDocumentsButton.tooltip');
       }
     });
   </script>

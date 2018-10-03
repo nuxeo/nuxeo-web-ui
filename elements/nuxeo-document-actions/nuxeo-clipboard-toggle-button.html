@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
@@ -28,21 +29,19 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-clipboard-toggle-button">
   <template>
-    <style>
-      :host {
-        display: inline-block;
-      }
-
+    <style include="nuxeo-action-button-styles">
       :host([in-clipboard]) {
         color: var(--icon-toggle-pressed-color, var(--nuxeo-action-color-activated));
       }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <paper-icon-button icon="[[icon]]" active="[[inClipboard]]" on-tap="toggle" noink></paper-icon-button>
-      <nuxeo-tooltip>[[_tooltip]]</nuxeo-tooltip>
+      <div class="action" on-tap="toggle">
+        <paper-icon-button icon="[[icon]]" active="[[inClipboard]]"noink></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
     </template>
-
   </template>
   <script>
     Polymer({
@@ -72,9 +71,17 @@ limitations under the License.
           reflectToAttribute: true
         },
 
-        _tooltip: {
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
+        _label: {
           type: String,
-          computed: '_computeTooltip(inClipboard)'
+          computed: '_computeLabel(inClipboard, i18n)'
         }
       },
 
@@ -90,7 +97,7 @@ limitations under the License.
         }
       },
 
-      _computeTooltip: function(inClipboard) {
+      _computeLabel: function(inClipboard) {
         return this.i18n('clipboardToggleButton.tooltip.' + (inClipboard ? 'remove' : 'add'));
       },
 

@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
@@ -30,29 +31,19 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-delete-documents-button">
   <template>
-
-    <style>
-      :host {
-        display: inline-block;
-      }
-
-      iron-icon:hover {
-        fill: var(--nuxeo-link-hover-color);
-      }
-    </style>
+    <style include="nuxeo-action-button-styles"></style>
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing></nuxeo-operation>
 
     <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <paper-icon-button icon="[[_icon]]" id="deleteAllButton">
-      </paper-icon-button>
-      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">
-        [[_tooltip]]
-      </nuxeo-tooltip>
+      <div class="action" on-tap="deleteDocuments">
+        <paper-icon-button icon="[[_icon]]" id="deleteAllButton"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      </div>
+      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-
   </template>
 
   <script>
@@ -79,19 +70,23 @@ limitations under the License.
           value: 'bottom'
         },
 
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+
         _icon: {
           type: 'String',
           computed: '_computeIcon(hard)'
         },
 
-        _tooltip: {
+        _label: {
           type: 'String',
-          computed: '_computeTooltip(hard)'
+          computed: '_computeLabel(hard, i18n)'
         }
-      },
-
-      listeners: {
-        'tap': 'deleteDocuments'
       },
 
       deleteDocuments: function() {
@@ -151,7 +146,7 @@ limitations under the License.
         return hard ? 'nuxeo:delete-permanently' : 'nuxeo:delete';
       },
 
-      _computeTooltip: function(hard) {
+      _computeLabel: function(hard) {
         return this.i18n(hard ? 'deleteDocumentsButton.tooltip.permanently' : 'deleteDocumentsButton.tooltip');
       }
     });
