@@ -1,4 +1,6 @@
 [![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=master/addons_nuxeo-web-ui-master)](https://qa.nuxeo.org/jenkins/job/master/job/addons_nuxeo-web-ui-master/)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5d8cd2a3c56745ecaae7e7f92a683ea7)](https://www.codacy.com/app/Nuxeo/nuxeo-web-ui)
+
 ## Nuxeo Web UI
 
 > Ongoing work to build a new Nuxeo Web UI. See [demo](https://webui-demo.nuxeo.com/nuxeo/ui/), use `demo`/`demo` for credentials.
