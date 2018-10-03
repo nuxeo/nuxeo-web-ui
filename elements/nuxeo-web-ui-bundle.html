@@ -233,6 +233,12 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="publishDocumentAction" slot="DOCUMENT_ACTIONS" order="45">
+  <template>
+    <nuxeo-publish-button document="[[document]]"></nuxeo-publish-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="notificationDocumentAction" slot="DOCUMENT_ACTIONS" order="50">
   <template>
     <nuxeo-notifications-toggle-button document="[[document]]"></nuxeo-notifications-toggle-button>
