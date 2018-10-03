@@ -73,12 +73,14 @@ limitations under the License.
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing>
     </nuxeo-operation>
-    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[document]]">
+    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[_src]]">
+    </nuxeo-operation>
+    <nuxeo-operation id="srcDocOp" op="Proxy.GetSourceDocument" input="[[document.uid]]">
     </nuxeo-operation>
 
     <nuxeo-page-provider id="provider"
       page-size="40"
-      query="[[_computeQuery(document)]]"
+      query="[[_computeQuery(_src)]]"
       sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
       enrichers="thumbnail, permissions"
       headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
@@ -116,7 +118,7 @@ limitations under the License.
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.publisher')]]" flex="40">
           <template>
-            <!-- TODO check it is indeed the publisher -->
+            <!-- TODO check it is indeed the publisher, might be the dc:publisher field -->
             <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
           </template>
         </nuxeo-data-table-column>
@@ -148,15 +150,31 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         document: Object,
+        _src: Object,
         visible: Boolean
       },
 
       observers: [
-        '_fetchPublications(document, visible)'
+        '_fetchPublications(_src, visible)',
+        '_observeDocument(document)'
       ],
 
       listeners: {
         'nx-publish-success': '_fetchPublications'
+      },
+
+      _observeDocument: function() {
+        if (this.document) {
+          if (!this.document.isVersion) {
+            this._src = this.document;
+          } else {
+            this.$.srcDocOp.execute().then(function(src) {
+              this._src = src;
+            }.bind(this));
+          }
+        } else {
+          this._src = null;
+        }
       },
 
       _navigate: function(e) {
@@ -164,8 +182,8 @@ limitations under the License.
       },
 
       _computeQuery: function() {
-        if (this.document) {
-          var uid = this.document.uid;
+        if (this._src) {
+          var uid = this._src.uid;
           return 'SELECT * FROM Document WHERE ecm:isProxy = 1 AND (rend:sourceVersionableId = "' +
             uid +
             '" OR ecm:proxyVersionableId = "' +
@@ -175,7 +193,7 @@ limitations under the License.
       },
 
       _fetchPublications: function() {
-        if (this.visible && this.document) {
+        if (this.visible && this._src) {
           this.$.table.fetch();
         }
       },
