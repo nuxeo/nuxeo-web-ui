@@ -73,7 +73,7 @@ limitations under the License.
 
     _hasWritePermission: function (doc) {
       return doc && this.hasPermission(doc, 'Write') &&
-        !this.isImmutable(doc) && doc.type !== 'Root' && doc.state !== 'deleted';
+        !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
     },
 
     _dropzoneMessage: function(data) {
