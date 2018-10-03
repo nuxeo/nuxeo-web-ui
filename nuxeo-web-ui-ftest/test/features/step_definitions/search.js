@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Then('I can see the {string} search panel', function (name) { this.ui.drawer._search(name).waitForVisible(); });
 Then('I can see the search results', function () { this.ui.search.waitForVisible().should.be.true; });

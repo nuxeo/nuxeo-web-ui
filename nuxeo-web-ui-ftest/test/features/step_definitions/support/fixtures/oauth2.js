@@ -1,10 +1,11 @@
 /**
  * Provisioning of OAuth2 providers, clients and tokens via oauth2/directory rest endpoint
  */
+import {
+  After,
+} from 'cucumber';
 import nuxeo from '../services/client';
 import '../services/date';
-
-const { After } = require('cucumber');
 
 global.oauth2Tokens = {};
 const oauth2TokensDir = nuxeo.directory('oauth2Tokens');

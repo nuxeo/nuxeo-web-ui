@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When('I click the Nuxeo logo', function () { return this.ui.goHome(); });
 

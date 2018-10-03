@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When(/^I give (\w+) permission to "([^"]*)" on the document$/, function (permission, name) {
   this.ui.browser.permissionsViewButton.waitForVisible();

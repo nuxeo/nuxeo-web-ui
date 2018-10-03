@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Given('I am on vocabulary page', function () { return this.ui.administration.goToVocabularyManagement(); });
 

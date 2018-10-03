@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When('I click the View Tasks Dashboard link', function () { this.ui.drawer.tasks.dashboardLink.click(); });
 When(/^I (\w+) the task for following actors:$/, function (option, table) {

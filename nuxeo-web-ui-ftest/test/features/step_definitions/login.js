@@ -1,13 +1,10 @@
-
-
-import Login from '../../pages/login';
-import UI from '../../pages/ui';
-
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
+import Login from '../../pages/login';
+import UI from '../../pages/ui';
 
 Given('user {string} exists in group {string}', (username, group) => fixtures.users.create(
   {

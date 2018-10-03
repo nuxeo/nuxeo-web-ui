@@ -1,6 +1,6 @@
-const {
+import {
   Then,
-} = require('cucumber');
+} from 'cucumber';
 
 Then('I can see the {string} collection', function (name) {
   this.ui.drawer.collections.waitForHasCollection(name).should.be.true;

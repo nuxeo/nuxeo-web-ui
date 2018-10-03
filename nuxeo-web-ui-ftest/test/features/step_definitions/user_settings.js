@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 /* Cloud Services */
 

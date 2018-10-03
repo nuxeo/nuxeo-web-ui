@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When('I click the preview button', function () {
   const page = this.ui.browser.documentPage(this.doc.type);

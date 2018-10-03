@@ -1,6 +1,7 @@
+import {
+  After,
+} from 'cucumber';
 import nuxeo from '../services/client';
-
-const { After } = require('cucumber');
 
 After(() => nuxeo.request('/search/saved')
   .get()

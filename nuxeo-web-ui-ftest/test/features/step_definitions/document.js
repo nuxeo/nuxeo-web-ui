@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   When,
   Then,
-} = require('cucumber');
+} from 'cucumber';
 
 Given('I have a {word} document', function (docType) {
   docType = docType || 'File';
