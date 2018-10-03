@@ -176,7 +176,7 @@ limitations under the License.
       },
 
       _isMutable: function(document) {
-        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && document.state !== 'deleted';
+        return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && !this.isTrashed(document);
       },
 
       _canEdit: function(document) {
