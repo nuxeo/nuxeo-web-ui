@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Given(/^I have the following trashed documents$/, (table) => {
   const tasks = table.rows().map(row => () => {

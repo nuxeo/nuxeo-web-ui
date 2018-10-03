@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When(/^I select user from the dropdown menu$/, function () {
   this.ui.user.dropdown.waitForVisible();

@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Then('I can see the administration menu', function () {
   this.ui.drawer.administration.waitForVisible().should.be.true;

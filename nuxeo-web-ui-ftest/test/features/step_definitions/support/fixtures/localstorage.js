@@ -1,4 +1,6 @@
-const { After } = require('cucumber');
+import {
+  After,
+} from 'cucumber';
 
 /* global document, localStorage  */
 // cleans up local storage fo the current user

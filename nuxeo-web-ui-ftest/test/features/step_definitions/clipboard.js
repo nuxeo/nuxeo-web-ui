@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When('I click remove button for {string} document', function (title) {
   this.ui.drawer.clipboard.waitForVisible();

@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When('I click the {string} button', function (button) { return this.ui.drawer.open(button); });
 When('I select {string} from the View menu', function (option) { return this.ui.view(option); });

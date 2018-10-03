@@ -1,8 +1,8 @@
-const {
+import {
   Given,
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Given('provider {string} exists in providers', provider => fixtures.providers.create({
   'entity-type': 'nuxeoOAuth2ServiceProvider',

@@ -1,6 +1,8 @@
+import {
+  After,
+  Before,
+} from 'cucumber';
 import nuxeo, { BlobHelper } from '../services/client';
-
-const { After, Before } = require('cucumber');
 
 global.liveDocuments = [];
 

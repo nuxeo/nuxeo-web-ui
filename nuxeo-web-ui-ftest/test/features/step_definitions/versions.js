@@ -1,6 +1,6 @@
-const {
+import {
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 When(/^I can see the version info bar with text "(.*)"$/, function (text) {
   const page = this.ui.browser.documentPage(this.doc.type);

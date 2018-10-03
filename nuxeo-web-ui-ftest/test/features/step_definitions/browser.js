@@ -1,7 +1,7 @@
-const {
+import {
   Then,
   When,
-} = require('cucumber');
+} from 'cucumber';
 
 Then('I can see the {word} tree', function (tab) {
   this.ui.drawer._section(tab).waitForVisible().should.be.true;

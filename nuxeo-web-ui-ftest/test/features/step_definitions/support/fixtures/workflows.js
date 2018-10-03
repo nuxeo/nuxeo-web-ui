@@ -1,7 +1,8 @@
+import {
+  After,
+} from 'cucumber';
 import Nuxeo from 'nuxeo';
 import nuxeo from '../services/client';
-
-const { After } = require('cucumber');
 
 global.runningWorkflows = [];
 

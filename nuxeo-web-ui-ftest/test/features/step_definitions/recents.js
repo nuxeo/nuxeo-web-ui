@@ -1,6 +1,6 @@
-const {
+import {
   Then,
-} = require('cucumber');
+} from 'cucumber';
 
 Then('I can see the list of recently viewed documents', function () {
   this.ui.drawer.recents.waitForVisible().should.be.true;
