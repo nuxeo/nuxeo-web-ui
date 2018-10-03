@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
+<link rel="import" href="./nuxeo-unpublish-button.html">
 
 <dom-module id="nuxeo-document-publications">
   <template>
@@ -71,7 +72,7 @@ limitations under the License.
 
     </style>
 
-    <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing>
+    <nuxeo-operation id="unpublishOp" op="Document.Delete" sync-indexing>
     </nuxeo-operation>
     <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[_src]]">
     </nuxeo-operation>
@@ -161,12 +162,17 @@ limitations under the License.
         '_observeDocument(document, visible)'
       ],
 
+      listeners : {
+        'nx-publish-success': '_fetchPublications',
+        'nx-unpublish-success': '_fetchPublications'
+      },
+
       ready: function() {
         // XXX :( I wish I could avoid that, may firing a `navigate` with `publication` tab in detail
         // could allow to refresh % a small refactoring
         // But it will mean we'll navigate to the publication tab after publishing
         // to be validated with PO
-        document.addEventListener('nx-publish-success', function(e) {
+        document.addEventListener('nx-publish-success', function() {
           this._fetchPublications();
         }.bind(this));
       },
@@ -212,8 +218,8 @@ limitations under the License.
             return;
           }
           var doc = e.target.parentNode.item;
-          this.$.deleteOp.input = doc;
-          this.$.deleteOp.execute().then(function() {
+          this.$.unpublishOp.input = doc;
+          this.$.unpublishOp.execute().then(function() {
             this.fire('notify', {'message': this.i18n('publication.unpublish.success')});
             this._fetchPublications();
           }.bind(this)).catch(function() {
