@@ -138,7 +138,7 @@ limitations under the License.
               <h3>[[i18n('documentPage.tags')]]</h3>
               <nuxeo-tag-suggestion document="[[document]]" allow-new-tags
                                     placeholder="[[i18n('documentPage.tags.placeholder')]]"
-                                    readonly="[[!hasPermission(document, 'Write')]]">
+                                    readonly="[[!_isTaggable(document)]]">
               </nuxeo-tag-suggestion>
             </div>
           </template>
@@ -169,6 +169,10 @@ limitations under the License.
 
       _hasCollections: function(doc) {
         return this.hasCollections(doc);
+      },
+
+      _isTaggable: function(doc) {
+        return !this.isProxy(doc) && !document.isVersion && this.hasPermission(document, 'Write');
       }
     });
   </script>
