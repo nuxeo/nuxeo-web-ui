@@ -60,7 +60,12 @@ limitations under the License.
     <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
       <div class="item">
         <label>[[i18n('documentInfo.version')]]</label>
-        <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+        <template is="dom-if" if="[[!isProxy(document)]]">
+          <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+        </template>
+        <template is="dom-if" if="[[isProxy(document)]]">
+          <div><nuxeo-tag uppercase>[[formatVersion(document)]]</nuxeo-tag></div>
+        </template>
       </div>
     </template>
     <div class="item">
