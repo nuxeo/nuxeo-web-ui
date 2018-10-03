@@ -28,6 +28,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
+<link rel="import" href="../nuxeo-publication/nuxeo-publication-info-bar.html">
 <link rel="import" href="../nuxeo-restore-version-button/nuxeo-restore-version-button.html">
 <link rel="import" href="../nuxeo-tasks/nuxeo-tasks-list.html">
 <link rel="import" href="../nuxeo-workflow-graph/nuxeo-workflow-graph.html">
@@ -156,6 +157,11 @@ limitations under the License.
         </div>
         <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
       </div>
+    </template>
+
+    <!-- proxy/publication -->
+    <template is="dom-if" if="[[isProxy(document)]]">
+      <nuxeo-publication-info-bar document="[[document]]"></nuxeo-publication-info-bar>
     </template>
 
   </template>

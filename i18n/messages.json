@@ -710,6 +710,7 @@
   "publication.internal.publish.error": "Error while publishing the document.",
   "publication.button.tooltip": "Publish document",
   "publication.details": "Publication details",
+  "publication.info": "You are viewing a publication of",
   "publication.noPublications": "No Publications",
   "publication.publish": "Publish",
   "publication.publisher": "Publisher",
