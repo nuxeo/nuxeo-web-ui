@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-actions-menu.html">
 <link rel="import" href="../nuxeo-selection/nuxeo-selection-toolbar.html">
 
 <!--
@@ -90,6 +91,11 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         color: var(--icon-toggle-outline-color, var(--nuxeo-action-color-activated));
       }
 
+      nuxeo-actions-menu {
+        height: 100%;
+        max-width: var(--nuxeo-results-selection-actions-menu-max-width, 240px);
+      }
+
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -101,8 +107,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems">
 
-        <slot name="selectionActions"></slot>
-        <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        <nuxeo-actions-menu>
+          <slot name="selectionActions"></slot>
+          <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        </nuxeo-actions-menu>
 
       </nuxeo-selection-toolbar>
 
