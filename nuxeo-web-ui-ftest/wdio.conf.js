@@ -1,5 +1,12 @@
 const path = require('path');
-const mkdirp = require('mkdirp');
+
+const reporters = ['spec'];
+if (process.env.JUNIT_REPORT_PATH) {
+  reporters.push('junit');
+}
+if (process.env.CUCUMBER_REPORT_PATH) {
+  reporters.push('multiple-cucumber-html');
+}
 
 const plugins = {};
 plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
@@ -16,7 +23,7 @@ const capability = {
 
 switch (capability.browserName) {
   case 'chrome':
-  capability.chromeOptions = {
+    capability.chromeOptions = {
       args: [
         '--no-sandbox',
         // '--auto-open-devtools-for-tabs',
@@ -147,16 +154,18 @@ exports.config = {
   framework: 'cucumber',
   //
   // Test reporter for stdout.
-  reporters: ['spec', 'junit', 'json'],
+  reporters,
 
   reporterOptions: {
     junit: {
-      outputDir: process.env.JUNIT_REPORT_PATH
+      outputDir: process.env.JUNIT_REPORT_PATH,
+      outputFileFormat: {
+        single: () => 'TEST-report.xml',
+      },
     },
-    json: {
-      outputDir: process.env.CUCUMBER_REPORT_PATH,
-      combined: true,
-      filename: 'report',
+    htmlReporter: {
+      jsonFolder: process.env.CUCUMBER_REPORT_PATH,
+      reportFolder: `${process.env.CUCUMBER_REPORT_PATH}/html`,
     },
   },
   //
@@ -255,14 +264,4 @@ exports.config = {
   // possible to defer the end of the process using a promise.
   // onComplete: () => {
   // },
-
-  // Cucumber specific hooks
-  afterStep: (step) => {
-    if (step.status === 'failed' && process.env.SCREENSHOTS_PATH) {
-      mkdirp.sync(process.env.SCREENSHOTS_PATH);
-      const filename = path.join(process.env.SCREENSHOTS_PATH,
-        `${step.keyword} ${step.text} (${step.status}).png`);
-      return browser.saveScreenshot(filename);
-    }
-  },
 };

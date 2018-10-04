@@ -44,10 +44,8 @@ if (argv.nuxeoUrl) {
 }
 
 if (argv.report) {
-  process.env.CUCUMBER_REPORT_PATH = argv.cucumberReport ? argv.cucumberReport
-    : './target/cucumber-reports';
-  process.env.JUNIT_REPORT_PATH = argv.junitReport ? argv.junitReport
-    : './target/surefire-reports';
+  process.env.CUCUMBER_REPORT_PATH = argv.cucumberReport ? argv.cucumberReport : './target/cucumber-reports';
+  process.env.JUNIT_REPORT_PATH = argv.junitReport ? argv.junitReport : './target/surefire-reports';
 }
 
 if (argv.screenshots) {
