@@ -1161,8 +1161,9 @@ limitations under the License.
 
       _computeEnrichers: function() {
         return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.join(',')) ||
-        'hasContent, firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications,' +
-        ' thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags';
+        'hasContent, firstAccessibleAncestor, permissions, breadcrumb, preview, favorites, subscribedNotifications' +
+        ', thumbnail, renditions, pendingTasks, runnableWorkflows, runningWorkflows, collections, audit, subtypes, tags' +
+        ', publications';
       },
 
       _computeHeaders: function() {

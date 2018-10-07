@@ -376,6 +376,7 @@
   "documentInfo.lastModified": "Last Modified",
   "documentInfo.process.running": "Running",
   "documentInfo.process": "Process",
+  "documentInfo.publications": "Publications",
   "documentInfo.state": "State",
   "documentInfo.version": "Version",
   "documentMetadata.layoutNotFound": "Failed to find metadata layout for {0}.",

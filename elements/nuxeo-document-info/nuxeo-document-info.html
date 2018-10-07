@@ -68,6 +68,16 @@ limitations under the License.
         </template>
       </div>
     </template>
+    <template is="dom-if" if="[[_showPub(document)]]">
+      <div class="item">
+        <label>[[i18n('documentInfo.publications')]]</label>
+        <div>
+          <a class="" href$="[[_urlForPub(document)]]">
+            [[document.contextParameters.publications.resultsCount]]
+          </a>
+        </div>
+      </div>
+    </template>
     <div class="item">
       <label>[[i18n('documentInfo.lastModified')]]</label>
       <nuxeo-date datetime="[[document.properties.dc:modified]]"></nuxeo-date>
@@ -104,9 +114,20 @@ limitations under the License.
       }
     },
 
+    _showPub: function() {
+      return this.document && this.hasFacet(this.document, 'Publishable') && this.document.contextParameters &&
+        this.document.contextParameters.publications && this.document.contextParameters.publications.resultsCount > 0;
+    },
+
     _documentChanged: function() {
       this._showProcess = this.document && this.document.contextParameters &&
         this.document.contextParameters.runningWorkflows && this.document.contextParameters.runningWorkflows.length > 0;
+    },
+
+    _urlForPub: function() {
+      if (this.document) {
+        return this.urlFor('browse', this.document.path) + '?p=publication';
+      }
     }
   });
 </script>
