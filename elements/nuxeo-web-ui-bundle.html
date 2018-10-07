@@ -379,6 +379,7 @@
 <nuxeo-slot-content name="documentPublicationItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
   <template>
     <nuxeo-filter document="[[document]]" expression="!document.isProxy
+                                                        && !document.isVersion
                                                         && document.facets.indexOf('Publishable') > -1
                                                         && document && document.contextParameters
                                                         && document.contextParameters.permissions
@@ -392,6 +393,7 @@
 <nuxeo-slot-content name="documentPublicationPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
   <template>
     <nuxeo-filter document="[[document]]" expression="!document.isProxy
+                                                        && !document.isVersion
                                                         && document.facets.indexOf('Publishable') > -1
                                                         && document && document.contextParameters
                                                         && document.contextParameters.permissions

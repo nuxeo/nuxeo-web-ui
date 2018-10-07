@@ -19,7 +19,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/social-icons.html">
-<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
@@ -42,8 +42,8 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="getSrcOp" op="Proxy.GetSourceDocument" input="[[document.uid]]">
-    </nuxeo-operation>
+    <nuxeo-document id="srcDoc">
+    </nuxeo-document>
 
     <div id="publicationInfoBar">
       <div class="layout horizontal center">
@@ -78,7 +78,8 @@ limitations under the License.
 
       _updateSrc: function() {
         if (this.document.isProxy) {
-          this.$.getSrcOp.execute().then(function(src) {
+          this.$.srcDoc.docId = this.document.versionableId;
+          this.$.srcDoc.get().then(function(src) {
             this._src = src;
             this._redirectDoc =
               (this.document.contextParameters && this.document.contextParameters.firstAccessibleAncestor) || src;

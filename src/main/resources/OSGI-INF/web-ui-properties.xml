@@ -18,6 +18,7 @@
     <property name="org.nuxeo.web.ui.enrichers">audit</property>
     <property name="org.nuxeo.web.ui.enrichers">subtypes</property>
     <property name="org.nuxeo.web.ui.enrichers">tags</property>
+    <property name="org.nuxeo.web.ui.enrichers">publications</property>
 
     <!-- Properties to be fetched when loading current document, default is 'properties' meaning all -->
     <property name="org.nuxeo.web.ui.fetchedProperties">properties</property>
