@@ -30,6 +30,14 @@ limitations under the License.
         position: relative;
         min-height: calc(100vh - 130px - var(--nuxeo-app-top));
       }
+
+      .ellipsis {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        width: calc(100% - 38px);
+      }
     </style>
 
     <nuxeo-results display-mode="table" name="nxql" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
@@ -49,10 +57,24 @@ limitations under the License.
                         display-quick-filters
                         on-row-clicked="_navigate">
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="100">
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="50" hidden>
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
+            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('label.path')]]" field="ecm:path" sort-by="ecm:path" flex="100">
+          <template>
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
+            <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('label.size')]]" field="file:content.length" sort-by="file:content/length" flex="10">
+          <template>
+            [[formatSize(item.properties.file:content.length)]]
           </template>
         </nuxeo-data-table-column>
 

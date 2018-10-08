@@ -620,6 +620,7 @@
   "label.security.permission.writeLifeCycle": "Edit lifecycle",
   "label.security.permission.writeProperties": "Edit properties",
   "label.security.permission.writeSecurity": "Edit security",
+  "label.size": "Size",
   "label.state": "State",
   "label.type": "Type",
   "label.ui.aggregate.big": "Between 10 MB and 100 MB",
