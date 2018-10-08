@@ -29,6 +29,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-document-suggestion.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
@@ -72,6 +73,9 @@ limitations under the License.
 
     <nuxeo-operation id="op" op="Document.PublishToSection">
     </nuxeo-operation>
+
+    <nuxeo-document id="srcDoc">
+    </nuxeo-document>
 
     <div class="container">
       <paper-dialog-scrollable>
@@ -121,7 +125,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-internal-publish',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.RoutingBehavior],
       properties: {
         /**
          * Input document.
@@ -162,6 +166,19 @@ limitations under the License.
         this.$.op.input = this.document.uid;
         this.$.op.execute().then(function(publishedDoc) {
           this.fire('notify', {'message': this.i18n('publication.internal.publish.success', publishedDoc.path)});
+
+          if (this.document.versionableId) {
+            this.$.srcDoc.docId = this.document.versionableId
+            this.$.srcDoc.get().then(function (src) {
+              // XXX @gbarata any way to make it cleaner or more consistent?
+              window.location = this.urlFor('browse', src.path) + '?p=publication';
+            }.bind(this)).catch(function() {
+              console.error('Could not retrieve source document:' + this.$.srcDoc.docId);
+            }.bind(this));
+          } else {
+            // XXX @gbarata any way to make it cleaner or more consistent?
+            window.location = this.urlFor('browse', this.document.path) + '?p=publication';
+          }
           this.fire('nx-publish-success');
         }.bind(this)).catch(function(err) {
           this.fire('notify', {'message': this.i18n('publication.internal.publish.error', err)});
