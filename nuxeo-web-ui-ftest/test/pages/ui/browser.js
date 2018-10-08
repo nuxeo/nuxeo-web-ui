@@ -271,10 +271,22 @@ export default class Browser extends BasePage {
     return this.el.element('.document-actions nuxeo-workflow-button #startButton');
   }
 
+  expandDocumentActionsMenu() {
+    const menu = this.el.element('nuxeo-actions-menu ');
+    menu.waitForVisible('#dropdownButton');
+    menu.click('#dropdownButton');
+    menu.waitForVisible('paper-listbox');
+    menu.waitForVisible('[slot="dropdown"] .label');
+    menu.waitForEnabled('[slot="dropdown"] .label');
+  }
+
   startWorkflow(workflow) {
     // click the action to trigger the dialog
     const workflowButton = this.el.element('.document-actions nuxeo-workflow-button paper-icon-button');
     workflowButton.waitForExist();
+    if (!workflowButton.isVisible()) {
+      this.expandDocumentActionsMenu();
+    }
     workflowButton.waitForVisible();
     workflowButton.click();
     // select the workflow
