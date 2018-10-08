@@ -318,7 +318,7 @@ limitations under the License.
 
       _observeDocument: function() {
         if (this.document) {
-          this.params = {'ecm_parentId': this.document.uid};
+          this.params = {'ecm_parentId': this.document.uid, 'ecm_trashed': this.isTrashed(this.document)};
           if (this.hasFacet(this.document, 'Orderable')) {
             this.$.nxProvider.set('sort', {'ecm:pos': 'ASC'});
           } else {
