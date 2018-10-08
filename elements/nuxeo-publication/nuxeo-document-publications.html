@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
@@ -166,16 +167,6 @@ limitations under the License.
       listeners : {
         'nx-publish-success': '_fetchPublications',
         'nx-unpublish-success': '_fetchPublications'
-      },
-
-      ready: function() {
-        // XXX :( I wish I could avoid that, may firing a `navigate` with `publication` tab in detail
-        // could allow to refresh % a small refactoring
-        // But it will mean we'll navigate to the publication tab after publishing
-        // to be validated with PO
-        document.addEventListener('nx-publish-success', function() {
-          this._fetchPublications();
-        }.bind(this));
       },
 
       _observeDocument: function() {
