@@ -235,7 +235,7 @@ limitations under the License.
         },
         provider: {
           type: String,
-          value: 'advanced_document_trash_content'
+          value: 'advanced_document_content'
         },
         pageSize: {
           type: Number,
@@ -296,7 +296,7 @@ limitations under the License.
 
       _observeDocument: function() {
         if (this.document) {
-          this.params = {'ecm_parentId': this.document.uid};
+          this.params = {'ecm_parentId': this.document.uid, 'ecm_trashed': true};
         }
       },
 
