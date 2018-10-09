@@ -182,11 +182,11 @@ export default class Browser extends BasePage {
     return titles.value.some((title) => title.getText().trim() === doc.title);
   }
 
-  clickChild(doc) {
+  clickChild(title) {
     this.waitForChildren();
     return this.rows.value.some((row) => {
       if (row.isVisible(`nuxeo-data-table-cell a.title`) &&
-          row.getText(`nuxeo-data-table-cell a.title`).trim() === doc.title) {
+          row.getText(`nuxeo-data-table-cell a.title`).trim() === title) {
         row.click();
         return true;
       } else {

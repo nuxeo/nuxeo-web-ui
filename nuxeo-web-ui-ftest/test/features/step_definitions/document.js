@@ -91,6 +91,8 @@ module.exports = function () {
 
   this.When(/^I browse to the document with path "(.+)"$/, (path) => this.ui.browser.browseTo(path));
 
+  this.Then('I navigate to "$title" child', (title) => this.ui.browser.clickChild(title));
+
   this.When(/^I start a (.+)$/, (workflow) => {
     this.ui.browser.startWorkflow(workflow);
   });
