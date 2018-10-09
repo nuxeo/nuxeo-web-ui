@@ -58,6 +58,11 @@ limitations under the License.
           observer: '_update'
         },
 
+        clipboard: {
+          type: Object,
+          observer: '_clipboardChanged'
+        },
+
         /**
          * Icon to use (iconset_name:icon_name).
          */
@@ -83,10 +88,10 @@ limitations under the License.
       },
 
       toggle: function() {
-        if (this._clipboard.contains(this.document)) {
-          this._clipboard.remove(this.document);
+        if (this.clipboard.contains(this.document)) {
+          this.clipboard.remove(this.document);
         } else {
-          this._clipboard.add(this.document);
+          this.clipboard.add(this.document);
         }
       },
 
@@ -95,20 +100,18 @@ limitations under the License.
       },
 
       _update: function() {
-        this.inClipboard = this._clipboard && this.document && this._clipboard.contains(this.document);
+        this.inClipboard = this.clipboard && this.document && this.clipboard.contains(this.document);
       },
 
-      set clipboard(clipboard) {
-        if (!clipboard) {
-          return;
+      _clipboardChanged: function(newValue, oldValue) {
+        this._listener = this._listener || this._update.bind(this);
+        if (oldValue) {
+          oldValue.removeEventListener('documents-changed', this._listener);
         }
-        this._clipboard = clipboard;
-        this._clipboard.addEventListener('documents-changed', this._update.bind(this));
+        if (newValue) {
+          newValue.addEventListener('documents-changed', this._listener);
+        }
         this._update();
-      },
-
-      get clipboard() {
-        return this._clipboard;
       }
 
     });
