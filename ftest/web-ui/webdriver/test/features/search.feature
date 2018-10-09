@@ -79,3 +79,11 @@ Feature: Search
     When I click the "manualSearch" button
     And I perform a fulltext search for hello on manualSearch
     Then I can see 2 search results
+
+  Scenario: Plural Term Full Text Search
+    Given I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | Dictionaries     | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
+    When I click the "defaultSearch" button
+    And I perform a fulltext search for dictionary on defaultSearch
+    Then I can see 1 search results
