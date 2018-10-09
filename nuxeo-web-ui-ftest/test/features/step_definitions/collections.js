@@ -8,7 +8,7 @@ module.exports = function () {
   this.Then('I can see that the document belongs to the collection', () =>
       this.ui.browser.waitForHasChild(this.doc).should.be.true);
   this.Then('I can click the document in the collection', () =>
-      this.ui.browser.clickChild(this.doc).should.be.true);
+      this.ui.browser.clickChild(this.doc.title).should.be.true);
   this.Then('I can see the collection is in queue mode', () => this.ui.drawer.collections.isQueueMode.should.be.true);
   this.Then('I can see the collection queue has the document', () =>
       this.ui.drawer.collections.waitForHasMember(this.doc).should.be.true);

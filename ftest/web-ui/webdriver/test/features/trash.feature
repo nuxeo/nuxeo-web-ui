@@ -124,3 +124,16 @@ Feature: Trash Management
     When I login as "John"
     And I browse to the document
     Then I cannot permanently delete current document
+
+  Scenario: I can browse trash content
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+      | File          | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+    When I login as "Administrator"
+    And I browse to the document with path "/default-domain/ws"
+    And I can trash current document
+    And I can navigate to trash pill
+    Then I can see the document has "1" children
+    Then I navigate to "ws" child
+    Then I can see the document has "1" children
