@@ -28,7 +28,7 @@ const fs = require('fs');
 const path = require('path');
 const spawn = require('child_process').spawn;
 
-const wdioBin = path.resolve(__dirname, '..', 'node_modules', '.bin', 'wdio');
+const wdioBin = require.resolve('webdriverio/bin/wdio');
 const argv = require('minimist')(process.argv.slice(2));
 
 const defaultDef = './test/features/step_definitions';
