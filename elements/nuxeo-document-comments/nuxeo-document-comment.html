@@ -18,9 +18,11 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="./nuxeo-document-comment-thread.html">
 
 <!--
@@ -142,6 +144,15 @@ limitations under the License.
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
 
+    <nuxeo-dialog id="dialog" with-backdrop>
+      <h2>[[i18n('comments.deletion.dialog.heading')]]</h2>
+      <div>[[_computeConfirmationLabel(comment.numberOfReplies)]]</div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
+        <paper-button dialog-confirm on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
+
     <div class="horizontal">
       <nuxeo-user-avatar  user="[[comment.author]]"
                           height="[[_computeAvatarDimensions(level)]]"
@@ -161,11 +172,11 @@ limitations under the License.
                                    alt="menu">
                 </paper-icon-button>
                 <paper-listbox slot="dropdown-content">
-                  <paper-icon-item class="smaller no-selection">
+                  <paper-icon-item class="smaller no-selection" on-tap="_editComment">
                     <iron-icon icon="nuxeo:edit" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.edit')]]</span>
                   </paper-icon-item>
-                  <paper-icon-item class="smaller no-selection">
+                  <paper-icon-item class="smaller no-selection" on-tap="_toggleDeletionConfirmation">
                     <iron-icon icon="nuxeo:delete" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.delete')]]</span>
                   </paper-icon-item>
@@ -229,8 +240,33 @@ limitations under the License.
         },
       },
 
+      connectedCallback : function() {
+        this.addEventListener('number-of-replies', this._handleRepliesChange);
+      },
+
+      disconnectedCallback: function() {
+        this.removeEventListener('number-of-replies', this._handleRepliesChange);
+      },
+
+      _deleteComment: function() {
+        this.fire('delete-comment', {commentId: this.comment.id});
+      },
+
+      _editComment: function() {
+        this.fire('edit-comment', {commentId: this.comment.id});
+      },
+
       _expand: function () {
         this.set('comment.expanded', true);
+      },
+
+      _handleRepliesChange: function(event) {
+        var numberOfReplies = event.detail.total;
+        if(numberOfReplies === 0) {
+          this.set('comment.expanded', false);
+        }
+        this.set('comment.numberOfReplies', numberOfReplies);
+        event.stopPropagation();
       },
 
       _showFullComment: function() {
@@ -246,12 +282,20 @@ limitations under the License.
         });
       },
 
+      _toggleDeletionConfirmation: function() {
+        this.$.dialog.toggle();
+      },
+
       _computeAvatarDimensions: function(level) {
         return this._isRootElement(level) ? 24 : 20;
       },
 
       _computeAvatarFontSize: function(level) {
         return this._isRootElement(level) ? 13 : 11;
+      },
+
+      _computeConfirmationLabel: function (replies) {
+        return this.i18n('comments.deletion.dialog.message.' + (replies > 0 ? 'withReplies' : 'withoutReplies'));
       },
 
       _computeDateLabel: function (item, option) {
