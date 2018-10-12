@@ -70,6 +70,14 @@ limitations under the License.
         color: var(--nuxeo-primary-color, #0066ff);
       }
 
+      .no-selection {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
       .opaque {
         opacity: 0.5;
       }
@@ -133,6 +141,7 @@ limitations under the License.
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
+
     <div class="horizontal">
       <nuxeo-user-avatar  user="[[comment.author]]"
                           height="[[_computeAvatarDimensions(level)]]"
@@ -143,7 +152,7 @@ limitations under the License.
       <div class="info">
         <div id="body" class="horizontal">
             <span class="author">[[comment.author]]</span>
-            <span class="smaller opaque">[[_computeDateLabel(comment)]]</span>
+            <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate)]]</span>
             <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
               <paper-menu-button no-animations close-on-activate>
                 <paper-icon-button class="main-option opaque"
@@ -152,11 +161,11 @@ limitations under the License.
                                    alt="menu">
                 </paper-icon-button>
                 <paper-listbox slot="dropdown-content">
-                  <paper-icon-item class="smaller">
+                  <paper-icon-item class="smaller no-selection">
                     <iron-icon icon="nuxeo:edit" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.edit')]]</span>
                   </paper-icon-item>
-                  <paper-icon-item class="smaller">
+                  <paper-icon-item class="smaller no-selection">
                     <iron-icon icon="nuxeo:delete" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.delete')]]</span>
                   </paper-icon-item>
@@ -165,7 +174,7 @@ limitations under the License.
             </template>
           </div>
         <div class="text">
-            <span>[[_computeTextToDisplay(comment, maxChars, truncated)]]</span>
+            <span>[[_computeTextToDisplay(comment.text, maxChars, truncated)]]</span>
             <template is="dom-if" if="[[truncated]]">
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
@@ -175,9 +184,9 @@ limitations under the License.
           </div>
         <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">
           <div id="summary" class="horizontal smaller">
-            <span class="more-content link" on-tap="_expand">[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span>
+            <span class="more-content link no-selection" on-tap="_expand">[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span>
             <span class="separator opaque">•</span>
-            <span class="opaque">[[_computeDateLabel(comment, 'lastReplyDate')]]</span>
+            <span class="opaque">[[_computeDateLabel(comment, 'lastReplyDate', comment.lastReplyDate)]]</span>
           </div>
         </template>
 
@@ -262,10 +271,10 @@ limitations under the License.
         return level + 1;
       },
 
-      _computeTextToDisplay: function(comment, maxChars, truncated) {
-        var parsedText = comment.text;
+      _computeTextToDisplay: function(text, maxChars, truncated) {
+        var parsedText = text;
         if(truncated){
-          parsedText = comment.text.substring(0, maxChars - 1) + '…';
+          parsedText = text.substring(0, maxChars - 1) + '…';
         }
         return parsedText;
       },

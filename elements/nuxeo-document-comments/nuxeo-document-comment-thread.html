@@ -21,6 +21,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-avatar.html">
 <link rel="import" href="./nuxeo-document-comment.html">
@@ -48,6 +50,12 @@ limitations under the License.
         color: var(--nuxeo-primary-color, #0066ff);
         cursor: pointer;
         font-size: 0.86em;
+
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
       }
 
       .reply-area {
@@ -74,12 +82,13 @@ limitations under the License.
 
     </style>
 
+    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
     <nuxeo-resource id="commentRequest" path="/id/[[uid]]/@comment"></nuxeo-resource>
 
     <template is="dom-if" if="[[_moreAvailable(comments.length, total, allCommentsLoaded)]]">
       <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(i18n, level, 'loadAll')]]</span>
     </template>
-    <template is="dom-repeat" items="[[comments]]" as="comment">
+    <template id="commentList" is="dom-repeat" items="[[comments]]" as="comment">
       <nuxeo-document-comment comment={{comment}}
                               level="[[level]]">
       </nuxeo-document-comment>
@@ -93,7 +102,7 @@ limitations under the License.
                       no-label-float>
       </paper-textarea>
       <template is="dom-if" if="[[_areReplyOptionsAvailable(reply)]]">
-        <iron-icon class="main-option" icon="check"></iron-icon>
+        <iron-icon class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
         <iron-icon class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
       </template>
     </div>
@@ -156,7 +165,14 @@ limitations under the License.
         this.set('reply', '');
       },
 
+      _clearRequest: function() {
+        this.$.commentRequest.data = {};
+        this.$.commentRequest.headers = {};
+        this.$.commentRequest.params = {};
+      },
+
       _fetchComments: function (loadAll) {
+        this._clearRequest();
         this.$.commentRequest.params = {
           pageSize: loadAll ? 0 : this.pageSize,
           currentPageIndex: 0,
@@ -164,20 +180,29 @@ limitations under the License.
         this.$.commentRequest.headers = {
           'X-NXfetch.comment': 'repliesSummary'
         };
-        this.$.commentRequest.get().then(function (response) {
-          /* Reconciliation of local and server comments */
-          var olderComment = this.comments.length > 0 ? this.comments[0] : null;
-          var newComments = response.entries;
-          while (newComments.length > 0 && !!olderComment
-          && (newComments[0].creationDate > olderComment.creationDate || newComments[0].id === olderComment.id)) {
-            newComments.shift();
-          }
-          response.entries.forEach(function(entry) {
-            this.unshift('comments', entry);
+        this.$.commentRequest.get()
+          .then(function (response) {
+            /* Reconciliation of local and server comments */
+            var olderComment = this.comments.length > 0 ? this.comments[0] : null;
+            var newComments = response.entries;
+            while (newComments.length > 0 && !!olderComment
+            && (newComments[0].creationDate > olderComment.creationDate || newComments[0].id === olderComment.id)) {
+              newComments.shift();
+            }
+            response.entries.forEach(function (entry) {
+              this.unshift('comments', entry);
+            }.bind(this));
+            this._setTotal(response.totalSize);
+            this._setAllCommentsLoaded(!!loadAll);
+          }.bind(this))
+          .catch(function (error) {
+            if (error.status === 404) {
+              this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'notFound')});
+            } else {
+              this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'fetch.error')});
+              throw error;
+            }
           }.bind(this));
-          this._setTotal(response.totalSize);
-          this._setAllCommentsLoaded(!!loadAll);
-        }.bind(this));
       },
 
       _loadMore: function () {
@@ -186,6 +211,26 @@ limitations under the License.
 
       _refresh: function() {
         this._fetchComments(this.allCommentsLoaded);
+      },
+
+      _submitReply: function() {
+        this._clearRequest();
+        this.$.commentRequest.data = {
+          'entity-type': 'comment',
+          parentId: this.uid,
+          author: this.selectedComment ? this.selectedComment.author : this.currentUser.properties.username,
+          text: this.reply
+        };
+
+        this.$.commentRequest.post()
+            .then(function (response){
+              this._clearReply();
+              this.push('comments', response);
+              this._setTotal(this.total + 1);
+            }.bind(this))
+            .catch(function (){
+              this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'creation.error')});
+            }.bind(this));
       },
 
       _computeMaxRows: function() {
