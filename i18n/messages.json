@@ -256,6 +256,8 @@
   "command.submit": "Submit",
   "command.unlock": "Unlock",
   "command.view": "View",
+  "comments.creation.error.comment": "An error occurred while creating the comment",
+  "comments.creation.error.reply": "An error occurred while creating the reply",
   "comments.edited": "{0} (edited)",
   "comments.lastReply": "Last reply {0}",
   "comments.loadAll.comment": "Load all comments",
