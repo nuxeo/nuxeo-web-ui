@@ -177,7 +177,11 @@ gulp.task('serve', ['lint', 'merge-message-files'], function() {
     proxy: {
       path: '/nuxeo',
       target: 'http://localhost:8080/nuxeo'
-    }
+    },
+    /* global Map */
+    additionalRoutes: new Map([
+      ['/*', require('express').static('.tmp')]
+    ]),
   };
 
   polyserve.startServers(options).then(function(serverInfos) {
