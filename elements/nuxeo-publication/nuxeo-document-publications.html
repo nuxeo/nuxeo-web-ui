@@ -97,11 +97,12 @@ limitations under the License.
         <paper-button class="uppercase primary" on-tap="_republishAll" disabled$="[[!hasPublications]]">[[i18n('publication.republishAll')]]</paper-button>
       </div>
       <nuxeo-data-table id="table" nx-provider="provider" class="results" items="{{publishedDocs}}"
-                        empty-label="[[i18n('publication.noPublications')]]">
+                        empty-label="[[i18n('publication.noPublications')]]"
+                        on-row-clicked="_navigate">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="path ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
+            <a class="path ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.path]]</a>
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>
@@ -113,7 +114,7 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('publication.rendition')]]" flex="10">
           <template>
             <span class="uppercase ellipsis rendition">
-              [[item.properties.rend:renditionName]]
+              [[formatRendition(item.properties.rend:renditionName)]]
             </span>
           </template>
         </nuxeo-data-table-column>
