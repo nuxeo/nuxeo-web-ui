@@ -79,7 +79,7 @@ limitations under the License.
 
     <div class="container">
       <paper-dialog-scrollable>
-        <nuxeo-document-suggestion
+        <nuxeo-document-suggestion id="target"
           label="[[i18n('publication.internal.location')]]"
           placeholder="[[i18n('publication.internal.location.placeholder')]]"
           selected-item="{{publishSpace}}"
@@ -89,13 +89,12 @@ limitations under the License.
         </nuxeo-document-suggestion>
 
         <div class="horizontal layout flex">
-          <nuxeo-select label="[[i18n('publication.internal.renditons.label')]]"
+          <nuxeo-select id="rendition"
+                        label="[[i18n('publication.internal.renditons.label')]]"
                         placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
                         selected="{{selectedRendition}}" attr-for-selected="name">
-            <paper-item name="none">[[i18n('publication.internal.renditon.none')]]</paper-item>
-            <paper-item name="default">[[i18n('publication.internal.renditon.default')]]</paper-item>
-            <template is="dom-repeat" items="[[document.contextParameters.renditions]]" as="rendition">
-              <paper-item name$="[[rendition.name]]">[[i18n(rendition.name)]]</paper-item>
+            <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
+              <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
             </template>
           </nuxeo-select>
           <div class="versions">
@@ -104,7 +103,7 @@ limitations under the License.
           </div>
           <div class="options">
             <label>[[i18n('publication.internal.options')]]</label>
-            <paper-checkbox checked="{{override}}">
+            <paper-checkbox id="override" checked="{{override}}">
               [[i18n('publication.internal.override')]]
             </paper-checkbox>
           </div>
@@ -145,9 +144,12 @@ limitations under the License.
       _computeRenditionOptions: function() {
         if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
           var options = this.document.contextParameters.renditions.map(function(item) {
-            return {'id': item.name, 'label': this.i18n(item.name)};
+            return {'id': item.name, 'label': this.i18n('exportButton.' + item.name), 'icon': item.icon};
           }.bind(this));
-          return [{'id': null, 'label': this.i18n('publication.internal.renditon.default')}, options];
+          return [
+            {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
+            {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')},
+          ].concat(options);
         }
       },
 
