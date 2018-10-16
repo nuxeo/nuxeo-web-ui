@@ -40,17 +40,6 @@ limitations under the License.
         display: block;
       }
 
-      nuxeo-dialog {
-        min-width: 915px;
-      }
-
-      @media (max-width: 1024px) {
-        nuxeo-dialog {
-          min-width: 0;
-          width: 90%;
-        }
-      }
-
       paper-tabs {
         border-bottom: 1px solid var(--divider-color);
       }
@@ -73,7 +62,7 @@ limitations under the License.
 
       #container {
         height: 30vh;
-        width: 50vw;
+        min-width: 50vw;
       }
 
       iron-pages {
