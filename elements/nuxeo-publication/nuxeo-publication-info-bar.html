@@ -31,7 +31,7 @@ limitations under the License.
 <dom-module id="nuxeo-publication-info-bar">
   <template>
     <style include="nuxeo-styles iron-flex">
-      #publicationInfoBar {
+      :host {
         @apply --layout-horizontal;
         @apply --layout-center;
         @apply --layout-justified;
@@ -50,17 +50,15 @@ limitations under the License.
     <nuxeo-document id="srcDoc" loading="{{loadingSrc}}">
     </nuxeo-document>
 
-    <div id="publicationInfoBar">
-      <div class="layout horizontal center" hidden$="[[loadingSrc]]">
-        <iron-icon icon="icons:info"></iron-icon>
-        <div>
-          <a class="" href$="[[_srcUrl(_src)]]" disabled$="[[_srcDeleted]]">
-            [[_infoLabel(_srcDeleted)]]
-          </a>
-        </div>
+    <div class="layout horizontal" hidden$="[[loadingSrc]]">
+      <iron-icon icon="icons:info"></iron-icon>
+      <div>
+        <a href$="[[_srcUrl(_src)]]" disabled$="[[_srcDeleted]]">
+          [[_infoLabel(_srcDeleted)]]
+        </a>
       </div>
-      <nuxeo-unpublish-button document="[[document]]"></nuxeo-unpublish-button>
     </div>
+    <nuxeo-unpublish-button document="[[document]]"></nuxeo-unpublish-button>
 
   </template>
 
@@ -72,14 +70,15 @@ limitations under the License.
         /**
          * Input document.
          */
-        document: Object,
+        document: {
+          type: Object,
+          observer: '_updateSrc'
+        },
         _redirectDoc: Object,
         _src: Object,
         _srcDeleted: Boolean
       },
-      observers: [
-        '_updateSrc(document)',
-      ],
+
       listeners: {
         'nx-unpublish-success': '_redirect'
       },
