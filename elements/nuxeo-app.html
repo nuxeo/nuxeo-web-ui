@@ -576,7 +576,7 @@ limitations under the License.
       },
 
       refresh: function() {
-        if (this.docPath && this.docPath.length > 0) {
+        if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
           this.load('browse', this.docId, this.docPath, this.docAction);
         } else {
           page('/');
