@@ -70,10 +70,10 @@ module.exports = function () {
           });
     });
 
-  this.Given(/^this document has file "(.+)" for content$/, (file) =>
+  this.Given(/^This document has file "(.+)" for content$/, (file) =>
     fixtures.documents.attach(this.doc, fixtures.blobs.get(file)));
 
-  this.Given(/^this document has file "(.+)" for attachment/, (file) =>
+  this.Given(/^This document has file "(.+)" for attachment/, (file) =>
     fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true));
 
   this.Given(/^I have a (.+) Note$/, (format) => {
