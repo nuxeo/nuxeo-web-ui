@@ -26,8 +26,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-if.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
@@ -99,7 +99,7 @@ limitations under the License.
           </nuxeo-select>
           <div class="versions">
             <label>[[i18n('documentInfo.version')]]</label>
-            <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
+            <nuxeo-document-versions id="version" document="[[document]]"></nuxeo-document-versions>
           </div>
           <div class="options">
             <label>[[i18n('publication.internal.options')]]</label>
@@ -124,7 +124,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-internal-publish',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.LayoutBehavior],
       properties: {
         /**
          * Input document.
@@ -144,7 +144,7 @@ limitations under the License.
       _computeRenditionOptions: function() {
         if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
           var options = this.document.contextParameters.renditions.map(function(item) {
-            return {'id': item.name, 'label': this.i18n('exportButton.' + item.name), 'icon': item.icon};
+            return {'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon};
           }.bind(this));
           return [
             {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
@@ -172,7 +172,7 @@ limitations under the License.
           this.fire('nx-publish-success');
         }.bind(this)).catch(function(err) {
           this.fire('notify', {'message': this.i18n('publication.internal.publish.error', err)});
-          this.fire('nx-publish-error');
+          throw err;
         }.bind(this));
       },
 
@@ -181,7 +181,7 @@ limitations under the License.
       },
 
       _cancel: function() {
-        this.fire('nx-publish-cancel');
+        this.fire('cancel');
       }
     });
   </script>
