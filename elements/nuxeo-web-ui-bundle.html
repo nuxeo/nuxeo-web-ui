@@ -235,7 +235,11 @@
 
 <nuxeo-slot-content name="publishDocumentAction" slot="DOCUMENT_ACTIONS" order="45">
   <template>
-    <nuxeo-publish-button document="[[document]]"></nuxeo-publish-button>
+    <nuxeo-filter document="[[document]]" expression="this.isPublishable(document)">
+      <template>
+        <nuxeo-publish-button document="[[document]]"></nuxeo-publish-button>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
@@ -378,12 +382,7 @@
 
 <nuxeo-slot-content name="documentPublicationItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
   <template>
-    <nuxeo-filter document="[[document]]" expression="!document.isProxy
-                                                        && !document.isVersion
-                                                        && document.facets.indexOf('Publishable') > -1
-                                                        && document && document.contextParameters
-                                                        && document.contextParameters.permissions
-                                                        && document.contextParameters.permissions.indexOf('Write') !== -1">
+    <nuxeo-filter document="[[document]]" expression="this.isPublishable(document)">
       <template>
         <nuxeo-page-item name="publication" label="browser.publications"></nuxeo-page-item>
       </template>
@@ -392,12 +391,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="documentPublicationPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
   <template>
-    <nuxeo-filter document="[[document]]" expression="!document.isProxy
-                                                        && !document.isVersion
-                                                        && document.facets.indexOf('Publishable') > -1
-                                                        && document && document.contextParameters
-                                                        && document.contextParameters.permissions
-                                                        && document.contextParameters.permissions.indexOf('Write') !== -1">
+    <nuxeo-filter document="[[document]]" expression="this.isPublishable(document)">
       <template>
         <nuxeo-document-publications name="publication" document="[[document]]"></nuxeo-document-publications>
       </template>

@@ -76,15 +76,11 @@ limitations under the License.
       }
     </style>
 
-    <dom-if if="[[_isAvailable(document)]]">
-      <template>
-        <div class="action" on-tap="_toggleDialog">
-          <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
-          <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-        </div>
-        <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
-      </template>
-    </dom-if>
+    <div class="action" on-tap="_toggleDialog">
+      <paper-icon-button icon="[[icon]]" noink></paper-icon-button>
+      <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+      <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
+    </div>
 
     <nuxeo-dialog id="pusblishDialog"
                   modal
@@ -144,13 +140,6 @@ limitations under the License.
         'nx-publish-cancel': '_close',
         'nx-publish-success': '_close',
         'nx-publish-error': '_close'
-      },
-
-
-      _isAvailable: function(document) {
-        return document && !document.isProxy
-                    && this.hasFacet(document, 'Publishable')
-                    && this.hasPermission(document, 'Write');
       },
 
       _toggleDialog: function() {
