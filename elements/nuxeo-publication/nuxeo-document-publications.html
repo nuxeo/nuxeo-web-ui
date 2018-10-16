@@ -101,18 +101,18 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
+            <a class="path ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.path]]</a>
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" flex="10">
           <template>
-            [[formatVersion(item)]]
+            <span class="version">[[formatVersion(item)]]</span>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.rendition')]]" flex="10">
           <template>
-            <span class="uppercase ellipsis">
+            <span class="uppercase ellipsis rendition">
               [[item.properties.rend:renditionName]]
             </span>
           </template>
