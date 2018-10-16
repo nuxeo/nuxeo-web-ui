@@ -82,7 +82,7 @@ limitations under the License.
       <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
     </div>
 
-    <nuxeo-dialog id="pusblishDialog"
+    <nuxeo-dialog id="publishDialog"
                   modal
                   no-auto-focus>
       <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
@@ -137,17 +137,16 @@ limitations under the License.
       },
 
       listeners: {
-        'nx-publish-cancel': '_close',
         'nx-publish-success': '_close',
-        'nx-publish-error': '_close'
+        'cancel': '_close'
       },
 
       _toggleDialog: function() {
-        this.$.pusblishDialog.toggle();
+        this.$.publishDialog.toggle();
       },
 
       _close: function() {
-        this.$.pusblishDialog.close();
+        this.$.publishDialog.close();
       },
 
       _publishContext: function() {
