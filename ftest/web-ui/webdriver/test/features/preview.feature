@@ -10,7 +10,7 @@ Feature: Content Preview
 
   Scenario Outline: Inline previewer for File document with different types of blobs as content
     When I have a File document
-    And this document has file "<file>" for content
+    And This document has file "<file>" for content
     And I browse to the document
     Then I can see the inline <viewer> previewer
 
@@ -30,7 +30,7 @@ Feature: Content Preview
 
   Scenario Outline: Previewer for File document with different types of blobs as content
     When I have a File document
-    And this document has file "<file>" for content
+    And This document has file "<file>" for content
     And I browse to the document
     And I click the preview button
     Then I can see a <viewer> previewer
@@ -46,7 +46,7 @@ Feature: Content Preview
 
   Scenario Outline: Previewer for File document with different types of blobs as attachment
     When I have a File document
-    And this document has file "<file>" for attachment
+    And This document has file "<file>" for attachment
     And I browse to the document
     And I click the preview button for the attachment
     Then I can see a <viewer> previewer
