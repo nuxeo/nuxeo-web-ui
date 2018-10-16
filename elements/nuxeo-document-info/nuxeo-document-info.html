@@ -114,9 +114,9 @@ limitations under the License.
       }
     },
 
-    _showPub: function() {
-      return this.document && this.hasFacet(this.document, 'Publishable') && this.document.contextParameters &&
-        this.document.contextParameters.publications && this.document.contextParameters.publications.resultsCount > 0;
+    _showPub: function(doc) {
+      return this.isPublishable(doc) && doc.contextParameters &&
+        doc.contextParameters.publications && doc.contextParameters.publications.resultsCount > 0;
     },
 
     _documentChanged: function() {
