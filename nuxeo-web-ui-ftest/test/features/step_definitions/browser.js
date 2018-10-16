@@ -78,4 +78,20 @@ module.exports = function () {
   });
 
   this.Then(/^I can see the permissions page$/, () => this.ui.browser.permissionsView.waitForVisible());
+
+  this.Then(/^I can perform the following publications$/, (table) => {
+    table.rows().forEach((row) => {
+      this.ui.browser.publishDocument(row[0], row[1], row[2], row[3]);
+    });
+  });
+
+  this.Then(/^I can see the document has (\d+) publications$/, (numberOfPublications) =>
+    this.ui.browser.publicationView.count.toString().should.equal(numberOfPublications)
+  );
+
+  this.Then(/^I can see the document has the following publication$/, (table) => {
+    table.rows().forEach((row) => {
+      this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
+    });
+  });
 };

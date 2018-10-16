@@ -21,7 +21,7 @@ export default class DocumentPage extends BasePage {
   }
 
   get versions() {
-    return new DocumentVersions('nuxeo-document-versions');
+    return new DocumentVersions(`${this._selector} nuxeo-document-versions`);
   }
 
   get previewButton() {

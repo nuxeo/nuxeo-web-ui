@@ -122,7 +122,7 @@ global.fieldRegistry.register('paper-checkbox',
                               (element) => element.getAttribute('checked'),
                               (element, value) => {
                                 if ((value === false && element.getAttribute('checked') === 'true') ||
-                                  (value === true && element.getAttribute('checked') === 'null')) {
+                                  (value === true && !element.getAttribute('checked'))) {
                                   element.click();
                                 }
                               });

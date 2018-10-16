@@ -67,4 +67,18 @@ export default class DocumentVersions extends BasePage {
   listItemTitle(index) {
     return this.list.element(`#version-id-${index}.title`);
   }
+
+  selectVersion(label) {
+    const items = this.list.elements('div[name="version-item"]').value;
+    const itemClicked = items.some((item) => {
+      const foundLabel = item.getText('.title').trim();
+      if (foundLabel === label) {
+        item.click();
+        return true;
+      }
+    });
+    if (!itemClicked) {
+      throw Error(`Could not find version ${label}`);
+    }
+  }
 }
