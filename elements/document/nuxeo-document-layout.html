@@ -86,6 +86,13 @@ limitations under the License.
         this.element.addEventListener('document-changed', function(e) {
           this.notifyPath(e.detail.path, e.detail.value);
         }.bind(this));
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          // fire the `document-layout-changed` event only after flush
+          this.fire('document-layout-changed', {
+            element: this.element,
+            layout: this.layout
+          });
+        }.bind(this));
       }
 
     });
