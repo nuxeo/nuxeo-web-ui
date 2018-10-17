@@ -85,8 +85,8 @@ module.exports = function () {
     });
   });
 
-  this.Then(/^I can see the document has (\d+) publications$/, (numberOfPublications) =>
-    this.ui.browser.publicationView.count.toString().should.equal(numberOfPublications)
+  this.Then(/^I can see the document has (\d+) publications$/, (nbPublications) =>
+    driver.waitUntil(() => this.ui.browser.publicationView.count.toString() === nbPublications)
   );
 
   this.Then(/^I can see the document has the following publication$/, (table) => {
