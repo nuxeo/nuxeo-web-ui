@@ -60,7 +60,7 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="50" hidden>
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.path]]</a>
+            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
 
