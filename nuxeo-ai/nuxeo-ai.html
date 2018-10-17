@@ -1,0 +1,180 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<link rel="import" href="nuxeo-ai-suggestions.html">
+<script>
+  AISuggestionManager = (() => {
+    const _map = new WeakMap(); // store field elements and suggestion widgets without preventing gc
+    let _updateDebouncer = null;
+
+    function _getBoundElements(element, property) {
+      const model = {};
+      for (let i = 0; i < element.__templateInfo.nodeInfoList.length; i++) {
+        const nodeInfo = element.__templateInfo.nodeInfoList[i];
+        const node = element.__templateInfo.nodeList[i];
+        const field = node.hasAttribute('field') && node.getAttribute('field');
+        if (field && field.startsWith(property)) {
+          model[field] = model[part.source] || [];
+          model[field] = node;
+        }
+        nodeInfo.bindings.forEach((binding) => {
+          if (binding.kind === 'property') {
+            binding.parts.forEach((part) => {
+              if (part.mode === '{' && !part.signature && part.source.startsWith(property)) {
+                model[part.source] = model[part.source] || [];
+                model[part.source] = node;
+              }
+            });
+          }
+        });
+      }
+      return model;
+    }
+
+    function _getSuggestionWidget(element) {
+      if (!_map.has(element)) {
+        const suggestionWidget = document.createElement('nuxeo-ai-suggestions');
+        element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
+        _map.set(element, suggestionWidget);
+        return suggestionWidget;
+      }
+      return _map.get(element);
+    }
+
+    function _getSuggestions(document) {
+      // XXX: return mocked data
+      return Promise.resolve([{
+        'created': '2018-08-09T13:23:10.270Z',
+        'serviceName': 'xyz',
+        'context': {
+          'repositoryName': 'test',
+          'documentRef': 'a29bbc51-4ea3-4270-88ee-e7e2891c5456',
+          'inputProperties': ['ecm:path', 'ecm:mixinType', 'dc:title']
+        },
+        'kind': '/classification/custom',
+        'rawKey': '1c0c7710-f187-4c97-bb78-85ebae7de8aa',
+        'suggestions': [{
+          'property': 'dc:description',
+          'values': [{
+            'name': 'Some description, yo!',
+            'confidence': 0.7
+          },
+            {
+              'name': 'Just my document.',
+              'confidence': 0.8
+            },
+            {
+              'name': 'My document described in a few words.',
+              'confidence': 0.9
+            }],
+        },
+          {
+            'property': 'dc:nature',
+            'values': [{
+              'name': 'application',
+              'confidence': 0.8
+            },
+              {
+                'name': 'certificate',
+                'confidence': 0.87
+              },
+              {
+                'name': 'endorsement',
+                'confidence': 0.92
+              },
+              {
+                'name': 'trainingApplication',
+                'confidence': 0.97
+              }],
+          },
+          {
+            'property': 'dc:subjects',
+            'values': [{
+              'name': ['art/architecture'],
+              'confidence': 0.7
+            },
+              {
+                'name': ['art/cinema'],
+                'confidence': 0.75
+              },
+              {
+                'name': ['endorsedaily life/collectionent'],
+                'confidence': 0.8
+              },
+              {
+                'name': ['human sciences/history'],
+                'confidence': 0.83
+              },
+              {
+                'name': ['sciences/earthscience'],
+                'confidence': 0.86
+              }],
+          }],
+      }]);
+    }
+
+    return {
+      /**
+       * For a given layout:
+       * 1) fetch suggestions for its document
+       * 2) add a suggestion widget to each field that has suggestions (if no widget was added yet)
+       * 3) update suggestions on suggestion widgets
+       */
+      updateWidgetSuggestions: (layout) => {
+        if (!layout) {
+          return;
+        }
+        _updateDebouncer = Polymer.Debouncer.debounce(
+            _updateDebouncer, Polymer.Async.timeOut.after(500),
+            () => {
+              console.log('updating widget suggestions');
+              const model = _getBoundElements(layout, 'document.properties');
+              _getSuggestions(layout.document).then((response) => {
+                response.forEach((service) => {
+                  service.suggestions.forEach((suggestion) => {
+                    const element = model[`document.properties.${suggestion.property}`];
+                    const suggestionWidget = _getSuggestionWidget(element);
+                    if (!suggestionWidget.property) {
+                      // convert path to xpath
+                      suggestionWidget.property = suggestion.property;
+                    }
+                    suggestionWidget.suggestions = suggestion.values;
+                    suggestionWidget.document = layout.document;
+                    // set up binding
+                    suggestionWidget.addEventListener('document-changed', (evt) => {
+                      if ('path' in evt.detail && 'value' in evt.detail) {
+                        layout.notifyPath(evt.detail.path);
+                      }
+                    });
+                    console.log('updating suggestions for "', suggestion.property, '" in ', element);
+                  });
+                });
+              });
+            },
+        );
+      },
+    };
+  })();
+  document.addEventListener('document-layout-changed', (e) => {
+    if (e.detail.layout === 'metadata' || e.detail.layout === 'view') {
+      return;
+    }
+    const layout = e.detail.element;
+    layout._documentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
+    layout._createMethodObserver('_documentChanged(document.*)', true);
+    AISuggestionManager.updateWidgetSuggestions(e.detail.element);
+  });
+</script>
