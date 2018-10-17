@@ -22,7 +22,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-element.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-if.html">
@@ -43,15 +42,6 @@ limitations under the License.
         display: block;
         @apply --layout-flex;
         @apply --layout-horizontal;
-        --paper-dialog-scrollable: {
-          padding: 0;
-          overflow-x: hidden;
-        };
-      }
-
-      paper-dialog-scrollable {
-        display: block;
-        @apply --layout-flex;
       }
 
       .container {
@@ -78,37 +68,35 @@ limitations under the License.
     </nuxeo-document>
 
     <div class="container">
-      <paper-dialog-scrollable>
-        <nuxeo-document-suggestion id="target"
-          label="[[i18n('publication.internal.location')]]"
-          placeholder="[[i18n('publication.internal.location.placeholder')]]"
-          selected-item="{{publishSpace}}"
-          min-chars="0"
-          page-provider="publish_space_suggestion"
-          repository="[[document.repository]]">
-        </nuxeo-document-suggestion>
+      <nuxeo-document-suggestion id="target"
+        label="[[i18n('publication.internal.location')]]"
+        placeholder="[[i18n('publication.internal.location.placeholder')]]"
+        selected-item="{{publishSpace}}"
+        min-chars="0"
+        page-provider="publish_space_suggestion"
+        repository="[[document.repository]]">
+      </nuxeo-document-suggestion>
 
-        <div class="horizontal layout flex">
-          <nuxeo-select id="rendition"
-                        label="[[i18n('publication.internal.renditons.label')]]"
-                        placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
-                        selected="{{selectedRendition}}" attr-for-selected="name">
-            <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
-              <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
-            </template>
-          </nuxeo-select>
-          <div class="versions">
-            <label>[[i18n('documentInfo.version')]]</label>
-            <nuxeo-document-versions id="version" document="[[document]]"></nuxeo-document-versions>
-          </div>
-          <div class="options">
-            <label>[[i18n('publication.internal.options')]]</label>
-            <paper-checkbox id="override" checked="{{override}}">
-              [[i18n('publication.internal.override')]]
-            </paper-checkbox>
-          </div>
+      <div class="horizontal layout flex">
+        <nuxeo-select id="rendition"
+                      label="[[i18n('publication.internal.renditons.label')]]"
+                      placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
+                      selected="{{selectedRendition}}" attr-for-selected="name">
+          <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
+            <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
+          </template>
+        </nuxeo-select>
+        <div class="versions">
+          <label>[[i18n('documentInfo.version')]]</label>
+          <nuxeo-document-versions id="version" document="[[document]]"></nuxeo-document-versions>
         </div>
-      </paper-dialog-scrollable>
+        <div class="options">
+          <label>[[i18n('publication.internal.options')]]</label>
+          <paper-checkbox id="override" checked="{{override}}">
+            [[i18n('publication.internal.override')]]
+          </paper-checkbox>
+        </div>
+      </div>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
           <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
