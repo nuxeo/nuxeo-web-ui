@@ -205,11 +205,11 @@ exports.config = {
     /*
      * Increase window size to avoid hidden buttons
      */
-    browser.windowHandleMaximize();
-
-    require('babel-core/register')({
-      ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/
-    });
+    try {
+      browser.windowHandleMaximize();
+    } catch (e) {
+      console.error('Failed to maximize.');
+    }
 
     /**
      * Setup the Chai assertion framework
