@@ -14,22 +14,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
-<link rel="import" href="../../iron-form-element-behavior/iron-form-element-behavior.html">
-<link rel="import" href="../../iron-validatable-behavior/iron-validatable-behavior.html">
-<link rel="import" href="../../nuxeo-elements/nuxeo-element.html">
-<link rel="import" href="../nuxeo-i18n-behavior.html">
-<link rel="import" href="../nuxeo-icons.html">
-
+<link rel="import" href="nuxeo-ai-icons.html">
 <dom-module id="nuxeo-ai-suggestions">
   <template>
 
     <style>
       :host {
         display: block;
-
         @apply --layout-horizontal;
         @apply --layout-wrap;
+        @apply --layout-flex;
       }
 
       :host([hidden]) {
@@ -68,11 +62,10 @@ limitations under the License.
         margin-left: 7px;
         height: 1.2em;
       }
-
     </style>
 
     <template is="dom-repeat" items="[[suggestions]]">
-      <div class$="suggestion [[_isSuggestionChosen(document.properties.*, item)]]" on-click="_selectSuggestion">
+      <div class$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
         <span>[[idFunction(item.name)]]</span>
         <iron-icon icon="[[_getConfidenceIcon(item.confidence)]]"></iron-icon>
       </div>
@@ -93,7 +86,7 @@ limitations under the License.
        *
        * @memberof Nuxeo
        */
-      class ArtificialIntelligenceSuggestions
+      class AISuggestions
         extends Polymer.mixinBehaviors([Nuxeo.I18nBehavior, Polymer.IronFormElementBehavior], Nuxeo.Element) {
 
         static get is() {
@@ -142,25 +135,51 @@ limitations under the License.
                 return this._idFunction.bind(this);
               },
             },
+
+            _inputMatches: {
+              type: Object,
+            }
           };
         }
 
-        _isSuggestionChosen(properties, suggestion) {
-          if (properties && suggestion) {
-            return JSON.stringify(this.get(this._parsePropertyPath())) === JSON.stringify(this.idFunction(suggestion.name)) ? 'chosen' : '';
+        static get observers() {
+          return [
+            '_matchInput(property, suggestions, document.properties.*)',
+          ];
+        }
+
+        _matchInput() {
+          if (!this.property || !this.suggestions || !this.document) {
+            return;
           }
-          return false;
+          // XXX: this method memoizes matching between the property value and the suggestions
+          const matches = new Map();
+          let currentValue = this.get(this._parsePropertyPath());
+          if (this.suggestions.length > 0) {
+            const isArray = Array.isArray(currentValue);
+            this.suggestions.forEach((suggestion) => {AISuggestions
+              const suggestedValue = this.idFunction(suggestion.name);
+              const match = isArray ? suggestedValue.every((value) => currentValue.includes(value)) :
+                  currentValue === suggestedValue;
+              matches.set(suggestion, match);
+            });
+          }
+          this._inputMatches = matches;
+        }
+
+        _styleSuggestion(suggestion) {
+          return (this._inputMatches && this._inputMatches.get(suggestion)) ? 'chosen' : '';
         }
 
         _getConfidenceIcon(confidenceLevel) {
           const interval = (1 - this.threshold) / 3;
           let icon;
           if (confidenceLevel >= this.threshold && confidenceLevel < this.threshold + interval) {
-            icon = 'nuxeo:confidence-level-low';
+            icon = 'nuxeo-ai:confidence-level-low';
           } else if (confidenceLevel >= this.threshold + interval && confidenceLevel < this.threshold + (2 * interval)) {
-            icon = 'nuxeo:confidence-level-medium';
+            icon = 'nuxeo-ai:confidence-level-medium';
           } else if (confidenceLevel >= this.threshold + (2 * interval) && confidenceLevel <= 1) {
-            icon = 'nuxeo:confidence-level-high';
+            icon = 'nuxeo-ai:confidence-level-high';
           }
           return icon;
         }
@@ -232,8 +251,8 @@ limitations under the License.
 
       }
 
-      customElements.define(ArtificialIntelligenceSuggestions.is, ArtificialIntelligenceSuggestions);
-      Nuxeo.ArtificialIntelligenceSuggestions = ArtificialIntelligenceSuggestions;
+      customElements.define(AISuggestions.is, AISuggestions);
+      Nuxeo.AISuggestions = AISuggestions;
     }
   </script>
 </dom-module>
