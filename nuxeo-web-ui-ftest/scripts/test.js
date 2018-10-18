@@ -59,7 +59,7 @@ if (argv.stepDefinitions) {
   def = defaultDef;
 }
 if (def) {
-  args.push(`--cucumberOpts.require=${def},./node_modules/@nuxeo/nuxeo-web-ui-ftest/test/features/step_definitions`);
+  args.push(`--cucumberOpts.require=${def}/**/*.js`);
 }
 
 
