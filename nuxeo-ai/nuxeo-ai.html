@@ -19,6 +19,7 @@ limitations under the License.
   AISuggestionManager = (() => {
     const _map = new WeakMap(); // store field elements and suggestion widgets without preventing gc
     let _updateDebouncer = null;
+    let op = null;
 
     function _getBoundElements(element, property) {
       const model = {};
@@ -46,7 +47,8 @@ limitations under the License.
 
     function _getSuggestionWidget(element) {
       if (!_map.has(element)) {
-        const suggestionWidget = document.createElement('nuxeo-ai-suggestions');
+        const suggestionWidget = document.createElement('nuxeo-ai-suggestions');;
+        suggestionWidget.style.marginBottom = '8px';
         element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
         _map.set(element, suggestionWidget);
         return suggestionWidget;
@@ -54,76 +56,14 @@ limitations under the License.
       return _map.get(element);
     }
 
-    function _getSuggestions(document) {
-      // XXX: return mocked data
-      return Promise.resolve([{
-        'created': '2018-08-09T13:23:10.270Z',
-        'serviceName': 'xyz',
-        'context': {
-          'repositoryName': 'test',
-          'documentRef': 'a29bbc51-4ea3-4270-88ee-e7e2891c5456',
-          'inputProperties': ['ecm:path', 'ecm:mixinType', 'dc:title']
-        },
-        'kind': '/classification/custom',
-        'rawKey': '1c0c7710-f187-4c97-bb78-85ebae7de8aa',
-        'suggestions': [{
-          'property': 'dc:description',
-          'values': [{
-            'name': 'Some description, yo!',
-            'confidence': 0.7
-          },
-            {
-              'name': 'Just my document.',
-              'confidence': 0.8
-            },
-            {
-              'name': 'My document described in a few words.',
-              'confidence': 0.9
-            }],
-        },
-          {
-            'property': 'dc:nature',
-            'values': [{
-              'name': 'application',
-              'confidence': 0.8
-            },
-              {
-                'name': 'certificate',
-                'confidence': 0.87
-              },
-              {
-                'name': 'endorsement',
-                'confidence': 0.92
-              },
-              {
-                'name': 'trainingApplication',
-                'confidence': 0.97
-              }],
-          },
-          {
-            'property': 'dc:subjects',
-            'values': [{
-              'name': ['art/architecture'],
-              'confidence': 0.7
-            },
-              {
-                'name': ['art/cinema'],
-                'confidence': 0.75
-              },
-              {
-                'name': ['endorsedaily life/collectionent'],
-                'confidence': 0.8
-              },
-              {
-                'name': ['human sciences/history'],
-                'confidence': 0.83
-              },
-              {
-                'name': ['sciences/earthscience'],
-                'confidence': 0.86
-              }],
-          }],
-      }]);
+    function _getSuggestions(doc) {
+      if (!op) {
+        op = document.createElement('nuxeo-operation');
+        op.op = 'AI.Suggestion';
+        document.querySelector('nuxeo-app').appendChild(op);
+      }
+      op.input = doc;
+      return op.execute();
     }
 
     return {
@@ -140,7 +80,6 @@ limitations under the License.
         _updateDebouncer = Polymer.Debouncer.debounce(
             _updateDebouncer, Polymer.Async.timeOut.after(500),
             () => {
-              console.log('updating widget suggestions');
               const model = _getBoundElements(layout, 'document.properties');
               _getSuggestions(layout.document).then((response) => {
                 response.forEach((service) => {
@@ -159,7 +98,6 @@ limitations under the License.
                         layout.notifyPath(evt.detail.path);
                       }
                     });
-                    console.log('updating suggestions for "', suggestion.property, '" in ', element);
                   });
                 });
               });
