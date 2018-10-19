@@ -148,6 +148,10 @@ limitations under the License.
         @apply --layout-vertical;
       }
 
+      .item .details {
+        min-width: 1px;
+      }
+
       .item + .item {
         border-top: 1px solid var(--nuxeo-border);
       }
@@ -211,8 +215,8 @@ limitations under the License.
         }
 
         paper-input {
-          width: calc(100% - 90px);
-          margin-left: 1.2rem;
+          width: var(--nuxeo-suggester-media-width, calc(100% - 90px));
+          margin-left: var(--nuxeo-suggester-media-margin-left, 1.2rem);
         }
 
         #results {
