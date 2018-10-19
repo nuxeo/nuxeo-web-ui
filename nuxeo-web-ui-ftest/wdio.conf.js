@@ -53,6 +53,11 @@ switch (capability.browserName) {
   // no default
 }
 
+// transform nuxeo-web-ui-ftest requires
+require('babel-register')({
+  ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
+});
+
 exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
@@ -173,7 +178,7 @@ exports.config = {
   cucumberOpts: {
     require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')],        // <string[]> (file/dir) require files before executing features
     backtrace: true,   // <boolean> show full backtrace for errors
-    compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
+    // compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
     dryRun: false,      // <boolean> invoke formatters without executing steps
     failFast: true,    // <boolean> abort the run on first failure
     colors: true,       // <boolean> disable colors in formatter output
