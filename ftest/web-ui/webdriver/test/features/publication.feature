@@ -7,7 +7,7 @@ Feature: Internal Publication
       | Section    | section2         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
     And I login as "Administrator"
 
-  Scenario: Publish and List Documents
+  Scenario: Publish Current Document
     Given I have a File document
     When I browse to the document
     And The document is unversioned
@@ -44,3 +44,20 @@ Feature: Internal Publication
        | /default-domain/sections/section1/my_document |            | 1.1     |
        | /default-domain/sections/section1/my_document | XML Export | 1.0     |
        | /default-domain/sections/section2/my_document | Thumbnail  | 1.1     |
+
+  Scenario: Publish Multiple Documents
+    Given I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
+      | File       | PublihsFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
+      | Note       | PublihsNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
+    When I browse to the document with path "/default-domain/PublishTest"
+    And I select the "PublihsFile" document
+    And I select the "PublihsNote" document
+    Then I can publish selection to "section1"
+    When I browse to the document with path "/default-domain/sections/section1"
+    Then I can see the document has 2 children
+    When I navigate to "PublihsFile" child
+    Then I can see the document is a publication
+    And I can unpublish the document
+    And I can see the document has 1 children

@@ -1,6 +1,7 @@
 
 
 import BasePage from '../base';
+import PublicationDialog from './browser/publication_dialog';
 
 export default class Selection extends BasePage {
   addToClipboard() {
@@ -49,5 +50,20 @@ export default class Selection extends BasePage {
   get deleteDocumentsButton() {
     // XXX: using a more specific selector here to ensure we can check for isExisting()
     return this.el.element('nuxeo-delete-documents-button[hard] #deleteAllButton');
+  }
+
+  get publishDocumentsButton() {
+    return this.el.element('nuxeo-publish-button #publishButton');
+  }
+
+  get publishDialog() {
+    if (!this.el.isExisting('#publishDialog') || !this.el.isVisible('#publishDialog')) {
+      const button = this.publishDocumentsButton;
+      button.waitForVisible();
+      button.click();
+    }
+    const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
+    publishDialog.waitForVisible();
+    return publishDialog;
   }
 }

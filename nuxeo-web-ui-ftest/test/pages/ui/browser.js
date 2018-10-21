@@ -3,9 +3,9 @@
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
+import PublicationDialog from './browser/publication_dialog';
 import DocumentPermissions from './browser/document_permissions';
 import DocumentPublications from './browser/document_publications';
-import DocumentVersions from './browser/document_versions';
 import DocumentTask from './browser/document_task';
 import EditDialog from './edit_dialog';
 import Selection from './selection';
@@ -252,6 +252,10 @@ export default class Browser extends BasePage {
     return this._selectChildDocument(title, true);
   }
 
+  get publicationInfobar() {
+    return this.el.element('nuxeo-publication-info-bar');
+  }
+
   get selectionToolbar() {
     return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
   }
@@ -322,7 +326,7 @@ export default class Browser extends BasePage {
     }
   }
 
-  publishDocument(target, rendition, version, override) {
+  get publishDialog() {
     const publishButton = this.el.element('nuxeo-publish-button');
     publishButton.waitForExist();
     if (!publishButton.isVisible()) {
@@ -330,25 +334,8 @@ export default class Browser extends BasePage {
     }
     publishButton.waitForVisible();
     publishButton.click();
-    // set target
-    const targetSelect = this.el.element('#target');
-    fixtures.layouts.setValue(targetSelect, target);
-    // set rendition
-    const renditionSelect = this.el.element('#rendition');
-    fixtures.layouts.setValue(renditionSelect, rendition);
-    // set version
-    if (version) {
-      const versionsList = new DocumentVersions(`${this._selector} #version`);
-      versionsList.toggle.waitForVisible();
-      versionsList.toggle.click();
-      versionsList.listItems.waitForVisible();
-      versionsList.selectVersion(version);
-    }
-    if (override) {
-      const overrideCheckbox = this.el.element('#override');
-      fixtures.layouts.setValue(overrideCheckbox, true);
-    }
-    driver.waitForEnabled('#publish');
-    driver.click('#publish');
+    const publishDialog = new PublicationDialog('#publishDialog');
+    publishDialog.waitForVisible();
+    return publishDialog;
   }
 }

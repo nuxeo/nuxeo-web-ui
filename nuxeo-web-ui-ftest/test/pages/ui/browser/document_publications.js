@@ -1,6 +1,6 @@
 import BasePage from '../../base';
 
-export default class DocumentPermissions extends BasePage {
+export default class DocumentPublications extends BasePage {
   get count() {
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
     return rows.value.filter(result => result.getAttribute('hidden') === null).length;

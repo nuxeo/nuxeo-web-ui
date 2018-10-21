@@ -85,12 +85,6 @@ Then(/^I can see the permissions page$/, function () {
   this.ui.browser.permissionsView.waitForVisible();
 });
 
-Then(/^I can perform the following publications$/, function (table) {
-  table.rows().forEach((row) => {
-    this.ui.browser.publishDocument(row[0], row[1], row[2], row[3]);
-  });
-});
-
 Then(/^I can see the document has (\d+) publications$/, function (nbPublications) {
   driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications);
 });
@@ -98,5 +92,16 @@ Then(/^I can see the document has (\d+) publications$/, function (nbPublications
 Then(/^I can see the document has the following publication$/, function (table) {
   table.rows().forEach((row) => {
     this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
+  });
+});
+
+Then('I can publish selection to {string}', function (target) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.publishDialog.publish(target);
+});
+
+Then(/^I can perform the following publications$/, function (table) {
+  table.rows().forEach((row) => {
+    this.ui.browser.publishDialog.publish(row[0], row[1], row[2], row[3]);
   });
 });

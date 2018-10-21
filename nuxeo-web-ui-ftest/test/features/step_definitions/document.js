@@ -254,3 +254,17 @@ Then(/^I can abandon the workflow$/, function () {
   // In order to avoid errors when performing the teardown
   fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
+
+Then(/^I can see the document is a publication$/, function () {
+  const infoBar = this.ui.browser.publicationInfobar;
+  infoBar.waitForVisible();
+});
+
+Then(/^I can unpublish the document$/, function () {
+  const unpublishButton = this.ui.browser.publicationInfobar.element('nuxeo-unpublish-button');
+  unpublishButton.waitForVisible();
+  unpublishButton.click();
+  const unpublishConfirm = unpublishButton.element('nuxeo-confirm-button #dialog paper-button[class="primary"]');
+  unpublishConfirm.waitForVisible();
+  unpublishConfirm.click();
+});
