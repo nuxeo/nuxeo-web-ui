@@ -86,10 +86,12 @@ limitations under the License.
             <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
           </template>
         </nuxeo-select>
-        <div class="versions">
-          <label>[[i18n('documentInfo.version')]]</label>
-          <nuxeo-document-versions id="version" document="[[document]]"></nuxeo-document-versions>
-        </div>
+        <template is="dom-if" if="[[!_isMultiple]]">
+          <div class="versions">
+            <label>[[i18n('documentInfo.version')]]</label>
+            <nuxeo-document-versions id="version" document="[[document]]"></nuxeo-document-versions>
+          </div>
+        </template>
         <div class="options">
           <label>[[i18n('publication.internal.options')]]</label>
           <paper-checkbox id="override" checked="{{override}}">
@@ -119,6 +121,11 @@ limitations under the License.
          */
         document: Object,
 
+        /**
+         * Input documents.
+         */
+        documents: Array,
+
         publishSpace: Object,
 
         selectedRendition: {
@@ -126,25 +133,34 @@ limitations under the License.
           value: 'none'
         },
 
-        keepAlreadyPublished: Boolean
+        _isMultiple: {
+          type: Boolean,
+          computed: '_computeMultiple(documents)'
+        }
+      },
+
+      _computeMultiple: function() {
+        return !!(this.documents && this.documents.length > 0);
       },
 
       _computeRenditionOptions: function() {
+        var options = [
+          {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
+          {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')}
+        ];
         if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
-          var options = this.document.contextParameters.renditions.map(function(item) {
-            return {'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon};
+          this.document.contextParameters.renditions.forEach(function(item) {
+            options.push({'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon});
           }.bind(this));
-          return [
-            {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
-            {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')},
-          ].concat(options);
         }
+        return options;
       },
 
       _publish: function() {
         this.$.op.params = {
           'target': this.publishSpace.uid,
-          'override': this.override
+          'override': this.override,
+          'renditionName': null
         }
         if (this.selectedRendition) {
           if (this.selectedRendition === 'default') {
@@ -153,13 +169,19 @@ limitations under the License.
             this.$.op.params.renditionName = this.selectedRendition;
           }
         }
-        this.$.op.input = this.document.uid;
-        this.$.op.execute().then(function(publishedDoc) {
-          this.fire('notify', {'message': this.i18n('publication.internal.publish.success', publishedDoc.path)});
-          this.fire('document-updated');
+        this.$.op.input = this._isMultiple ? 'docs:' + this.documents.map(function(doc) {
+          return doc.uid;
+        }).join(',') : this.document.uid;
+        this.$.op.execute().then(function() {
+          this.fire('notify', {
+            'message': this.i18n('publication.internal.publish.success' + (this._isMultiple ? '.multiple' : ''))
+          });
+          this._isMultiple ? this.fire('navigate', {doc: this.publishSpace}) : this.fire('document-updated');
           this.fire('nx-publish-success');
         }.bind(this)).catch(function(err) {
-          this.fire('notify', {'message': this.i18n('publication.internal.publish.error', err)});
+          this.fire('notify', {
+            'message': this.i18n('publication.internal.publish.error' + (this._isMultiple ? '.multiple' : ''))
+          });
           throw err;
         }.bind(this));
       },
