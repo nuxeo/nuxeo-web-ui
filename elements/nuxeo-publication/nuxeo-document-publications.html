@@ -80,6 +80,8 @@ limitations under the License.
     </nuxeo-operation>
     <nuxeo-operation id="srcDocOp" op="Proxy.GetSourceDocument" input="[[document.uid]]">
     </nuxeo-operation>
+    <nuxeo-operation id="publishOp" op="Document.PublishToSection">
+    </nuxeo-operation>
 
     <nuxeo-page-provider id="provider"
       page-size="40"
@@ -95,11 +97,9 @@ limitations under the License.
 
       <div class="resultActions">
         <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]">[[i18n('publication.unpublishAll')]]</paper-button>
-        <paper-button class="uppercase primary" on-tap="_republishAll" disabled$="[[!hasPublications]]">[[i18n('publication.republishAll')]]</paper-button>
       </div>
       <nuxeo-data-table id="table" nx-provider="provider" class="results" items="{{publishedDocs}}"
-                        empty-label="[[i18n('publication.noPublications')]]"
-                        on-row-clicked="_navigate">
+                        empty-label="[[i18n('publication.noPublications')]]">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -140,7 +140,9 @@ limitations under the License.
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
           <template>
-            <paper-button class="uppercase primary" on-tap="_republish">[[i18n('publication.republish')]]</paper-button>
+            <template is="dom-if" if="[[_canRepublish(item)]]">
+              <paper-button class="uppercase primary" on-tap="_republish">[[i18n('publication.republish')]]</paper-button>
+            </template>
           </template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>
@@ -185,10 +187,6 @@ limitations under the License.
         }
       },
 
-      _navigate: function(e) {
-        this.fire('navigate', {doc: e.detail.item});
-      },
-
       _computeParams: function() {
         if (this._src) {
           var uid = this._src.uid;
@@ -224,12 +222,46 @@ limitations under the License.
         }
       },
 
-      _republish: function() {
-        alert('Not implemented yet!');
+      _republish: function(e) {
+        if (e && e.target) {
+          if (!confirm(this.i18n('publication.republish.confirm'))) {
+            return;
+          }
+          var obsolete = e.target.parentNode.item;
+          this.$.publishOp.params = {
+            'target': obsolete.parentRef,
+            'override': true,
+            'renditionName': obsolete.properties['rend:renditionName']
+          }
+          this.$.publishOp.input = this._src.uid;
+          this.$.publishOp.execute().then(function() {
+            this.fire('notify', {
+              'message': this.i18n('publication.internal.publish.success')
+            });
+            this.fire('document-updated');
+            this.fire('nx-publish-success');
+          }.bind(this)).catch(function(err) {
+            this.fire('notify', {
+              'message': this.i18n('publication.internal.publish.error')
+            });
+            throw err;
+          }.bind(this));
+        }
       },
 
       _canUnpublish: function(doc) {
         return doc && this.hasPermission(doc, 'Write');
+      },
+
+      _canRepublish: function(doc) {
+        if (this._src && this._canUnpublish(doc)) {
+          var pubMaj = doc.properties['uid:major_version'];
+          var pubMin = doc.properties['uid:minor_version'];
+          var srcMaj = this._src.properties['uid:major_version'];
+          var srcMin = this._src.properties['uid:minor_version'];
+          return pubMaj < srcMaj || (pubMaj === srcMaj && pubMin < srcMin);
+        }
+        return false;
       },
 
       _hasPublications: function(docs) {
@@ -246,10 +278,6 @@ limitations under the License.
         }.bind(this)).catch(function() {
           this.fire('notify', {'message': this.i18n('publication.unpublish.all.error')});
         });
-      },
-
-      _republishAll: function() {
-        alert('Not implemented yet!');
       }
 
     });
