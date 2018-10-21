@@ -192,7 +192,8 @@ limitations under the License.
       _computeParams: function() {
         if (this._src) {
           var uid = this._src.uid;
-          return {queryParams: 'SELECT * FROM Document WHERE ecm:isProxy = 1 AND (rend:sourceVersionableId = "' +
+          return {queryParams: 'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
+            'AND (rend:sourceVersionableId = "' +
             uid +
             '" OR ecm:proxyVersionableId = "' +
             uid +

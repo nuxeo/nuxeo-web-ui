@@ -235,11 +235,7 @@
 
 <nuxeo-slot-content name="publishDocumentAction" slot="DOCUMENT_ACTIONS" order="45">
   <template>
-    <nuxeo-filter document="[[document]]" expression="this.isPublishable(document)">
-      <template>
-        <nuxeo-publish-button document="[[document]]"></nuxeo-publish-button>
-      </template>
-    </nuxeo-filter>
+    <nuxeo-publish-button document="[[document]]"></nuxeo-publish-button>
   </template>
 </nuxeo-slot-content>
 
@@ -578,6 +574,12 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="publishSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="25">
+  <template>
+    <nuxeo-publish-button documents="[[selectedItems]]"></nuxeo-publish-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
     <nuxeo-delete-documents-button documents="[[selectedItems]]">
@@ -676,7 +678,7 @@
 
 <nuxeo-slot-content name="internalPublishPage" slot="PUBLISH_PAGES" order="10">
   <template>
-    <nuxeo-internal-publish id="internalPublish" name="internal" document="[[document]]">
+    <nuxeo-internal-publish id="internalPublish" name="internal" document="[[document]]" documents="[[documents]]">
     </nuxeo-internal-publish>
   </template>
 </nuxeo-slot-content>
