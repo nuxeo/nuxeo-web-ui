@@ -138,6 +138,7 @@ gulp.task('move-elements', function() {
   // fix asset path
   var elements = gulp.src([dist('elements/nuxeo-app.html'), dist('elements/elements.html')])
     .pipe($.replace('..\/bower_components', 'bower_components'))
+    .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
 
