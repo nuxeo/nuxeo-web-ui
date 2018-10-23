@@ -7,7 +7,7 @@ import PublicationDialog from './browser/publication_dialog';
 import DocumentPermissions from './browser/document_permissions';
 import DocumentPublications from './browser/document_publications';
 import DocumentTask from './browser/document_task';
-import EditDialog from './edit_dialog';
+import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
 
@@ -85,11 +85,11 @@ export default class Browser extends BasePage {
   }
 
   get editButton() {
-    return this.el.element('#edit');
+    return this.el.element('#edit-button');
   }
 
-  get editDialog() {
-    return new EditDialog('#edit-dialog');
+  editForm(docType) {
+    return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
   }
 
   get rows() {

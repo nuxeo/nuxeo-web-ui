@@ -139,23 +139,21 @@ Then(/^I can edit the (.*) metadata$/, function (docType) {
   const browser = this.ui.browser;
   browser.editButton.waitForVisible();
   browser.editButton.click();
-  browser.editDialog.waitForVisible();
-  browser.editDialog.edit(docType).waitForVisible();
-  browser.editDialog.edit(docType).title = docType;
-  browser.editDialog.saveButton.waitForVisible().should.be.true;
-  browser.editDialog.saveButton.click();
+  const form = browser.editForm(docType);
+  form.waitForVisible();
+  form.title = docType;
+  form.save();
 });
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, function (docType, table) {
   const browser = this.ui.browser;
   browser.editButton.waitForVisible();
   browser.editButton.click();
-  browser.editDialog.waitForVisible();
-  browser.editDialog.edit(docType).waitForVisible();
-  browser.editDialog.edit(docType).layout().waitForVisible();
-  browser.editDialog.edit(docType).layout().fillMultipleValues(table);
-  browser.editDialog.saveButton.waitForVisible().should.be.true;
-  browser.editDialog.saveButton.click();
+  const form = browser.editForm(docType);
+  form.waitForVisible();
+  form.layout.waitForVisible();
+  form.layout.fillMultipleValues(table);
+  form.save();
 });
 
 Then(/^I can edit the (.*) Note$/, function (format) {
