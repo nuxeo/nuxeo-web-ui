@@ -53,6 +53,13 @@ switch (capability.browserName) {
   // no default
 }
 
+// Allow overriding driver version
+const drivers = {};
+drivers[process.env.BROWSER] = {};
+if (process.env.DRIVER_VERSION) {
+  drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
+}
+
 // transform nuxeo-web-ui-ftest requires
 require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
@@ -149,6 +156,11 @@ exports.config = {
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
   services: ['selenium-standalone'],
+
+  seleniumArgs: { drivers },
+
+  seleniumInstallArgs: { drivers },
+
   //
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
