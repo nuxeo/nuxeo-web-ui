@@ -24,7 +24,9 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-actions-menu.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-sort-select.html">
 <link rel="import" href="../nuxeo-selection/nuxeo-selection-toolbar.html">
 
 <!--
@@ -77,7 +79,18 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         display: block;
         @apply --layout-horizontal;
         @apply --layout-center;
-        @apply --layout-end-justified;
+      }
+
+      .leftHand {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-flex;
+      }
+
+      .rightHand {
+        @apply --layout-horizontal;
+        position: relative;
+        right: 0;
       }
 
       .resultActions paper-icon-button {
@@ -116,22 +129,35 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
 
-        <slot name="actions"></slot>
+        <div class="leftHand">
+          <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
+            <nuxeo-sort-select label="[[_sortLabel(view, sortLabel)]]" options="[[_sortOptions(view, sortOptions)]]"
+              selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
+          </template>
+          <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
+            <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_fetch">
+            </nuxeo-quick-filters>
+          </template>
+        </div>
 
-        <!-- 0.9 compatibility -->
-        <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        <div class="rightHand">
+          <slot name="actions"></slot>
 
-        <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          <!-- 0.9 compatibility -->
+          <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
 
-        <template is="dom-repeat" items="[[_displayModes]]">
-          <paper-icon-button class="displayMode"
-                             icon="[[item.icon]]"
-                             title$="[[_displayModeTitle(item, i18n)]]"
-                             selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                             disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                             on-tap="_toggleDisplayMode">
-          </paper-icon-button>
-        </template>
+          <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+
+          <template is="dom-repeat" items="[[_displayModes]]">
+            <paper-icon-button class="displayMode"
+                                icon="[[item.icon]]"
+                                title$="[[_displayModeTitle(item, i18n)]]"
+                                selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                                disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                                on-tap="_toggleDisplayMode">
+            </paper-icon-button>
+          </template>
+        </div>
 
       </div>
 
@@ -206,6 +232,58 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * If enabled, it displays the list of quickfilters defined on the associated
+         * page provider at the top of the search results.
+         */
+        displayQuickFilters: {
+          type: Boolean,
+          value: false,
+        },
+        /**
+         * Specify here a subset of quick filters in case you want to
+         * specify the ones to be displayed on the search results.
+         * Expected format : ['quickfilter1','quickfilter2']
+         */
+        quickFilters: {
+          type: Array
+        },
+        /**
+         * If enabled, it allows to sort the results of the search results.
+         */
+        displaySort: {
+          type: Boolean,
+          value: false,
+        },
+        /**
+         * Name of the sort label displayed on Grid view mode "Sort by" at the top of the search results.
+         * If the field is empty, the label will be hidden.
+         */
+        sortLabel: {
+          type: String,
+          value: '',
+        },
+        /**
+         * Sort option selected by default (can retrieve the one configured in sort-options).
+         */
+        sortSelected: {
+          type: Object,
+          observer: '_sortSelectedChanged',
+        },
+        /**
+         * List of properties available to sort the result list.
+         * It should be formatted as a JSON array of objects like:
+         * ```
+         * [
+         *   {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
+         *   {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true}
+         * ]
+         * ```
+         */
+        sortOptions: {
+          type: Array,
+          value: [],
+        },
 
         _displayModes:  Array,
 
@@ -244,6 +322,53 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         this.view = null;
       },
 
+      _displayQuickFilters: function() {
+        // XXX check previous view properties for compatibility
+        return this.view && !this.view.handlesFiltering &&
+          (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters);
+      },
+
+      _displaySort: function() {
+        // XXX check previous view properties for compatibility
+        return this.view && !this.view.handlesSorting && (this.view.hasAttribute('display-sort') || this.displaySort);
+      },
+
+      _sortLabel: function() {
+        // XXX check previous view properties for compatibility
+        return (this.view && this.view.sortLabel) || this.sortLabel;
+      },
+
+      _sortOptions: function() {
+        // XXX check previous view properties for compatibility
+        return (this.view && this.view.sortOptions) || this.sortOptions;
+      },
+
+      _sortChanged: function() {
+        if (this.sortSelected && this.nxProvider) {
+          var sort = {};
+          sort[this.sortSelected.field] = this.sortSelected.order;
+          this.nxProvider.sort = sort;
+          this._fetch();
+        }
+      },
+
+      _sortSelectedChanged: function(newSort, oldSort) {
+        // do not trigger fetch results when sort options are being initialized
+        if (newSort && oldSort) {
+          this._sortChanged();
+        }
+      },
+
+      _fetch: function() {
+        if (this.view) {
+          this.debounce('fetch', function() {
+            this.view.fetch().then(function() {
+              this.quickFilters = this.nxProvider.quickFilters;
+            }.bind(this));
+          }, 100);
+        }
+      },
+
       _viewChanged: function(view, oldView) {
         if (oldView) {
           this.unlisten(oldView, 'columns-changed', '_columnsChanged');
@@ -269,9 +394,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           view.nxProvider = this.nxProvider;
           // update view
           view.reset();
-          this.debounce('fetch', function() {
-            view.fetch();
-          }, 100);
+          this._fetch();
           this.fire('search-results-view', {view: view, name: this.name});
         }
       },
@@ -314,7 +437,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       _refreshAndFetch: function() {
         if (this.view) {
           this.view.reset();
-          this.view.fetch();
+          this._fetch();
         }
       },
 

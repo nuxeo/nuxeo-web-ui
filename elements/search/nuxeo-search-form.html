@@ -30,6 +30,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-document-permissions/nuxeo-document-permissions.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-select.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
@@ -288,12 +289,13 @@ limitations under the License.
         </div>
 
         <div id="queue" hidden$="{{!queue}}">
+          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="refresh">
+          </nuxeo-quick-filters>
           <nuxeo-data-list nx-provider="provider" id="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
             empty-label-when-filtered=""
-            selection-enabled select-on-tap
-            display-quick-filters>
+            selection-enabled select-on-tap>
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">

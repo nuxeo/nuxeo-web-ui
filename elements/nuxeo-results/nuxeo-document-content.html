@@ -96,7 +96,16 @@ limitations under the License.
 
     <div id="dropzone">
 
-      <nuxeo-results id="results" display-mode="table" name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" document="[[document]]">
+      <nuxeo-results id="results"
+                     display-mode="table"
+                     name="[[document.uid]]"
+                     nx-provider="[[nxProvider]]"
+                     selected-items="{{selectedItems}}"
+                     document="[[document]]"
+                     display-quick-filters
+                     display-sort$="[[_canSort(document)]]"
+                     sort-label="[[i18n('documentContentView.sort.label')]]"
+                     sort-options="[[sortOptions]]">
         <div slot="selectionActions">
           <nuxeo-slot slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
         </div>
@@ -106,8 +115,7 @@ limitations under the License.
                          class="results"
                          empty-label="[[emptyLabel]]"
                          empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                         selection-enabled display-quick-filters
-                         display-sort$="[[_canSort(document)]]" sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]"
+                         selection-enabled
                          draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
           <template>
             <nuxeo-document-grid-thumbnail class="grid-box"
@@ -127,7 +135,6 @@ limitations under the License.
                           empty-label="[[emptyLabel]]"
                           empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                           selection-enabled
-                          display-quick-filters
                           on-row-clicked="_navigate"
                           draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"

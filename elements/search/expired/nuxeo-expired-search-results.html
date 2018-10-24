@@ -33,11 +33,15 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-results display-mode="table" name="expired" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+    <nuxeo-results display-mode="table"
+                   name="expired"
+                   nx-provider="[[nxProvider]]"
+                   selected-items="{{selectedItems}}"
+                   display-quick-filters display-sort
+                   sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results"
-                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters
-                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
+                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled>
         <template>
           <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
@@ -49,7 +53,6 @@ limitations under the License.
                         settings-enabled
                         empty-label="[[i18n('searchResults.noResults')]]"
                         selection-enabled
-                        display-quick-filters
                         on-row-clicked="_navigate">
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="100">
