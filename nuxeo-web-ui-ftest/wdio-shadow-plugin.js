@@ -129,7 +129,7 @@ exports.init = function (browser) {
   }
 
   function fixResult(result) {
-    if (browser.desiredCapabilities.browserName !== 'safari' || !result || !result.value) {
+    if (!result || !result.value) {
       return;
     }
     if (Array.isArray(result.value)) {
