@@ -59,14 +59,19 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-results id="results" display-mode="table" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}">
+    <nuxeo-results id="results"
+                   display-mode="table"
+                   name="[[name]]"
+                   nx-provider="[[nxProvider]]"
+                   selected-items="{{selectedItems}}"
+                   display-quick-filters>
 
       <slot name="selectionActions" slot="selectionActions"></slot>
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
                        empty-label="[[emptyLabel]]"
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                       selection-enabled display-quick-filters>
+                       selection-enabled>
         <template>
           <nuxeo-document-grid-thumbnail class="grid-box" tabindex$="{{tabIndex}}"
                                          selected$="{{selected}}" selected-items="[[selectedItems]]" index="[[index]]"
@@ -80,7 +85,6 @@ limitations under the License.
                         empty-label="[[emptyLabel]]"
                         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                         selection-enabled
-                        display-quick-filters
                         on-row-clicked="_navigate">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
                                  field="dc:title" sort-by="dc:title" flex="100">

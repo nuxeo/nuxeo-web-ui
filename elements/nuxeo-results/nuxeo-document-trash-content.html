@@ -93,7 +93,14 @@ limitations under the License.
                          fetch-aggregates>
     </nuxeo-page-provider>
 
-    <nuxeo-results id="results" display-mode="table" name="[[document.uid]]-trashed" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" document="[[document]]">
+    <nuxeo-results id="results"
+                   display-mode="table"
+                   name="[[document.uid]]-trashed"
+                   nx-provider="[[nxProvider]]"
+                   selected-items="{{selectedItems}}"
+                   document="[[document]]"
+                   display-quick-filters display-sort
+                   sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
 
       <div slot="actions">
         <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
@@ -106,8 +113,7 @@ limitations under the License.
                        class="results"
                        empty-label="[[emptyLabel]]"
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                       selection-enabled display-quick-filters
-                       display-sort sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
+                       selection-enabled>
         <template>
           <nuxeo-document-grid-thumbnail class="grid-box"
                                          tabindex$="{{tabIndex}}"
@@ -126,7 +132,6 @@ limitations under the License.
                         empty-label="[[emptyLabel]]"
                         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
                         selection-enabled
-                        display-quick-filters
                         on-row-clicked="_navigate">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
                                  field="dc:title" sort-by="dc:title" filter-by="title"  flex="100">

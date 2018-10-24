@@ -32,11 +32,12 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-results name="trash" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-mode="list">
+    <nuxeo-results name="trash" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-mode="list"
+                   display-quick-filters display-sort
+                   sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
-                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters
-                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
+                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled>
         <template>
           <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
                                          on-navigate="_navigate" selected-items="[[selectedItems]]">
@@ -48,7 +49,6 @@ limitations under the License.
                         settings-enabled
                         empty-label="[[i18n('searchResults.noResults')]]"
                         selection-enabled
-                        display-quick-filters
                         on-row-clicked="_navigate">
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="30">
@@ -131,8 +131,7 @@ limitations under the License.
       <nuxeo-data-list name="list" icon="nuxeo:view-headline"
                        empty-label="[[emptyLabel]]" multi-selection
                        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                       selection-enabled display-quick-filters
-                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
+                       selection-enabled>
         <template>
           <nuxeo-document-list-item selected$="{{selected}}" doc="[[item]]" index="[[index]]"
                                     on-navigate="_navigate" selected-items="[[selectedItems]]">
