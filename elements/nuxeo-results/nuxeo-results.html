@@ -75,22 +75,27 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         top: 0;
       }
 
-      .resultActions {
-        display: block;
+      .resultActions, .viewModes, .rightHand {
         @apply --layout-horizontal;
         @apply --layout-center;
       }
 
-      .leftHand {
-        @apply --layout-horizontal;
-        @apply --layout-center;
-        @apply --layout-flex;
+      .resultActions, .rightHand {
+        @apply --layout-wrap;
+      }
+
+      .resultActions > * {
+        margin-top: 8px;
       }
 
       .rightHand {
-        @apply --layout-horizontal;
-        position: relative;
-        right: 0;
+        @apply --layout-flex;
+        @apply --layout-end-justified;
+      }
+
+      .resultActions {
+        margin-bottom: 16px;
+        min-height: 38px;
       }
 
       .resultActions paper-icon-button {
@@ -100,6 +105,11 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         margin-left: 4px;
       }
 
+      .resultsCount {
+        opacity: 0.5;
+        margin-right: 16px;
+      }
+
       paper-icon-button[selected] {
         color: var(--icon-toggle-outline-color, var(--nuxeo-action-color-activated));
       }
@@ -107,6 +117,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       nuxeo-actions-menu {
         height: 100%;
         max-width: var(--nuxeo-results-selection-actions-menu-max-width, 240px);
+      }
+
+      nuxeo-quick-filters {
+        margin-right: 16px;
       }
 
     </style>
@@ -129,16 +143,15 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
 
-        <div class="leftHand">
-          <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
-            <nuxeo-sort-select label="[[_sortLabel(view, sortLabel)]]" options="[[_sortOptions(view, sortOptions)]]"
-              selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
-          </template>
-          <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
-            <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_fetch">
-            </nuxeo-quick-filters>
-          </template>
-        </div>
+        <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
+          <nuxeo-sort-select options="[[_sortOptions(view, sortOptions)]]"
+            selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
+        </template>
+        <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
+          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_fetch">
+          </nuxeo-quick-filters>
+        </template>
+        <span class="resultsCount">[[i18n('results.heading.count', resultsCount)]]</span>
 
         <div class="rightHand">
           <slot name="actions"></slot>
@@ -148,15 +161,17 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
           <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
 
-          <template is="dom-repeat" items="[[_displayModes]]">
-            <paper-icon-button class="displayMode"
-                                icon="[[item.icon]]"
-                                title$="[[_displayModeTitle(item, i18n)]]"
-                                selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                                disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                                on-tap="_toggleDisplayMode">
-            </paper-icon-button>
-          </template>
+          <div class="viewModes">
+            <template is="dom-repeat" items="[[_displayModes]]">
+              <paper-icon-button class="displayMode"
+                                  icon="[[item.icon]]"
+                                  title$="[[_displayModeTitle(item, i18n)]]"
+                                  selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                                  disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                                  on-tap="_toggleDisplayMode">
+              </paper-icon-button>
+            </template>
+          </div>
         </div>
 
       </div>
@@ -256,14 +271,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           value: false,
         },
         /**
-         * Name of the sort label displayed on Grid view mode "Sort by" at the top of the search results.
-         * If the field is empty, the label will be hidden.
-         */
-        sortLabel: {
-          type: String,
-          value: '',
-        },
-        /**
          * Sort option selected by default (can retrieve the one configured in sort-options).
          */
         sortSelected: {
@@ -283,6 +290,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         sortOptions: {
           type: Array,
           value: [],
+        },
+
+        resultsCount: {
+          type: Number,
         },
 
         _displayModes:  Array,
@@ -333,11 +344,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         return this.view && !this.view.handlesSorting && (this.view.hasAttribute('display-sort') || this.displaySort);
       },
 
-      _sortLabel: function() {
-        // XXX check previous view properties for compatibility
-        return (this.view && this.view.sortLabel) || this.sortLabel;
-      },
-
       _sortOptions: function() {
         // XXX check previous view properties for compatibility
         return (this.view && this.view.sortOptions) || this.sortOptions;
@@ -364,6 +370,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.debounce('fetch', function() {
             this.view.fetch().then(function() {
               this.quickFilters = this.nxProvider.quickFilters;
+              this.resultsCount = this.nxProvider.resultsCount;
             }.bind(this));
           }, 100);
         }

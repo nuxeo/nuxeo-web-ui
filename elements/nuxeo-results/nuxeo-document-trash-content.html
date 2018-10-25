@@ -61,7 +61,6 @@ limitations under the License.
         @apply --layout-vertical;
         @apply --layout-flex;
         min-height: calc(100vh - 19em - var(--nuxeo-app-top));
-        margin-top: 8px;
       }
 
       .ellipsis {
@@ -100,7 +99,7 @@ limitations under the License.
                    selected-items="{{selectedItems}}"
                    document="[[document]]"
                    display-quick-filters display-sort
-                   sort-label="[[i18n('documentContentView.sort.label')]]" sort-options="[[sortOptions]]">
+                   sort-options="[[sortOptions]]">
 
       <div slot="actions">
         <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
