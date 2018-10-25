@@ -207,7 +207,7 @@ limitations under the License.
       }
 
       nuxeo-quick-filters {
-        padding: .5em .5em 0;
+        padding: .3em .5em;
         border-bottom: 1px solid var(--nuxeo-border);
         max-height: 7em;
         overflow: auto;
@@ -225,7 +225,7 @@ limitations under the License.
        aggregations="{{aggregations}}"
        enrichers="[[enrichers]]"
        params="[[params]]"
-       quick-filters="{{quickFilters}}"
+       quick-filters="{{_quickFilters}}"
        schemas="[[schemas]]"
        headers="[[headers]]"
        fetch-aggregates
@@ -290,8 +290,10 @@ limitations under the License.
         </div>
 
         <div id="queue" hidden$="{{!queue}}">
-          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="refresh">
-          </nuxeo-quick-filters>
+          <template is="dom-if" if="[[_displayQuickFilters(_quickFilters)]]">
+            <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
+            </nuxeo-quick-filters>
+          </template>
           <nuxeo-data-list nx-provider="provider" id="list"
             selected-item="{{selectedDocument}}"
             empty-label="[[i18n('searchForm.queue.noResults')]]"
@@ -534,7 +536,7 @@ limitations under the License.
       },
 
       observers: [
-        '_resetResults(provider, params.*, quickFilters.*, query)',
+        '_resetResults(provider, params.*, _quickFilters.*, query)',
         '_paramsChanged(params.*)',
         '_visibleChanged(auto, visible)'
       ],
@@ -600,7 +602,7 @@ limitations under the License.
       },
 
       _resetResults: function() {
-        if (this.provider && this.params && this.quickFilters && this.query) {
+        if (this.provider && this.params && this._quickFilters && this.query) {
           this.$.list._resetResults();
         }
       },
@@ -866,6 +868,10 @@ limitations under the License.
           this.loading = false;
           throw err;
         }.bind(this));
+      },
+
+      _displayQuickFilters: function() {
+        return this._quickFilters && this._quickFilters.length > 0;
       }
 
     });
