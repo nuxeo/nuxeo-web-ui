@@ -187,8 +187,8 @@ limitations under the License.
                                      left-uid="[[leftUid]]"
                                      right-uid="[[rightUid]]"
                                      delta="[[_getPropertyDiff(_delta, property)]]"
-                                     original-value="[[_getDocumentProperty(property, _left)]]"
-                                     new-value="[[_getDocumentProperty(property, _right)]]"
+                                     original-value="[[_getDocumentProperty(property, right)]]"
+                                     new-value="[[_getDocumentProperty(property, left)]]"
                                      show-all="[[showAll]]"
                                      unified
                                      display-label></nuxeo-object-diff>
@@ -202,8 +202,8 @@ limitations under the License.
                                        left-uid="[[leftUid]]"
                                        right-uid="[[rightUid]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
-                                       original-value="[[_getDocumentProperty(property, _left)]]"
-                                       new-value="[[_getDocumentProperty(property, _right)]]"
+                                       original-value="[[_getDocumentProperty(property, right)]]"
+                                       new-value="[[_getDocumentProperty(property, left)]]"
                                        show-all="[[showAll]]"
                                        hide-additions display-label></nuxeo-object-diff>
                     <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
@@ -211,8 +211,8 @@ limitations under the License.
                                        left-uid="[[leftUid]]"
                                        right-uid="[[rightUid]]"
                                        delta="[[_getPropertyDiff(_delta, property)]]"
-                                       original-value="[[_getDocumentProperty(property, _left)]]"
-                                       new-value="[[_getDocumentProperty(property, _right)]]"
+                                       original-value="[[_getDocumentProperty(property, right)]]"
+                                       new-value="[[_getDocumentProperty(property, left)]]"
                                        show-all="[[showAll]]"
                                        hide-deletions display-label></nuxeo-object-diff>
                   </div>
@@ -310,8 +310,14 @@ limitations under the License.
           },
           _showUnifiedViewControl: Boolean,
           _schemas: Array,
-          _left: Object,
-          _right: Object,
+          left: {
+            type: Object,
+            notify: true
+          },
+          right:  {
+            type: Object,
+            notify: true
+          },
           _delta: Object,
           _hasVersions: {
             type: Boolean,
@@ -388,8 +394,8 @@ limitations under the License.
         },
 
         _sortSchemas: function(schema1, schema2) {
-          var schema1properties = this._getCommonProperties(this._left, this._right, schema1, this._delta);
-          var schema2properties = this._getCommonProperties(this._left, this._right, schema2, this._delta);
+          var schema1properties = this._getCommonProperties(this.left, this.right, schema1, this._delta);
+          var schema2properties = this._getCommonProperties(this.left, this.right, schema2, this._delta);
           if ((schema1properties.length === 0 && schema1properties.length === schema2properties.length) ||
               (schema1properties.length > 0 && schema2properties.length > 0))  {
             return schema1.name > schema2.name;
@@ -470,7 +476,7 @@ limitations under the License.
         },
 
         _getCommonSchemaProperties: function(schema, showAll, delta) {
-          return this._getCommonProperties(this._left, this._right, schema, showAll ? null : delta);
+          return this._getCommonProperties(this.left, this.right, schema, showAll ? null : delta);
         },
 
         _getCommonSchemas: function(schemas, showAll) {
@@ -478,7 +484,7 @@ limitations under the License.
             return;
           }
           return showAll ? schemas : schemas.filter(function(schema) {
-            return this._getCommonProperties(this._left, this._right, schema, showAll ? null : this._delta).length > 0;
+            return this._getCommonProperties(this.left, this.right, schema, showAll ? null : this._delta).length > 0;
           }.bind(this));
         },
 
@@ -509,8 +515,8 @@ limitations under the License.
           var right = this.documents.find(function(doc) {
             return doc.uid === this.rightUid;
           }.bind(this));
-          this._left = left;
-          this._right = right;
+          this.left = left;
+          this.right = right;
           this._fetchCommonSchemas(left, right).then(function(schemas) {
             this._schemas = schemas;
             var delta = jsondiffpatch.diff(left.properties, right.properties);

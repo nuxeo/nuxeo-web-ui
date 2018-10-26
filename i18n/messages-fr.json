@@ -338,6 +338,7 @@
   "diff.controls.switchSides.tooltip": "Intervertir",
   "diff.controls.unifiedView": "Vue unifiée",
   "diffPage.noDocuments": "Aucun document à comparer.",
+  "diffPage.versus": "Vs.",
   "documentAttachments.empty": "Il n'y a pas de fichiers complémentaires",
   "documentAttachments.heading": "Fichiers complémentaires",
   "documentAttachments.upload.add": "Ajouter un fichier complémentaire",
