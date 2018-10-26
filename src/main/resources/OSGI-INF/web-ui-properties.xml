@@ -19,6 +19,7 @@
     <property name="org.nuxeo.web.ui.enrichers.document">subtypes</property>
     <property name="org.nuxeo.web.ui.enrichers.document">tags</property>
     <property name="org.nuxeo.web.ui.enrichers.document">publications</property>
+    <property name="org.nuxeo.web.ui.enrichers.blob" list="true">appLinks</property>
 
     <!-- Properties to be fetched when loading current document, default is 'properties' meaning all -->
     <property name="org.nuxeo.web.ui.fetch.document" list="true">properties</property>
