@@ -2,26 +2,26 @@
 <component name="org.nuxeo.web.ui.properties.contrib">
   <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
     <!-- enrichers -->
-    <property name="org.nuxeo.web.ui.enrichers" list="true">hasContent</property>
-    <property name="org.nuxeo.web.ui.enrichers">firstAccessibleAncestor</property>
-    <property name="org.nuxeo.web.ui.enrichers">permissions</property>
-    <property name="org.nuxeo.web.ui.enrichers">breadcrumb</property>
-    <property name="org.nuxeo.web.ui.enrichers">preview</property>
-    <property name="org.nuxeo.web.ui.enrichers">favorites</property>
-    <property name="org.nuxeo.web.ui.enrichers">subscribedNotifications</property>
-    <property name="org.nuxeo.web.ui.enrichers">thumbnail</property>
-    <property name="org.nuxeo.web.ui.enrichers">renditions</property>
-    <property name="org.nuxeo.web.ui.enrichers">pendingTasks</property>
-    <property name="org.nuxeo.web.ui.enrichers">runnableWorkflows</property>
-    <property name="org.nuxeo.web.ui.enrichers">runningWorkflows</property>
-    <property name="org.nuxeo.web.ui.enrichers">collections</property>
-    <property name="org.nuxeo.web.ui.enrichers">audit</property>
-    <property name="org.nuxeo.web.ui.enrichers">subtypes</property>
-    <property name="org.nuxeo.web.ui.enrichers">tags</property>
-    <property name="org.nuxeo.web.ui.enrichers">publications</property>
+    <property name="org.nuxeo.web.ui.enrichers.document" list="true">hasContent</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">firstAccessibleAncestor</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">permissions</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">breadcrumb</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">preview</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">favorites</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">subscribedNotifications</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">thumbnail</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">renditions</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">pendingTasks</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">runnableWorkflows</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">runningWorkflows</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">collections</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">audit</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">subtypes</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">tags</property>
+    <property name="org.nuxeo.web.ui.enrichers.document">publications</property>
 
     <!-- Properties to be fetched when loading current document, default is 'properties' meaning all -->
-    <property name="org.nuxeo.web.ui.fetchedProperties">properties</property>
+    <property name="org.nuxeo.web.ui.fetch.document" list="true">properties</property>
 
     <!-- Date (time) format -->
     <property name="org.nuxeo.web.ui.dateFormat">LL</property>

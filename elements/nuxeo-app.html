@@ -500,7 +500,7 @@ limitations under the License.
         },
 
         enrichers: {
-          type: String,
+          type: Object,
           value: function() {
             return this._computeEnrichers();
           }
@@ -1160,36 +1160,55 @@ limitations under the License.
       },
 
       _computeEnrichers: function() {
-        return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.join(',')) ||
-          [
-            'hasContent',
-            'firstAccessibleAncestor',
-            'permissions',
-            'breadcrumb',
-            'preview',
-            'favorites',
-            'subscribedNotifications',
-            'thumbnail',
-            'renditions',
-            'pendingTasks',
-            'runnableWorkflows',
-            'runningWorkflows',
-            'collections',
-            'audit',
-            'subtypes',
-            'tags',
-            'publications'
-          ].join(',');
+        return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) ||
+          {
+            document: [
+              'hasContent',
+              'firstAccessibleAncestor',
+              'permissions',
+              'breadcrumb',
+              'preview',
+              'favorites',
+              'subscribedNotifications',
+              'thumbnail',
+              'renditions',
+              'pendingTasks',
+              'runnableWorkflows',
+              'runningWorkflows',
+              'collections',
+              'audit',
+              'subtypes',
+              'tags',
+              'publications'
+            ]
+          };
       },
 
       _computeHeaders: function() {
-        var fProps = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetchedProperties) || 'properties';
-        return {
-          'X-NXfetch.directoryEntry': 'parent',
-          'X-NXfetch.document': 'lock,' + fProps,
-          'X-NXfetch.task': 'actors',
-          'X-NXtranslate.directoryEntry': 'label'
-        };
+        var headers = {
+          'translate-directoryEntry': 'label',
+        }
+
+        var fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
+
+        // add required fetchers
+        var required = {document: ['properties', 'lock'], directoryEntry: ['parent'], task: ['actors']};
+
+        Object.keys(required).forEach(function (k) {
+          fetch[k] = fetch[k] || [];
+          required[k].forEach(function (v) {
+            if (!fetch[k].includes(v)) {
+              fetch[k].push(v);
+            }
+          });
+        });
+
+        // generate fetch headers
+        Object.keys(fetch).forEach(function (f) {
+          headers['fetch-' + f] = fetch[f].join(',');
+        });
+
+        return headers;
       }
 
     });
