@@ -163,6 +163,14 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="blobAppLinks" slot="BLOB_ACTIONS" order="50">
+  <template>
+    <template is="dom-repeat" items="[[blob.appLinks]]">
+      <nuxeo-link-button href="[[item.link]]" icon-src="[[item.icon]]" label="[[item.appName]]" target="_blank"></nuxeo-link-button>
+    </template>
+  </template>
+</nuxeo-slot-content>
+
 <!-- COLECTION ACTIONS -->
 
 <nuxeo-slot-content name="removeCollectionAction" slot="COLLECTION_ACTIONS" order="10">
