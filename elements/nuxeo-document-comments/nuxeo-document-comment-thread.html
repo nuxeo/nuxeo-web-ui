@@ -101,7 +101,8 @@ limitations under the License.
                       placeholder="[[_computeTextLabel(i18n, level, 'writePlaceholder')]]"
                       value="{{reply}}"
                       max-rows="[[_computeMaxRows()]]"
-                      no-label-float>
+                      no-label-float
+                      on-keydown="_checkForEnter">
       </paper-textarea>
       <template is="dom-if" if="[[_areReplyOptionsAvailable(reply)]]">
         <iron-icon class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
@@ -173,6 +174,13 @@ limitations under the License.
 
       focusInput: function() {
         this.$.replyContainer.focus();
+      },
+
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13 && !e.shiftKey && this._areReplyOptionsAvailable(this.reply)) {
+          e.stopPropagation();
+          this._submitReply();
+        }
       },
 
       _clearReply: function() {
