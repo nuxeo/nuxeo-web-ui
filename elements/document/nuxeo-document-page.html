@@ -158,12 +158,12 @@ limitations under the License.
           <!-- activity -->
           <div class="section">
             <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-              <nuxeo-page-item name="comments" label="[[i18n('documentPage.activity.comments')]]"></nuxeo-page-item>
-              <nuxeo-page-item name="history" label="[[i18n('documentPage.activity.history')]]"></nuxeo-page-item>
+              <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
+              <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
             </paper-listbox>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
               <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
-              <nuxeo-document-activity name="history" document="[[document]]"></nuxeo-document-activity>
+              <nuxeo-document-activity name="activity" document="[[document]]"></nuxeo-document-activity>
             </iron-pages>
           </div>
         </div>
