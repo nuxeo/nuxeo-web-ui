@@ -79,7 +79,6 @@ limitations under the License.
     </style>
 
     <nuxeo-page-provider id="provider"
-                         auto$="[[_isAuto(auto, visible, searchForm)]]"
                          provider="[[provider]]"
                          page-size="[[pageSize]]"
                          aggregations="{{aggregations}}"
@@ -90,6 +89,7 @@ limitations under the License.
                          loading="{{loading}}"
                          headers="[[headers]]"
                          fetch-aggregates
+                         skip-aggregates$="[[skipAggregates]]"
                          on-error="_onError">
     </nuxeo-page-provider>
 
@@ -258,6 +258,11 @@ limitations under the License.
         },
 
         /**
+         * If `true`, aggregagtes from page provider definition will not be computed.
+         */
+        skipAggregates: Boolean,
+
+        /**
          * Currently selected view
          */
         view: Object,
@@ -296,10 +301,6 @@ limitations under the License.
 
       toggleExpand: function() {
         this.$$('#collapse').toggle();
-      },
-
-      _isAuto: function() {
-        return this.visible && this.auto && !this.searchForm;
       },
 
       _expandIcon: function(opened) {
@@ -371,8 +372,15 @@ limitations under the License.
           // e.detail.path is params.prop_name eg: params.ecm_fulltext
           if (e.detail.path) {
             var param = e.detail.path.split('.')[1];
-            this.set('_params.' + param, e.detail.value);
+            this.notifyPath('_params.' + param, e.detail.value);
+            if (this.visible && this.auto) {
+              this._search();
+            }
           }
+        }.bind(this));
+        this.skipAggregates = form.skipAggregates;
+        form.addEventListener('skip-aggregates-changed', function(e) {
+          this.notifyPath('skipAggregates', e.detail.value);
         }.bind(this));
         form.addEventListener('trigger-search', this._search.bind(this));
         this._search();

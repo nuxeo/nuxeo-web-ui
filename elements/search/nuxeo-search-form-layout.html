@@ -70,6 +70,10 @@ limitations under the License.
           type: Object,
           notify: true
         },
+        skipAggregates: {
+          type: Boolean,
+          notify: true
+        },
         /**
          * The aggregations returned by `provider`.
          **/
@@ -112,7 +116,11 @@ limitations under the License.
       },
 
       _formModel: function () {
-        return { provider: this.provider, params: this.params, aggregations: this.aggregations };
+        return {
+          provider: this.provider,
+          params: this.params,
+          aggregations: this.aggregations
+        };
       },
 
       _formChanged: function (e) {
@@ -120,6 +128,10 @@ limitations under the License.
         // forward params change events
         this.element.addEventListener('params-changed', function(e) {
           this.notifyPath(e.detail.path || 'params', e.detail.value);
+        }.bind(this));
+        this.skipAggregates = this.element.skipAggregates;
+        this.element.addEventListener('skip-aggregates-changed', function(e) {
+          this.notifyPath(e.detail.path || 'skipAggregates', e.detail.value);
         }.bind(this));
       }
 

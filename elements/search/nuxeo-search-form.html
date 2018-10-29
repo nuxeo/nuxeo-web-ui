@@ -228,6 +228,7 @@ limitations under the License.
        schemas="[[schemas]]"
        headers="[[headers]]"
        fetch-aggregates
+       skip-aggregates$="[[skipAggregates]]"
        on-error="_onError">
     </nuxeo-page-provider>
 
@@ -522,7 +523,12 @@ limitations under the License.
         /**
          * Currently selected view in search results
          */
-        view: Object
+        view: Object,
+
+        /**
+         * If `true`, aggregagtes from page provider definition will not be computed.
+         */
+        skipAggregates: Boolean,
       },
 
       observers: [
@@ -825,6 +831,10 @@ limitations under the License.
               this._navigateToResults();
             }
           }
+        }.bind(this));
+        this.skipAggregates = this.form.skipAggregates;
+        this.form.addEventListener('skip-aggregates-changed', function(e) {
+          this.notifyPath('skipAggregates', e.detail.value);
         }.bind(this));
         this.form.addEventListener('trigger-search', this._search.bind(this));
         if (!this.auto) {
