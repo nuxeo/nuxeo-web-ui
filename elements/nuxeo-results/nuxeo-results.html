@@ -148,7 +148,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
             selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
         </template>
         <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
-          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="_fetch">
+          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch">
           </nuxeo-quick-filters>
         </template>
         <span class="resultsCount">[[i18n('results.heading.count', resultsCount)]]</span>
@@ -354,7 +354,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           var sort = {};
           sort[this.sortSelected.field] = this.sortSelected.order;
           this.nxProvider.sort = sort;
-          this._fetch();
+          this.fetch();
         }
       },
 
@@ -365,12 +365,14 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         }
       },
 
-      _fetch: function() {
+      fetch: function() {
         if (this.view) {
           this.debounce('fetch', function() {
             this.view.fetch().then(function() {
-              this.quickFilters = this.nxProvider.quickFilters;
-              this.resultsCount = this.nxProvider.resultsCount;
+              if (this.nxProvider) {
+                this.quickFilters = this.nxProvider.quickFilters;
+                this.resultsCount = this.nxProvider.resultsCount;
+              }
             }.bind(this));
           }, 100);
         }
@@ -401,7 +403,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           view.nxProvider = this.nxProvider;
           // update view
           view.reset();
-          this._fetch();
+          this.fetch();
           this.fire('search-results-view', {view: view, name: this.name});
         }
       },
@@ -444,7 +446,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       _refreshAndFetch: function() {
         if (this.view) {
           this.view.reset();
-          this._fetch();
+          this.fetch();
         }
       },
 
