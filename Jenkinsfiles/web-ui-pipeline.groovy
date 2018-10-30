@@ -88,7 +88,7 @@ timestamps {
             def MP_BASE_BRANCH = BASE_BRANCH == '9.10' ? '2.2_9.10' : BASE_BRANCH
             def el, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
-                sh 'npm cache clean && bower cache clean'
+                sh 'npm cache clean --force && bower cache clean'
             }
             stage('nuxeo-elements') {
                 timeout(30) {
