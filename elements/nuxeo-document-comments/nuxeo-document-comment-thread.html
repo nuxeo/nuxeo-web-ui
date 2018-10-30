@@ -88,7 +88,7 @@ limitations under the License.
     <array-selector id="selector" items="{{comments}}" selected="{{selectedComment}}"></array-selector>
 
     <template is="dom-if" if="[[_moreAvailable(comments.length, total, allCommentsLoaded)]]">
-      <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(i18n, level, 'loadAll', total)]]</span>
+      <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span>
     </template>
     <template id="commentList" is="dom-repeat" items="[[comments]]" as="comment">
       <nuxeo-document-comment comment={{comment}}
@@ -98,7 +98,7 @@ limitations under the License.
 
     <div class="reply-area">
       <paper-textarea id="replyContainer"
-                      placeholder="[[_computeTextLabel(i18n, level, 'writePlaceholder')]]"
+                      placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
                       value="{{reply}}"
                       max-rows="[[_computeMaxRows()]]"
                       no-label-float
@@ -221,9 +221,9 @@ limitations under the License.
           }.bind(this))
           .catch(function (error) {
             if (error.status === 404) {
-              this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'notFound')});
+              this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
             } else {
-              this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'fetch.error')});
+              this.fire('notify', {message: this._computeTextLabel(this.level, 'fetch.error')});
               throw error;
             }
           }.bind(this));
@@ -253,9 +253,9 @@ limitations under the License.
             }.bind(this))
             .catch(function (error) {
               if (error.status === 404) {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'notFound')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
               } else {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'deletion.error')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'deletion.error')});
                 throw error;
               }
             }.bind(this));
@@ -305,9 +305,9 @@ limitations under the License.
             }.bind(this))
             .catch(function (error){
               if (error.status === 404) {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'notFound')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
               } else {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'edition.error')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'edition.error')});
                 throw error;
               }
             }.bind(this));
@@ -320,9 +320,9 @@ limitations under the License.
             }.bind(this))
             .catch(function (error) {
               if (error.status === 404) {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'notFound')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
               } else {
-                this.fire('notify', {message: this._computeTextLabel(this.i18n, this.level, 'creation.error')});
+                this.fire('notify', {message: this._computeTextLabel(this.level, 'creation.error')});
                 throw error;
               }
             }.bind(this));
@@ -343,7 +343,7 @@ limitations under the License.
         return level + 1;
       },
 
-      _computeTextLabel: function (i18n, level, option, placeholder) {
+      _computeTextLabel: function (level, option, placeholder) {
         return level === 1 ? this.i18n('comments.' + option + '.comment', placeholder)
           : this.i18n('comments.' + option + '.reply', placeholder);
       },
