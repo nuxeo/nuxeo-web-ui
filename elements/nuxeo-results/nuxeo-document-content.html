@@ -333,8 +333,8 @@ limitations under the License.
       },
 
       _refresh: function() {
-        if (this.document && this.$.results.view && this.visible) {
-          this.$.results.view.fetch();
+        if (this.document && this.visible) {
+          this.$.results.fetch();
         }
       },
 
