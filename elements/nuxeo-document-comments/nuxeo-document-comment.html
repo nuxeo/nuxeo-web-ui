@@ -164,7 +164,7 @@ limitations under the License.
         <div id="body">
           <div class="horizontal">
             <span class="author">[[comment.author]]</span>
-            <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate)]]</span>
+            <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate, i18n)]]</span>
             <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
               <paper-menu-button no-animations close-on-activate>
                 <paper-icon-button class="main-option"
@@ -198,7 +198,7 @@ limitations under the License.
             <div id="summary" class="horizontal smaller">
               <span class="more-content link no-selection" on-tap="_expand">[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span>
               <span class="separator opaque">•</span>
-              <span class="opaque">[[_computeDateLabel(comment, 'lastReplyDate', comment.lastReplyDate)]]</span>
+              <span class="opaque">[[_computeDateLabel(comment, 'lastReplyDate', comment.lastReplyDate, i18n)]]</span>
             </div>
           </template>
         </div>
