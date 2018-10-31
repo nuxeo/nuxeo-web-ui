@@ -56,6 +56,11 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
     <style>
 
+      :host([loading]) .resultsCount {
+        opacity: 0.1;
+        transition: opacity 300ms ease-in-out;
+      }
+
       .displayMode {
         @apply --nuxeo-action;
       }
@@ -108,6 +113,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       .resultsCount {
         opacity: 0.5;
         margin-right: 16px;
+        transition: opacity 100ms ease-in-out;
       }
 
       paper-icon-button[selected] {
@@ -151,7 +157,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch">
           </nuxeo-quick-filters>
         </template>
-        <span class="resultsCount">[[i18n('results.heading.count', resultsCount)]]</span>
+        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[i18n('results.heading.count', resultsCount)]]</span>
 
         <div class="rightHand">
           <slot name="actions"></slot>
@@ -201,7 +207,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         /**
          * the page provider to display results for
          */
-        nxProvider: Object,
+        nxProvider: {
+          type: Object,
+          observer: '_providerChanged',
+        },
 
         /**
          * Used as key for settings in local storage. Without a `name`, no settings are saved/restored.
@@ -295,6 +304,18 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         resultsCount: {
           type: Number,
         },
+
+        /**
+         * `true` if results are being loaded.
+         */
+        loading: {
+          type: Boolean,
+          reflectToAttribute: true,
+          notify: true,
+          readOnly: true,
+          value: false,
+        },
+
 
         _displayModes:  Array,
 
@@ -540,7 +561,25 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.set('_settings.' + this.displayMode, this.view.settings);
           this.saveSettings();
         }
-      }
+      },
+
+      _providerChanged: function(provider, oldProvider) {
+        if (oldProvider) {
+          this.unlisten(oldProvider, 'loading-changed', '_loadingChanged');
+        }
+        if (provider) {
+          this.listen(provider, 'loading-changed', '_loadingChanged');
+          this._setLoading(provider.loading);
+        }
+      },
+
+      _loadingChanged: function() {
+        this._setLoading(this.nxProvider.loading);
+      },
+
+      _showResultsCount: function() {
+        return this.nxProvider && this.resultsCount;
+      },
 
     });
   </script>
