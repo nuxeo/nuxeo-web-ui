@@ -134,10 +134,10 @@ limitations under the License.
 
       useHashbang: true,
 
-      browse: function(path) {
+      browse: function(path, subPage) {
         return '/browse' +  (path ? path.split('/').map(function(n) {
           return encodeURIComponent(n);
-        }).join('/') : '');
+        }).join('/') : '') + (subPage ? '?p=' + encodeURIComponent(subPage) : '');
       },
 
       document: function(id) {
