@@ -1,0 +1,202 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
+
+<!--
+`nuxeo-csv-export-button`
+@group Nuxeo UI
+@element nuxeo-csv-export-button
+-->
+<dom-module id="nuxeo-csv-export-button">
+  <template>
+    <style include="nuxeo-action-button-styles"></style>
+
+    <nuxeo-resource id="resource"></nuxeo-resource>
+
+    <div class="action" on-click="execute">
+      <paper-icon-button icon="nuxeo:csv-export"></paper-icon-button>
+      <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+    </div>
+    <nuxeo-tooltip>[[i18n(_label)]]</nuxeo-tooltip>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-csv-export-button',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      properties: {
+        /**
+         * Page provider from which results are to be expored.
+         */
+        provider: {
+          type: Object,
+        },
+        /**
+         * The interval to poll for the result, in milliseconds.
+         */
+        pollInterval: {
+          type: Number,
+          value: 1000,
+        },
+        /**
+         * The schemas to be used to get the results. If `null` or `undefined`, the `provider`'s schemas will be used.
+         */
+        schemas: {
+          type: String,
+        },
+        /**
+         * A comman separated list of fields to be be exported.
+         */
+        fields: {
+          type: String,
+        },
+        /**
+         * `true` if the action should display the label, `false` otherwise.
+         */
+        showLabel: {
+          type: Boolean,
+          value: false,
+        },
+        _label: {
+          type: String,
+          computed: '_computeLabel(i18n)',
+        },
+        _lastStatus: Object,
+        _success: {
+          type: Boolean,
+          value: false,
+        }
+      },
+
+      execute: function() {
+        return (this._lastStatus && !this._success ? this.abort() : Promise.resolve()).then(function() {
+          this._success = false;
+          this.$.resource.path = this.provider.$.nxResource.path.replace(/\/execute$/, '/bulk/csvExport');
+          this.$.resource.params = this.provider.$.nxResource.params;
+          this.$.resource.data = {};
+          var schemas = this.schemas != null ? this.schemas : this.provider.$.nxResource.schemas;
+          if (schemas) {
+            this.$.resource.data.schemas = schemas.split(',').map(function(schema) {
+              return schema.trim();
+            });
+          }
+          if (this.fields) {
+            this.$.resource.data.xpaths = this.fields.split(',').map(function(field) {
+              return field.trim();
+            });
+          }
+          return this.$.resource.post().then(function(response) {
+            this.$.resource.params = null;
+            this.$.resource.data = null;
+            if (response.state === 'SCHEDULED') {
+              this._lastStatus = response;
+              this.fire('notify', { message: this.i18n('csvExportButton.action.scheduled') });
+              this.fire('bulk-action-scheduled', response);
+              this._poll();
+            }
+          }.bind(this)).catch(function(error) {
+            this.fire('notify', {
+              message: this.i18n('csvExportButton.action.schedule.fail', error.message),
+              close: true,
+            });
+            if (error.status !== 404) {
+              throw error;
+            }
+          });
+        }.bind(this));
+      },
+
+      abort: function() {
+        if (this._timeout) {
+          clearTimeout(this._timeout);
+        }
+        this.fire('notify', { close: true });
+        this.$.resource.path = '/bulk/' + this._lastStatus.commandId + '/abortion';
+        return this.$.resource.put().then(function(response) {
+          this._lastStatus = response;
+          this.fire('bulk-action-aborted', response);
+        }.bind(this)).catch(function(error) {
+          // a 404 here means the command doesn't exist, so it can be ignored
+          if (error.status !== 404) {
+            throw error;
+          }
+        }.bind(this));
+      },
+
+      _poll: function() {
+        this._timeout = setTimeout(function() {
+          this.$.resource.path = '/bulk/' + this._lastStatus.commandId;
+          this.$.resource.params = null;
+          this.$.resource.get().then(function(response) {
+            if (response.state === 'RUNNING') {
+              this.fire('bulk-action-update', response);
+              if (this._lastStatus.state !== response.state ) {
+                this.fire('notify', {
+                  message: this.i18n('csvExportButton.action.poll'),
+                  duration: 0,
+                  close: true,
+                });
+              }
+              this._poll();
+            } else if (response.state === 'COMPLETED') {
+              this.fire('bulk-action-completed', response);
+              this.fire('notify', {
+                message: this.i18n('csvExportButton.action.completed'),
+                close: true,
+              });
+              this._download(response);
+              this._success = true;
+              this._lastStatus = response;
+            }
+          }.bind(this)).catch(function(error) {
+            if (this._timeout) {
+              clearTimeout(this._timeout);
+            }
+            this._success = false;
+            this.fire('notify', {
+              message: this.i18n('csvExportButton.action.poll.fail', error.message),
+              close: true,
+            });
+            if (error.status !== 404) {
+              throw error;
+            }
+          }.bind(this));
+        }.bind(this), this.pollInterval);
+      },
+
+      _computeLabel: function() {
+        return this.i18n('csvExportButton.label');
+      },
+
+      _download: function(response) {
+        var a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.href = [this.$.resource.$.nx.url, response.result.url].join('/');
+        a.click();
+        document.body.removeChild(a);
+      }
+
+    });
+  </script>
+</dom-module>
