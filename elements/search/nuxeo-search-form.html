@@ -368,6 +368,7 @@ limitations under the License.
 
       properties: {
         /**
+         * @ignore
          * The selected saved search.
          **/
         selectedSearch: {
@@ -376,6 +377,7 @@ limitations under the License.
           observer: '_selectedSearchChanged'
         },
         /**
+         * @ignore
          * The selected saved search index.
          **/
         selectedSearchIdx: {
@@ -390,7 +392,7 @@ limitations under the License.
           type: String
         },
         /**
-         * The page size passed on to `provider`.
+         * The page size passed on to `provider` (number of results per page).
          **/
         pageSize: {
           type: Number,
@@ -398,6 +400,7 @@ limitations under the License.
         },
         /**
          * The parameters passed on to `provider`.
+         * Useful to do a mapping between the query parameters and the variables.
          **/
         params: {
           type: Object
@@ -405,12 +408,14 @@ limitations under the License.
         /**
          * List of content enrichers passed on to `provider`.
          * Already set by default are thumbnail, permissions and highlight.
+         * More details on the [documentation site](https://doc.nuxeo.com/nxdoc/content-enrichers/).
          */
         enrichers: {
           type: String,
           value: 'thumbnail, permissions, highlight'
         },
         /**
+         * @ignore
          * The headers passed on to `provider`.
          * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
          */
@@ -419,12 +424,13 @@ limitations under the License.
           value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
         },
         /**
-         * The schemas passed on to `provider`.
+         * The schemas passed on to `provider` (like `dublincore`, `uid`, `file`...).
          **/
         schemas: {
           type: String
         },
         /**
+         * @ignore
          * Gets or sets the mode, `true` if in queue mode, `false` otherwise.
          **/
         queue: {
@@ -432,6 +438,7 @@ limitations under the License.
           value: false
         },
         /**
+         * @ignore
          * The selected document if in queue mode.
          **/
         selectedDocument: {
@@ -440,6 +447,7 @@ limitations under the License.
           notify: true
         },
         /**
+         * @ignore
          * If `true`, the parameters for the currently selected search changed.
          **/
         dirty: {
@@ -448,6 +456,7 @@ limitations under the License.
           notify: true
         },
         /**
+         * @ignore
          * If `true`, a previously saved search is selected.
          **/
         isSavedSearch: {
@@ -456,6 +465,7 @@ limitations under the License.
           notify: true
         },
         /**
+         * @ignore
          * If `true`, only the queue title will be displayed in the header, without the actions dropdown.
          **/
         onlyQueue: {
@@ -488,6 +498,7 @@ limitations under the License.
           }
         },
         /**
+         * @ignore
          * If `true`, requests from `provider` are in flight.
          **/
         loading: {
@@ -497,6 +508,7 @@ limitations under the License.
         },
         /**
          * The name of the search layout.
+         * Usually the page provider name.
          **/
         searchName: String,
         /**
@@ -506,6 +518,7 @@ limitations under the License.
           type: Object
         },
         /**
+         * @ignore
          * If `true`, the current element is visible.
          **/
         visible: Boolean,
@@ -525,7 +538,7 @@ limitations under the License.
         },
 
         /**
-         * Currently selected view in search results
+         * Currently selected view in search results (grid, justified grid, data table, list views).
          */
         view: Object,
 
