@@ -690,3 +690,11 @@
     </nuxeo-internal-publish>
   </template>
 </nuxeo-slot-content>
+
+<!-- CSV EXPORT -->
+
+<nuxeo-slot-content name="csvExportSelectionAction" slot="RESULTS_ACTIONS" order="-100">
+  <template>
+    <nuxeo-csv-export-button provider="[[nxProvider]]"></nuxeo-csv-export-button>
+  </template>
+</nuxeo-slot-content>
