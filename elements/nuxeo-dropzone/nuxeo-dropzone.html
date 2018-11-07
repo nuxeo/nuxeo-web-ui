@@ -120,7 +120,7 @@ limitations under the License.
 
     <input hidden id="input" type="file" on-change="_filesChanged">
 
-    <div id="details" hidden$="[[!_hasFiles]]">
+    <div id="details" hidden$="[[!hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
         <div class="file">
           <div class="info">
@@ -137,7 +137,7 @@ limitations under the License.
       </template>
     </div>
 
-    <div id="dropzone" hidden$="[[!_isDropzoneVisible(_hasFiles, document, blobList)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, document, blobList)]]">
       <div id="container">
         <a href="javascript:undefined" on-tap="open">[[message]]</a>
         <div class="actions">
@@ -189,9 +189,15 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        _hasFiles: {
+        hasFiles: {
           type: Boolean,
-          value: false
+          readOnly: true,
+          value: false,
+          notify: true,
+        },
+        _parsedXpath: {
+          type: String,
+          computed: '_computeParsedXpath(xpath)'
         }
       },
 
@@ -223,6 +229,10 @@ limitations under the License.
         this.$$('input').click();
       },
 
+      _computeParsedXpath: function() {
+        return this.xpath.replace(new RegExp('/', 'g'), '.');
+      },
+
       importBatch: function(data) {
         data.stopPropagation();
         if (this.blobList) {
@@ -232,9 +242,9 @@ limitations under the License.
               xpath: this.xpath
             }).then(this._handleBlobListUploaded.bind(this));
           } else {
-            this.document.properties[this.xpath] = [];
+            this.set('document.properties.' + this._parsedXpath, []);
             this.files.forEach(function(file, index) {
-              this.push('document.properties.' + [this.xpath], {
+              this.push('document.properties.' + this._parsedXpath, {
                 'upload-batch': data.detail.batchId,
                 'upload-fileId': index.toString()
               });
@@ -242,7 +252,7 @@ limitations under the License.
             this._handleBlobListUploaded();
           }
         } else {
-          this.set('document.properties.' + this.xpath, {
+          this.set('document.properties.' + this._parsedXpath, {
             'upload-batch': data.detail.batchId,
             'upload-fileId': '0'
           });
@@ -251,7 +261,7 @@ limitations under the License.
       },
 
       _blobPicked: function(e) {
-        this._hasFiles = true;
+        this._setHasFiles(true);
         this.set('files', e.detail.blobs);
         if (this.blobList) {
           this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
@@ -262,11 +272,11 @@ limitations under the License.
           return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
         } else {
           var file = e.detail.blobs[e.detail.blobs.length - 1];
-          this.document.properties[this.xpath] = {
+          this.set('document.properties.' + this._parsedXpath, {
             'providerId': file.providerId,
             'user': file.user,
             'fileId': file.fileId
-          };
+          });
           this._handleBlobUploaded();
         }
       },
@@ -285,7 +295,7 @@ limitations under the License.
             this.document = response;
             this.fire('notify', {message: this.uploadedMessage});
             this.progress = false;
-            this._hasFiles = false;
+            this._setHasFiles(false);
             this.fire('document-updated');
           }.bind(this));
         } else {
@@ -298,27 +308,27 @@ limitations under the License.
         this.fire('notify', {message: this.uploadedMessage});
         this.progress = false;
         if (this.immediate) {
-          this._hasFiles = false;
+          this._setHasFiles(false);
           this.$.doc.get().then(function(response) {
-            this.set('document.properties.' + this.xpath, response.properties[this.xpath]);
+            this.set('document.properties.' + this._parsedXpath, this.get(this._parsedXpath, response.properties));
           }.bind(this));
         }
       },
 
       _deleteFile: function(e) {
-        if (!this.immediate && this.blobList && Array.isArray(this.document.properties[this.xpath])) {
-          this.splice('document.properties.' + [this.xpath], e.model.itemsIndex, 1);
+        if (!this.immediate && this.blobList && Array.isArray(this.get('document.properties.' + this._parsedXpath))) {
+          this.splice('document.properties.' + this._parsedXpath, e.model.itemsIndex, 1);
           this.splice('files', e.model.itemsIndex, 1);
-          this._hasFiles = this.files.length > 0;
+          this._setHasFiles(this.files.length > 0);
         } else {
-          this.document.properties[this.xpath] = '';
           this._reset();
+          this.set('document.properties.' + this._parsedXpath, '');
         }
       },
 
       _reset: function() {
         this.$.input.value = '';
-        this._hasFiles = false;
+        this._setHasFiles(false);
         this.files = [];
       },
 
@@ -328,7 +338,7 @@ limitations under the License.
 
       _upload: function(files) {
         if (files && files.length > 0) {
-          this._hasFiles = true;
+          this._setHasFiles(true);
           this.progress = true;
           this.uploadFiles(files);
         }
@@ -362,7 +372,7 @@ limitations under the License.
       _isDropzoneVisible: function() {
         // Area to drop files should stay visible when the element is attached to a blob list property and `immediate`
         // is false (e.g during the creation of a new document). This will allow the user to manage the list of files.
-        return (!this.immediate && this.blobList) || !this._hasFiles;
+        return (!this.immediate && this.blobList) || !this.hasFiles;
       },
 
     });
