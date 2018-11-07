@@ -55,6 +55,7 @@ limitations under the License.
 
       .chosen {
         opacity: 0.3;
+        pointer-events:none;
       }
 
       iron-icon {
@@ -157,10 +158,9 @@ limitations under the License.
           let currentValue = this.get(this._parsePropertyPath());
           if (this.suggestions.length > 0) {
             const isArray = Array.isArray(currentValue);
-            this.suggestions.forEach((suggestion) => {AISuggestions
+            this.suggestions.forEach((suggestion) => {
               const suggestedValue = this.idFunction(suggestion.name);
-              const match = isArray ? suggestedValue.every((value) => currentValue.includes(value)) :
-                  currentValue === suggestedValue;
+              const match = isArray ? currentValue.includes(suggestedValue) : currentValue === suggestedValue;
               matches.set(suggestion, match);
             });
           }
@@ -190,7 +190,15 @@ limitations under the License.
           if (!this.get(propertyPath)) {
             this._createNestedObjectRecursive(this.document.properties, this.property.split('/'));
           }
-          this.set(propertyPath, this.idFunction(suggestion.name));
+          const value = this.idFunction(suggestion.name);
+          if (Array.isArray(this.get(propertyPath))) {
+            // XXX: we're doing this instead of `this.push(propertyPath, value);` because the push will produce
+            // a `<propertyPath>.splices` which might not reflect to widgets with the value double bound to
+            // `propertyPath`.
+            this.set(propertyPath, this.get(propertyPath).concat(value));
+          } else {
+            this.set(propertyPath, value);
+          }
         }
 
         _idFunction(item) {
