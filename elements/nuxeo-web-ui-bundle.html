@@ -145,12 +145,6 @@
 
 <!-- BLOB ACTIONS -->
 
-<nuxeo-slot-content name="deleteBlobAction" slot="BLOB_ACTIONS" order="40">
-  <template>
-    <nuxeo-delete-blob-button document="[[document]]" xpath="[[xpath]]"></nuxeo-delete-blob-button>
-  </template>
-</nuxeo-slot-content>
-
 <nuxeo-slot-content name="previewBlobAction" slot="BLOB_ACTIONS" order="20">
   <template>
     <nuxeo-preview-button document="[[document]]" xpath="[[xpath]]"></nuxeo-preview-button>
@@ -160,6 +154,18 @@
 <nuxeo-slot-content name="downloadBlobAction" slot="BLOB_ACTIONS" order="30">
   <template>
     <nuxeo-download-button document="[[document]]" xpath="[[xpath]]"></nuxeo-download-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="replaceBlobAction" slot="BLOB_ACTIONS" order="35">
+  <template>
+    <nuxeo-replace-blob-button document="[[document]]" xpath="[[xpath]]"></nuxeo-replace-blob-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="deleteBlobAction" slot="BLOB_ACTIONS" order="40">
+  <template>
+    <nuxeo-delete-blob-button document="[[document]]" xpath="[[xpath]]"></nuxeo-delete-blob-button>
   </template>
 </nuxeo-slot-content>
 

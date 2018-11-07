@@ -45,13 +45,13 @@ limitations under the License.
 
     <template is="dom-if" if="[[!document.properties.file:content.data]]">
       <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
+      <template is="dom-if" if="[[_hasWritePermission(document)]]">
+        <nuxeo-dropzone document="{{document}}" update-document></nuxeo-dropzone>
+      </template>
     </template>
     <template is="dom-if" if="[[document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
       <nuxeo-document-blob document="[[document]]"></nuxeo-document-blob>
-    </template>
-    <template is="dom-if" if="[[_hasWritePermission(document)]]">
-      <nuxeo-dropzone document="{{document}}" update-document message="[[_dropzoneMessage(document.properties.file:content.data)]]"></nuxeo-dropzone>
     </template>
 
   </template>
@@ -75,9 +75,5 @@ limitations under the License.
       return doc && this.hasPermission(doc, 'Write') &&
         !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
     },
-
-    _dropzoneMessage: function(data) {
-      return this.i18n(data ? 'dropzone.replace' : 'dropzone.add');
-    }
   });
 </script>
