@@ -35,12 +35,21 @@ limitations under the License.
 <dom-module id="nuxeo-dropzone">
   <template>
     <style include="nuxeo-styles">
+      :host {
+        display: block;
+      }
+
       label {
         margin-bottom: 8px;
       }
 
       label.dragging {
         color: var(--paper-input-container-focus-color);
+      }
+
+      a, a:active, a:visited, a:focus {
+        color: var(--nuxeo-secondary-color, #0066ff);
+        text-decoration: underline;
       }
 
       #dropzone {
@@ -66,13 +75,12 @@ limitations under the License.
 
       #container .actions {
         text-align: center;
-        opacity: .5;
         @apply --layout-horizontal;
         @apply --layout-wrap;
       }
 
       #details {
-        border: 1px solid var(--nuxeo-border);
+        border: 1px solid var(--nuxeo-border, rgba(0,0,0,0.15));
         padding: 16px;
         margin-bottom: 8px;
       }

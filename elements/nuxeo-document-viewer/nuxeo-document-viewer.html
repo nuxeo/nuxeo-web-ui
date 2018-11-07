@@ -31,14 +31,16 @@ limitations under the License.
 <dom-module id="nuxeo-document-viewer">
   <template>
     <style include="nuxeo-styles">
-      iron-image, nuxeo-document-preview {
+      :host {
         display: block;
+      }
+
+      iron-image, nuxeo-document-preview {
         width: 100%;
         height: calc(80vh - 100px);
       }
 
       nuxeo-document-blob, nuxeo-dropzone {
-        display: block;
         margin-top: 8px;
       }
     </style>
