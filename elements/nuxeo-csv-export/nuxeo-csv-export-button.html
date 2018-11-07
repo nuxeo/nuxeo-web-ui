@@ -59,7 +59,8 @@ limitations under the License.
           value: 1000,
         },
         /**
-         * The schemas to be used to get the results. If `null` or `undefined`, the `provider`'s schemas will be used.
+         * A comma separated list of schemas to be used to get the results.
+         * If `null` or `undefined`, the `provider`'s schemas will be used.
          */
         schemas: {
           type: String,
@@ -81,59 +82,50 @@ limitations under the License.
           type: String,
           computed: '_computeLabel(i18n)',
         },
-        _lastStatus: Object,
-        _success: {
-          type: Boolean,
-          value: false,
-        }
+        _lastStatus: Object
       },
 
       execute: function() {
-        return (this._lastStatus && !this._success ? this.abort() : Promise.resolve()).then(function() {
-          this._success = false;
-          this.$.resource.path = this.provider.$.nxResource.path.replace(/\/execute$/, '/bulk/csvExport');
-          this.$.resource.params = this.provider.$.nxResource.params;
-          this.$.resource.data = {};
-          var schemas = this.schemas != null ? this.schemas : this.provider.$.nxResource.schemas;
-          if (schemas) {
-            this.$.resource.data.schemas = schemas.split(',').map(function(schema) {
-              return schema.trim();
-            });
-          }
-          if (this.fields) {
-            this.$.resource.data.xpaths = this.fields.split(',').map(function(field) {
-              return field.trim();
-            });
-          }
-          return this.$.resource.post().then(function(response) {
-            this.$.resource.params = null;
-            this.$.resource.data = null;
-            if (response.state === 'SCHEDULED') {
-              this._lastStatus = response;
-              this.fire('notify', { message: this.i18n('csvExportButton.action.scheduled') });
-              this.fire('bulk-action-scheduled', response);
-              this._poll();
-            }
-          }.bind(this)).catch(function(error) {
-            this.fire('notify', {
-              message: this.i18n('csvExportButton.action.schedule.fail', error.message),
-              close: true,
-            });
-            if (error.status !== 404) {
-              throw error;
-            }
+        this.$.resource.path = this.provider.$.nxResource.path.replace(/\/execute$/, '/bulk/csvExport');
+        this.$.resource.params = this.provider.$.nxResource.params;
+        this.$.resource.data = {};
+        var schemas = this.schemas != null ? this.schemas : this.provider.$.nxResource.schemas;
+        if (schemas) {
+          this.$.resource.data.schemas = schemas.split(',').map(function(schema) {
+            return schema.trim();
           });
-        }.bind(this));
+        }
+        if (this.fields) {
+          this.$.resource.data.xpaths = this.fields.split(',').map(function(field) {
+            return field.trim();
+          });
+        }
+        return this.$.resource.post().then(function(response) {
+          this.$.resource.params = null;
+          this.$.resource.data = null;
+          if (response.state === 'SCHEDULED') {
+            this.fire('notify', { message: this.i18n('csvExportButton.action.scheduled') });
+            this.fire('bulk-action-scheduled', response);
+            this._poll(response);
+          }
+        }.bind(this)).catch(function(error) {
+          this.fire('notify', {
+            message: this.i18n('csvExportButton.action.schedule.fail', error.message),
+            close: true,
+          });
+          if (error.status !== 404) {
+            throw error;
+          }
+        });
       },
 
-      abort: function() {
+      abort: function(commandId) {
         if (this._timeout) {
           clearTimeout(this._timeout);
         }
         this.fire('notify', { close: true });
-        this.$.resource.path = '/bulk/' + this._lastStatus.commandId + '/abortion';
+        this.$.resource.path = '/bulk/' + commandId + '/abortion';
         return this.$.resource.put().then(function(response) {
-          this._lastStatus = response;
           this.fire('bulk-action-aborted', response);
         }.bind(this)).catch(function(error) {
           // a 404 here means the command doesn't exist, so it can be ignored
@@ -143,21 +135,21 @@ limitations under the License.
         }.bind(this));
       },
 
-      _poll: function() {
+      _poll: function(bulkStatus) {
         this._timeout = setTimeout(function() {
-          this.$.resource.path = '/bulk/' + this._lastStatus.commandId;
+          this.$.resource.path = '/bulk/' + bulkStatus.commandId;
           this.$.resource.params = null;
           this.$.resource.get().then(function(response) {
             if (response.state === 'RUNNING') {
               this.fire('bulk-action-update', response);
-              if (this._lastStatus.state !== response.state ) {
+              if (bulkStatus.state !== response.state ) {
                 this.fire('notify', {
                   message: this.i18n('csvExportButton.action.poll'),
                   duration: 0,
                   close: true,
                 });
               }
-              this._poll();
+              this._poll(response);
             } else if (response.state === 'COMPLETED') {
               this.fire('bulk-action-completed', response);
               this.fire('notify', {
@@ -165,14 +157,11 @@ limitations under the License.
                 close: true,
               });
               this._download(response);
-              this._success = true;
-              this._lastStatus = response;
             }
           }.bind(this)).catch(function(error) {
             if (this._timeout) {
               clearTimeout(this._timeout);
             }
-            this._success = false;
             this.fire('notify', {
               message: this.i18n('csvExportButton.action.poll.fail', error.message),
               close: true,
