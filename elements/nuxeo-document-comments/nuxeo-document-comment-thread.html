@@ -104,7 +104,7 @@ limitations under the License.
                       no-label-float
                       on-keydown="_checkForEnter">
       </paper-textarea>
-      <template is="dom-if" if="[[_areReplyOptionsAvailable(reply)]]">
+      <template is="dom-if" if="[[!_isBlank(reply)]]">
         <iron-icon class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
         <iron-icon class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
       </template>
@@ -177,9 +177,12 @@ limitations under the License.
       },
 
       _checkForEnter: function(e) {
-        if (e.keyCode === 13 && !e.shiftKey && this._areReplyOptionsAvailable(this.reply)) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+          e.preventDefault();
           e.stopPropagation();
-          this._submitReply();
+          if(!this._isBlank(this.reply)) {
+            this._submitReply();
+          }
         }
       },
 
@@ -290,7 +293,7 @@ limitations under the License.
           'entity-type': 'comment',
           parentId: this.uid,
           author: this.selectedComment ? this.selectedComment.author : this.currentUser.properties.username,
-          text: this.reply
+          text: this.reply.trim()
         };
 
         if(this.selectedComment) {
@@ -350,8 +353,8 @@ limitations under the License.
 
       /** Visibility Methods **/
 
-      _areReplyOptionsAvailable: function (reply) {
-        return reply && reply.length > 0;
+      _isBlank: function (reply) {
+        return !reply || typeof reply !== 'string' || reply.trim().length === 0;
       },
 
       _moreAvailable: function (length, total, allCommentsLoaded) {
