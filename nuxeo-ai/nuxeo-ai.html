@@ -14,7 +14,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<link rel="import" href="admin/admin-ai-core.html">
+<link rel="import" href="admin/admin-ai-export.html">
 <link rel="import" href="nuxeo-ai-suggestions.html">
+
+<nuxeo-slot-content name="adminAIMenuItem" slot="ADMINISTRATION_MENU" order="100">
+    <template>
+        <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+            <template>
+                <nuxeo-menu-item name="aicore" label="app.title.admin.aicore" route="administration:aicore">
+                </nuxeo-menu-item>
+            </template>
+        </nuxeo-filter>
+    </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="aiadminslot" slot="ADMINISTRATION_PAGES">
+    <template>
+        <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+            <template>
+                <nuxeo-admin-ai name="aicore" ></nuxeo-admin-ai>
+            </template>
+        </nuxeo-filter>
+    </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAiExport" slot="AI_ITEMS" order="20">
+    <template>
+        <nuxeo-page-item name="export" label="Datasets"></nuxeo-page-item>
+    </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="adminAiExportPage" slot="AI_PAGES" order="20">
+    <template>
+        <nuxeo-admin-ai-export name="export"></nuxeo-admin-ai-export>
+    </template>
+</nuxeo-slot-content>
+
 <script>
   AISuggestionManager = (() => {
     const _map = new WeakMap(); // store field elements and suggestion widgets without preventing gc
