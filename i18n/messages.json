@@ -738,6 +738,7 @@
   "publication.internal.title": "Internal Publication",
   "publication.internal.location": "Location",
   "publication.internal.location.placeholder": "Choose where to publish",
+  "publication.internal.location.error.noPermission": "You do not have permissions to publish under this space.",
   "publication.internal.options": "Options",
   "publication.internal.override": "Override existing publications.",
   "publication.internal.renditons.label": "Renditions",
