@@ -59,6 +59,13 @@ limitations under the License.
       label {
         @apply --nuxeo-label;
       }
+
+      .error {
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--nuxeo-text-default);
+        padding-left: 8px;
+        margin-bottom: 8px;
+      }
     </style>
 
     <nuxeo-operation id="op" op="Document.PublishToSection">
@@ -73,9 +80,13 @@ limitations under the License.
         placeholder="[[i18n('publication.internal.location.placeholder')]]"
         selected-item="{{publishSpace}}"
         min-chars="0"
+        enrichers="permissions"
         page-provider="publish_space_suggestion"
         repository="[[document.repository]]">
       </nuxeo-document-suggestion>
+      <template is="dom-if" if="[[errorMessage]]">
+        <span class="horizontal layout error">[[errorMessage]]</span>
+      </template>
 
       <div class="horizontal layout flex">
         <nuxeo-select id="rendition"
@@ -187,7 +198,15 @@ limitations under the License.
       },
 
       _canPublish: function() {
-        return !!this.publishSpace;
+        this.errorMessage = null;
+        if(!this.publishSpace) {
+          return false;
+        }
+        var hasPermission = this.hasPermission(this.publishSpace, 'AddChildren');
+        if(!hasPermission) {
+          this.errorMessage = this.i18n('publication.internal.location.error.noPermission');
+        }
+        return hasPermission;
       },
 
       _cancel: function() {
