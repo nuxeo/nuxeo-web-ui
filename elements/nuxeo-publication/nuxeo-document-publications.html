@@ -256,10 +256,14 @@ limitations under the License.
       _canRepublish: function(doc) {
         if (this._src && this._canUnpublish(doc)) {
           var pubMaj = doc.properties['uid:major_version'];
-          var pubMin = doc.properties['uid:minor_version'];
           var srcMaj = this._src.properties['uid:major_version'];
-          var srcMin = this._src.properties['uid:minor_version'];
-          return pubMaj < srcMaj || (pubMaj === srcMaj && pubMin < srcMin);
+          if (pubMaj < srcMaj) {
+            return true;
+          } else if (pubMaj === srcMaj) {
+            var pubMin = doc.properties['uid:minor_version'];
+            var srcMin = this._src.properties['uid:minor_version'];
+            return pubMin < srcMin || (pubMin === srcMin && this._src.isCheckedOut);
+          }
         }
         return false;
       },
