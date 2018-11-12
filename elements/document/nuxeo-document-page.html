@@ -20,6 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../nuxeo-app/nuxeo-page-item.html">
 <link rel="import" href="../nuxeo-document-info-bar/nuxeo-document-info-bar.html">
 <link rel="import" href="../nuxeo-document-info/nuxeo-document-info.html">
@@ -37,35 +38,60 @@ limitations under the License.
 <dom-module id="nuxeo-document-page">
   <template>
     <style include="nuxeo-styles">
+      #details {
+        width: 28px;
+        height: 28px;
+        padding: 5px;
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        opacity: 0.3;
+      }
+
+      :host([opened]) #details {
+        opacity: 1;
+      }
 
       .page {
         @apply --layout-horizontal;
       }
 
-      .page .main {
+      .main {
         @apply --layout-vertical;
         @apply --layout-flex-2;
-        padding-right: 1.3rem;
-        max-width: 65%;
+        padding-right: 38px;
       }
 
-      .page .side {
+      :host([opened]) .main {
         @apply --layout-vertical;
-        @apply --layout-flex;
+        @apply --layout-flex-2;
+        padding-right: 18px;
+      }
+
+      .side {
+        @apply --layout-horizontal;
         position: relative;
-        margin-bottom: 16px;
         min-height: 60vh;
+      }
+
+      :host([opened]) .side {
+        @apply --layout-flex;
       }
 
       .scroller {
         @apply --nuxeo-card;
         margin-bottom: 0;
+        overflow: auto;
+        display: none;
         left: 0;
         top: 0;
         right: 0;
         bottom: 0;
-        overflow: auto;
         position: absolute;
+      }
+
+      :host([opened]) .scroller {
+        display: block;
       }
 
       .section {
@@ -73,34 +99,35 @@ limitations under the License.
       }
 
       @media (max-width: 1024px) {
-        .page {
+        #details {
+          opacity: 1;
+          cursor: default;
+        }
+
+        .page, .side {
           flex-direction: column;
         }
 
-        .page .main {
+        .main,
+        :host([opened]) .main {
           padding: 0;
           margin-bottom: 1rem;
           max-width: initial;
+          margin-right: 0;
         }
 
-        .page .side {
+        .side {
           padding: 0;
           margin-bottom: 1rem;
           max-width: initial;
-          display: block !important;
+          display: block;
+          margin-bottom: 16px;
         }
 
         .scroller {
           position: relative;
+          display: block;
         }
-      }
-
-      paper-icon-button {
-        @apply --nuxeo-action;
-      }
-
-      paper-icon-button:hover {
-        @apply --nuxeo-action-hover;
       }
 
       ::content nuxeo-document-attachments {
@@ -114,6 +141,10 @@ limitations under the License.
 
       #documentViewsItems > [name='comments'] {
         margin: 0;
+      }
+
+      paper-listbox {
+        padding: 0;
       }
 
     </style>
@@ -167,6 +198,9 @@ limitations under the License.
             </iron-pages>
           </div>
         </div>
+
+        <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
+        <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
       </div>
     </div>
 
@@ -184,7 +218,27 @@ limitations under the License.
           value: 'comments',
           notify: true
         },
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true,
+          observer: '_openedChanged',
+        }
+      },
 
+      _openedChanged: function() {
+        Polymer.Async.animationFrame.run(function() {
+          // notify that there was a resize
+          this.dispatchEvent(new CustomEvent('resize', {
+            bubbles: false,
+            composed: true,
+          }));
+        });
+      },
+
+      _toggleOpened: function() {
+        this.opened = !this.opened;
       },
 
       _isMutable: function(doc) {
