@@ -434,6 +434,7 @@
   "documentPage.initiated.workflow.currentUser": "You started a {0} workflow on this document.",
   "documentPage.initiated.workflow": " started a {0} workflow on this document.",
   "documentPage.metadata": "Properties",
+  "documentPage.details.opened": "Details",
   "documentPage.tags": "Tags",
   "documentPage.tags.placeholder": "Add tags to this document",
   "documentPage.trash.info": "You are viewing a trashed document.",
