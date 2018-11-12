@@ -16,13 +16,10 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-operation-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 
 <!--
 `nuxeo-download-documents-button`
@@ -31,17 +28,10 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-download-documents-button">
   <template>
-    <style include="nuxeo-action-button-styles"></style>
-
-    <nuxeo-connection id="nx"></nuxeo-connection>
-
-    <nuxeo-operation id="bulkDownloadOp" op="Blob.BulkDownload"></nuxeo-operation>
-
-    <div class="action" on-tap="downloadDocuments">
-      <paper-icon-button icon="nuxeo:download" id="downloadAllButtons"></paper-icon-button>
-      <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-    </div>
-    <nuxeo-tooltip for="downloadAllButtons" id="downloadAllButtonsTooltip" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
+    <nuxeo-operation-button id="btn" operation="Blob.BulkDownload" input="[[_input(document, documents)]]"
+                            params="[[_params(document, documents)]]"
+                            icon="nuxeo:download" label="bulkDownload.tooltip" show-label$=[[showLabel]]
+                            async download></nuxeo-operation-button>
   </template>
 
   <script>
@@ -57,14 +47,6 @@ limitations under the License.
 
         document: {
           type: Object,
-          observer: '_observeDocument'
-        },
-
-        filename: String,
-
-        tooltipPosition: {
-          type: String,
-          value: 'bottom'
         },
 
         /**
@@ -74,76 +56,36 @@ limitations under the License.
           type: Boolean,
           value: false,
         },
+      },
 
-        _label: {
-          type: String,
-          computed: '_computeLabel(i18n)'
+      ready: function() {
+        this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
+        this.$.btn.addEventListener('response', this._onResponse.bind(this));
+      },
+
+      _params: function() {
+        var params = {};
+        if (this.document && (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish'))) {
+          params.filename = this.document.title + '_' + new Date().getTime() + '.zip';
+        } else {
+          params.filename = this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
         }
+        return params;
       },
 
-      _observeDocument: function() {
-        if (this.document) {
-          this.documents = [];
-          this.documents.push(this.document);
-          if (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish')) {
-            this.filename = this.document.title + '_' + new Date().getTime() + '.zip';
-          }
-        }
+      _input: function() {
+        return 'docs:' + (this.document ? [this.document] : this.documents).map(function(doc) {
+          return doc.uid;
+        }).join(',');
       },
 
-      downloadDocuments: function() {
-        if (this.documents && this.documents.length) {
-          var uids = this.documents.map(function(doc) {
-            return doc.uid;
-          }).join(',');
-          this.$.bulkDownloadOp.input = 'docs:' + uids;
-          this.$.bulkDownloadOp.params = {
-            "filename": this.filename ?
-              this.filename : this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
-          }
-          this.$.bulkDownloadOp.execute().then(function(res) {
-            if (res.status === 204) {
-              this.fire('notify', {"message": this.i18n('bulkDownload.empty')});
-              return;
-            }
-            this.fire('notify', {
-              'message': this.i18n('bulkDownload.preparing'),
-              'duration': 0
-            });
-            window.setTimeout(this._watchDownload.bind(this), 1000, res.key);
-          }.bind(this)).catch(function(err) {
-            this.fire('notify', {"message": err});
-          }.bind(this));
-        }
+      _onPollStart: function() {
+        this.fire('notify', { message: this.i18n('bulkDownload.preparing') });
       },
 
-      _watchDownload: function(key) {
-        this.$.nx.http(this.$.nx.url + "/nxblobstatus/" + key).then(function(res) {
-          if (res.completed) {
-            this.fire('notify', {
-              'message': this.i18n('bulkDownload.completed'),
-              'close': true
-            });
-            var a = document.createElement('a');
-            a.style = 'display: none';
-            a.download = true;
-            a.href = this.$.nx.url + "/nxbigblob/" + key;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-          } else {
-            window.setTimeout(this._watchDownload.bind(this), 1000, key);
-          }
-        }.bind(this)).catch(function() {
-          this.fire('notify', {"message": this.i18n('bulkDownload.error')});
-        }.bind(this));
-      },
-
-      _computeLabel: function() {
-        return this.i18n('bulkDownload.tooltip');
+      _onResponse: function() {
+        this.fire('notify', { message: this.i18n('bulkDownload.completed') });
       }
-
     });
   </script>
 
