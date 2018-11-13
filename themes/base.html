@@ -294,10 +294,12 @@ limitations under the License.
       box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
     };
 
+    --nuxeo-card-margin-bottom: 16px;
+
     --nuxeo-card: {
       display: block;
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
       box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
       font-family: var(--nuxeo-app-font);
       border-radius: 0;
@@ -403,7 +405,7 @@ limitations under the License.
     --paper-card: {
       display: block;
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
       box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
       font-family: var(--nuxeo-app-font);
       border-radius: 0;
