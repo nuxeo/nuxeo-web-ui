@@ -134,14 +134,14 @@ limitations under the License.
         <nuxeo-data-table-column flex="10">
           <template>
             <template is="dom-if" if="[[_canUnpublish(item)]]">
-              <paper-button class="uppercase" on-tap="_unpublish">[[i18n('publication.unpublish')]]</paper-button>
+              <paper-button class="uppercase unpublish" on-tap="_unpublish">[[i18n('publication.unpublish')]]</paper-button>
             </template>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
           <template>
             <template is="dom-if" if="[[_canRepublish(item)]]">
-              <paper-button class="uppercase primary" on-tap="_republish">[[i18n('publication.republish')]]</paper-button>
+              <paper-button class="uppercase primary republish" on-tap="_republish">[[i18n('publication.republish')]]</paper-button>
             </template>
           </template>
         </nuxeo-data-table-column>
