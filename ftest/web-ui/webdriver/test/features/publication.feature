@@ -83,3 +83,19 @@ Feature: Internal Publication
     Then I can see the document is a publication
     And I can unpublish the document
     And I can see the document has 1 children
+
+  Scenario: Read Only Publications
+    Given user "John" exists in group "members"
+    Given  I have a File document
+    When I browse to the document
+    Then I can perform the following publications
+      | target            | rendition | version | override |
+      | section1          |           |         |          |
+    When I logout
+    And I login as "John"
+    When I browse to the document
+    Then I can navigate to publication pill
+    And I can see the document has 1 publications
+    And I can see the document has the following publication
+      | path                                          | rendition | version |
+      | /default-domain/sections/section1/my_document |           | 0.1     |
