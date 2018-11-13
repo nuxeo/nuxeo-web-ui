@@ -95,6 +95,12 @@ Then(/^I can see the document has the following publication$/, function (table) 
   });
 });
 
+Then(/^I can republish the following publication$/, function (table) {
+  table.rows().forEach((row) => {
+    this.ui.browser.publicationView.republish(row[0], row[1], row[2]);
+  });
+});
+
 Then('I can publish selection to {string}', function (target) {
   this.ui.browser.waitForVisible();
   this.ui.browser.selectionToolbar.publishDialog.publish(target);

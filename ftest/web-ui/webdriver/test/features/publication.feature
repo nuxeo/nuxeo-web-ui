@@ -7,7 +7,7 @@ Feature: Internal Publication
       | Section    | section2         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
     And I login as "Administrator"
 
-  Scenario: Publish Current Document
+  Scenario: Publish Current Document Versions
     Given I have a File document
     When I browse to the document
     And The document is unversioned
@@ -26,7 +26,7 @@ Feature: Internal Publication
     And This document has file "sample.png" for content
     Then I can perform the following publications
       | target            | rendition  | version | override |
-      | section1          | None  |         |  true    |
+      | section1          | None       |         |  true    |
     And I can navigate to publication pill
     And I can see the document has 1 publications
     And I can see the document has the following publication
@@ -44,6 +44,28 @@ Feature: Internal Publication
        | /default-domain/sections/section1/my_document |            | 1.1     |
        | /default-domain/sections/section1/my_document | XML Export | 1.0     |
        | /default-domain/sections/section2/my_document | Thumbnail  | 1.1     |
+
+  Scenario: Republish Current Document
+    Given  I have a File document
+    When I browse to the document
+    Then I can perform the following publications
+      | target            | rendition | version | override |
+      | section1          |           |         |          |
+    And I can navigate to publication pill
+    And I can see the document has 1 publications
+    And I can see the document has the following publication
+       | path                                          | rendition | version |
+       | /default-domain/sections/section1/my_document |           | 0.1     |
+    And This document has file "sample.png" for content
+    When I browse to the document
+    And I can navigate to publication pill
+    Then I can republish the following publication
+       | path                                          | rendition  | version |
+       | /default-domain/sections/section1/my_document |            | 0.1     |
+    And I can see the document has 1 publications
+    And I can see the document has the following publication
+      | path                                          | rendition | version |
+      | /default-domain/sections/section1/my_document |           | 0.2     |
 
   Scenario: Publish Multiple Documents
     Given I have the following documents

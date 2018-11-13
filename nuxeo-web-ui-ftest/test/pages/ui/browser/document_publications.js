@@ -7,9 +7,13 @@ export default class DocumentPublications extends BasePage {
   }
 
   hasPublication(path, rendition, version) {
+    return !!this.getPublicationRow(path, rendition, version);
+  }
+
+  getPublicationRow(path, rendition, version) {
     this.waitForVisible('nuxeo-data-table nuxeo-data-table-row:not([header])');
     const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
-    const found = rows.value.some((row) => {
+    const result = rows.value.find((row) => {
       if (row.isVisible('nuxeo-data-table-cell a.path')) {
         const foundPath = row.getText('nuxeo-data-table-cell a.path').toLowerCase();
         const foundRendition = row.getText('nuxeo-data-table-cell .rendition').trim().toLowerCase();
@@ -27,7 +31,18 @@ export default class DocumentPublications extends BasePage {
       }
       return false;
     });
-    return found;
+    return result;
+  }
+
+  republish(path, rendition, version) {
+    const pubRow = this.getPublicationRow(path, rendition, version);
+    if (pubRow) {
+      pubRow.waitForVisible('paper-button.republish');
+      pubRow.element('paper-button.republish').click();
+      driver.alertAccept();
+    } else {
+      throw new Error(`Could not find publication ${path} ${rendition} ${version}`);
+    }
   }
 
   waitForVisible() {
