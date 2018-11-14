@@ -59,6 +59,10 @@ limitations under the License.
       paper-icon-button:hover {
         @apply --nuxeo-action-hover;
       }
+
+      nuxeo-document-view {
+        --nuxeo-document-content-min-height: calc(100vh - 237px - var(--nuxeo-app-top));
+      }
     </style>
 
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
