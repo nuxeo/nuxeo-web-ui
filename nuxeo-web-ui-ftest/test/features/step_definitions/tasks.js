@@ -56,3 +56,6 @@ Then('I can see the my task list has {int} item(s)', function (nb) {
   this.ui.drawer.tasks.waitForVisible();
   this.ui.drawer.tasks.nbItems.should.be.equals(nb);
 });
+Then('I can perform the {string} task action', function (name) {
+  this.ui.browser.documentTaskView.performAction(name);
+});

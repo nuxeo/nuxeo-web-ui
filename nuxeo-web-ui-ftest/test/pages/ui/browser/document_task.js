@@ -40,4 +40,9 @@ export default class DocumentTask extends BasePage {
     const users = element.elements('nuxeo-user-tag .tag a').value;
     return users.some(user => user.getText() === `${actor} undefined`);
   }
+
+  performAction(name) {
+    this.el.waitForVisible(`.options paper-button[name="${name}"]`);
+    this.el.element(`.options paper-button[name="${name}"]`).click();
+  }
 }

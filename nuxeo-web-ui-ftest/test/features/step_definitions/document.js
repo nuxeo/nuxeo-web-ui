@@ -231,6 +231,12 @@ Then(/^I can see a process is running in the document$/, function () {
   documentPage.info.waitForVisible('[name="process"]');
 });
 
+Then(/^I can see a process is not running in the document$/, function () {
+  const documentPage = this.ui.browser.documentPage();
+  // check info bar in the document is not visible
+  documentPage.infoBar.isVisible().should.be.false;
+});
+
 Then(/^I cannot start a workflow$/, function () {
   this.ui.browser.startWorkflowButton.isExisting().should.be.false;
 });
