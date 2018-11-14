@@ -116,6 +116,9 @@ global.fieldRegistry.register('paper-radio-button',
       element.element('#radioContainer').click();
     }
   });
+global.fieldRegistry.register('paper-textarea',
+  element => element.element('#textarea').getValue(),
+  (element, value) => { element.element('#textarea').setValue(value); });
 global.fieldRegistry.register('paper-checkbox',
   element => element.getAttribute('checked'),
   (element, value) => {

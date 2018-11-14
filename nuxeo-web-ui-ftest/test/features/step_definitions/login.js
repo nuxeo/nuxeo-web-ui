@@ -36,6 +36,7 @@ When('I login as {string}', function (username) {
   login.submit();
   this.username = username;
   this.ui = UI.get();
+  driver.waitForVisible('nuxeo-page');
 });
 
 When(/^I visit (.*)$/, url => driver.url(url));

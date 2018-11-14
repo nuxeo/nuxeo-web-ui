@@ -30,6 +30,7 @@
     'radix': 0
   },
   'globals': {
+    'addedComments': true,
     'driver': true,
     'fixtures': true,
     'liveCollections': true,

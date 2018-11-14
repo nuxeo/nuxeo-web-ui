@@ -1,9 +1,8 @@
-
-
 import BasePage from '../../base';
 import DocumentMetadata from './document_metadata';
 import DocumentView from './document_view';
 import DocumentVersions from './document_versions';
+import DocumentCommentThread from './document_comment_thread';
 
 export default class DocumentPage extends BasePage {
   constructor(selector, docType) {
@@ -59,5 +58,9 @@ export default class DocumentPage extends BasePage {
 
   get abandonWorkflowButton() {
     return this.el.element('nuxeo-document-info-bar .workflow paper-button');
+  }
+
+  get comments() {
+    return new DocumentCommentThread('nuxeo-document-comment-thread[name="comments"]');
   }
 }
