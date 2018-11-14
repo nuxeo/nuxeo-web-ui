@@ -105,8 +105,8 @@ limitations under the License.
                       on-keydown="_checkForEnter">
       </paper-textarea>
       <template is="dom-if" if="[[!_isBlank(reply)]]">
-        <iron-icon class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
-        <iron-icon class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
+        <iron-icon name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
+        <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
       </template>
     </div>
 

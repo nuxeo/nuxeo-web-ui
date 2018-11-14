@@ -148,8 +148,8 @@ limitations under the License.
       <h2>[[i18n('comments.deletion.dialog.heading')]]</h2>
       <div>[[_computeConfirmationLabel(comment.numberOfReplies)]]</div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
-        <paper-button dialog-confirm on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
+        <paper-button name="dismiss" dialog-dismiss>[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
+        <paper-button name="confirm" dialog-confirm on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
@@ -166,18 +166,18 @@ limitations under the License.
             <span class="author">[[comment.author]]</span>
             <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate, i18n)]]</span>
             <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
-              <paper-menu-button no-animations close-on-activate>
+              <paper-menu-button id="options" no-animations close-on-activate>
                 <paper-icon-button class="main-option"
                                    icon="more-vert"
                                    slot="dropdown-trigger"
                                    alt="menu">
                 </paper-icon-button>
                 <paper-listbox slot="dropdown-content">
-                  <paper-icon-item class="smaller no-selection" on-tap="_editComment">
+                  <paper-icon-item name="edit" class="smaller no-selection" on-tap="_editComment">
                     <iron-icon icon="nuxeo:edit" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.edit')]]</span>
                   </paper-icon-item>
-                  <paper-icon-item class="smaller no-selection" on-tap="_toggleDeletionConfirmation">
+                  <paper-icon-item name="delete" class="smaller no-selection" on-tap="_toggleDeletionConfirmation">
                     <iron-icon icon="nuxeo:delete" slot="item-icon"></iron-icon>
                     <span>[[i18n('comments.options.delete')]]</span>
                   </paper-icon-item>
@@ -191,7 +191,7 @@ limitations under the License.
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
             <template is="dom-if" if="[[!truncated]]">
-              <iron-icon class="main-option opaque" icon="reply" on-tap="_reply" hidden$="[[!_isRootElement(level)]]"></iron-icon>
+              <iron-icon name="reply" class="main-option opaque" icon="reply" on-tap="_reply" hidden$="[[!_isRootElement(level)]]"></iron-icon>
             </template>
           </div>
           <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">
