@@ -146,7 +146,7 @@ limitations under the License.
           <div class="horizontal">
             <div class="options">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-                <paper-button noink dialog-confirm class="primary" on-tap="_processTask" data-args$="[[item.name]]">[[i18n(item.label)]]</paper-button>
+                <paper-button noink dialog-confirm class="primary" name$=[[item.name]] on-tap="_processTask">[[i18n(item.label)]]</paper-button>
               </template>
             </div>
           </div>
@@ -199,8 +199,9 @@ limitations under the License.
       },
 
       _processTask: function(e) {
-        if (this.validate()) {
-          this.action = e.target.dataset.args;
+        var validate = e.model.item.validate;
+        if (!validate || this.validate()) {
+          this.action = e.model.item.name;
           this.taskData = {
             'entity-type': 'task',
             id: this.$.layout.element.task.id,
