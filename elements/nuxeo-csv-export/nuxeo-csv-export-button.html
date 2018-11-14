@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-action-button-styles.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
@@ -32,7 +33,9 @@ limitations under the License.
   <template>
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-resource id="resource"></nuxeo-resource>
+    <nuxeo-operation id="op" op="Bulk.RunAction" input="[[provider]]"></nuxeo-operation>
+
+    <nuxeo-resource id="resource" path="/bulk/[[status.commandId]]"></nuxeo-resource>
 
     <div class="action" on-click="execute">
       <paper-icon-button icon="nuxeo:csv-export"></paper-icon-button>
@@ -66,7 +69,7 @@ limitations under the License.
           type: String,
         },
         /**
-         * A comman separated list of fields to be be exported.
+         * A comma separated list of fields to be be exported.
          */
         fields: {
           type: String,
@@ -78,35 +81,41 @@ limitations under the License.
           type: Boolean,
           value: false,
         },
+
+        /**
+         * Current action status.
+         */
+        status: {
+          type: Object,
+          notify: true,
+        },
+
         _label: {
           type: String,
           computed: '_computeLabel(i18n)',
-        },
-        _lastStatus: Object
+        }
       },
 
       execute: function() {
-        this.$.resource.path = this.provider.$.nxResource.path.replace(/\/execute$/, '/bulk/csvExport');
-        this.$.resource.params = this.provider.$.nxResource.params;
-        this.$.resource.data = {};
-        var schemas = this.schemas != null ? this.schemas : this.provider.$.nxResource.schemas;
+        var actionParams = {};
+        var schemas = this.schemas != null ? this.schemas : this.provider.schemas;
         if (schemas) {
-          this.$.resource.data.schemas = schemas.split(',').map(function(schema) {
-            return schema.trim();
-          });
+          actionParams.schemas = schemas.split(',').map(function(s) { return s.trim(); });
         }
         if (this.fields) {
-          this.$.resource.data.xpaths = this.fields.split(',').map(function(field) {
-            return field.trim();
-          });
+          actionParams.xpaths = this.fields.split(',').map(function(s) { return s.trim(); });
         }
-        return this.$.resource.post().then(function(response) {
-          this.$.resource.params = null;
-          this.$.resource.data = null;
-          if (response.state === 'SCHEDULED') {
-            this.fire('notify', { message: this.i18n('csvExportButton.action.scheduled') });
-            this.fire('bulk-action-scheduled', response);
-            this._poll(response);
+        this.$.op.params = {
+          action: 'csvExport',
+          parameters: actionParams,
+        };
+        return this.$.op.execute().then(function(response) {
+          if (response['entity-type'] === 'bulkStatus') {
+            this.status = response.value;
+            if (response.value.state === 'SCHEDULED') {
+              this.fire('notify', { message: this.i18n('csvExportButton.action.scheduled') });
+              this._poll();
+            }
           }
         }.bind(this)).catch(function(error) {
           this.fire('notify', {
@@ -116,42 +125,24 @@ limitations under the License.
           if (error.status !== 404) {
             throw error;
           }
-        });
-      },
-
-      abort: function(commandId) {
-        if (this._timeout) {
-          clearTimeout(this._timeout);
-        }
-        this.fire('notify', { close: true });
-        this.$.resource.path = '/bulk/' + commandId + '/abortion';
-        return this.$.resource.put().then(function(response) {
-          this.fire('bulk-action-aborted', response);
-        }.bind(this)).catch(function(error) {
-          // a 404 here means the command doesn't exist, so it can be ignored
-          if (error.status !== 404) {
-            throw error;
-          }
         }.bind(this));
       },
 
-      _poll: function(bulkStatus) {
+      _poll: function() {
         this._timeout = setTimeout(function() {
-          this.$.resource.path = '/bulk/' + bulkStatus.commandId;
-          this.$.resource.params = null;
           this.$.resource.get().then(function(response) {
-            if (response.state === 'RUNNING') {
-              this.fire('bulk-action-update', response);
-              if (bulkStatus.state !== response.state ) {
+            var currentState = this.status.state;
+            this.status = response;
+            if (this.status.state === 'RUNNING') {
+              if (currentState !== response.state ) {
                 this.fire('notify', {
                   message: this.i18n('csvExportButton.action.poll'),
                   duration: 0,
                   close: true,
                 });
               }
-              this._poll(response);
+              this._poll();
             } else if (response.state === 'COMPLETED') {
-              this.fire('bulk-action-completed', response);
               this.fire('notify', {
                 message: this.i18n('csvExportButton.action.completed'),
                 close: true,
