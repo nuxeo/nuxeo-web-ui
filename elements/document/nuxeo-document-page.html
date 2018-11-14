@@ -42,14 +42,32 @@ limitations under the License.
         width: 28px;
         height: 28px;
         padding: 5px;
-        position: absolute;
-        top: 6px;
-        right: 6px;
         opacity: 0.3;
+        margin: 6px 0;
       }
 
       :host([opened]) #details {
         opacity: 1;
+        margin-left: 6px;
+      }
+
+      #documentViewsItems {
+        @apply --layout-horizontal;
+        --paper-listbox-background-color: transparent;
+      }
+
+      #documentViewsItems > [name='comments'] {
+        margin: 0;
+      }
+
+      .scrollerHeader {
+        @apply --layout-horizontal;
+      }
+
+      :host([opened]) .scrollerHeader {
+        box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
+        border-radius: 0;
+        background-color: var(--nuxeo-box) !important;
       }
 
       .page {
@@ -59,17 +77,15 @@ limitations under the License.
       .main {
         @apply --layout-vertical;
         @apply --layout-flex-2;
-        padding-right: 38px;
+        padding-right: 8px;
       }
 
       :host([opened]) .main {
-        @apply --layout-vertical;
-        @apply --layout-flex-2;
-        padding-right: 18px;
+        padding-right: 16px;
       }
 
       .side {
-        @apply --layout-horizontal;
+        @apply --layout-vertical;
         position: relative;
         margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
         min-height: 60vh;
@@ -85,7 +101,7 @@ limitations under the License.
         overflow: auto;
         display: none;
         left: 0;
-        top: 0;
+        top: 36px;
         right: 0;
         bottom: 0;
         position: absolute;
@@ -99,55 +115,49 @@ limitations under the License.
         margin-bottom: 32px;
       }
 
+      nuxeo-document-view {
+        --nuxeo-document-content-margin-bottom: var(--nuxeo-card-margin-bottom);
+      }
+
       @media (max-width: 1024px) {
         #details {
           opacity: 1;
+          margin-left: 6px;
           cursor: default;
         }
 
-        .page, .side {
-          flex-direction: column;
+        .scrollerHeader {
+          box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
+          font-family: var(--nuxeo-app-font);
+          border-radius: 0;
+          background-color: var(--nuxeo-box) !important;
+        }
+
+        .page {
+          @apply --layout-vertical;
         }
 
         .main,
         :host([opened]) .main {
           padding: 0;
-          margin-bottom: 1rem;
           max-width: initial;
           margin-right: 0;
         }
 
         .side {
           padding: 0;
-          margin-bottom: 1rem;
           max-width: initial;
+          min-height: initial;
           display: block;
           margin-bottom: 16px;
         }
 
         .scroller {
+          top: 0;
           position: relative;
           display: block;
         }
       }
-
-      ::content nuxeo-document-attachments {
-        margin-top: 32px;
-      }
-
-      #documentViewsItems {
-        @apply --layout-horizontal;
-        --paper-listbox-background-color: transparent;
-      }
-
-      #documentViewsItems > [name='comments'] {
-        margin: 0;
-      }
-
-      paper-listbox {
-        padding: 0;
-      }
-
     </style>
 
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
@@ -159,6 +169,10 @@ limitations under the License.
       </div>
 
       <div class="side">
+        <div class="scrollerHeader">
+          <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
+          <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
+        </div>
         <div class="scroller">
           <!-- info -->
           <div class="section">
@@ -199,9 +213,6 @@ limitations under the License.
             </iron-pages>
           </div>
         </div>
-
-        <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
-        <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
       </div>
     </div>
 
