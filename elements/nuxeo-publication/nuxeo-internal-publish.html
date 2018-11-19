@@ -161,7 +161,9 @@ limitations under the License.
         ];
         if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
           this.document.contextParameters.renditions.forEach(function(item) {
-            options.push({'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon});
+            if (item.kind !== 'nuxeo:video:conversion' && item.kind !== 'nuxeo:picture:conversion') {
+              options.push({'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon});
+            }
           }.bind(this));
         }
         return options;
