@@ -81,6 +81,7 @@ Feature: Internal Publication
     Then I can see the document has 2 children
     When I navigate to "PublihsFile" child
     Then I can see the document is a publication
+    And I cannot see to publication pill
     And I can unpublish the document
     And I can see the document has 1 children
 
