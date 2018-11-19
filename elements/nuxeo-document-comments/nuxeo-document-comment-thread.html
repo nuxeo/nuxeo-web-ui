@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-avatar.html">
 <link rel="import" href="./nuxeo-document-comment.html">
 
@@ -105,7 +106,8 @@ limitations under the License.
                       on-keydown="_checkForEnter">
       </paper-textarea>
       <template is="dom-if" if="[[!_isBlank(reply)]]">
-        <iron-icon name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
+        <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
+        <nuxeo-tooltip for="submit" position="left">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
         <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
       </template>
     </div>
@@ -177,9 +179,7 @@ limitations under the License.
       },
 
       _checkForEnter: function(e) {
-        if (e.keyCode === 13 && !e.shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
+        if (e.keyCode === 13 && e.ctrlKey) {
           if(!this._isBlank(this.reply)) {
             this._submitReply();
           }
@@ -286,7 +286,10 @@ limitations under the License.
         this._fetchComments(this.allCommentsLoaded);
       },
 
-      _submitReply: function() {
+      _submitReply: function(e) {
+        if (e) {
+          e.preventDefault();
+        }
         this._clearRequest();
         this.$.commentRequest.path = this._computeResourcePath(this.selectedComment ? this.selectedComment.id : null);
         this.$.commentRequest.data = {
