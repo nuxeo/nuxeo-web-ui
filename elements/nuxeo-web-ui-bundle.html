@@ -392,12 +392,20 @@
 
 <nuxeo-slot-content name="documentPublicationItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
   <template>
-    <nuxeo-page-item name="publication" label="browser.publications"></nuxeo-page-item>
+    <nuxeo-filter document="[[document]]" expression="!this.isPublication(document)">
+      <template>
+        <nuxeo-page-item name="publication" label="browser.publications"></nuxeo-page-item>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="documentPublicationPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
   <template>
-    <nuxeo-document-publications name="publication" document="[[document]]"></nuxeo-document-publications>
+    <nuxeo-filter document="[[document]]" expression="!this.isPublication(document)">
+      <template>
+        <nuxeo-document-publications name="publication" document="[[document]]"></nuxeo-document-publications>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
