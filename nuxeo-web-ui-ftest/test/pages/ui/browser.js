@@ -284,24 +284,26 @@ export default class Browser extends BasePage {
     return this.el.element('.document-actions nuxeo-workflow-button #startButton');
   }
 
-  expandDocumentActionsMenu() {
-    const menu = this.el.element('nuxeo-actions-menu ');
-    menu.waitForVisible('#dropdownButton');
-    menu.click('#dropdownButton');
-    menu.waitForVisible('paper-listbox');
-    menu.waitForVisible('[slot="dropdown"] .label');
-    menu.waitForEnabled('[slot="dropdown"] .label');
+  clickDocumentActionMenu(selector) {
+    let action = this.el.element(selector);
+    action.waitForExist();
+    if (!action.isVisible()) {
+      const menu = this.el.element('nuxeo-actions-menu ');
+      menu.waitForVisible('#dropdownButton');
+      menu.click('#dropdownButton');
+      menu.waitForVisible('paper-listbox');
+      menu.waitForVisible('[slot="dropdown"] .label');
+      menu.waitForEnabled('[slot="dropdown"] .label');
+    }
+    action = this.el.element(selector);
+    action.waitForVisible();
+    action.waitForEnabled();
+    action.click();
   }
 
   startWorkflow(workflow) {
     // click the action to trigger the dialog
-    const workflowButton = this.el.element('.document-actions nuxeo-workflow-button paper-icon-button');
-    workflowButton.waitForExist();
-    if (!workflowButton.isVisible()) {
-      this.expandDocumentActionsMenu();
-    }
-    workflowButton.waitForVisible();
-    workflowButton.click();
+    this.clickDocumentActionMenu('.document-actions nuxeo-workflow-button paper-icon-button');
     // select the workflow
     const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
     workflowSelect.waitForVisible();
@@ -327,13 +329,7 @@ export default class Browser extends BasePage {
   }
 
   get publishDialog() {
-    const publishButton = this.el.element('nuxeo-publish-button');
-    publishButton.waitForExist();
-    if (!publishButton.isVisible()) {
-      this.expandDocumentActionsMenu();
-    }
-    publishButton.waitForVisible();
-    publishButton.click();
+    this.clickDocumentActionMenu('.document-actions nuxeo-publish-button');
     const publishDialog = new PublicationDialog('#publishDialog');
     publishDialog.waitForVisible();
     return publishDialog;
