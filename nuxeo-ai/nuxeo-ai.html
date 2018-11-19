@@ -93,6 +93,7 @@ limitations under the License.
       if (!op) {
         op = document.createElement('nuxeo-operation');
         op.op = 'AI.Suggestion';
+        op.headers = {'X-Batch-No-Drop': 'true'};
         document.querySelector('nuxeo-app').appendChild(op);
       }
       op.input = doc;
