@@ -97,20 +97,22 @@ limitations under the License.
       </nuxeo-document-comment>
     </template>
 
-    <div class="reply-area">
-      <paper-textarea id="replyContainer"
-                      placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
-                      value="{{reply}}"
-                      max-rows="[[_computeMaxRows()]]"
-                      no-label-float
-                      on-keydown="_checkForEnter">
-      </paper-textarea>
-      <template is="dom-if" if="[[!_isBlank(reply)]]">
-        <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
-        <nuxeo-tooltip for="submit" position="left">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
-        <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
-      </template>
-    </div>
+    <template is="dom-if" if="[[_allowReplies(level)]]">
+      <div class="reply-area">
+        <paper-textarea id="replyContainer"
+                        placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
+                        value="{{reply}}"
+                        max-rows="[[_computeMaxRows()]]"
+                        no-label-float
+                        on-keydown="_checkForEnter">
+        </paper-textarea>
+        <template is="dom-if" if="[[!_isBlank(reply)]]">
+          <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
+          <nuxeo-tooltip for="submit" position="left">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
+          <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
+        </template>
+      </div>
+    </template>
 
   </template>
 
@@ -197,7 +199,7 @@ limitations under the License.
         this.$.commentRequest.params = {};
       },
 
-      _fetchComments: function (loadAll) {
+      _fetchComments: function(loadAll) {
         this._clearRequest();
         this.$.commentRequest.path = this._computeResourcePath();
         this.$.commentRequest.params = {
@@ -239,7 +241,7 @@ limitations under the License.
       },
 
       _handleCommentsChange: function(event) {
-        if(event.detail.path === 'comments.length') {
+        if (event.detail.path === 'comments.length') {
           this.fire('number-of-replies', {total: this.comments.length});
         }
       },
@@ -278,7 +280,7 @@ limitations under the License.
         event.stopPropagation();
       },
 
-      _loadMore: function () {
+      _loadMore: function() {
         this._fetchComments(true);
       },
 
@@ -299,7 +301,7 @@ limitations under the License.
           text: this.reply.trim()
         };
 
-        if(this.selectedComment) {
+        if (this.selectedComment) {
           this.$.commentRequest.put()
             .then(function (response){
               var index = this._getCommentIndexById(this.selectedComment.id);
@@ -345,22 +347,25 @@ limitations under the License.
         return "/id/" + this.uid + "/@comment/" + (commentId ? commentId : '');
       },
 
-      _computeSubLevel: function (level) {
+      _computeSubLevel: function(level) {
         return level + 1;
       },
 
-      _computeTextLabel: function (level, option, placeholder) {
+      _computeTextLabel: function(level, option, placeholder) {
         return level === 1 ? this.i18n('comments.' + option + '.comment', placeholder)
           : this.i18n('comments.' + option + '.reply', placeholder);
       },
 
       /** Visibility Methods **/
+      _allowReplies: function(level) {
+        return level <= 2;
+      },
 
-      _isBlank: function (reply) {
+      _isBlank: function(reply) {
         return !reply || typeof reply !== 'string' || reply.trim().length === 0;
       },
 
-      _moreAvailable: function (length, total, allCommentsLoaded) {
+      _moreAvailable: function(length, total, allCommentsLoaded) {
         return length < total && !allCommentsLoaded;
       },
 
