@@ -119,7 +119,7 @@ limitations under the License.
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="preview"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="[[enrichers]]"></nuxeo-document>
     <nuxeo-operation id="bulkAttach" op="Blob.AttachOnDocument" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[label]]">
@@ -206,6 +206,12 @@ limitations under the License.
         _parsedXpath: {
           type: String,
           computed: '_computeParsedXpath(xpath)'
+        },
+        enrichers: {
+          type: Object,
+          value: function() {
+            return this._computeEnrichers();
+          }
         }
       },
 
@@ -382,6 +388,14 @@ limitations under the License.
         // is false (e.g during the creation of a new document). This will allow the user to manage the list of files.
         return (!this.immediate && this.blobList) || !this.hasFiles;
       },
+
+      _computeEnrichers: function() {
+        return {
+          document: ['preview'],
+          blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob)
+            || ['appLinks']
+        };
+      }
 
     });
   </script>
