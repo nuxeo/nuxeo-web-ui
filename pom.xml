@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.nuxeo.ecm.annotation</groupId>
     <artifactId>nuxeo-arender-connector-parent</artifactId>
-    <version>10.3-SNAPSHOT</version>
+    <version>10.3.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>nuxeo-arender-web-ui</artifactId>
