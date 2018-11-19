@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.nuxeo.ecm.distribution</groupId>
     <artifactId>nuxeo-distribution</artifactId>
-    <version>10.3-SNAPSHOT</version>
+    <version>10.10-SNAPSHOT</version>
   </parent>
 
   <groupId>org.nuxeo.web.ui</groupId>
@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <name>Nuxeo Web UI - Parent</name>
   <description>Nuxeo Web UI - Parent</description>
-  <version>2.3.3-SNAPSHOT</version>
+  <version>2.3.4-SNAPSHOT</version>
 
   <modules>
     <module>marketplace</module>
