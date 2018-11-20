@@ -107,7 +107,7 @@ limitations under the License.
         }
         this.$.op.params = {
           action: 'csvExport',
-          parameters: actionParams,
+          parameters: JSON.stringify(actionParams),
         };
         return this.$.op.execute().then(function(response) {
           if (response['entity-type'] === 'bulkStatus') {
