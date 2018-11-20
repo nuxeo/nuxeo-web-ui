@@ -301,7 +301,10 @@ limitations under the License.
       _handleBlobUploaded: function() {
         if (this.updateDocument) {
           var props = {};
-          props[this.xpath] = this.document.properties[this.xpath];
+          this._createNestedObjectRecursive(
+            props, this._parsedXpath.split('.'),
+            this.get('document.properties.' + this._parsedXpath)
+          );
           this.$.doc.data = {
             "entity-type": "document",
             "repository": this.document.repository,
@@ -398,7 +401,32 @@ limitations under the License.
           blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob)
             || ['appLinks']
         };
-      }
+      },
+
+      /**
+       * Recursive method to create nested objects when they don't exist in a parent object.
+       * It does not change any other existing objects or inner objects, only the ones referred in 'path'.
+       * @param obj Parent Object where inner nested objects should be created.
+       * @param path Array containing the inner object keys.
+       * @param value Object that should be set to last nested object.
+       * Usage Example:
+       *
+       *  - Creating document properties using xpath:
+       *
+       *    const xpath = 'my:custom/field/subfield/x'
+       *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'), 'should set this value');
+       *
+       */
+      _createNestedObjectRecursive: function(obj, path, value) {
+        if (path.length === 0) {
+          return;
+        }
+        if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
+          obj[path[0]] = path.length === 1 && value ? value : {};
+
+        }
+        return this._createNestedObjectRecursive(obj[path[0]], path.slice(1), value);
+      },
 
     });
   </script>
