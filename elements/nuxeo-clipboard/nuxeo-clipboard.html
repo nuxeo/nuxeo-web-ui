@@ -235,9 +235,11 @@ limitations under the License.
         return this.$.storage.contains(doc);
       },
 
-      remove: function(doc) {
+      remove: function(doc, notify) {
         this.$.storage.remove(doc);
-        this.fire('removed-from-clipboard', {docId : doc.uid});
+        if (notify) {
+          this.fire('removed-from-clipboard', {docId : doc.uid});
+        }
       },
 
       canPaste: function(documents, doc) {
@@ -254,7 +256,7 @@ limitations under the License.
 
       _remove: function(evt) {
         evt.stopImmediatePropagation();
-        this.remove(evt.model.document);
+        this.remove(evt.model.document, true);
       },
 
       _uids: function() {
