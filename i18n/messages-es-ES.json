@@ -284,6 +284,7 @@
   "comments.options.edit": "Edit",
   "comments.options.reply": "Reply",
   "comments.showAll": "show all",
+  "comments.submit.tooltip": "CTRL + Enter to submit",
   "comments.writePlaceholder.comment": "Write a comment here",
   "comments.writePlaceholder.reply": "Write a reply here",
   "csv.import": "CSV",
