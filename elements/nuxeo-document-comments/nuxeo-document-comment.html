@@ -186,7 +186,7 @@ limitations under the License.
             </template>
           </div>
           <div class="text">
-            <span>[[_computeTextToDisplay(comment.text, maxChars, truncated)]]</span>
+            <span inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
             <template is="dom-if" if="[[truncated]]">
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
