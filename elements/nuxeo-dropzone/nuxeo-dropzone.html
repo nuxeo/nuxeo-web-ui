@@ -192,7 +192,11 @@ limitations under the License.
         _hasFiles: {
           type: Boolean,
           value: false
-        }
+        },
+        _parsedXpath: {
+          type: String,
+          computed: '_computeParsedXpath(xpath)'
+        },
       },
 
       listeners: {
@@ -205,11 +209,14 @@ limitations under the License.
       ],
 
       ready: function() {
-        this.connection = this.$.nx;
-        this.setupDropZone(this.$.dropzone);
         this.message = this.i18n('dropzone.message');
         this.uploadedMessage = this.i18n('dropzone.uploaded');
         this.progressMessage = this.i18n('dropzone.progress');
+      },
+
+      attached: function() {
+        this.connection = this.$.nx;
+        this.setupDropZone(this.$.dropzone);
       },
 
       detached: function() {
@@ -221,6 +228,10 @@ limitations under the License.
         this.$$('input').click();
       },
 
+      _computeParsedXpath: function() {
+        return this.xpath.replace(new RegExp('/', 'g'), '.');
+      },
+
       importBatch: function(data) {
         data.stopPropagation();
         if (this.blobList) {
@@ -229,7 +240,7 @@ limitations under the License.
             xpath: this.xpath
           }).then(this._handleBlobListUploaded.bind(this));
         } else {
-          this.set('document.properties.' + this.xpath, {
+          this.set('document.properties.' + this._parsedXpath, {
             'upload-batch': data.detail.batchId,
             'upload-fileId': '0'
           });
@@ -250,11 +261,11 @@ limitations under the License.
           return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
         } else {
           var file = e.detail.blobs[e.detail.blobs.length - 1];
-          this.document.properties[this.xpath] = {
+          this.set('document.properties.' + this._parsedXpath, {
             'providerId': file.providerId,
             'user': file.user,
             'fileId': file.fileId
-          };
+          });
           this._handleBlobUploaded();
         }
       },
@@ -262,7 +273,10 @@ limitations under the License.
       _handleBlobUploaded: function() {
         if (this.updateDocument) {
           var props = {};
-          props[this.xpath] = this.document.properties[this.xpath];
+          this._createNestedObjectRecursive(
+            props, this._parsedXpath.split('.'),
+            this.get('document.properties.' + this._parsedXpath)
+          );
           this.$.doc.data = {
             "entity-type": "document",
             "repository": this.document.repository,
@@ -287,13 +301,13 @@ limitations under the License.
         this.progress = false;
         this._hasFiles = false;
         this.$.doc.get().then(function(response) {
-          this.set('document.properties.' + this.xpath, response.properties[this.xpath]);
+          this.set('document.properties.' + this._parsedXpath, this.get(this._parsedXpath, response.properties));
         }.bind(this));
       },
 
       _deleteFile: function() {
-        this.document.properties[this.xpath] = '';
         this._reset();
+        this.set('document.properties.' + this._parsedXpath, '');
       },
 
       _reset: function() {
@@ -330,7 +344,31 @@ limitations under the License.
         this.toggleClass('dragging', false, this.$.label);
         this.toggleClass('dragging', false, this.$.container);
         this._upload(e.dataTransfer.files);
-      }
+      },
+
+      /**
+       * Recursive method to create nested objects when they don't exist in a parent object.
+       * It does not change any other existing objects or inner objects, only the ones referred in 'path'.
+       * @param obj Parent Object where inner nested objects should be created.
+       * @param path Array containing the inner object keys.
+       * @param value Object that should be set to last nested object.
+       * Usage Example:
+       *
+       *  - Creating document properties using xpath:
+       *
+       *    const xpath = 'my:custom/field/subfield/x'
+       *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'), 'should set this value');
+       *
+       */
+      _createNestedObjectRecursive: function(obj, path, value) {
+        if (path.length === 0) {
+          return;
+        }
+        if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
+          obj[path[0]] = path.length === 1 && value ? value : {};
+        }
+        return this._createNestedObjectRecursive(obj[path[0]], path.slice(1), value);
+      },
 
     });
   </script>
