@@ -97,6 +97,7 @@ limitations under the License.
       toggle: function() {
         if (this.clipboard.contains(this.document)) {
           this.clipboard.remove(this.document);
+          this.fire('removed-from-clipboard', {docId : this.document.uid});
         } else {
           this.clipboard.add(this.document);
         }
