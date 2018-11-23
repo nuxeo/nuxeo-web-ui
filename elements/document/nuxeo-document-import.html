@@ -936,7 +936,21 @@ limitations under the License.
         var layout = this.$$('#document-import');
 
         // run our custom validation function first to allow setting custom native validity
-        return (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
+        var result = (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
+
+        if (result || !layout) {
+          return result;
+        } else {
+          var innerLayout = layout.$.layout;
+          var nodes = innerLayout._getValidatableElements(innerLayout.element.root);
+          var invalidField = nodes.find(function(node) {
+            return node.invalid;
+          });
+          if (invalidField) {
+            invalidField.scrollIntoView();
+            invalidField.focus();
+          }
+        }
       },
 
       _tapLocalDoc: function(e) {
