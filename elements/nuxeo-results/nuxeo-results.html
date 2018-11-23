@@ -244,6 +244,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
         }
         if (view) {
+          // initialize columns
+          if (this.columns.length === 0 && Array.isArray(view.columns) && view.columns.length > 0) {
+            this.set('columns', view.columns);
+          }
           // restore settings
           if (this._settings) {
             this.set('_settings.displayMode', this.displayMode);
