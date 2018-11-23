@@ -213,7 +213,7 @@ limitations under the License.
                                    always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">&#8203;[[errorMessage]]</span>
           </div>
-          <paper-dialog-scrollable>
+          <paper-dialog-scrollable id="editScrollable">
             <iron-form id="form">
               <form class="form vertical layout flex">
                 <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
@@ -300,6 +300,7 @@ limitations under the License.
           document.parentRef = this.parent.uid;
           this.document = document;
           this.stage = 'edit';
+          this.$.editScrollable.scrollTarget.scrollTop = 0;
         }.bind(this));
       },
 
