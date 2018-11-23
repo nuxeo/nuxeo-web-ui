@@ -54,6 +54,15 @@ limitations under the License.
     let _updateDebouncer = null;
     let op = null;
 
+    function _clearSuggestions(model) {
+      Object.values(model).forEach((element) => {
+        const suggestionWidget = _getSuggestionWidget(element);
+        if (suggestionWidget) {
+          suggestionWidget.suggestions = [];
+        }
+      });
+    }
+
     function _getBoundElements(element, property) {
       const model = {};
       for (let i = 0; i < element.__templateInfo.nodeInfoList.length; i++) {
@@ -116,6 +125,12 @@ limitations under the License.
             () => {
               const model = _getBoundElements(layout, 'document.properties');
               _getSuggestions(layout.document).then((response) => {
+                /*
+                 * Inefficient approach that should be changed as soon as the response from server includes more information (e.g. all output fields)
+                 * to only clear the elements in need.
+                 * Ticket created to analyse and tackle this need: NXP-26314
+                 */
+                _clearSuggestions(model);
                 response.forEach((service) => {
                   service.suggestions.forEach((suggestion) => {
                     const element = model[`document.properties.${suggestion.property}`];
