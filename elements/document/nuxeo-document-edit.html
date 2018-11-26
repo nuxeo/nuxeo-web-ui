@@ -91,7 +91,18 @@ limitations under the License.
 
       _validate: function() {
         // run our custom validation function first to allow setting custom native validity
-        return this.$['document-edit'].validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
+        var result = this.$['document-edit'].validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
+        if (result) {
+          return result;
+        } else {
+          var layout = this.$['document-edit'].$.layout;
+          var nodes = layout._getValidatableElements(layout.element.root);
+          var invalidField = nodes.find(function(node) {
+            return node.invalid;
+          });
+          invalidField.scrollIntoView();
+          invalidField.focus();
+        }
       },
 
       _save: function() {
