@@ -30,7 +30,8 @@ limitations under the License.
     <nuxeo-operation-button id="btn" operation="Bulk.RunAction" input="[[provider]]"
                             params="[[_params(provider, schemas, fields)]]"
                             icon="nuxeo:csv-export" label="csvExportButton.label" show-label$=[[showLabel]]
-                            poll-interval="[[pollInterval]]" async download>
+                            poll-interval="[[pollInterval]]" error-label="csvExportButton.action.error"
+                            async download>
     </nuxeo-operation-button>
   </template>
   <script>
