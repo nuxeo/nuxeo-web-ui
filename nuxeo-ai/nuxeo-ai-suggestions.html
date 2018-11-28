@@ -161,14 +161,14 @@ limitations under the License.
             this.suggestions.forEach((suggestion) => {
               const suggestedValue = this.idFunction(suggestion.name);
               const match = isArray ? currentValue.includes(suggestedValue) : currentValue === suggestedValue;
-              matches.set(suggestion, match);
+              matches.set(suggestedValue, match);
             });
           }
           this._inputMatches = matches;
         }
 
         _styleSuggestion(suggestion) {
-          return (this._inputMatches && this._inputMatches.get(suggestion)) ? 'chosen' : '';
+          return (this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name)) ? 'chosen' : '';
         }
 
         _getConfidenceIcon(confidenceLevel) {
