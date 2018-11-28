@@ -5,13 +5,17 @@ Feature: Internal Publication
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Section    | section1         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
       | Section    | section2         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
-    And I login as "Administrator"
 
   Scenario: Publish Current Document Versions
-    Given I have a File document
+    Given user "BJones" exists
+    And I login as "BJones"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section2"
+    And I have a File document
+    And I have permission ReadWrite for this document
     When I browse to the document
-    And The document is unversioned
-    And I click the Create Version button
+    Then The document is unversioned
+    When I click the Create Version button
     Then The create version dialog appears
     When I create a major version
     Then I can perform the following publications
@@ -46,7 +50,8 @@ Feature: Internal Publication
        | /default-domain/sections/section2/my_document | Thumbnail  | 1.1     |
 
   Scenario: Republish Current Document
-    Given  I have a File document
+    Given I login as "Administrator"
+    And I have a File document
     When I browse to the document
     Then I can perform the following publications
       | target            | rendition | version | override |
@@ -68,7 +73,8 @@ Feature: Internal Publication
       | /default-domain/sections/section1/my_document |           | 0.2     |
 
   Scenario: Publish Multiple Documents
-    Given I have the following documents
+    Given I login as "Administrator"
+    And I have the following documents
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
       | File       | PublihsFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
@@ -87,7 +93,8 @@ Feature: Internal Publication
 
   Scenario: Read Only Publications
     Given user "John" exists in group "members"
-    Given  I have a File document
+    And I login as "Administrator"
+    And I have a File document
     When I browse to the document
     Then I can perform the following publications
       | target            | rendition | version | override |
