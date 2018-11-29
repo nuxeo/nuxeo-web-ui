@@ -80,6 +80,7 @@ limitations under the License.
         placeholder="[[i18n('publication.internal.location.placeholder')]]"
         selected-item="{{publishSpace}}"
         min-chars="0"
+        selection-formatter="[[targetFormatter]]"
         enrichers="permissions"
         page-provider="publish_space_suggestion"
         repository="[[document.repository]]">
@@ -147,6 +148,13 @@ limitations under the License.
         _isMultiple: {
           type: Boolean,
           computed: '_computeMultiple(document, documents.length)'
+        },
+
+        targetFormatter: {
+          type: Function,
+          value: function() {
+            return this._targetFormatter.bind(this);
+          }
         }
       },
 
@@ -213,6 +221,10 @@ limitations under the License.
 
       _cancel: function() {
         this.fire('cancel');
+      },
+
+      _targetFormatter: function(doc) {
+        return doc.title;
       }
     });
   </script>
