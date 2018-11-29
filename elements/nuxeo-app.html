@@ -609,7 +609,9 @@ limitations under the License.
             this.loading = false;
           }.bind(this)).catch(function(error) {
             if(error.status === 403){
-              this._defineTaskAndNavigate();
+              this._fetchTasks();
+              this.navigateTo('tasks');
+              this.loading = false;
             }
           }.bind(this));
         } else {
