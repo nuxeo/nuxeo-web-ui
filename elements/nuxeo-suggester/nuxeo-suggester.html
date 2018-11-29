@@ -242,17 +242,17 @@ limitations under the License.
                       label="[[i18n('suggester.label')]]"
                       no-label-float></paper-input>
         </div>
-        <div id="results" hidden$="[[!_canShowResults(searchTerm, items)]]">
+        <div id="results" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="item" href$="[[urlFor(item.type, item.id)]]" on-click="_itemClicked">
+              <a class="item" href$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
                 <div class="thumbnailContainer">
                   <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
                   </iron-image>
                 </div>
                 <div class="details">
                   <div class="itemName">[[item.label]]</div>
-                  <div class="itemPath">[[_getUrl(item)]]</div>
+                  <div class="itemPath">[[_getUrl(item, true, urlFor)]]</div>
                   <nuxeo-document-highlights highlights="[[item.highlights]]"></nuxeo-document-highlights>
                 </div>
               </a>
@@ -271,98 +271,150 @@ limitations under the License.
   </template>
 
   <script>
-    Polymer({
-      is: 'nuxeo-suggester',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
-      properties: {
-        toggled: {
-          type: Boolean,
-          notify: true,
-          value: false
-        },
-        searchTerm: {
-          type: String,
-          value: '',
-          notify: true,
-          observer: '_searchTermChanged'
-        },
-        searchDelay: {
-          type: Number,
-          value: 200
-        },
-        target: {
-          type: Object,
-          value: function() {
-            return this;
+    var Nuxeo = Nuxeo || {};
+    (function() {
+      var commands = [];
+      Nuxeo._Suggester = Nuxeo._Suggester || {};
+      /**
+       * Adds a custom command to nuxeo-suggester. Expected command format:
+       * { id: String, startsWith: Boolean, searchTerm: String, suggestion: Object, run: Function }
+       * Here, suggestion must have and id, icon and label.
+       */
+      Nuxeo._Suggester.addCommand = function(command) {
+        if (!command) {
+          return;
+        }
+        var index = commands.indexOf(function(c) {
+          return c.id === command.id
+        });
+        if (index > -1) {
+          commands.splice(index, 1, command);
+        } else {
+          commands.push(command);
+        }
+        command.suggestion.command = command;
+      };
+      Polymer({
+        is: 'nuxeo-suggester',
+        behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+        properties: {
+          toggled: {
+            type: Boolean,
+            notify: true,
+            value: false
+          },
+          searchTerm: {
+            type: String,
+            value: '',
+            notify: true,
+            observer: '_searchTermChanged'
+          },
+          searchDelay: {
+            type: Number,
+            value: 200
+          },
+          target: {
+            type: Object,
+            value: function() {
+              return this;
+            }
+          },
+          items: {
+            type: Array
           }
         },
-        items: {
-          type: Array
-        }
-      },
 
-      toggle: function() {
-        this.toggled = !this.toggled;
-        this.searchTerm = '';
-        this.toggleClass('toggled', this.toggled, this.$.searchButton);
-        if (this.toggled) {
-          this.$.searchInput.focus();
-        }
-      },
+        toggle: function() {
+          this.toggled = !this.toggled;
+          this.searchTerm = '';
+          this.toggleClass('toggled', this.toggled, this.$.searchButton);
+          if (this.toggled) {
+            this.$.searchInput.focus();
+          }
+        },
 
-      closeResults: function(e) {
-        e.detail.keyboardEvent.preventDefault();
-        this.toggle();
-      },
-
-      _searchTermChanged: function() {
-        this.$.selector.selected = 0;
-        if (this.searchTerm === '') {
-          this.items = [];
-        } else {
-          this.debounce('suggester-search', function() {
-            this.$.op.execute();
-          }.bind(this), this.searchDelay);
-        }
-      },
-
-      _canShowResults: function() {
-        return this.searchTerm !== '' && this.items &&
-          (Array.isArray(this.items) ? this.items.length > 0 : true);
-      },
-
-      _getIcon: function(item) {
-        if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
-          return this.$.nxcon.url + '/' + item.thumbnailUrl;
-        } else {
-          return this.$.nxcon.url + item.icon;
-        }
-      },
-
-      _getUrl: function(item) {
-        return this.urlFor(item.type, item.id).replace('/#!', '');
-      },
-
-      _upPressed: function(e) {
-        e.detail.keyboardEvent.preventDefault();
-        this.$.selector.selectPrevious();
-      },
-
-      _downPressed: function(e) {
-        e.detail.keyboardEvent.preventDefault();
-        this.$.selector.selectNext();
-      },
-
-      _enterPressed: function(e) {
-        if (this.$.selector.items.length > 0) {
+        closeResults: function(e) {
           e.detail.keyboardEvent.preventDefault();
-          this.$.selector.items[this.$.selector.selected].click();
-        }
-      },
+          this.toggle();
+        },
 
-      _itemClicked: function() {
-        this.toggle();
-      }
-    });
+        _searchTermChanged: function() {
+          this.$.selector.selected = 0;
+          if (this.searchTerm === '') {
+            this.items = [];
+          } else {
+            this.debounce('suggester-search', function() {
+              this.$.op.execute().then(function() {
+                commands.forEach(function(command) {
+                  var addSuggestion = false;
+                  if (command.trigger.regex) {
+                    addSuggestion = this.searchTerm.match(command.trigger.regex);
+                  } else if (command.trigger.searchTerm) {
+                    var commandTerm = command.trigger.searchTerm.trim().toLowerCase();
+                    var searchTerm = this.searchTerm.trim().toLowerCase();
+                    addSuggestion = command.trigger.startsWith ?
+                                          commandTerm.startsWith(searchTerm) :
+                                          commandTerm === searchTerm;
+                  }
+                  if (addSuggestion) {
+                    this.push('items', command.suggestion);
+                  }
+                }.bind(this));
+              }.bind(this));
+            }.bind(this), this.searchDelay);
+          }
+        },
+
+        _canShowResults: function() {
+          return this.searchTerm !== '' && this.items &&
+            (Array.isArray(this.items) ? this.items.length > 0 : true);
+        },
+
+        _getIcon: function(item) {
+          if (item.command) {
+            return item.icon;
+          } else if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
+            return this.$.nxcon.url + '/' + item.thumbnailUrl;
+          } else {
+            return this.$.nxcon.url + item.icon;
+          }
+        },
+
+        _getUrl: function(item, replaceHashbang) {
+          var url;
+          if (!item.command) {
+            url = item.type && this.urlFor(item.type, item.id)
+          }
+          if (url && replaceHashbang) {
+            url = url.replace('/#!', '');
+          }
+          return url;
+        },
+
+        _upPressed: function(e) {
+          e.detail.keyboardEvent.preventDefault();
+          this.$.selector.selectPrevious();
+        },
+
+        _downPressed: function(e) {
+          e.detail.keyboardEvent.preventDefault();
+          this.$.selector.selectNext();
+        },
+
+        _enterPressed: function(e) {
+          if (this.$.selector.items.length > 0) {
+            e.detail.keyboardEvent.preventDefault();
+            this.$.selector.items[this.$.selector.selected].click();
+          }
+        },
+
+        _itemClicked: function(e) {
+          if (e.model.item.command && e.model.item.command.run) {
+            e.model.item.command.run(this.searchTerm);
+          }
+          this.toggle();
+        },
+      });
+    })();
   </script>
 </dom-module>
