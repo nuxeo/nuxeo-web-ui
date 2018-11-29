@@ -242,7 +242,7 @@ limitations under the License.
         <div id="results" hidden$="[[!_canShowResults(searchTerm, items)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="item" href$="[[urlFor(item.type, item.id)]]" on-tap="_itemClicked">
+              <a class="item" href$="[[urlFor(item.type, item.id)]]" on-click="_itemClicked">
                 <div class="thumbnailContainer">
                   <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
                   </iron-image>
