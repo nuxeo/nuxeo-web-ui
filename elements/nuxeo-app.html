@@ -93,6 +93,8 @@ limitations under the License.
 <!-- performance analyzer -->
 <script src="nuxeo-app/performance-analyzer.js"></script>
 
+<link rel="import" href="nuxeo-sardine.html">
+
 <script>
   Polymer.setPassiveTouchGestures(true);
 </script>
@@ -292,6 +294,8 @@ limitations under the License.
                     enrichers="[[enrichers]]"
                     headers="[[headers]]">
     </nuxeo-document>
+
+    <nuxeo-sardine hidden></nuxeo-sardine>
 
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
     <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
