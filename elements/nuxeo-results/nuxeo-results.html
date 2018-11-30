@@ -378,12 +378,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       fetch: function() {
         if (this.view) {
           this.debounce('fetch', function() {
-            this.view.fetch().then(function() {
-              if (this.nxProvider) {
-                this.quickFilters = this.nxProvider.quickFilters;
-                this.resultsCount = this.nxProvider.resultsCount;
-              }
-            }.bind(this));
+            this.view.fetch();
           }, 100);
         }
       },
@@ -414,6 +409,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.listen(view, 'columns-changed', '_columnsChanged');
           this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
           this.listen(view, 'settings-changed', '_saveViewSettings');
+          this.listen(view, 'items-changed', '_itemsChanged');
+          this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
           view.nxProvider = this.nxProvider;
           // update view
           view.reset();
@@ -574,6 +571,21 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
         return this.nxProvider && this.resultsCount;
       },
 
+      _itemsChanged: function(e) {
+        // XXX: the condition `!e.detail.path` is used to prevent `resultsCount` updates when a single item is changed,
+        // since it is not likelty for the results count to have changed.
+        if (e.detail.value && !e.detail.path) {
+          this.resultsCount = this.nxProvider.resultsCount;
+        }
+      },
+
+      _quickFiltersChanged: function(e) {
+        // XXX: the condition `!e.detail.path` is used to prevent `quickFilters` updates when a single item is changed,
+        // since it is not likelty for the quick filters to have changed.
+        if (e.detail.value && !e.detail.path) {
+          this.quickFilters = this.nxProvider.quickFilters;
+        }
+      },
     });
   </script>
 
