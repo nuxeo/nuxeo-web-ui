@@ -376,10 +376,20 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       fetch: function() {
-        if (this.view) {
+        return new Promise(function(resolve, error) {
           this.debounce('fetch', function() {
-            this.view.fetch();
-          }, 100);
+            if (this.view) {
+              this.view.fetch().then(resolve).catch(error);
+            } else {
+              resolve();
+            }
+          }.bind(this), 100);
+        }.bind(this));
+      },
+
+      reset: function() {
+        if (this.view) {
+          this.view.reset();
         }
       },
 
@@ -413,7 +423,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
           view.nxProvider = this.nxProvider;
           // update view
-          view.reset();
+          this.reset();
           this.fetch();
           this.fire('search-results-view', {view: view, name: this.name});
         }

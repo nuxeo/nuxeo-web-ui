@@ -115,7 +115,7 @@ limitations under the License.
                                     search-name="[[searchName]]"
                                     aggregations="[[aggregations]]"
                                     params="[[_params]]"
-                                    on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
+                                    on-layout-changed="_formLayoutChanged"></nuxeo-search-form-layout>
           <paper-spinner-lite active="[[loading]]"></paper-spinner-lite>
         </iron-collapse>
         <div class="buttons" hidden$="[[!opened]]">
@@ -133,9 +133,10 @@ limitations under the License.
 
     <template is="dom-if" if="[[visible]]">
       <nuxeo-search-results-layout id="results"
-                                  search-name="[[searchName]]"
-                                  nx-provider="[[_nxProvider]]"
-                                  on-navigate="_navigateFromSearch"></nuxeo-search-results-layout>
+                                   search-name="[[searchName]]"
+                                   nx-provider="[[_nxProvider]]"
+                                   on-navigate="_navigateFromSearch"
+                                   on-layout-changed="_resultsLayoutChanged"></nuxeo-search-results-layout>
     </template>
 
   </template>
@@ -263,9 +264,12 @@ limitations under the License.
         skipAggregates: Boolean,
 
         /**
-         * Currently selected view
+         * The `nuxeo-results` element inside the search results layout.
          */
-        view: Object,
+        results: {
+          type: Object,
+          observer: '_resultsChanged',
+        },
 
         _params: Object,
         _paramsCount: Number,
@@ -281,22 +285,15 @@ limitations under the License.
         if (!this._nxProvider) {
           this._nxProvider = this.$.provider;
         }
-        document.addEventListener('search-results-view', function(e) {
-          if (this.searchName === e.detail.name) {
-            this.view = e.detail.view;
-          }
-        }.bind(this));
       },
 
-      get form() {
+      get formLayout() {
         var form = this.$$('#form');
-        if (form) {
-          return form.element;
-        }
+        return form && form.element;
       },
 
-      get results() {
-        return this.$.results.element;
+      get resultsLayout() {
+        return this.$.results && this.$.results.element;
       },
 
       toggleExpand: function() {
@@ -334,15 +331,15 @@ limitations under the License.
       },
 
       _search: function() {
-        if (this.view) {
-          this.view.reset();
-          this.view.fetch();
+        if (this.results) {
+          this.results.reset();
+          this.results.fetch();
         }
       },
 
       _aggregationsChanged: function() {
-        if (this.form) {
-          this.form.aggregations = this.aggregations;
+        if (this.formLayout) {
+          this.formLayout.aggregations = this.aggregations;
         }
       },
 
@@ -352,8 +349,8 @@ limitations under the License.
       },
 
       _clear: function() {
-        if (this.form && this.form.clear !== undefined && typeof this.form.clear === 'function') {
-          this.form.clear();
+        if (this.formLayout && this.formLayout.clear !== undefined && typeof this.formLayout.clear === 'function') {
+          this.formLayout.clear();
         }
         this._paramsChanged();
         if (!this.auto) {
@@ -364,7 +361,7 @@ limitations under the License.
         }
       },
 
-      _formChanged: function(e) {
+      _formLayoutChanged: function(e) {
         this._clear();
         var form = e.detail.value;
         // setup data binding
@@ -386,11 +383,25 @@ limitations under the License.
         this._search();
       },
 
+      _resultsLayoutChanged: function(e) {
+        this.results = e.detail.value.shadowRoot.querySelector('nuxeo-results');
+      },
+
+      _resultsChanged: function() {
+        if (this.searchForm) {
+          this.searchForm.results = this.results;
+        }
+      },
+
       _searchFormChanged: function(searchForm) {
         if (searchForm) {
           this._nxProvider = searchForm.nxProvider;
           this.provider = this._nxProvider.provider;
           this.searchName = searchForm.searchName;
+          var results = this.results;
+          if (results) {
+            searchForm.results = results;
+          }
         }
       },
 

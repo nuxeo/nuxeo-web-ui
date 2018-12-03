@@ -268,7 +268,7 @@ limitations under the License.
                                     search-name="[[searchName]]"
                                     aggregations="[[aggregations]]"
                                     params="{{params}}"
-                                    on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
+                                    on-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
@@ -538,9 +538,9 @@ limitations under the License.
         },
 
         /**
-         * Currently selected view in search results (grid, justified grid, data table, list views).
+         * The `nuxeo-results` element bound to this form.
          */
-        view: Object,
+        results: Object,
 
         /**
          * If `true`, aggregagtes from page provider definition will not be computed.
@@ -570,14 +570,6 @@ limitations under the License.
         }
       },
 
-      ready: function() {
-        document.addEventListener('search-results-view', function(e) {
-          if (this.searchName === e.detail.name) {
-            this.view = e.detail.view;
-          }
-        }.bind(this));
-      },
-
       get nxProvider() {
         return this.$.provider;
       },
@@ -591,9 +583,9 @@ limitations under the License.
           if (this.queue) {
             this.$.list.fetch();
           }
-          if (this.view) {
-            this.view.reset();
-            this._fetch(this.view);
+          if (this.results) {
+            this.results.reset();
+            this._fetch(this.results);
           }
         }
       },
@@ -654,11 +646,11 @@ limitations under the License.
       _paramsChanged: function() {
         this.$.provider.page = 1;
         this.dirty = true;
-        if (this.view && this.auto && this.visible) {
+        if (this.results && this.auto && this.visible) {
           this.__fetchDebouncer = Polymer.Debouncer.debounce(this.__fetchDebouncer, Polymer.Async.timeOut.after(300),
             function() {
-              this.view.reset();
-              this._fetch(this.view);
+              this.results.reset();
+              this._fetch(this.results);
             }.bind(this));
         }
       },
@@ -710,9 +702,9 @@ limitations under the License.
       },
 
       _search: function() {
-        if (this.view) {
-          this.view.reset();
-          return this._fetch(this.view).then(this._navigateToResults.bind(this));
+        if (this.results) {
+          this.results.reset();
+          return this._fetch(this.results).then(this._navigateToResults.bind(this));
         } else if (this.visible) {
           // if the view is not initialized yet, navigating to the search will trigger a search and display the results
           this.navigateTo('search', this.searchName);
