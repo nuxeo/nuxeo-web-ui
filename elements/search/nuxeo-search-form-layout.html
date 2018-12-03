@@ -124,7 +124,7 @@ limitations under the License.
       },
 
       _formChanged: function (e) {
-        this.fire('search-form-layout-changed', e.detail);
+        this.fire('layout-changed', e.detail, { bubbles: false});
         // forward params change events
         this.element.addEventListener('params-changed', function(e) {
           this.notifyPath(e.detail.path || 'params', e.detail.value);

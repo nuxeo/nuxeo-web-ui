@@ -28,7 +28,8 @@ limitations under the License.
 
     <nuxeo-layout id="results" href="[[_resultsHref(searchName)]]"
                                model="[[_resultsModel(searchName,nxProvider)]]"
-                               error="[[i18n('searchResults.layoutNotFound', searchName)]]"></nuxeo-layout>
+                               error="[[i18n('searchResults.layoutNotFound', searchName)]]"
+                               on-element-changed="_formChanged"></nuxeo-layout>
 
   </template>
 
@@ -67,6 +68,10 @@ limitations under the License.
 
       _resultsModel: function () {
         return { nxProvider: this.nxProvider, name: this.searchName };
+      },
+
+      _formChanged: function (e) {
+        this.fire('layout-changed', e.detail, { bubbles: false});
       }
 
     });
