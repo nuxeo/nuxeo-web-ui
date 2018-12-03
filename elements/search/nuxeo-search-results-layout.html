@@ -54,11 +54,32 @@ limitations under the License.
         model: {
           type: Object,
           value: function() { return {}; }
-        }
+        },
+        /**
+         * The `nuxeo-results` element bound to this element.
+         */
+        results: {
+          type: Object,
+          notify: true
+        },
       },
 
       get element() {
-        return this.$.results.element;
+        return this.$.results && this.$.results.element;
+      },
+
+      fetch: function() {
+        if (this.results) {
+          this.results.fetch();
+        } else {
+          return Promise.resolve();
+        }
+      },
+
+      reset: function() {
+        if (this.results) {
+          this.results.reset();
+        }
       },
 
       _resultsHref: function() {
@@ -71,7 +92,34 @@ limitations under the License.
       },
 
       _formChanged: function (e) {
-        this.fire('layout-changed', e.detail, { bubbles: false});
+        this.results = e.detail.value && this._grabResults([e.detail.value]);
+      },
+
+      _grabResults: function(els) {
+        if (!Array.isArray(els) || els.length === 0) {
+          return;
+        }
+        // let's find the results element on the local and light dom of the current elements
+        var i, el;
+        for (i = 0; i < els.length; i++) {
+          el = els[i];
+          var results = Polymer.dom(el).querySelector('nuxeo-results');
+          if (!results && el.root) {
+            results = Polymer.dom(el.root).querySelector('nuxeo-results');
+          }
+          if (results) {
+            return results;
+          }
+        }
+        // none found; let's do the same for the children of the current elements
+        var children = [];
+        for (i = 0; i < els.length; i++) {
+          el = els[i];
+          if (el.root) {
+            children = [].concat.apply(children, children.concat(Polymer.dom(el.root).querySelectorAll('*')));
+          }
+        }
+        return this._grabResults(children);
       }
 
     });

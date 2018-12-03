@@ -115,7 +115,7 @@ limitations under the License.
                                     search-name="[[searchName]]"
                                     aggregations="[[aggregations]]"
                                     params="[[_params]]"
-                                    on-layout-changed="_formLayoutChanged"></nuxeo-search-form-layout>
+                                    on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <paper-spinner-lite active="[[loading]]"></paper-spinner-lite>
         </iron-collapse>
         <div class="buttons" hidden$="[[!opened]]">
@@ -136,7 +136,7 @@ limitations under the License.
                                    search-name="[[searchName]]"
                                    nx-provider="[[_nxProvider]]"
                                    on-navigate="_navigateFromSearch"
-                                   on-layout-changed="_resultsLayoutChanged"></nuxeo-search-results-layout>
+                                   on-results-changed="_resultsChanged"></nuxeo-search-results-layout>
     </template>
 
   </template>
@@ -263,14 +263,6 @@ limitations under the License.
          */
         skipAggregates: Boolean,
 
-        /**
-         * The `nuxeo-results` element inside the search results layout.
-         */
-        results: {
-          type: Object,
-          observer: '_resultsChanged',
-        },
-
         _params: Object,
         _paramsCount: Number,
         _nxProvider: HTMLElement,
@@ -287,13 +279,13 @@ limitations under the License.
         }
       },
 
-      get formLayout() {
+      get form() {
         var form = this.$$('#form');
         return form && form.element;
       },
 
-      get resultsLayout() {
-        return this.$.results && this.$.results.element;
+      get results() {
+        return this.$$('#results');
       },
 
       toggleExpand: function() {
@@ -338,8 +330,8 @@ limitations under the License.
       },
 
       _aggregationsChanged: function() {
-        if (this.formLayout) {
-          this.formLayout.aggregations = this.aggregations;
+        if (this.form) {
+          this.form.aggregations = this.aggregations;
         }
       },
 
@@ -349,8 +341,8 @@ limitations under the License.
       },
 
       _clear: function() {
-        if (this.formLayout && this.formLayout.clear !== undefined && typeof this.formLayout.clear === 'function') {
-          this.formLayout.clear();
+        if (this.form && this.form.clear !== undefined && typeof this.form.clear === 'function') {
+          this.form.clear();
         }
         this._paramsChanged();
         if (!this.auto) {
@@ -361,7 +353,7 @@ limitations under the License.
         }
       },
 
-      _formLayoutChanged: function(e) {
+      _formChanged: function(e) {
         this._clear();
         var form = e.detail.value;
         // setup data binding
@@ -383,13 +375,10 @@ limitations under the License.
         this._search();
       },
 
-      _resultsLayoutChanged: function(e) {
-        this.results = e.detail.value.shadowRoot.querySelector('nuxeo-results');
-      },
-
       _resultsChanged: function() {
-        if (this.searchForm) {
-          this.searchForm.results = this.results;
+        var results = this.results;
+        if (this.searchForm && results) {
+          this.searchForm.results = results.results;
         }
       },
 
@@ -400,7 +389,7 @@ limitations under the License.
           this.searchName = searchForm.searchName;
           var results = this.results;
           if (results) {
-            searchForm.results = results;
+            searchForm.results = results.results;
           }
         }
       },
