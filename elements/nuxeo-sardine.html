@@ -151,9 +151,14 @@ limitations under the License.
           this._req = requestAnimationFrame(this._animateSardine.bind(this));
         }.bind(this);
         this.hidden = false;
-        window.addEventListener('pointermove', this._onpointermove, false);
+        if (window.PointerEvent) {
+          window.addEventListener('pointermove', this._onpointermove, false);
+          window.addEventListener('pointerout', this._onpointerout, false);
+        } else {
+          window.addEventListener('mousemove', this._onpointermove, false);
+          window.addEventListener('mouseout', this._onpointerout, false);
+        }
         window.addEventListener('keyup', this._onkeypress, false);
-        window.addEventListener('pointerout', this._onpointerout, false);
       },
 
       _animateSardine: function() {
