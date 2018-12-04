@@ -108,6 +108,33 @@ limitations under the License.
       },
 
       ready: function() {
+        this._onkeypress = function(e) {
+          if (e.key === 'Escape') {
+            this._off();
+          }
+        }.bind(this);
+        this._onpointerout = function() {
+          this._unknownLocation = true;
+        }.bind(this);
+        this._ondblclick = function() {
+          this._off();
+        }.bind(this);
+        this._onpointermove = function(e) {
+          if (this._idleTimeout) {
+            clearTimeout(this._idleTimeout);
+          }
+          this._idleTimeout = setTimeout(function() {
+            this.feeling = '💤';
+          }.bind(this), 15000);
+          this._unknownLocation = false;
+          // XXX this will only capture the first touch on mobile, because the browser will reclaim the move for itself.
+          // see https://developer.mozilla.org/en-US/docs/Web/Events/pointermove for more
+          this._lastPointerEvent = e;
+          if (this._req) {
+            cancelAnimationFrame(this._req);
+          }
+          this._req = requestAnimationFrame(this._animate.bind(this));
+        }.bind(this);
         customElements.whenDefined('nuxeo-suggester').then(function() {
           this.$.sardine.style.left = Math.random() * window.innerWidth + 'px';
           this.$.sardine.style.top = Math.random() * window.innerHeight + 'px';
@@ -122,35 +149,14 @@ limitations under the License.
               icon: 'images/gift.png',
               label: 'I love sardines!!! 🐟🐟🐟💝💝💝',
             },
-            run: this._sardineOn.bind(this),
+            run: this._on.bind(this),
           });
         }.bind(this));
       },
 
-      _sardineOn: function() {
-        this._onkeypress = this._onkeypress || function(e) {
-          if (e.key === 'Escape') {
-            this._sardineOff();
-          }
-        }.bind(this);
-        this._onpointerout = this._onpointerout || function() {
-          this._unknownLocation = true;
-        }.bind(this);
-        this._ondblclick = this._ondblclick || function() {
-          this._sardineOff();
-        }.bind(this);
-        this.$.sardine.addEventListener('dblclick', this._ondblclick);
-        this._onpointermove = this._onpointermove || function(e) {
-          this._unknownLocation = false;
-          // XXX this will only capture the first touch on mobile, because the browser will reclaim the move for itself.
-          // see https://developer.mozilla.org/en-US/docs/Web/Events/pointermove for more
-          this._lastPointerEvent = e;
-          if (this._req) {
-            cancelAnimationFrame(this._req);
-          }
-          this._req = requestAnimationFrame(this._animateSardine.bind(this));
-        }.bind(this);
+      _on: function() {
         this.hidden = false;
+        this.$.sardine.addEventListener('dblclick', this._ondblclick);
         if (window.PointerEvent) {
           window.addEventListener('pointermove', this._onpointermove, false);
           window.addEventListener('pointerout', this._onpointerout, false);
@@ -161,13 +167,7 @@ limitations under the License.
         window.addEventListener('keyup', this._onkeypress, false);
       },
 
-      _animateSardine: function() {
-        if (this._idleTimeout) {
-          clearTimeout(this._idleTimeout);
-        }
-        this._idleTimeout = setTimeout(function() {
-          this.feeling = '💤';
-        }.bind(this), 15000);
+      _animate: function() {
         var rect = this.$.sardine.getBoundingClientRect();
         var x1 = rect.left;
         var y1 = rect.top;
@@ -202,11 +202,11 @@ limitations under the License.
             }
             this.$.sardine._dir = dir;
           }
-          this._req = requestAnimationFrame(this._animateSardine.bind(this));
+          this._req = requestAnimationFrame(this._animate.bind(this));
         }
       },
 
-      _sardineOff: function() {
+      _off: function() {
         this.hidden = true;
         if (this._req) {
           cancelAnimationFrame(this._req);
