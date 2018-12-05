@@ -284,7 +284,7 @@
   "comments.options.edit": "編集",
   "comments.options.reply": "返信",
   "comments.showAll": "すべて表示",
-  "comments.submit.tooltip": "CTRL + Enter to submit",
+  "comments.submit.tooltip": "CTRL +入力して送信",
   "comments.writePlaceholder.comment": "ここにコメントを書く",
   "comments.writePlaceholder.reply": "ここに返信を書く",
   "csv.import": "CSV",
