@@ -329,9 +329,7 @@ limitations under the License.
         this.progress = false;
         if (this.immediate) {
           this._setHasFiles(false);
-          this.$.doc.get().then(function(response) {
-            this.set('document.properties.' + this._parsedXpath, this.get(this._parsedXpath, response.properties));
-          }.bind(this));
+          this.fire('document-updated');
         }
       },
 
