@@ -1,9 +1,8 @@
+importScripts('workbox/workbox-sw.js');
+workbox.loadModule('workbox-strategies');
+
 self.addEventListener('install', event => {
   self.skipWaiting();
-
-  importScripts('workbox/workbox-sw.js');
-
-  workbox.setConfig({ modulePathPrefix: 'workbox/' });
 
   const params = new URL(self.location.href).searchParams;
   if (params.has('ts')) {
