@@ -138,6 +138,8 @@ gulp.task('move-elements', function() {
   // fix asset path
   var elements = gulp.src([dist('elements/nuxeo-app.html'), dist('elements/elements.html')])
     .pipe($.replace('..\/bower_components', 'bower_components'))
+    .pipe($.replace('..\/moment\/min\/moment-with-locales.min.js',
+      'bower_components/moment/min/moment-with-locales.min.js'))
     .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
@@ -193,4 +195,3 @@ gulp.task('serve', ['lint', 'merge-message-files'], function() {
   gulp.watch(['{scripts,elements}/**/{*.js,*.html}'], ['lint']);
   gulp.watch(['i18n/**/*'], ['merge-message-files']);
 });
-

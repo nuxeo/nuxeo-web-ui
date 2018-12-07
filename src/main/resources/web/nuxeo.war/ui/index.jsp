@@ -91,8 +91,6 @@ limitations under the License.
 
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
-
   <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
 
   <script>
