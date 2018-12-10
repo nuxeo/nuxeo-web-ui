@@ -22,14 +22,62 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-l10nxvocabulary-edit-layout">
   <template>
-    <style>
+    <style include="iron-flex iron-positioning nuxeo-styles">
       *[role=widget] {
         margin-bottom: 16px;
+      }
+
+      :host {
+        --nuxeo-tree-theme: {
+          padding: 1em;
+          color: var(--nuxeo-drawer-text);
+        };
+        --nuxeo-tree-node-theme: {
+          min-height: 24px;
+        };
+        --nuxeo-tree-children-theme: {
+          padding-left: 1em;
+        };
+        --nuxeo-tree-node-more-theme: {
+          line-height: 1.3em;
+          display: inline-block;
+          vertical-align: text-top;
+          margin-left: 1.3em;
+          word-break: break-word;
+        }
       }
 
       label {
         @apply --nuxeo-label;
       }
+
+      .node-name {
+        line-height: 1.3em;
+        display: inline-block;
+        vertical-align: text-top;
+        margin-left: 1.3em;
+        word-break: break-word;
+      }
+
+      a {
+        @apply --nuxeo-link;
+      }
+
+      a:hover {
+        @apply --nuxeo-link-hover;
+      }
+
+      iron-icon {
+        opacity: .3;
+        width: 1.3rem;
+        margin-right: -1.6em;
+        margin-top: -0.07rem;
+      }
+
+      [toggle] {
+        cursor: pointer;
+      }
+
     </style>
 
     <div role="widget">
@@ -40,14 +88,14 @@ limitations under the License.
         <iron-form id="form">
           <form>
             <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
-              <template>
+              <template  class="horizontal layout">
                 <div name$="[[item.properties.id]]">
-                  <template is="dom-if" if="[[!isLeaf]]">
+                  <template class="flex" is="dom-if" if="[[!isLeaf]]">
                     <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
                   </template>
                   <span class="flex node-name" select>
-                  <a class="parent">[[item.properties.id]]</a>
-                </span>
+                    <a class="parent">[[item.properties.id]]</a>
+                  </span>
                 </div>
               </template>
             </nuxeo-tree>
