@@ -149,21 +149,21 @@ limitations under the License.
 
       properties: {
         /**
-         * The `nuxeo-page-provider` instance used to perform the search.
-         **/
+         * The id of the `nuxeo-page-provider` instance used to perform the search.
+         */
         provider: {
           type: String
         },
         /**
-         * The page size passed on to `provider`.
-         **/
+         * The number of results per page.
+         */
         pageSize: {
           type: Number,
           value: 40
         },
         /**
-         * The parameters passed on to `provider`.
-         **/
+         * The query parameters passed on to `provider`.
+         */
         params: {
           type: Object,
           observer: '_paramsChanged',
@@ -186,14 +186,15 @@ limitations under the License.
           value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
         },
         /**
-         * The schemas passed on to `provider`.
-         **/
+         * List of comma separated values of the document schemas to be returned.
+         * All document schemas are returned by default.
+         */
         schemas: {
           type: String
         },
         /**
          * If `true`, requests from `provider` are in flight.
-         **/
+         */
         loading: {
           type: Boolean,
           reflectToAttribute: true,
@@ -201,18 +202,19 @@ limitations under the License.
         },
         /**
          * The name of the search layout.
-         **/
+         */
         searchName: String,
         /**
          * The aggregations returned by `provider`.
-         **/
+         */
         aggregations: {
           type: Object,
           observer: '_aggregationsChanged',
           notify: true
         },
         /**
-         * Quick filters state of `provider`.
+         * Name of the quick filters to be displayed in case you don't want to display all of them.
+         * Expected format : ['quickfilter1','quickfilter2'].
          */
         quickFilters: {
           type: Array,
@@ -220,13 +222,13 @@ limitations under the License.
         },
         /**
          * If `true`, the current element is visible.
-         **/
+         */
         visible: {
           type: Boolean,
           value: false
         },
         /**
-         * If `true`, automatically execute the search each time a param is changed.
+         * If `true`, automatically execute the search when either `provider` or `params` changes.
          */
         auto: {
           type: Boolean,
@@ -239,14 +241,14 @@ limitations under the License.
           type: Boolean,
           value: false
         },
-        /*
+        /**
          * If `true`, opens the collapsible top filtering panel.
          */
         opened: {
           type: Boolean,
           value: false
         },
-        /*
+        /**
          * An external search form (containing its own page provider) will be used, instead of the embeded one.
          * In case this is set, the following properties should be ignored, as the behavior they affect will be
          * controlled by the search form: `provider`, `pageSize`, `params`, `schemas`, `enrichers`, `headers`,
@@ -259,7 +261,7 @@ limitations under the License.
         },
 
         /**
-         * If `true`, aggregagtes from page provider definition will not be computed.
+         * If `true`, aggregates from page provider definition will not be computed.
          */
         skipAggregates: Boolean,
 
