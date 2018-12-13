@@ -87,7 +87,7 @@ limitations under the License.
         this._src = null;
         this._srcDeleted = false;
         if (this.document && this.document.isProxy) {
-          this.$.srcDoc.docId = this.document.versionableId;
+          this.$.srcDoc.docId = this.document.properties['rend:sourceId'] || this.document.versionableId;
           this.$.srcDoc.get().then(function(src) {
             this._src = src;
             this._redirectDoc =
