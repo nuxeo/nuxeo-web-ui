@@ -96,18 +96,11 @@ limitations under the License.
           <span>[[_labelForInitiatedWf(workflow, currentUser)]]</span>
         </div>
         <a class="viewGraph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</a>
+        <nuxeo-workflow-graph id="graph-[[workflow.id]]" workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
         <template is="dom-if" if="[[_hasPermissionToAbandon(workflow.initiator, currentUser)]]">
           <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
         </template>
       </div>
-      <nuxeo-dialog id="graphDialog-[[workflow.id]]" with-backdrop>
-        <paper-dialog-scrollable>
-          <nuxeo-workflow-graph workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
-        </paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
-        </div>
-      </nuxeo-dialog>
       <nuxeo-dialog id="tasksDialog-[[workflow.id]]" with-backdrop>
         <nuxeo-tasks-list id="taskLists" tasks="[[_wfTasks]]" no-navigation></nuxeo-tasks-list>
         <div class="buttons">
@@ -234,7 +227,7 @@ limitations under the License.
       },
 
       _toggleGraphDialog: function(e) {
-        this.$$('#graphDialog-' + e.model.workflow.id).toggle();
+        this.$$('#graph-' + e.model.workflow.id).show();
       }
 
     });
