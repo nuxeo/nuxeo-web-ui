@@ -64,7 +64,22 @@ limitations under the License.
           type: Object,
           value: {},
           observer: '_entityChanged'
-        }
+        },
+        /**
+         * The route under which this page is available.
+         */
+        route: {
+          type: String,
+          value: 'page'
+        },
+        /**
+         * An array with the route parameters. This page expects two parameters: the first is the entity
+         * type (user or group), and the second is the entity id.
+         */
+        routeParams: {
+          type: Array,
+          observer: '_routeParamsChanged'
+        },
       },
 
       listeners: {
@@ -73,11 +88,22 @@ limitations under the License.
         'manageGroup': '_handleUGMmanageGroup'
       },
 
+      _routeParamsChanged: function(route) {
+        if (route && route.length === 2) {
+          this.entity = { type: route[0], id: route[1] };
+        } else {
+          this.entity = {};
+        }
+      },
+
       _entityChanged: function() {
         if (!this.visible) {
           return;
         }
-        var management = this.root.querySelector('nuxeo-user-group-management');
+        var management = this.$$('nuxeo-user-group-management');
+        if (!management) {
+          return;
+        }
         if (this.entity && this.entity.id && this.entity.type) {
           if (this.entity.type === 'group') {
             management.selectedGroup = this.entity.id;
@@ -106,19 +132,19 @@ limitations under the License.
 
       _handleUGMgoHome: function() {
         this.entity = {};
-        this.navigateTo('administration', 'user-group-management');
+        this.navigateTo(this.route, 'user-group-management');
       },
 
       _handleUGMmanageUser: function(e) {
         this.entity = {type: 'user', id: e.detail.user};
         var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
-        this.navigateTo('administration', url);
+        this.navigateTo(this.route, url);
       },
 
       _handleUGMmanageGroup: function(e) {
         this.entity = {type: 'group', id: e.detail.group};
         var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
-        this.navigateTo('administration', url);
+        this.navigateTo(this.route, url);
       },
 
       _observePage: function() {
