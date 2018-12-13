@@ -20,12 +20,9 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../nuxeo-workflow-graph/nuxeo-workflow-graph.html">
 <link rel="import" href="nuxeo-document-task-assignment-popup.html">
@@ -94,17 +91,7 @@ limitations under the License.
 
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
-          <nuxeo-dialog id="graphDialog" with-backdrop>
-            <paper-dialog-scrollable>
-              <div class="graph-container">
-                <nuxeo-workflow-graph workflow-id="[[task.workflowInstanceId]]"></nuxeo-workflow-graph>
-              </div>
-            </paper-dialog-scrollable>
-            <div class="buttons">
-              <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
-            </div>
-          </nuxeo-dialog>
-
+          <nuxeo-workflow-graph id="graph" workflow-id="[[task.workflowInstanceId]]"></nuxeo-workflow-graph>
           <nuxeo-document-task-assignment-popup id="assignmentDialog" task="[[task]]" action="[[action]]"></nuxeo-document-task-assignment-popup>
 
           <div class="heading">
@@ -214,7 +201,7 @@ limitations under the License.
       },
 
       _toggleGraphDialog: function() {
-        this.$.graphDialog.toggle();
+        this.$.graph.show();
       },
 
       _toggleAssignmentDialog: function(e) {

@@ -17,7 +17,11 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 
 <!-- Note: support for user supplied segments was removed in 2.0.5 -->
 <script src="../../bower_components/jsPlumb/dist/js/jsPlumb-2.0.4.js"></script>
@@ -135,13 +139,22 @@ limitations under the License.
                     response="{{graph}}"
                     headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
-    <div id="container"></div>
+    <nuxeo-dialog id="graphDialog" with-backdrop>
+      <paper-dialog-scrollable>
+        <div class="graph-container">
+          <div id="container"></div>
+        </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
+      </div>
+    </nuxeo-dialog>
   </template>
 
   <script>
     Polymer({
       is: 'nuxeo-workflow-graph',
-      behaviors: [Polymer.IronResizableBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Polymer.IronResizableBehavior],
       properties: {
         workflowId: {
           type: String
@@ -192,11 +205,10 @@ limitations under the License.
 
         _jsPlumbInstance: {
           type: Object
-        }
+        },
       },
 
       observers: [
-        '_fetchGraph(workflowId)',
         '_updateGraph(graph)'
       ],
 
@@ -207,6 +219,15 @@ limitations under the License.
       ready: function() {
         this.scopeSubtree(this.$.container, true);
         this._initialize();
+      },
+
+      show: function() {
+        this.$.graphResource.execute().then(function() {
+          this.$.graphDialog.toggle();
+        }.bind(this)).catch(function(error) {
+          this.fire('notify', {message: this.i18n('documentPage.route.view.graph.error')});
+          throw error;
+        });
       },
 
       _initialize: function() {
@@ -263,12 +284,6 @@ limitations under the License.
         }
       },
 
-      _fetchGraph: function() {
-        if (this.workflowId && this.workflowId.length > 0) {
-          this.$.graphResource.execute();
-        }
-      },
-
       _updateGraph: function(data) {
         if (!data) {
           return;
@@ -319,7 +334,7 @@ limitations under the License.
           var anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
           // add endpoints
           var endPointSource = this._addSourceEndpoint(Polymer.dom(this.$.container).querySelector('#' + source),
-                                                       anchors[anchorIndex]),
+                anchors[anchorIndex]),
               endPointTarget = this._addTargetEndpoint(Polymer.dom(this.$.container).querySelector('#' + target));
 
           var connection = this._jsPlumbInstance.connect({
