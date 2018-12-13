@@ -286,7 +286,7 @@ limitations under the License.
 
           <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
-          <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" entity="[[entity]]" on-error="_onError"></nuxeo-admin>
+          <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" route-params="[[routeParams]]" on-error="_onError"></nuxeo-admin>
 
           <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
@@ -366,8 +366,6 @@ limitations under the License.
           type: String,
           value: 'view'
         },
-
-        entity: Object,
 
         searchName: {
           type: String,
