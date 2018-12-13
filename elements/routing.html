@@ -117,8 +117,9 @@ limitations under the License.
       app.showDiff(data.params.id1, data.params.id2);
     });
 
-    page('/:page', function(ctx) {
-      app.show(ctx.params.page);
+    // use two capture groups, a first one for the page name, and a second for the page route (optional)
+    page(/^\/([^/]*)(?:\/(.*))?/, function(ctx) {
+      app.show(ctx.params[0], ctx.params[1] && ctx.params[1].split('/'));
     });
 
     page('*', function(ctx) {
