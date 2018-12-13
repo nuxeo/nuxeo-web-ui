@@ -412,7 +412,7 @@ limitations under the License.
         actionContext: {
           type: Object,
           computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-          ' clipboard, clipboardDocCount, userWorkspace)'
+          ' clipboard, clipboardDocCount, userWorkspace, routeParams)'
         },
 
         clipboard: {
@@ -429,7 +429,9 @@ limitations under the License.
         _dismissible: {
           type: Boolean,
           value: false
-        }
+        },
+
+        routeParams: String
       },
 
       listeners: {
@@ -551,8 +553,9 @@ limitations under the License.
         this.show('error');
       },
 
-      show: function(page) {
+      show: function(page, route) {
         this.page = page;
+        this.routeParams = route;
         this._updateTitle();
       },
 
@@ -633,7 +636,8 @@ limitations under the License.
           clipboardDocCount: this.clipboardDocCount,
           clipboard: this.clipboard,
           actionContext: this.actionContext,
-          userWorkspace: this.userWorkspace
+          userWorkspace: this.userWorkspace,
+          routeParams: this.routeParams
         };
       },
 
