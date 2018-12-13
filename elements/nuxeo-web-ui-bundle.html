@@ -392,7 +392,7 @@
 
 <nuxeo-slot-content name="documentPublicationItem" slot="DOCUMENT_VIEWS_ITEMS" order="40">
   <template>
-    <nuxeo-filter document="[[document]]" expression="!this.isPublication(document)">
+    <nuxeo-filter document="[[document]]" expression="!this.isProxy(document) && this.hasFacet(document, 'Publishable')">
       <template>
         <nuxeo-page-item name="publication" label="browser.publications"></nuxeo-page-item>
       </template>
@@ -401,7 +401,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="documentPublicationPage" slot="DOCUMENT_VIEWS_PAGES" order="40">
   <template>
-    <nuxeo-filter document="[[document]]" expression="!this.isPublication(document)">
+    <nuxeo-filter document="[[document]]" expression="!this.isProxy(document) && this.hasFacet(document, 'Publishable')">
       <template>
         <nuxeo-document-publications name="publication" document="[[document]]"></nuxeo-document-publications>
       </template>
