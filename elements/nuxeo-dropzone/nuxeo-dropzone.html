@@ -246,8 +246,8 @@ limitations under the License.
         this.$$('input').click();
       },
 
-      _computeParsedXpath: function() {
-        return this.xpath.replace(new RegExp('/', 'g'), '.');
+      _computeParsedXpath: function(xpath) {
+        return this.formatPropertyXpath(xpath);
       },
 
       importBatch: function(data) {
