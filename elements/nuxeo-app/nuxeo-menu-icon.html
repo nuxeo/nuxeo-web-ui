@@ -54,16 +54,25 @@ limitations under the License.
         height: 48px;
         padding: 12px 13px;
         width: var(--nuxeo-sidebar-width);
+        flex: none;
       }
 
       paper-icon-button:hover {
         color: var(--nuxeo-sidebar-menu-hover);
       }
+
+      a {
+        display: var(--layout-horizontal_-_display);
+      }
+
+      a span {
+        flex: none;
+      }
    </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]"></paper-icon-button>
-      <nuxeo-tooltip for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</nuxeo-tooltip>
+      <span>[[i18n(label)]]</span>
       <template is="dom-if" if="[[badge]]">
         <paper-badge label="[[badge]]" for="button"></paper-badge>
       </template>
