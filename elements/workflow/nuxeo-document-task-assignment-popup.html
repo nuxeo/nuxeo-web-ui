@@ -97,9 +97,9 @@ limitations under the License.
           this.params['comment'] = this.comment;
           this.params[this.action === 'delegate' ? 'delegatedActors' : 'actors'] = this.actors;
 
-          this.$.taskAssignment.put().then(function() {
+          this.$.taskAssignment.put().then(function(task) {
             this.$.assignmentDialog.close();
-            this.fire('workflowTaskAssignment');
+            this.fire('workflowTaskAssignment', { task: task });
           }.bind(this));
         }
       },
