@@ -196,10 +196,7 @@ limitations under the License.
       },
 
       _processTask: function(e) {
-        var details = {
-          id: e.model.task.id
-        };
-        this.fire('workflowTaskProcess', details);
+        this.fire('workflowTaskProcess', { task: e.model.task });
       },
 
       ready: function() {
@@ -224,7 +221,7 @@ limitations under the License.
         if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
           this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
           this.$.worfklow.remove().then(function() {
-            this.fire('workflowAbandoned');
+            this.fire('workflowAbandoned', { workflow: e.model.workflow });
           }.bind(this));
         }
       },

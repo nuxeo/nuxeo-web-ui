@@ -207,8 +207,8 @@ limitations under the License.
             id: this.$.layout.element.task.id,
             variables: this.$.layout.element.task.variables
           };
-          this.$.taskRequest.put().then(function() {
-            this.fire('workflowTaskProcessed');
+          this.$.taskRequest.put().then(function(task) {
+            this.fire('workflowTaskProcessed', { task: task });
           }.bind(this));
         }
       },
