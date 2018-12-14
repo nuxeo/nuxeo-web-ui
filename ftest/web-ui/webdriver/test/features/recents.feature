@@ -31,3 +31,14 @@ Feature: Recents
     When I can trash current document
     Then I can see the list of recently viewed documents has 1 items
     And I can see the list of recently viewed documents has "ws" document
+
+  Scenario: Recents list is updated when document's title changes
+    When I browse to the document with path "/default-domain/ws/file"
+    And I click the "recents" button
+    Then I can see the list of recently viewed documents has 1 items
+    And I can see the list of recently viewed documents has "file" document
+    When I can edit the following properties in the File metadata:
+      | name  | value    |
+      | title | newTitle |
+    Then I can see the list of recently viewed documents has 1 items
+    And I can see the list of recently viewed documents has "newTitle" document
