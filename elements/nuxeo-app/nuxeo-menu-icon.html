@@ -36,8 +36,8 @@ limitations under the License.
         outline: none;
       }
 
-      :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
+      :host(.selected) {
+        background: rgba(0, 0, 0, 0.1);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
@@ -63,6 +63,15 @@ limitations under the License.
 
       a {
         display: var(--layout-horizontal_-_display);
+        align-items: center;
+        cursor: pointer;
+        color: var(--nuxeo-sidebar-menu);
+        transition: all .2s ease;
+      }
+
+      a:hover {
+        color: var(--nuxeo-sidebar-menu-hover);
+        background: rgba(0, 0, 0, 0.1);
       }
 
       a span {

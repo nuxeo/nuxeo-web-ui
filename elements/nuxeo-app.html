@@ -140,55 +140,92 @@ limitations under the License.
         };
       }
 
+      #menuWrapper {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: var(--nuxeo-sidebar-width);
+        height: 100%;
+        background-color: var(--nuxeo-sidebar-background);
+        transition: width .2s ease;
+        display: var(--layout-vertical_-_display);
+        flex-direction: var(--layout-vertical_-_flex-direction);
+      }
+
+      #menuWrapper:hover {
+        width: var(--nuxeo-sidebar-hover-width, 240px);
+      }
+
+      #menuWrapper:hover #menu {
+        width: 100%;
+      }
+
+      #menuWrapper:hover .logo-img-hover {
+        opacity: 1;
+      }
+
+      #menuWrapper:hover .logo-img {
+        opacity: 0;
+      }
+
       /* logo */
       #logo {
-        position: fixed;
-        width: var(--nuxeo-sidebar-width);
-        height: 53px;
-        top: var(--nuxeo-app-top);
-        left: 0;
+        position: relative;
+        display: block;
         z-index: 102;
         box-sizing: border-box;
         outline: none;
-        background-color: var(--nuxeo-sidebar-background);
+        margin: 12px;
+        width: 100%;
+        flex: none;
       }
 
       #logo img {
-        width: var(--nuxeo-sidebar-width);
-        height: 53px;
+        display: block;
+        width: auto;
+        height: 27px;
+        transition: opacity .2s ease;
+      }
+
+      #logo .logo-img-hover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: auto;
+        height: 100%;
+        opacity: 0;
+      }
+
+      #menuContainer {
+        overflow: auto;
+        flex: 1 1 auto;
+        display: var(--layout-vertical_-_display);
+        flex-direction: var(--layout-vertical_-_flex-direction);
       }
 
       /* menu */
       #menu {
         @apply --nuxeo-sidebar;
-        position: fixed;
         width: var(--nuxeo-sidebar-width);
-        height: calc(100% - 54px);
         z-index: 100;
-        padding: 53px 0;
-        overflow: auto;
+        overflow: hidden;
+        flex: 1 0 auto;
+        display: var(--layout-vertical_-_display);
+        flex-direction: var(--layout-vertical_-_flex-direction);
+      }
+
+      .admin-icon {
+        margin-top: auto;
       }
 
       #logo:hover img {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        opacity: .8;
       }
 
       #logo:hover img {
         filter: brightness(110%);
         -webkit-filter: brightness(110%);
-      }
-
-      #menu .profile-icon,
-      #menu .admin-icon {
-        position: fixed;
-        height: 48px;
-        bottom: 0;
-        left: 0;
-      }
-
-      #menu .admin-icon {
-        bottom: 48px;
       }
 
       @media (max-width: 1024px), (max-height: 700px) {
@@ -305,23 +342,29 @@ limitations under the License.
     <paper-drawer-panel id="drawerPanel" narrow="{{isNarrow}}" drawer-width="[[drawerWidth]]" responsive-width="720px" edge-swipe-sensitivity="0">
       <div slot="drawer">
 
-        <!-- logo -->
-        <a id="logo" href$="[[urlFor('home')]]">
-          <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]"/>
-        </a>
+        <div id="menuWrapper">
 
-        <!-- menu -->
-        <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
-          <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
-                           hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
-          </nuxeo-menu-icon>
-          <nuxeo-menu-icon name="profile"
-            src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-            icon="nuxeo:user-settings"
-            label="app.account" class="profile-icon">
-          </nuxeo-menu-icon>
-        </paper-listbox>
+          <!-- logo -->
+          <a id="logo" href$="[[urlFor('home')]]">
+            <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" class="logo-img" />
+            <img src$="[[_logoFull(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" class="logo-img-hover" />
+          </a>
+
+          <div id="menuContainer">
+            <!-- menu -->
+            <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
+              <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
+                               hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
+              </nuxeo-menu-icon>
+              <nuxeo-menu-icon name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account" class="profile-icon">
+              </nuxeo-menu-icon>
+            </paper-listbox>
+          </div>
+        </div>
 
         <!-- drawer -->
         <div id="drawer">
@@ -745,7 +788,11 @@ limitations under the License.
       },
 
       _logo: function(baseUrl) {
-        return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
+        return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo-picto.png';
+      },
+
+      _logoFull: function(baseUrl) {
+        return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo-full.png';
       },
 
       showHome: function(e) {
