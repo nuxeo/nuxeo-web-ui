@@ -103,6 +103,9 @@ limitations under the License.
   <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
   <% } %>
 
+  <!-- routing -->
+  <link rel="import" href="routing.html">
+
   <% if (!Framework.isDevModeSet()) { %>
   <script>
     if ('serviceWorker' in navigator) {

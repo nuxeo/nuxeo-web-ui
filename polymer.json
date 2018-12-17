@@ -2,7 +2,8 @@
   "entrypoint": "index.html",
   "shell": "elements/nuxeo-app.html",
   "fragments": [
-    "elements/elements.html"
+    "elements/elements.html",
+    "elements/routing.html"
   ],
   "sources": [
     "elements/**/*",
