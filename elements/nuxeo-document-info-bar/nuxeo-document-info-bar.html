@@ -19,18 +19,15 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-delete-document-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-untrash-document-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../nuxeo-publication/nuxeo-publication-info-bar.html">
 <link rel="import" href="../nuxeo-restore-version-button/nuxeo-restore-version-button.html">
-<link rel="import" href="../nuxeo-tasks/nuxeo-tasks-list.html">
 <link rel="import" href="../nuxeo-workflow-graph/nuxeo-workflow-graph.html">
 
 <!--
@@ -72,11 +69,6 @@ limitations under the License.
         margin: 0 .5em;
         width: 1.5em;
       }
-
-      nuxeo-tasks-list, nuxeo-tasks-list ::content nuxeo-data-list {
-        height: 350px !important;
-        min-width: 450px
-      }
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
@@ -101,12 +93,6 @@ limitations under the License.
           <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
         </template>
       </div>
-      <nuxeo-dialog id="tasksDialog-[[workflow.id]]" with-backdrop>
-        <nuxeo-tasks-list id="taskLists" tasks="[[_wfTasks]]" no-navigation></nuxeo-tasks-list>
-        <div class="buttons">
-          <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
-        </div>
-      </nuxeo-dialog>
     </template>
 
     <!-- tasks -->
