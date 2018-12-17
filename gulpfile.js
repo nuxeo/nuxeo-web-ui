@@ -136,7 +136,10 @@ gulp.task('move-elements', function() {
   ], {base: dist('elements')}).pipe(gulp.dest(dist()));
 
   // fix asset path
-  var elements = gulp.src([dist('elements/nuxeo-app.html'), dist('elements/elements.html')])
+  var elements = gulp.src([
+    dist('elements/nuxeo-app.html'),
+    dist('elements/elements.html'),
+    dist('elements/routing.html')])
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe($.replace('..\/moment\/min\/moment-with-locales.min.js',
       'bower_components/moment/min/moment-with-locales.min.js'))
