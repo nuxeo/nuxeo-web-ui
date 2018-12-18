@@ -86,6 +86,7 @@ limitations under the License.
 
     <!-- workflows -->
     <template is="dom-repeat" items="[[workflows]]" as="workflow">
+      <nuxeo-workflow-graph id="graph-[[workflow.id]]" workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
       <div class="bar workflow">
         <div class="item">
           <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
@@ -95,7 +96,6 @@ limitations under the License.
           <span>[[_labelForInitiatedWf(workflow, currentUser)]]</span>
         </div>
         <a class="viewGraph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</a>
-        <nuxeo-workflow-graph id="graph-[[workflow.id]]" workflow-id="[[workflow.id]]"></nuxeo-workflow-graph>
         <template is="dom-if" if="[[_hasPermissionToAbandon(workflow.initiator, currentUser)]]">
           <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
         </template>
