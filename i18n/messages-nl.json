@@ -430,6 +430,7 @@
   "documentPage.process.title": "Verwerken",
   "documentPage.route.noTasks": "Geen taken.",
   "documentPage.route.view.graph": "Grafiek weergeven",
+  "documentPage.route.view.graph.error": "An error occurred when drawing the workflow's graph",
   "documentPage.info": "Info",
   "documentPage.initiated.workflow.currentUser": "U bent een {0} workflow i.v.m. dit document gestart.",
   "documentPage.initiated.workflow": " is een {0} workflow i.v.m. dit document gestart.",

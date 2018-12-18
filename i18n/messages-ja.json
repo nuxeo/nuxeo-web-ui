@@ -430,6 +430,7 @@
   "documentPage.process.title": "処理",
   "documentPage.route.noTasks": "タスクがありません。",
   "documentPage.route.view.graph": "グラフを表示",
+  "documentPage.route.view.graph.error": "An error occurred when drawing the workflow's graph",
   "documentPage.info": "情報",
   "documentPage.initiated.workflow.currentUser": "この文書に対する{0}ワークフローを開始しました。",
   "documentPage.initiated.workflow": " この文書に対する{0}ワークフローを開始しました。",

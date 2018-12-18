@@ -430,6 +430,7 @@
   "documentPage.process.title": "Procesar",
   "documentPage.route.noTasks": "No hay tareas.",
   "documentPage.route.view.graph": "Ver gráfico",
+  "documentPage.route.view.graph.error": "An error occurred when drawing the workflow's graph",
   "documentPage.info": "Información",
   "documentPage.initiated.workflow.currentUser": "Ha iniciado un flujo de trabajo {0} en este documento.",
   "documentPage.initiated.workflow": " ha iniciado un flujo de trabajo {0} en este documento.",
