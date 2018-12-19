@@ -951,6 +951,7 @@
   "versions.unversioned": "バージョン管理外の変更",
   "versions.unversionedChanges": "バージョン管理外の変更",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "バージョンの比較",
   "videoViewLayout.conversions": "変換",
   "videoViewLayout.delete.confirm.message": "このビデオを削除しますか？",

@@ -951,6 +951,7 @@
   "versions.unversioned": "Mudanças sem versionamento",
   "versions.unversionedChanges": "Alterações sem versionamento",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "Compare Versions",
   "videoViewLayout.conversions": "Conversões",
   "videoViewLayout.delete.confirm.message": "Deseja realmente excluir este video?",

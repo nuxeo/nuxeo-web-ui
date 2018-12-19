@@ -951,6 +951,7 @@
   "versions.unversioned": "Bertsio gabea",
   "versions.unversionedChanges": "Bertsio gabeko aldaketak",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "Alderatu bertsioak",
   "videoViewLayout.conversions": "Bihurketak",
   "videoViewLayout.delete.confirm.message": "Ziur bideo hau ezabatu nahi duzula?",

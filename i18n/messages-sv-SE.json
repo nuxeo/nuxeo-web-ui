@@ -951,6 +951,7 @@
   "versions.unversioned": "Versionslösa förändringar",
   "versions.unversionedChanges": "Versionslösa ändringar",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "Jämför versioner",
   "videoViewLayout.conversions": "Konverteringar",
   "videoViewLayout.delete.confirm.message": "Vill du verkligen ta bort denna video?",

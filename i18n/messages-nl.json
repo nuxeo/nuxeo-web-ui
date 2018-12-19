@@ -951,6 +951,7 @@
   "versions.unversioned": "Niet voorzien van versienummer",
   "versions.unversionedChanges": "Wijzigingen zonder versienummer",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "Versies vergelijken",
   "videoViewLayout.conversions": "Conversies",
   "videoViewLayout.delete.confirm.message": "Weet u zeker dat u deze video wilt wissen?",

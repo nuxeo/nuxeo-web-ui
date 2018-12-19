@@ -951,6 +951,7 @@
   "versions.unversioned": "Tidak berversi",
   "versions.unversionedChanges": "Perubahan yang tidak berversi",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "Compare Versions",
   "videoViewLayout.conversions": "Konversi",
   "videoViewLayout.delete.confirm.message": "Apakah anda benar-benar ingin menghapus video ini?",

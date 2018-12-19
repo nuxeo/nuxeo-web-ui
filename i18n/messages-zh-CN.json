@@ -951,6 +951,7 @@
   "versions.unversioned": "无版本控制",
   "versions.unversionedChanges": "不做版本控制的更改",
   "versions.version": "{0}.{1}",
+  "versionsDiffButton.nothingToCompare": "There are no other versions to compare with.",
   "versionsDiffButton.tooltip": "对比版本",
   "videoViewLayout.conversions": "转换",
   "videoViewLayout.delete.confirm.message": "是否确实要删除此视频？",
