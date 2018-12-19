@@ -16,7 +16,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
@@ -30,6 +29,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.html">
 <link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
 <link rel="import" href="../nuxeo-data-grid/nuxeo-document-grid-thumbnail.html">
+<link rel="import" href="nuxeo-document-content-behavior.html">
 <link rel="import" href="nuxeo-results.html">
 
 <!--
@@ -77,11 +77,10 @@ limitations under the License.
                          provider="[[provider]]"
                          page-size="[[pageSize]]"
                          aggregations="{{aggregations}}"
-                         enrichers="thumbnail, permissions"
-                         page="[[pageNumber]]"
+                         enrichers="[[enrichers]]"
                          params="[[params]]"
                          schemas="[[schemas]]"
-                         headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+                         headers="[[headers]]"
                          fetch-aggregates>
     </nuxeo-page-provider>
 
@@ -220,104 +219,79 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-document-trash-content',
-      behaviors: [Nuxeo.LayoutBehavior, Polymer.IronResizableBehavior],
+      behaviors: [Nuxeo.DocumentContentBehavior],
       properties: {
-        document: {
-          type: Object
-        },
-        params: {
-          type: Object,
-          value: {},
-          notify: true
-        },
+        /**
+         * The name of the page provider to be used.
+         */
         provider: {
           type: String,
           value: 'advanced_document_content'
         },
+        /**
+         * The number of results per page.
+         */
         pageSize: {
           type: Number,
           value: 40
         },
+        /**
+         * List of comma separated values of the document schemas to be returned.
+         * All document schemas are returned by default.
+         */
         schemas: {
           type: String,
           value: 'dublincore,common,uid,file'
         },
-        currentIndex: {
-          type: Number,
-          notify: true
+        /**
+         * List of content enrichers passed on to `provider`.
+         * Already set by default are thumbnail, permissions and highlight.
+         */
+        enrichers: {
+          type: String,
+          value: 'thumbnail, permissions'
         },
-        sortOptions: {
-          type: Array,
-          value: []
+        /**
+         * The headers passed on to `provider`.
+         * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
+         */
+        headers: {
+          type: String,
+          value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
         },
-        visible: {
-          type: Boolean,
-          value: false
-        }
+        /**
+         * The label to be dislayed when there are no results.
+         */
+        emptyLabel: String,
+        /**
+         * The label to be dislayed when there are no results with filtering applied.
+         */
+        emptyLabelWhenFiltered: String
       },
 
-      listeners: {
-        'iron-resize': '_computeVisible'
+      _emptyTrash: function() {
+        this.$.opEmptyTrash.execute().then(function() {
+          this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.success') });
+          this._refresh();
+        }.bind(this)).catch(function(error) {
+          this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.error') });
+          if (error.status !== 404) {
+            throw error;
+          }
+        }.bind(this));
       },
 
-      observers: [
-        '_refresh(params, visible)',
-        '_observeDocument(document)'
-      ],
-
-      ready: function() {
-        this.nxProvider = this.$.nxProvider;
+      _computeParams: function(document) {
+        return document ? {'ecm_parentId': document.uid, 'ecm_trashed': true} : {};
       },
 
-      detached: function() {
-        this.nxProvider = null;
-      },
-
-      attached: function() {
-        this.sortOptions = [
+      _computeSortOptions: function() {
+        return [
           {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
           {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
           {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
           {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'}
         ];
-      },
-
-      _emptyTrash: function() {
-        this.$.opEmptyTrash.execute().then(function() {
-          this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.success')});
-          this._refresh();
-        }.bind(this)).catch(function() {
-          this.fire('notify', {message: this.i18n('documentTrashContent.emptyTrash.error')});
-        }.bind(this));
-      },
-
-      _observeDocument: function() {
-        if (this.document) {
-          this.params = {'ecm_parentId': this.document.uid, 'ecm_trashed': true};
-        }
-      },
-
-      _refresh: function() {
-        if (this.document && this.visible) {
-          this.$.results.fetch();
-        }
-      },
-
-      _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item});
-        e.stopPropagation();
-      },
-
-      _computedClass: function(isSelected) {
-        var classes = 'grid-box';
-        if (isSelected) {
-          classes += ' selected';
-        }
-        return classes;
-      },
-
-      _computeVisible: function() {
-        this.visible = Boolean(this.offsetWidth || this.offsetHeight);
       }
 
     });
