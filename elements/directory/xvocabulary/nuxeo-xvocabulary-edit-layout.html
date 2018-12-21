@@ -30,7 +30,7 @@ limitations under the License.
                   placeholder="[[i18n('vocabularyManagement.selectParent')]]"
                   selected="{{entry.properties.parent}}"
                   attr-for-selected="name"
-                  required>
+                  required$="[[_isParentRequired(parentDirectory, directory)]]">
       <template is="dom-repeat" items="[[parentResponse.entries]]">
         <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
       </template>
@@ -52,8 +52,7 @@ limitations under the License.
 
     <div role="widget">
       <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
-      <paper-toggle-button value="{{entry.properties.label::change}}"
-                           checked$="[[_isObsolete(entry.properties.obsolete)]]"
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
                            on-change="_obsoleteChanged"
                            noink>
       </paper-toggle-button>
@@ -62,6 +61,7 @@ limitations under the License.
     <nuxeo-input role="widget"
                  label="[[i18n('vocabularyManagement.edit.ordering')]]"
                  name="ordering"
+                 type="number"
                  value="{{entry.properties.ordering::change}}">
     </nuxeo-input>
   </template>
@@ -83,11 +83,13 @@ limitations under the License.
         parentDirectory: {
           type: String,
           observer: '_observeParent'
-        }
+        },
+
+        directory: Object,
       },
 
       _isObsolete: function(obsolete) {
-        return obsolete !== null && obsolete !== 0;
+        return obsolete === 1;
       },
 
       _obsoleteChanged: function() {
@@ -102,6 +104,10 @@ limitations under the License.
         if (this.parentDirectory && this.parentDirectory.length > 0) {
           this.$.directory.get();
         }
+      },
+
+      _isParentRequired: function() {
+        return this.directory && this.parentDirectory && this.directory !== this.parentDirectory
       }
 
     });
