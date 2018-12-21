@@ -195,6 +195,7 @@ limitations under the License.
       _layoutModel: function() {
         return {
           entry: this._selectedEntry,
+          directory: this.selectedVocabulary,
           parentDirectory: this._getParentDirectoryFor(this._selectedEntry),
           entries: this.entries,
           "new": this._new
