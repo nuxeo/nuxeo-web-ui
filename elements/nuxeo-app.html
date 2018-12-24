@@ -1217,7 +1217,7 @@ limitations under the License.
         var fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
 
         // add required fetchers
-        var required = {document: ['properties', 'lock'], directoryEntry: ['parent'], task: ['actors']};
+        var required = {document: ['lock'], directoryEntry: ['parent'], task: ['actors']};
 
         Object.keys(required).forEach(function (k) {
           fetch[k] = fetch[k] || [];
