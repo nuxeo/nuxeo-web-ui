@@ -24,7 +24,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.html">
 
 <!--
@@ -145,7 +144,7 @@ limitations under the License.
       </template>
     </div>
 
-    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, document, blobList)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
       <div id="container">
         <a href="javascript:undefined" on-tap="open">[[message]]</a>
         <div class="actions">
@@ -159,54 +158,92 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-dropzone',
-      behaviors: [Nuxeo.UploaderBehavior, Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+      behaviors: [Nuxeo.UploaderBehavior, Nuxeo.FormatBehavior],
       properties: {
+        /**
+         * Input Document.
+         */
         document: {
           type: Object,
-          notify: true,
-          observer: '_documentChanged'
+          notify: true
         },
+        /**
+         * The label for this element.
+         */
         label: {
           type: String
         },
+        /**
+         * Dropzone clickable link text.
+         */
         message: {
           type: String
         },
+        /**
+         * This flag determines whether the dropzone allows multiple files or not.
+         */
         blobList: {
           type: Boolean,
           value: false
         },
+        /**
+         * Path to which the file(s) should be uploaded.
+         * For example `xpath="files:files"`.
+         * By default it will consider `file:content`.
+         */
         xpath: {
           type: String,
           value: 'file:content'
         },
+        /**
+         * This flag determines whether the file should be immediately uploaded or not.
+         */
         updateDocument: {
           type: Boolean,
           value: false,
           reflectToAttribute: true
         },
+        /**
+         * Message to show when file is uploaded successfully.
+         */
         uploadedMessage: {
           type: String,
           value: 'File uploaded'
         },
+        /**
+         * Message to show while file is being uploaded.
+         */
         progressMessage: {
           type: String,
           value: 'Uploading...'
         },
+        /**
+         * Flag that indicates if an upload is in progress.
+         */
         progress: {
           type: Boolean,
           value: false
         },
+        /**
+         * Flag that indicates if there are already uploaded files on the dropzone.
+         */
         hasFiles: {
           type: Boolean,
           readOnly: true,
           value: false,
           notify: true,
         },
+        /**
+         * A string containing an xpath expression, connected by dot (.) characters instead of slashes (/).
+         */
         _parsedXpath: {
           type: String,
           computed: '_computeParsedXpath(xpath)'
         },
+        /**
+         * Content enrichers to be passed on to `nuxeo-document` resource.
+         * Can be an object with entity type as keys or list or string (which defaults to `document` entity type).
+         */
         enrichers: {
           type: Object,
           value: function() {
@@ -253,21 +290,17 @@ limitations under the License.
       importBatch: function(data) {
         data.stopPropagation();
         if (this.blobList) {
-          if (this.immediate) {
-            this.batchExecute('Blob.AttachOnDocument', {
-              document: this.document.uid,
-              xpath: this.xpath
-            }).then(this._handleBlobListUploaded.bind(this));
-          } else {
-            this.set('document.properties.' + this._parsedXpath, []);
-            this.files.forEach(function(file, index) {
-              this.push('document.properties.' + this._parsedXpath, {
-                'upload-batch': data.detail.batchId,
-                'upload-fileId': index.toString()
-              });
-            }.bind(this));
-            this._handleBlobListUploaded();
-          }
+          this.set('document.properties.' + this._parsedXpath, []);
+          this.files.forEach(function(file, index) {
+            var uploadedFile = {
+              'upload-batch': data.detail.batchId,
+              'upload-fileId': index.toString()
+            };
+            this.push('document.properties.' + this._parsedXpath,
+              // Handle special case when using files:files
+              this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
+          }.bind(this));
+          this._handleBlobListUploaded();
         } else {
           this.set('document.properties.' + this._parsedXpath, {
             'upload-batch': data.detail.batchId,
@@ -286,7 +319,14 @@ limitations under the License.
             document: this.document.uid,
             xpath: this.xpath
           };
-          return this.$.bulkAttach.execute().then(this._handleBlobListUploaded.bind(this));
+          return this.$.bulkAttach.execute().then(function(){
+            this.fire('notify', { message: this.uploadedMessage });
+            this.progress = false;
+            if (this.updateDocument) {
+              this._setHasFiles(false);
+              this.fire('document-updated');
+            }
+          }.bind(this));
         } else {
           var file = e.detail.blobs[e.detail.blobs.length - 1];
           this.set('document.properties.' + this._parsedXpath, {
@@ -313,28 +353,36 @@ limitations under the License.
           };
           this.$.doc.put().then(function(response) {
             this.document = response;
-            this.fire('notify', {message: this.uploadedMessage});
+            this.fire('notify', { message: this.uploadedMessage });
             this.progress = false;
             this._setHasFiles(false);
             this.fire('document-updated');
           }.bind(this));
         } else {
-          this.fire('notify', {message: this.uploadedMessage});
+          this.fire('notify', { message: this.uploadedMessage });
           this.progress = false;
         }
       },
 
       _handleBlobListUploaded: function() {
-        this.fire('notify', {message: this.uploadedMessage});
-        this.progress = false;
-        if (this.immediate) {
-          this._setHasFiles(false);
-          this.fire('document-updated');
+        if (this.updateDocument) {
+          this.batchExecute('Blob.AttachOnDocument', {
+            document: this.document.uid,
+            xpath: this.xpath
+          }).then(function() {
+            this.fire('notify', { message: this.uploadedMessage });
+            this.progress = false;
+            this._setHasFiles(false);
+            this.fire('document-updated');
+          }.bind(this));
+        } else {
+          this.fire('notify', { message: this.uploadedMessage });
+          this.progress = false;
         }
       },
 
       _deleteFile: function(e) {
-        if (!this.immediate && this.blobList && Array.isArray(this.get('document.properties.' + this._parsedXpath))) {
+        if (!this.updateDocument && this.blobList && Array.isArray(this.get('document.properties.' + this._parsedXpath))) {
           this.splice('document.properties.' + this._parsedXpath, e.model.itemsIndex, 1);
           this.splice('files', e.model.itemsIndex, 1);
           this._setHasFiles(this.files.length > 0);
@@ -381,16 +429,11 @@ limitations under the License.
         this._upload(e.dataTransfer.files);
       },
 
-      _documentChanged: function() {
-        // `immediate` is false during document creation, meaning the user can manage the list of files when dropzone
-        // is bound to a blob list property.
-        this.immediate = !!(this.document && this.document.uid);
-      },
-
       _isDropzoneVisible: function() {
-        // Area to drop files should stay visible when the element is attached to a blob list property and `immediate`
-        // is false (e.g during the creation of a new document). This will allow the user to manage the list of files.
-        return (!this.immediate && this.blobList) || !this.hasFiles;
+        // Area to drop files should stay visible when the element is attached to a blob list property
+        // and `updateDocument` is false (e.g when using the element on a form: creation or edition of documents).
+        // This will allow the user to manage the list of files.
+        return (!this.updateDocument && this.blobList) || !this.hasFiles;
       },
 
       _computeEnrichers: function() {
