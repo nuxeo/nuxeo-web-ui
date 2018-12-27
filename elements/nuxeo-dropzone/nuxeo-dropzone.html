@@ -119,7 +119,6 @@ limitations under the License.
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="[[enrichers]]"></nuxeo-document>
-    <nuxeo-operation id="bulkAttach" op="Blob.AttachOnDocument" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[label]]">
       <label id="label">[[label]]</label>
@@ -290,7 +289,9 @@ limitations under the License.
       importBatch: function(data) {
         data.stopPropagation();
         if (this.blobList) {
-          this.set('document.properties.' + this._parsedXpath, []);
+          if (!this.get('document.properties.' + this._parsedXpath)) {
+            this.set('document.properties.' + this._parsedXpath, []);
+          }
           this.files.forEach(function(file, index) {
             var uploadedFile = {
               'upload-batch': data.detail.batchId,
@@ -300,42 +301,41 @@ limitations under the License.
               // Handle special case when using files:files
               this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
           }.bind(this));
-          this._handleBlobListUploaded();
         } else {
           this.set('document.properties.' + this._parsedXpath, {
             'upload-batch': data.detail.batchId,
             'upload-fileId': '0'
           });
-          this._handleBlobUploaded();
         }
+        this._handleBlobUploaded();
       },
 
       _blobPicked: function(e) {
         this._setHasFiles(true);
         this.set('files', e.detail.blobs);
         if (this.blobList) {
-          this.$.bulkAttach.input = 'blobs:' + this.files.map(function(file) { return file.key; }).join();
-          this.$.bulkAttach.params = {
-            document: this.document.uid,
-            xpath: this.xpath
-          };
-          return this.$.bulkAttach.execute().then(function(){
-            this.fire('notify', { message: this.uploadedMessage });
-            this.progress = false;
-            if (this.updateDocument) {
-              this._setHasFiles(false);
-              this.fire('document-updated');
-            }
+          if (!this.get('document.properties.' + this._parsedXpath)) {
+            this.set('document.properties.' + this._parsedXpath, []);
+          }
+          this.files.forEach(function(file) {
+            var uploadedFile = {
+              'providerId': file.providerId,
+              'user': file.user,
+              'fileId': file.fileId
+            };
+            this.push('document.properties.' + this._parsedXpath,
+              // Handle special case when using files:files
+              this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
           }.bind(this));
         } else {
-          var file = e.detail.blobs[e.detail.blobs.length - 1];
+          var file = e.detail.blobs[0];
           this.set('document.properties.' + this._parsedXpath, {
             'providerId': file.providerId,
             'user': file.user,
             'fileId': file.fileId
           });
-          this._handleBlobUploaded();
         }
+        this._handleBlobUploaded();
       },
 
       _handleBlobUploaded: function() {
@@ -353,23 +353,6 @@ limitations under the License.
           };
           this.$.doc.put().then(function(response) {
             this.document = response;
-            this.fire('notify', { message: this.uploadedMessage });
-            this.progress = false;
-            this._setHasFiles(false);
-            this.fire('document-updated');
-          }.bind(this));
-        } else {
-          this.fire('notify', { message: this.uploadedMessage });
-          this.progress = false;
-        }
-      },
-
-      _handleBlobListUploaded: function() {
-        if (this.updateDocument) {
-          this.batchExecute('Blob.AttachOnDocument', {
-            document: this.document.uid,
-            xpath: this.xpath
-          }).then(function() {
             this.fire('notify', { message: this.uploadedMessage });
             this.progress = false;
             this._setHasFiles(false);
