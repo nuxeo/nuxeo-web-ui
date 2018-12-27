@@ -124,7 +124,7 @@ limitations under the License.
       <label id="label">[[label]]</label>
     </template>
 
-    <input hidden id="input" type="file" on-change="_filesChanged">
+    <input hidden id="input" type="file" on-change="_uploadInputFiles">
 
     <div id="details" hidden$="[[!hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
@@ -132,11 +132,11 @@ limitations under the License.
           <div class="info">
             <div class="name">[[file.name]]</div>
             <div class="size">[[formatSize(file.size)]]</div>
-            <template is="dom-if" if="[[progress]]">
+            <template is="dom-if" if="[[uploading]]">
               <paper-progress class="progress" indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
             </template>
           </div>
-          <div class="actions" hidden$="[[progress]]">
+          <div class="actions" hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
             <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"></paper-icon-button>
           </div>
         </div>
@@ -145,7 +145,7 @@ limitations under the License.
 
     <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
       <div id="container">
-        <a href="javascript:undefined" on-tap="open">[[message]]</a>
+        <a href="javascript:undefined" on-tap="open">[[i18n(message)]]</a>
         <div class="actions">
           <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
@@ -173,10 +173,12 @@ limitations under the License.
           type: String
         },
         /**
-         * Dropzone clickable link text.
+         * Dropzone clickable link translated text or key to be translated.
+         * By default it will show: 'Upload main file'.
          */
         message: {
-          type: String
+          type: String,
+          value: 'dropzone.add'
         },
         /**
          * This flag determines whether the dropzone allows multiple files or not.
@@ -204,24 +206,12 @@ limitations under the License.
         },
         /**
          * Message to show when file is uploaded successfully.
+         * It expects translated text or a key to be translated.
+         * By default it will show: 'File uploaded'.
          */
         uploadedMessage: {
           type: String,
-          value: 'File uploaded'
-        },
-        /**
-         * Message to show while file is being uploaded.
-         */
-        progressMessage: {
-          type: String,
-          value: 'Uploading...'
-        },
-        /**
-         * Flag that indicates if an upload is in progress.
-         */
-        progress: {
-          type: Boolean,
-          value: false
+          value: 'dropzone.uploaded'
         },
         /**
          * Flag that indicates if there are already uploaded files on the dropzone.
@@ -257,16 +247,9 @@ limitations under the License.
       },
 
       observers: [
-        '_reset(document)'
+        '_reset(document)',
+        '_filesChanged(files.splices)'
       ],
-
-      ready: function() {
-        if (!this.message) {
-          this.message = this.i18n('dropzone.add');
-        }
-        this.uploadedMessage = this.i18n('dropzone.uploaded');
-        this.progressMessage = this.i18n('dropzone.progress');
-      },
 
       attached: function() {
         this.connection = this.$.nx;
@@ -311,7 +294,6 @@ limitations under the License.
       },
 
       _blobPicked: function(e) {
-        this._setHasFiles(true);
         this.set('files', e.detail.blobs);
         if (this.blobList) {
           if (!this.get('document.properties.' + this._parsedXpath)) {
@@ -353,14 +335,11 @@ limitations under the License.
           };
           this.$.doc.put().then(function(response) {
             this.document = response;
-            this.fire('notify', { message: this.uploadedMessage });
-            this.progress = false;
-            this._setHasFiles(false);
+            this.fire('notify', { message: this.i18n(this.uploadedMessage) });
             this.fire('document-updated');
           }.bind(this));
         } else {
-          this.fire('notify', { message: this.uploadedMessage });
-          this.progress = false;
+          this.fire('notify', { message: this.i18n(this.uploadedMessage) });
         }
       },
 
@@ -368,7 +347,6 @@ limitations under the License.
         if (!this.updateDocument && this.blobList && Array.isArray(this.get('document.properties.' + this._parsedXpath))) {
           this.splice('document.properties.' + this._parsedXpath, e.model.itemsIndex, 1);
           this.splice('files', e.model.itemsIndex, 1);
-          this._setHasFiles(this.files.length > 0);
         } else {
           this._reset();
           this.set('document.properties.' + this._parsedXpath, '');
@@ -377,18 +355,19 @@ limitations under the License.
 
       _reset: function() {
         this.$.input.value = '';
-        this._setHasFiles(false);
         this.files = [];
       },
 
-      _filesChanged: function(e) {
+      _uploadInputFiles: function(e) {
         this._upload(e.target.files);
+      },
+
+      _filesChanged: function() {
+        this._setHasFiles(this.files.length > 0);
       },
 
       _upload: function(files) {
         if (files && files.length > 0) {
-          this._setHasFiles(true);
-          this.progress = true;
           this.uploadFiles(files);
         }
       },
@@ -406,7 +385,6 @@ limitations under the License.
 
       _drop: function(e) {
         e.preventDefault();
-        this.progress = true;
         this.toggleClass('dragging', false, this.$.label);
         this.toggleClass('dragging', false, this.$.container);
         this._upload(e.dataTransfer.files);
@@ -417,6 +395,10 @@ limitations under the License.
         // and `updateDocument` is false (e.g when using the element on a form: creation or edition of documents).
         // This will allow the user to manage the list of files.
         return (!this.updateDocument && this.blobList) || !this.hasFiles;
+      },
+
+      _areActionsVisible: function() {
+        return !this.updateDocument && this.hasFiles && !this.uploading;
       },
 
       _computeEnrichers: function() {
@@ -447,7 +429,6 @@ limitations under the License.
         }
         if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
           obj[path[0]] = path.length === 1 && value ? value : {};
-
         }
         return this._createNestedObjectRecursive(obj[path[0]], path.slice(1), value);
       },
