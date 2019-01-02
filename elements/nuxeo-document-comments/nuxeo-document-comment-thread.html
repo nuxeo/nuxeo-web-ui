@@ -108,7 +108,7 @@ limitations under the License.
         </paper-textarea>
         <template is="dom-if" if="[[!_isBlank(reply)]]">
           <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
-          <nuxeo-tooltip for="submit" position="left">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
+          <nuxeo-tooltip for="submit">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
           <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
         </template>
       </div>
