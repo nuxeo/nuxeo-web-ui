@@ -30,6 +30,7 @@ limitations under the License.
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
 <% ConfigurationService cs = Framework.getService(ConfigurationService.class); %>
 <% String ua = request.getHeader("user-agent"); %>
+<% String context = request.getContextPath(); %>
 
 <!DOCTYPE html>
 <html lang="">
@@ -54,9 +55,11 @@ limitations under the License.
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nuxeo">
 
-  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png">
-  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png">
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png" type="image/png">
+  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png" type="image/png">
+  <% if (UserAgentMatcher.isMSEdge(ua)) { %>
+  <link rel="shortcut icon" href="<%=context%>/icons/favicon.ico" type="image/x-icon">
+  <% } %>
   <!-- Safari pinned tab icon -->
   <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg" color="#0066ff">
 
@@ -77,7 +80,7 @@ limitations under the License.
 </head>
 
 <body>
-  <nuxeo-connection url="<%= request.getContextPath() %>"
+  <nuxeo-connection url="<%= context %>"
                     repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= request.getRequestURI() %>"
              product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
@@ -102,7 +105,7 @@ limitations under the License.
   </script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
-  <link rel="import" href="<%= request.getContextPath() %><%= resource.getURI() %>">
+  <link rel="import" href="<%= context %><%= resource.getURI() %>">
   <% } %>
 
   <!-- routing -->
