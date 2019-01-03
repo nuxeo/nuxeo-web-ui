@@ -430,7 +430,7 @@
   "documentPage.process.title": "Process",
   "documentPage.route.noTasks": "No Tasks.",
   "documentPage.route.view.graph": "View Graph",
-  "documentPage.route.view.graph.error": "An error occurred when drawing the workflow's graph",
+  "documentPage.route.view.graph.error": "An error occurred while drawing the workflow's graph",
   "documentPage.info": "Info",
   "documentPage.initiated.workflow.currentUser": "You started a {0} workflow on this document.",
   "documentPage.initiated.workflow": " started a {0} workflow on this document.",
