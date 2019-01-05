@@ -473,7 +473,6 @@
   "driveSyncToggleButton.sync": "同期化する",
   "driveSyncToggleButton.unsync": "同期を解除する",
   "dropzone.add": "ファイルを追加",
-  "dropzone.progress": "アップロード中...",
   "dropzone.uploaded": "ファイルがアップロードされました",
   "dublincoreEdit.directorySuggestion.placeholder": "値を選択",
   "easyshare.copy.label": "リンクをコピーして、文書を共有する{0}",

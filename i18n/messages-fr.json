@@ -473,7 +473,6 @@
   "driveSyncToggleButton.sync": "Synchroniser",
   "driveSyncToggleButton.unsync": "Désynchroniser",
   "dropzone.add": "Ajouter un fichier principal",
-  "dropzone.progress": "Ajout en cours",
   "dropzone.uploaded": "Fichier chargé",
   "dublincoreEdit.directorySuggestion.placeholder": "Sélectionnez une valeur",
   "easyshare.copy.label": "Copiez le lien et partagez le document {0}.",
