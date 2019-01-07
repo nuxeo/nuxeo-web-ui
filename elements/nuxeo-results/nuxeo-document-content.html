@@ -97,10 +97,6 @@ limitations under the License.
                      display-quick-filters
                      display-sort$="[[_canSort(document)]]"
                      sort-options="[[sortOptions]]">
-        <div slot="selectionActions">
-          <nuxeo-slot slot="BROWSE_ACTIONS" model="[[browseActionContext]]"></nuxeo-slot>
-        </div>
-
         <!-- Grid view -->
         <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
                          class="results"
@@ -251,10 +247,6 @@ limitations under the License.
           type: Number,
           notify: true
         },
-        browseActionContext: {
-          type: Object,
-          computed: '_browseActionContext(document, selectedItems)'
-        },
         sortOptions: {
           type: Array,
           value: []
@@ -380,10 +372,6 @@ limitations under the License.
 
       _handleDocumentCreated: function() {
         this.fire('document-updated');
-      },
-
-      _browseActionContext: function() {
-        return {document: this.document, selectedItems: this.selectedItems};
       },
 
       _computeVisible: function() {
