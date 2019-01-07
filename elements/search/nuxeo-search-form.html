@@ -765,11 +765,12 @@ limitations under the License.
             'params': this.params,
             'title': this.$.savedSearchTitle.value
           };
-          _el.post().then(function(response) {
+          _el.post().then(function(search) {
+            var id = search.id;
             this.$.saveDialog.close();
-            this.selectedSearch = response;
+            this.selectedSearch = search;
             this.$['saved-searches'].get().then(function() {
-              this.selectedSearchIdx = this.searches.length;
+              this.selectedSearchIdx = this.searches.findIndex(function(s) { return s.id === id; }) + 1;
             }.bind(this));
           }.bind(this));
         } else {
