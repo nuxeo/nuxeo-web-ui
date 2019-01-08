@@ -833,6 +833,7 @@
   "vocabularyManagement.cannotDelete.error": "このエントリを削除中にエラーが発生しました。",
   "vocabularyManagement.cannotDelete.referencedEntry": "このエントリは別の語彙で参照されています。",
   "vocabularyManagement.cannotEdit": "編集中にエラーが発生しました。",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "語彙エントリを削除しますか？",
   "vocabularyManagement.deleteEntry": "エントリを削除",
   "vocabularyManagement.edit.actions": "操作",
