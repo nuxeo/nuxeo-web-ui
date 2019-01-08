@@ -832,6 +832,7 @@
   "vocabularyManagement.cannotDelete.error": "Ett fel uppstod när denna post skulle tas bort.",
   "vocabularyManagement.cannotDelete.referencedEntry": "Den här posten refereras till i en annan ordlista.",
   "vocabularyManagement.cannotEdit": "Ett fel uppstod medan du redigerade posten.",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "Ta bort ordlisteposten?",
   "vocabularyManagement.deleteEntry": "Ta bort post",
   "vocabularyManagement.edit.actions": "Åtgärder",
