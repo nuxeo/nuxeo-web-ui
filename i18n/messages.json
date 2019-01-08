@@ -969,6 +969,7 @@
   "vocabularyManagement.cannotDelete.error": "An error occurred while deleting this entry.",
   "vocabularyManagement.cannotDelete.referencedEntry": "This entry is referenced in another vocabulary.",
   "vocabularyManagement.cannotEdit": "An error occurred while editing the entry.",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "Delete vocabulary entry?",
   "vocabularyManagement.deleteEntry": "Delete Entry",
   "vocabularyManagement.edit.actions": "Actions",
