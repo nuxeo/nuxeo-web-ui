@@ -76,6 +76,8 @@ limitations under the License.
           var doctype = document.type.toLowerCase();
           var name = ['nuxeo', doctype, layout, 'layout'].join('-');
           this._href = this.resolveUrl(doctype + '/' + name + '.html');
+        } else {
+          this._model = {document: null};
         }
         this.previousDocument = document;
       },
