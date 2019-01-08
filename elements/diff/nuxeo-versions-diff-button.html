@@ -71,11 +71,6 @@ limitations under the License.
 
       _doDiff: function() {
         this.$$('#opGetVersions').execute().then(function(result) {
-          // check if there is at least two versions to be compared
-          if (result.entries.length < 2) {
-            this.fire('notify', { message: this.i18n('versionsDiffButton.nothingToCompare')} );
-            return;
-          }
           // sort the versions from the most to the least recent
           var versions = result.entries.reverse();
           var currentIndex = versions.findIndex(function(doc) {
@@ -90,6 +85,11 @@ limitations under the License.
           }
           if (this.document.isCheckedOut) {
             versions.unshift(this.document);
+          }
+          // check if there is at least two versions to be compared
+          if (versions.length < 2) {
+            this.fire('notify', { message: this.i18n('versionsDiffButton.nothingToCompare')} );
+            return;
           }
           this.fire('nuxeo-diff-documents', {
             documents: versions
