@@ -398,6 +398,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           this.unlisten(oldView, 'columns-changed', '_columnsChanged');
           this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
           this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
+          this.unlisten(oldView, 'items-changed', '_itemsChanged');
+          this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
         }
         if (view) {
           // initialize columns
@@ -582,17 +584,13 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _itemsChanged: function(e) {
-        // XXX: the condition `!e.detail.path` is used to prevent `resultsCount` updates when a single item is changed,
-        // since it is not likelty for the results count to have changed.
-        if (this.nxProvider && e.detail.value && !e.detail.path) {
+        if (this.nxProvider && e.detail.value) {
           this.resultsCount = this.nxProvider.resultsCount;
         }
       },
 
       _quickFiltersChanged: function(e) {
-        // XXX: the condition `!e.detail.path` is used to prevent `quickFilters` updates when a single item is changed,
-        // since it is not likelty for the quick filters to have changed.
-        if (this.nxProvider && e.detail.value && !e.detail.path) {
+        if (this.nxProvider && e.detail.value) {
           this.quickFilters = this.nxProvider.quickFilters;
         }
       },
