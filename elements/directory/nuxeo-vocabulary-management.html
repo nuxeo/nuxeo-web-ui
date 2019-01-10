@@ -201,7 +201,7 @@ limitations under the License.
             directory: this.selectedVocabulary,
             parentDirectory: this._getParentDirectoryFor(this._selectedEntry),
             entries: this.entries,
-            "new": this._new
+            new: this._new
           };
         },
 
@@ -238,7 +238,7 @@ limitations under the License.
         },
 
         _refresh: function() {
-          if (this.selectedVocabulary && this.selectedVocabulary.length > 0) {
+          if (this._isVocabularySelected()) {
             this.$.directory.path = '/directory/' + this.selectedVocabulary;
             this.entries = [];
             this.colDef = [];
@@ -263,10 +263,6 @@ limitations under the License.
           }
         },
 
-        _displayTable: function() {
-          return this.selectedVocabulary && this.selectedVocabulary.length > 0;
-        },
-
         _value: function(index, prop) {
           var entry = this.entries[index];
           if (entry && entry.properties && prop) {
@@ -275,7 +271,6 @@ limitations under the License.
             }
             return entry.properties[prop];
           } else {
-            console.error('Could not resolve property ' + prop);
             return 'N/A';
           }
         },
