@@ -117,7 +117,7 @@ limitations under the License.
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
                 <template>
-                  [[item.type]]
+                  <nuxeo-tag>[[formatDocType(item.type)]]</nuxeo-tag>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.lastViewed')]]" flex="50">

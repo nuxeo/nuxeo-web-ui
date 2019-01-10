@@ -17,7 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../nuxeo-document-creation-stats/nuxeo-document-creation-stats.html">
 
 <!--
@@ -49,7 +49,7 @@ limitations under the License.
     Polymer({
       is: 'nuxeo-document-create-shortcuts',
 
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.FormatBehavior],
 
       properties: {
         hostVisible: {
@@ -81,7 +81,7 @@ limitations under the License.
             var el = document.createElement('nuxeo-document-create-shortcut');
             el.type = type;
             el.icon =  'images/doctypes/' + type + '.svg';
-            el.label = this.i18n('label.document.type.' + type);
+            el.label = this.formatDocType(type);
             shorcuts.push(el);
           }
         }.bind(this));

@@ -207,7 +207,7 @@ limitations under the License.
       },
 
       _getTypeLabel: function(type) {
-        return this._isValidType(type) ? this.i18n('label.document.type.' + type.id) : '';
+        return this._isValidType(type) ? this.formatDocType(type.id) : '';
       },
 
       _getTypeIcon: function(type) {
