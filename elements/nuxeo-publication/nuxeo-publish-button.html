@@ -127,8 +127,7 @@ limitations under the License.
           value: 'internal'
         },
         publishContext: {
-          type: Object,
-          computed: '_publishContext(document, documents.splices, i18n)'
+          type: Object
         },
         /**
          * `true` if the action should display the label, `false` otherwise.
@@ -150,14 +149,12 @@ limitations under the License.
 
       _toggleDialog: function() {
         this.$.publishDialog.toggle();
+        this.publishContext = {document: this.document, documents: this.documents, i18n: this.i18n};
       },
 
       _close: function() {
         this.$.publishDialog.close();
-      },
-
-      _publishContext: function() {
-        return {document: this.document, documents: this.documents, i18n: this.i18n};
+        this.publishContext = {};
       },
 
       _computeLabel: function() {
