@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-download-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.html">
@@ -196,7 +197,7 @@ limitations under the License.
         <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
           <div class="dataContainer">
             <div class="title">[[doc.title]]</div>
-            <nuxeo-tag>[[_docType(doc)]]</nuxeo-tag>
+            <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
           </div>
         </a>
         <div class="actions">
@@ -214,7 +215,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-document-grid-thumbnail',
-      behaviors: [Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.FormatBehavior, Nuxeo.RoutingBehavior],
       properties: {
         doc: {
           type: Object,
@@ -249,10 +250,6 @@ limitations under the License.
       _thumbnail: function(doc) {
         return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
                doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
-      },
-
-      _docType: function() {
-        return this.doc.type;
       },
 
       handleClick: function(e) {

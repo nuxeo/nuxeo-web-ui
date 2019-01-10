@@ -24,7 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-page-provider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
@@ -247,7 +247,7 @@ limitations under the License.
                       </div>
                       <div class="flex">
                         <span class="list-item-title ellipsis">[[member.title]]</span>
-                        <span class="list-item-property ellipsis">[[member.type]]</span>
+                        <span class="list-item-property ellipsis">[[formatDocType(member.type)]]</span>
                       </div>
                       <iron-icon  id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]"
                         icon="nuxeo:remove" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
@@ -273,7 +273,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-collections',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.FiltersBehavior],
 
       properties: {
 
