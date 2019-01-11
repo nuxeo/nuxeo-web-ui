@@ -68,7 +68,7 @@ if (argv.watch) {
 }
 
 if (argv.tags) {
-  args.push(`--cucumberOpts.tags=${argv.tags}`);
+  args.push(`--cucumberOpts.tagExpression=${argv.tags}`);
 }
 
 if (argv.debug) {
