@@ -349,12 +349,13 @@ limitations under the License.
           this.splice('files', e.model.itemsIndex, 1);
         } else {
           this._reset();
+          this.cancelBatch();
           this.set('document.properties.' + this._parsedXpath, '');
         }
       },
 
       _reset: function() {
-        this.cancelBatch();
+        this.abortBatch();
         this.$.input.value = '';
         this.files = [];
       },
