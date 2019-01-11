@@ -969,6 +969,7 @@
   "vocabularyManagement.cannotDelete.error": "Si è verificato un errore durante l’eliminazione della voce.",
   "vocabularyManagement.cannotDelete.referencedEntry": "In un altro vocabolario si fa riferimento a questa voce.",
   "vocabularyManagement.cannotEdit": "Si è verificato un errore durante la modifica della voce.",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "Eliminare la voce di vocabolario?",
   "vocabularyManagement.deleteEntry": "Elimina voce",
   "vocabularyManagement.edit.actions": "Azioni",

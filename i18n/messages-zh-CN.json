@@ -969,6 +969,7 @@
   "vocabularyManagement.cannotDelete.error": "删除此项时出错。",
   "vocabularyManagement.cannotDelete.referencedEntry": "此项在另一个词汇表中引用。",
   "vocabularyManagement.cannotEdit": "编辑条目时出错。",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "是否删除词汇表项？",
   "vocabularyManagement.deleteEntry": "删除条目",
   "vocabularyManagement.edit.actions": "操作",

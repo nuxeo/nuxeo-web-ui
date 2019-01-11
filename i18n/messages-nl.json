@@ -969,6 +969,7 @@
   "vocabularyManagement.cannotDelete.error": "Er is een fout opgetreden tijdens het wissen van dit lemma.",
   "vocabularyManagement.cannotDelete.referencedEntry": "Er wordt naar dit lemma verwezen in een ander woordenboek.",
   "vocabularyManagement.cannotEdit": "Er is een fout opgetreden tijdens het bewerken van het lemma.",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "Woordenboeklemma wissen?",
   "vocabularyManagement.deleteEntry": "Lemma wissen",
   "vocabularyManagement.edit.actions": "Acties",

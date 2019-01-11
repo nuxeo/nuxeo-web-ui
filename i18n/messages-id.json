@@ -969,6 +969,7 @@
   "vocabularyManagement.cannotDelete.error": "Terjadi kesalahan saat mngahapus masukan.",
   "vocabularyManagement.cannotDelete.referencedEntry": "Masukan ini dirujuk dalam kosakata lain.",
   "vocabularyManagement.cannotEdit": "Terjadi kesalahan saat menyunting masukan.",
+  "vocabularyManagement.cannotGetSchema": "An error occurred while trying to get vocabulary details.",
   "vocabularyManagement.confirmDelete": "Hapus kosa kata masuk?",
   "vocabularyManagement.deleteEntry": "Hapus Masukan",
   "vocabularyManagement.edit.actions": "Tindakan",
