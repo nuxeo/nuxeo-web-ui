@@ -85,7 +85,7 @@ limitations under the License.
     </template>
 
     <nuxeo-dialog id="publishDialog"
-                  modal
+                  modal opened="{{opened}}"
                   no-auto-focus>
       <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot slot="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
@@ -127,7 +127,8 @@ limitations under the License.
           value: 'internal'
         },
         publishContext: {
-          type: Object
+          type: Object,
+          computed: '_publishContext(document, documents.splices, i18n, opened)'
         },
         /**
          * `true` if the action should display the label, `false` otherwise.
@@ -149,12 +150,14 @@ limitations under the License.
 
       _toggleDialog: function() {
         this.$.publishDialog.toggle();
-        this.publishContext = {document: this.document, documents: this.documents, i18n: this.i18n};
       },
 
       _close: function() {
         this.$.publishDialog.close();
-        this.publishContext = {};
+      },
+
+      _publishContext: function() {
+        return this.opened ? {document: this.document, documents: this.documents, i18n: this.i18n} : {};
       },
 
       _computeLabel: function() {
