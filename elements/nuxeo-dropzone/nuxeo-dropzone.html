@@ -353,8 +353,10 @@ limitations under the License.
         }
       },
 
-      _reset: function() {
-        this.cancelBatch();
+      _reset: function(document) {
+        if (document === undefined) {
+          this.cancelBatch();
+        }
         this.$.input.value = '';
         this.files = [];
       },

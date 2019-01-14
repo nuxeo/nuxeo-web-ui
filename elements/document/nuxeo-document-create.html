@@ -352,6 +352,7 @@ limitations under the License.
 
       _cancel: function() {
         this._clear();
+        this.document = undefined;
         this.fire('nx-creation-wizard-show-tabs');
       },
 
@@ -362,7 +363,6 @@ limitations under the License.
       _clear: function() {
         this.stage = 'choose';
         this.selectedDocType = {};
-        this.document = null;
       },
 
       _visibleOnStage: function() {
