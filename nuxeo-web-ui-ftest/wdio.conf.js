@@ -26,11 +26,15 @@ switch (capability.browserName) {
     capability.chromeOptions = {
       args: [
         '--no-sandbox',
-        // '--auto-open-devtools-for-tabs',
-        // '--window-size=1920,1080',
-        // '--headless',
       ],
     };
+    if (process.env.HEADLESS) {
+      capability.chromeOptions.args.push('--window-size=1920,1080');
+      capability.chromeOptions.args.push('--single-process');
+      capability.chromeOptions.args.push('--headless');
+      capability.chromeOptions.args.push('--disable-gpu');
+      capability.chromeOptions.args.push('--disable-dev-shm-usage');
+    }
     if (process.env.BROWSER_BINARY) {
       capability.chromeOptions.binary = process.env.BROWSER_BINARY;
     }
@@ -99,7 +103,7 @@ exports.config = {
   // and 30 processes will get spawned. The property handles how many capabilities
   // from the same test should run tests.
   //
-  maxInstances: 2,
+  maxInstances: 1,
   //
   // If you have trouble getting all important capabilities together, check out the
   // Sauce Labs platform configurator - a great tool to configure your capabilities:

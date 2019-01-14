@@ -2,7 +2,7 @@
   "name": "nuxeo-web-ui-webdriverio",
   "version": "1.0.0",
   "scripts": {
-    "test": "nuxeo-web-ui-ftest --report --screenshots",
+    "test": "nuxeo-web-ui-ftest --report --screenshots --headless",
     "test:dev": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo",
     "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --tags=@watch --debug"
   },

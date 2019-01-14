@@ -62,9 +62,12 @@ if (def) {
   args.push(`--cucumberOpts.require=${def}/**/*.js`);
 }
 
-
 if (argv.watch) {
   args.push('--watch');
+}
+
+if (argv.headless) {
+  process.env.HEADLESS = true;
 }
 
 if (argv.tags) {
