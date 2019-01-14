@@ -157,7 +157,7 @@ export default class Browser extends BasePage {
       if (collection.getText().trim() === name) {
         const remove = collection.element('iron-icon[name="remove"]');
         remove.waitForVisible();
-        this.el.scrollIntoView();
+        remove.scrollIntoView();
         remove.click();
         return true;
       }
