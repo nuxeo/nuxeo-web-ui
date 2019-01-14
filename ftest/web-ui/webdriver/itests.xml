@@ -30,7 +30,7 @@
       <arg value="run" />
       <arg value="lint" />
     </exec>
-    <delete includeEmptyDirs="yes" failonerror="true">
+    <delete includeEmptyDirs="yes" failonerror="false">
       <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />
     </delete>
     <exec executable="${cmd.npm}" failonerror="true">
