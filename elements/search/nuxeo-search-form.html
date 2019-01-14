@@ -286,7 +286,7 @@ limitations under the License.
               </paper-button>
             </div>
           </div>
-          <paper-spinner-lite active$="[[loading]]"></paper-spinner-lite>
+          <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
         <div id="queue" hidden$="{{!queue}}">
