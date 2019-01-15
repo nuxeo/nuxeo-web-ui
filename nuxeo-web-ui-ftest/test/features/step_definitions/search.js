@@ -70,11 +70,15 @@ Given(/^I have the following documents$/, (table) => {
 });
 
 When(/^I clear the (.+) search on (.+)$/, function (searchType, searchName) {
-  return this.ui.searchForm(searchName).search(searchType);
+  const searchForm = this.ui.searchForm(searchName);
+  searchForm.waitForVisible();
+  searchForm.search(searchType);
 });
 
 When(/^I perform a (.+) search for (.+) on (.+)$/, function (searchType, searchTerm, searchName) {
-  return this.ui.searchForm(searchName).search(searchType, searchTerm);
+  const searchForm = this.ui.searchForm(searchName);
+  searchForm.waitForVisible();
+  searchForm.search(searchType, searchTerm);
 });
 
 Then(/^I can see (\d+) search results$/, function (numberOfResults) {
@@ -83,7 +87,8 @@ Then(/^I can see (\d+) search results$/, function (numberOfResults) {
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) === numberOfResults);
+    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) === numberOfResults,
+      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`);
   }
 });
 
@@ -93,7 +98,8 @@ Then(/^I can see more than (\d+) search results$/, function (minNumberOfResults)
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) > minNumberOfResults);
+    driver.waitUntil(() => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
+      `Expecting to get at least ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`);
   }
 });
 
