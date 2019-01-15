@@ -749,7 +749,7 @@
   "publication.internal.publish.success": "Documento publicado con exito",
   "publication.internal.publish.success.multiple": "Documentos publicados con exito",
   "publication.internal.publish.error": "Error al publicar el documento.",
-  "publication.internal.publish.error.multiple": "Error al publicar el documento.",
+  "publication.internal.publish.error.multiple": "Error al publicar los documentos.",
   "publication.button.tooltip": "Publicar documento",
   "publication.details": "Detalles de publicación",
   "publication.info": "Estas viendo una publicación de {0}",

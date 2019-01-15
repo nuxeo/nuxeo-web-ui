@@ -749,7 +749,7 @@
   "publication.internal.publish.success": "Dokumentet publicerat",
   "publication.internal.publish.success.multiple": "Dokumenten publicerade",
   "publication.internal.publish.error": "Fel när dokumentet publicerades.",
-  "publication.internal.publish.error.multiple": "Fel när dokumentet publicerades.",
+  "publication.internal.publish.error.multiple": "Fel när dokument publicerades.",
   "publication.button.tooltip": "Publicera dokument",
   "publication.details": "Publiceringsinformation",
   "publication.info": "Du läser en publicering av {0}",

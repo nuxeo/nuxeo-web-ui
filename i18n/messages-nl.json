@@ -749,7 +749,7 @@
   "publication.internal.publish.success": "Document met succes gepubliceerd",
   "publication.internal.publish.success.multiple": "Documenten met succes gepubliceerd",
   "publication.internal.publish.error": "Fout bij het publiceren van het document.",
-  "publication.internal.publish.error.multiple": "Fout bij het publiceren van het document.",
+  "publication.internal.publish.error.multiple": "Fout bij het publiceren van het documenten.",
   "publication.button.tooltip": "Document publiceren",
   "publication.details": "Details van publicatie",
   "publication.info": "U bekijkt een publicatie van {0}",
