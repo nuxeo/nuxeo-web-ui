@@ -8,7 +8,7 @@
 
   <artifactId>nuxeo-web-ui-marketplace-itests</artifactId>
   <packaging>zip</packaging>
-  <name>Nuxeo Web UI - Marketplace Package Sample for Functionnal tests</name>
+  <name>Nuxeo Web UI - Marketplace Package Sample for Functional tests</name>
 
   <dependencies>
     <dependency>

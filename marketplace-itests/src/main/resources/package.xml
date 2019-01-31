@@ -1,7 +1,7 @@
 <package type="addon" name="nuxeo-web-ui-ftest-sample" version="@VERSION@">
   <title>Nuxeo Web UI</title>
   <description>
-    <p>Web UI sample extension for functionnal tests</p>
+    <p>Web UI sample extension for functional tests</p>
   </description>
   <home-page>https://github.com/nuxeo/nuxeo-web-ui</home-page>
   <vendor>Nuxeo</vendor>
