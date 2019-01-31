@@ -171,7 +171,7 @@ timestamps {
                                 if (!params.SKIP_IT_TESTS) profiles.add('ftest')
                                 if (params.GENERATE_METRICS) profiles.add('metrics')
                                 withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-                                    sh "mvn clean install ${profiles.empty ? "" : "-P" + profiles.join(",")}"
+                                    sh "mvn clean install ${profiles.isEmpty() ? "" : "-P" + profiles.join(",")}"
                                 }
                                 archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip, metrics/target/report/*'
                             }
