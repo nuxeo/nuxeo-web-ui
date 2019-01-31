@@ -1,20 +1,18 @@
 properties([
     [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
-    [$class: 'ParametersDefinitionProperty', parameterDefinitions:
-        [
-            [$class: 'StringParameterDefinition', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', name: 'BRANCH'],
-            [$class: 'ChoiceParameterDefinition', choices: 'master\n9.10', description: 'The branch to fallback on when $BRANCH is not found.', name: 'BASE_BRANCH'],
-            [$class: 'StringParameterDefinition', defaultValue: 'SLAVE', description: 'Slave label to be used.', name: 'SLAVE'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false,  description: 'Run npm and bower cache clean?', name: 'CLEAN'],
-            [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?', name: 'SAUCE_LAB'],
-            [$class: 'BooleanParameterDefinition', defaultValue: true,  description: 'Should PRs be created if build is successful?', name: 'CREATE_PR'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the functionnal tests be skipped?', name: 'SKIP_IT_TESTS'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the element\'s tests be skipped?', name: 'SKIP_UNIT_TESTS'],
-            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Should the metrics report be generated?', name: 'GENERATE_METRICS'],
-            [$class: 'StringParameterDefinition', defaultValue: 'chrome', description: 'The browser to use for functional tests.', name: 'BROWSER'],
-            [$class: 'StringParameterDefinition', defaultValue: '', description: 'The path to the browser binary.', name: 'BROWSER_BINARY']
-        ]
-    ],
+    parameters([
+            string(name: 'BRANCH', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', trim: false),
+            choice(name: 'BASE_BRANCH', choices: ['master', '10.10', '9.10'], description: 'The branch to fallback on when $BRANCH is not found.'),
+            string(name: 'SLAVE', defaultValue: 'SLAVE', description: 'Slave label to be used.', trim: false),
+            booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm and bower cache clean?'),
+            booleanParam(name: 'SAUCE_LAB', defaultValue: true, description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?'),
+            booleanParam(name: 'CREATE_PR', defaultValue: true, description: 'Should PRs be created if build is successful?'),
+            booleanParam(name: 'SKIP_IT_TESTS', defaultValue: false, description: 'Should the functional tests be skipped?'),
+            booleanParam(name: 'SKIP_UNIT_TESTS', defaultValue: false, description: 'Should the element\'s tests be skipped?'),
+            booleanParam(name: 'GENERATE_METRICS', defaultValue: false, description: 'Should the metrics report be generated?'),
+            string(name: 'BROWSER', defaultValue: 'chrome', description: 'The browser to use for functional tests.', trim: false),
+            string(name: 'BROWSER_BINARY', defaultValue: '', description: 'The path to the browser binary.', trim: false),
+    ]),
     pipelineTriggers([])
 ])
 
@@ -84,8 +82,9 @@ timestamps {
     node(SLAVE) {
         try {
             deleteDir()
-            def ELEMENTS_BASE_BRANCH = BASE_BRANCH == '9.10' ? 'maintenance-2.2.x' : BASE_BRANCH
-            def MP_BASE_BRANCH = BASE_BRANCH == '9.10' ? '2.2_9.10' : BASE_BRANCH
+            def VERSIONS_MAPPING = ['10.10': '2.4', '9.10': '2.2']
+            def ELEMENTS_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "maintenance-${VERSIONS_MAPPING.get(BASE_BRANCH)}.x" : BASE_BRANCH
+            def MP_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "${VERSIONS_MAPPING.get(BASE_BRANCH)}_${BASE_BRANCH}" : BASE_BRANCH
             def el, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
                 sh 'npm cache clean --force && bower cache clean'
