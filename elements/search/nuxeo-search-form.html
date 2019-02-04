@@ -237,7 +237,7 @@ limitations under the License.
 
     <div id="search-container">
       <div class="header ellipsis search-header">
-        <nuxeo-search id="saved-searches" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
+        <nuxeo-search id="saved-searches" headers="[[headers]]" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
             <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
@@ -674,7 +674,7 @@ limitations under the License.
             this.searchTerm = this.params.ecm_fulltext.replace('*', '');
             this.form.searchTerm = this.searchTerm;
           }
-          this.$.provider.fetch();
+          this._fetch(this.$.provider);
         }
       },
 
@@ -868,6 +868,17 @@ limitations under the License.
        */
       _fetch: function(el) {
         this.loading = true;
+        // Ensure that objects are not sent as query parameters
+        Object.keys(this.params).forEach(function(k) {
+          var value = this.params[k];
+          if (Array.isArray(value)) {
+            this.params[k] = value.map(function(item) {
+              return (item && item['entity-type']) ? (item.uid || item.id) : item;
+            });
+          } else {
+            this.params[k] = (value && value['entity-type']) ? (value.uid || value.id) : value;
+          }
+        }.bind(this));
         return el.fetch().then(function() {
           this.loading = false;
         }.bind(this)).catch(function(err) {
