@@ -271,7 +271,7 @@ limitations under the License.
 
       _labelModified: function(doc) {
         return this.i18n('versions.modified',
-          moment().to(doc.properties['dc:modified']), doc.properties['dc:creator']);
+          moment().to(doc.properties['dc:modified']), doc.properties['dc:lastContributor']);
       },
 
       _date: function(date) {
