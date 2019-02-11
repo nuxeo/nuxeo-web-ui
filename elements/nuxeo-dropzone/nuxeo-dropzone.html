@@ -38,12 +38,21 @@ limitations under the License.
         display: block;
       }
 
-      label {
-        margin-bottom: 8px;
+      :host([dragging-files]) label {
+        color: var(--paper-input-container-focus-color);
       }
 
-      label.dragging {
-        color: var(--paper-input-container-focus-color);
+      :host([dragging-files]) a {
+        text-decoration: none;
+      }
+
+      :host([dragging-files]) #container {
+        border: 1px dashed var(--paper-input-container-focus-color);
+        background-color: var(--paper-input-container-focus-background-color, rgba(0, 102, 255, 0.1));
+      }
+
+      label {
+        margin-bottom: 8px;
       }
 
       a, a:active, a:visited, a:focus {
@@ -65,11 +74,6 @@ limitations under the License.
         border: 1px dashed var(--paper-input-container-color);
         min-height: 64px;
         height: calc(100% - 2px);
-      }
-
-      #container.dragging {
-        border: 1px dashed var(--paper-input-container-focus-color);
-        background: rgba(0, 0, 0, 0.01);
       }
 
       #container .actions {
@@ -145,7 +149,7 @@ limitations under the License.
 
     <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
       <div id="container">
-        <a href="javascript:undefined" on-tap="open">[[i18n(message)]]</a>
+        <a href="javascript:undefined" on-tap="open">[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a>
         <div class="actions">
           <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
@@ -212,6 +216,24 @@ limitations under the License.
         uploadedMessage: {
           type: String,
           value: 'dropzone.uploaded'
+        },
+        /**
+         * Message to show when files are being dragged into the dropzone.
+         * It expects translated text or a key to be translated.
+         * By default it will show: 'Drop your file'.
+         */
+        dragContentMessage: {
+          type: String,
+          value: 'dropzone.dropFile'
+        },
+        /**
+         * Flag that indicates if there are any files being dragged into the dropzone.
+         */
+        draggingFiles: {
+          type: Boolean,
+          readOnly: true,
+          value: false,
+          reflectToAttribute: true,
         },
         /**
          * Flag that indicates if there are already uploaded files on the dropzone.
@@ -377,20 +399,22 @@ limitations under the License.
 
       _dragover: function(e) {
         e.preventDefault();
-        this.toggleClass('dragging', true, this.$.label);
-        this.toggleClass('dragging', true, this.$.container);
+        e.dataTransfer.dropEffect = 'copy';
+        this._setDraggingFiles(true);
       },
 
       _dragleave: function() {
-        this.toggleClass('dragging', false, this.$.label);
-        this.toggleClass('dragging', false, this.$.container);
+        this._setDraggingFiles(false);
       },
 
       _drop: function(e) {
         e.preventDefault();
-        this.toggleClass('dragging', false, this.$.label);
-        this.toggleClass('dragging', false, this.$.container);
+        this._setDraggingFiles(false);
         this._upload(e.dataTransfer.files);
+      },
+
+      _computeMessage: function() {
+        return this.i18n && this.draggingFiles ? this.i18n(this.dragContentMessage) : this.i18n(this.message);
       },
 
       _isDropzoneVisible: function() {
