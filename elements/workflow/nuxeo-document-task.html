@@ -126,7 +126,10 @@ limitations under the License.
 
           <iron-form id="task-container">
             <form>
-              <nuxeo-layout id="layout" href="[[_layoutHref(task)]]" model="[[_layoutModel(task)]]" error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"></nuxeo-layout>
+              <nuxeo-layout id="layout"
+                href="[[_href]]" model="[[_model]]"
+                error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"
+                on-element-changed="_elementChanged"></nuxeo-layout>
             </form>
           </iron-form>
 
@@ -156,25 +159,36 @@ limitations under the License.
           type: String
         },
 
+        _href: {
+          type: String
+        },
+
+        _model: {
+          type: Object
+        },
+
         _selectedTab: {
           type: String,
           value: 'resolution'
         }
       },
 
+      observers: [
+        '_updateTaskLayout(task)'
+      ],
+
+      _elementChanged: function() {
+        this._model = { document: this.task.targetDocumentIds[0], task: this.task };
+      },
+
       /**
        * Returns the name for the current layout element
        */
-      _layoutHref: function(task) {
+      _updateTaskLayout: function(task) {
         if (task) {
+          this._href = null;
           var layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
-          return this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
-        }
-      },
-
-      _layoutModel: function(task) {
-        if (task) {
-          return { document: task.targetDocumentIds[0], task: task };
+          this._href = this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
         }
       },
 
