@@ -31,7 +31,7 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-scroll-threshold/iron-scroll-threshold.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -152,7 +152,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-versions',
-  behaviors: [Nuxeo.RoutingBehavior, FormatBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
 
   properties: {
     document: Object,

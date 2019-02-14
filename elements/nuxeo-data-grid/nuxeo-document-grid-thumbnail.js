@@ -28,7 +28,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
@@ -217,7 +217,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-grid-thumbnail',
-  behaviors: [FormatBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [FormatBehavior, RoutingBehavior],
 
   properties: {
     doc: {

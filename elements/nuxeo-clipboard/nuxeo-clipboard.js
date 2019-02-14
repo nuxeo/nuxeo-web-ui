@@ -33,7 +33,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
@@ -174,7 +174,7 @@ Polymer({
 `,
 
   is: 'nuxeo-clipboard',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {

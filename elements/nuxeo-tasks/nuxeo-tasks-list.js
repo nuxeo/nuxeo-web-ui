@@ -27,7 +27,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
@@ -139,7 +139,7 @@ Polymer({
 `,
 
   is: 'nuxeo-tasks-list',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior],
 
   properties: {
     tasks: Array,

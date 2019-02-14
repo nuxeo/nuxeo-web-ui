@@ -28,7 +28,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-app/nuxeo-page-item.js';
@@ -228,7 +228,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-page',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: {
@@ -249,7 +249,7 @@ Polymer({
   },
 
   _openedChanged: function() {
-    animationFrame.run(function() {
+    animationFrame.run(() => {
       // notify that there was a resize
       this.dispatchEvent(new CustomEvent('resize', {
         bubbles: false,

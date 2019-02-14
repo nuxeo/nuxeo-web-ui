@@ -26,7 +26,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
@@ -37,6 +37,7 @@ import './nuxeo-results.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
@@ -145,7 +146,7 @@ Polymer({
 `,
 
   is: 'nuxeo-default-results',
-  behaviors: [Nuxeo.RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior],
 
   properties: {
     nxProvider: Object,

@@ -31,7 +31,7 @@ import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-tree/nuxeo-tree.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -180,7 +180,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-tree',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     controller: Object,

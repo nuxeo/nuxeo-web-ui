@@ -33,7 +33,7 @@ import '@polymer/paper-tooltip/paper-tooltip.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-html-editor.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -127,7 +127,7 @@ Polymer({
 `,
 
   is: 'nuxeo-note-editor',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: {

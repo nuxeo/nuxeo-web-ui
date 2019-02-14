@@ -26,9 +26,9 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-document-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
@@ -113,7 +113,7 @@ Polymer({
 `,
 
   is: 'nuxeo-internal-publish',
-  behaviors: [I18nBehavior, Nuxeo.LayoutBehavior],
+  behaviors: [I18nBehavior, LayoutBehavior],
 
   properties: {
     /**

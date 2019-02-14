@@ -39,7 +39,7 @@ Polymer({
 
   is: 'nuxeo-document-layout',
   behaviors: [I18nBehavior],
-
+  importMeta: import.meta,
   properties: {
     document: {
       type: Object,

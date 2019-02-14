@@ -1,9 +1,9 @@
 {
   "entrypoint": "index.html",
-  "shell": "elements/nuxeo-app.html",
+  "shell": "elements/nuxeo-app.js",
   "fragments": [
-    "elements/elements.html",
-    "elements/routing.html"
+    "elements/elements.js",
+    "elements/routing.js"
   ],
   "sources": [
     "elements/**/*",

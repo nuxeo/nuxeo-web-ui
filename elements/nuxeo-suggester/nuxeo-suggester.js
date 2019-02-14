@@ -35,7 +35,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '../nuxeo-keys/nuxeo-keys.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
@@ -290,7 +290,7 @@ Polymer({
 `,
 
   is: 'nuxeo-suggester',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior],
 
   properties: {
     toggled: {

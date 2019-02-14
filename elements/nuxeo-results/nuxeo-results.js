@@ -49,7 +49,7 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
@@ -178,7 +178,7 @@ Polymer({
 `,
 
   is: 'nuxeo-results',
-  behaviors: [Nuxeo.RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior],
 
   properties: {
     /**

@@ -27,7 +27,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-user-group-latest.js';
@@ -52,7 +52,7 @@ Polymer({
 `,
 
   is: 'nuxeo-user-group-management-page',
-  behaviors: [I18nBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior],
 
   properties: {
     visible: {

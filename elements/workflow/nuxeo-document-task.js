@@ -31,7 +31,7 @@ import '@polymer/iron-form/iron-form.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-button/paper-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '../nuxeo-workflow-graph/nuxeo-workflow-graph.js';
@@ -147,7 +147,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-task',
-  behaviors: [Nuxeo.RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior],
 
   properties: {
     task: {

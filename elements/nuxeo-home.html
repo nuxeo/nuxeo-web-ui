@@ -169,9 +169,10 @@ limitations under the License.
   <script type="module">
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 Polymer({
   is: 'nuxeo-home',
-  behaviors: [Nuxeo.RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior],
   properties: {
     visible: {
       type: Boolean,

@@ -18,7 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
@@ -143,7 +143,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-publications',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: Object,
