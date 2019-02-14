@@ -29,7 +29,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@nuxeo/nuxeo-elements/nuxeo-audit-page-provider.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
@@ -95,7 +95,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-history',
-  behaviors: [FormatBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [FormatBehavior, RoutingBehavior],
 
   properties: {
     document: Object,

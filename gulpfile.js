@@ -197,6 +197,6 @@ gulp.task('serve', ['merge-message-files'], function() {
     log('Web UI running at ' + require('url').format(urls.serverUrl));
   });
 
-  gulp.watch(['{scripts,elements}/**/{*.js,*.html}'], ['lint']);
+  // gulp.watch(['{scripts,elements}/**/{*.js,*.html}'], ['lint']);
   gulp.watch(['i18n/**/*'], ['merge-message-files']);
 });

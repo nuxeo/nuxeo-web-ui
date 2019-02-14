@@ -97,5 +97,5 @@ Polymer({
 `,
 
   is: 'nuxeo-document-diff',
-  behaviors: [DiffBehavior, Nuxeo.RoutingBehavior]
+  behaviors: [DiffBehavior, RoutingBehavior]
 });

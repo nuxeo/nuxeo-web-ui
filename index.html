@@ -84,6 +84,8 @@ limitations under the License.
 
   <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
+  <script src="node_modules/@webcomponents/html-imports/html-imports.min.js"></script>
+
   <script src="node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
 
   <script defer src="node_modules/moment/min/moment-with-locales.min.js"></script>
@@ -93,7 +95,7 @@ limitations under the License.
   <script type="module" src="./elements/nuxeo-app.js"></script>
 
   <!-- Web UI default contributions -->
-  <script type="module" src="./elements/nuxeo-web-ui-bundle.js"></script>
+  <link rel="import" href="elements/nuxeo-web-ui-bundle.html">
 
   <!-- routing -->
   <script type="module" src="./elements/routing.js"></script>

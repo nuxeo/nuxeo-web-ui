@@ -16,7 +16,7 @@ limitations under the License.
 */
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 var schemaFetcher = null;
 
 /**
@@ -24,7 +24,7 @@ var schemaFetcher = null;
  *
  * @polymerBehavior
  */
-export const DocumentCreationBehavior = [FormatBehavior, Nuxeo.RoutingBehavior, {
+export const DocumentCreationBehavior = [FormatBehavior, RoutingBehavior, {
   properties: {
     parent: {
       type: Object,

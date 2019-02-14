@@ -29,7 +29,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-badge/paper-badge.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -78,7 +78,7 @@ Polymer({
 `,
 
   is: 'nuxeo-menu-icon',
-  behaviors: [I18nBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior],
 
   properties: {
     /**

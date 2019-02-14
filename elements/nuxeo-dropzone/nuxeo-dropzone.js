@@ -34,7 +34,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
@@ -164,7 +164,7 @@ Polymer({
 `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [Nuxeo.UploaderBehavior, FormatBehavior],
+  behaviors: [UploaderBehavior, FormatBehavior],
 
   properties: {
     /**

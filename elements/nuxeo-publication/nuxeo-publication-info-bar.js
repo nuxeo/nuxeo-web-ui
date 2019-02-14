@@ -22,7 +22,7 @@ import '@polymer/iron-icons/social-icons.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
@@ -63,7 +63,7 @@ Polymer({
 `,
 
   is: 'nuxeo-publication-info-bar',
-  behaviors: [I18nBehavior, FiltersBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [I18nBehavior, FiltersBehavior, RoutingBehavior],
 
   properties: {
     /**

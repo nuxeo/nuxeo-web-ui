@@ -76,6 +76,7 @@
     "@polymer/paper-tabs": "^3.0.0",
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
+    "@webcomponents/html-imports": "^1.2.0",
     "jsondiffpatch": "^0.3.9",
     "jsplumb": "^2.0.7",
     "page": "^1.11.3",

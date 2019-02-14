@@ -31,6 +31,7 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tags.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
@@ -80,7 +81,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-collections',
-  behaviors: [Nuxeo.RoutingBehavior],
+  behaviors: [RoutingBehavior],
 
   properties: {
     document: Object

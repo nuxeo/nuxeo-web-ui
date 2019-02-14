@@ -31,7 +31,7 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
@@ -141,7 +141,7 @@ Polymer({
 `,
 
   is: 'nuxeo-favorites',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     favorites: {

@@ -37,7 +37,7 @@ Polymer({
 
   is: 'nuxeo-search-results-layout',
   behaviors: [I18nBehavior],
-
+  importMeta: import.meta,
   properties: {
     /**
      * The name of the search layout.

@@ -33,7 +33,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-delete-document-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-untrash-document-button.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '../nuxeo-publication/nuxeo-publication-info-bar.js';
@@ -150,7 +150,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-info-bar',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: {

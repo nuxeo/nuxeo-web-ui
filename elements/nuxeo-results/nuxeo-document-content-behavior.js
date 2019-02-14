@@ -16,12 +16,12 @@ limitations under the License.
 */
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
 /**
  * @polymerBehavior Nuxeo.DocumentContentBehavior
  */
-export const DocumentContentBehavior = [IronResizableBehavior, Nuxeo.LayoutBehavior, {
+export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
   properties: {
     /**
      * The document to be displayed.

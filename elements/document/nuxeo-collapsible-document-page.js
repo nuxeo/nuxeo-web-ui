@@ -27,7 +27,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
@@ -117,7 +117,7 @@ Polymer({
 `,
 
   is: 'nuxeo-collapsible-document-page',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: {

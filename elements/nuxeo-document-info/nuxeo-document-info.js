@@ -27,7 +27,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tags.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
@@ -103,7 +103,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-info',
-  behaviors: [Nuxeo.LayoutBehavior],
+  behaviors: [LayoutBehavior],
 
   properties: {
     document: {

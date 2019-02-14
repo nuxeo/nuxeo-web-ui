@@ -37,7 +37,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-permissions/nuxeo-document-permissions.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
@@ -342,7 +342,7 @@ Polymer({
 `,
 
   is: 'nuxeo-search-form',
-  behaviors: [I18nBehavior, Nuxeo.RoutingBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior],
 
   properties: {
     /**

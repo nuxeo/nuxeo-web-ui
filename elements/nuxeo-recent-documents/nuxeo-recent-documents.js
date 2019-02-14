@@ -26,7 +26,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
@@ -94,7 +94,7 @@ Polymer({
 `,
 
   is: 'nuxeo-recent-documents',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
