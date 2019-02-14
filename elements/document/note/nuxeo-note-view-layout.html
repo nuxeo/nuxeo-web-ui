@@ -31,17 +31,18 @@ limitations under the License.
     <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-note-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype Note
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-note-view-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype Note
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

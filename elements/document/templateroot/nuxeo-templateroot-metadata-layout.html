@@ -85,17 +85,18 @@ limitations under the License.
     </div>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-templateroot-metadata-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype TemplateRoot
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-templateroot-metadata-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype TemplateRoot
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

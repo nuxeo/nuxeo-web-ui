@@ -75,17 +75,18 @@ limitations under the License.
 
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-root-edit-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype Root
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-root-edit-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype Root
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

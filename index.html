@@ -78,28 +78,33 @@ limitations under the License.
     Nuxeo.UI = Nuxeo.UI || {};
     Nuxeo.UI.config = Nuxeo.UI.config || {};
     Nuxeo.UI.config.fetch = {document: ['properties']};
-    /*Nuxeo.UI.config.dateFormat = 'YYYY-MM-DD';
-    Nuxeo.UI.config.dateTimeFormat = 'YYYY-MM-DD HH:mm';*/
+    // Nuxeo.UI.config.dateFormat = 'YYYY-MM-DD';
+    // Nuxeo.UI.config.dateTimeFormat = 'YYYY-MM-DD HH:mm';
   </script>
-  <script>
-    // Force all polyfills on
-    // window.ShadyDOM = { force: true };
-    // window.ShadyCSS = { shimcssproperties: true};
-    // if (window.customElements) window.customElements.forcePolyfill = true;
-  </script>
-  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script defer src="bower_components/moment/min/moment-with-locales.min.js"></script>
+  <script type="module">
+import './elements/nuxeo-app.js';
+import './elements/nuxeo-web-ui-bundle.js';
+import './elements/routing.js';
+</script>
+  <script type="module">
+import './elements/nuxeo-app.js';
+import './elements/nuxeo-web-ui-bundle.js';
+import './elements/routing.js';
+</script>
+  <script src="../../@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <script defer="" src="../../moment/min/moment-with-locales.min.js"></script>
 
-  <link rel="import" href="elements/nuxeo-app.html">
+  <script defer="" src="../../@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+
+  <script type="module" src="./elements/nuxeo-app.js"></script>
 
   <!-- Web UI default contributions -->
-  <link rel="import" href="elements/nuxeo-web-ui-bundle.html">
+  <script type="module" src="./elements/nuxeo-web-ui-bundle.js"></script>
 
   <!-- routing -->
-  <link rel="import" href="elements/routing.html">
+  <script type="module" src="./elements/routing.js"></script>
 
   <!--
   <script>

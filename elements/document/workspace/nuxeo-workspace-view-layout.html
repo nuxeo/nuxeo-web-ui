@@ -26,19 +26,20 @@ limitations under the License.
     <nuxeo-document-content document="[[document]]"></nuxeo-document-content>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-workspace-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype Workspace
-         */
-        document: {
-          type: Object
-        }
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-workspace-view-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype Workspace
+     */
+    document: {
+      type: Object
+    }
+  }
+});
+</script>
 
 </dom-module>
