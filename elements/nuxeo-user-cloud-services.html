@@ -61,96 +61,98 @@ limitations under the License.
       </template>
     </nuxeo-page>
   </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-user-cloud-services',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        visible: {
-          type: Boolean,
-          observer: '_visibleChanged'
-        },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+Polymer({
+  is: 'nuxeo-user-cloud-services',
+  behaviors: [I18nBehavior],
+  properties: {
+    visible: {
+      type: Boolean,
+      observer: '_visibleChanged'
+    },
 
-        providers: {
-          type: Array,
-          value: []
-        },
+    providers: {
+      type: Array,
+      value: []
+    },
 
-        tokens: {
-          type: Array,
-          value: []
-        }
-      },
+    tokens: {
+      type: Array,
+      value: []
+    }
+  },
 
-      refreshTokens: function() {
-        this.$.tokens.get().then(function(response) {
-          this.tokens = response.entries;
-        }.bind(this));
-      },
+  refreshTokens: function() {
+    this.$.tokens.get().then(function(response) {
+      this.tokens = response.entries;
+    }.bind(this));
+  },
 
-      _visibleChanged: function() {
-        if (this.visible) {
-          this.$.providers.get().then(function(response) {
-            this.providers = response.entries;
-          }.bind(this));
-          this.refreshTokens();
-        }
-      },
+  _visibleChanged: function() {
+    if (this.visible) {
+      this.$.providers.get().then(function(response) {
+        this.providers = response.entries;
+      }.bind(this));
+      this.refreshTokens();
+    }
+  },
 
-      _showConnectTo: function() {
-        return this.providers && this.providers.length > 0 && this.providers.some(function(provider) {
-          return provider.isEnabled;
-        });
-      },
-
-      _connectTo: function(e) {
-        this._openPopup(e.model.provider.authorizationURL, {
-          onClose: this.refreshTokens.bind(this)
-        });
-      },
-
-      _openPopup: function(url, options) {
-        var popup, checkCompleted, settings, listener;
-
-        settings = {
-          'width': '1000',
-          'height': '650',
-          'onClose': function() {},
-          'onMessageReceive': function() {}
-        };
-
-        if (options) {
-          Object.assign(settings, options);
-        }
-
-        var left = window.screenX + (window.outerWidth / 2) - (settings.width / 2);
-        var top = window.screenY + (window.outerHeight / 2) - (settings.height / 2);
-
-        if (typeof settings.onMessageReceive === 'function') {
-          listener = function(event) {
-            settings.onMessageReceive(event);
-          };
-          window.addEventListener('message', listener);
-        }
-
-        popup = window.open(url, 'popup',
-          'height=' + settings.height +
-          ',width=' + settings.width +
-          ',top=' + top +
-          ',left=' + left);
-
-        checkCompleted = setInterval(function() {
-          if (!popup || !popup.closed) {
-            return;
-          }
-
-          clearInterval(checkCompleted);
-          if (typeof settings.onClose === 'function') {
-            settings.onClose();
-          }
-          window.removeEventListener('message', listener);
-        }, 100);
-      }
+  _showConnectTo: function() {
+    return this.providers && this.providers.length > 0 && this.providers.some(function(provider) {
+      return provider.isEnabled;
     });
-  </script>
+  },
+
+  _connectTo: function(e) {
+    this._openPopup(e.model.provider.authorizationURL, {
+      onClose: this.refreshTokens.bind(this)
+    });
+  },
+
+  _openPopup: function(url, options) {
+    var popup, checkCompleted, settings, listener;
+
+    settings = {
+      'width': '1000',
+      'height': '650',
+      'onClose': function() {},
+      'onMessageReceive': function() {}
+    };
+
+    if (options) {
+      Object.assign(settings, options);
+    }
+
+    var left = window.screenX + (window.outerWidth / 2) - (settings.width / 2);
+    var top = window.screenY + (window.outerHeight / 2) - (settings.height / 2);
+
+    if (typeof settings.onMessageReceive === 'function') {
+      listener = function(event) {
+        settings.onMessageReceive(event);
+      };
+      window.addEventListener('message', listener);
+    }
+
+    popup = window.open(url, 'popup',
+      'height=' + settings.height +
+      ',width=' + settings.width +
+      ',top=' + top +
+      ',left=' + left);
+
+    checkCompleted = setInterval(function() {
+      if (!popup || !popup.closed) {
+        return;
+      }
+
+      clearInterval(checkCompleted);
+      if (typeof settings.onClose === 'function') {
+        settings.onClose();
+      }
+      window.removeEventListener('message', listener);
+    }, 100);
+  }
+});
+</script>
 </dom-module>

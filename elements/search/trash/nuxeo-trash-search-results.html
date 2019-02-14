@@ -142,35 +142,36 @@ limitations under the License.
     </nuxeo-results>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-trash-search-results',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        nxProvider: Object,
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-trash-search-results',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    nxProvider: Object,
 
-        sortOptions: {
-          type: Array,
-          value: []
-        }
-      },
+    sortOptions: {
+      type: Array,
+      value: []
+    }
+  },
 
-      attached: function() {
-        this.sortOptions = [
-          {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
-          {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
-          {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
-          {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
-          {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
-          {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
-          {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
-        ];
-      },
+  attached: function() {
+    this.sortOptions = [
+      {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
+      {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
+      {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
+      {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
+      {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
+      {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
+      {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
+    ];
+  },
 
-      _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
-      }
-    });
-  </script>
+  _navigate: function(e) {
+    this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
+  }
+});
+</script>
 
 </dom-module>

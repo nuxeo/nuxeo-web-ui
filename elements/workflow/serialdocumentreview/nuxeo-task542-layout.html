@@ -23,22 +23,23 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-task542-layout">
 
-  <script>
-    Polymer({
-      is: 'nuxeo-task542-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @schema dublincore
-         */
-        document: Object,
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-task542-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @schema dublincore
+     */
+    document: Object,
 
-        /**
-         * @task var_task542
-         */
-        task: Object
-      }
-    });
-  </script>
+    /**
+     * @task var_task542
+     */
+    task: Object
+  }
+});
+</script>
 
 </dom-module>

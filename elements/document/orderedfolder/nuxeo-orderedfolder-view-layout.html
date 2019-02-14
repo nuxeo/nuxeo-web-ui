@@ -26,18 +26,19 @@ limitations under the License.
     <nuxeo-document-content document="[[document]]"></nuxeo-document-content>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-orderedfolder-view-layout',
-      properties: {
-        /**
-         * @doctype Folder
-         */
-        document: {
-          type: Object
-        }
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-orderedfolder-view-layout',
+  properties: {
+    /**
+     * @doctype Folder
+     */
+    document: {
+      type: Object
+    }
+  }
+});
+</script>
 
 </dom-module>

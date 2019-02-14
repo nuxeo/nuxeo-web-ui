@@ -31,17 +31,18 @@ limitations under the License.
     <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-file-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype File
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-file-view-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype File
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

@@ -83,103 +83,106 @@ limitations under the License.
 
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-browser',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-      properties: {
-        document: {
-          type: Object
-        },
-        selectedTab: {
-          type: String,
-          value: 'view',
-          notify: true,
-          observer: '_updateUrl'
-        },
-        cvParams: {
-          type: Object,
-          notify: true
-        },
-        clipboard: {
-          type: Object
-        },
-        actionContext: {
-          type: Object,
-          computed: '_actionContext(document, clipboard)'
-        },
-        viewsContext: {
-          type: Object,
-          computed: '_viewsContext(document)'
-        }
-      },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+Polymer({
+  is: 'nuxeo-browser',
+  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  properties: {
+    document: {
+      type: Object
+    },
+    selectedTab: {
+      type: String,
+      value: 'view',
+      notify: true,
+      observer: '_updateUrl'
+    },
+    cvParams: {
+      type: Object,
+      notify: true
+    },
+    clipboard: {
+      type: Object
+    },
+    actionContext: {
+      type: Object,
+      computed: '_actionContext(document, clipboard)'
+    },
+    viewsContext: {
+      type: Object,
+      computed: '_viewsContext(document)'
+    }
+  },
 
-      listeners: {
-        'aceupdated': '_documentUpdated',
-        'acedeleted': '_documentUpdated',
-        'added-to-collection': '_documentUpdated',
-        'removed-from-collection': '_documentUpdated'
-      },
+  listeners: {
+    'aceupdated': '_documentUpdated',
+    'acedeleted': '_documentUpdated',
+    'added-to-collection': '_documentUpdated',
+    'removed-from-collection': '_documentUpdated'
+  },
 
-      _documentUpdated: function() {
-        this.fire('document-updated');
-      },
+  _documentUpdated: function() {
+    this.fire('document-updated');
+  },
 
-      download: function() {
-        location.href = this.document.properties['file:content'].data;
-      },
+  download: function() {
+    location.href = this.document.properties['file:content'].data;
+  },
 
-      get _enrichers() {
-        if (this.document) {
-          return this.document.contextParameters;
-        }
-      },
+  get _enrichers() {
+    if (this.document) {
+      return this.document.contextParameters;
+    }
+  },
 
-      get _canReadChildren() {
-        return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
-      },
+  get _canReadChildren() {
+    return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
+  },
 
-      _actionContext: function() {
-        return {document: this.document, clipboard: this.clipboard};
-      },
+  _actionContext: function() {
+    return {document: this.document, clipboard: this.clipboard};
+  },
 
-      _viewsContext: function() {
-        return {document: this.document};
-      },
+  _viewsContext: function() {
+    return {document: this.document};
+  },
 
-      _navigateToView: function() {
-        this.navigateTo('browse', this.document.path);
-      },
+  _navigateToView: function() {
+    this.navigateTo('browse', this.document.path);
+  },
 
-      _updateUrl: function() {
-        var currentUrl = window.location.href;
-        var newUrl;
-        var queryParamsIdx = currentUrl.lastIndexOf('?');
-        var queryParams;
-        if (queryParamsIdx > -1) {
-          newUrl = currentUrl.slice(0, queryParamsIdx);
-          queryParams = new URLSearchParams(currentUrl.substring(queryParamsIdx));
-        } else {
-          newUrl = currentUrl;
-          queryParams = new URLSearchParams();
-        }
-        // remove 'p' queryParam if current tab is the default one
-        if (this.selectedTab === this.properties.selectedTab.value) {
-          queryParams.delete('p');
-        } else {
-          queryParams.set('p', this.selectedTab);
-        }
-        if (queryParams.toString().length > 0) {
-          newUrl += '?' + queryParams.toString();
-        }
-        if (newUrl !== currentUrl) {
-          history.pushState(null, window.title, newUrl);
-        } else {
-          history.replaceState(null, window.title, newUrl);
-        }
-      }
+  _updateUrl: function() {
+    var currentUrl = window.location.href;
+    var newUrl;
+    var queryParamsIdx = currentUrl.lastIndexOf('?');
+    var queryParams;
+    if (queryParamsIdx > -1) {
+      newUrl = currentUrl.slice(0, queryParamsIdx);
+      queryParams = new URLSearchParams(currentUrl.substring(queryParamsIdx));
+    } else {
+      newUrl = currentUrl;
+      queryParams = new URLSearchParams();
+    }
+    // remove 'p' queryParam if current tab is the default one
+    if (this.selectedTab === this.properties.selectedTab.value) {
+      queryParams.delete('p');
+    } else {
+      queryParams.set('p', this.selectedTab);
+    }
+    if (queryParams.toString().length > 0) {
+      newUrl += '?' + queryParams.toString();
+    }
+    if (newUrl !== currentUrl) {
+      history.pushState(null, window.title, newUrl);
+    } else {
+      history.replaceState(null, window.title, newUrl);
+    }
+  }
 
-    });
-  </script>
+});
+</script>
 
 </dom-module>

@@ -147,18 +147,19 @@ limitations under the License.
     </nuxeo-results>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-nxql-search-results',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        nxProvider: Object
-      },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-nxql-search-results',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    nxProvider: Object
+  },
 
-      _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.detail || e.model).index});
-      }
-    });
-  </script>
+  _navigate: function(e) {
+    this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.detail || e.model).index});
+  }
+});
+</script>
 
 </dom-module>

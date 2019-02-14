@@ -93,17 +93,18 @@ limitations under the License.
 
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-note-metadata-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype Note
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-note-metadata-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype Note
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

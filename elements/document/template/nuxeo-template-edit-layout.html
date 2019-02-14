@@ -74,17 +74,18 @@ limitations under the License.
     </nuxeo-date-picker>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-template-edit-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        /**
-         * @doctype Template
-         */
-        document: Object
-      }
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-template-edit-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    /**
+     * @doctype Template
+     */
+    document: Object
+  }
+});
+</script>
 
 </dom-module>

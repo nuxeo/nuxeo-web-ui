@@ -14,22 +14,32 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<link rel="import" href="elements/nuxeo-default-diff.html">
-<link rel="import" href="elements/nuxeo-blob-diff.html">
-<link rel="import" href="elements/nuxeo-date-diff.html">
-<link rel="import" href="elements/nuxeo-directory-diff.html">
-<link rel="import" href="elements/nuxeo-directory-arr-diff.html">
-<link rel="import" href="elements/nuxeo-document-diff.html">
-<link rel="import" href="elements/nuxeo-document-arr-diff.html">
-<link rel="import" href="elements/nuxeo-user-diff.html">
-<link rel="import" href="elements/nuxeo-user-arr-diff.html">
-<script>
-  Nuxeo.Diff.registerElement('nuxeo-blob-diff', {type: 'blob'});
-  Nuxeo.Diff.registerElement('nuxeo-dete-diff', {type: 'date'});
-  Nuxeo.Diff.registerElement('nuxeo-directory-diff', {type: 'directoryEntry'});
-  Nuxeo.Diff.registerElement('nuxeo-directory-arr-diff', {type: 'directoryEntry[]'});
-  Nuxeo.Diff.registerElement('nuxeo-document-diff', {type: 'document'});
-  Nuxeo.Diff.registerElement('nuxeo-document-arr-diff', {type: 'document[]'});
-  Nuxeo.Diff.registerElement('nuxeo-user-diff', {type: 'user'});
-  Nuxeo.Diff.registerElement('nuxeo-user-arr-diff', {type: 'user[]'});
+<script type="module" src="./elements/nuxeo-default-diff.js"></script>
+<script type="module" src="./elements/nuxeo-blob-diff.js"></script>
+<script type="module" src="./elements/nuxeo-date-diff.js"></script>
+<script type="module" src="./elements/nuxeo-directory-diff.js"></script>
+<script type="module" src="./elements/nuxeo-directory-arr-diff.js"></script>
+<script type="module" src="./elements/nuxeo-document-diff.js"></script>
+<script type="module" src="./elements/nuxeo-document-arr-diff.js"></script>
+<script type="module" src="./elements/nuxeo-user-diff.js"></script>
+<script type="module" src="./elements/nuxeo-user-arr-diff.js"></script>
+<script type="module">
+import './elements/nuxeo-default-diff.js';
+import './elements/nuxeo-blob-diff.js';
+import './elements/nuxeo-date-diff.js';
+import './elements/nuxeo-directory-diff.js';
+import './elements/nuxeo-directory-arr-diff.js';
+import './elements/nuxeo-document-diff.js';
+import './elements/nuxeo-document-arr-diff.js';
+import './elements/nuxeo-user-diff.js';
+import './elements/nuxeo-user-arr-diff.js';
+import { Diff } from './nuxeo-object-diff.js';
+Diff.registerElement('nuxeo-blob-diff', {type: 'blob'});
+Diff.registerElement('nuxeo-dete-diff', {type: 'date'});
+Diff.registerElement('nuxeo-directory-diff', {type: 'directoryEntry'});
+Diff.registerElement('nuxeo-directory-arr-diff', {type: 'directoryEntry[]'});
+Diff.registerElement('nuxeo-document-diff', {type: 'document'});
+Diff.registerElement('nuxeo-document-arr-diff', {type: 'document[]'});
+Diff.registerElement('nuxeo-user-diff', {type: 'user'});
+Diff.registerElement('nuxeo-user-arr-diff', {type: 'user[]'});
 </script>

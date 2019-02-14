@@ -52,33 +52,34 @@ limitations under the License.
     </nuxeo-default-results>
 
   </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-favorites-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        document: {
-          type: Object,
-          observer: '_documentChanged'
-        },
-        actionContext: {
-          type: Object,
-          computed: '_actionContext(document, selectedItems)'
-        }
-      },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+Polymer({
+  is: 'nuxeo-favorites-view-layout',
+  behaviors: [Nuxeo.LayoutBehavior],
+  properties: {
+    document: {
+      type: Object,
+      observer: '_documentChanged'
+    },
+    actionContext: {
+      type: Object,
+      computed: '_actionContext(document, selectedItems)'
+    }
+  },
 
-      _documentChanged: function() {
-        if (this.document) {
-          this.$.results.nxProvider = this.$.provider;
-          this.$.provider.params = [this.document.uid];
-          this.$.provider.page = 1;
-          this.$.provider.fetch();
-        }
-      },
+  _documentChanged: function() {
+    if (this.document) {
+      this.$.results.nxProvider = this.$.provider;
+      this.$.provider.params = [this.document.uid];
+      this.$.provider.page = 1;
+      this.$.provider.fetch();
+    }
+  },
 
-      _actionContext: function() {
-        return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
-      }
-    });
-  </script>
+  _actionContext: function() {
+    return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
+  }
+});
+</script>
 </dom-module>

@@ -1,11 +1,10 @@
 {
-  "name": "nuxeo-web-ui",
   "description": "Nuxeo Web UI",
-  "version": "2.5.0",
   "homepage": "http://www.nuxeo.com",
+  "name": "@nuxeo/nuxeo-web-ui",
+  "version": "3.0.0-SNAPSHOT",
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
-  "private": true,
   "devDependencies": {
     "css-slam": "^1.2.1",
     "del": "^2.1.0",
@@ -37,7 +36,8 @@
     "polyserve": "^0.27.11",
     "run-sequence": "^1.1.5",
     "through2": "^2.0.1",
-    "workbox-build": "^3.4.1"
+    "workbox-build": "^3.4.1",
+    "@webcomponents/webcomponentsjs": "^2.0.0"
   },
   "scripts": {
     "start": "gulp serve",
@@ -48,6 +48,36 @@
     "node": ">=8.0"
   },
   "dependencies": {
-    "jsondiffpatch": "^0.3.9"
+    "@nuxeo/nuxeo-dataviz-elements": "^3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-elements": "^3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-ui-elements": "^3.0.0-SNAPSHOT",
+    "@polymer/app-layout": "^3.0.0",
+    "@polymer/iron-a11y-keys": "^3.0.0",
+    "@polymer/iron-icons": "^3.0.0",
+    "@polymer/iron-jsonp-library": "^3.0.0",
+    "@polymer/iron-label": "^3.0.0",
+    "@polymer/iron-localstorage": "^3.0.0",
+    "@polymer/iron-location": "^3.0.0",
+    "@polymer/iron-media-query": "^3.0.0",
+    "@polymer/iron-overlay-behavior": "^3.0.0",
+    "@polymer/iron-pages": "^3.0.0",
+    "@polymer/iron-validator-behavior": "^3.0.0",
+    "@polymer/marked-element": "^3.0.0",
+    "@polymer/neon-animation": "^3.0.0",
+    "@polymer/paper-badge": "^3.0.0",
+    "@polymer/paper-dialog-scrollable": "^3.0.0",
+    "@polymer/paper-drawer-panel": "^3.0.0",
+    "@polymer/paper-fab": "^3.0.0",
+    "@polymer/paper-header-panel": "^3.0.0",
+    "@polymer/paper-listbox": "^3.0.0",
+    "@polymer/paper-radio-button": "^3.0.0",
+    "@polymer/paper-radio-group": "^3.0.0",
+    "@polymer/paper-slider": "^3.0.0",
+    "@polymer/paper-tabs": "^3.0.0",
+    "@polymer/paper-toolbar": "^3.0.0",
+    "@polymer/polymer": "^3.0.0",
+    "jsondiffpatch": "^0.3.9",
+    "page": "^1.11.3",
+    "web-animations-js": "^2.3.1"
   }
 }

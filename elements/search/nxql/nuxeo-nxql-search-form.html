@@ -44,36 +44,38 @@ limitations under the License.
 
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-nxql-search-form',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        params: {
-          type: Object,
-          value: {},
-          notify: true,
-          observer: '_observeParams'
-        }
-      },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+Polymer({
+  is: 'nuxeo-nxql-search-form',
+  behaviors: [I18nBehavior],
+  properties: {
+    params: {
+      type: Object,
+      value: {},
+      notify: true,
+      observer: '_observeParams'
+    }
+  },
 
-      _observeParams: function() {
-        if (!this.params || !this.params.queryParams || this.params.queryParams.length !== 0) {
-          if (this.params['saved:queryParams']) {
-            this.set('params.queryParams', this.params['saved:queryParams']);
-          } else {
-            this.set('params.queryParams', "SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND " +
-              "ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0");
-          }
-        }
-      },
-
-      _checkForEnter: function(e) {
-        if (e.keyCode === 13 && e.ctrlKey) {
-          this.fire('trigger-search');
-        }
+  _observeParams: function() {
+    if (!this.params || !this.params.queryParams || this.params.queryParams.length !== 0) {
+      if (this.params['saved:queryParams']) {
+        this.set('params.queryParams', this.params['saved:queryParams']);
+      } else {
+        this.set('params.queryParams', "SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation' AND " +
+          "ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0");
       }
+    }
+  },
 
-    });
-  </script>
+  _checkForEnter: function(e) {
+    if (e.keyCode === 13 && e.ctrlKey) {
+      this.fire('trigger-search');
+    }
+  }
+
+});
+</script>
 </dom-module>

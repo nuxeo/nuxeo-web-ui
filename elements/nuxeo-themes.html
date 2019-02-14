@@ -52,10 +52,12 @@ limitations under the License.
     </nuxeo-page>
 
   </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-themes',
-      behaviors: [Nuxeo.I18nBehavior]
-    });
-  </script>
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+Polymer({
+  is: 'nuxeo-themes',
+  behaviors: [I18nBehavior]
+});
+</script>
 </dom-module>

@@ -146,104 +146,106 @@ limitations under the License.
 
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-l10nxvocabulary-edit-layout',
-      behaviors: [Nuxeo.I18nBehavior],
-      properties: {
-        entry: {
-          type: Object,
-          observer: '_entryChanged'
-        },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+Polymer({
+  is: 'nuxeo-l10nxvocabulary-edit-layout',
+  behaviors: [I18nBehavior],
+  properties: {
+    entry: {
+      type: Object,
+      observer: '_entryChanged'
+    },
 
-        new: {
-          type: Boolean,
-          value: false
-        },
+    new: {
+      type: Boolean,
+      value: false
+    },
 
-        entries: {
-          type: Array
-        },
+    entries: {
+      type: Array
+    },
 
-        _parentLabel: {
-          type: String
-        },
+    _parentLabel: {
+      type: String
+    },
 
-        controller: Object,
+    controller: Object,
 
-        _root: {
-          type: Object,
-          value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
-        }
-      },
+    _root: {
+      type: Object,
+      value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
+    }
+  },
 
-      observers: ['_inputChanged(entry, entries)'],
+  observers: ['_inputChanged(entry, entries)'],
 
-      _entryChanged: function() {
-        this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
-      },
+  _entryChanged: function() {
+    this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+  },
 
-      _isObsolete: function(obsolete) {
-        return obsolete === 1;
-      },
+  _isObsolete: function(obsolete) {
+    return obsolete === 1;
+  },
 
-      _obsoleteChanged: function() {
-        this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
-      },
+  _obsoleteChanged: function() {
+    this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
+  },
 
-      _inputChanged: function() {
-        if (this.entry) {
-          if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
-            this._parentLabel = this.entry.properties.parent;
-          } else {
-            this._parentLabel = this.i18n('vocabularyManagement.edit.selectParent');
-          }
-          if (this.entries) {
-            this.controller = {
-              getChildren: function(node) {
-                return new Promise(function(resolve) {
-                  var targetParentId = !node ? '' : node.properties.id;
-                  var children = this.entries.filter(
-                    function(e) {
-                      if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
-                        e.id = e.properties.id;
-                        return true;
-                      }
-                    }.bind(this)
-                  );
-                  resolve(children);
-                }.bind(this));
-              }.bind(this),
-
-              isLeaf: function(node) {
-                var lookedUpId = node.properties.id;
-                var isNotLeaf = this.entries.some(
-                  function(e) {
-                    return e.properties.parent === lookedUpId;
-                  }
-                );
-                return !isNotLeaf && node.root !== true;
-              }.bind(this)
-            };
-            this.$.tree.open.apply(this.$.tree, ['root']);
-          }
-        }
-      },
-
-      _expandIcon: function(opened) {
-        return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
-      },
-
-      _selectParent: function(e) {
-        this.entry.properties.parent = e.detail.item.properties.id;
+  _inputChanged: function() {
+    if (this.entry) {
+      if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
         this._parentLabel = this.entry.properties.parent;
-        this._toggleParent();
-      },
-
-      _toggleParent: function() {
-        this.$.parentDialog.toggle();
+      } else {
+        this._parentLabel = this.i18n('vocabularyManagement.edit.selectParent');
       }
+      if (this.entries) {
+        this.controller = {
+          getChildren: function(node) {
+            return new Promise(function(resolve) {
+              var targetParentId = !node ? '' : node.properties.id;
+              var children = this.entries.filter(
+                function(e) {
+                  if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                    e.id = e.properties.id;
+                    return true;
+                  }
+                }.bind(this)
+              );
+              resolve(children);
+            }.bind(this));
+          }.bind(this),
 
-    });
-  </script>
+          isLeaf: function(node) {
+            var lookedUpId = node.properties.id;
+            var isNotLeaf = this.entries.some(
+              function(e) {
+                return e.properties.parent === lookedUpId;
+              }
+            );
+            return !isNotLeaf && node.root !== true;
+          }.bind(this)
+        };
+        this.$.tree.open.apply(this.$.tree, ['root']);
+      }
+    }
+  },
+
+  _expandIcon: function(opened) {
+    return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+  },
+
+  _selectParent: function(e) {
+    this.entry.properties.parent = e.detail.item.properties.id;
+    this._parentLabel = this.entry.properties.parent;
+    this._toggleParent();
+  },
+
+  _toggleParent: function() {
+    this.$.parentDialog.toggle();
+  }
+
+});
+</script>
 </dom-module>

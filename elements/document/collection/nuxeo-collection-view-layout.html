@@ -52,49 +52,51 @@ limitations under the License.
     </nuxeo-default-results>
   </template>
 
-  <script>
-    Polymer({
-      is: 'nuxeo-collection-view-layout',
-      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FiltersBehavior],
-      properties: {
-        /**
-         * @doctype Collection
-         */
-        document: {
-          type: Object,
-          observer: '_documentChanged'
-        },
-        actionContext: {
-          type: Object,
-          computed: '_actionContext(document, selectedItems)'
-        }
-      },
+  <script type="module">
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+Polymer({
+  is: 'nuxeo-collection-view-layout',
+  behaviors: [Nuxeo.LayoutBehavior, FiltersBehavior],
+  properties: {
+    /**
+     * @doctype Collection
+     */
+    document: {
+      type: Object,
+      observer: '_documentChanged'
+    },
+    actionContext: {
+      type: Object,
+      computed: '_actionContext(document, selectedItems)'
+    }
+  },
 
-      _documentChanged: function () {
-        if (this.document && this.hasFacet(this.document, 'Collection')) {
-          this.$.results.nxProvider = this.$.provider;
-          this.$.provider.params = [this.document.uid];
-          this.$.provider.page = 1;
-          this.fire('collection-loaded', {collection: this.document, provider: this.$.provider});
-          this.$.results._refreshAndFetch();
-        }
-      },
+  _documentChanged: function () {
+    if (this.document && this.hasFacet(this.document, 'Collection')) {
+      this.$.results.nxProvider = this.$.provider;
+      this.$.provider.params = [this.document.uid];
+      this.$.provider.page = 1;
+      this.fire('collection-loaded', {collection: this.document, provider: this.$.provider});
+      this.$.results._refreshAndFetch();
+    }
+  },
 
-      _actionContext: function () {
-        return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
-      },
+  _actionContext: function () {
+    return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
+  },
 
-      _navigate: function(e) {
-        this.fire('navigate', {
-          doc: e.detail.doc,
-          index: e.detail.index,
-          srcDoc: this.document,
-          isFromCollection: true
-        });
-        e.stopPropagation();
-      }
-
+  _navigate: function(e) {
+    this.fire('navigate', {
+      doc: e.detail.doc,
+      index: e.detail.index,
+      srcDoc: this.document,
+      isFromCollection: true
     });
-  </script>
+    e.stopPropagation();
+  }
+
+});
+</script>
 
 </dom-module>
