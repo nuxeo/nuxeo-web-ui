@@ -42,7 +42,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
@@ -526,7 +526,7 @@ Polymer({
 `,
 
   is: 'nuxeo-document-import',
-  behaviors: [IronResizableBehavior, Nuxeo.UploaderBehavior, DocumentCreationBehavior],
+  behaviors: [IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
 
   properties: {
 

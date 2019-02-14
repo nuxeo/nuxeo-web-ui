@@ -36,7 +36,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
-import 'jsPlumb/dist/js/jsPlumb-2.0.4.js';
+// import 'jsplumb/dist/js/jsPlumb-2.0.7.js';
 Polymer({
   _template: html`
     <style>

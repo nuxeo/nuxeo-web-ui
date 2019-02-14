@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { XHRLocaleResolver } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+
 var baseUrl = window.nuxeo.I18n.baseUrl || location.origin + location.pathname;
 var msgFolder = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'i18n';
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';

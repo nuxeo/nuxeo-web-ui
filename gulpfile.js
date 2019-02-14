@@ -175,7 +175,7 @@ gulp.task('build', ['clean'], function(cb) {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['lint', 'merge-message-files'], function() {
+gulp.task('serve', ['merge-message-files'], function() {
 
   var options = {
     hostname: '0.0.0.0',
@@ -188,6 +188,8 @@ gulp.task('serve', ['lint', 'merge-message-files'], function() {
     additionalRoutes: new Map([
       ['/*', require('express').static('.tmp')]
     ]),
+    npm: true,
+    moduleResolution: 'node'
   };
 
   polyserve.startServers(options).then(function(serverInfos) {
