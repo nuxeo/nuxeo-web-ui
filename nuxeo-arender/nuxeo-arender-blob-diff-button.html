@@ -102,18 +102,16 @@ limitations under the License.
       },
 
       _openDialog: function() {
-        if (!this._aRenderUrl) {
-          this.$.aRenderDiffOp.params = {
-            leftDocId: this.leftUid,
-            rightDocId: this.rightUid,
-            leftBlobXPath: this.xpath,
-            rightBlobXPath: this.xpath
-          }
-          this.$.aRenderDiffOp.execute().then(function(res) {
-            this.set('_aRenderUrl', res.previewerUrl);
-          }.bind(this));
+        this.$.aRenderDiffOp.params = {
+          leftDocId: this.leftUid,
+          rightDocId: this.rightUid,
+          leftBlobXPath: this.xpath,
+          rightBlobXPath: this.xpath
         }
-        this.$.aRenderBlobDiffDialog.open();
+        this.$.aRenderDiffOp.execute().then(function(res) {
+          this.set('_aRenderUrl', res.previewerUrl);
+          this.$.aRenderBlobDiffDialog.open();
+        }.bind(this));
       },
 
       _closeDialog: function() {
