@@ -28,7 +28,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
-import '@nuxeo/nuxeo-ui-elements/es6-polyfills.js';
+
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({

@@ -26,13 +26,13 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import 'nuxeo-dataviz-elements/nuxeo-search-data.js';
+import '@nuxeo/nuxeo-dataviz-elements/nuxeo-search-data.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
-import 'chart-elements/chart-pie.js';
-import 'chart-elements/chart-bar.js';
+// import 'chart-elements/chart-pie.js';
+// import 'chart-elements/chart-bar.js';
 import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';

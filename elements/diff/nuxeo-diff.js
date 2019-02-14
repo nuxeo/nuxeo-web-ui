@@ -39,6 +39,8 @@ import './nuxeo-object-diff.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
+// import { diff } from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
+
 var _customLoadPromise;
 var typeDataCache = {};
 Polymer({
@@ -494,7 +496,7 @@ Polymer({
     this.right = right;
     this._fetchCommonSchemas(left, right).then(function(schemas) {
       this._schemas = schemas;
-      var delta = jsondiffpatch.diff(left.properties, right.properties);
+      var delta = diff(left.properties, right.properties);
       this._schemas.forEach(function(schema) {
         this._filterDelta(delta, schema);
       }.bind(this));

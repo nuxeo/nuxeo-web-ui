@@ -42,7 +42,8 @@ import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 var commands = [];
-export const _Suggester = _Suggester || {};
+
+export const _Suggester = {};
 /**
  * Adds a custom command to nuxeo-suggester. Expected command format:
  * { id: String, startsWith: Boolean, searchTerm: String, suggestion: Object, run: Function }

@@ -35,8 +35,8 @@ import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
@@ -76,8 +76,8 @@ import '../themes/base.js';
 import '../themes/loader.js';
 import './nuxeo-search-page.js';
 import './search/nuxeo-search-form.js';
-import './nuxeo-admin/nuxeo-user-group-management-page.js';
-import '@polymer/neon-animation/web-animations.js';
+//import './nuxeo-admin/nuxeo-user-group-management-page.js';
+//import '@polymer/neon-animation/web-animations.js';
 import './nuxeo-mobile/nuxeo-mobile-banner.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -85,6 +85,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
 window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
@@ -633,7 +634,7 @@ Polymer({
 `,
 
   is: 'nuxeo-app',
-  behaviors: [Nuxeo.RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
 
@@ -962,7 +963,7 @@ Polymer({
   },
 
   _baseUrlChanged: function() {
-    Nuxeo.RoutingBehavior.baseUrl = this.baseUrl;
+    RoutingBehavior.baseUrl = this.baseUrl;
   },
 
   _logo: function(baseUrl) {
@@ -1345,7 +1346,7 @@ Polymer({
       // check if page is already registered (vulcanized)
       if (!(el instanceof PolymerElement)) {
         var tag = el.tagName.toLowerCase();
-        this.importHref(this.resolveUrl(tag + '.html'), this._loadElements, function() {
+        importHref('/elements/' + tag + '.html', this._loadElements.bind(this), function() {
           this.showError(404, '', tag + '.html');
         }.bind(this), true);
       } else {
@@ -1356,11 +1357,9 @@ Polymer({
   },
 
   _loadElements: function() {
-    afterNextRender(this, function() {
-      this.importHref(this.resolveUrl('elements.html'), function() {
-        this.loading = false;
-      });
-    }.bind(this));
+    afterNextRender(this, () => {
+      import('/elements/elements.js').then(() => this.loading = false);
+    });
   },
 
   _notify: function(e) {

@@ -30,7 +30,7 @@ import { DiffBehavior } from './nuxeo-diff-behavior.js';
 import './nuxeo-diff-styles.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-export const Diff = Diff || {};
+export const Diff = {};
 Diff.registry = {
   default: 'nuxeo-default-diff'
 };
