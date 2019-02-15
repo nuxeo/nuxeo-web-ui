@@ -48,9 +48,11 @@
     "node": ">=8.0"
   },
   "dependencies": {
+    "@nuxeo/chart-elements": "^4.0.0-SNAPSHOT",
     "@nuxeo/nuxeo-dataviz-elements": "^3.0.0-SNAPSHOT",
     "@nuxeo/nuxeo-elements": "^3.0.0-SNAPSHOT",
     "@nuxeo/nuxeo-ui-elements": "^3.0.0-SNAPSHOT",
+    "@nuxeo/page": "^1.11.4-SNAPSHOT",
     "@polymer/app-layout": "^3.0.0",
     "@polymer/iron-a11y-keys": "^3.0.0",
     "@polymer/iron-icons": "^3.0.0",
@@ -79,7 +81,6 @@
     "@webcomponents/html-imports": "^1.2.0",
     "jsondiffpatch": "^0.3.9",
     "jsplumb": "^2.0.7",
-    "page": "^1.11.3",
     "web-animations-js": "^2.3.1"
   }
 }
