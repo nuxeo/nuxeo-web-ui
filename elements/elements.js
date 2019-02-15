@@ -143,9 +143,9 @@ import '@nuxeo/nuxeo-dataviz-elements/nuxeo-search-data.js';
 import '@nuxeo/nuxeo-dataviz-elements/nuxeo-workflow-data.js';
 
 // Chart elements -->
-// import 'chart-elements/chart-bar.js';
-// import 'chart-elements/chart-line.js';
-// import 'chart-elements/chart-pie.js';
+import '@nuxeo/chart-elements/chart-bar.js';
+import '@nuxeo/chart-elements/chart-line.js';
+import '@nuxeo/chart-elements/chart-pie.js';
 
 // Marked element-->
 import '@polymer/marked-element/marked-element.js';
