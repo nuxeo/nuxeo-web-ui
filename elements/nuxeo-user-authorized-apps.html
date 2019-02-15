@@ -62,85 +62,83 @@ limitations under the License.
       </nuxeo-card>
     </nuxeo-page>
   </template>
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-var OAUTH2_CLIENT_TOKEN_BASE_PATH = 'oauth2/token/client';
+  <script>
+    var OAUTH2_CLIENT_TOKEN_BASE_PATH = 'oauth2/token/client';
 
-Polymer({
-  is: 'nuxeo-user-authorized-apps',
-  behaviors: [I18nBehavior],
-  properties: {
-    visible: {
-      type: Boolean,
-      observer: '_visibleChanged'
-    },
+    Polymer({
+      is: 'nuxeo-user-authorized-apps',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        },
 
-    clients: {
-      type: Array,
-      value: []
-    },
+        clients: {
+          type: Array,
+          value: []
+        },
 
-    tokens: {
-      type: Array,
-      value: []
-    }
-  },
+        tokens: {
+          type: Array,
+          value: []
+        }
+      },
 
-  refresh: function() {
-    this.$.tokens.path = OAUTH2_CLIENT_TOKEN_BASE_PATH;
-    this.$.tokens.get().then(function(response) {
-      this.tokens = response.entries;
-      if (this.tokens.length > 0) {
-        this.$.clients.get().then(function(response) {
-          this.clients = response.entries.filter(function(client) {
-            return this.tokens.findIndex(function(token) {
-              return token.clientId === client.id;
-            }.bind(this)) > -1;
-          }.bind(this));
+      refresh: function() {
+        this.$.tokens.path = OAUTH2_CLIENT_TOKEN_BASE_PATH;
+        this.$.tokens.get().then(function(response) {
+          this.tokens = response.entries;
+          if (this.tokens.length > 0) {
+            this.$.clients.get().then(function(response) {
+              this.clients = response.entries.filter(function(client) {
+                return this.tokens.findIndex(function(token) {
+                  return token.clientId === client.id;
+                }.bind(this)) > -1;
+              }.bind(this));
+            }.bind(this));
+          } else {
+            this.clients = [];
+          }
         }.bind(this));
-      } else {
-        this.clients = [];
+      },
+
+      _visibleChanged: function() {
+        if (this.visible) {
+          this.refresh();
+        }
+      },
+
+      _token: function(client) {
+        return this.tokens.find(function(token){
+          return token.clientId === client.id;
+        });
+      },
+
+      _authorizationDate: function(client) {
+        return this._token(client).creationDate;
+      },
+
+      _revoke: function(e) {
+        var client = e.target.parentNode.item;
+        if (confirm(this.i18n('authorizedApps.confirmRevoke', client.name))) {
+          var token = this._token(client);
+          this.$.tokens.path = [OAUTH2_CLIENT_TOKEN_BASE_PATH, client.id, 'user', token.nuxeoLogin].join('/');
+          return this.$.tokens.remove().then(function() {
+            this.refresh();
+            this.fire('authorized-app-revoked');
+            this.fire('notify', {
+              message: this.i18n('authorizedApps.successfullyRevoked', client.name)
+            });
+          }.bind(this), function() {
+            this.refresh();
+            this.fire('notify', {
+              message: this.i18n('label.error').toUpperCase() + ': ' +
+                        this.i18n('authorizedApps.errorRevoking', client.name)
+            });
+          }.bind(this));
+        }
       }
-    }.bind(this));
-  },
-
-  _visibleChanged: function() {
-    if (this.visible) {
-      this.refresh();
-    }
-  },
-
-  _token: function(client) {
-    return this.tokens.find(function(token){
-      return token.clientId === client.id;
     });
-  },
-
-  _authorizationDate: function(client) {
-    return this._token(client).creationDate;
-  },
-
-  _revoke: function(e) {
-    var client = e.target.parentNode.item;
-    if (confirm(this.i18n('authorizedApps.confirmRevoke', client.name))) {
-      var token = this._token(client);
-      this.$.tokens.path = [OAUTH2_CLIENT_TOKEN_BASE_PATH, client.id, 'user', token.nuxeoLogin].join('/');
-      return this.$.tokens.remove().then(function() {
-        this.refresh();
-        this.fire('authorized-app-revoked');
-        this.fire('notify', {
-          message: this.i18n('authorizedApps.successfullyRevoked', client.name)
-        });
-      }.bind(this), function() {
-        this.refresh();
-        this.fire('notify', {
-          message: this.i18n('label.error').toUpperCase() + ': ' +
-                    this.i18n('authorizedApps.errorRevoking', client.name)
-        });
-      }.bind(this));
-    }
-  }
-});
-</script>
+  </script>
 </dom-module>

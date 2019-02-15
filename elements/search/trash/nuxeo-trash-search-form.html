@@ -64,64 +64,62 @@ limitations under the License.
     </div>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-trash-search-form',
-  behaviors: [Nuxeo.LayoutBehavior, I18nBehavior],
-  properties: {
-    params: {
-      type: Object,
-      value: {},
-      notify: true
-    },
-    aggregations: {
-      type: Object,
-      value: {},
-      notify: true
-    },
-    searchTerm: {
-      type: String,
-      notify: true
-    },
-    _path: {
-      type: String,
-      value: '/',
-      observer: '_addPathSearch'
-    }
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-trash-search-form',
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        searchTerm: {
+          type: String,
+          notify: true
+        },
+        _path: {
+          type: String,
+          value: '/',
+          observer: '_addPathSearch'
+        }
+      },
 
-  clear: function() {
-    this.searchTerm = '';
-    this._path = '/';
-    this._search();
-  },
+      clear: function() {
+        this.searchTerm = '';
+        this._path = '/';
+        this._search();
+      },
 
-  _search: function() {
-    if (this.searchTerm) {
-      this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
-      this.set('params.highlight',
-        'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
-    } else if (this.params.ecm_fulltext) {
-      this.set('params.ecm_fulltext', '');
-      delete this.params.ecm_fulltext;
-      delete this.params.highlight;
-    }
-  },
+      _search: function() {
+        if (this.searchTerm) {
+          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
+          this.set('params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+        } else if (this.params.ecm_fulltext) {
+          this.set('params.ecm_fulltext', '');
+          delete this.params.ecm_fulltext;
+          delete this.params.highlight;
+        }
+      },
 
-  _addPathSearch: function() {
-    if (this._path) {
-      this.set('params.ecm_path', [this._path]);
-    }
-  },
+      _addPathSearch: function() {
+        if (this._path) {
+          this.set('params.ecm_path', [this._path]);
+        }
+      },
 
-  _checkForEnter: function(e) {
-    if (e.keyCode === 13) {
-      this._search();
-    }
-  }
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13) {
+          this._search();
+        }
+      }
 
-});
-</script>
+    });
+  </script>
 </dom-module>

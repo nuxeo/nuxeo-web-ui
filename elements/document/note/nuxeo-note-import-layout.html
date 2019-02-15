@@ -80,28 +80,27 @@ limitations under the License.
     </nuxeo-date-picker>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-Polymer({
-  is: 'nuxeo-note-import-layout',
-  behaviors: [Nuxeo.LayoutBehavior],
-  properties: {
-    /**
-     * @doctype Note
-     */
-    document: Object,
-    formats: Array
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-note-import-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype Note
+         */
+        document: Object,
+        formats: Array
+      },
 
-  ready: function () {
-    this.formats = [
-      {id: 'text/html', label: this.formatMimeType('text/html')},
-      {id: 'text/plain', label: this.formatMimeType('text/plain')},
-      {id: 'text/xml', label: this.formatMimeType('text/xml')},
-      {id: 'text/x-web-markdown', label: this.formatMimeType('text/x-web-markdown')}
-    ]
-  }
-});
-</script>
+      ready: function () {
+        this.formats = [
+          {id: 'text/html', label: this.formatMimeType('text/html')},
+          {id: 'text/plain', label: this.formatMimeType('text/plain')},
+          {id: 'text/xml', label: this.formatMimeType('text/xml')},
+          {id: 'text/x-web-markdown', label: this.formatMimeType('text/x-web-markdown')}
+        ]
+      }
+    });
+  </script>
 
 </dom-module>

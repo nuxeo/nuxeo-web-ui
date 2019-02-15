@@ -26,19 +26,18 @@ limitations under the License.
     <nuxeo-document-content document="[[document]]"></nuxeo-document-content>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-Polymer({
-  is: 'nuxeo-root-view-layout',
-  properties: {
-    /**
-     * @doctype Root
-     */
-    document: {
-      type: Object
-    }
-  }
-});
-</script>
+  <script>
+    Polymer({
+      is: 'nuxeo-root-view-layout',
+      properties: {
+        /**
+         * @doctype Root
+         */
+        document: {
+          type: Object
+        }
+      }
+    });
+  </script>
 
 </dom-module>

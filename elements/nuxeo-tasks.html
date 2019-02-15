@@ -181,81 +181,79 @@ limitations under the License.
 
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-tasks',
-  behaviors: [RoutingBehavior, I18nBehavior],
-  properties: {
-    tasks: {
-      type: Array
-    },
+  <script>
+    Polymer({
+      is: 'nuxeo-tasks',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        tasks: {
+          type: Array
+        },
 
-    current: {
-      type: Object,
-      value: null,
-      observer: '_currentChanged'
-    },
+        current: {
+          type: Object,
+          value: null,
+          observer: '_currentChanged'
+        },
 
-    currentTaskDocument: Object
-  },
+        currentTaskDocument: Object
+      },
 
-  _process: function(e) {
-    this.navigateTo('tasks', e.model.task.id);
-  },
+      _process: function(e) {
+        this.navigateTo('tasks', e.model.task.id);
+      },
 
-  _currentChanged: function() {
-    if (this.current) {
-      this.$.currentTaskDoc.get();
-    }
-  },
-
-  _hasCurrent: function() {
-    return this.current ? true : false;
-  },
-
-  _href: function(doc) {
-    if (doc) {
-      return this.urlFor('browse', doc.path);
-    }
-  },
-
-  _getPath: function(path){
-    return path.substr(0, path.lastIndexOf("/"));
-  },
-
-  _date: function(date) {
-    return moment(date).format('MMMM D, YYYY');
-  },
-
-  _count: function() {
-    if (this.tasks) {
-      return this.tasks.length;
-    }
-  },
-
-  _docId: function() {
-    if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
-      return this.current.targetDocumentIds[0].uid;
-    }
-  },
-
-  _empty: function(tasks) {
-    return tasks && tasks.length === 0;
-  },
-
-  get currenIndex() {
-    if (this.tasks && this.current) {
-      for (var i = 0; i < this.tasks.length; i++) {
-        if (this.tasks[i].id === this.current.id) {
-          return i;
+      _currentChanged: function() {
+        if (this.current) {
+          this.$.currentTaskDoc.get();
         }
-      }
-    }
-    return -1;
-  }
+      },
 
-});
-</script>
+      _hasCurrent: function() {
+        return this.current ? true : false;
+      },
+
+      _href: function(doc) {
+        if (doc) {
+          return this.urlFor('browse', doc.path);
+        }
+      },
+
+      _getPath: function(path){
+        return path.substr(0, path.lastIndexOf("/"));
+      },
+
+      _date: function(date) {
+        return moment(date).format('MMMM D, YYYY');
+      },
+
+      _count: function() {
+        if (this.tasks) {
+          return this.tasks.length;
+        }
+      },
+
+      _docId: function() {
+        if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
+          return this.current.targetDocumentIds[0].uid;
+        }
+      },
+
+      _empty: function(tasks) {
+        return tasks && tasks.length === 0;
+      },
+
+      get currenIndex() {
+        if (this.tasks && this.current) {
+          for (var i = 0; i < this.tasks.length; i++) {
+            if (this.tasks[i].id === this.current.id) {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+    });
+  </script>
 </dom-module>

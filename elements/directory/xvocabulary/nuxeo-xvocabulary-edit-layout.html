@@ -66,52 +66,50 @@ limitations under the License.
     </nuxeo-input>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-xvocabulary-edit-layout',
-  behaviors: [I18nBehavior],
-  properties: {
-    entry: {
-      type: Object
-    },
+  <script>
+    Polymer({
+      is: 'nuxeo-xvocabulary-edit-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        entry: {
+          type: Object
+        },
 
-    new: {
-      type: Boolean,
-      value: false
-    },
+        new: {
+          type: Boolean,
+          value: false
+        },
 
-    parentDirectory: {
-      type: String,
-      observer: '_observeParent'
-    },
+        parentDirectory: {
+          type: String,
+          observer: '_observeParent'
+        },
 
-    directory: Object,
-  },
+        directory: Object,
+      },
 
-  _isObsolete: function(obsolete) {
-    return obsolete === 1;
-  },
+      _isObsolete: function(obsolete) {
+        return obsolete === 1;
+      },
 
-  _obsoleteChanged: function() {
-    if (this.entry.properties.obsolete > 0) {
-      this.entry.properties.obsolete = 0;
-    } else {
-      this.entry.properties.obsolete = 1;
-    }
-  },
+      _obsoleteChanged: function() {
+        if (this.entry.properties.obsolete > 0) {
+          this.entry.properties.obsolete = 0;
+        } else {
+          this.entry.properties.obsolete = 1;
+        }
+      },
 
-  _observeParent: function() {
-    if (this.parentDirectory && this.parentDirectory.length > 0) {
-      this.$.directory.get();
-    }
-  },
+      _observeParent: function() {
+        if (this.parentDirectory && this.parentDirectory.length > 0) {
+          this.$.directory.get();
+        }
+      },
 
-  _isParentRequired: function() {
-    return this.directory && this.parentDirectory && this.directory !== this.parentDirectory
-  }
+      _isParentRequired: function() {
+        return this.directory && this.parentDirectory && this.directory !== this.parentDirectory
+      }
 
-});
-</script>
+    });
+  </script>
 </dom-module>
