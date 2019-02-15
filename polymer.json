@@ -9,21 +9,23 @@
     "elements/**/*",
     "themes/**/*",
     "images/**/*",
-    "fonts/**/*",
-    "bower.json"
+    "fonts/**/*"
   ],
   "extraDependencies": [
     "sw.js",
     "manifest.json",
     "index.css",
-    "bower_components/webcomponentsjs/*",
-    "bower_components/moment/min/moment-with-locales.min.js",
-    "bower_components/jquery/dist/jquery.min.js",
-    "bower_components/nuxeo-ui-elements/viewers/pdfjs/**/*",
-    "bower_components/nuxeo-ui-elements/widgets/alloy/**/*",
-    "bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html",
-    "bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html"
+    "node_modules/@webcomponents/webcomponentsjs/*",
+    "node_modules/@webcomponents/html-imports//html-imports.min.js",
+    "node_modules/web-animations-js/web-animations-next-lite.min.js",
+    "node_modules/moment/min/moment-with-locales.min.js",
+    "node_modules/@nuxeo/nuxeo-ui-elements/viewers/pdfjs/**/*",
+    "node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/**/*",
+    "node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html",
+    "node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html"
   ],
+  "moduleResolution": "node",
+  "npm": true,
   "lint": {
     "rules": ["polymer-1"],
     "ignoreWarnings": [
