@@ -51,47 +51,45 @@ limitations under the License.
 
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-diff-page',
-  behaviors: [I18nBehavior, RoutingBehavior],
-  properties: {
-    docIds: {
-      type: Array,
-      value: []
-    },
-    visible: Boolean,
-    _leftUid: String,
-    _rightUid: String
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-diff-page',
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      properties: {
+        docIds: {
+          type: Array,
+          value: []
+        },
+        visible: Boolean,
+        _leftUid: String,
+        _rightUid: String
+      },
 
-  observers: ['_updateUrl(_leftUid, _rightUid)'],
+      observers: ['_updateUrl(_leftUid, _rightUid)'],
 
-  /**
-   * Update url with the left and right documents' ids
-   */
-  _updateUrl: function(leftUid, rightUid) {
-    if (!leftUid || !rightUid || leftUid === rightUid) {
-      return;
-    }
-    var matches = window.location.href.match(/^.*\/#!\/diff/g);
-    if (matches.length) {
-      var needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
-      var newUrl = [matches[0], leftUid, rightUid].join('/');
-      if (needsReplace) {
-        history.replaceState(null, window.title, newUrl);
-      } else if (newUrl !== window.location.href) {
-        history.pushState(null, window.title, newUrl);
+      /**
+       * Update url with the left and right documents' ids
+       */
+      _updateUrl: function(leftUid, rightUid) {
+        if (!leftUid || !rightUid || leftUid === rightUid) {
+          return;
+        }
+        var matches = window.location.href.match(/^.*\/#!\/diff/g);
+        if (matches.length) {
+          var needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
+          var newUrl = [matches[0], leftUid, rightUid].join('/');
+          if (needsReplace) {
+            history.replaceState(null, window.title, newUrl);
+          } else if (newUrl !== window.location.href) {
+            history.pushState(null, window.title, newUrl);
+          }
+        }
+      },
+
+      _buildPermalink: function(document) {
+        return document ? location.origin + location.pathname + '#!/doc/' + document.uid : '';
       }
-    }
-  },
-
-  _buildPermalink: function(document) {
-    return document ? location.origin + location.pathname + '#!/doc/' + document.uid : '';
-  }
-});
-</script>
+    });
+  </script>
 
 </dom-module>

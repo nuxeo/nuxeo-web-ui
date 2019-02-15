@@ -86,18 +86,17 @@ limitations under the License.
     </div>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-Polymer({
-  is: 'nuxeo-domain-metadata-layout',
-  behaviors: [Nuxeo.LayoutBehavior],
-  properties: {
-    /**
-     * @doctype Domain
-     */
-    document: Object
-  }
-});
-</script>
+  <script>
+    Polymer({
+      is: 'nuxeo-domain-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype Domain
+         */
+        document: Object
+      }
+    });
+  </script>
 
 </dom-module>

@@ -52,56 +52,54 @@ limitations under the License.
 
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-expired-search-form',
-  behaviors: [Nuxeo.LayoutBehavior, I18nBehavior],
-  properties: {
-    params: {
-      type: Object,
-      value: {},
-      observer: '_paramsChanged',
-      notify: true
-    },
-    aggregations: {
-      type: Object,
-      value: {},
-      notify: true
-    },
-    searchTerm: {
-      type: String,
-      notify: true
-    }
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-expired-search-form',
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          observer: '_paramsChanged',
+          notify: true
+        },
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        searchTerm: {
+          type: String,
+          notify: true
+        }
+      },
 
-  clear: function() {
-    this.searchTerm = '';
-    this._search();
-  },
+      clear: function() {
+        this.searchTerm = '';
+        this._search();
+      },
 
-  _paramsChanged: function() {
-    var currentDate = new Date();
-    if (!this.params.expired_max) {
-      this.set('params.expired_max', currentDate.toJSON());
-    }
-  },
+      _paramsChanged: function() {
+        var currentDate = new Date();
+        if (!this.params.expired_max) {
+          this.set('params.expired_max', currentDate.toJSON());
+        }
+      },
 
-  _search: function() {
-    if (this.searchTerm) {
-      this.set('params.title', this.formatFulltext(this.searchTerm));
-    } else if (this.params.title) {
-      this.set('params.title', '');
-      delete this.params.title;
-    }
-  },
+      _search: function() {
+        if (this.searchTerm) {
+          this.set('params.title', this.formatFulltext(this.searchTerm));
+        } else if (this.params.title) {
+          this.set('params.title', '');
+          delete this.params.title;
+        }
+      },
 
-  _checkForEnter: function(e) {
-    if (e.keyCode === 13) {
-      this._search();
-    }
-  }
-});
-</script>
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13) {
+          this._search();
+        }
+      }
+    });
+  </script>
 </dom-module>

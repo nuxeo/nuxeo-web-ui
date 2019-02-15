@@ -28,46 +28,44 @@ limitations under the License.
       </iron-pages>
     </template>
   </template>
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-Polymer({
-  is: 'nuxeo-admin',
-  behaviors: [I18nBehavior],
-  properties: {
-    visible: Boolean,
-    selected: {
-      type: String,
-      value: 'analytics',
-      notify: true,
-      observer: '_checkError'
-    },
-    isAdministrator: {
-      type: Boolean,
-      value: false,
-      reflectToAttribute: true
-    },
-    actionContext: {
-      type: Object,
-      computed: '_actionContext(user, routeParams)'
-    },
-    routeParams: Object
-  },
+  <script>
+    Polymer({
+      is: 'nuxeo-admin',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        visible: Boolean,
+        selected: {
+          type: String,
+          value: 'analytics',
+          notify: true,
+          observer: '_checkError'
+        },
+        isAdministrator: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        actionContext: {
+          type: Object,
+          computed: '_actionContext(user, routeParams)'
+        },
+        routeParams: Object
+      },
 
-  _actionContext: function() {
-    return {user: this.user, routeParams: this.routeParams};
-  },
+      _actionContext: function() {
+        return {user: this.user, routeParams: this.routeParams};
+      },
 
-  _errorUrl: function() {
-    return window.location.href;
-  },
+      _errorUrl: function() {
+        return window.location.href;
+      },
 
-  _checkError: function() {
-    // XXX: removed fallback-selection="error"
-    if (this.selected === 'error') {
-      this.fire('error', {code: 404});
-    }
-  }
-});
-</script>
+      _checkError: function() {
+        // XXX: removed fallback-selection="error"
+        if (this.selected === 'error') {
+          this.fire('error', {code: 404});
+        }
+      }
+    });
+  </script>
 </dom-module>

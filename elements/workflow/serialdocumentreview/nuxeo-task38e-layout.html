@@ -45,31 +45,30 @@ limitations under the License.
     </paper-textarea>
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-Polymer({
-  is: 'nuxeo-task38e-layout',
-  behaviors: [Nuxeo.LayoutBehavior],
-  properties: {
-    /**
-     * @schema dublincore
-     */
-    document: Object,
+  <script>
+    Polymer({
+      is: 'nuxeo-task38e-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @schema dublincore
+         */
+        document: Object,
 
-    /**
-     * @task var_task38e
-     */
-    task: Object,
-    types: Array
-  },
+        /**
+         * @task var_task38e
+         */
+        task: Object,
+        types: Array
+      },
 
-  ready: function () {
-    this.types = [
-      {id: 'simpleReview', label: this.i18n('wf.serialDocumentReview.simpleReview')},
-      {id: 'validation', label: this.i18n('wf.serialDocumentReview.validation')}
-    ]
-  }
-});
-</script>
+      ready: function () {
+        this.types = [
+          {id: 'simpleReview', label: this.i18n('wf.serialDocumentReview.simpleReview')},
+          {id: 'validation', label: this.i18n('wf.serialDocumentReview.validation')}
+        ]
+      }
+    });
+  </script>
 
 </dom-module>

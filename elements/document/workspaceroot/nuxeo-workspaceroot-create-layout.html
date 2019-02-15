@@ -22,18 +22,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-workspaceroot-create-layout">
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-Polymer({
-  is: 'nuxeo-workspaceroot-create-layout',
-  behaviors: [Nuxeo.LayoutBehavior],
-  properties: {
-    /**
-     * @doctype WorkspaceRoot
-     */
-    document: Object
-  }
-});
-</script>
+  <script>
+    Polymer({
+      is: 'nuxeo-workspaceroot-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype WorkspaceRoot
+         */
+        document: Object
+      }
+    });
+  </script>
 
 </dom-module>

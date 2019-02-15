@@ -166,88 +166,85 @@ limitations under the License.
 
   </template>
 
-  <script type="module">
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-Polymer({
-  is: 'nuxeo-home',
-  behaviors: [RoutingBehavior, FormatBehavior],
-  properties: {
-    visible: {
-      type: Boolean,
-      observer: '_visibleChanged'
-    },
+  <script>
+    Polymer({
+      is: 'nuxeo-home',
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      properties: {
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        },
 
-    _recentDocuments: {
-      type: Array,
-      value: [],
-      observer: '_recentDocumentsChanged'
-    }
-  },
+        _recentDocuments: {
+          type: Array,
+          value: [],
+          observer: '_recentDocumentsChanged'
+        }
+      },
 
-  _visibleChanged: function(visible) {
-    if (visible) {
-      this._refresh();
-    }
-  },
+      _visibleChanged: function(visible) {
+        if (visible) {
+          this._refresh();
+        }
+      },
 
-  _refresh: function() {
-    this.$.latestEditedDocs.fetch();
-    this.$.recentStorage.reload();
-    this._fetchFavorite().then(function(favorite) {
-      this.$.favoritesProvider.params = [favorite.uid];
-      this.$.favoritesProvider.page = 1;
-      this.$.favoriteDocs.fetch();
-    }.bind(this));
-  },
-
-  _navigate: function(e) {
-    var detail;
-    if (e.detail.item) {
-      detail = {
-        doc: e.detail.item
-      };
-      this.navigateTo('browse', detail.doc.path);
-    } else {
-      detail = {
-        doc: e.model.item
-      };
-    }
-    this.fire('navigate', detail);
-  },
-
-  _fetchFavorite: function() {
-    if (this.favorite) {
-      return Promise.resolve(this.favorite);
-    } else {
-      return this.$.fetchFavOp.execute()
-        .then(function(resp) {
-          this.favorite = resp;
-          return resp;
+      _refresh: function() {
+        this.$.latestEditedDocs.fetch();
+        this.$.recentStorage.reload();
+        this._fetchFavorite().then(function(favorite) {
+          this.$.favoritesProvider.params = [favorite.uid];
+          this.$.favoritesProvider.page = 1;
+          this.$.favoriteDocs.fetch();
         }.bind(this));
-    }
-  },
+      },
 
-  _recentDocumentsChanged: function(docs) {
-    if (docs && docs.length > 0) {
-      var storage = this.$.recentStorage;
-      var provider = this.$.recentProvider;
-      var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
-      provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ') AND ecm:isTrashed = 0';
-      provider.fetch().then(function(result) {
-        docs.forEach(function(doc) {
-          if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
-            storage.remove(doc);
-          }
-        });
-        this.$.latestViewedDocs.items = docs;
-        this.$.latestViewedDocs.notifyResize(); // XXX: force rendering for Edge (NXP-26244)
-      }.bind(this));
-    }
-  }
+      _navigate: function(e) {
+        var detail;
+        if (e.detail.item) {
+          detail = {
+            doc: e.detail.item
+          };
+          this.navigateTo('browse', detail.doc.path);
+        } else {
+          detail = {
+            doc: e.model.item
+          };
+        }
+        this.fire('navigate', detail);
+      },
 
-});
-</script>
+      _fetchFavorite: function() {
+        if (this.favorite) {
+          return Promise.resolve(this.favorite);
+        } else {
+          return this.$.fetchFavOp.execute()
+            .then(function(resp) {
+              this.favorite = resp;
+              return resp;
+            }.bind(this));
+        }
+      },
+
+      _recentDocumentsChanged: function(docs) {
+        if (docs && docs.length > 0) {
+          var storage = this.$.recentStorage;
+          var provider = this.$.recentProvider;
+          var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
+          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ') AND ecm:isTrashed = 0';
+          provider.fetch().then(function(result) {
+            docs.forEach(function(doc) {
+              if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
+                storage.remove(doc);
+              }
+            });
+            this.$.latestViewedDocs.items = docs;
+            this.$.latestViewedDocs.notifyResize(); // XXX: force rendering for Edge (NXP-26244)
+          }.bind(this));
+        }
+      }
+
+    });
+  </script>
 
 </dom-module>
