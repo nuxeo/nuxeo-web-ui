@@ -46,7 +46,7 @@ customElements.whenDefined('nuxeo-app').then(function() {
   });
 
   // /browse/<path>@<action>
-  page(/^\/browse\/(.*)?/, function(data) {
+  page(/\/browse\/(.*)?/, function(data) {
     if (!data.state.contentView) {
       app.currentContentView = null;
     }

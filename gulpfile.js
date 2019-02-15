@@ -56,7 +56,7 @@ gulp.task('lint', function() {
 gulp.task('merge-message-files', function() {
   var i18ndist = dist('i18n');
   var i18ntmp = '.tmp/i18n';
-  return gulp.src(['bower_components/nuxeo-ui-elements/i18n/messages*.json'])
+  return gulp.src(['node_modules/@nuxeo/nuxeo-ui-elements/i18n/messages*.json'])
              .pipe($.if(function(file) {
                return fs.existsSync(path.join('i18n', path.basename(file.path)));
              }, through.obj(function(file, enc, callback) {
@@ -84,20 +84,18 @@ gulp.task('polymer-build', function() {
   return new Promise(function(resolve, reject) {
     mergeStream(sources, dependencies)
       .pipe($.if('**/*.{png,gif,jpg,svg}', $.imagemin()))
-
       // pull any inline styles and scripts out of their HTML files and
       // into separate CSS and JS files in the build stream.
       .pipe(htmlSplitter.split())
       .pipe($.if(/\.css$/, cssSlam())) // Install css-slam to use
       .pipe($.if(/\.html$/, htmlMinifier())) // Install gulp-html-minifier to use
       .pipe(htmlSplitter.rejoin()) // Call rejoin when you're finished
-
       .pipe(project.bundler({
-        rewriteUrlsInTemplates: true,
+        sourcemaps: true,
         stripComments: true,
         inlineCss: true,
         inlineScripts: true,
-        excludes: [dist('elements/nuxeo-search-page.html')]
+        excludes: [dist('elements/nuxeo-search-page.html')],
       }))
       .pipe(gulp.dest(DIST))
       .on('end', resolve)
@@ -118,8 +116,8 @@ gulp.task('workbox-sw', function() {
 gulp.task('move-elements', function() {
   // copy user-group-management layouts
   var userGroupManagement = gulp.src([
-    dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
-    dist('bower_components/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
+    dist('node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html'),
+    dist('node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html')])
     .pipe(gulp.dest(dist('nuxeo-user-group-management')));
 
   // copy diff elements
@@ -142,7 +140,7 @@ gulp.task('move-elements', function() {
     dist('elements/routing.html')])
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe($.replace('..\/moment\/min\/moment-with-locales.min.js',
-      'bower_components/moment/min/moment-with-locales.min.js'))
+      'node_modules/moment/min/moment-with-locales.min.js'))
     .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
