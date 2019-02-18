@@ -94,9 +94,17 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <script src="node_modules/@webcomponents/html-imports/html-imports.min.js"></script>
+
+  <script src="node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+
+  <script defer src="node_modules/moment/min/moment-with-locales.min.js"></script>
+
+  <script defer src="node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+
+  <script type="module" src="./nuxeo-app.js"></script>
 
   <script>
     var Nuxeo = Nuxeo || {};
@@ -109,7 +117,7 @@ limitations under the License.
   <% } %>
 
   <!-- routing -->
-  <link rel="import" href="routing.html">
+  <script type="module" src="./routing.js"></script>
 
   <% if (!Framework.isDevModeSet()) { %>
   <script>

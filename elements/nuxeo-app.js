@@ -655,7 +655,7 @@ Polymer({
 
   is: 'nuxeo-app',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
-
+  importMeta: import.meta,
   properties: {
 
     productName: {
@@ -1366,7 +1366,7 @@ Polymer({
       // check if page is already registered (vulcanized)
       if (!(el instanceof PolymerElement)) {
         var tag = el.tagName.toLowerCase();
-        importHref('/elements/' + tag + '.html', this._loadElements.bind(this), function() {
+        importHref(this.resolveUrl(tag + '.html'), this._loadElements.bind(this), function() {
           this.showError(404, '', tag + '.html');
         }.bind(this), true);
       } else {
@@ -1378,7 +1378,7 @@ Polymer({
 
   _loadElements: function() {
     afterNextRender(this, () => {
-      import('/elements/elements.js').then(() => this.loading = false);
+      import('./elements.js').then(() => this.loading = false);
     });
   },
 

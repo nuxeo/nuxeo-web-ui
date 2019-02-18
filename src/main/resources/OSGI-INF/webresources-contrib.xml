@@ -4,10 +4,6 @@
 
   <extension target="org.nuxeo.ecm.platform.WebResources" point="resources">
 
-    <resource name="nuxeo-app.html" type="import">
-      <uri>/ui/nuxeo-app.html</uri>
-    </resource>
-
     <resource name="nuxeo-web-ui-bundle.html" type="import">
       <uri>/ui/nuxeo-web-ui-bundle.html</uri>
     </resource>
@@ -19,7 +15,6 @@
     <!-- main bundle with all import resources -->
     <bundle name="web-ui">
       <resources>
-        <resource>nuxeo-app.html</resource>
         <resource>nuxeo-web-ui-bundle.html</resource>
       </resources>
     </bundle>

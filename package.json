@@ -40,6 +40,7 @@
     "workbox-build": "^3.4.1"
   },
   "scripts": {
+    "build": "gulp build",
     "start": "gulp serve",
     "lint": "gulp lint && polymer lint -i elements/*/*.html",
     "win-lint": "gulp lint && polymer lint -i elements\\*\\*.html"
@@ -79,6 +80,7 @@
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
     "@webcomponents/html-imports": "^1.2.0",
+    "d3": "^4.13.0",
     "jsondiffpatch": "^0.3.9",
     "jsplumb": "^2.0.7",
     "web-animations-js": "^2.3.1"
