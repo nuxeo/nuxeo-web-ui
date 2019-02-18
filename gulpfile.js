@@ -138,6 +138,7 @@ gulp.task('move-elements', function() {
     dist('elements/nuxeo-app.js'),
     dist('elements/elements.js'),
     dist('elements/routing.js')])
+    .pipe($.replace('..\/node_modules', 'node_modules'))
     .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
