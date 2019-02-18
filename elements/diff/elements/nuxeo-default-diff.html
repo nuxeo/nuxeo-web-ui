@@ -1,0 +1,208 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-default-diff`
+@group Nuxeo UI
+@element nuxeo-default-diff
+-->
+<dom-module id="nuxeo-default-diff">
+  <template>
+    <style include="nuxeo-diff-styles">
+      .default.simple {
+        @apply --layout-horizontal;
+      }
+
+      .default.complex {
+        @apply --layout-vertical;
+      }
+
+      .default.complex > .label {
+        margin-bottom: 12px;
+      }
+    </style>
+    <div class$="default [[_computeDefaultClass(delta, originalValue)]]">
+      <template is="dom-if" if="[[displayLabel]]">
+        <div class="label">
+          <span style$="[[_computeIndentStyle(level, isArrayItem)]]">[[_computeLabel(property, label)]]</span>
+        </div>
+      </template>
+      <div class$="value [[_computeDefaultClass(delta, originalValue)]]">
+        <!-- no changes -->
+        <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
+          <!-- simple value-->
+          <template is="dom-if" if="[[_isNotObjectNorArray(originalValue)]]">
+            <span>[[originalValue]]</span>
+          </template>
+          <!-- array -->
+          <template is="dom-if" if="[[_isArray(originalValue)]]">
+            <div class$="array [[_computeArrayClass(delta, originalValue, newValue, hideAdditions, hideDeletions)]]">
+              <template is="dom-repeat" items="[[originalValue]]" as="value">
+                <div class="item">
+                  <nuxeo-object-diff original-value="[[value]]"
+                                     schema="[[_getPropertySchema(schema, property)]]"
+                                     type="[[_arrayItemType(type)]]"
+                                     level="[[level]]"
+                                     unified="[[unified]]"
+                                     show-all="[[showAll]]"
+                                     label="[[index]]:"
+                                     is-array-item
+                                     display-label></nuxeo-object-diff>
+                </div>
+              </template>
+            </div>
+          </template>
+          <!-- object -->
+          <template is="dom-if" if="[[_isObject(originalValue)]]">
+            <div class="object">
+              <template is="dom-repeat" items="[[_getKeys(originalValue)]]" as="subproperty">
+                <nuxeo-object-diff property="[[subproperty]]"
+                                   original-value="[[_getValue(originalValue, subproperty)]]"
+                                   schema="[[_getPropertySchema(schema, property)]]"
+                                   level="[[_incLevel(level)]]"
+                                   unified="[[unified]]"
+                                   show-all="[[showAll]]"
+                                   display-label></nuxeo-object-diff>
+              </template>
+            </div>
+          </template>
+        </template>
+        <!-- additions -->
+        <template is="dom-if" if="[[_hasAddition(delta, hideAdditions)]]">
+          <div class="addition">
+            <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+              <span class="added">[[_getAddition(delta)]]</span>
+            </template>
+            <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+              <nuxeo-object-diff original-value="[[_getAddition(delta)]]"
+                                 level="[[level]]"
+                                 type="[[type]]"
+                                 unified="[[unified]]"
+                                 show-all="[[showAll]]"
+                                 schema="[[_getPropertySchema(schema, property)]]"></nuxeo-object-diff>
+            </template>
+          </div>
+        </template>
+        <!-- modifications -->
+        <template is="dom-if" if="[[_hasModification(delta)]]">
+          <template is="dom-if" if="[[!hideDeletions]]">
+            <!-- old value -->
+            <div class="deletion">
+              <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+                <span class="deleted">[[_getModificationOldValue(delta)]]</span>
+              </template>
+              <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+                <nuxeo-object-diff original-value="[[_getModificationOldValue(delta)]]"
+                                   level="[[level]]"
+                                   type="[[type]]"
+                                   unified="[[unified]]"
+                                   show-all="[[showAll]]"
+                                   schema="[[_getPropertySchema(schema, property)]]"></nuxeo-object-diff>
+              </template>
+            </div>
+          </template>
+          <template is="dom-if" if="[[!hideAdditions]]">
+            <!-- new value -->
+            <div class="addition">
+              <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+                <span class="added">[[_getModificationNewValue(delta)]]</span>
+              </template>
+              <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+                <nuxeo-object-diff original-value="[[_getModificationNewValue(delta)]]"
+                                   level="[[level]]"
+                                   type="[[type]]"
+                                   unified="[[unified]]"
+                                   show-all="[[showAll]]"
+                                   schema="[[_getPropertySchema(schema, property)]]"></nuxeo-object-diff>
+              </template>
+            </div>
+          </template>
+        </template>
+        <!-- deletions -->
+        <template is="dom-if" if="[[_hasDeletion(delta, hideDeletions)]]">
+          <div class="deletion">
+            <template is="dom-if" if="[[_isSimpleDelta(delta)]]">
+              <span class="deleted">[[_getDeletion(delta)]]</span>
+            </template>
+            <template is="dom-if" if="[[!_isSimpleDelta(delta)]]">
+              <nuxeo-object-diff original-value="[[_getDeletion(delta)]]"
+                                 level="[[level]]"
+                                 type="[[type]]"
+                                 unified="[[unified]]"
+                                 show-all="[[showAll]]"
+                                 schema="[[_getPropertySchema(schema, property)]]"></nuxeo-object-diff>
+            </template>
+          </div>
+        </template>
+        <!-- text diff -->
+        <template is="dom-if" if="[[_hasTextDiff(delta)]]">
+          <div class="text diff" inner-H-T-M-L="[[_getTextDiff(delta, originalValue, hideAdditions, hideDeletions)]]"></div>
+        </template>
+        <!-- object with inner changes -->
+        <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
+          <div class="object diff">
+            <template is="dom-repeat" items="[[_getAllKeys(delta, originalValue, showAll)]]" as="subproperty">
+              <nuxeo-object-diff property="[[subproperty]]"
+                                 delta="[[_getValue(delta, subproperty)]]"
+                                 unified="[[unified]]"
+                                 schema="[[_getPropertySchema(schema, property)]]"
+                                 original-value="[[_getValue(originalValue, subproperty)]]"
+                                 new-value="[[_getValue(newValue, subproperty)]]"
+                                 level="[[_incLevel(level)]]"
+                                 show-all="[[showAll]]"
+                                 hide-deletions="[[hideDeletions]]"
+                                 hide-additions="[[hideAdditions]]"
+                                 display-label></nuxeo-object-diff>
+            </template>
+          </div>
+        </template>
+        <!-- arrays with inner changes -->
+        <template is="dom-if" if="[[_hasArrayInnerChanges(delta)]]">
+          <div class$="array diff [[_computeArrayClass(delta, originalValue, newValue, hideAdditions, hideDeletions)]]">
+            <template is="dom-repeat" items="[[_getArrayDelta(delta, originalValue, newValue, hideAdditions, hideDeletions)]]" as="arrdelta">
+              <template is="dom-if" if="[[_showArrayItem(arrdelta, showAll)]]">
+                <div class$="item [[arrdelta.change]]">
+                  <nuxeo-object-diff delta="[[arrdelta.value]]"
+                                     original-value="[[arrdelta.originalValue]]"
+                                     new-value="[[arrdelta.newValue]]"
+                                     unified="[[unified]]"
+                                     schema="[[_getPropertySchema(schema, property)]]"
+                                     type="[[_arrayItemType(type)]]"
+                                     level="[[level]]"
+                                     show-all="[[showAll]]"
+                                     hide-deletions="[[hideDeletions]]"
+                                     hide-additions="[[hideAdditions]]"
+                                     is-array-item
+                                     label="[[arrdelta.index]]:"
+                                     display-label></nuxeo-object-diff>
+                </div>
+              </template>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-default-diff',
+      behaviors: [Nuxeo.DiffBehavior]
+    });
+  </script>
+
+</dom-module>
