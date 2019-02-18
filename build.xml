@@ -20,15 +20,7 @@ limitations under the License.
   <condition property="cmd.npm" value="npm.cmd" else="npm">
     <os family="windows"/>
   </condition>
-  <condition property="cmd.bower" value="bower.cmd" else="bower">
-    <os family="windows"/>
-  </condition>
-  <condition property="cmd.gulp" value="gulp.cmd" else="gulp">
-    <os family="windows"/>
-  </condition>
-  <condition property="cmd.mvn" value="mvn.cmd" else="mvn">
-    <os family="windows"/>
-  </condition>
+
   <!-- set npm script names based on OS family -->
   <condition property="lint.script" value="win-lint" else="lint">
     <os family="windows"/>
@@ -36,34 +28,30 @@ limitations under the License.
 
   <target name="clean" description="Clean npm and bower dependencies">
     <delete dir="node_modules" />
-    <delete includeEmptyDirs="yes" failonerror="false">
-      <fileset dir="bower_components" defaultexcludes="no" followsymlinks="false" />
-    </delete>
   </target>
 
-  <target name="npmInstall" description="Install npm depedencies" unless="skipInstall">
+  <target name="install" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
   </target>
 
-  <target name="bowerInstall" description="Install npm depedencies" unless="skipInstall">
-    <exec executable="${cmd.bower}" failonerror="true">
-      <arg value="install" />
-    </exec>
-  </target>
-
-  <target name="init" description="Download all node and web dependencies" depends="npmInstall,bowerInstall">
-    <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="run" />
-      <arg value="${lint.script}" />
-    </exec>
+  <target name="init" description="Download all node and web dependencies" depends="install">
+    <!-- npm-run script="${lint.script}" /-->
   </target>
 
   <target name="build" depends="init">
-    <exec executable="${cmd.gulp}" failonerror="true">
-      <arg value="build" />
-    </exec>
+    <npm-run script="build" />
   </target>
+
+  <macrodef name="npm-run">
+    <attribute name="script"/>
+    <sequential>
+      <exec executable="${cmd.npm}" failonerror="true">
+        <arg value="run" />
+        <arg value="@{script}" />
+      </exec>
+    </sequential>
+</macrodef>
 
 </project>
