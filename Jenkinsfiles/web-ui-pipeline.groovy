@@ -4,7 +4,7 @@ properties([
             string(name: 'BRANCH', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', trim: false),
             choice(name: 'BASE_BRANCH', choices: ['master', '10.10', '9.10'], description: 'The branch to fallback on when $BRANCH is not found.'),
             string(name: 'SLAVE', defaultValue: 'SLAVE', description: 'Slave label to be used.', trim: false),
-            booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm and bower cache clean?'),
+            booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm cache clean?'),
             booleanParam(name: 'SAUCE_LAB', defaultValue: true, description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?'),
             booleanParam(name: 'CREATE_PR', defaultValue: true, description: 'Should PRs be created if build is successful?'),
             booleanParam(name: 'SKIP_IT_TESTS', defaultValue: false, description: 'Should the functional tests be skipped?'),
@@ -70,14 +70,6 @@ def cloneRebaseAndDir(repo, branch = BRANCH, fallback = BASE_BRANCH) {
     }
 }
 
-def replaceVersion(dep) {
-    def bower_folder = 'bower_components'
-    if (fileExists("${bower_folder}/${dep}/bower.json")) {
-        sh "rm -rf ${bower_folder}/${dep}"
-        sh "rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../${dep}/ ${bower_folder}/${dep}"
-    }
-}
-
 timestamps {
     node(SLAVE) {
         try {
@@ -87,7 +79,7 @@ timestamps {
             def MP_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "${VERSIONS_MAPPING.get(BASE_BRANCH)}_${BASE_BRANCH}" : BASE_BRANCH
             def el, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
-                sh 'npm cache clean --force && bower cache clean'
+                sh 'npm cache clean --force'
             }
             stage('nuxeo-elements') {
                 timeout(30) {
@@ -95,8 +87,8 @@ timestamps {
                     if (el) {
                         echo 'Need to build nuxeo-elements'
                         dir('nuxeo-elements') {
-                            sh 'bower install'
-                            sh 'npm install && npm run lint'
+                            sh 'npm install --no-package-lock && npm run lint'
+                            el = sh 'npm pack'
                             runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
                         }
                     } else {
@@ -110,11 +102,12 @@ timestamps {
                     if (uiel || el) {
                         echo 'Need to build nuxeo-ui-elements'
                         dir('nuxeo-ui-elements') {
-                            sh 'bower install'
+                            sh 'npm install --no-package-lock'
                             if (el) {
-                                replaceVersion('nuxeo-elements')
+                                sh "npm install --no-package-lock ../nuxeo-elements/${el}"
                             }
-                            sh 'npm install && npm run lint'
+                            sh 'npm run lint'
+                            uiel = sh 'npm pack'
                             runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
                         }
                     } else {
@@ -131,15 +124,16 @@ timestamps {
                         if (webui || el || uiel) {
                             echo 'Need to build nuxeo-web-ui'
                             dir('nuxeo-web-ui') {
-                                sh 'bower install'
+                                sh 'npm install --no-package-lock'
                                 if (el) {
-                                    replaceVersion('nuxeo-elements')
+                                    sh "npm install --no-package-lock ../nuxeo-elements/${el}"
                                 }
                                 if (uiel) {
-                                    replaceVersion('nuxeo-ui-elements')
+                                    sh "npm install --no-package-lock ../nuxeo-ui-elements/${uiel}"
                                 }
-                                sh 'npm install'
-                                sh 'mvn install -DskipInstall'
+                                withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
+                                    sh 'mvn install -DskipInstall'
+                                }
                                 archive 'target/*.jar'
                             }
                         } else {
