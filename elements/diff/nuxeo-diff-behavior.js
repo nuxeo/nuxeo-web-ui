@@ -401,3 +401,5 @@ export const DiffBehavior = {
     return deltas;
   }
 };
+
+Nuxeo.DiffBehavior = DiffBehavior;

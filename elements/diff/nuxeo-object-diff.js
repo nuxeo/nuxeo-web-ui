@@ -114,3 +114,5 @@ Polymer({
     }
   }
 });
+
+Nuxeo.Diff = Diff;

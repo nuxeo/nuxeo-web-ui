@@ -39,7 +39,7 @@ import './nuxeo-object-diff.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
-// import { diff } from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
+import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 var _customLoadPromise;
 var typeDataCache = {};
@@ -302,6 +302,8 @@ Polymer({
     }
   },
 
+  importMeta: import.meta,
+
   observers: [
     '_docIdsChanged(docIds.*)'
   ],
@@ -313,7 +315,14 @@ Polymer({
   created: function() {
     if (!_customLoadPromise) {
       _customLoadPromise = new Promise(function(resolve, reject) {
-        this.importHref(this.resolveUrl('imports.html'), resolve, reject);
+        // XXX we cannot load it as es6 module because some transitive dependencies (chalk and diff-match-patch) are not
+        // pure es6 modules and do not export default
+        const script = document.createElement('script');
+        script.src = this.resolveUrl('../../node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js');
+        script.onload = () => {
+          importHref(this.resolveUrl('imports.html'), resolve, reject);
+        }
+        document.head.appendChild(script);
       }.bind(this));
     }
   },
@@ -496,7 +505,7 @@ Polymer({
     this.right = right;
     this._fetchCommonSchemas(left, right).then(function(schemas) {
       this._schemas = schemas;
-      var delta = diff(left.properties, right.properties);
+      var delta = jsondiffpatch.diff(left.properties, right.properties);
       this._schemas.forEach(function(schema) {
         this._filterDelta(delta, schema);
       }.bind(this));
