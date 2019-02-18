@@ -45,8 +45,10 @@ limitations under the License.
     </style>
 
     <nuxeo-dropzone document="{{document}}" hidden$="[[document.properties.file:content.data]]" update-document></nuxeo-dropzone>
-    <nuxeo-document-preview document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-preview>
-    <nuxeo-document-blob document="[[document]]" hidden$="[[!document.properties.file:content.data]]"></nuxeo-document-blob>
+    <template is="dom-if" if="[[document.properties.file:content.data]]">
+      <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+      <nuxeo-document-blob document="[[document]]"></nuxeo-document-blob>
+    </template>
 
   </template>
 
