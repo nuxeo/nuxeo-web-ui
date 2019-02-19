@@ -27,8 +27,6 @@ var fs = require('fs');
 var through = require('through2');
 var mergeJson = require('gulp-merge-json');
 var mergeStream = require('merge-stream');
-var cssSlam = require('css-slam').gulp;
-var htmlMinifier = require('gulp-html-minifier');
 var polymer = require('polymer-build');
 var polyserve = require('polyserve');
 var log = require('fancy-log');
@@ -71,6 +69,11 @@ gulp.task('merge-message-files', function() {
              .pipe($.size({title: 'merge-message-files'}));
 });
 
+function pipeStreams(streams) {
+  return Array.prototype.concat.apply([], streams)
+      .reduce(function(a, b) { return a.pipe(b); })
+}
+
 gulp.task('polymer-build', function() {
 
   var project = new polymer.PolymerProject('./polymer.json');
@@ -81,22 +84,33 @@ gulp.task('polymer-build', function() {
 
   var dependencies = project.dependencies();
 
+  var buildStream = pipeStreams([
+    mergeStream(sources, dependencies),
+    project.bundler({
+      inlineScripts: false
+    }),
+    htmlSplitter.split(),
+    polymer.getOptimizeStreams({
+      css: {
+        minify: true
+      },
+      js: {
+        minify: true,
+        compile: { target: 'es2015' },
+        transformModulesToAmd: 'auto',
+        moduleResolution: project.config.moduleResolution,
+      },
+      html: {
+        minify: false
+      },
+      entrypointPath: project.config.entrypoint,
+      rootDir: project.config.root,
+    }),
+    htmlSplitter.rejoin()
+  ]);
+
   return new Promise(function(resolve, reject) {
-    mergeStream(sources, dependencies)
-      .pipe($.if('**/*.{png,gif,jpg,svg}', $.imagemin()))
-      // pull any inline styles and scripts out of their HTML files and
-      // into separate CSS and JS files in the build stream.
-      .pipe(htmlSplitter.split())
-      .pipe($.if(/\.css$/, cssSlam())) // Install css-slam to use
-      .pipe($.if(/\.html$/, htmlMinifier())) // Install gulp-html-minifier to use
-      .pipe(htmlSplitter.rejoin()) // Call rejoin when you're finished
-      .pipe(project.bundler({
-        sourcemaps: true,
-        stripComments: true,
-        inlineCss: true,
-        inlineScripts: true,
-        excludes: [dist('elements/nuxeo-search-page.html')],
-      }))
+    buildStream
       .pipe(gulp.dest(DIST))
       .on('end', resolve)
       .on('error', reject);
