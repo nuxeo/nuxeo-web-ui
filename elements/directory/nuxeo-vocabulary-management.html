@@ -182,7 +182,9 @@ limitations under the License.
         _visibleChanged: function() {
           if (this.visible && !this.vocabularies) {
             this.$.directory.get().then(function(response) {
-              this.vocabularies = response.entries;
+              this.vocabularies = response.entries.sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+              });
             }.bind(this));
           }
         },
