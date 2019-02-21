@@ -111,6 +111,7 @@ Nuxeo.FormatBehavior = FormatBehavior;
 // Export Polymer and PolymerElement for 1.x and 2.x compat
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
+window.importHref = importHref;
 
 // inspired by https://github.com/treosh/uxm
 export const Performance = {
