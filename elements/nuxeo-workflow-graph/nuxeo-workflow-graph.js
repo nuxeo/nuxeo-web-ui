@@ -36,7 +36,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
-// import 'jsplumb/dist/js/jsPlumb-2.0.7.js';
+import 'jsplumb/dist/js/jsplumb.js';
+
 Polymer({
   _template: html`
     <style>
@@ -131,11 +132,11 @@ Polymer({
         transform: none !important;
       }
 
-      .jsplumb-endpoint {
+      .jtk-endpoint {
         z-index: 110;
       }
 
-      .jsplumb-overlay {
+      .jtk-overlay {
         z-index: 6;
       }
     </style>
@@ -182,7 +183,7 @@ Polymer({
       value: {
         connector: ['Flowchart', {cornerRadius: 5}],
         paintStyle: {
-          fillStyle: '#92e1aa'
+          fill: '#92e1aa'
         },
         isSource: true,
         isTarget: false,
@@ -195,7 +196,7 @@ Polymer({
       type: Object,
       value: {
         paintStyle: {
-          fillStyle: '#003f7d'
+          fill: '#003f7d'
         },
         isSource: false,
         isTarget: true,
@@ -226,7 +227,7 @@ Polymer({
   show: function() {
     this.$.graphResource.execute().then(function() {
       this.$.graphDialog.toggle();
-    }.bind(this)).catch(function(error) {
+    }.bind(this)).catch((error) => {
       this.fire('notify', {message: this.i18n('documentPage.route.view.graph.error')});
       throw error;
     });
@@ -239,10 +240,10 @@ Polymer({
         zIndex: 2000
       },
       PaintStyle: {
-        strokeStyle: '#92e1aa',
-        lineWidth: 3,
+        stroke: '#92e1aa',
+        strokeWidth: 3,
         outlineWidth: 2,
-        outlineColor: 'white',
+        outlineStroke: 'white',
         joinstyle: 'round'
       },
       Endpoint: ['Dot', {
@@ -252,7 +253,7 @@ Polymer({
         location: 0.8
       }, {
         foldback: 0.9,
-        fillStyle: '#92e1aa',
+        fill: '#92e1aa',
         width: 14
       }]]
     });
@@ -261,7 +262,7 @@ Polymer({
 
   _transitionOverlay: function(transition) {
     return [
-      ['Arrow', {location: 0.8}, {foldback: 0.9, fillStyle: '#92e1aa', width: 14}],
+      ['Arrow', {location: 0.8}, {foldback: 0.9, fill: '#92e1aa', width: 14}],
       ['Label', {
         label: '<span title="' + transition.label + '">' + transition.label + '</span>',
         cssClass: 'workflow_connection_label',
@@ -345,28 +346,33 @@ Polymer({
         target: endPointTarget,
         overlays: this._transitionOverlay(transition),
         paintStyle: {
-          lineWidth: 3,
-          strokeStyle: this.connectionColors[anchorIndex],
+          strokeWidth: 3,
+          stroke: this.connectionColors[anchorIndex],
           outlineWidth: 2,
-          outlineColor: 'white',
+          outlineStroke: 'white',
           joinstyle: 'round'
         },
         detachable: false
       });
 
+      // TODO: fix transition path
       // prepare the transition's path
       // ignore paths with only one segment
-      var segments = [];
+      /*
+      var segments = connection.connector.getSegments();
+
+      segments.length = 0;
       if (transition.path && transition.path.length > 2) {
         for (var i = 1; i < transition.path.length; i++) {
-          segments.push({
-            start: [transition.path[i - 1].x, transition.path[i - 1].y],
-            end: [transition.path[i].x, transition.path[i].y]
-          });
+          segments.push(new jsPlumb.Segments.Straight({
+            x1: transition.path[i - 1].x, y1: transition.path[i - 1].y,
+            x2: transition.path[i].x, y2: transition.path[i].y
+          }));
         }
-        connection.connector.setPath(segments);
       }
+      */
     }.bind(this));
+
   },
 
   _addTargetEndpoint: function(target) {
