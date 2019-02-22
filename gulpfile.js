@@ -143,6 +143,8 @@ gulp.task('move-elements', function() {
     .pipe($.replace('..\/bower_components', 'bower_components'))
     .pipe($.replace('..\/moment\/min\/moment-with-locales.min.js',
       'bower_components/moment/min/moment-with-locales.min.js'))
+    .pipe($.replace('.\/lang\/alloy-editor',
+      'bower_components\/nuxeo-ui-elements\/widgets\/alloy\/lang\/alloy-editor'))
     .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
