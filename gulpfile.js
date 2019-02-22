@@ -141,6 +141,9 @@ gulp.task('move-elements', function() {
   // fix asset path
   var elements = gulp.src(dist('elements/elements.html'))
     .pipe($.replace('..\/bower_components', 'bower_components'))
+    .pipe($.replace('.\/lang\/alloy-editor',
+      'bower_components\/nuxeo-ui-elements\/widgets\/alloy\/lang\/alloy-editor'))
+    .pipe($.replace('..\/fonts\/', './fonts/'))
     .pipe(gulp.dest(dist()));
 
   return merge(elements, layouts, userGroupManagement);
