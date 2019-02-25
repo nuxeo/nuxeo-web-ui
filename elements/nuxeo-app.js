@@ -1416,9 +1416,11 @@ Polymer({
   _removeFromRecentlyViewed: function(docs) {
     if (Array.isArray(docs)) {
       var recent = this.$$('#recent');
-      docs.forEach(function(doc) {
-        recent.remove(doc);
-      }.bind(this));
+      if (recent) {
+        docs.forEach(function(doc) {
+          recent.remove(doc);
+        }.bind(this));
+      }
     }
   },
 
