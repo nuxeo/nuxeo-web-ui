@@ -146,7 +146,7 @@ Polymer({
 
   is: 'nuxeo-vocabulary-management',
   behaviors: [I18nBehavior],
-
+  importMeta: import.meta,
   properties: {
     vocabularies: Array,
     selectedVocabulary: String,

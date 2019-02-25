@@ -148,7 +148,7 @@ Polymer({
 
   is: 'nuxeo-document-task',
   behaviors: [RoutingBehavior, FormatBehavior],
-
+  importMeta: import.meta,
   properties: {
     task: {
       type: Object
