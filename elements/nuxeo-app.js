@@ -1379,7 +1379,7 @@ Polymer({
 
   _loadElements: function() {
     afterNextRender(this, () => {
-      import('./elements.js').then(() => this.loading = false);
+      import(/* webpackChunkName: "elements" */'./elements.js').then(() => this.loading = false);
     });
   },
 

@@ -80,25 +80,20 @@ limitations under the License.
     Nuxeo.UI.config.fetch = {document: ['properties']};
     // Nuxeo.UI.config.dateFormat = 'YYYY-MM-DD';
     // Nuxeo.UI.config.dateTimeFormat = 'YYYY-MM-DD HH:mm';
+    Nuxeo.UI.bundles = ['elements/nuxeo-web-ui-bundle.html'];
   </script>
 
-  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script src="node_modules/@webcomponents/html-imports/html-imports.min.js"></script>
+  <script src="vendor/html-imports/html-imports.min.js"></script>
 
-  <script src="node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script defer src="node_modules/moment/min/moment-with-locales.min.js"></script>
+  <script defer src="vendor/moment/moment-with-locales.min.js"></script>
 
-  <script defer src="node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <script defer src="vendor/alloy/alloy-editor-all.js"></script>
 
-  <script type="module" src="./elements/nuxeo-app.js"></script>
-
-  <!-- Web UI default contributions -->
-  <link rel="import" href="elements/nuxeo-web-ui-bundle.html">
-
-  <!-- routing -->
-  <script type="module" src="./elements/routing.js"></script>
+  <script src="main.bundle.js"></script>
 
   <!--
   <script>
