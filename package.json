@@ -19,12 +19,15 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-merge": "^4.1.4",
-    "workbox-build": "^3.4.1"
+    "workbox-cli": "3.6.3"
   },
   "scripts": {
     "prestart": "npm run prepare:i18n",
     "start": "webpack-dev-server --env development",
-    "prebuild": "node scripts/merge-messages.js",
+    "prebuild": "npm-run-all prepare:*",
+    "prepare:tmp": "rm -rf .tmp",
+    "prepare:i18n": "node scripts/merge-messages.js",
+    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_devDependencies_workbox_cli .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:elements": "replace '/elements/' '${window.location.pathname}/' target/classes/web/nuxeo.war/ui/*.js",
