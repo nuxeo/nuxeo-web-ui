@@ -88,7 +88,7 @@ timestamps {
                         echo 'Need to build nuxeo-elements'
                         dir('nuxeo-elements') {
                             sh 'npm install --no-package-lock && npm run lint'
-                            el = sh 'npm pack'
+                            el = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
                             runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
                         }
                     } else {
@@ -107,7 +107,7 @@ timestamps {
                                 sh "npm install --no-package-lock ../nuxeo-elements/${el}"
                             }
                             sh 'npm run lint'
-                            uiel = sh 'npm pack'
+                            uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
                             runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
                         }
                     } else {
