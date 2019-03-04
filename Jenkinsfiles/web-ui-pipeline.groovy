@@ -24,7 +24,7 @@ def runSauceLabTests(repo, sauceCredentialId) {
     } else {
         if (params.SAUCE_LAB) {
             withCredentials([usernamePassword(credentialsId: "$sauceCredentialId", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-                sh "./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
+                sh "./node_modules/.bin/polymer test --npm --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
             }
         } else {
             sh 'npm run test'
@@ -77,43 +77,47 @@ timestamps {
             def VERSIONS_MAPPING = ['10.10': '2.4', '9.10': '2.2']
             def ELEMENTS_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "maintenance-${VERSIONS_MAPPING.get(BASE_BRANCH)}.x" : BASE_BRANCH
             def MP_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "${VERSIONS_MAPPING.get(BASE_BRANCH)}_${BASE_BRANCH}" : BASE_BRANCH
-            def el, uiel, webui, webuiitests, plugin
+            def el, datavizel, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
                 sh 'npm cache clean --force'
             }
-            stage('nuxeo-elements') {
-                timeout(30) {
-                    el = cloneRebaseAndDir('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
-                    if (el) {
-                        echo 'Need to build nuxeo-elements'
+            if (cloneRebaseAndDir('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)) {
+                echo 'Need to build nuxeo-elements'
+                stage('nuxeo-elements') {
+                    withEnv(["LAUNCHPAD_FIREFOX=/opt/build/tools/firefox-63/firefox"]) {
                         dir('nuxeo-elements') {
-                            sh 'npm install --no-package-lock && npm run lint'
-                            el = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
-                            runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
+                            sh 'npm install --no-package-lock && npm run bootstrap -- --no-ci'
+                            sh 'npm run lint'
+                            stage('nuxeo-elements/core') {
+                                timeout(30) {
+                                    dir('core') {
+                                        el = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
+                                        runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
+                                    }
+                                }
+                            }
+                            stage('nuxeo-elements/dataviz') {
+                                timeout(30) {
+                                    dir('dataviz') {
+                                        datavizel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
+                                        runSauceLabTests('nuxeo-dataviz-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
+                                    }
+                                }
+                            }
+                            stage('nuxeo-elements/ui') {
+                                timeout(30) {
+                                    dir('ui') {
+                                        uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
+                                        runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
+                                    }
+                                }
+                            }
                         }
-                    } else {
-                        echo 'No need to build nuxeo-elements'
                     }
                 }
             }
-            stage('nuxeo-ui-elements') {
-                timeout(30) {
-                    uiel = cloneRebaseAndDir('nuxeo-ui-elements', BRANCH, ELEMENTS_BASE_BRANCH)
-                    if (uiel || el) {
-                        echo 'Need to build nuxeo-ui-elements'
-                        dir('nuxeo-ui-elements') {
-                            sh 'npm install --no-package-lock'
-                            if (el) {
-                                sh "npm install --no-package-lock ../nuxeo-elements/${el}"
-                            }
-                            sh 'npm run lint'
-                            uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
-                            runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
-                        }
-                    } else {
-                        echo 'No need to build nuxeo-ui-elements'
-                    }
-                }
+            else {
+                echo 'No need to build nuxeo-elements'
             }
             def mvnHome = tool 'maven-3.3'
             def javaHome = tool 'java-8-oracle'
@@ -121,15 +125,18 @@ timestamps {
                 stage('nuxeo-web-ui') {
                     timeout(60) {
                         webui = cloneRebaseAndDir('nuxeo-web-ui')
-                        if (webui || el || uiel) {
+                        if (webui || el || uiel || datavizel) {
                             echo 'Need to build nuxeo-web-ui'
                             dir('nuxeo-web-ui') {
                                 sh 'npm install --no-package-lock'
                                 if (el) {
-                                    sh "npm install --no-package-lock ../nuxeo-elements/${el}"
+                                    sh "npm install --no-package-lock ../nuxeo-elements/core/${el}"
+                                }
+                                if (datavizel) {
+                                    sh "npm install --no-package-lock ../nuxeo-elements/dataviz/${datavizel}"
                                 }
                                 if (uiel) {
-                                    sh "npm install --no-package-lock ../nuxeo-ui-elements/${uiel}"
+                                    sh "npm install --no-package-lock ../nuxeo-elements/ui/${uiel}"
                                 }
                                 withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
                                     sh 'mvn install -DskipInstall'
