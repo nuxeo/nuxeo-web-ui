@@ -390,6 +390,7 @@
   "documentImport.error.importFailed": "Deze assets konden niet worden aangemaakt, ofwel omdat de server niet kon worden bereikt of omdat sommige assets problemen hebben. U kunt proberen deze opnieuw aan te maken, te annuleren, of het later opnieuw te proberen.",
   "documentImport.importing": "Bezig met importeren ...",
   "documentImport.uploading": "Bezig met uploaden ...",
+  "documentImportForm.addMoreFiles": "Add more files",
   "documentImportForm.addProperties.otherDocuments": "+ {0} andere documenten",
   "documentImportForm.addProperties": "Eigenschappen toevoegen",
   "documentImportForm.applyToAll": "Toepassen op alles",
