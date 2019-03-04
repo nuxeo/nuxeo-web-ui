@@ -390,6 +390,7 @@
   "documentImport.error.importFailed": "无法创建这些资产, 这是因为无法访问服务器或某些资产存在问题。您可以尝试再次创建它们、取消或稍后重试。",
   "documentImport.importing": "正在导入...",
   "documentImport.uploading": "正在上传···",
+  "documentImportForm.addMoreFiles": "Add more files",
   "documentImportForm.addProperties.otherDocuments": "+ {0} 其他文档",
   "documentImportForm.addProperties": "添加属性",
   "documentImportForm.applyToAll": "应用到全部",

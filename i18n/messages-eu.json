@@ -390,6 +390,7 @@
   "documentImport.error.importFailed": "Baliabide hauek ezin izan dira sortu, edo zerbitzaria ezin izan delako atzitu edo zenbait baliabidek arazoak dituztelako. Berriro sortzen saia zaitezke, utzi, edo geroago berriro saiatu.",
   "documentImport.importing": "Inportatzen...",
   "documentImport.uploading": "Igotzen...",
+  "documentImportForm.addMoreFiles": "Add more files",
   "documentImportForm.addProperties.otherDocuments": "+ beste {0} dokumentu",
   "documentImportForm.addProperties": "Gehitu propietateak",
   "documentImportForm.applyToAll": "Aplikatu guztiei",

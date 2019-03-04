@@ -390,6 +390,7 @@
   "documentImport.error.importFailed": "Estes assets não podem ser criados, ou porque o servidor não pôde ser alcançado, ou parte dos assets têm problemas. Você pode tentar criá-los novamente, cancelar ou tente novamente mais tarde.",
   "documentImport.importing": "Importando...",
   "documentImport.uploading": "A carregar...",
+  "documentImportForm.addMoreFiles": "Add more files",
   "documentImportForm.addProperties.otherDocuments": "+ {0} outros documentos",
   "documentImportForm.addProperties": "Adicionar propriedades",
   "documentImportForm.applyToAll": "Aplicar a tudo",
