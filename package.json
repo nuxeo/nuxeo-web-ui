@@ -31,6 +31,7 @@
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:elements": "replace '/elements/' '${window.location.pathname}/' target/classes/web/nuxeo.war/ui/*.js",
+    "fix:ui_elements": "replace '/node_modules/@nuxeo/nuxeo-ui-elements/' '${window.location.pathname}/' target/classes/web/nuxeo.war/ui/*.js",
     "fix:fonts": "replace '\\.\\./fonts' './fonts' target/classes/web/nuxeo.war/ui/*.js",
     "build:analyze": "webpack --env production --analyze",
     "lint": "gulp lint && polymer lint -i elements/*/*.html",
