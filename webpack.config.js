@@ -50,7 +50,12 @@ const layouts = [
     context: 'elements',
     from: 'nuxeo-*.html',
     to: TARGET
-  }
+  },
+  {
+    context: 'node_modules/@nuxeo/nuxeo-ui-elements',
+    from: 'nuxeo-user-group-management/**/*.html',
+    to: TARGET
+  },
 ]
 
 const common = merge([
