@@ -93,7 +93,7 @@ Polymer({
         <paper-button class="uppercase" on-tap="_unpublishAll" disabled\$="[[!hasPublications]]">[[i18n('publication.unpublishAll')]]</paper-button>
       </div>
       <nuxeo-data-table id="table" nx-provider="provider" class="results" items="{{publishedDocs}}" empty-label="[[i18n('publication.noPublications')]]">
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="200">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.path')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
             <a class="path ellipsis" href\$="[[urlFor('browse', item.path)]]">[[item.path]]</a>

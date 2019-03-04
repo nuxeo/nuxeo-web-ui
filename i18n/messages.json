@@ -349,6 +349,7 @@
   "documentContentView.datatable.header.lastContributor": "Last Contributor",
   "documentContentView.datatable.header.modified": "Modified",
   "documentContentView.datatable.header.nature": "Nature",
+  "documentContentView.datatable.header.path": "Path",
   "documentContentView.datatable.header.state": "State",
   "documentContentView.datatable.header.subjects": "Subjects",
   "documentContentView.datatable.header.title": "Title",
