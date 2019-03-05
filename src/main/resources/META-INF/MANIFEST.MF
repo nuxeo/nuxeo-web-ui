@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-Vendor: Nuxeo
-Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .
-Bundle-Version: 1.0.0
-Bundle-Name: Nuxeo ARender Connector Web UI
-Nuxeo-Component: OSGI-INF/nuxeoarender-webresources-contrib.xml
-Bundle-ManifestVersion: 2
-Bundle-SymbolicName: com.nuxeo.ecm.annotation.arender.web.ui;singleton:=true
