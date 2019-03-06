@@ -17,6 +17,9 @@ limitations under the License.
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.List"%>
 <%@ page import="java.lang.management.ManagementFactory"%>
+<%@ page import="java.nio.file.Files"%>
+<%@ page import="java.nio.file.Path"%>
+<%@ page import="java.nio.file.Paths"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.runtime.services.config.ConfigurationService"%>
@@ -25,10 +28,13 @@ limitations under the License.
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
+<%@ page import="org.nuxeo.connect.packages.PackageManager"%>
+<%@ page import="org.nuxeo.connect.update.PackageType"%>
 
 <% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
 <% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
 <% ConfigurationService cs = Framework.getService(ConfigurationService.class); %>
+<% PackageManager pm = Framework.getService(PackageManager.class); %>
 <% String ua = request.getHeader("user-agent"); %>
 <% String context = request.getContextPath(); %>
 
@@ -80,10 +86,9 @@ limitations under the License.
 </head>
 
 <body>
-  <nuxeo-connection url="<%= context %>"
-                    repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
+  <nuxeo-connection url="<%= context %>" repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= request.getRequestURI() %>"
-             product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
+    product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
     <div id="sidebar">
       <img src="themes/default/logo.png">
     </div>
@@ -113,6 +118,12 @@ limitations under the License.
       '<%= context %><%= resource.getURI() %>',
       <% } %>
     ];
+    <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
+      Path path = Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html");
+      if (Files.exists(path)) { %>
+        Nuxeo.UI.bundles.push('<%= context %><%= "/ui/" + pn + ".html" %>');
+        <% } %>
+    <% }%>
   </script>
 
   <script src="main.bundle.js"></script>
