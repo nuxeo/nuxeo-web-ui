@@ -207,6 +207,7 @@ limitations under the License.
                                        show-all="[[showAll]]"
                                        hide-additions display-label></nuxeo-object-diff>
                     <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]"
+                                       label="[[_computeLabel(schema, property)]]"
                                        schema="[[schema]]"
                                        left-uid="[[leftUid]]"
                                        right-uid="[[rightUid]]"
