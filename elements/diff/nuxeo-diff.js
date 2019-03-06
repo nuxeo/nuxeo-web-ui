@@ -40,6 +40,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
+import * as jsondiffpatch from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
 
 var _customLoadPromise;
 var typeDataCache = {};
@@ -314,16 +315,9 @@ Polymer({
 
   created: function() {
     if (!_customLoadPromise) {
-      _customLoadPromise = new Promise(function(resolve, reject) {
-        // XXX we cannot load it as es6 module because some transitive dependencies (chalk and diff-match-patch) are not
-        // pure es6 modules and do not export default
-        const script = document.createElement('script');
-        script.src = this.resolveUrl('../../node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js');
-        script.onload = () => {
-          importHref(this.resolveUrl('imports.html'), resolve, reject);
-        }
-        document.head.appendChild(script);
-      }.bind(this));
+      _customLoadPromise = new Promise((resolve, reject) => {
+        importHref(this.resolveUrl('imports.html'), resolve, reject);
+      });
     }
   },
 
