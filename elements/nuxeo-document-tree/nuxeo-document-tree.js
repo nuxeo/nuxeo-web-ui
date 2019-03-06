@@ -274,7 +274,7 @@ Polymer({
 
   _currentDocumentChanged: function() {
     var doc = this.currentDocument;
-    if (doc && doc.path.startsWith(this.rootDocPath)) {
+    if (doc && doc.path && doc.path.startsWith(this.rootDocPath)) {
 
       if (this.docPath === doc.path && this.document && this.document.title !== doc.title) {
         //If document is the same as before but its name changed, get the document again
