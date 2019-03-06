@@ -281,13 +281,6 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="previewDocumentAction" slot="DOCUMENT_ACTIONS" order="80">
-  <template>
-    <nuxeo-preview-button document="[[document]]"></nuxeo-preview-button>
-  </template>
-</nuxeo-slot-content>
-
-
 <nuxeo-slot-content name="downloadDocumentAction" slot="DOCUMENT_ACTIONS" order="90">
   <template>
     <nuxeo-filter document="[[document]]" expression="(document.facets.indexOf('Folderish') !== -1
