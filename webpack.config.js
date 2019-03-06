@@ -58,6 +58,13 @@ const layouts = [
   },
 ]
 
+const addons = [{
+  from: 'addons/**/*',
+  to: TARGET,
+  // strip addon folder, copy everything over
+  transformPath: (path) => path.replace(/^addons\/([^\/]*)\//, ENV === 'production' ? '' : 'elements/')
+}];
+
 const common = merge([
   {
     entry: './elements/index.js',
@@ -85,6 +92,7 @@ const development = merge([
       new CopyWebpackPlugin([
         ...tmp,
         ...polyfills,
+        ...addons,
         ...third_party
       ], { debug: 'info' })
     ],
@@ -126,6 +134,7 @@ const production = merge([
         ...polyfills,
         ...third_party,
         ...layouts,
+        ...addons,
         ...assets,
         { from: 'manifest.json' },
         { from: 'index.css' },
