@@ -125,7 +125,7 @@ Polymer({
           <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
-                <div class="list-item-thumb">
+                <div class="list-item-thumbnail">
                   <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
                 <div class="list-item-title">[[favorite.title]]</div>
