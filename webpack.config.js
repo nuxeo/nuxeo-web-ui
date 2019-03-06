@@ -43,7 +43,7 @@ const third_party = [
 const layouts = [
   {
     context: 'elements',
-    from: '+(document|directory|search|workflow)/**/*.html',
+    from: '+(document|directory|search|workflow|diff)/**/*.html',
     to: TARGET
   }, // '(document|directory|search|workflow)/**/*.html',
   {
