@@ -3,6 +3,8 @@ const merge = require('webpack-merge')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const fs = require('fs');
+const path = require('path');
 
 const ENV = process.argv.find(arg => arg.includes('production'))
   ? 'production'
@@ -52,6 +54,39 @@ const layouts = [
     to: TARGET
   }
 ]
+
+const addons = [];
+fs.readdirSync('addons')
+.filter(function (file) {
+  return fs.statSync(path.join('addons', file)).isDirectory();
+}).map(function (addon) {
+  addons.push({
+    context: path.join('addons', addon),
+    from: 'search/**/*.html',
+    to: TARGET
+  });
+  addons.push({
+    context: path.join('addons', addon),
+    from: 'document/**/*.html',
+    to: TARGET
+  });
+  addons.push({
+    context: 'addons',
+    from: '**/*.html',
+    ignore: [`${addon}/document/**/*`, `${addon}/search/**/*`],
+    to: TARGET
+  });
+  addons.push({
+    context: path.join('addons', addon),
+    from: 'images/**/*',
+    to: TARGET
+  });
+  addons.push({
+    context: path.join('addons', addon),
+    from: 'diff/**/*',
+    to: TARGET
+  });
+});
 
 const common = merge([
   {
@@ -121,6 +156,7 @@ const production = merge([
         ...polyfills,
         ...third_party,
         ...layouts,
+        ...addons,
         ...assets,
         { from: 'manifest.json' },
         { from: 'index.css' },
