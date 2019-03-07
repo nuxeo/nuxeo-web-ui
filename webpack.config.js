@@ -62,7 +62,8 @@ const addons = [{
   from: 'addons/**/*',
   to: TARGET,
   // strip addon folder, copy everything over
-  transformPath: (path) => path.replace(/^addons\/([^\/]*)\//, ENV === 'production' ? '' : 'elements/')
+  transformPath: (path) => path.replace(/^addons\/([^\/]*)\//, ENV === 'production' ? '' : 'elements/'),
+  force: true
 }];
 
 const common = merge([
