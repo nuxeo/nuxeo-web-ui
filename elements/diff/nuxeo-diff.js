@@ -408,9 +408,9 @@ Polymer({
         this._hasVersions = this.documents.some(function(doc) {
           return doc.isVersion;
         });
-        this.rightUid = null; // prevent accidental comparison with an old document
-        this.leftUid = this.documents[0].uid;
-        this.rightUid = this.documents[1].uid;
+        this.leftUid = null; // prevent accidental comparison with an old document
+        this.leftUid = this.documents[1].uid;
+        this.rightUid = this.documents[0].uid;
       }.bind(this));
     }
   },
