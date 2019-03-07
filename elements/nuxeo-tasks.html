@@ -58,16 +58,6 @@ limitations under the License.
         margin-right: .5rem;
       }
 
-      .task-document {
-        color: var(--primary-text-color);
-      }
-
-      .task-document iron-icon {
-        height: 16px;
-        width: 16px;
-        margin: -.3em 0 0 -.3em;
-      }
-
       iron-icon.task-name-icon {
         --iron-icon-height: .9em;
         --iron-icon-width: .9em;
@@ -89,19 +79,6 @@ limitations under the License.
       nuxeo-document-task,
       nuxeo-document-view {
         width: 100%;
-      }
-
-      .task-header {
-        background-color: var(--nuxeo-box);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
-        margin-bottom: 16px;
-        padding: .5em;
-      }
-
-      .prev-button,
-      .next-button {
-        height: 64px;
-        width: 64px;
       }
 
       .header {
@@ -156,11 +133,11 @@ limitations under the License.
                   <div>
                     <div class="taskDoc">
                       <span class="task-property">[[i18n('tasksList.on')]]</span>
-                      <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+                      <span>[[task.targetDocumentIds.0.title]]</span>
                     </div>
                     <div class="taskPath">
                       <span class="task-property">[[i18n('tasksList.in')]]</span>
-                      <span class="doc-title">[[_getPath(task.targetDocumentIds.0.path)]]</span>
+                      <span>[[_getPath(task.targetDocumentIds.0.path)]]</span>
                     </div>
                   </div>
                 </div>
