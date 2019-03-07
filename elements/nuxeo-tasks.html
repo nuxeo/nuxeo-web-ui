@@ -144,7 +144,7 @@ limitations under the License.
           <div class="task-list layout vertical">
             <template is="dom-repeat" items="[[tasks]]" as="task">
               <div class="task-item task-box layout horizontal" on-tap="_process">
-                <div class="layout horizontal flex">
+                <div class="layout horizontal flex-4">
                   <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
                   <div class="task-info layout vertical">
                     <span class="task-name">[[i18n(task.name)]]</span>
@@ -152,7 +152,7 @@ limitations under the License.
                     <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
                   </div>
                 </div>
-                <div class="layout vertical flex">
+                <div class="layout vertical flex-4">
                   <div>
                     <div class="taskDoc">
                       <span class="task-property">[[i18n('tasksList.on')]]</span>
@@ -164,7 +164,7 @@ limitations under the License.
                     </div>
                   </div>
                 </div>
-                <div class="vertical layout">
+                <div class="layout vertical flex">
                   <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
                   <span class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
                 </div>
