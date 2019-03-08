@@ -118,11 +118,12 @@ limitations under the License.
       '<%= context %><%= resource.getURI() %>',
       <% } %>
       <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
-      Path path = Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js");
-      if (Files.exists(path)) { %>
-        '<%= pn %>',
+        if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js"))) { %>
+          '<%= pn %>',
+        <% } else if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html"))) { %>
+          '<%= context %><%= "/ui/" + pn + ".html" %>'
+        <% } %>
       <% } %>
-    <% }%>
     ];
   </script>
 
