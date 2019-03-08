@@ -73,6 +73,9 @@ const addons = [{
 const common = merge([
   {
     entry: './elements/index.js',
+    resolve: {
+      extensions: ['.js', '.html'],
+    },
     output: {
       filename: '[name].bundle.js',
       path: TARGET
@@ -84,6 +87,15 @@ const common = merge([
         {
           test: /\.js$/,
           loader: require.resolve('@open-wc/webpack/loaders/import-meta-url-loader.js'),
+        },
+        {
+          test: /\.html$/,
+          use: {
+            loader: 'html-loader',
+            options: {
+              exportAsEs6Default: true,
+            },
+          },
         },
       ],
     }
