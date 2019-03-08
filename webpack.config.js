@@ -65,6 +65,7 @@ const layouts = [
 const addons = [{
   from: 'addons/**/*',
   to: TARGET,
+  ignore: ['*.js'],
   // strip addon folder, copy everything over
   transformPath: (path) => path.replace(/^addons\/([^\/]*)\//, ENV === 'production' ? '' : 'elements/'),
   force: true
@@ -72,7 +73,7 @@ const addons = [{
 
 const common = merge([
   {
-    entry: './elements/index.js',
+    entry: './index.js',
     resolve: {
       extensions: ['.js', '.html'],
     },

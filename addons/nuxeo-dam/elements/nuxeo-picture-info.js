@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,15 +13,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
-<!--
+/**
 `nuxeo-picture-info`
 @group Nuxeo UI
 @element nuxeo-picture-info
--->
-<dom-module id="nuxeo-picture-info">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style>
       .properties label {
         min-width: 10em;
@@ -58,18 +61,13 @@ limitations under the License.
         <div>[[formatSize(document.properties.file:content.length)]]</div>
       </div>
     </div>
+`,
 
-  </template>
+  is: 'nuxeo-picture-info',
+  behaviors: [I18nBehavior, FormatBehavior],
 
-</dom-module>
-
-<script>
-  Polymer({
-    is: 'nuxeo-picture-info',
-    behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
-    properties: {
-      label: String,
-      document: Object
-    }
-  });
-</script>
+  properties: {
+    label: String,
+    document: Object
+  }
+});

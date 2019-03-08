@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -12,20 +12,22 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License. -->
+limitations under the License. */
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
-<link rel="import" href="nuxeo-picture-exif.html">
-<link rel="import" href="nuxeo-picture-info.html">
-<link rel="import" href="nuxeo-picture-formats.html">
-<link rel="import" href="nuxeo-picture-iptc.html">
+import './nuxeo-picture-exif.js';
+import './nuxeo-picture-info.js';
+import './nuxeo-picture-formats.js';
+import './nuxeo-picture-iptc.js';
 
-<!--
+/**
 `nuxeo-picture-document-page`
 @group Nuxeo UI
 @element nuxeo-picture-document-page
--->
-<dom-module id="nuxeo-picture-document-page">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style>
       .additional {
         @apply --layout-horizontal;
@@ -43,7 +45,7 @@ limitations under the License. -->
       }
     </style>
 
-    <nuxeo-document-page document="[[document]]" opened></nuxeo-document-page>
+    <nuxeo-document-page document="[[document]]" opened=""></nuxeo-document-page>
 
     <div class="additional">
       <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]">
@@ -62,16 +64,14 @@ limitations under the License. -->
         <nuxeo-picture-iptc role="widget" document="[[document]]"></nuxeo-picture-iptc>
       </nuxeo-card>
     </div>
-  </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-picture-document-page',
-      behaviors: [Nuxeo.LayoutBehavior],
-      properties: {
-        document: {
-          type: Object
-        }
-      }
-    });
-  </script>
-</dom-module>
+`,
+
+  is: 'nuxeo-picture-document-page',
+  behaviors: [LayoutBehavior],
+
+  properties: {
+    document: {
+      type: Object
+    }
+  }
+});

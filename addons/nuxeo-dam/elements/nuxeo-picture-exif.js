@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,15 +13,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
-<!--
+/**
 `nuxeo-picture-exif`
 @group Nuxeo UI
 @element nuxeo-picture-exif
--->
-<dom-module id="nuxeo-picture-exif">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style>
       .properties label {
         min-width: 10em;
@@ -39,8 +42,7 @@ limitations under the License.
     <div class="properties">
       <div class="item">
         <label>[[i18n('pictureViewLayout.date')]]</label>
-        <nuxeo-date datetime="[[document.properties.imd:date_time_original]]"
-                    hidden$="![[document.properties.imd:date_time_original]]"></nuxeo-date>
+        <nuxeo-date datetime="[[document.properties.imd:date_time_original]]" hidden\$="![[document.properties.imd:date_time_original]]"></nuxeo-date>
       </div>
       <div class="item">
         <label>[[i18n('pictureViewLayout.orientation')]]</label>
@@ -63,15 +65,13 @@ limitations under the License.
         <div>[[document.properties.imd:focalLength]]</div>
       </div>
     </div>
-  </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-picture-exif',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
-      properties: {
-        label: String,
-        document: Object
-      }
-    });
-  </script>
-</dom-module>
+`,
+
+  is: 'nuxeo-picture-exif',
+  behaviors: [I18nBehavior, FormatBehavior],
+
+  properties: {
+    label: String,
+    document: Object
+  }
+});

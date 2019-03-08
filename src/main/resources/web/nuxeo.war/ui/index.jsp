@@ -117,13 +117,13 @@ limitations under the License.
       <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
       '<%= context %><%= resource.getURI() %>',
       <% } %>
-    ];
-    <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
-      Path path = Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html");
+      <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
+      Path path = Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js");
       if (Files.exists(path)) { %>
-        Nuxeo.UI.bundles.push('<%= context %><%= "/ui/" + pn + ".html" %>');
-        <% } %>
+        '<%= pn %>',
+      <% } %>
     <% }%>
+    ];
   </script>
 
   <script src="main.bundle.js"></script>
