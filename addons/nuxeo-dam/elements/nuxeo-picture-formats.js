@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,16 +13,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
-<!--
+/**
 `nuxeo-picture-formats`
 @group Nuxeo UI
 @element nuxeo-picture-formats
--->
-<dom-module id="nuxeo-picture-formats">
-  <template>
-
+*/
+Polymer({
+  _template: html`
     <style>
       :host {
         display: block;
@@ -66,33 +67,30 @@ limitations under the License.
         </div>
       </template>
     </div>
-  </template>
-</dom-module>
+`,
 
-<script>
-  Polymer({
-    is: 'nuxeo-picture-formats',
-    behaviors: [Nuxeo.LayoutBehavior],
-    properties: {
-      label: String,
-      document: Object,
-      additionalFormats: {
-        type: Object,
-        computed: '_getAdditionalFormats(document)'
-      }
-    },
+  is: 'nuxeo-picture-formats',
+  behaviors: [LayoutBehavior],
 
-    _getAdditionalFormats: function(document) {
-      return (document && document.properties['picture:views']) ? document.properties['picture:views']
-        .map(function(view) {
-          return {
-            name: view.description,
-            dimensions: view.width + ' x ' + view.height,
-            size: this.formatSize(view.content.length),
-            format: view.info.format,
-            data: view.content.data
-          };
-        }.bind(this)) : [];
+  properties: {
+    label: String,
+    document: Object,
+    additionalFormats: {
+      type: Object,
+      computed: '_getAdditionalFormats(document)'
     }
-  });
-</script>
+  },
+
+  _getAdditionalFormats: function(document) {
+    return (document && document.properties['picture:views']) ? document.properties['picture:views']
+      .map(function(view) {
+        return {
+          name: view.description,
+          dimensions: view.width + ' x ' + view.height,
+          size: this.formatSize(view.content.length),
+          format: view.info.format,
+          data: view.content.data
+        };
+      }.bind(this)) : [];
+  }
+});
