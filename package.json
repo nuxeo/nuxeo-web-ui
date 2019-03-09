@@ -8,6 +8,7 @@
   "devDependencies": {
     "@open-wc/webpack": "^0.1.6",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "aws-sdk": "^2.201.0",
     "clean-webpack-plugin": "^1.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "eslint-plugin-html": "^2.0.0",
