@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
-<link rel="import" href="nuxeo-authentication-tokens-management.html">
-<link rel="import" href="nuxeo-drive-sync-roots-management.html">
-<link rel="import" href="nuxeo-drive-desktop-packages.html">
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import './nuxeo-authentication-tokens-management.js';
+import './nuxeo-drive-sync-roots-management.js';
+import './nuxeo-drive-desktop-packages.js';
 
-<!--
+/**
 Nuxeo Drive management page.
 
 Example:
@@ -28,9 +30,9 @@ Example:
 
 @group Nuxeo UI Elements
 @element nuxeo-drive-page
--->
-<dom-module id="nuxeo-drive-page">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-styles"></style>
     <nuxeo-page>
       <div class="header">[[i18n('drivePage.heading','Nuxeo Drive')]]</div>
@@ -46,11 +48,8 @@ Example:
         </nuxeo-card>
       </div>
     </nuxeo-page>
-  </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-drive-page',
-      behaviors: [Nuxeo.I18nBehavior]
-    });
-  </script>
-</dom-module>
+`,
+
+  is: 'nuxeo-drive-page',
+  behaviors: [I18nBehavior]
+});

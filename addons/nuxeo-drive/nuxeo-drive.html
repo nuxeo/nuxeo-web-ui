@@ -1,10 +1,22 @@
-<link rel="import" href="elements/nuxeo-drive-sync-toggle-button.html">
-<link rel="import" href="elements/nuxeo-drive-edit-button.html">
-<link rel="import" href="elements/nuxeo-drive-page.html">
+
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
 <!-- DOCUMENT ACTIONS -->
-<link rel="import" href="nuxeo-drive-sync-toggle-button.html">
-
 <nuxeo-slot-content name="driveSyncToggleButton" slot="DOCUMENT_ACTIONS">
   <template>
     <nuxeo-drive-sync-toggle-button document="[[document]]"></nuxeo-drive-sync-toggle-button>
@@ -12,8 +24,6 @@
 </nuxeo-slot-content>
 
 <!-- BLOB ACTIONS -->
-<link rel="import" href="nuxeo-drive-edit-button.html">
-
 <nuxeo-slot-content name="driveEditButton" slot="BLOB_ACTIONS">
   <template>
     <nuxeo-drive-edit-button user="[[user]]" document="[[document]]" blob="[[blob]]"></nuxeo-drive-edit-button>
