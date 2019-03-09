@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,15 +13,16 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-<!--
+/**
 `nuxeo-arender-page`
 @group Nuxeo UI
 @element nuxeo-arender-page
--->
-<dom-module id="nuxeo-arender-page">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-styles">
       iframe {
         width: 100%;
@@ -30,45 +31,39 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation id="aRenderOp"
-                     op="Document.ARenderGetPreviewerUrl"
-                     input="[[document.uid]]">
+    <nuxeo-operation id="aRenderOp" op="Document.ARenderGetPreviewerUrl" input="[[document.uid]]">
     </nuxeo-operation>
 
     <iframe src="[[aRenderUrl]]"></iframe>
+`,
 
-  </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-arender-page',
-      properties: {
-        document: {
-          type: Object
-        },
-        aRenderUrl: {
-          type: String,
-          value: ''
-        },
-        visible: {
-          type: Boolean
-        }
-      },
+  is: 'nuxeo-arender-page',
 
-      observers: [
-        '_observeDocument(document, visible)'
-      ],
+  properties: {
+    document: {
+      type: Object
+    },
+    aRenderUrl: {
+      type: String,
+      value: ''
+    },
+    visible: {
+      type: Boolean
+    }
+  },
 
-      _observeDocument: function() {
-        this.aRenderUrl = '';
-        if (this.visible && this.document) {
-          this.$.aRenderOp.execute().then(function(res) {
-            this.set('aRenderUrl', res.previewerUrl);
-          }.bind(this)).catch(function(err) {
-            console.error(err);
-          });
-        }
-      }
-    });
-  </script>
+  observers: [
+    '_observeDocument(document, visible)'
+  ],
 
-</dom-module>
+  _observeDocument: function() {
+    this.aRenderUrl = '';
+    if (this.visible && this.document) {
+      this.$.aRenderOp.execute().then(function(res) {
+        this.set('aRenderUrl', res.previewerUrl);
+      }.bind(this)).catch(function(err) {
+        console.error(err);
+      });
+    }
+  }
+});
