@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the License);
@@ -15,15 +15,19 @@ limitations under the License.
 
 Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
-<!--
+/**
 `nuxeo-spreadsheet-button`
 @group Nuxeo UI
 @element nuxeo-spreadsheet-button
--->
-<dom-module id="nuxeo-spreadsheet-button">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-action-button-styles">
       .dialog {
         width: 100%;
@@ -44,109 +48,103 @@ Contributors:
     <template is="dom-if" if="[[_isAvailable(nxProvider, columns)]]">
       <div class="action" on-click="_show">
         <paper-icon-button id="button" icon="nuxeo:spreadsheet"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <span class="label" hidden\$="[[!showLabel]]">[[_label]]</span>
       </div>
       <nuxeo-tooltip for="button">[[_label]]</nuxeo-tooltip>
     </template>
 
-    <paper-dialog id="dialog" class="dialog" with-backdrop>
+    <paper-dialog id="dialog" class="dialog" with-backdrop="">
       <iframe id="iframe" frameborder="0" scrolling="auto" on-load="_onLoad"></iframe>
     </paper-dialog>
+`,
 
-  </template>
+  is: 'nuxeo-spreadsheet-button',
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
 
-  <script>
-    Polymer({
-      is: 'nuxeo-spreadsheet-button',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-      properties: {
-        nxProvider: {
-          type: HTMLElement,
-          value: null
-        },
-        columns: {
-          type: Array,
-          value: []
-        },
-        /**
-         * `true` if the action should display the label, `false` otherwise.
-         */
-         showLabel: {
-          type: Boolean,
-          value: false,
-        },
-        _label: {
-          type: String,
-          computed: '_computeLabel(i18n)',
-        }
-      },
+  properties: {
+    nxProvider: {
+      type: HTMLElement,
+      value: null
+    },
+    columns: {
+      type: Array,
+      value: []
+    },
+    /**
+     * `true` if the action should display the label, `false` otherwise.
+     */
+     showLabel: {
+      type: Boolean,
+      value: false,
+    },
+    _label: {
+      type: String,
+      computed: '_computeLabel(i18n)',
+    }
+  },
 
-      _isAvailable: function() {
-        return (this.nxProvider !== null) && this.columns.length;
-      },
+  _isAvailable: function() {
+    return (this.nxProvider !== null) && this.columns.length;
+  },
 
-      _show: function() {
-        var provider = this.nxProvider;
+  _show: function() {
+    var provider = this.nxProvider;
 
-        // convert from provider.sort to sortInfos
-        var sortInfos = [];
-        Object.keys(provider.sort).forEach(function(key) {
-          sortInfos.push({'sortColumn': key, 'sortAscending': provider.sort[key] === 'asc'});
-        });
-
-        // convert provider.params and provider.aggregations to properties
-        var properties = {};
-        if (provider.params) {
-          Object.keys(provider.params).forEach(function(key) {
-            properties[key] = provider.params[key];
-          });
-        }
-        if (provider.aggregations) {
-          Object.keys(provider.aggregations).forEach(function(key) {
-            properties[key] = provider.aggregations[key].selection;
-          });
-        }
-
-        // convert datatable.columns to columns
-        var columns = [];
-        this.columns.forEach(function(c) {
-          if (c.field && !c.hidden) {
-            columns.push({label: c.name ? c.name : c.field, field: c.field});
-          }
-        });
-
-        var state = {
-          pageProviderName: provider.provider,
-          pageSize: provider.pageSize,
-          currentPage: provider.page,
-          namedParameters: provider.params,
-          searchDocument: {properties: properties},
-          sortInfos: sortInfos,
-          resultColumns: columns,
-          executed: false
-        };
-
-        this.$.iframe.src = this.$.nxconn.url + '/spreadsheet/?cv=' + encodeURIComponent(btoa(JSON.stringify(state)));
-        this.$.dialog.toggle();
-      },
-
-      _close: function() {
-        this.$.dialog.toggle();
-        this.nxProvider.fetch();
-      },
-
-      _onLoad: function() {
-        var close = (this.$.iframe.contentDocument || this.$.iframe.contentWindow.document).querySelector('#close');
-        if (close) {
-          close.addEventListener('click', this._close.bind(this));
-        }
-      },
-
-      _computeLabel: function() {
-        return this.i18n('spreadsheetButton.tooltip');
-      },
-
+    // convert from provider.sort to sortInfos
+    var sortInfos = [];
+    Object.keys(provider.sort).forEach(function(key) {
+      sortInfos.push({'sortColumn': key, 'sortAscending': provider.sort[key] === 'asc'});
     });
-  </script>
 
-</dom-module>
+    // convert provider.params and provider.aggregations to properties
+    var properties = {};
+    if (provider.params) {
+      Object.keys(provider.params).forEach(function(key) {
+        properties[key] = provider.params[key];
+      });
+    }
+    if (provider.aggregations) {
+      Object.keys(provider.aggregations).forEach(function(key) {
+        properties[key] = provider.aggregations[key].selection;
+      });
+    }
+
+    // convert datatable.columns to columns
+    var columns = [];
+    this.columns.forEach(function(c) {
+      if (c.field && !c.hidden) {
+        columns.push({label: c.name ? c.name : c.field, field: c.field});
+      }
+    });
+
+    var state = {
+      pageProviderName: provider.provider,
+      pageSize: provider.pageSize,
+      currentPage: provider.page,
+      namedParameters: provider.params,
+      searchDocument: {properties: properties},
+      sortInfos: sortInfos,
+      resultColumns: columns,
+      executed: false
+    };
+
+    this.$.iframe.src = this.$.nxconn.url + '/spreadsheet/?cv=' + encodeURIComponent(btoa(JSON.stringify(state)));
+    this.$.dialog.toggle();
+  },
+
+  _close: function() {
+    this.$.dialog.toggle();
+    this.nxProvider.fetch();
+  },
+
+  _onLoad: function() {
+    var close = (this.$.iframe.contentDocument || this.$.iframe.contentWindow.document).querySelector('#close');
+    if (close) {
+      close.addEventListener('click', this._close.bind(this));
+    }
+  },
+
+  _computeLabel: function() {
+    return this.i18n('spreadsheetButton.tooltip');
+  }
+});

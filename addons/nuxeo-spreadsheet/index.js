@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,10 +13,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
-<nuxeo-slot-content name="spreadsheetButton" slot="DOCUMENT_LISTING_ACTIONS">
-  <template>
-    <nuxeo-spreadsheet-button nx-provider="[[nxProvider]]" mode="[[displayMode]]" columns="[[columns]]">
-    </nuxeo-spreadsheet-button>
-  </template>
-</nuxeo-slot-content>
+*/
+import './elements/nuxeo-spreadsheet-button.js';
+
+import html from './nuxeo-spreadsheet.html';
+const tmpl = document.createElement('template');
+tmpl.innerHTML = html;
+document.head.appendChild(tmpl.content);
