@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,21 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
-<!--
+// cache roots
+var roots;
+
+/**
 `nuxeo-drive-sync-toggle-button`
 @group Nuxeo UI
 @element nuxeo-drive-sync-toggle-button
--->
-<dom-module id="nuxeo-drive-sync-toggle-button">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-action-button-styles">
       ::slotted(iron-icon:hover) {
         fill: var(--nuxeo-link-hover-color);
@@ -34,115 +40,106 @@ Contributors:
       }
     </style>
 
-    <nuxeo-operation auto op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
+    <nuxeo-operation auto="" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
     <nuxeo-operation id="op" op="NuxeoDrive.SetSynchronization" input="[[document.uid]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document, synchronizationRoot)]]">
       <div class="action" on-tap="toggle">
         <paper-icon-button id="syncBut" icon="[[_icon(synchronized)]]"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <span class="label" hidden\$="[[!showLabel]]">[[_label]]</span>
       </div>
       <paper-tooltip for="syncBut">[[_label]]</paper-tooltip>
     </template>
-  </template>
+`,
 
-  <script>
-    (function() {
-      // cache roots
-      var roots;
+  is: 'nuxeo-drive-sync-toggle-button',
+  behaviors: [I18nBehavior, FiltersBehavior],
 
-      Polymer({
-        is: 'nuxeo-drive-sync-toggle-button',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-        properties: {
-          document: {
-            type: Object,
-            observer: '_update'
-          },
-          synchronized: {
-            type: Boolean,
-            notify: true,
-            reflectToAttribute: true
-          },
-          synchronizationRoot: String,
-          /**
-           * `true` if the action should display the label, `false` otherwise.
-           */
-          showLabel: {
-            type: Boolean,
-            reflectToAttribute: true,
-            value: false,
-          },
-          _label: {
-            type: String,
-            computed: '_computeLabel(synchronized, i18n)'
-          }
-        },
+  properties: {
+    document: {
+      type: Object,
+      observer: '_update'
+    },
+    synchronized: {
+      type: Boolean,
+      notify: true,
+      reflectToAttribute: true
+    },
+    synchronizationRoot: String,
+    /**
+     * `true` if the action should display the label, `false` otherwise.
+     */
+    showLabel: {
+      type: Boolean,
+      reflectToAttribute: true,
+      value: false,
+    },
+    _label: {
+      type: String,
+      computed: '_computeLabel(synchronized, i18n)'
+    }
+  },
 
-        toggle: function() {
-          var enable = !this.synchronized;
-          this.$.op.params = {enable: !this.synchronized};
-          return this.$.op.execute().then(function() {
-            // update our root cache
-            var idx = roots.indexOf(this.document.uid);
-            if (enable && idx === -1) {
-              roots.push(this.document.uid);
-            } else if (!enable && idx !== -1) {
-              roots.splice(idx, 1);
-            }
-            // as well as the status
-            this.synchronized = enable;
-          }.bind(this));
-        },
+  toggle: function() {
+    var enable = !this.synchronized;
+    this.$.op.params = {enable: !this.synchronized};
+    return this.$.op.execute().then(function() {
+      // update our root cache
+      var idx = roots.indexOf(this.document.uid);
+      if (enable && idx === -1) {
+        roots.push(this.document.uid);
+      } else if (!enable && idx !== -1) {
+        roots.splice(idx, 1);
+      }
+      // as well as the status
+      this.synchronized = enable;
+    }.bind(this));
+  },
 
-        _isAvailable: function() {
-          if (!this.document) {
-            return false;
-          }
-          if (this.isVersion(this.document)) {
-            return false;
-          }
-          var excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
-          var isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
-          var isFolder = this.document.facets.indexOf('Folderish') !== -1;
-          var isSyncRootCandidate = isFolder && !this.isTrashed(this.document);
-          return !isExcluded && isSyncRootCandidate && !this.synchronizationRoot;
-        },
+  _isAvailable: function() {
+    if (!this.document) {
+      return false;
+    }
+    if (this.isVersion(this.document)) {
+      return false;
+    }
+    var excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
+    var isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
+    var isFolder = this.document.facets.indexOf('Folderish') !== -1;
+    var isSyncRootCandidate = isFolder && !this.isTrashed(this.document);
+    return !isExcluded && isSyncRootCandidate && !this.synchronizationRoot;
+  },
 
-        _computeLabel: function(synchronized) {
-          return synchronized ? this.i18n('driveSyncToggleButton.unsync','Unsynchronize')
-                              : this.i18n('driveSyncToggleButton.sync','Synchronize');
-        },
+  _computeLabel: function(synchronized) {
+    return synchronized ? this.i18n('driveSyncToggleButton.unsync','Unsynchronize')
+                        : this.i18n('driveSyncToggleButton.sync','Synchronize');
+  },
 
-        _icon: function(synchronized) {
-          return synchronized ? 'notification:sync-disabled' : 'notification:sync';
-        },
+  _icon: function(synchronized) {
+    return synchronized ? 'notification:sync-disabled' : 'notification:sync';
+  },
 
-        _update: function() {
-          if (!this.document || !roots) {
-            return;
-          }
-          this.synchronized = (roots.indexOf(this.document.uid) !== -1);
+  _update: function() {
+    if (!this.document || !roots) {
+      return;
+    }
+    this.synchronized = (roots.indexOf(this.document.uid) !== -1);
 
-          // determine synchronization root (closest synchronized ancestor)
-          var breadcrumb = this.document.contextParameters.breadcrumb.entries;
-          for (var i = breadcrumb.length - 1; i >= 0; i--) {
-            if (roots.indexOf(breadcrumb[i].parentRef) !== -1) {
-              this.synchronizationRoot = breadcrumb[i].parentRef;
-              return;
-            }
-          }
-          this.synchronizationRoot = null;
-        },
+    // determine synchronization root (closest synchronized ancestor)
+    var breadcrumb = this.document.contextParameters.breadcrumb.entries;
+    for (var i = breadcrumb.length - 1; i >= 0; i--) {
+      if (roots.indexOf(breadcrumb[i].parentRef) !== -1) {
+        this.synchronizationRoot = breadcrumb[i].parentRef;
+        return;
+      }
+    }
+    this.synchronizationRoot = null;
+  },
 
-        _handleRoots: function(e) {
-          roots = e.detail.response.entries.map(function(doc) {
-            return doc.uid;
-          });
-          this._update();
-        }
-      });
-    })();
-  </script>
-
-</dom-module>
+  _handleRoots: function(e) {
+    roots = e.detail.response.entries.map(function(doc) {
+      return doc.uid;
+    });
+    this._update();
+  }
+});

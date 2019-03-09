@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
-<!--
+/**
 An element for managing authentication tokens.
 
 Example:
@@ -25,9 +27,9 @@ Example:
 
 @group Nuxeo UI Elements
 @element nuxeo-authentication-tokens-management
--->
-<dom-module id="nuxeo-authentication-tokens-management">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="iron-flex iron-flex-alignment iron-flex-factors">
       :host {
         display: block;
@@ -80,17 +82,17 @@ Example:
       }
     </style>
 
-    <nuxeo-resource auto id="tokens" path="/token" params="[[_params(application)]]" on-response="_handleTokens"></nuxeo-resource>
+    <nuxeo-resource auto="" id="tokens" path="/token" params="[[_params(application)]]" on-response="_handleTokens"></nuxeo-resource>
 
     <nuxeo-resource id="token" path="/token"></nuxeo-resource>
 
-    <template is="dom-if" if=[[_empty(tokens)]]>
+    <template is="dom-if" if="[[_empty(tokens)]]">
       <div class="table-row">
         <div class="emptyResult">[[i18n('authenticationTokensManagement.empty', "You currently don't have any token.")]]</div>
       </div>
     </template>
 
-    <template is="dom-if" if=[[!_empty(tokens)]]>
+    <template is="dom-if" if="[[!_empty(tokens)]]">
       <div class="table">
         <div class="header">
           <div class="flex-2">[[i18n('authenticationTokensManagement.token', 'Token')]]</div>
@@ -110,9 +112,7 @@ Example:
             <div class="flex">[[token.permission]]</div>
             <div class="flex"><nuxeo-date datetime="[[token.creationDate]]"></nuxeo-date></div>
             <div class="actions">
-              <paper-icon-button icon="icons:clear"
-                                 title="[[i18n('authenticationTokensManagement.revoke', 'Revoke)]]"
-                                 on-tap="_revoke">
+              <paper-icon-button icon="icons:clear" title="[[i18n('authenticationTokensManagement.revoke', 'Revoke)]]" on-tap="_revoke">
               </paper-icon-button>
             </div>
           </div>
@@ -121,48 +121,46 @@ Example:
     </template>
 
     <paper-toast id="toast">[[i18n('authenticationTokensManagement.revoked', 'Token revoked')]]</paper-toast>
-  </template>
-  <script>
-      Polymer({
-        is: 'nuxeo-authentication-tokens-management',
-        properties: {
-          application: String,
-          tokens: {
-            type: Array,
-            value: []
-          }
-        },
-        behaviors: [Nuxeo.I18nBehavior],
+`,
 
-        _params: function(application) {
-          return {'application': application};
-        },
+  is: 'nuxeo-authentication-tokens-management',
 
-        _handleTokens: function(e) {
-          this.tokens = e.detail.response.entries;
-        },
+  properties: {
+    application: String,
+    tokens: {
+      type: Array,
+      value: []
+    }
+  },
 
-        _revoke: function(e) {
-          this.$.token.path = '/token/' + e.model.token.id;
-          this.$.token.remove()
-            .then(this.refresh.bind(this))
-            .then(function() {
-              this.$.toast.open();
-            }.bind(this));
-        },
+  behaviors: [I18nBehavior],
 
-        refresh: function() {
-          return this.$.tokens.execute(this);
-        },
+  _params: function(application) {
+    return {'application': application};
+  },
 
-        _empty: function(arr) {
-          return !arr.length;
-        },
+  _handleTokens: function(e) {
+    this.tokens = e.detail.response.entries;
+  },
 
-        _formatDate: function(date) {
-          return moment(date).format('MMMM D, YYYY');
-        }
+  _revoke: function(e) {
+    this.$.token.path = '/token/' + e.model.token.id;
+    this.$.token.remove()
+      .then(this.refresh.bind(this))
+      .then(function() {
+        this.$.toast.open();
+      }.bind(this));
+  },
 
-      });
-  </script>
-</dom-module>
+  refresh: function() {
+    return this.$.tokens.execute(this);
+  },
+
+  _empty: function(arr) {
+    return !arr.length;
+  },
+
+  _formatDate: function(date) {
+    return moment(date).format('MMMM D, YYYY');
+  }
+});

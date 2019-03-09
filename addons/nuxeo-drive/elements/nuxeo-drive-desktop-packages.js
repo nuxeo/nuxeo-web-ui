@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
-<!--
+/**
 An element listing Nuxeo Drive desktop client packages for download.
 
 Example:
@@ -25,9 +27,9 @@ Example:
 
 @group Nuxeo UI Elements
 @element nuxeo-drive-desktop-packages
--->
-<dom-module id="nuxeo-drive-desktop-packages">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
       :host {
         display: block;
@@ -92,8 +94,8 @@ Example:
         <div class="row">
           <div class="cell flex"><span class="platform">[[pkg.platform]]</span></div>
           <div class="cell flex-3">
-            <a href$="[[pkg.url]]" tabindex="-1" target="_blank">
-              <paper-button noink>
+            <a href\$="[[pkg.url]]" tabindex="-1" target="_blank">
+              <paper-button noink="">
                 [[pkg.name]]
               </paper-button>
             </a>
@@ -101,53 +103,49 @@ Example:
         </div>
       </template>
     </div>
-  </template>
-  <script>
-    (function() {
+`,
 
-      Polymer({
-        is: 'nuxeo-drive-desktop-packages',
-        properties: {
-          packages: {
-            type: Array,
-            computed: '_computeUrls(_tp)'
-          },
-          _tp: String
-        },
-        behaviors: [Nuxeo.I18nBehavior],
+  is: 'nuxeo-drive-desktop-packages',
 
-        _computeUrls: function(tp) {
-          if (!tp) {
-            return;
-          }
-          var pkgs = [];
+  properties: {
+    packages: {
+      type: Array,
+      computed: '_computeUrls(_tp)'
+    },
+    _tp: String
+  },
 
-          var prefix = 'nuxeo-drive';
-          var baseUrl = 'https://community.nuxeo.com/static/drive-updates';
+  behaviors: [I18nBehavior],
 
-          var name = prefix + '.dmg';
-          pkgs.push({
-            name: name,
-            platform: 'osx',
-            url: baseUrl + '/' + name
-          });
+  _computeUrls: function(tp) {
+    if (!tp) {
+      return;
+    }
+    var pkgs = [];
 
-          name = prefix + '.exe';
-          pkgs.push({
-            name: name,
-            platform: 'windows',
-            url: baseUrl + '/' + name
-          });
+    var prefix = 'nuxeo-drive';
+    var baseUrl = 'https://community.nuxeo.com/static/drive-updates';
 
-          pkgs.push({
-            name: window.nuxeo.I18n.translate('driveDesktopPackages.ubuntu.name',
-                                              'Read the documentation about the Linux client'),
-            platform: 'ubuntu',
-            url: 'https://github.com/nuxeo/nuxeo-drive#debian-based-distributions-and-other-gnulinux-variants-client'
-          });
-          return pkgs;
-        }
-      });
-    })();
-  </script>
-</dom-module>
+    var name = prefix + '.dmg';
+    pkgs.push({
+      name: name,
+      platform: 'osx',
+      url: baseUrl + '/' + name
+    });
+
+    name = prefix + '.exe';
+    pkgs.push({
+      name: name,
+      platform: 'windows',
+      url: baseUrl + '/' + name
+    });
+
+    pkgs.push({
+      name: window.nuxeo.I18n.translate('driveDesktopPackages.ubuntu.name',
+                                        'Read the documentation about the Linux client'),
+      platform: 'ubuntu',
+      url: 'https://github.com/nuxeo/nuxeo-drive#debian-based-distributions-and-other-gnulinux-variants-client'
+    });
+    return pkgs;
+  }
+});

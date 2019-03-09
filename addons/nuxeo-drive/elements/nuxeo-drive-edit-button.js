@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,94 +15,92 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
-<!--
+/**
 `nuxeo-drive-edit-button`
 @group Nuxeo UI
 @element nuxeo-drive-edit-button
--->
-<dom-module id="nuxeo-drive-edit-button">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
+    <nuxeo-resource id="token" path="/token" params="{&quot;application&quot;: &quot;Nuxeo Drive&quot;}"></nuxeo-resource>
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
-        <paper-icon-button noink icon="icons:open-in-new" id="driveBtn"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[i18n('driveEditButton.tooltip')]]</span>
+        <paper-icon-button noink="" icon="icons:open-in-new" id="driveBtn"></paper-icon-button>
+        <span class="label" hidden\$="[[!showLabel]]">[[i18n('driveEditButton.tooltip')]]</span>
       </div>
       <paper-tooltip for="driveBtn">[[i18n('driveEditButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop="">
       <div class="vertical layout">
         <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
         <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
-  </template>
+`,
 
-  <script>
-    Polymer({
-      is: 'nuxeo-drive-edit-button',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-      properties: {
-        user: Object,
-        document: Object,
-        blob: Object,
-        /**
-          * `true` if the action should display the label, `false` otherwise.
-          */
-        showLabel: {
-          type: Boolean,
-          reflectToAttribute: true,
-          value: false,
-        }
-      },
+  is: 'nuxeo-drive-edit-button',
+  behaviors: [I18nBehavior, FiltersBehavior],
 
-      _isAvailable: function(doc, blob) {
-        return doc && blob && this.hasPermission(doc, 'Write') && (!blob.appLinks || blob.appLinks.length === 0);
-      },
+  properties: {
+    user: Object,
+    document: Object,
+    blob: Object,
+    /**
+      * `true` if the action should display the label, `false` otherwise.
+      */
+    showLabel: {
+      type: Boolean,
+      reflectToAttribute: true,
+      value: false,
+    }
+  },
 
-      _go: function() {
-        this.$.token.get().then(function(response) {
-          var tokens = response.entries.map(function(token) {
-            return token.id;
-          });
-          if (!tokens || !tokens.length) {
-            this.$.dialog.toggle();
-            return;
-          }
-          window.open(this.driveEditURL, '_top');
-        }.bind(this));
+  _isAvailable: function(doc, blob) {
+    return doc && blob && this.hasPermission(doc, 'Write') && (!blob.appLinks || blob.appLinks.length === 0);
+  },
 
-      },
-
-      get driveEditURL() {
-        if (!this.blob) {
-          return '';
-        }
-
-        var parts = this.blob.data.split('/nxfile/');
-        var baseUrl = parts[0];
-        var downloadUrl = 'nxfile/' + parts[1];
-
-        return [
-          'nxdrive://edit',
-          baseUrl.replace('://', '/'), // XXX replaceFirst
-          'user', this.user.id,
-          'repo', this.document.repository,
-          'nxdocid', this.document.uid,
-          'filename', encodeURIComponent(this.blob.name),
-          'downloadUrl', downloadUrl].join('/');
+  _go: function() {
+    this.$.token.get().then(function(response) {
+      var tokens = response.entries.map(function(token) {
+        return token.id;
+      });
+      if (!tokens || !tokens.length) {
+        this.$.dialog.toggle();
+        return;
       }
+      window.open(this.driveEditURL, '_top');
+    }.bind(this));
 
-    });
-  </script>
+  },
 
-</dom-module>
+  get driveEditURL() {
+    if (!this.blob) {
+      return '';
+    }
+
+    var parts = this.blob.data.split('/nxfile/');
+    var baseUrl = parts[0];
+    var downloadUrl = 'nxfile/' + parts[1];
+
+    return [
+      'nxdrive://edit',
+      baseUrl.replace('://', '/'), // XXX replaceFirst
+      'user', this.user.id,
+      'repo', this.document.repository,
+      'nxdocid', this.document.uid,
+      'filename', encodeURIComponent(this.blob.name),
+      'downloadUrl', downloadUrl].join('/');
+  }
+});

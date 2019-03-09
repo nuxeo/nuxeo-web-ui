@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@ limitations under the License.
 
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
-<!--
+/**
 An element listing Nuxeo Drive synchronization roots.
 
 Example:
@@ -25,9 +27,9 @@ Example:
 
 @group Nuxeo UI Elements
 @element nuxeo-drive-sync-roots-management
--->
-<dom-module id="nuxeo-drive-sync-roots-management">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="iron-flex iron-flex-alignment iron-flex-factors">
       :host {
         display: block;
@@ -76,8 +78,8 @@ Example:
       }
     </style>
 
-    <nuxeo-operation auto id="roots" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
-    <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params='{"enable": false}'></nuxeo-operation>
+    <nuxeo-operation auto="" id="roots" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
+    <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params="{&quot;enable&quot;: false}"></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">
       <div class="emptyResult">[[i18n('driveSyncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]</div>
@@ -95,9 +97,7 @@ Example:
             <div class="cell flex-1">[[doc.title]]</div>
             <div class="cell flex-3">[[doc.path]]</div>
             <div class="cell actions">
-              <paper-icon-button icon="icons:clear"
-                                 title="[[i18n('driveSyncRootsManagement.root.disable', 'Disable)]]"
-                                 on-tap="_disable">
+              <paper-icon-button icon="icons:clear" title="[[i18n('driveSyncRootsManagement.root.disable', 'Disable)]]" on-tap="_disable">
               </paper-icon-button>
             </div>
           </div>
@@ -107,39 +107,37 @@ Example:
 
     <paper-toast id="toast">[[i18n('driveSyncRootsManagement.roots.disabled',
                                    'Synchronization root disabled')]]</paper-toast>
+`,
 
-  </template>
-  <script>
-      Polymer({
-        is: 'nuxeo-drive-sync-roots-management',
-        properties: {
-          roots: {
-            type: Array,
-            value: []
-          }
-        },
-        behaviors: [Nuxeo.I18nBehavior],
+  is: 'nuxeo-drive-sync-roots-management',
 
-        _handleRoots: function(e) {
-          this.roots = e.detail.response.entries;
-        },
+  properties: {
+    roots: {
+      type: Array,
+      value: []
+    }
+  },
 
-        _empty: function(arr) {
-          return !arr.length;
-        },
+  behaviors: [I18nBehavior],
 
-        _disable: function(e) {
-          this.$.disable.input = e.model.doc.uid;
-          return this.$.disable.execute()
-            .then(this.refresh.bind(this))
-            .then(function() {
-              this.$.toast.toggle();
-            }.bind(this));
-        },
+  _handleRoots: function(e) {
+    this.roots = e.detail.response.entries;
+  },
 
-        refresh: function() {
-          return this.$.roots.execute(this);
-        }
-      });
-  </script>
-</dom-module>
+  _empty: function(arr) {
+    return !arr.length;
+  },
+
+  _disable: function(e) {
+    this.$.disable.input = e.model.doc.uid;
+    return this.$.disable.execute()
+      .then(this.refresh.bind(this))
+      .then(function() {
+        this.$.toast.toggle();
+      }.bind(this));
+  },
+
+  refresh: function() {
+    return this.$.roots.execute(this);
+  }
+});
