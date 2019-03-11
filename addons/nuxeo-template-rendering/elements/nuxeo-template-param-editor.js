@@ -1,4 +1,4 @@
-<!--
+/*
 (C) Copyright 2017 Nuxeo (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,23 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
-<!--
+var serializer = new XMLSerializer();
+var parser = new DOMParser();
+
+
+/**
 `nuxeo-template-param-editor`
 @group Nuxeo UI
 @element nuxeo-template-param-editor
--->
-<dom-module id="nuxeo-template-param-editor">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-styles">
       :host {
         display: inline-block;
@@ -114,7 +122,7 @@ limitations under the License.
 
     <iron-pages selected="[[mode]]" attr-for-selected="name" class="vertical flex">
       <div name="view">
-        <div class="horizontal-layout signature justified" hidden$="[[!_hasParams(params)]]">
+        <div class="horizontal-layout signature justified" hidden\$="[[!_hasParams(params)]]">
           <div class="horizontal-layout start-justified">
             <label>[[i18n('templateRenderingPage.parameters.name')]]</label>
           </div>
@@ -154,7 +162,7 @@ limitations under the License.
           </div>
         </div>
         <template is="dom-repeat" items="[[_getParams(params)]]" as="param">
-          <div class$="horizontal-layout signature justified [[_formatSignature(param, params)]]">
+          <div class\$="horizontal-layout signature justified [[_formatSignature(param, params)]]">
             <div class="horizontal-layout start-justified">
               <span>[[_getParamAttribute(param, 'name', params)]]</span>
             </div>
@@ -167,36 +175,29 @@ limitations under the License.
             <div class="horizontal-layout end-justified">
               <paper-icon-button id="[[_computeBtnId(param, 'edit')]]" icon="icons:create" on-tap="_editParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
               <paper-tooltip for="[[_computeBtnId(param, 'edit')]]">[[i18n('templateRenderingPage.parameters.edit.tooltip')]]</paper-tooltip>
-              <div hidden$="[[!allowDelete]]">
+              <div hidden\$="[[!allowDelete]]">
                 <paper-icon-button id="[[_computeBtnId(param, 'remove')]]" icon="icons:delete" on-tap="_deleteParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
                 <paper-tooltip for="[[_computeBtnId(param, 'remove')]]">[[i18n('templateRenderingPage.parameters.remove.tooltip')]]</paper-tooltip>
               </div>
             </div>
           </div>
         </template>
-        <div class="horizontal-layout end-justified signatureFooter" hidden$="[[!allowCreate]]">
+        <div class="horizontal-layout end-justified signatureFooter" hidden\$="[[!allowCreate]]">
           <paper-icon-button id="addParamBtn" icon="icons:add-circle" on-tap="_addParam"></paper-icon-button>
           <paper-tooltip for="addParamBtn">[[i18n('templateRenderingPage.parameters.add.tooltip')]]</paper-tooltip>
         </div>
       </div>
     </iron-pages>
 
-    <nuxeo-dialog id="editParamDialog" modal no-auto-focus>
+    <nuxeo-dialog id="editParamDialog" modal="" no-auto-focus="">
       <iron-form id="form" on-iron-form-submit="_submitSaveParam">
         <form class="vertical flex">
           <div class="container vertical">
             <span class="heading">[[i18n('templateRenderingPage.editParamDialog.heading')]]</span>
-            <paper-input label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]"
-                         pattern="[[_computeParamNamePattern(param, params)]]"
-                         error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]"
-                         value="{{selectedParamProperties.name}}"
-                         auto-validate
-                         always-float-label
-                         required></paper-input>
+            <paper-input label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]" pattern="[[_computeParamNamePattern(param, params)]]" error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]" value="{{selectedParamProperties.name}}" auto-validate="" always-float-label="" required=""></paper-input>
 
-            <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.type')]]" always-float-label>
-              <paper-listbox slot="dropdown-content" selected="{{selectedParamProperties.type}}"
-                             attr-for-selected="name">
+            <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.type')]]" always-float-label="">
+              <paper-listbox slot="dropdown-content" selected="{{selectedParamProperties.type}}" attr-for-selected="name">
                 <template is="dom-repeat" items="[[paramTypes]]">
                   <paper-item name="[[item]]">[[item]]</paper-item>
                 </template>
@@ -204,9 +205,7 @@ limitations under the License.
             </paper-dropdown-menu>
 
             <template is="dom-if" if="[[_isSelectedParamType('String', selectedParamProperties.type)]]">
-              <paper-textarea label="[[i18n('templateRenderingPage.parameters.value')]]"
-                              value="{{selectedParamProperties.value}}"
-                              always-float-label></paper-textarea>
+              <paper-textarea label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-textarea>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('Boolean', selectedParamProperties.type)]]">
               <div class="horizontal-layout">
@@ -216,16 +215,13 @@ limitations under the License.
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('Date', selectedParamProperties.type)]]">
               <div class="horizontal-layout">
-                <nuxeo-date-picker label="[[i18n('templateRenderingPage.parameters.value')]]"
-                                   value="{{selectedParamProperties.value}}">
+                <nuxeo-date-picker label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}">
                 </nuxeo-date-picker>
               </div>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('source', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]"
-                             value="{{selectedParamProperties.value}}"
-                             always-float-label></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -234,9 +230,7 @@ limitations under the License.
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('picture', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]"
-                             value="{{selectedParamProperties.value}}"
-                             always-float-label></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -244,311 +238,299 @@ limitations under the License.
               </div>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('content', selectedParamProperties.type)]]">
-              <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label>
-                <paper-listbox class="dropdown-content" selected="{{selectedParamProperties.contentType}}"
-                               attr-for-selected="name">
+              <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label="">
+                <paper-listbox class="dropdown-content" selected="{{selectedParamProperties.contentType}}" attr-for-selected="name">
                   <template is="dom-repeat" items="[[contentTypes]]">
                     <paper-item name="[[item]]">[[_getContentTypeLabel(item)]]</paper-item>
                   </template>
                 </paper-listbox>
               </paper-dropdown-menu>
               <template is="dom-if" if="[[_isSelectedContentTypeXPath(selectedParamProperties.contentType)]]">
-                <paper-input label="[[i18n('templateRenderingPage.paramType.content.xpath')]]"
-                             value="{{selectedParamProperties.value}}"
-                             always-float-label></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.paramType.content.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
               </template>
             </template>
           </div>
           <div class="buttons">
             <div class="flex start-justified">
-              <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
             </div>
-            <paper-button noink class="primary" on-tap="_save" disabled$="[[!_isValid(collection)]]">
+            <paper-button noink="" class="primary" on-tap="_save" disabled\$="[[!_isValid(collection)]]">
               [[i18n('command.save')]]
             </paper-button>
           </div>
         </form>
       </iron-form>
     </nuxeo-dialog>
-  </template>
+`,
 
-  <script>
-    (function() {
-      var serializer = new XMLSerializer();
-      var parser = new DOMParser();
-      Polymer({
-        is: 'nuxeo-template-param-editor',
-        behaviors: [Nuxeo.I18nBehavior, Nuxeo.FormatBehavior],
+  is: 'nuxeo-template-param-editor',
+  behaviors: [I18nBehavior, FormatBehavior],
 
-        properties: {
-          templateData: {
-            type: String,
-            observer: '_readTemplateParams'
-          },
-          mode: {
-            type: String,
-            value: 'view'
-          },
-          params: Object,
-          param: Object,
-          paramTypes: {
-            type: Array,
-            value: ['String', 'Boolean', 'Date', 'source', 'picture', 'content']
-          },
-          contentTypes: {
-            type: Array,
-            value: ['htmlPreview', 'blobContent', 'xpath']
-          },
-          selectedParamProperties: {
-            type: Object,
-            value: {
-              name: '',
-              type: '',
-              loop: '',
-              value: '',
-              contentType: ''
-            }
-          },
-          allowDelete: {
-            type: Boolean,
-            value: false
-          },
-          allowCreate: {
-            type: Boolean,
-            value: false
-          }
-        },
+  properties: {
+    templateData: {
+      type: String,
+      observer: '_readTemplateParams'
+    },
+    mode: {
+      type: String,
+      value: 'view'
+    },
+    params: Object,
+    param: Object,
+    paramTypes: {
+      type: Array,
+      value: ['String', 'Boolean', 'Date', 'source', 'picture', 'content']
+    },
+    contentTypes: {
+      type: Array,
+      value: ['htmlPreview', 'blobContent', 'xpath']
+    },
+    selectedParamProperties: {
+      type: Object,
+      value: {
+        name: '',
+        type: '',
+        loop: '',
+        value: '',
+        contentType: ''
+      }
+    },
+    allowDelete: {
+      type: Boolean,
+      value: false
+    },
+    allowCreate: {
+      type: Boolean,
+      value: false
+    }
+  },
 
-        generateTemplateData: function() {
-          return serializer.serializeToString(this.params.node);
-        },
+  generateTemplateData: function() {
+    return serializer.serializeToString(this.params.node);
+  },
 
-        reset: function() {
-          this._readTemplateParams();
-        },
+  reset: function() {
+    this._readTemplateParams();
+  },
 
-        commitChanges: function() {
-          this._getParams().forEach(function(param) {
-            var change = this._getParamAttribute(param, 'change');
-            if (change) {
-              if (change === 'deleted') {
-                this.params.querySelector('templateParams').removeChild(param);
-              }
-              this._removeParamAttribute(param, 'change');
-            }
-          }.bind(this));
-        },
-
-        _templateDataChanged: function() {
-          this._readTemplateParams();
-        },
-
-        _getParamTypeLabel: function(type) {
-          return this.i18n('templateRenderingPage.paramType.' + type);
-        },
-
-        _getContentTypeLabel: function(type) {
-          return this.i18n('templateRenderingPage.paramType.content.' + type);
-        },
-
-        _readTemplateParams: function() {
-          this.set('params', Polymer.dom(parser.parseFromString(this.templateData ? this.templateData :
-              '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>', 'text/xml')));
-        },
-
-        _getParams: function() {
-          return this.params ? this.params.querySelectorAll('templateParams field') : [];
-        },
-
-        _hasParams: function() {
-          return this._getParams().length > 0;
-        },
-
-        _getParamAttribute: function(param, attrname) {
-          return param ? param.getAttribute(attrname) : '';
-        },
-
-        _setParamAttribute: function(param, attrname, attrvale) {
-          param.setAttribute(attrname, attrvale);
-        },
-
-        _removeParamAttribute: function(param, attrname) {
-          param.removeAttribute(attrname);
-        },
-
-        _checkParamAttribute: function(param, attrname, attrvalue) {
-          return this._getParamAttribute(param, attrname) === attrvalue;
-        },
-
-        _getParamValue: function(param) {
-          var type = this._getParamAttribute(param, 'type');
-          switch (type) {
-            case 'source':
-            case 'picture':
-            case 'content':
-              return this._getParamAttribute(param, 'source');
-            default:
-              return this._getParamAttribute(param, 'value');
-          }
-        },
-
-        _setParamValue: function(param, value) {
-          var type = this._getParamAttribute(param, 'type');
-          switch (type) {
-            case 'source':
-            case 'picture':
-            case 'content':
-              this._setParamAttribute(param, 'source', value);
-              break;
-            default:
-              this._setParamAttribute(param, 'value', value);
-              break;
-          }
-        },
-
-        _getParamTypeTranslated: function(param) {
-          return this._getParamTypeLabel(this._getParamAttribute(param, 'type'));
-        },
-
-        _getParamValueWithLoop: function(param) {
-          var loop = this._getParamAttribute(param, 'autoloop');
-          return this._getParamValue(param) + (loop ?
-              ' (' + this.i18n('templateRenderingPage.parameters.autoloop') + ')' : '')
-        },
-
-        _refreshParams: function() {
-          // because this.params is a complex element, using this.set won't notify changes for sub-properties, which in
-          // this case are inner elements. We need to override dirty checking:
-          // https://www.polymer-project.org/1.0/docs/devguide/model-data#override-dirty-check
-          var params = this.params;
-          this.set('params', null);
-          this.set('params', params);
-        },
-
-        _deleteParam: function(e) {
-          this._setParamAttribute(e.model.param, 'change', 'deleted');
-          this._refreshParams();
-        },
-
-        _loadEditParamDialog: function(param) {
-          this.set('param', param);
-          this.set('selectedParamProperties.name', this._getParamAttribute(this.param, 'name'));
-          this.set('selectedParamProperties.type', this._getParamAttribute(this.param, 'type'));
-          var loop = this._getParamAttribute(this.param, 'autoloop');
-          this.set('selectedParamProperties.loop', (!loop || loop === 'false') ? false : true);
-          var value = this._getParamValue(this.param);
-          if (this.selectedParamProperties.type === 'Date') {
-            value = this.formatDate(value, 'yyyy-MM-ddTHH:mm:ss')
-          } else if (this.selectedParamProperties.type === 'Boolean') {
-            value = (!value || value === 'false') ? false : true;
-          }
-          if (this.selectedParamProperties.type === 'content') {
-            if (value !== 'htmlPreview' && value !== 'blobContent') {
-              this.set('selectedParamProperties.contentType', 'xpath');
-            } else {
-              this.set('selectedParamProperties.contentType', value);
-              value = '';
-            }
-          } else {
-            this.set('selectedParamProperties.contentType', 'htmlPreview');
-          }
-          this.set('selectedParamProperties.value', value);
-        },
-
-        _editParam: function(e) {
-          this._loadEditParamDialog(e.model.param);
-          this.$.editParamDialog.toggle();
-        },
-
-        _addParam: function() {
-          this.new = true;
-          this.param = document.createElementNS('http://www.nuxeo.org/DocumentTemplate', 'nxdt:field');
-          this._setParamAttribute(this.param, 'name', '');
-          this._setParamAttribute(this.param, 'type', 'String');
-          this._setParamAttribute(this.param, 'value', '');
-          this._loadEditParamDialog(this.param);
-          this.$.editParamDialog.toggle();
-        },
-
-        _save: function() {
-          this.$.form.submit();
-        },
-
-        _cancel: function() {
-          this.new = false;
-        },
-
-        _submitSaveParam: function() {
-          this._setParamAttribute(this.param, 'name', this.selectedParamProperties.name);
-          this._setParamAttribute(this.param, 'type', this.selectedParamProperties.type);
-          if ((this.selectedParamProperties.type === 'source' ||
-                  this.selectedParamProperties.type === 'picture') &&
-              this.selectedParamProperties.loop === true) {
-            this._setParamAttribute(this.param, 'autoloop', this.selectedParamProperties.loop);
-          } else {
-            this._removeParamAttribute(this.param, 'autoloop');
-          }
-          if (this.selectedParamProperties.type === 'Date') {
-            this._setParamValue(this.param,
-                this.formatDate(this.selectedParamProperties.value, 'yyyy-MM-dd HH:mm:ss.SSS'));
-          } else if (this.selectedParamProperties.type === 'content' &&
-              this.selectedParamProperties.contentType !== 'xpath') {
-            this._setParamValue(this.param, this.selectedParamProperties.contentType);
-          } else {
-            this._setParamValue(this.param, this.selectedParamProperties.value);
-          }
-          if (this.new) {
-            this.params.querySelector('templateParams').appendChild(this.param);
-            this.new = false;
-          }
-          this._setParamAttribute(this.param, 'change', 'edited');
-          this._refreshParams();
-          this.$.editParamDialog.toggle();
-        },
-
-        _computeBtnId: function(param, action) {
-          return action + '_btn_' + param.attributes.item('name').value;
-        },
-
-        _computeParamNamePattern: function() {
-          var params = this._getParams();
-          if (params && params.length > 0) {
-            var fiteredParams = Array.from(this._getParams()).filter(function(param) {
-              return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
-            }.bind(this));
-            if (fiteredParams.length > 0) {
-              // return a pattern that prevents the name from being equal to the name of an already existing parameter
-              // ex: /^((?!(^name1$|^name2$|^name3$)).)*$/g
-              return '^((?!(' + Array.from(this._getParams())
-                  .filter(function(param) {
-                    return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
-                  }.bind(this))
-                  .map(function(param) {
-                    return '^' + this._getParamAttribute(param, 'name') + '$';
-                  }.bind(this)).join('|') + ')).)*$'
-            }
-          }
-          return '.*';
-        },
-
-        _isSelectedParamType: function(type) {
-          return this.selectedParamProperties.type === type;
-        },
-
-        _isSelectedContentTypeXPath: function(selectedContentType) {
-          return selectedContentType !== 'htmlPreview' && selectedContentType !== 'blobContent';
-        },
-
-        _formatSignature: function(param) {
-          var change = this._getParamAttribute(param, 'change');
-          return change ? change : '';
-        },
-
-        _canEdit: function(param) {
-          return this._getParamAttribute(param, 'change') !== 'deleted';
+  commitChanges: function() {
+    this._getParams().forEach(function(param) {
+      var change = this._getParamAttribute(param, 'change');
+      if (change) {
+        if (change === 'deleted') {
+          this.params.querySelector('templateParams').removeChild(param);
         }
-      });
-    })();
-  </script>
+        this._removeParamAttribute(param, 'change');
+      }
+    }.bind(this));
+  },
 
-</dom-module>
+  _templateDataChanged: function() {
+    this._readTemplateParams();
+  },
+
+  _getParamTypeLabel: function(type) {
+    return this.i18n('templateRenderingPage.paramType.' + type);
+  },
+
+  _getContentTypeLabel: function(type) {
+    return this.i18n('templateRenderingPage.paramType.content.' + type);
+  },
+
+  _readTemplateParams: function() {
+    this.set('params', dom(parser.parseFromString(this.templateData ? this.templateData :
+        '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>', 'text/xml')));
+  },
+
+  _getParams: function() {
+    return this.params ? this.params.querySelectorAll('templateParams field') : [];
+  },
+
+  _hasParams: function() {
+    return this._getParams().length > 0;
+  },
+
+  _getParamAttribute: function(param, attrname) {
+    return param ? param.getAttribute(attrname) : '';
+  },
+
+  _setParamAttribute: function(param, attrname, attrvale) {
+    param.setAttribute(attrname, attrvale);
+  },
+
+  _removeParamAttribute: function(param, attrname) {
+    param.removeAttribute(attrname);
+  },
+
+  _checkParamAttribute: function(param, attrname, attrvalue) {
+    return this._getParamAttribute(param, attrname) === attrvalue;
+  },
+
+  _getParamValue: function(param) {
+    var type = this._getParamAttribute(param, 'type');
+    switch (type) {
+      case 'source':
+      case 'picture':
+      case 'content':
+        return this._getParamAttribute(param, 'source');
+      default:
+        return this._getParamAttribute(param, 'value');
+    }
+  },
+
+  _setParamValue: function(param, value) {
+    var type = this._getParamAttribute(param, 'type');
+    switch (type) {
+      case 'source':
+      case 'picture':
+      case 'content':
+        this._setParamAttribute(param, 'source', value);
+        break;
+      default:
+        this._setParamAttribute(param, 'value', value);
+        break;
+    }
+  },
+
+  _getParamTypeTranslated: function(param) {
+    return this._getParamTypeLabel(this._getParamAttribute(param, 'type'));
+  },
+
+  _getParamValueWithLoop: function(param) {
+    var loop = this._getParamAttribute(param, 'autoloop');
+    return this._getParamValue(param) + (loop ?
+        ' (' + this.i18n('templateRenderingPage.parameters.autoloop') + ')' : '')
+  },
+
+  _refreshParams: function() {
+    // because this.params is a complex element, using this.set won't notify changes for sub-properties, which in
+    // this case are inner elements. We need to override dirty checking:
+    // https://www.polymer-project.org/1.0/docs/devguide/model-data#override-dirty-check
+    var params = this.params;
+    this.set('params', null);
+    this.set('params', params);
+  },
+
+  _deleteParam: function(e) {
+    this._setParamAttribute(e.model.param, 'change', 'deleted');
+    this._refreshParams();
+  },
+
+  _loadEditParamDialog: function(param) {
+    this.set('param', param);
+    this.set('selectedParamProperties.name', this._getParamAttribute(this.param, 'name'));
+    this.set('selectedParamProperties.type', this._getParamAttribute(this.param, 'type'));
+    var loop = this._getParamAttribute(this.param, 'autoloop');
+    this.set('selectedParamProperties.loop', (!loop || loop === 'false') ? false : true);
+    var value = this._getParamValue(this.param);
+    if (this.selectedParamProperties.type === 'Date') {
+      value = this.formatDate(value, 'yyyy-MM-ddTHH:mm:ss')
+    } else if (this.selectedParamProperties.type === 'Boolean') {
+      value = (!value || value === 'false') ? false : true;
+    }
+    if (this.selectedParamProperties.type === 'content') {
+      if (value !== 'htmlPreview' && value !== 'blobContent') {
+        this.set('selectedParamProperties.contentType', 'xpath');
+      } else {
+        this.set('selectedParamProperties.contentType', value);
+        value = '';
+      }
+    } else {
+      this.set('selectedParamProperties.contentType', 'htmlPreview');
+    }
+    this.set('selectedParamProperties.value', value);
+  },
+
+  _editParam: function(e) {
+    this._loadEditParamDialog(e.model.param);
+    this.$.editParamDialog.toggle();
+  },
+
+  _addParam: function() {
+    this.new = true;
+    this.param = document.createElementNS('http://www.nuxeo.org/DocumentTemplate', 'nxdt:field');
+    this._setParamAttribute(this.param, 'name', '');
+    this._setParamAttribute(this.param, 'type', 'String');
+    this._setParamAttribute(this.param, 'value', '');
+    this._loadEditParamDialog(this.param);
+    this.$.editParamDialog.toggle();
+  },
+
+  _save: function() {
+    this.$.form.submit();
+  },
+
+  _cancel: function() {
+    this.new = false;
+  },
+
+  _submitSaveParam: function() {
+    this._setParamAttribute(this.param, 'name', this.selectedParamProperties.name);
+    this._setParamAttribute(this.param, 'type', this.selectedParamProperties.type);
+    if ((this.selectedParamProperties.type === 'source' ||
+            this.selectedParamProperties.type === 'picture') &&
+        this.selectedParamProperties.loop === true) {
+      this._setParamAttribute(this.param, 'autoloop', this.selectedParamProperties.loop);
+    } else {
+      this._removeParamAttribute(this.param, 'autoloop');
+    }
+    if (this.selectedParamProperties.type === 'Date') {
+      this._setParamValue(this.param,
+          this.formatDate(this.selectedParamProperties.value, 'yyyy-MM-dd HH:mm:ss.SSS'));
+    } else if (this.selectedParamProperties.type === 'content' &&
+        this.selectedParamProperties.contentType !== 'xpath') {
+      this._setParamValue(this.param, this.selectedParamProperties.contentType);
+    } else {
+      this._setParamValue(this.param, this.selectedParamProperties.value);
+    }
+    if (this.new) {
+      this.params.querySelector('templateParams').appendChild(this.param);
+      this.new = false;
+    }
+    this._setParamAttribute(this.param, 'change', 'edited');
+    this._refreshParams();
+    this.$.editParamDialog.toggle();
+  },
+
+  _computeBtnId: function(param, action) {
+    return action + '_btn_' + param.attributes.item('name').value;
+  },
+
+  _computeParamNamePattern: function() {
+    var params = this._getParams();
+    if (params && params.length > 0) {
+      var fiteredParams = Array.from(this._getParams()).filter(function(param) {
+        return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
+      }.bind(this));
+      if (fiteredParams.length > 0) {
+        // return a pattern that prevents the name from being equal to the name of an already existing parameter
+        // ex: /^((?!(^name1$|^name2$|^name3$)).)*$/g
+        return '^((?!(' + Array.from(this._getParams())
+            .filter(function(param) {
+              return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
+            }.bind(this))
+            .map(function(param) {
+              return '^' + this._getParamAttribute(param, 'name') + '$';
+            }.bind(this)).join('|') + ')).)*$'
+      }
+    }
+    return '.*';
+  },
+
+  _isSelectedParamType: function(type) {
+    return this.selectedParamProperties.type === type;
+  },
+
+  _isSelectedContentTypeXPath: function(selectedContentType) {
+    return selectedContentType !== 'htmlPreview' && selectedContentType !== 'blobContent';
+  },
+
+  _formatSignature: function(param) {
+    var change = this._getParamAttribute(param, 'change');
+    return change ? change : '';
+  },
+
+  _canEdit: function(param) {
+    return this._getParamAttribute(param, 'change') !== 'deleted';
+  }
+});

@@ -71,7 +71,14 @@ const addons = [{
   to: TARGET,
   ignore: ['*.js'],
   // strip addon folder, copy everything over
-  transformPath: (path) => path.replace(/^addons\/([^\/]*)\//, ENV === 'production' ? '' : 'elements/'),
+  transformPath: (path) => {
+    path = path.replace(/^addons\/([^\/]*)\//, '');
+    // prepend elements/ when in dev mode (except images)
+    if (ENV === 'development' && !path.startsWith('images/')) {
+      path = `elements/${path}`;
+    }
+    return path;
+  },
   force: true
 }];
 
