@@ -73,6 +73,7 @@
     "@polymer/polymer": "^3.0.0",
     "@webcomponents/html-imports": "^1.2.0",
     "d3": "^4.13.0",
+    "jquery": "^3.3.1",
     "jsondiffpatch": "^0.3.11",
     "jsplumb": "^2.9.0",
     "web-animations-js": "^2.3.1"
