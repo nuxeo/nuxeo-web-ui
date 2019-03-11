@@ -73,16 +73,6 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script>
-    var Nuxeo = Nuxeo || {};
-    Nuxeo.UI = Nuxeo.UI || {};
-    Nuxeo.UI.config = Nuxeo.UI.config || {};
-    Nuxeo.UI.config.fetch = {document: ['properties']};
-    // Nuxeo.UI.config.dateFormat = 'YYYY-MM-DD';
-    // Nuxeo.UI.config.dateTimeFormat = 'YYYY-MM-DD HH:mm';
-    Nuxeo.UI.bundles = [];
-  </script>
-
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
 
   <script src="vendor/html-imports/html-imports.min.js"></script>
@@ -92,6 +82,10 @@ limitations under the License.
   <script defer src="vendor/moment/moment-with-locales.min.js"></script>
 
   <script defer src="vendor/alloy/alloy-editor-all.js"></script>
+
+  <script>
+    var Nuxeo = {UI: {bundles: [/* 'nuxeo-dam', ... */]}};
+  </script>
 
   <script src="main.bundle.js"></script>
 
