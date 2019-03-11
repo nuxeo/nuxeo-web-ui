@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 icensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,18 @@ limitations under the License.
 
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
--->
-<link rel="import" href="nuxeo-liveconnect-onedrive-provider.html">
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import './nuxeo-liveconnect-onedrive-provider.js';
 
-<!--
+/**
 `nuxeo-liveconnect-onedrive-link`
 @group Nuxeo UI
 @element nuxeo-liveconnect-onedrive-link
--->
-<dom-module id="nuxeo-liveconnect-onedrive-link">
-
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-styles">
       :host {
         display: inline-block;
@@ -60,20 +61,16 @@ Contributors:
         [[i18n('liveconnectImportActions.onedrive', 'OneDrive')]]
       </a>
     </template>
-  </template>
+`,
 
-  <script>
-    Polymer({
-      is: 'nuxeo-liveconnect-onedrive-link',
-      behaviors: [Nuxeo.I18nBehavior],
+  is: 'nuxeo-liveconnect-onedrive-link',
+  behaviors: [I18nBehavior],
 
-      ready: function() {
-        this.$.provider.updateProviderInfo();
-      },
+  ready: function() {
+    this.$.provider.updateProviderInfo();
+  },
 
-      _openPicker: function() {
-        this.$.provider.openPicker();
-      }
-    });
-  </script>
-</dom-module>
+  _openPicker: function() {
+    this.$.provider.openPicker();
+  }
+});
