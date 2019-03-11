@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,9 +13,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
-<nuxeo-slot-content name="shareDocumentAction" slot="DOCUMENT_ACTIONS" order="40" priority="10">
-  <template>
-    <nuxeo-easyshare-share-link document="[[document]]"></nuxeo-easyshare-share-link>
-  </template>
-</nuxeo-slot-content>
+*/
+import './elements/nuxeo-easyshare-share-link.js';
+
+import html from './easyshare.html';
+const tmpl = document.createElement('template');
+tmpl.innerHTML = html;
+document.head.appendChild(tmpl.content);
