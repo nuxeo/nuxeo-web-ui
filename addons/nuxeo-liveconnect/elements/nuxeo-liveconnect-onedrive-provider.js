@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
 
 icensed under the Apache License, Version 2.0 (the "License");
@@ -15,105 +15,89 @@ limitations under the License.
 
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
--->
-<link rel="import" href="nuxeo-liveconnect-behavior.html">
-<link rel="stylesheet" type="text/css" href="../vendor/onedrive/onedrive-file-picker.css">
-<script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
-<script type="text/javascript" src="../vendor/onedrive/onedrive-file-picker.js"></script>
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
-<!--
-`nuxeo-liveconnect-onedrive-provider`
-@group Nuxeo UI
-@element nuxeo-liveconnect-onedrive-provider
--->
-<dom-module id="nuxeo-liveconnect-onedrive-provider">
+import '../vendor/onedrive/onedrive-file-picker.css';
+import * as OneDriveFilePicker from '../vendor/onedrive/onedrive-file-picker.js';
 
-  <template>
+Polymer({
+  _template: html`
     <style>
       :host {
         display: none;
       }
     </style>
     <nuxeo-resource id="oauth2"></nuxeo-resource>
-  </template>
+`,
 
-  <script>
-    (function() {
-      'use strict';
+  is: 'nuxeo-liveconnect-onedrive-provider',
+  behaviors: [LiveConnectBehavior],
 
-      Polymer({
-        is: 'nuxeo-liveconnect-onedrive-provider',
+  properties: {
+    providerId: {
+      value: 'onedrive'
+    }
+  },
 
-        behaviors: [Nuxeo.LiveConnectBehavior],
+  openPicker: function() {
+    this.updateProviderInfo().then(function() {
+      if (this.isUserAuthorized) {
+        return this.getToken().then(function(response) {
+          this.accessToken = response.token;
+          this._handleAuthResult(response.token);
+        }.bind(this));
+      } else {
+        this.openPopup(this.authorizationURL, {
+          onMessageReceive: this._parseMessage.bind(this),
+          onClose: this._onOAuthPopupClose.bind(this)
+        });
+      }
+    }.bind(this));
+  },
 
-        properties: {
-          providerId: {
-            value: 'onedrive'
+  _parseMessage: function(event) {
+    var data = JSON.parse(event.data);
+    this.accessToken = data.token;
+  },
+
+  _onOAuthPopupClose: function() {
+    if (this.accessToken) {
+      if (!this.userId) {
+        this.updateProviderInfo().then(function() {
+          if (!this.userId) {
+            throw 'No username available.';
           }
-        },
+          this._handleAuthResult(this.accessToken);
+        }.bind(this));
+      } else {
+        this._handleAuthResult(this.accessToken);
+      }
+    }
+  },
 
-        openPicker: function() {
-          this.updateProviderInfo().then(function() {
-            if (this.isUserAuthorized) {
-              return this.getToken().then(function(response) {
-                this.accessToken = response.token;
-                this._handleAuthResult(response.token);
-              }.bind(this));
-            } else {
-              this.openPopup(this.authorizationURL, {
-                onMessageReceive: this._parseMessage.bind(this),
-                onClose: this._onOAuthPopupClose.bind(this)
-              });
-            }
-          }.bind(this));
-        },
+  _handleAuthResult: function(token) {
+    var options = {
+      accessToken: token
+    };
+    var filePicker = new OneDriveFilePicker(options);
 
-        _parseMessage: function(event) {
-          var data = JSON.parse(event.data);
-          this.accessToken = data.token;
-        },
-
-        _onOAuthPopupClose: function() {
-          if (this.accessToken) {
-            if (!this.userId) {
-              this.updateProviderInfo().then(function() {
-                if (!this.userId) {
-                  throw 'No username available.';
-                }
-                this._handleAuthResult(this.accessToken);
-              }.bind(this));
-            } else {
-              this._handleAuthResult(this.accessToken);
-            }
-          }
-        },
-
-        _handleAuthResult: function(token) {
-          var options = {
-            accessToken: token
-          };
-          var filePicker = new OneDriveFilePicker(options);
-
-          // open picker and handle result
-          filePicker.select().then(function(result) {
-            if (result.action === 'select') {
-              var files = [];
-              files.push({
-                providerId: this.providerId,
-                providerName: 'One Drive',
-                user: this.userId,
-                fileId: result.item.id,
-                name: result.item.name,
-                size: result.item.size,
-                key: this.generateBlobKey(result.item.id)
-              });
-              this.notifyBlobPick(files);
-            }
-          }.bind(this));
-        }
-
-      });
-    })();
-  </script>
-
-</dom-module>
+    // open picker and handle result
+    filePicker.select().then(function(result) {
+      if (result.action === 'select') {
+        var files = [];
+        files.push({
+          providerId: this.providerId,
+          providerName: 'One Drive',
+          user: this.userId,
+          fileId: result.item.id,
+          name: result.item.name,
+          size: result.item.size,
+          key: this.generateBlobKey(result.item.id)
+        });
+        this.notifyBlobPick(files);
+      }
+    }.bind(this));
+  }
+});

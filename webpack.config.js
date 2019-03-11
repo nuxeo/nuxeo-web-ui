@@ -38,10 +38,6 @@ const third_party = [
   {
     from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js',
     to: join(TARGET, 'vendor/alloy')
-  },
-  {
-    from: 'node_modules/jquery/dist/jquery.min.js',
-    to: join(TARGET, 'vendor/jquery')
   }
 ]
 
@@ -106,11 +102,16 @@ const common = merge([
             },
           },
         },
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader']
+        }
       ],
     },
     plugins: [
       new ProvidePlugin({
-        THREE: 'three'
+        THREE: 'three',
+        jQuery: 'jquery'
       })
     ]
   }

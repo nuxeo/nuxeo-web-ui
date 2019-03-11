@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@ limitations under the License.
 
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
--->
-<script>
-var Nuxeo = Nuxeo || {};
-Nuxeo.LiveConnectBehavior = {
+*/
+
+export const LiveConnectBehavior = {
   properties: {
     clientId: {
       type: String
@@ -130,4 +129,3 @@ Nuxeo.LiveConnectBehavior = {
     throw 'not implemented';
   }
 };
-</script>
