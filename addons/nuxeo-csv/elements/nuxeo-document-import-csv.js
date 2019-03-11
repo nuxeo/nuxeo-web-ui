@@ -1,4 +1,4 @@
-<!--
+/*
 (C) Copyright 2017 Nuxeo SA (http://nuxeo.com/) and others.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -8,21 +8,25 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
+-distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { IronResizableBehavior } from '@polymer/iron-resizable-behavior';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { DocumentCreationBehavior } from '../../../elements/nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 
-<!--
+/**
 `nuxeo-document-import-csv`
 @group Nuxeo UI
 @element nuxeo-document-import-csv
--->
-<dom-module id="nuxeo-document-import-csv">
-  <template>
-
+*/
+Polymer({
+  _template: html`
     <style include="iron-flex iron-flex-alignment nuxeo-styles">
       :host {
         display: block;
@@ -249,20 +253,13 @@ limitations under the License.
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical">
         <div class="suggester">
-          <nuxeo-path-suggestion id="pathSuggesterUpload"
-                                 label="[[i18n('documentImportForm.location')]]"
-                                 value="{{targetPath}}"
-                                 parent="{{suggesterParent}}"
-                                 enrichers="permissions, subtypes"
-                                 children="{{suggesterChildren}}"
-                                 disabled
-                                 always-float-label></nuxeo-path-suggestion>
-          <span class="error">&#8203;[[targetLocationError]]</span>
+          <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" enrichers="permissions, subtypes" children="{{suggesterChildren}}" disabled="" always-float-label=""></nuxeo-path-suggestion>
+          <span class="error">​[[targetLocationError]]</span>
         </div>
 
 
         <div id="dropzone" class="vertical layout flex step">
-          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv">
+          <input hidden="" id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv">
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
@@ -296,7 +293,7 @@ limitations under the License.
                         </div>
                       </template>
                       <template is="dom-if" if="[[!complete]]">
-                        <paper-progress indeterminate></paper-progress>
+                        <paper-progress indeterminate=""></paper-progress>
                       </template>
                     </div>
                     <div class="clear">
@@ -319,36 +316,31 @@ limitations under the License.
 
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss
-                          on-tap="_cancel"
-                          disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button dialog-dismiss="" on-tap="_cancel" disabled\$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink
-                        class="primary"
-                        on-tap="_import"
-                        disabled$="[[!_canImport(_creating,hasFile)]]">
+          <paper-button noink="" class="primary" on-tap="_import" disabled\$="[[!_canImport(_creating,hasFile)]]">
                         [[i18n('command.create')]]
                       </paper-button>
-          <div class="layout" hidden$="[[!_creating]]">
+          <div class="layout" hidden\$="[[!_creating]]">
             <span class="importing-label">[[i18n('documentImport.importing')]]</span>
-            <paper-spinner-lite active></paper-spinner-lite>
+            <paper-spinner-lite active=""></paper-spinner-lite>
           </div>
         </div>
       </div>
 
       <div name="progress" class="vertical layout flex">
         <div id="progress" class="summary">
-          <div hidden$="[[_hasResult]]">
-            <div hidden$="[[_error]]">
+          <div hidden\$="[[_hasResult]]">
+            <div hidden\$="[[_error]]">
               <div class="name status">[[progressLabel]]</div>
               <div class="status">
-                <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate>
+                <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate="">
                 </paper-progress>
               </div>
             </div>
           </div>
-          <span class="error" hidden$="[[!_error]]">[[i18n('csv.import.error')]]</span>
-          <div hidden$="[[!_hasResult]]">
+          <span class="error" hidden\$="[[!_error]]">[[i18n('csv.import.error')]]</span>
+          <div hidden\$="[[!_hasResult]]">
             <div class="success"><iron-icon icon="icons:check"></iron-icon>[[i18n('csv.import.success')]]</div>
             <div class="report">
               <div class="line successful layout flex">
@@ -364,7 +356,7 @@ limitations under the License.
                 <div class="count">[[_importResult.errorLineCount]] / [[_importResult.totalLineCount]]</div>
               </div>
             </div>
-            <div class="brief" hidden$="[[!receiveEmailReport]]">[[i18n('csv.import.report.notify')]]</div>
+            <div class="brief" hidden\$="[[!receiveEmailReport]]">[[i18n('csv.import.report.notify')]]</div>
           </div>
         </div>
 
@@ -374,10 +366,10 @@ limitations under the License.
               <template>
                 <div class="item">
                   <div class="list-item-info horizontal layout">
-                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">
+                    <div class="flex-1" failed\$="[[_isError(item)]]" skipped\$="[[_isSkipped(item)]]">
                       [[i18n('csv.import.report.line')]] [[item.line]]
                     </div>
-                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">[[item.status]]</div>
+                    <div class="flex-1" failed\$="[[_isError(item)]]" skipped\$="[[_isSkipped(item)]]">[[item.status]]</div>
                     <div class="flex-3 list-item-detail">[[_i18n(item.localizedMessage, item.localizedMessageParams)]]</div>
                   </div>
                 </div>
@@ -387,314 +379,304 @@ limitations under the License.
         </div>
 
         <div class="buttons horizontal end-justified layout">
-         <paper-button noink
-                        on-tap="_clear"
-                        disabled$="[[!_hasResult]]">
+         <paper-button noink="" on-tap="_clear" disabled\$="[[!_hasResult]]">
                         [[i18n('csv.import.new')]]
           </paper-button>
-          <paper-button dialog-dismiss on-tap="_close"
-                        class="primary">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss="" on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>
         </div>
       </div>
 
     </iron-pages>
 
     <paper-toast id="toast"></paper-toast>
+`,
 
-  </template>
+  is: 'nuxeo-document-import-csv',
+  behaviors: [I18nBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
 
-  <script>
-    Polymer({
-      is: 'nuxeo-document-import-csv',
+  properties: {
+    accept: {
+      type: String,
+      value: '.csv'
+    },
+    hasFile: {
+      type: Boolean,
+      value: false
+    },
+    file: {
+      type: Object
+    },
+    complete: {
+      type: Boolean,
+      value: false
+    },
+    _importDocTypes: {
+      type: Array,
+      computed: '_computeImportDocTypes(subtypes)'
+    },
+    visible: {
+      type: Boolean
+    },
+    _creating: {
+      type: Boolean,
+      value: false
+    },
+    _importResult: {
+      type: Object
+    },
+    _importLogs: {
+      type: Array,
+      value: []
+    },
+    _hasResult: {
+      type: Boolean,
+      value: false
+    },
+    stage: {
+      type: String,
+      value: 'upload'
+    },
+    _count: {
+      type: Number,
+      value: 0
+    },
+    _total: {
+      type: Number,
+      value: 0
+    },
+    _error: {
+      type: Boolean,
+      value: false
+    },
 
-      behaviors: [Nuxeo.I18nBehavior, Polymer.IronResizableBehavior, Nuxeo.UploaderBehavior, Nuxeo.DocumentCreationBehavior],
+    receiveEmailReport: {
+      type: Boolean,
+      value: false
+    },
+    enableImportMode: {
+      type: Boolean,
+      value: false
+    },
 
-      properties: {
-        accept: {
-          type: String,
-          value: '.csv'
-        },
-        hasFile: {
-          type: Boolean,
-          value: false
-        },
-        file: {
-          type: Object
-        },
-        complete: {
-          type: Boolean,
-          value: false
-        },
-        _importDocTypes: {
-          type: Array,
-          computed: '_computeImportDocTypes(subtypes)'
-        },
-        visible: {
-          type: Boolean
-        },
-        _creating: {
-          type: Boolean,
-          value: false
-        },
-        _importResult: {
-          type: Object
-        },
-        _importLogs: {
-          type: Array,
-          value: []
-        },
-        _hasResult: {
-          type: Boolean,
-          value: false
-        },
-        stage: {
-          type: String,
-          value: 'upload'
-        },
-        _count: {
-          type: Number,
-          value: 0
-        },
-        _total: {
-          type: Number,
-          value: 0
-        },
-        _error: {
-          type: Boolean,
-          value: false
-        },
+    progressLabel: {
+      type: String,
+      value: ''
+    }
+  },
 
-        receiveEmailReport: {
-          type: Boolean,
-          value: false
-        },
-        enableImportMode: {
-          type: Boolean,
-          value: false
-        },
+  _canImport: function() {
+    return this.hasFile && !this._creating;
+  },
 
-        progressLabel: {
-          type: String,
-          value: ''
-        }
-      },
+  ready: function() {
+    this.connection = this.$.nx;
+    this.setupDropZone(this.$.dropzone);
+    this._clear();
+  },
 
-      _canImport: function() {
-        return this.hasFile && !this._creating;
-      },
+  observers: [
+    '_observeFiles(files.*)'
+  ],
 
-      ready: function() {
-        this.connection = this.$.nx;
-        this.setupDropZone(this.$.dropzone);
-        this._clear();
-      },
+  listeners: {
+    'nx-document-creation-parent-validated': '_parentValidated'
+  },
 
-      observers: [
-        '_observeFiles(files.*)'
-      ],
+  observers: [
+    '_observeFiles(files.*)',
+    '_visibleOnStage(visible,stage)',
+    '_observeVisible(visible)'
+  ],
 
-      listeners: {
-        'nx-document-creation-parent-validated': '_parentValidated'
-      },
-      observers: [
-        '_observeFiles(files.*)',
-        '_visibleOnStage(visible,stage)',
-        '_observeVisible(visible)'
-      ],
+  _i18n: function(label, params){
+    return !params || params.length === 0 ? this.i18n(label)
+        : (params.length === 1 ? this.i18n(label, params[0]) : this.i18n(label, params[0], params[1]));
+  },
 
-      _i18n: function(label, params){
-        return !params || params.length === 0 ? this.i18n(label)
-            : (params.length === 1 ? this.i18n(label, params[0]) : this.i18n(label, params[0], params[1]));
-      },
+  _filterLogs: function(items){
+    return items.filter(function (item) {
+      return this._isError(item) || this._isSkipped(item);
+    }.bind(this));
 
-      _filterLogs: function(items){
-        return items.filter(function (item) {
-          return this._isError(item) || this._isSkipped(item);
-        }.bind(this));
+  },
 
-      },
+  _isError: function(log){
+    return log.status === 'ERROR';
+  },
 
-      _isError: function(log){
-        return log.status === 'ERROR';
-      },
+  _isSkipped: function(log){
+    return log.status === 'SKIPPED';
+  },
 
-      _isSkipped: function(log){
-        return log.status === 'SKIPPED';
-      },
+  _observeVisible: function() {
+    if (this.visible) {
+      this._clear();
+    } else if (this._waitProgressId) {
+      clearTimeout(this._waitProgressId);
+    }
+  },
 
-      _observeVisible: function() {
-        if (this.visible) {
-          this._clear();
-        } else if (this._waitProgressId) {
-          clearTimeout(this._waitProgressId);
-        }
-      },
-
-      _parentValidated: function() {
-        if (this.isValidTargetPath) {
-          if (this.suggesterParent && this.suggesterParent.contextParameters && this.suggesterParent.contextParameters.permissions) {
-            // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren, so we had to rely on Write.
-            if (this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
-                   this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1) {
-              this.set('targetLocationError', '');
-              return;
-            }
-          }
-        }
-        this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
-      },
-
-      _removeBlob: function(e) {
-        this.$.csvImportRes.path = 'upload/' + this.batchId + '/0';
-        this.$.csvImportRes.remove().then(function() {
-          this.file = {};
-          this.hasFile = false;
-          this.$.uploadFiles.value = '';
-        }.bind(this), this._handleError.bind(this));
-      },
-
-      _computeImportDocTypes: function() {
-        if (this.subtypes) {
-          return this.subtypes.filter(this._filterImportDocTypes);
-        }
-      },
-
-      _filterImportDocTypes: function(type) {
-        return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
-      },
-
-      _observeFiles: function(changeRecord) {
-        if (changeRecord) {
-          if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
-            if (this.files && this.files.length > 0) {
-              this.file = this.files[0];
-              this.hasFile = true;
-              this._creating = true;
-            }
-          } else if (changeRecord.path.match(/files\.\d+\.complete/gi)) {
-            this.complete = true;
-            this._creating = false;
-          }
-        }
-      },
-
-      _showUploadDialog: function() {
-        this.$.uploadFiles.click();
-      },
-
-      _fileChanged: function(e) {
-        this.uploadFiles(e.target.files);
-        this.hasFile = true;
-      },
-
-      _visibleOnStage: function() {
-        this.$.pathSuggesterUpload.disabled = !this.visible || this.stage !== 'upload';
-      },
-
-      _clear: function() {
-        this.stage = 'upload';
-        this.files = [];
-        this.file = {};
-        this.hasFile = false;
-        this._creating = false;
-        this._importResult = {};
-        this._total = 0;
-        this._count = 0;
-        this.$.importProgress.indeterminate = true;
-        this._error = false;
-        this.$.uploadFiles.value = '';
-        this._hasResult = false;
-        this.progressLabel = '';
-        this._importLogs = [];
-      },
-
-      _handleError: function(error) {
-        this._toast('ERROR: ' + error.message);
-      },
-
-      _toast: function(msg) {
-        this.$.toast.text = msg;
-        this.$.toast.open();
-      },
-
-      _cancel: function() {
-      if (this.batchId) {
-          this.cancelBatch();
-        }
-        this._clear();
-        this.stage = 'upload';
-        this.fire('nx-creation-wizard-show-tabs');
-      },
-
-      _import: function() {
-        this.$.csvImportRes.path = 'upload/' + this.batchId + '/0/execute/CSV.Import';
-        this.$.csvImportRes.data = {
-          params: {
-            path: this.targetPath,
-            sendReport: this.receiveEmailReport,
-            documentMode: this.enableImportMode
-          }
-        };
-        this.$.csvImportRes.post().then(function(res) {
-          this.stage = 'progress';
-          this._waitProgressId = window.setTimeout(this._waitForProgress.bind(this), 500, res);
-        }.bind(this), this._handleError.bind(this));
-      },
-
-      _waitForProgress: function(importId) {
-        this.$.cvsImportStatus.input = importId;
-        this.$.cvsImportStatus.execute().then(function(res) {
-          var status = res.value;
-          this._total = status.totalNumberOfDocument;
-          if (this._total >= 0) {
-            this.$.importProgress.indeterminate = false;
-          }
-          if(status.state === 'ERROR') {
-            this._error = true;
-          } else if (status.state === 'RUNNING' || status.state === 'SCHEDULED') {
-            this._count = status.numberOfProcessedDocument;
-            if (this._total >= 0) {
-              this.progressLabel = this.i18n('csv.import.progress.statusWithTotal', this._count, this._total);
-            } else {
-              this.progressLabel = this.i18n('csv.import.progress.statusWithoutTotal', this._count);
-            }
-            this._waitProgressId = window.setTimeout(this._waitForProgress.bind(this), 800, importId);
-          } else if (status.state === 'COMPLETED') {
-            this._count = status.numberOfProcessedDocument;
-            this._waitProgressId = null;
-            if (this._count < 0) {
-              this._error = true;
-            } else {
-              this.$.cvsImportLogOp.input = importId;
-              this.$.cvsImportLogOp.execute().then(function(res) {
-                this._importLogs = this._filterLogs(res.value);
-                this.$.list.notifyResize();
-              }.bind(this));
-
-              this.$.cvsImportResultOp.input = importId;
-              this.$.cvsImportResultOp.execute().then(function(res) {
-                this._importResult = res.value;
-                this._hasResult = true;
-              }.bind(this));
-            }
-          } else {
-            this._handleError({message: 'Error while processing: unknown status.'})
-          }
-
-        }.bind(this), this._handleError.bind(this))
-      },
-
-      _close: function() {
-        if (this.stage === 'progress' && this._count > 0) {
-          this.fire('document-updated');
-          page('/browse' + this.targetPath);
-        }
-        if (this._waitProgressId) {
-          clearTimeout(this._waitProgressId);
+  _parentValidated: function() {
+    if (this.isValidTargetPath) {
+      if (this.suggesterParent && this.suggesterParent.contextParameters && this.suggesterParent.contextParameters.permissions) {
+        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren, so we had to rely on Write.
+        if (this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
+               this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1) {
+          this.set('targetLocationError', '');
+          return;
         }
       }
+    }
+    this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
+  },
 
-    });
-  </script>
+  _removeBlob: function(e) {
+    this.$.csvImportRes.path = 'upload/' + this.batchId + '/0';
+    this.$.csvImportRes.remove().then(function() {
+      this.file = {};
+      this.hasFile = false;
+      this.$.uploadFiles.value = '';
+    }.bind(this), this._handleError.bind(this));
+  },
 
-</dom-module>
+  _computeImportDocTypes: function() {
+    if (this.subtypes) {
+      return this.subtypes.filter(this._filterImportDocTypes);
+    }
+  },
+
+  _filterImportDocTypes: function(type) {
+    return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
+  },
+
+  _observeFiles: function(changeRecord) {
+    if (changeRecord) {
+      if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
+        if (this.files && this.files.length > 0) {
+          this.file = this.files[0];
+          this.hasFile = true;
+          this._creating = true;
+        }
+      } else if (changeRecord.path.match(/files\.\d+\.complete/gi)) {
+        this.complete = true;
+        this._creating = false;
+      }
+    }
+  },
+
+  _showUploadDialog: function() {
+    this.$.uploadFiles.click();
+  },
+
+  _fileChanged: function(e) {
+    this.uploadFiles(e.target.files);
+    this.hasFile = true;
+  },
+
+  _visibleOnStage: function() {
+    this.$.pathSuggesterUpload.disabled = !this.visible || this.stage !== 'upload';
+  },
+
+  _clear: function() {
+    this.stage = 'upload';
+    this.files = [];
+    this.file = {};
+    this.hasFile = false;
+    this._creating = false;
+    this._importResult = {};
+    this._total = 0;
+    this._count = 0;
+    this.$.importProgress.indeterminate = true;
+    this._error = false;
+    this.$.uploadFiles.value = '';
+    this._hasResult = false;
+    this.progressLabel = '';
+    this._importLogs = [];
+  },
+
+  _handleError: function(error) {
+    this._toast('ERROR: ' + error.message);
+  },
+
+  _toast: function(msg) {
+    this.$.toast.text = msg;
+    this.$.toast.open();
+  },
+
+  _cancel: function() {
+  if (this.batchId) {
+      this.cancelBatch();
+    }
+    this._clear();
+    this.stage = 'upload';
+    this.fire('nx-creation-wizard-show-tabs');
+  },
+
+  _import: function() {
+    this.$.csvImportRes.path = 'upload/' + this.batchId + '/0/execute/CSV.Import';
+    this.$.csvImportRes.data = {
+      params: {
+        path: this.targetPath,
+        sendReport: this.receiveEmailReport,
+        documentMode: this.enableImportMode
+      }
+    };
+    this.$.csvImportRes.post().then(function(res) {
+      this.stage = 'progress';
+      this._waitProgressId = window.setTimeout(this._waitForProgress.bind(this), 500, res);
+    }.bind(this), this._handleError.bind(this));
+  },
+
+  _waitForProgress: function(importId) {
+    this.$.cvsImportStatus.input = importId;
+    this.$.cvsImportStatus.execute().then(function(res) {
+      var status = res.value;
+      this._total = status.totalNumberOfDocument;
+      if (this._total >= 0) {
+        this.$.importProgress.indeterminate = false;
+      }
+      if(status.state === 'ERROR') {
+        this._error = true;
+      } else if (status.state === 'RUNNING' || status.state === 'SCHEDULED') {
+        this._count = status.numberOfProcessedDocument;
+        if (this._total >= 0) {
+          this.progressLabel = this.i18n('csv.import.progress.statusWithTotal', this._count, this._total);
+        } else {
+          this.progressLabel = this.i18n('csv.import.progress.statusWithoutTotal', this._count);
+        }
+        this._waitProgressId = window.setTimeout(this._waitForProgress.bind(this), 800, importId);
+      } else if (status.state === 'COMPLETED') {
+        this._count = status.numberOfProcessedDocument;
+        this._waitProgressId = null;
+        if (this._count < 0) {
+          this._error = true;
+        } else {
+          this.$.cvsImportLogOp.input = importId;
+          this.$.cvsImportLogOp.execute().then(function(res) {
+            this._importLogs = this._filterLogs(res.value);
+            this.$.list.notifyResize();
+          }.bind(this));
+
+          this.$.cvsImportResultOp.input = importId;
+          this.$.cvsImportResultOp.execute().then(function(res) {
+            this._importResult = res.value;
+            this._hasResult = true;
+          }.bind(this));
+        }
+      } else {
+        this._handleError({message: 'Error while processing: unknown status.'})
+      }
+
+    }.bind(this), this._handleError.bind(this))
+  },
+
+  _close: function() {
+    if (this.stage === 'progress' && this._count > 0) {
+      this.fire('document-updated');
+      page('/browse' + this.targetPath);
+    }
+    if (this._waitProgressId) {
+      clearTimeout(this._waitProgressId);
+    }
+  }
+});
