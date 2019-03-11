@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,14 +13,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
-<!--
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+
+/**
 `nuxeo-ai-admin`
 @group Nuxeo UI
 @element nuxeo-admin-ai-export
--->
-<dom-module id="nuxeo-admin-ai-export">
-    <template>
+*/
+Polymer({
+  _template: html`
         <style>
             #statsResult {
                 height: 60vh;
@@ -39,12 +42,7 @@ limitations under the License.
         <nuxeo-operation id="aiStats" op="AI.DatasetStats" response="{{_stats}}"></nuxeo-operation>
         <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
         <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-            <paper-textarea id="queryInput"
-                            type="search"
-                            label="[[i18n('admin.ai.query')]]"
-                            value="{{query}}"
-                            placeholder="[[i18n('imaging.query.placeholder')]]"
-                            autofocus>
+            <paper-textarea id="queryInput" type="search" label="[[i18n('admin.ai.query')]]" value="{{query}}" placeholder="[[i18n('imaging.query.placeholder')]]" autofocus="">
             </paper-textarea>
             <paper-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}"></paper-input>
             <paper-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}"></paper-input>
@@ -80,90 +78,93 @@ limitations under the License.
                 [[_exportText]]
             </div>
         </nuxeo-card>
-    </template>
-    <script>
-        Polymer({
-            is: 'nuxeo-admin-ai-export',
-            behaviors: [Nuxeo.LayoutBehavior],
-            properties: {
-                inProps: {
-                    type: String,
-                    value: 'dc:title,file:content'
-                },
-                outProps: {
-                    type: String,
-                    value: 'dc:lastContributor'
-                },
-                splitProp: {
-                    type: String,
-                    value: '80'
-                },
-                query: {
-                    type: String,
-                    value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'"
-                },
-                _exportText: {
-                    type: String,
-                    value: ''
-                },
-                _stats: {
-                    type: String
-                }
-            },
-            _displayVal: function (val) {
-                if (val.numericValue != null) {
-                    return val.numericValue;
-                }
-                if (val.type === 'terms') {
-                    var toReturn = '';
-                    for (i = 0, len = val.value.length; i < len; i++) {
-                        toReturn += ' ' + val.value[i].key + ' (' + val.value[i].docCount + ')';
-                    }
-                    return toReturn;
-                } else {
-                    return JSON.stringify(val.value);
-                }
-            },
-            _filter: function (items) {
-                return items && items.filter(function (item) {
-                    return !(item.type === 'total' || item.type === 'count');
-                });
-            },
-            _computeLabel: function (theStats, fieldName) {
-                var foundItem = theStats && theStats.find(function (item) {
-                    return item.type === fieldName;
-                });
-                return foundItem && this.i18n('admin.ai.export.' + fieldName, foundItem.numericValue);
-            },
-            _recompute: function () {
-                this.$.aiStats.params = {
-                    'query': this.query,
-                    'inputs': this.inProps,
-                    'outputs': this.outProps
-                };
-                this.$.aiStats.execute().then(function (response) {
-                    if (response === undefined || response.length === 0) {
-                        this.fire('notify', {message: this.i18n('admin.ai.stats.none')});
-                    }
-                }.bind(this)).catch(function () {
-                    this.fire('notify', {message: this.i18n('admin.ai.stats.error')});
-                }.bind(this));
-            },
-            _export: function () {
-                this.$.aiExport.params = {
-                    'query': this.query,
-                    'inputs': this.inProps,
-                    'outputs': this.outProps,
-                    'split': this.splitProp
-                };
-                this.$.aiExport.execute().then(function (response) {
-                    this._exportText = this.i18n('admin.ai.export.id', response.value);
-                    this.fire('notify', {message: this.i18n('admin.ai.export.success')});
-                }.bind(this)).catch(function () {
-                    this._exportText = '';
-                    this.fire('notify', {message: this.i18n('admin.ai.export.error')});
-                }.bind(this));
-            }
-        });
-    </script>
-</dom-module>
+`,
+
+  is: 'nuxeo-admin-ai-export',
+  behaviors: [LayoutBehavior],
+
+  properties: {
+      inProps: {
+          type: String,
+          value: 'dc:title,file:content'
+      },
+      outProps: {
+          type: String,
+          value: 'dc:lastContributor'
+      },
+      splitProp: {
+          type: String,
+          value: '80'
+      },
+      query: {
+          type: String,
+          value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'"
+      },
+      _exportText: {
+          type: String,
+          value: ''
+      },
+      _stats: {
+          type: String
+      }
+  },
+
+  _displayVal: function (val) {
+      if (val.numericValue != null) {
+          return val.numericValue;
+      }
+      if (val.type === 'terms') {
+          var toReturn = '';
+          for (i = 0, len = val.value.length; i < len; i++) {
+              toReturn += ' ' + val.value[i].key + ' (' + val.value[i].docCount + ')';
+          }
+          return toReturn;
+      } else {
+          return JSON.stringify(val.value);
+      }
+  },
+
+  _filter: function (items) {
+      return items && items.filter(function (item) {
+          return !(item.type === 'total' || item.type === 'count');
+      });
+  },
+
+  _computeLabel: function (theStats, fieldName) {
+      var foundItem = theStats && theStats.find(function (item) {
+          return item.type === fieldName;
+      });
+      return foundItem && this.i18n('admin.ai.export.' + fieldName, foundItem.numericValue);
+  },
+
+  _recompute: function () {
+      this.$.aiStats.params = {
+          'query': this.query,
+          'inputs': this.inProps,
+          'outputs': this.outProps
+      };
+      this.$.aiStats.execute().then(function (response) {
+          if (response === undefined || response.length === 0) {
+              this.fire('notify', {message: this.i18n('admin.ai.stats.none')});
+          }
+      }.bind(this)).catch(function () {
+          this.fire('notify', {message: this.i18n('admin.ai.stats.error')});
+      }.bind(this));
+  },
+
+  _export: function () {
+      this.$.aiExport.params = {
+          'query': this.query,
+          'inputs': this.inProps,
+          'outputs': this.outProps,
+          'split': this.splitProp
+      };
+      this.$.aiExport.execute().then(function (response) {
+          this._exportText = this.i18n('admin.ai.export.id', response.value);
+          this.fire('notify', {message: this.i18n('admin.ai.export.success')});
+      }.bind(this)).catch(function () {
+          this._exportText = '';
+          this.fire('notify', {message: this.i18n('admin.ai.export.error')});
+      }.bind(this));
+  }
+});

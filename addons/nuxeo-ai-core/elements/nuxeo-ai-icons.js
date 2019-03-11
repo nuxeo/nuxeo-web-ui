@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,8 +13,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
-<iron-iconset-svg size="24" name="nuxeo-ai">
+*/
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+const $_documentContainer = document.createElement('template');
+
+$_documentContainer.innerHTML = `<iron-iconset-svg size="24" name="nuxeo-ai">
   <svg>
     <defs>
       <g id="confidence-level-low" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -36,4 +43,6 @@ limitations under the License.
       </g>
     </defs>
   </svg>
-</iron-iconset-svg>
+</iron-iconset-svg>`;
+
+document.head.appendChild($_documentContainer.content);
