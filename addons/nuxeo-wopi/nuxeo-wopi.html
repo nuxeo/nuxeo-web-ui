@@ -14,17 +14,6 @@ limitations under the License.
 Contributors:
   Thomas Roger <troger@nuxeo.com>
 -->
-
-<script>
-  Nuxeo.UI = Nuxeo.UI || {};
-  Nuxeo.UI.config = Nuxeo.UI.config || {};
-  Nuxeo.UI.config.enrichers = Nuxeo.UI.config.enrichers || {};
-  Nuxeo.UI.config.enrichers.blob = Nuxeo.UI.config.enrichers.blob || [];
-  Nuxeo.UI.config.enrichers.blob.push('wopi');
-</script>
-
-<link rel="import" href="elements/nuxeo-wopi-link.html">
-
 <nuxeo-slot-content name="wopiLink" slot="BLOB_ACTIONS">
   <template>
     <nuxeo-wopi-link document="[[document]]" blob="[[blob]]"></nuxeo-wopi-link>
