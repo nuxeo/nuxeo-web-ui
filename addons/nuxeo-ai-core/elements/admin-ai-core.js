@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,14 +13,17 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
-<!--
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+
+/**
 `nuxeo-ai-admin`
 @group Nuxeo UI
 @element nuxeo-admin-ai
--->
-<dom-module id="nuxeo-admin-ai">
-    <template>
+*/
+Polymer({
+  _template: html`
         <style>
             .flex {
                 @apply --layout-flex;
@@ -49,19 +52,16 @@ limitations under the License.
                 </template>
             </div>
         </nuxeo-page>
+`,
 
-    </template>
-    <script>
-        Polymer({
-            is: 'nuxeo-admin-ai',
-            behaviors: [Nuxeo.I18nBehavior],
-            properties: {
-                visible: Boolean,
-                selected: {
-                    type: String,
-                    value: 'export'
-                }
-            }
-        });
-    </script>
-</dom-module>
+  is: 'nuxeo-admin-ai',
+  behaviors: [I18nBehavior],
+
+  properties: {
+      visible: Boolean,
+      selected: {
+          type: String,
+          value: 'export'
+      }
+  }
+});
