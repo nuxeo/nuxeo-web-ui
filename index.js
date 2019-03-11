@@ -1,4 +1,41 @@
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
+
+// Nuxeo.UI namespace
+const Nuxeo = window.Nuxeo = window.Nuxeo || {};
+Nuxeo.UI = Nuxeo.UI || {};
+
+// default configuration
+Nuxeo.UI.config = Nuxeo.UI.config || {
+  fetch: {
+    document: ['properties']
+  },
+  enrichers: {
+    document: [
+      'hasContent',
+      'firstAccessibleAncestor',
+      'permissions',
+      'breadcrumb',
+      'preview',
+      'favorites',
+      'subscribedNotifications',
+      'thumbnail',
+      'renditions',
+      'pendingTasks',
+      'runnableWorkflows',
+      'runningWorkflows',
+      'collections',
+      'audit',
+      'subtypes',
+      'tags',
+      'publications'
+    ],
+    blob: ['appLinks']
+  },
+  dateFormat: 'LL',
+  dateTimeFormat: 'LLL'
+};
+
+// load app
 import './elements/nuxeo-app.js';
 
 // load Web UI bundle
@@ -8,16 +45,15 @@ tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
 
 // load addons / bundles
-Nuxeo.UI.bundles.forEach((url) => {
+// NXP-26977: await loading of addons
+Promise.all(Nuxeo.UI.bundles.map((url) => {
   if (url.endsWith('.html')) {
-    importHref(url);
+    return new Promise((resolve, reject) => importHref(url, resolve, reject));
   } else {
-    import(
+    return import(
       /* webpackChunkName: "[request]" */
       /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
       `./addons/${url}`
     );
   }
-});
-
-import './elements/routing.js';
+})).then(() => import(/* webpackMode: "eager" */ './elements/routing.js'));

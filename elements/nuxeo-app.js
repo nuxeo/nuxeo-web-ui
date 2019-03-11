@@ -538,7 +538,7 @@ Polymer({
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
-    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}" enrichers="[[enrichers]]" headers="[[headers]]">
+    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}">
     </nuxeo-document>
 
     <nuxeo-sardine hidden=""></nuxeo-sardine>
@@ -754,20 +754,6 @@ Polymer({
       value: false
     },
 
-    enrichers: {
-      type: Object,
-      value: function() {
-        return this._computeEnrichers();
-      }
-    },
-
-    headers: {
-      type: Object,
-      value: function() {
-        return this._computeHeaders();
-      }
-    },
-
     routeParams: String,
   },
 
@@ -869,6 +855,8 @@ Polymer({
     this.docId = id;
     this.docPath = path;
     this.docAction = action;
+    this.$.doc.headers = this._computeHeaders();
+    this.$.doc.enrichers = this._computeEnrichers();
     this.$.doc.get().then(function(doc) {
       if (this.docId && !doc.isVersion) {
         this.docId = '';
@@ -1425,29 +1413,7 @@ Polymer({
   },
 
   _computeEnrichers: function() {
-    return (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) ||
-      {
-        document: [
-          'hasContent',
-          'firstAccessibleAncestor',
-          'permissions',
-          'breadcrumb',
-          'preview',
-          'favorites',
-          'subscribedNotifications',
-          'thumbnail',
-          'renditions',
-          'pendingTasks',
-          'runnableWorkflows',
-          'runningWorkflows',
-          'collections',
-          'audit',
-          'subtypes',
-          'tags',
-          'publications'
-        ],
-        blob: 'appLinks'
-      };
+    return Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers;
   },
 
   _computeHeaders: function() {
