@@ -8,7 +8,6 @@
   "devDependencies": {
     "@open-wc/webpack": "^0.1.6",
     "@webcomponents/webcomponentsjs": "^2.0.0",
-    "aws-sdk": "^2.201.0",
     "clean-webpack-plugin": "^1.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "eslint-plugin-html": "^2.0.0",
@@ -74,6 +73,7 @@
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
     "@webcomponents/html-imports": "^1.2.0",
+    "aws-sdk": "^2.420.0",
     "d3": "^4.13.0",
     "jquery": "^3.3.1",
     "jsondiffpatch": "^0.3.11",
