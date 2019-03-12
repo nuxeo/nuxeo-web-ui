@@ -121,7 +121,7 @@ limitations under the License.
         if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js"))) { %>
           '<%= pn %>',
         <% } else if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html"))) { %>
-          '<%= context %><%= "/ui/" + pn + ".html" %>'
+          '<%= context %><%= "/ui/" + pn + ".html" %>',
         <% } %>
       <% } %>
     ];
