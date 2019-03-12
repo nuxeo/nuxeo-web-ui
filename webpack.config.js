@@ -41,6 +41,10 @@ const third_party = [
   {
     from: 'node_modules/jquery/dist/jquery.min.js',
     to: join(TARGET, 'vendor/jquery')
+  },
+  {
+    from: 'node_modules/three',
+    to: join(TARGET, 'vendor/three')
   }
 ]
 
