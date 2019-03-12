@@ -84,7 +84,40 @@ limitations under the License.
   <script defer src="vendor/alloy/alloy-editor-all.js"></script>
 
   <script>
-    var Nuxeo = {UI: {bundles: [/* 'nuxeo-dam', ... */]}};
+    var Nuxeo = {
+      UI: {
+        bundles: [/* 'nuxeo-dam', ... */],
+        config: {
+          fetch: {
+            document: ['properties']
+          },
+          enrichers: {
+            document: [
+              'hasContent',
+              'firstAccessibleAncestor',
+              'permissions',
+              'breadcrumb',
+              'preview',
+              'favorites',
+              'subscribedNotifications',
+              'thumbnail',
+              'renditions',
+              'pendingTasks',
+              'runnableWorkflows',
+              'runningWorkflows',
+              'collections',
+              'audit',
+              'subtypes',
+              'tags',
+              'publications'
+            ],
+            blob: ['appLinks']
+          },
+          dateFormat: 'LL',
+          dateTimeFormat: 'LLL'
+        }
+      }
+    };
   </script>
 
   <script src="main.bundle.js"></script>

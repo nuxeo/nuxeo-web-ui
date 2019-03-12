@@ -27,5 +27,8 @@
     <!-- Date (time) format -->
     <property name="org.nuxeo.web.ui.dateFormat">LL</property>
     <property name="org.nuxeo.web.ui.dateTimeFormat">LLL</property>
+
+    <!-- S3 Direct upload -->
+    <property name="org.nuxeo.web.ui.s3.useDirectUpload">${nuxeo.s3storage.useDirectUpload:=false}</property>
   </extension>
 </component>

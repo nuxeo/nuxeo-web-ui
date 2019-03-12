@@ -170,4 +170,9 @@ class S3Provider {
 }
 
 UploaderBehavior.registerProvider('s3', S3Provider);
-UploaderBehavior.defaultProvider = 's3';
+
+// if S3 direct upload is enabled set it as default upload provider
+// config values from configuration service are strings
+if (String(Nuxeo.UI.config.s3.useDirectUpload) === 'true') {
+  UploaderBehavior.defaultProvider = 's3';
+}
