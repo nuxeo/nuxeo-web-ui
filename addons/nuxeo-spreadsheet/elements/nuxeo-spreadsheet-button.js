@@ -21,6 +21,14 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
+// see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+      function toSolidBytes(match, p1) {
+          return String.fromCharCode('0x' + p1);
+  }));
+}
+
 /**
 `nuxeo-spreadsheet-button`
 @group Nuxeo UI
@@ -128,7 +136,8 @@ Polymer({
       executed: false
     };
 
-    this.$.iframe.src = this.$.nxconn.url + '/spreadsheet/?cv=' + encodeURIComponent(btoa(JSON.stringify(state)));
+    this.$.iframe.src = this.$.nxconn.url + '/spreadsheet/?cv=' +
+      encodeURIComponent(b64EncodeUnicode(JSON.stringify(state)));
     this.$.dialog.toggle();
   },
 
