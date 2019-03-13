@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@ limitations under the License.
 
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
+/**
 `nuxeo-3d-render-views` displays the render views of a 3D document (if available).
 These views can be downloaded as image files. On tap events are used to trigger orientation changes in
 `nuxeo-3d-preview` elements on the page.
@@ -27,12 +31,9 @@ Example - Load a ThreeD document:
 
 @group Nuxeo 3D Elements
 @element nuxeo-3d-render-views
--->
-
-<dom-module id="nuxeo-3d-render-views">
-
-  <template>
-
+*/
+Polymer({
+  _template: html`
     <style>
       :host {
         display: block;
@@ -67,10 +68,10 @@ Example - Load a ThreeD document:
       <div class="render-views">
         <template is="dom-repeat" items="[[document.properties.threed:renderViews]]" as="renderView">
           <div class="item">
-            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords"/>
+            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords">
             <div>
               <label class="layout flex-2">[[renderView.title]]</label>
-              <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink></paper-icon-button>
+              <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink=""></paper-icon-button>
               <paper-tooltip>[[i18n('threeDViewLayout.renderViews.download')]]</paper-tooltip>
             </div>
           </div>
@@ -80,39 +81,34 @@ Example - Load a ThreeD document:
     <template is="dom-if" if="{{!_hasItems(document.properties.threed:renderViews)}}">
       <p>[[i18n('threeDViewLayout.renderViews.notAvailable')]]</p>
     </template>
+`,
 
-  </template>
+  is: 'nuxeo-3d-render-views',
 
-</dom-module>
-<script>
-  Polymer({
-    is: 'nuxeo-3d-render-views',
-
-    properties: {
-      /**
-       * The ThreeD `document` with (or without) render views.
-       */
-      document: {
-        type: Object,
-        notify: true
-      }
-    },
-
-    behaviors: [Nuxeo.I18nBehavior],
-
-    _hasItems: function(list) {
-      return list.length > 0;
-    },
-
-    _setCoords: function(e) {
-      this.fire('3d-viewer-coords-change', {
-        azimuth: e.model.renderView.azimuth,
-        zenith: e.model.renderView.zenith
-      });
-    },
-
-    _downloadView: function(e) {
-      location.href = e.model.renderView.content.data;
+  properties: {
+    /**
+     * The ThreeD `document` with (or without) render views.
+     */
+    document: {
+      type: Object,
+      notify: true
     }
-  });
-</script>
+  },
+
+  behaviors: [I18nBehavior],
+
+  _hasItems: function(list) {
+    return list.length > 0;
+  },
+
+  _setCoords: function(e) {
+    this.fire('3d-viewer-coords-change', {
+      azimuth: e.model.renderView.azimuth,
+      zenith: e.model.renderView.zenith
+    });
+  },
+
+  _downloadView: function(e) {
+    location.href = e.model.renderView.content.data;
+  }
+});
