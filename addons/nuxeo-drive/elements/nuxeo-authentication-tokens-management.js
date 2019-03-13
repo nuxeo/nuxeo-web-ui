@@ -17,6 +17,7 @@ Contributors:
 */
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import moment from 'moment';
 
 /**
 An element for managing authentication tokens.

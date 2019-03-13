@@ -40,6 +40,8 @@ import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 import { mimeTypes } from './nuxeo-mime-types.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import moment from 'moment';
+
 Polymer({
   _template: html`
     <style include="iron-flex iron-flex-alignment">
