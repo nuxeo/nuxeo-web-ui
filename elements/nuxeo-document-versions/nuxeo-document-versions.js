@@ -41,6 +41,8 @@ import './nuxeo-document-versions-list.js';
 import './nuxeo-document-create-version.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import moment from 'moment';
+
 Polymer({
   _template: html`
     <style>
