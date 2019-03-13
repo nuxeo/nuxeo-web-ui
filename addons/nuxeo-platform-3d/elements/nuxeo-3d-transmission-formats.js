@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@ limitations under the License.
 
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
+/**
 `nuxeo-3d-transmission-formats` lists the transmission formats of a 3D document (if available).
 These formats can be downloaded individually or directly loaded into `nuxeo-3d-preview` elements on the page.
 
@@ -26,12 +30,9 @@ Example - Load a ThreeD document:
 
 @group Nuxeo 3D Elements
 @element nuxeo-3d-transmission-formats
--->
-
-<dom-module id="nuxeo-3d-transmission-formats">
-
-  <template>
-
+*/
+Polymer({
+  _template: html`
     <style>
       :host {
         display: block;
@@ -96,12 +97,10 @@ Example - Load a ThreeD document:
               <div class="format-polygons item">
                 <iron-icon class="format-info-element" icon="image:details"></iron-icon>
                 <span class="layout flex format-info-element">[[_getPolyInfo(format)]]</span>
-                <template class="format-info-element" is="dom-if"
-                          if="{{format.info.geometry_lod_success}}">
+                <template class="format-info-element" is="dom-if" if="{{format.info.geometry_lod_success}}">
                   <iron-icon icon="icons:done"></iron-icon>
                 </template>
-                <template class="format-info-element" is="dom-if"
-                          if="{{!format.info.geometry_lod_success}}">
+                <template class="format-info-element" is="dom-if" if="{{!format.info.geometry_lod_success}}">
                   <iron-icon icon="icons:warning"></iron-icon>
                 </template>
                 <span class="layout flex format-info-element">[[_getPolyNumber(format)]] [[i18n('threeDViewLayout.unit.polygons')]]</span>
@@ -110,12 +109,10 @@ Example - Load a ThreeD document:
                 <template is="dom-if" if="{{_hasTextures(format)}}">
                   <iron-icon class="format-info-element" icon="image:image"></iron-icon>
                   <span class="layout flex format-info-element">[[_getTexInfo(format)]]</span>
-                  <template class="format-info-element" is="dom-if"
-                            if="{{format.info.texture_lod_success}}">
+                  <template class="format-info-element" is="dom-if" if="{{format.info.texture_lod_success}}">
                     <iron-icon icon="icons:done"></iron-icon>
                   </template>
-                  <template class="format-info-element" is="dom-if"
-                            if="{{!format.info.texture_lod_success}}">
+                  <template class="format-info-element" is="dom-if" if="{{!format.info.texture_lod_success}}">
                     <iron-icon icon="icons:warning"></iron-icon>
                   </template>
                   <span class="layout flex format-info-element">[[_getTexSize(format)]]</span>
@@ -124,11 +121,11 @@ Example - Load a ThreeD document:
             </div>
             <div class="format-buttons">
               <div>
-                <paper-icon-button icon="icons:visibility" on-tap="_loadFormat" noink></paper-icon-button>
+                <paper-icon-button icon="icons:visibility" on-tap="_loadFormat" noink=""></paper-icon-button>
                 <paper-tooltip>[[i18n('threeDViewLayout.transmissionFormats.preview')]]</paper-tooltip>
               </div>
               <div>
-                <paper-icon-button icon="icons:file-download" on-tap="_downloadFormat" noink></paper-icon-button>
+                <paper-icon-button icon="icons:file-download" on-tap="_downloadFormat" noink=""></paper-icon-button>
                 <paper-tooltip>[[i18n('threeDViewLayout.transmissionFormats.download')]]</paper-tooltip>
               </div>
             </div>
@@ -139,72 +136,67 @@ Example - Load a ThreeD document:
     <template is="dom-if" if="{{!_hasItems(document.properties.threed:transmissionFormats)}}">
       <p>[[i18n('threeDViewLayout.transmissionFormats.notAvailable')]]</p>
     </template>
+`,
 
-  </template>
+  is: 'nuxeo-3d-transmission-formats',
 
-</dom-module>
-<script>
-  Polymer({
-    is: 'nuxeo-3d-transmission-formats',
-
-    properties: {
-      /**
-       * The ThreeD `document` with (or without) transmission formats.
-       */
-      document: {
-        type: Object,
-        notify: true
-      }
-    },
-
-    behaviors: [Nuxeo.I18nBehavior],
-
-    _hasItems: function(list) {
-      return list.length > 0;
-    },
-
-    _formatAsReadable: function(value, base, unit) {
-      value = Number(value);
-      if (value < base) {
-        return value + ' ' + unit;
-      }
-      var exp = parseInt((Math.log(value) / Math.log(base)));
-      var pre = String(('kMGTPE').charAt(exp - 1));
-      return (Math.round(value / Math.pow(base, exp) * 10) / 10) + ' ' + pre + unit;
-    },
-
-    _getPolyInfo: function(f) {
-      var perc = f.percPoly == null ? '' : f.percPoly + ' %';
-      var max = f.maxPoly == null ? '' : '< ' + this._formatAsReadable(f.maxPoly, 1000, '');
-      return f.percPoly != null && f.maxPoly != null ? perc + ' | ' + max : perc + max;
-    },
-
-    _getPolyNumber: function(f) {
-      return this._formatAsReadable(f.info.polygons, 1000, '');
-    },
-
-    _hasTextures: function(f) {
-      return f.info.textures_size > 0;
-    },
-
-    _getTexInfo: function(f) {
-      var perc = f.percTex == null ? '' : f.percTex + ' %';
-      var max = f.maxTex == null ? '' : '< ' + f.maxTex;
-      return f.percTex != null && f.maxTex != null ? perc + ' | ' + max : perc + max;
-    },
-
-    _getTexSize: function(f) {
-      return this._hasTextures(f) ? this._formatAsReadable(f.info.textures_size, 1024, 'B') : null;
-    },
-
-    _loadFormat: function(e) {
-      this.fire('3d-viewer-content-change', {
-        content: e.model.format.content.data
-      });
-    },
-
-    _downloadFormat: function(e) {
-      location.href = e.model.format.content.data;
+  properties: {
+    /**
+     * The ThreeD `document` with (or without) transmission formats.
+     */
+    document: {
+      type: Object,
+      notify: true
     }
-  });
-</script>
+  },
+
+  behaviors: [I18nBehavior],
+
+  _hasItems: function(list) {
+    return list.length > 0;
+  },
+
+  _formatAsReadable: function(value, base, unit) {
+    value = Number(value);
+    if (value < base) {
+      return value + ' ' + unit;
+    }
+    var exp = parseInt((Math.log(value) / Math.log(base)));
+    var pre = String(('kMGTPE').charAt(exp - 1));
+    return (Math.round(value / Math.pow(base, exp) * 10) / 10) + ' ' + pre + unit;
+  },
+
+  _getPolyInfo: function(f) {
+    var perc = f.percPoly == null ? '' : f.percPoly + ' %';
+    var max = f.maxPoly == null ? '' : '< ' + this._formatAsReadable(f.maxPoly, 1000, '');
+    return f.percPoly != null && f.maxPoly != null ? perc + ' | ' + max : perc + max;
+  },
+
+  _getPolyNumber: function(f) {
+    return this._formatAsReadable(f.info.polygons, 1000, '');
+  },
+
+  _hasTextures: function(f) {
+    return f.info.textures_size > 0;
+  },
+
+  _getTexInfo: function(f) {
+    var perc = f.percTex == null ? '' : f.percTex + ' %';
+    var max = f.maxTex == null ? '' : '< ' + f.maxTex;
+    return f.percTex != null && f.maxTex != null ? perc + ' | ' + max : perc + max;
+  },
+
+  _getTexSize: function(f) {
+    return this._hasTextures(f) ? this._formatAsReadable(f.info.textures_size, 1024, 'B') : null;
+  },
+
+  _loadFormat: function(e) {
+    this.fire('3d-viewer-content-change', {
+      content: e.model.format.content.data
+    });
+  },
+
+  _downloadFormat: function(e) {
+    location.href = e.model.format.content.data;
+  }
+});

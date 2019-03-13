@@ -3,6 +3,7 @@ const merge = require('webpack-merge')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { ProvidePlugin } = require('webpack');
 
 const ENV = process.argv.find(arg => arg.includes('production'))
   ? 'production'
@@ -41,10 +42,6 @@ const third_party = [
   {
     from: 'node_modules/jquery/dist/jquery.min.js',
     to: join(TARGET, 'vendor/jquery')
-  },
-  {
-    from: 'node_modules/three',
-    to: join(TARGET, 'vendor/three')
   }
 ]
 
@@ -110,7 +107,12 @@ const common = merge([
           },
         },
       ],
-    }
+    },
+    plugins: [
+      new ProvidePlugin({
+        THREE: 'three'
+      })
+    ]
   }
 ]);
 

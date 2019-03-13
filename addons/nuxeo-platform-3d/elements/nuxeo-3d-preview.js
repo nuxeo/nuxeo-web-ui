@@ -1,4 +1,4 @@
-<!--
+/**
 (C) Copyright 2015 Nuxeo SA (http://nuxeo.com/) and others.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@ limitations under the License.
 
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
--->
+*/
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import './nuxeo-3d-viewer.js';
 
-<link rel="import" href="nuxeo-3d-viewer.html">
-
-<!--
+/**
 `nuxeo-3d-preview` allows the visualization of a 3D document.
 Download and delete actions are available below the WebGL viewer.
 
@@ -30,12 +31,9 @@ Example - Load a ThreeD document:
 
 @group Nuxeo 3D Elements
 @element nuxeo-3d-preview
--->
-
-<dom-module id="nuxeo-3d-preview">
-
-  <template>
-
+*/
+Polymer({
+  _template: html`
     <style>
       :host {
         display: block;
@@ -67,7 +65,7 @@ Example - Load a ThreeD document:
       </template>
     </template>
     <template is="dom-if" if="{{!document.properties.file:content}}">
-      <nuxeo-dropzone document="{{document}}" xpath="{{file:content}}" update-document></nuxeo-dropzone>
+      <nuxeo-dropzone document="{{document}}" xpath="{{file:content}}" update-document=""></nuxeo-dropzone>
     </template>
     <div class="horizontal layout center">
       <template is="dom-if" if="[[document.properties.file:content]]">
@@ -84,28 +82,23 @@ Example - Load a ThreeD document:
         </p>
       </template>
     </div>
+`,
 
-  </template>
+  is: 'nuxeo-3d-preview',
 
-</dom-module>
-<script>
-  Polymer({
-    is: 'nuxeo-3d-preview',
-
-    properties: {
-      /**
-       * The ThreeD `document` to be previewed.
-       */
-      document: {
-        type: Object,
-        notify: true
-      }
-    },
-
-    behaviors: [Nuxeo.I18nBehavior],
-
-    _hasItems: function(list) {
-      return list.length > 0;
+  properties: {
+    /**
+     * The ThreeD `document` to be previewed.
+     */
+    document: {
+      type: Object,
+      notify: true
     }
-  });
-</script>
+  },
+
+  behaviors: [I18nBehavior],
+
+  _hasItems: function(list) {
+    return list.length > 0;
+  }
+});
