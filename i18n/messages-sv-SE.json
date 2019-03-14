@@ -490,6 +490,7 @@
   "label.description": "Beskrivning",
   "label.document.type.audio": "Ljud",
   "label.document.type.collection": "Samling",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Domän",
   "label.document.type.easysharefolder": "Easyshare Folder",
   "label.document.type.file": "Fil",
