@@ -168,7 +168,7 @@ Polymer({
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
             <paper-spinner active$="[[loading]]"></paper-spinner>
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle="" hidden$="[[loading]]"></iron-icon>
+            <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]"></iron-icon>
           </template>
           <span class="node-name flex">
             <a href$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>

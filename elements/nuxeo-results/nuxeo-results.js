@@ -173,7 +173,7 @@ Polymer({
 
     </div>
 
-    <iron-localstorage id="prefStorage" name="[[_localStorageName]]" value="{{_settings}}" on-iron-localstorage-load="restoreSettings" on-iron-localstorage-load-empty="initializeSettings" auto-save-disabled="">
+    <iron-localstorage id="prefStorage" name="[[_localStorageName]]" value="{{_settings}}" on-iron-localstorage-load="restoreSettings" on-iron-localstorage-load-empty="initializeSettings" auto-save-disabled>
     </iron-localstorage>
 `,
 

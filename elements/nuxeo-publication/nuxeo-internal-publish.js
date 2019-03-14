@@ -69,14 +69,14 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing="">
+    <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing>
     </nuxeo-operation>
 
     <nuxeo-document id="srcDoc">
     </nuxeo-document>
 
     <div class="container">
-      <nuxeo-document-suggestion id="target" required="" label="[[i18n('publication.internal.location')]]" placeholder="[[i18n('publication.internal.location.placeholder')]]" selected-item="{{publishSpace}}" min-chars="0" selection-formatter="[[targetFormatter]]" enrichers="permissions" page-provider="publish_space_suggestion" repository="[[document.repository]]">
+      <nuxeo-document-suggestion id="target" required label="[[i18n('publication.internal.location')]]" placeholder="[[i18n('publication.internal.location.placeholder')]]" selected-item="{{publishSpace}}" min-chars="0" selection-formatter="[[targetFormatter]]" enrichers="permissions" page-provider="publish_space_suggestion" repository="[[document.repository]]">
       </nuxeo-document-suggestion>
       <template is="dom-if" if="[[errorMessage]]">
         <span class="horizontal layout error">[[errorMessage]]</span>
@@ -103,9 +103,9 @@ Polymer({
       </div>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button id="publish" noink="" class="primary" on-tap="_publish" disabled$="[[!_canPublish(document,publishSpace)]]">
+        <paper-button id="publish" noink class="primary" on-tap="_publish" disabled$="[[!_canPublish(document,publishSpace)]]">
             [[i18n('publication.publish')]]
         </paper-button>
       </div>

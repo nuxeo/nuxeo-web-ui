@@ -186,18 +186,18 @@ Polymer({
       </div>
       <div id="diffPane">
         <template is="dom-repeat" items="[[_getCommonSchemas(_schemas, showAll, _delta)]]" as="schema" sort="_sortSchemas">
-          <nuxeo-card heading="[[schema.name]]" collapsible="" opened="">
+          <nuxeo-card heading="[[schema.name]]" collapsible opened>
             <div class="deltaPane">
               <template is="dom-repeat" items="[[_getCommonSchemaProperties(schema, showAll, _delta)]]" as="property">
                 <!-- unified view -->
                 <template is="dom-if" if="[[unifiedView]]">
-                  <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" unified="" display-label=""></nuxeo-object-diff>
+                  <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" unified display-label></nuxeo-object-diff>
                 </template>
                 <!-- side-by-side view -->
                 <template is="dom-if" if="[[!unifiedView]]">
                   <div class="side-by-side">
-                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-additions="" display-label=""></nuxeo-object-diff>
-                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-deletions="" display-label=""></nuxeo-object-diff>
+                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-additions display-label></nuxeo-object-diff>
+                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-deletions display-label></nuxeo-object-diff>
                   </div>
                 </template>
               </template>

@@ -74,7 +74,7 @@ Polymer({
 
         <nuxeo-data-table-column name="[[i18n('cloudProviders.enabled')]]" field="isEnabled" sort-by="isEnabled">
           <template>
-            <paper-checkbox noink="" checked="[[item.isEnabled]]" disabled=""></paper-checkbox>
+            <paper-checkbox noink checked="[[item.isEnabled]]" disabled></paper-checkbox>
           </template>
         </nuxeo-data-table-column>
 
@@ -87,12 +87,12 @@ Polymer({
       </nuxeo-data-table>
     </nuxeo-card>
 
-    <nuxeo-dialog id="dialog" with-backdrop="" no-auto-focus="">
+    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('cloudProviders.popup.editEntry')]]</h2>
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-input required="" label="[[i18n('cloudProviderEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
+            <nuxeo-input required label="[[i18n('cloudProviderEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
             </nuxeo-input>
 
             <nuxeo-input label="[[i18n('cloudProviderEdit.description')]]" name="description" value="{{_selectedEntry.description}}">
@@ -116,15 +116,15 @@ Polymer({
             <nuxeo-input label="[[i18n('cloudProviderEdit.scopes')]]" name="scopes" value="{{_selectedEntry.scopes}}">
             </nuxeo-input>
 
-            <paper-checkbox noink="" id="isEnabled" checked="{{_selectedEntry.isEnabled}}">
+            <paper-checkbox noink id="isEnabled" checked="{{_selectedEntry.isEnabled}}">
               [[i18n('cloudProviderEdit.isEnabled')]]
             </paper-checkbox>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button id="cancel" name="cancel" noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
-        <paper-button id="save" name="save" noink="" class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
+        <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

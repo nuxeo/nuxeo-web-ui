@@ -78,7 +78,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation auto="" id="roots" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
+    <nuxeo-operation auto id="roots" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
     <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params="{&quot;enable&quot;: false}"></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">

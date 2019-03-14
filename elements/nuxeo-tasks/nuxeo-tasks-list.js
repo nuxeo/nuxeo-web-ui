@@ -113,7 +113,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-data-list items="[[tasks]]" id="list" as="task" selected-item="{{_selection}}" empty-label="[[i18n('tasksList.noTasks')]]" selection-enabled="" select-on-tap="">
+    <nuxeo-data-list items="[[tasks]]" id="list" as="task" selected-item="{{_selection}}" empty-label="[[i18n('tasksList.noTasks')]]" selection-enabled select-on-tap>
       <template>
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
           <div class="task-box">

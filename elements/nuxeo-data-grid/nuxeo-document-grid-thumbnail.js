@@ -210,7 +210,7 @@ Polymer({
           <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
         </div>
         <div class="select">
-          <paper-icon-button noink="" icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
+          <paper-icon-button noink icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
         </div>
       </template>
     </div>

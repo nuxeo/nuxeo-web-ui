@@ -61,7 +61,7 @@ Polymer({
       <nuxeo-tooltip for="button">[[_label]]</nuxeo-tooltip>
     </template>
 
-    <paper-dialog id="dialog" class="dialog" with-backdrop="">
+    <paper-dialog id="dialog" class="dialog" with-backdrop>
       <iframe id="iframe" frameborder="0" scrolling="auto" on-load="_onLoad"></iframe>
     </paper-dialog>
 `,

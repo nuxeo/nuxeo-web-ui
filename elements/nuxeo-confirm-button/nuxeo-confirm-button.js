@@ -58,15 +58,15 @@ Polymer({
       }
     </style>
 
-    <paper-button noink="" id="button" class="primary" on-tap="_toggleDialog">
+    <paper-button noink id="button" class="primary" on-tap="_toggleDialog">
       <slot></slot>
     </paper-button>
 
-    <nuxeo-dialog id="dialog" class="dialog" no-overlap="" horizontal-align="auto" vertical-align="auto" on-iron-overlay-closed="_dismiss">
+    <nuxeo-dialog id="dialog" class="dialog" no-overlap horizontal-align="auto" vertical-align="auto" on-iron-overlay-closed="_dismiss">
       <div class="title">[[dialogTitle]]</div>
       <div class="actions">
-        <paper-button noink="" dialog-dismiss="">[[dialogDismiss]]</paper-button>
-        <paper-button noink="" dialog-confirm="" class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
+        <paper-button noink dialog-dismiss>[[dialogDismiss]]</paper-button>
+        <paper-button noink dialog-confirm class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

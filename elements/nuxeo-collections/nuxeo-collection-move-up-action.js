@@ -41,7 +41,7 @@ Polymer({
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members)]]">
       <div class="action" on-tap="moveUp">
-        <paper-icon-button noink="" id="upButton" icon="icons:arrow-upward"></paper-icon-button>
+        <paper-icon-button noink id="upButton" icon="icons:arrow-upward"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
       </div>
       <nuxeo-tooltip for="upButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>

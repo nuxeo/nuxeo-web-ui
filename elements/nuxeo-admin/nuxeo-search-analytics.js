@@ -107,7 +107,7 @@ Polymer({
       </nuxeo-card>
 
       <!-- Number of calls per hour -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" with-date-intervals="hour" without-extended-bounds="" date-format="HH" data="{{callsPerHour}}" index="[[index]]">
+      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" with-date-intervals="hour" without-extended-bounds date-format="HH" data="{{callsPerHour}}" index="[[index]]">
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">

@@ -198,7 +198,7 @@ Polymer({
             <nuxeo-page-provider id="collectionsProvider" provider="user_collections" page-size="40" params="{&quot;searchTerm&quot;:&quot;%&quot;,&quot;user&quot;:&quot;\$currentUser&quot;}" sort="{&quot;dc:modified&quot;:&quot;desc&quot;}" schemas="dublincore,common" enrichers="permissions" headers="{&quot;X-NXfetch.document&quot;: &quot;properties&quot;}">
             </nuxeo-page-provider>
 
-            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" selected-item="{{selectedCollection}}" selection-enabled="" select-on-tap="" as="collection" empty-label="[[i18n('collections.empty')]]" empty-label-when-filtered="[[i18n('collections.empty')]]">
+            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" selected-item="{{selectedCollection}}" selection-enabled select-on-tap as="collection" empty-label="[[i18n('collections.empty')]]" empty-label-when-filtered="[[i18n('collections.empty')]]">
               <template>
                 <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                   <div class="collection-box">
@@ -227,7 +227,7 @@ Polymer({
         <neon-animatable>
 
           <div id="queue" hidden$="{{!_isDisplayMembers}}">
-            <nuxeo-data-list id="membersList" selected-item="{{selectedMember}}" selection-enabled="" select-on-tap="" as="member" empty-label="[[i18n('collections.members.empty')]]" empty-label-when-filtered="[[i18n('collections.members.empty')]]">
+            <nuxeo-data-list id="membersList" selected-item="{{selectedMember}}" selection-enabled select-on-tap as="member" empty-label="[[i18n('collections.members.empty')]]" empty-label-when-filtered="[[i18n('collections.members.empty')]]">
               <template>
                 <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
 

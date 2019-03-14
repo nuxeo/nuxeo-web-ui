@@ -65,7 +65,7 @@ Polymer({
       </template>
     </template>
     <template is="dom-if" if="{{!document.properties.file:content}}">
-      <nuxeo-dropzone document="{{document}}" xpath="{{file:content}}" update-document=""></nuxeo-dropzone>
+      <nuxeo-dropzone document="{{document}}" xpath="{{file:content}}" update-document></nuxeo-dropzone>
     </template>
     <div class="horizontal layout center">
       <template is="dom-if" if="[[document.properties.file:content]]">

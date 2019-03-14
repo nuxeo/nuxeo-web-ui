@@ -74,7 +74,7 @@ Polymer({
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
 
     <div class="page">
-      <nuxeo-card id="detailsCard" heading="[[i18n('documentPage.details')]]" collapsible="">
+      <nuxeo-card id="detailsCard" heading="[[i18n('documentPage.details')]]" collapsible>
         <div class="details">
           <div class="section">
             <h3>[[i18n('documentPage.info')]]</h3>
@@ -97,7 +97,7 @@ Polymer({
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h3>[[i18n('documentPage.tags')]]</h3>
-              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags="" placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!hasPermission(document, 'Write')]]">&gt;
+              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!hasPermission(document, 'Write')]]">&gt;
               </nuxeo-tag-suggestion>
             </div>
           </template>

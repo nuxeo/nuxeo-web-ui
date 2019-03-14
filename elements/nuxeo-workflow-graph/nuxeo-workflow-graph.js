@@ -143,14 +143,14 @@ Polymer({
 
     <nuxeo-resource id="graphResource" path="/workflow/[[workflowId]]/graph" response="{{graph}}" headers="{&quot;Content-Type&quot;:&quot;application/json&quot;}"></nuxeo-resource>
 
-    <nuxeo-dialog id="graphDialog" with-backdrop="">
+    <nuxeo-dialog id="graphDialog" with-backdrop>
       <paper-dialog-scrollable>
         <div class="graph-container">
           <div id="container"></div>
         </div>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button noink="" class="primary" dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+        <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

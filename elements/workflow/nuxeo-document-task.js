@@ -107,8 +107,8 @@ Polymer({
               <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
             </div>
             <div class="options">
-              <paper-button id="reassignBtn" noink="" dialog-confirm="" on-tap="_toggleAssignmentDialog" data-args="reassign" hidden$="[[!task.taskInfo.allowTaskReassignment]]">[[i18n('tasks.reassign')]]</paper-button>
-              <paper-button id="delegateBtn" noink="" dialog-confirm="" on-tap="_toggleAssignmentDialog" data-args="delegate">[[i18n('tasks.delegate')]]</paper-button>
+              <paper-button id="reassignBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="reassign" hidden$="[[!task.taskInfo.allowTaskReassignment]]">[[i18n('tasks.reassign')]]</paper-button>
+              <paper-button id="delegateBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="delegate">[[i18n('tasks.delegate')]]</paper-button>
             </div>
           </div>
           <div class="horizontal spaced">
@@ -136,7 +136,7 @@ Polymer({
           <div class="horizontal">
             <div class="options">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-                <paper-button noink="" dialog-confirm="" class="primary" name$="[[item.name]]" on-tap="_processTask">[[i18n(item.label)]]</paper-button>
+                <paper-button noink dialog-confirm class="primary" name$="[[item.name]]" on-tap="_processTask">[[i18n(item.label)]]</paper-button>
               </template>
             </div>
           </div>

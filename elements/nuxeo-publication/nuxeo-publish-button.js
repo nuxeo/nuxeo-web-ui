@@ -79,14 +79,14 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document, documents.splices)]]">
       <div class="action" on-tap="_toggleDialog">
-        <paper-icon-button id="publishButton" icon="[[icon]]" noink=""></paper-icon-button>
+        <paper-icon-button id="publishButton" icon="[[icon]]" noink></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
         <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>
 
-    <nuxeo-dialog id="publishDialog" modal="" opened="{{opened}}" no-auto-focus="">
-      <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink="">
+    <nuxeo-dialog id="publishDialog" modal opened="{{opened}}" no-auto-focus>
+      <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot slot="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="container" class="vertical layout flex">

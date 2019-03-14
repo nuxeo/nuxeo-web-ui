@@ -75,9 +75,9 @@ Polymer({
 
     </style>
 
-    <nuxeo-operation id="unpublishOp" op="Document.Delete" sync-indexing="">
+    <nuxeo-operation id="unpublishOp" op="Document.Delete" sync-indexing>
     </nuxeo-operation>
-    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing="" input="[[_src]]">
+    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[_src]]">
     </nuxeo-operation>
     <nuxeo-operation id="srcDocOp" op="Proxy.GetSourceDocument" input="[[document.uid]]">
     </nuxeo-operation>

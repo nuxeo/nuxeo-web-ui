@@ -83,7 +83,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-resource auto="" id="tokens" path="/token" params="[[_params(application)]]" on-response="_handleTokens"></nuxeo-resource>
+    <nuxeo-resource auto id="tokens" path="/token" params="[[_params(application)]]" on-response="_handleTokens"></nuxeo-resource>
 
     <nuxeo-resource id="token" path="/token"></nuxeo-resource>
 

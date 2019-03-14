@@ -57,7 +57,7 @@ Polymer({
 
     </style>
 
-    <paper-fab mini="" noink="" id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
+    <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
     <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
 `,
 

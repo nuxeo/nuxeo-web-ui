@@ -541,10 +541,10 @@ Polymer({
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}">
     </nuxeo-document>
 
-    <nuxeo-sardine hidden=""></nuxeo-sardine>
+    <nuxeo-sardine hidden></nuxeo-sardine>
 
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
-    <nuxeo-operation id="moveDocumentsOp" sync-indexing=""></nuxeo-operation>
+    <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
     <nuxeo-resource id="tasks" path="/task" headers="{&quot;X-NXfetch.task&quot;: &quot;targetDocumentIds,actors&quot;}"></nuxeo-resource>
     <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.document": "properties", "X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
@@ -609,7 +609,7 @@ Polymer({
 
           <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
 
-          <nuxeo-search-page name="search" id="searchResults" heading="searchResults.results" search-form="[[searchForm]]" show-saved-search-actions=""></nuxeo-search-page>
+          <nuxeo-search-page name="search" id="searchResults" heading="searchResults.results" search-form="[[searchForm]]" show-saved-search-actions></nuxeo-search-page>
 
           <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 

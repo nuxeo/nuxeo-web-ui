@@ -121,7 +121,7 @@ Polymer({
       </div>
     </div>
 
-    <nuxeo-dialog id="selectedItemsPopup" no-auto-focus="" with-backdrop="">
+    <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
       <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <template is="dom-repeat" items="[[selectedItems]]">
@@ -131,7 +131,7 @@ Polymer({
         </template>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

@@ -104,7 +104,7 @@ Polymer({
 
     <template is="dom-if" if="[[_allowReplies(level)]]">
       <div class="reply-area">
-        <paper-textarea id="replyContainer" placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]" value="{{reply}}" max-rows="[[_computeMaxRows()]]" no-label-float="" on-keydown="_checkForEnter">
+        <paper-textarea id="replyContainer" placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]" value="{{reply}}" max-rows="[[_computeMaxRows()]]" no-label-float on-keydown="_checkForEnter">
         </paper-textarea>
         <template is="dom-if" if="[[!_isBlank(reply)]]">
           <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>

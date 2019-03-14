@@ -67,18 +67,18 @@ Polymer({
       }
     </style>
 
-    <nuxeo-results id="results" display-mode="table" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-quick-filters="">
+    <nuxeo-results id="results" display-mode="table" name="[[name]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-quick-filters>
 
       <slot name="selectionActions" slot="selectionActions"></slot>
 
-      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="">
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled>
         <template>
           <nuxeo-document-grid-thumbnail class="grid-box" tabindex$="{{tabIndex}}" selected$="{{selected}}" selected-items="[[selectedItems]]" index="[[index]]" doc="[[item]]" on-navigate="_navigate">
           </nuxeo-document-grid-thumbnail>
         </template>
       </nuxeo-data-grid>
 
-      <nuxeo-data-table name="table" icon="nuxeo:view-list" settings-enabled="" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="" on-row-clicked="_navigate">
+      <nuxeo-data-table name="table" icon="nuxeo:view-list" settings-enabled empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled on-row-clicked="_navigate">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" field="dc:title" sort-by="dc:title" flex="100">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -87,7 +87,7 @@ Polymer({
             </a>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.type')]]" field="type" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.type')]]" field="type" hidden>
           <template>
             <nuxeo-tag>[[formatDocType(item.type)]]</nuxeo-tag>
           </template>
@@ -102,39 +102,39 @@ Polymer({
             <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]" field="currentLifeCycleState" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.state')]]" field="currentLifeCycleState" hidden>
           <template><span class="capitalize">[[formatLifecycleState(item.state)]]</span></template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" field="versionLabel" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]" field="versionLabel" hidden>
           <template>
             [[formatVersion(item)]]
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]" field="dc:created" sort-by="dc:created" flex="50" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.created')]]" field="dc:created" sort-by="dc:created" flex="50" hidden>
           <template>
             <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]" field="dc:creator" sort-by="dc:creator" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.author')]]" field="dc:creator" sort-by="dc:creator" hidden>
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" field="dc:nature" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" field="dc:nature" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
               [[formatDirectory(item.properties.dc:nature)]]
             </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" field="dc:coverage" hidden="">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" field="dc:coverage" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
               [[formatDirectory(item.properties.dc:coverage)]]
             </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects')]]" field="dc:subjects" hidden="" flex="60">
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.subjects')]]" field="dc:subjects" hidden flex="60">
           <template>
             <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
               <nuxeo-tag>[[formatDirectory(subject)]]</nuxeo-tag>

@@ -33,19 +33,19 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
-        <paper-icon-button noink="" icon="icons:open-in-new" id="driveBtn"></paper-icon-button>
+        <paper-icon-button noink icon="icons:open-in-new" id="driveBtn"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[i18n('driveEditButton.tooltip')]]</span>
       </div>
       <paper-tooltip for="driveBtn">[[i18n('driveEditButton.tooltip')]]</paper-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" with-backdrop="">
+    <nuxeo-dialog id="dialog" with-backdrop>
       <div class="vertical layout">
         <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
         <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

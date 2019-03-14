@@ -54,7 +54,7 @@ Polymer({
     <template is="dom-if" if="[[!document.properties.file:content.data]]">
       <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
       <template is="dom-if" if="[[_hasWritePermission(document)]]">
-        <nuxeo-dropzone document="{{document}}" update-document=""></nuxeo-dropzone>
+        <nuxeo-dropzone document="{{document}}" update-document></nuxeo-dropzone>
       </template>
     </template>
     <template is="dom-if" if="[[document.properties.file:content.data]]">

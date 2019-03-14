@@ -82,7 +82,7 @@ Polymer({
 
       <nuxeo-data-table-column name="[[i18n('cloudTokens.isShared')]]" field="isShared" sort-by="isShared">
         <template>
-          <paper-checkbox noink="" checked="[[item.isShared]]" disabled=""></paper-checkbox>
+          <paper-checkbox noink checked="[[item.isShared]]" disabled></paper-checkbox>
         </template>
       </nuxeo-data-table-column>
 
@@ -94,35 +94,35 @@ Polymer({
       </nuxeo-data-table-column>
     </nuxeo-data-table>
 
-    <nuxeo-dialog id="dialog" with-backdrop="" no-auto-focus="">
+    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('cloudTokens.popup.editEntry')]]</h2>
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-input disabled="" label="[[i18n('cloudTokenEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
+            <nuxeo-input disabled label="[[i18n('cloudTokenEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
             </nuxeo-input>
 
-            <nuxeo-input disabled="" label="[[i18n('cloudTokenEdit.nuxeoLogin')]]" name="description" value="{{_selectedEntry.nuxeoLogin}}">
+            <nuxeo-input disabled label="[[i18n('cloudTokenEdit.nuxeoLogin')]]" name="description" value="{{_selectedEntry.nuxeoLogin}}">
             </nuxeo-input>
 
-            <nuxeo-input required="" label="[[i18n('cloudTokenEdit.serviceLogin')]]" name="clientId" value="{{_selectedEntry.serviceLogin}}">
+            <nuxeo-input required label="[[i18n('cloudTokenEdit.serviceLogin')]]" name="clientId" value="{{_selectedEntry.serviceLogin}}">
             </nuxeo-input>
 
-            <nuxeo-date-picker name="creationDate" required="" label="[[i18n('cloudTokenEdit.creationDate')]]" value="{{_selectedEntry.creationDate}}">
+            <nuxeo-date-picker name="creationDate" required label="[[i18n('cloudTokenEdit.creationDate')]]" value="{{_selectedEntry.creationDate}}">
             </nuxeo-date-picker>
 
-            <paper-checkbox noink="" checked="{{_selectedEntry.isShared}}">
+            <paper-checkbox noink checked="{{_selectedEntry.isShared}}">
               [[i18n('cloudTokenEdit.isShared')]]
             </paper-checkbox>
 
-            <nuxeo-user-suggestion label="[[i18n('cloudTokenEdit.shareWith')]]" value="{{_selectedEntry.sharedWith}}" prefixed="" multiple="">
+            <nuxeo-user-suggestion label="[[i18n('cloudTokenEdit.shareWith')]]" value="{{_selectedEntry.sharedWith}}" prefixed multiple>
             </nuxeo-user-suggestion>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button id="cancel" name="cancel" noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
-        <paper-button id="save" name="save" noink="" class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
+        <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

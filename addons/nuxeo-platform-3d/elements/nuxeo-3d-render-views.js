@@ -71,7 +71,7 @@ Polymer({
             <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords">
             <div>
               <label class="layout flex-2">[[renderView.title]]</label>
-              <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink=""></paper-icon-button>
+              <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink></paper-icon-button>
               <paper-tooltip>[[i18n('threeDViewLayout.renderViews.download')]]</paper-tooltip>
             </div>
           </div>

@@ -85,7 +85,7 @@ Polymer({
         </div>
       </div>
 
-      <paper-fab id="createBtn" noink="" icon="nuxeo:add" on-tap="_displayWizard"></paper-fab>
+      <paper-fab id="createBtn" noink icon="nuxeo:add" on-tap="_displayWizard"></paper-fab>
        <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
        <paper-tooltip for="createBtn" position="left">[[i18n('documentCreateButton.tooltip')]]</paper-tooltip>
     </div>
