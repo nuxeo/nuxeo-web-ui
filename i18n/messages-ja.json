@@ -557,6 +557,7 @@
   "label.description": "説明",
   "label.document.type.audio": "オーディオ",
   "label.document.type.collection": "コレクション",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "ドメイン",
   "label.document.type.easysharefolder": "Easyshareフォルダ",
   "label.document.type.file": "ファイル",
