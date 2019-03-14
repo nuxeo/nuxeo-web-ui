@@ -39,7 +39,7 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(selectedDocuments)]]">
       <div class="action" on-tap="_doDiff">
-        <paper-icon-button noink="" id="diff" icon="nuxeo:compare"></paper-icon-button>
+        <paper-icon-button noink id="diff" icon="nuxeo:compare"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
       </div>
       <nuxeo-tooltip for="diff" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>

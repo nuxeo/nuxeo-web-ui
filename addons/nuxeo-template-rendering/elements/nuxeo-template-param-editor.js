@@ -189,14 +189,14 @@ Polymer({
       </div>
     </iron-pages>
 
-    <nuxeo-dialog id="editParamDialog" modal="" no-auto-focus="">
+    <nuxeo-dialog id="editParamDialog" modal no-auto-focus>
       <iron-form id="form" on-iron-form-submit="_submitSaveParam">
         <form class="vertical flex">
           <div class="container vertical">
             <span class="heading">[[i18n('templateRenderingPage.editParamDialog.heading')]]</span>
-            <paper-input label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]" pattern="[[_computeParamNamePattern(param, params)]]" error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]" value="{{selectedParamProperties.name}}" auto-validate="" always-float-label="" required=""></paper-input>
+            <paper-input label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]" pattern="[[_computeParamNamePattern(param, params)]]" error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]" value="{{selectedParamProperties.name}}" auto-validate always-float-label required></paper-input>
 
-            <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.type')]]" always-float-label="">
+            <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.type')]]" always-float-label>
               <paper-listbox slot="dropdown-content" selected="{{selectedParamProperties.type}}" attr-for-selected="name">
                 <template is="dom-repeat" items="[[paramTypes]]">
                   <paper-item name="[[item]]">[[item]]</paper-item>
@@ -205,7 +205,7 @@ Polymer({
             </paper-dropdown-menu>
 
             <template is="dom-if" if="[[_isSelectedParamType('String', selectedParamProperties.type)]]">
-              <paper-textarea label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-textarea>
+              <paper-textarea label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-textarea>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('Boolean', selectedParamProperties.type)]]">
               <div class="horizontal-layout">
@@ -221,7 +221,7 @@ Polymer({
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('source', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -230,7 +230,7 @@ Polymer({
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('picture', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -238,7 +238,7 @@ Polymer({
               </div>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('content', selectedParamProperties.type)]]">
-              <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label="">
+              <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label>
                 <paper-listbox class="dropdown-content" selected="{{selectedParamProperties.contentType}}" attr-for-selected="name">
                   <template is="dom-repeat" items="[[contentTypes]]">
                     <paper-item name="[[item]]">[[_getContentTypeLabel(item)]]</paper-item>
@@ -246,15 +246,15 @@ Polymer({
                 </paper-listbox>
               </paper-dropdown-menu>
               <template is="dom-if" if="[[_isSelectedContentTypeXPath(selectedParamProperties.contentType)]]">
-                <paper-input label="[[i18n('templateRenderingPage.paramType.content.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label=""></paper-input>
+                <paper-input label="[[i18n('templateRenderingPage.paramType.content.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
               </template>
             </template>
           </div>
           <div class="buttons">
             <div class="flex start-justified">
-              <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
             </div>
-            <paper-button noink="" class="primary" on-tap="_save" disabled$="[[!_isValid(collection)]]">
+            <paper-button noink class="primary" on-tap="_save" disabled$="[[!_isValid(collection)]]">
               [[i18n('command.save')]]
             </paper-button>
           </div>

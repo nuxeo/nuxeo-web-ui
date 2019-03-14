@@ -39,7 +39,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <iron-localstorage id="storage" name="[[name]]" value="{{creationStats}}" on-iron-localstorage-load-empty="initialize" auto-save-disabled="">
+    <iron-localstorage id="storage" name="[[name]]" value="{{creationStats}}" on-iron-localstorage-load-empty="initialize" auto-save-disabled>
     </iron-localstorage>
 `,
 

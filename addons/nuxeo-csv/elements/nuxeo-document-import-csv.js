@@ -253,13 +253,13 @@ Polymer({
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical">
         <div class="suggester">
-          <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" enrichers="permissions, subtypes" children="{{suggesterChildren}}" disabled="" always-float-label=""></nuxeo-path-suggestion>
+          <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" enrichers="permissions, subtypes" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
           <span class="error">​[[targetLocationError]]</span>
         </div>
 
 
         <div id="dropzone" class="vertical layout flex step">
-          <input hidden="" id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv">
+          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv">
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
@@ -293,7 +293,7 @@ Polymer({
                         </div>
                       </template>
                       <template is="dom-if" if="[[!complete]]">
-                        <paper-progress indeterminate=""></paper-progress>
+                        <paper-progress indeterminate></paper-progress>
                       </template>
                     </div>
                     <div class="clear">
@@ -316,14 +316,14 @@ Polymer({
 
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss="" on-tap="_cancel" disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button dialog-dismiss on-tap="_cancel" disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink="" class="primary" on-tap="_import" disabled$="[[!_canImport(_creating,hasFile)]]">
+          <paper-button noink class="primary" on-tap="_import" disabled$="[[!_canImport(_creating,hasFile)]]">
                         [[i18n('command.create')]]
                       </paper-button>
           <div class="layout" hidden$="[[!_creating]]">
             <span class="importing-label">[[i18n('documentImport.importing')]]</span>
-            <paper-spinner-lite active=""></paper-spinner-lite>
+            <paper-spinner-lite active></paper-spinner-lite>
           </div>
         </div>
       </div>
@@ -334,7 +334,7 @@ Polymer({
             <div hidden$="[[_error]]">
               <div class="name status">[[progressLabel]]</div>
               <div class="status">
-                <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate="">
+                <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate>
                 </paper-progress>
               </div>
             </div>
@@ -379,10 +379,10 @@ Polymer({
         </div>
 
         <div class="buttons horizontal end-justified layout">
-         <paper-button noink="" on-tap="_clear" disabled$="[[!_hasResult]]">
+         <paper-button noink on-tap="_clear" disabled$="[[!_hasResult]]">
                         [[i18n('csv.import.new')]]
           </paper-button>
-          <paper-button dialog-dismiss="" on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>
         </div>
       </div>
 

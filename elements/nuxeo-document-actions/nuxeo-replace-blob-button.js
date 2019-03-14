@@ -44,24 +44,24 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" sync-indexing=""></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" sync-indexing></nuxeo-document>
 
     <dom-if if="[[_isAvailable(document)]]">
       <template>
         <div class="action" on-tap="_toggleDialog">
-          <paper-icon-button id="replaceBtn" icon="[[icon]]" noink=""></paper-icon-button>
+          <paper-icon-button id="replaceBtn" icon="[[icon]]" noink></paper-icon-button>
           <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
         </div>
         <nuxeo-tooltip for="replaceBtn">[[_label]]</nuxeo-tooltip>
       </template>
     </dom-if>
 
-    <nuxeo-dialog id="dialog" with-backdrop="">
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('replaceBlobButton.dialog.heading')]]</h2>
       <nuxeo-dropzone id="dropzone" document="{{document}}" xpath="[[xpath]]" has-files="{{_canSubmit}}"></nuxeo-dropzone>
       <div class="buttons">
-        <paper-button dialog-dismiss="" on-tap="_cancel">[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button>
-        <paper-button noink="" class="primary" dialog-confirm="" on-tap="_replaceBlob" disabled="[[!_canSubmit]]">[[i18n('replaceBlobButton.dialog.replace')]]</paper-button>
+        <paper-button dialog-dismiss on-tap="_cancel">[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button>
+        <paper-button noink class="primary" dialog-confirm on-tap="_replaceBlob" disabled="[[!_canSubmit]]">[[i18n('replaceBlobButton.dialog.replace')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

@@ -95,7 +95,7 @@ Polymer({
         </div>
         <a class="viewGraph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</a>
         <template is="dom-if" if="[[_hasPermissionToAbandon(workflow.initiator, currentUser)]]">
-          <paper-button class="primary" on-tap="_abandonWorkflow" noink="">[[i18n('documentPage.abandon.workflow')]]</paper-button>
+          <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
         </template>
       </div>
     </template>
@@ -109,7 +109,7 @@ Polymer({
             <nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date>
           </span>
         </div>
-        <paper-button class="primary" on-tap="_processTask" noink="">[[i18n('documentPage.process.task')]]</paper-button>
+        <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
       </div>
     </template>
 
@@ -127,7 +127,7 @@ Polymer({
           <nuxeo-untrash-document-button document="[[document]]"></nuxeo-untrash-document-button>
         </template>
         <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
-          <nuxeo-delete-document-button document="[[document]]" hard=""></nuxeo-delete-document-button>
+          <nuxeo-delete-document-button document="[[document]]" hard></nuxeo-delete-document-button>
         </template>
       </div>
     </template>

@@ -151,12 +151,12 @@ Polymer({
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
 
-    <nuxeo-dialog id="dialog" with-backdrop="">
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('comments.deletion.dialog.heading')]]</h2>
       <div>[[_computeConfirmationLabel(comment.numberOfReplies)]]</div>
       <div class="buttons">
-        <paper-button name="dismiss" dialog-dismiss="">[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
-        <paper-button name="confirm" dialog-confirm="" on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
+        <paper-button name="dismiss" dialog-dismiss>[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
+        <paper-button name="confirm" dialog-confirm on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
@@ -169,7 +169,7 @@ Polymer({
             <span class="author">[[comment.author]]</span>
             <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate, i18n)]]</span>
             <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
-              <paper-menu-button id="options" no-animations="" close-on-activate="">
+              <paper-menu-button id="options" no-animations close-on-activate>
                 <paper-icon-button class="main-option" icon="more-vert" slot="dropdown-trigger" alt="menu">
                 </paper-icon-button>
                 <paper-listbox slot="dropdown-content">

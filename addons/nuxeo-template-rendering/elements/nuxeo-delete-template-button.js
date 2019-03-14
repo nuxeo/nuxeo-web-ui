@@ -38,12 +38,12 @@ Polymer({
     <nuxeo-operation id="deleteTemplatesOp" op="TemplateProcessor.Detach"></nuxeo-operation>
     <nuxeo-document id="template" doc-path="[[document.path]]"></nuxeo-document>
     <div id="delete" class="action" on-tap="_toggleDialog">
-      <paper-icon-button icon="icons:delete-sweep" noink=""></paper-icon-button>
+      <paper-icon-button icon="icons:delete-sweep" noink></paper-icon-button>
       <span class="label" hidden$="[[!showLabel]]">[[i18n('deleteTemplateButton.tooltip')]]</span>
     </div>
     <paper-tooltip for="delete">[[i18n('deleteTemplateButton.tooltip')]]</paper-tooltip>
 
-    <nuxeo-dialog id="dialog" modal="" no-auto-focus="">
+    <nuxeo-dialog id="dialog" modal no-auto-focus>
       <h2>[[i18n('deleteTemplateButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <div class="container horizontal layout">
@@ -52,9 +52,9 @@ Polymer({
       </paper-dialog-scrollable>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button noink="" class="primary" on-tap="_delete">
+        <paper-button noink class="primary" on-tap="_delete">
           [[i18n('deleteTemplateButton.dialog.confirm')]]
         </paper-button>
       </div>

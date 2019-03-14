@@ -47,7 +47,7 @@ Polymer({
 
     <nuxeo-resource id="taskAssignment" path="/task/[[task.id]]/[[action]]" params="[[params]]"></nuxeo-resource>
 
-    <nuxeo-dialog id="assignmentDialog" with-backdrop="" no-auto-focus="">
+    <nuxeo-dialog id="assignmentDialog" with-backdrop no-auto-focus>
       <h2>[[i18n(task.name)]]</h2>
       <paper-dialog-scrollable>
         <iron-form id="assignmentForm">
@@ -60,8 +60,8 @@ Polymer({
         </iron-form>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button id="cancel" noink="" dialog-dismiss="">[[i18n('command.close')]]</paper-button>
-        <paper-button id="confirm" noink="" class="primary" on-click="_processAssignment">[[_getActionLabel(action, i18n)]]</paper-button>
+        <paper-button id="cancel" noink dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button id="confirm" noink class="primary" on-click="_processAssignment">[[_getActionLabel(action, i18n)]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

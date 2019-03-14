@@ -80,7 +80,7 @@ Polymer({
 
     <div class="header">[[i18n('app.recentlyViewed')]]</div>
     <div class="content">
-      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document" selected-item="{{selectedRecent}}" selection-enabled="" select-on-tap="" empty-label="[[i18n('recentDocuments.empty')]]" empty-label-when-filtered="[[i18n('recentDocuments.empty')]]">
+      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document" selected-item="{{selectedRecent}}" selection-enabled select-on-tap empty-label="[[i18n('recentDocuments.empty')]]" empty-label-when-filtered="[[i18n('recentDocuments.empty')]]">
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-info">

@@ -134,7 +134,7 @@ Polymer({
       <label id="label">[[label]]</label>
     </template>
 
-    <input hidden="" id="input" type="file" on-change="_uploadInputFiles">
+    <input hidden id="input" type="file" on-change="_uploadInputFiles">
 
     <div id="details" hidden$="[[!hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
@@ -147,7 +147,7 @@ Polymer({
             </template>
           </div>
           <div class="actions" hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
-            <paper-icon-button noink="" icon="nuxeo:delete" on-tap="_deleteFile"></paper-icon-button>
+            <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"></paper-icon-button>
           </div>
         </div>
       </template>

@@ -110,7 +110,7 @@ Polymer({
       <nuxeo-audit-data event-id="download" where="{&quot;extended.downloadReason&quot;: &quot;download&quot;}" grouped-by="docUUID" group-limit="10" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{downloads}}">
       </nuxeo-audit-data>
 
-      <nuxeo-page-provider auto="" page-size="10" query="[[_downloadsQuery(downloads)]]" schemas="dublincore, common" current-page="{{downloadedDocs}}">
+      <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" schemas="dublincore, common" current-page="{{downloadedDocs}}">
       </nuxeo-page-provider>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">

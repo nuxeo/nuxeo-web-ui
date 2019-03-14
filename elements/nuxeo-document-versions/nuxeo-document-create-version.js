@@ -98,11 +98,11 @@ Polymer({
     <nuxeo-document id="doc" headers="[[headers]]" doc-id="[[document.uid]]" data="{{document}}" response="{{document}}">
     </nuxeo-document>
 
-    <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]" response="{{version}}" sync-indexing=""></nuxeo-operation>
+    <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]" response="{{version}}" sync-indexing></nuxeo-operation>
 
-    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase="">[[label]]</nuxeo-tag>
+    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase>[[label]]</nuxeo-tag>
 
-    <nuxeo-dialog id="dialog" class="dialog" with-backdrop="" on-iron-overlay-opened="_dialogOpened" on-iron-overlay-closed="_dialogClosed">
+    <nuxeo-dialog id="dialog" class="dialog" with-backdrop on-iron-overlay-opened="_dialogOpened" on-iron-overlay-closed="_dialogClosed">
       <h2>[[i18n('documentCreateVersion.title',
         document.properties.dc:title, document.properties.uid:major_version, document.properties.uid:minor_version)]]
       </h2>
@@ -119,8 +119,8 @@ Polymer({
         </paper-radio-group>
       </div>
       <div class="buttons">
-        <paper-button noink="" dialog-dismiss="">[[i18n('documentCreateVersion.dismiss')]]</paper-button>
-        <paper-button noink="" dialog-confirm="" class="primary" on-tap="_create">
+        <paper-button noink dialog-dismiss>[[i18n('documentCreateVersion.dismiss')]]</paper-button>
+        <paper-button noink dialog-confirm class="primary" on-tap="_create">
           [[i18n('documentCreateVersion.confirm')]]
         </paper-button>
       </div>

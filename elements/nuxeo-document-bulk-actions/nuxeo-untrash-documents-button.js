@@ -39,7 +39,7 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing=""></nuxeo-operation>
+    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="untrashDocuments">

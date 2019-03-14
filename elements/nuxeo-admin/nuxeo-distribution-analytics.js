@@ -82,7 +82,7 @@ Polymer({
           </div>
         </div>
 
-        <nuxeo-document-distribution-chart id="chart" index="_all" path="[[path]]" mode="count" include-version="" include-hidden="" include-deleted="">
+        <nuxeo-document-distribution-chart id="chart" index="_all" path="[[path]]" mode="count" include-version include-hidden include-deleted>
         </nuxeo-document-distribution-chart>
 
         <div class="horizontal layout center">
@@ -90,7 +90,7 @@ Polymer({
             <iron-icon icon="icons:track-changes"></iron-icon>
           </div>
           <div class="flex">
-            <paper-slider id="ratings" pin="" snaps="" max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
+            <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
           </div>
         </div>
       </nuxeo-card>

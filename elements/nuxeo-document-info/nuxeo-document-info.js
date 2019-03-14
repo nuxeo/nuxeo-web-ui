@@ -57,11 +57,11 @@ Polymer({
 
     <div class="item" name="process" hidden$="[[!_showProcess]]">
       <label>[[i18n('documentInfo.process')]]</label>
-      <div><nuxeo-tag uppercase="">[[i18n('documentInfo.process.running')]]</nuxeo-tag></div>
+      <div><nuxeo-tag uppercase>[[i18n('documentInfo.process.running')]]</nuxeo-tag></div>
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.state')]]</label>
-      <div><nuxeo-tag uppercase="">[[formatLifecycleState(document.state)]]</nuxeo-tag></div>
+      <div><nuxeo-tag uppercase>[[formatLifecycleState(document.state)]]</nuxeo-tag></div>
     </div>
     <template is="dom-if" if="[[hasFacet(document, 'Versionable')]]">
       <div class="item">
@@ -70,7 +70,7 @@ Polymer({
           <nuxeo-document-versions document="[[document]]"></nuxeo-document-versions>
         </template>
         <template is="dom-if" if="[[isProxy(document)]]">
-          <div><nuxeo-tag uppercase="">[[formatVersion(document)]]</nuxeo-tag></div>
+          <div><nuxeo-tag uppercase>[[formatVersion(document)]]</nuxeo-tag></div>
         </template>
       </div>
     </template>

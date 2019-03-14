@@ -52,13 +52,13 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <div class="action" on-tap="_openDialog">
-        <paper-icon-button noink="" id="[[layout]]-button" icon="[[icon]]"></paper-icon-button>
+        <paper-icon-button noink id="[[layout]]-button" icon="[[icon]]"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
       </div>
       <nuxeo-tooltip for="[[layout]]-button">[[i18n(label)]]</nuxeo-tooltip>
     </template>
 
-    <nuxeo-dialog id="[[layout]]-dialog" no-auto-focus="" with-backdrop="" modal="">
+    <nuxeo-dialog id="[[layout]]-dialog" no-auto-focus with-backdrop modal>
       <div class="container">
         <nuxeo-document-form-layout id="layout" document="[[document]]" layout="[[layout]]" on-document-updated="_closeDialog"></nuxeo-document-form-layout>
       </div>

@@ -71,7 +71,7 @@ Polymer({
     </nuxeo-card>
 
     <nuxeo-card>
-      <nuxeo-data-table id="table" paginable="" nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
+      <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
         <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
           <template>[[_formatActivity(item.eventId)]]</template>
         </nuxeo-data-table-column>
@@ -90,7 +90,7 @@ Polymer({
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-          <template><nuxeo-tag uppercase="">[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
+          <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-card>

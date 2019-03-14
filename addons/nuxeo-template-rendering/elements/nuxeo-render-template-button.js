@@ -41,16 +41,16 @@ Polymer({
     <nuxeo-operation id="getTemplatesOp" op="[[filterOp]]"></nuxeo-operation>
     <nuxeo-operation id="renderTemplateOp" op="[[renderOp]]"></nuxeo-operation>
     <div id="render" class="action" on-tap="_toggleDialog">
-      <paper-icon-button noink="" icon="[[icon]]" src="[[iconSrc]]"></paper-icon-button>
+      <paper-icon-button noink icon="[[icon]]" src="[[iconSrc]]"></paper-icon-button>
       <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
     </div>
     <paper-tooltip for="render">[[i18n(tooltip)]]</paper-tooltip>
 
-    <nuxeo-dialog id="dialog" modal="" no-auto-focus="">
+    <nuxeo-dialog id="dialog" modal no-auto-focus>
       <h2>[[i18n('renderTemplateButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">
-          <paper-dropdown-menu label="[[i18n('renderTemplateButton.dialog.instruction')]]" class="typeDropdown" noink="" always-float-label="" horizontal-align="left">
+          <paper-dropdown-menu label="[[i18n('renderTemplateButton.dialog.instruction')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
             <paper-listbox slot="dropdown-content" selected="{{selectedTemplate}}" attr-for-selected="key">
               <template is="dom-repeat" items="[[_templates]]">
                 <paper-item key="[[item]]">[[item.properties.dc:title]]</paper-item>
@@ -65,15 +65,15 @@ Polymer({
       </paper-dialog-scrollable>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button noink="" class="primary" on-tap="_render">
+        <paper-button noink class="primary" on-tap="_render">
           [[i18n('renderTemplateButton.dialog.render')]]
         </paper-button>
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="editParamsDialog" modal="" no-auto-focus="">
+    <nuxeo-dialog id="editParamsDialog" modal no-auto-focus>
       <h2>[[i18n('renderTemplateButton.editParamsDialog.heading', selectedTemplate.properties.dc:title)]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">
@@ -82,10 +82,10 @@ Polymer({
       </paper-dialog-scrollable>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button noink="" on-tap="_reset">[[i18n('renderTemplateButton.editParamsDialog.reset')]]</paper-button>
-        <paper-button noink="" class="primary" on-tap="_override">
+        <paper-button noink on-tap="_reset">[[i18n('renderTemplateButton.editParamsDialog.reset')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_override">
           [[i18n('renderTemplateButton.editParamsDialog.render')]]
         </paper-button>
       </div>

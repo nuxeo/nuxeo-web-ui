@@ -45,7 +45,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document-page document="[[document]]" opened=""></nuxeo-document-page>
+    <nuxeo-document-page document="[[document]]" opened></nuxeo-document-page>
 
     <div class="additional">
       <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]">

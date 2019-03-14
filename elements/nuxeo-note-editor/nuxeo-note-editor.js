@@ -100,10 +100,10 @@ Polymer({
             <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
           </template>
           <template is="dom-if" if="[[!_viewMode]]">
-            <paper-textarea value="{{_value}}" no-label-float="" placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
+            <paper-textarea value="{{_value}}" no-label-float placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
           </template>
           <div class="layout horizontal end-justified">
-            <paper-button name="editorSave" noink="" class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+            <paper-button name="editorSave" noink class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
         </div>
       </template>
@@ -115,10 +115,10 @@ Polymer({
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>
         <template is="dom-if" if="[[!_viewMode]]">
-          <paper-textarea value="{{_value}}" no-label-float="" placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
+          <paper-textarea value="{{_value}}" no-label-float placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
           <div class="layout horizontal end-justified">
-            <paper-button noink="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
-            <paper-button name="editorSave" noink="" class="primary" on-tap="_editorSave">[[i18n('command.save')]]</paper-button>
+            <paper-button noink on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button name="editorSave" noink class="primary" on-tap="_editorSave">[[i18n('command.save')]]</paper-button>
           </div>
         </template>
       </template>

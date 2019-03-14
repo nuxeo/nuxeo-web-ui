@@ -129,7 +129,7 @@ Polymer({
       </div>
     </nuxeo-page>
 
-    <nuxeo-dialog id="vocabularyEditDialog" with-backdrop="">
+    <nuxeo-dialog id="vocabularyEditDialog" with-backdrop>
       <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
       <iron-form id="form">
         <form>
@@ -138,8 +138,8 @@ Polymer({
         </form>
       </iron-form>
       <div class="buttons">
-        <paper-button name="cancel" noink="" dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
-        <paper-button name="save" noink="" class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
+        <paper-button name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

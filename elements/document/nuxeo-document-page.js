@@ -182,7 +182,7 @@ Polymer({
 
       <div class="side">
         <div class="scrollerHeader">
-          <paper-icon-button id="details" noink="" icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
+          <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
           <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
         </div>
         <div class="scroller">
@@ -206,7 +206,7 @@ Polymer({
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h3>[[i18n('documentPage.tags')]]</h3>
-              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags="" placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!isTaggable(document)]]">
+              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!isTaggable(document)]]">
               </nuxeo-tag-suggestion>
             </div>
           </template>

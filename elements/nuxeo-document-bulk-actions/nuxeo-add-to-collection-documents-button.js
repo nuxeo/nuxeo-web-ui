@@ -61,25 +61,25 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
       <div class="action" on-tap="_toggleDialog">
-        <paper-icon-button noink="" icon="nuxeo:collections" id="addColBut"></paper-icon-button>
+        <paper-icon-button noink icon="nuxeo:collections" id="addColBut"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
       </div>
       <nuxeo-tooltip for="addColBut" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop="">
+    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>
       <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
 
-        <nuxeo-selectivity id="nxSelect" label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]" operation="Collection.Suggestion" min-chars="0" placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]" value="{{collection}}" tagging="true" query-results-filter="[[resultsFilter]]" result-formatter="[[resultAndSelectionFormatter]]" selection-formatter="[[resultAndSelectionFormatter]]" new-entry-formatter="[[newEntryFormatter]]" required="">
+        <nuxeo-selectivity id="nxSelect" label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]" operation="Collection.Suggestion" min-chars="0" placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]" value="{{collection}}" tagging="true" query-results-filter="[[resultsFilter]]" result-formatter="[[resultAndSelectionFormatter]]" selection-formatter="[[resultAndSelectionFormatter]]" new-entry-formatter="[[newEntryFormatter]]" required>
         </nuxeo-selectivity>
-        <nuxeo-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]" value="{{description::input}}" hidden$="[[!_isNew(collection)]]" always-float-label="">
+        <nuxeo-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]" value="{{description::input}}" hidden$="[[!_isNew(collection)]]" always-float-label>
         </nuxeo-textarea>
       </paper-dialog-scrollable>
 
       <div class="buttons">
-        <paper-button noink="" dialog-dismiss="">[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button>
-        <paper-button noink="" class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
+        <paper-button noink dialog-dismiss>[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
           [[i18n('addToCollectionDocumentsButton.dialog.add')]]
         </paper-button>
       </div>

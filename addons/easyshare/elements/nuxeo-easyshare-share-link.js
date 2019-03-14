@@ -39,25 +39,25 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <div class="action" on-tap="_toggleDialog">
-        <paper-icon-button id="shareBtn" icon="[[icon]]" noink=""></paper-icon-button>
+        <paper-icon-button id="shareBtn" icon="[[icon]]" noink></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[i18n('shareButton.tooltip')]]</span>
       </div>
       <nuxeo-tooltip for="shareBtn">[[i18n('shareButton.tooltip')]]</nuxeo-tooltip>
     </template>
 
-    <nuxeo-dialog id="dialog" with-backdrop="">
+    <nuxeo-dialog id="dialog" with-backdrop>
       <div class="heading">
         <h2>[[i18n('shareButton.dialog.heading')]]</h2>
       </div>
-      <nuxeo-input id="permalink" label="[[i18n('easyshare.copy.label', document.properties.dc:title)]]" value="[[_buildPermalink(document)]]" autofocus="" readonly="">
+      <nuxeo-input id="permalink" label="[[i18n('easyshare.copy.label', document.properties.dc:title)]]" value="[[_buildPermalink(document)]]" autofocus readonly>
       </nuxeo-input>
 
       <template is="dom-if" if="[[_isEasyshare(document)]]">
-        <nuxeo-input id="easyshareLink" label="[[i18n('easysharefolder.share', document.properties.dc:title)]]" value="[[_buildEasysharelink(document)]]" autofocus="" readonly="">
+        <nuxeo-input id="easyshareLink" label="[[i18n('easysharefolder.share', document.properties.dc:title)]]" value="[[_buildEasysharelink(document)]]" autofocus readonly>
         </nuxeo-input>
       </template>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('shareButton.dialog.close')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('shareButton.dialog.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

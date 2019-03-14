@@ -227,7 +227,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" quick-filters="{{_quickFilters}}" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates="" skip-aggregates$="[[skipAggregates]]" on-error="_onError">
+    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" quick-filters="{{_quickFilters}}" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates skip-aggregates$="[[skipAggregates]]" on-error="_onError">
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
@@ -266,14 +266,14 @@ Polymer({
             <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
           </div>
           <div class="actions">
-            <paper-button noink="" class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset')]]
             </paper-button>
             <div class="layout horizontal">
-              <paper-button noink="" class="primary clear" on-tap="_clear">
+              <paper-button noink class="primary clear" on-tap="_clear">
                 [[i18n('command.clear')]]
               </paper-button>
-              <paper-button noink="" class="primary search" on-tap="_search" hidden$="[[auto]]">
+              <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
                 [[i18n('command.search')]]
               </paper-button>
             </div>
@@ -286,7 +286,7 @@ Polymer({
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
           </template>
-          <nuxeo-data-list nx-provider="provider" id="list" selected-item="{{selectedDocument}}" empty-label="[[i18n('searchForm.queue.noResults')]]" empty-label-when-filtered="" selection-enabled="" select-on-tap="">
+          <nuxeo-data-list nx-provider="provider" id="list" selected-item="{{selectedDocument}}" empty-label="[[i18n('searchForm.queue.noResults')]]" empty-label-when-filtered selection-enabled select-on-tap>
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
@@ -304,39 +304,39 @@ Polymer({
       </div>
     </div>
 
-    <nuxeo-dialog id="saveDialog" with-backdrop="" reparent="">
+    <nuxeo-dialog id="saveDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.savePopup.heading')]]</h2>
-      <paper-input id="savedSearchTitle" label="[[i18n('searchForm.savePopup.label')]]" autofocus="" no-label-float="">
+      <paper-input id="savedSearchTitle" label="[[i18n('searchForm.savePopup.label')]]" autofocus no-label-float>
       </paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
-        <paper-button noink="" class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="renameDialog" with-backdrop="" reparent="">
+    <nuxeo-dialog id="renameDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
-      <paper-input id="savedSearchRenameTitle" label="[[i18n('searchForm.renamePopup.label')]]" autofocus="" no-label-float="">
+      <paper-input id="savedSearchRenameTitle" label="[[i18n('searchForm.renamePopup.label')]]" autofocus no-label-float>
       </paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.cancel')]]</paper-button>
-        <paper-button noink="" class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="shareDialog" with-backdrop="" reparent="" opened="{{permissionsVisible}}">
+    <nuxeo-dialog id="shareDialog" with-backdrop reparent opened="{{permissionsVisible}}">
       <h2>[[i18n('searchForm.shared.heading')]]</h2>
       <nuxeo-document-permissions doc-id="[[selectedSearch.id]]" visible="[[permissionsVisible]]"></nuxeo-document-permissions>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="deleteDialog" with-backdrop="" reparent="">
+    <nuxeo-dialog id="deleteDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.delete.heading')]]</h2>
       <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('label.no')]]</paper-button>
-        <paper-button noink="" class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
+        <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
       </div>
     </nuxeo-dialog>
 `,

@@ -50,7 +50,7 @@ Polymer({
 
     </style>
 
-    <nuxeo-operation id="unpublishOp" op="Document.Delete" input="[[document]]" sync-indexing="">
+    <nuxeo-operation id="unpublishOp" op="Document.Delete" input="[[document]]" sync-indexing>
     </nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">

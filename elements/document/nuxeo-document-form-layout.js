@@ -51,7 +51,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]" sync-indexing=""></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]" sync-indexing></nuxeo-document>
 
     <iron-form id="form">
       <form>
@@ -59,8 +59,8 @@ Polymer({
           <nuxeo-document-layout id="layout" document="{{document}}" layout="[[layout]]"></nuxeo-document-layout>
         </div>
         <div class="actions">
-          <paper-button on-tap="cancel" noink="">[[i18n('command.cancel')]]</paper-button>
-          <paper-button id="save" on-tap="save" noink="" class="primary">[[i18n('command.save')]]</paper-button>
+          <paper-button on-tap="cancel" noink>[[i18n('command.cancel')]]</paper-button>
+          <paper-button id="save" on-tap="save" noink class="primary">[[i18n('command.save')]]</paper-button>
         </div>
       </form>
     </iron-form>

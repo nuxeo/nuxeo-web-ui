@@ -103,7 +103,7 @@ Polymer({
 
     </style>
 
-    <nuxeo-resource auto="" path="workflowModel" on-response="_handleWorkflowModelResponse">
+    <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse">
     </nuxeo-resource>
 
     <nuxeo-card class="dates">

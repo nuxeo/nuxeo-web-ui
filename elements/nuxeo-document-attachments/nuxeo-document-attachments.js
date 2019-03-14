@@ -68,7 +68,7 @@ Polymer({
     </div>
 
     <template is="dom-if" if="[[_hasWritePermission(document)]]">
-      <nuxeo-dropzone document="{{document}}" xpath="[[xpath]]" uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]" message="[[i18n('documentAttachments.upload.add')]]" drag-content-message="[[i18n('documentAttachments.upload.drop')]]" blob-list="" update-document="">
+      <nuxeo-dropzone document="{{document}}" xpath="[[xpath]]" uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]" message="[[i18n('documentAttachments.upload.add')]]" drag-content-message="[[i18n('documentAttachments.upload.drop')]]" blob-list update-document>
       </nuxeo-dropzone>
     </template>
 `,

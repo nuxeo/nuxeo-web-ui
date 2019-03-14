@@ -34,7 +34,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
-    <nuxeo-operation-button id="btn" operation="Blob.BulkDownload" input="[[_input(document, documents)]]" params="[[_params(document, documents)]]" icon="nuxeo:download" label="bulkDownload.tooltip" show-label$="[[showLabel]]" error-label="bulkDownload.error" async="" download=""></nuxeo-operation-button>
+    <nuxeo-operation-button id="btn" operation="Blob.BulkDownload" input="[[_input(document, documents)]]" params="[[_params(document, documents)]]" icon="nuxeo:download" label="bulkDownload.tooltip" show-label$="[[showLabel]]" error-label="bulkDownload.error" async download></nuxeo-operation-button>
 `,
 
   is: 'nuxeo-download-documents-button',

@@ -260,7 +260,7 @@ Polymer({
       <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar">
-          <paper-input noink="" id="searchInput" value="{{searchTerm}}" type="search" auto-focus="" label="[[i18n('suggester.label')]]" no-label-float=""></paper-input>
+          <paper-input noink id="searchInput" value="{{searchTerm}}" type="search" auto-focus label="[[i18n('suggester.label')]]" no-label-float></paper-input>
         </div>
         <div id="results" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
           <iron-selector id="selector">
@@ -281,7 +281,7 @@ Polymer({
         </div>
       </div>
     </div>
-    <paper-icon-button noink="" id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle"></paper-icon-button>
+    <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle"></paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>

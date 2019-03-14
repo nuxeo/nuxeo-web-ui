@@ -159,7 +159,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document id="docRequest" doc-path="[[targetPath]]" data="[[document]]" sync-indexing="" enrichers="permissions, subtypes" response="{{createResponse}}"></nuxeo-document>
+    <nuxeo-document id="docRequest" doc-path="[[targetPath]]" data="[[document]]" sync-indexing enrichers="permissions, subtypes" response="{{createResponse}}"></nuxeo-document>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name">
 
@@ -167,13 +167,13 @@ Polymer({
       <div name="choose" class="vertical">
         <div class="container">
           <div class="suggester">
-            <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled="" always-float-label=""></nuxeo-path-suggestion>
+            <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
               <template is="dom-repeat" items="[[subtypes]]" as="type">
-                <paper-button noink="" name$="[[type.type]]" class="docTypeButton vertical layout" on-tap="_selectType" data-args$="[[type]]">
+                <paper-button noink name$="[[type.type]]" class="docTypeButton vertical layout" on-tap="_selectType" data-args$="[[type]]">
                   <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
                   <div>[[_getTypeLabel(type)]]</div>
                 </paper-button>
@@ -183,7 +183,7 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
           </div>
         </div>
       </div>
@@ -196,7 +196,7 @@ Polymer({
         </div>
         <div id="editor" class="container">
           <div class="suggester">
-            <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled="" always-float-label=""></nuxeo-path-suggestion>
+            <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
           </div>
           <paper-dialog-scrollable id="editScrollable">
@@ -210,16 +210,16 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink="" dialog-dismiss="" on-tap="_cancel" disabled$="[[creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink="" on-tap="_back" disabled$="[[creating]]">[[i18n('command.back')]]</paper-button>
-          <paper-button id="create" noink="" class="primary" on-tap="_create" disabled$="[[!_canCreate(canCreate,creating)]]">
+          <paper-button noink on-tap="_back" disabled$="[[creating]]">[[i18n('command.back')]]</paper-button>
+          <paper-button id="create" noink class="primary" on-tap="_create" disabled$="[[!_canCreate(canCreate,creating)]]">
             <template is="dom-if" if="[[!creating]]">
               [[i18n('command.create')]]
             </template>
             <template is="dom-if" if="[[creating]]">
               <span class="importing-label">[[i18n('documentImport.creating')]]</span>
-              <paper-spinner-lite active=""></paper-spinner-lite>
+              <paper-spinner-lite active></paper-spinner-lite>
             </template>
           </paper-button>
         </div>

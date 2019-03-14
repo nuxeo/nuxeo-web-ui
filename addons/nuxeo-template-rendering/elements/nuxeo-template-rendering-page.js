@@ -47,7 +47,7 @@ Polymer({
 
           <div hidden$="[[!document.properties.tmpl:applicableTypes]]">
             <label>[[i18n('templateRenderingPage.validDocTypes')]]</label>
-            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{document.properties.tmpl:applicableTypes}}" min-chars="0" multiple="" readonly=""></nuxeo-selectivity>
+            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{document.properties.tmpl:applicableTypes}}" min-chars="0" multiple readonly></nuxeo-selectivity>
           </div>
 
           <div>
@@ -67,20 +67,20 @@ Polymer({
 
           <div class="buttons">
             <div class="horizontal layout start-justified">
-              <paper-button noink="" class="primary" on-tap="_editConfig">[[i18n('command.edit')]]</paper-button>
+              <paper-button noink class="primary" on-tap="_editConfig">[[i18n('command.edit')]]</paper-button>
             </div>
           </div>
         </div>
         <div name="edit">
           <div class="vertical layout">
-            <nuxeo-resource path="config/types/" on-response="_handleDocTypes" auto=""></nuxeo-resource>
+            <nuxeo-resource path="config/types/" on-response="_handleDocTypes" auto></nuxeo-resource>
 
             <label>[[i18n('templateRenderingPage.validDocTypes')]]</label>
-            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{editedDocument.properties.tmpl:applicableTypes}}" min-chars="0" multiple=""></nuxeo-selectivity>
+            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{editedDocument.properties.tmpl:applicableTypes}}" min-chars="0" multiple></nuxeo-selectivity>
             <label>[[i18n('templateRenderingPage.parametersOverride')]]</label>
             <paper-checkbox checked="{{editedDocument.properties.tmpl:allowOverride}}"></paper-checkbox>
 
-            <paper-dropdown-menu label="[[i18n('templateRenderingPage.processor.label')]]" horizontal-align="left" always-float-label="">
+            <paper-dropdown-menu label="[[i18n('templateRenderingPage.processor.label')]]" horizontal-align="left" always-float-label>
               <paper-listbox slot="dropdown-content" selected="{{editedDocument.properties.tmpl:templateType}}" attr-for-selected="name">
                 <template is="dom-repeat" items="[[processors]]">
                   <paper-item name="[[item]]">[[_getProcessorLabel(item)]]</paper-item>
@@ -90,8 +90,8 @@ Polymer({
           </div>
           <div class="buttons">
             <div class="horizontal layout start-justified">
-              <paper-button noink="" dialog-dismiss="" on-tap="_cancelEditConfig">[[i18n('command.cancel')]]</paper-button>
-              <paper-button noink="" class="primary" on-tap="_saveEditConfig">[[i18n('command.save')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancelEditConfig">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink class="primary" on-tap="_saveEditConfig">[[i18n('command.save')]]</paper-button>
             </div>
           </div>
         </div>
@@ -100,17 +100,17 @@ Polymer({
 
     <nuxeo-card heading="[[i18n('templateRenderingPage.parameters.heading')]]">
       <div class="vertical layout">
-        <nuxeo-template-param-editor id="paramEditor" template-data="[[_getTemplateData(editedDocument)]]" mode="[[paramsMode]]" allow-create="" allow-delete=""></nuxeo-template-param-editor>
+        <nuxeo-template-param-editor id="paramEditor" template-data="[[_getTemplateData(editedDocument)]]" mode="[[paramsMode]]" allow-create allow-delete></nuxeo-template-param-editor>
       </div>
       <div class="buttons">
         <div class="horizontal layout start-justified">
           <iron-pages selected="[[paramsMode]]" attr-for-selected="name" class="vertical layout flex">
             <div name="view">
-              <paper-button noink="" class="primary" on-tap="_editParams">[[i18n('command.edit')]]</paper-button>
+              <paper-button noink class="primary" on-tap="_editParams">[[i18n('command.edit')]]</paper-button>
             </div>
             <div name="edit">
-              <paper-button noink="" dialog-dismiss="" on-tap="_cancelEditParams">[[i18n('command.cancel')]]</paper-button>
-              <paper-button noink="" class="primary" on-tap="_saveEditParams">[[i18n('command.save')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancelEditParams">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink class="primary" on-tap="_saveEditParams">[[i18n('command.save')]]</paper-button>
             </div>
           </iron-pages>
         </div>

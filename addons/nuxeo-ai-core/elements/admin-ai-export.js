@@ -42,7 +42,7 @@ Polymer({
         <nuxeo-operation id="aiStats" op="AI.DatasetStats" response="{{_stats}}"></nuxeo-operation>
         <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
         <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-            <paper-textarea id="queryInput" type="search" label="[[i18n('admin.ai.query')]]" value="{{query}}" placeholder="[[i18n('imaging.query.placeholder')]]" autofocus="">
+            <paper-textarea id="queryInput" type="search" label="[[i18n('admin.ai.query')]]" value="{{query}}" placeholder="[[i18n('imaging.query.placeholder')]]" autofocus>
             </paper-textarea>
             <paper-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}"></paper-input>
             <paper-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}"></paper-input>

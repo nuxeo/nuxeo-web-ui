@@ -39,9 +39,9 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing=""></nuxeo-operation>
+    <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing></nuxeo-operation>
 
-    <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing=""></nuxeo-operation>
+    <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="deleteDocuments">
