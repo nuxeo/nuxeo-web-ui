@@ -489,6 +489,7 @@
   "label.description": "Description",
   "label.document.type.audio": "Audio",
   "label.document.type.collection": "Collection",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Domaine",
   "label.document.type.easysharefolder": "Dossier public",
   "label.document.type.file": "Fichier",

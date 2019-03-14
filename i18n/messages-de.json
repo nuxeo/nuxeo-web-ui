@@ -490,6 +490,7 @@
   "label.description": "Beschreibung",
   "label.document.type.audio": "Audio",
   "label.document.type.collection": "Kollektion",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Domäne",
   "label.document.type.easysharefolder": "Easyshare-Ordner",
   "label.document.type.file": "Datei",
