@@ -19,9 +19,11 @@ limitations under the License.
   from HTML and may be out of place here. Review them and
   then delete this comment!
 */
-const $_documentContainer = document.createElement('template');
+import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-$_documentContainer.innerHTML = `<iron-iconset-svg size="24" name="nuxeo-ai">
+const template = html`
+<iron-iconset-svg size="24" name="nuxeo-ai">
   <svg>
     <defs>
       <g id="confidence-level-low" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -43,6 +45,7 @@ $_documentContainer.innerHTML = `<iron-iconset-svg size="24" name="nuxeo-ai">
       </g>
     </defs>
   </svg>
-</iron-iconset-svg>`;
+</iron-iconset-svg>
+`;
 
-document.head.appendChild($_documentContainer.content);
+document.head.appendChild(template.content);
