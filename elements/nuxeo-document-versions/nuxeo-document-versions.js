@@ -113,7 +113,7 @@ Polymer({
     <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
     </nuxeo-operation>
 
-    <nuxeo-page-provider id="provider" query="[[query]]" page-size="[[pageSize]]" page="{{page}}" sort="{&quot;uid:major_version&quot;: &quot;desc&quot;, &quot;uid:minor_version&quot;: &quot;desc&quot;}" schemas="dublincore,common,uid">
+    <nuxeo-page-provider id="provider" query="[[query]]" page-size="[[pageSize]]" page="{{page}}" sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}' schemas="dublincore,common,uid">
     </nuxeo-page-provider>
 
     <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]" label="[[_labelCreate(document)]]">

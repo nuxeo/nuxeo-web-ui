@@ -79,7 +79,7 @@ Polymer({
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
 
     <nuxeo-resource id="worfklow" path="/workflow"></nuxeo-resource>
-    <nuxeo-resource id="task" path="/task" headers="{&quot;X-NXfetch.task&quot;: &quot;targetDocumentIds,actors&quot;}"></nuxeo-resource>
+    <nuxeo-resource id="task" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
     <nuxeo-resource id="user" path="/user"></nuxeo-resource>
 
     <!-- workflows -->

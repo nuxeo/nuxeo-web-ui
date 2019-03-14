@@ -141,7 +141,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-resource id="graphResource" path="/workflow/[[workflowId]]/graph" response="{{graph}}" headers="{&quot;Content-Type&quot;:&quot;application/json&quot;}"></nuxeo-resource>
+    <nuxeo-resource id="graphResource" path="/workflow/[[workflowId]]/graph" response="{{graph}}" headers='{"Content-Type":"application/json"}'></nuxeo-resource>
 
     <nuxeo-dialog id="graphDialog" with-backdrop>
       <paper-dialog-scrollable>

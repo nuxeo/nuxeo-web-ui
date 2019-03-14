@@ -79,7 +79,7 @@ Polymer({
     </style>
 
     <nuxeo-operation auto id="roots" op="NuxeoDrive.GetRoots" on-response="_handleRoots"></nuxeo-operation>
-    <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params="{&quot;enable&quot;: false}"></nuxeo-operation>
+    <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params='{"enable": false}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">
       <div class="emptyResult">[[i18n('driveSyncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]</div>

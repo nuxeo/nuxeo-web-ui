@@ -195,7 +195,7 @@ Polymer({
         <neon-animatable>
 
           <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
-            <nuxeo-page-provider id="collectionsProvider" provider="user_collections" page-size="40" params="{&quot;searchTerm&quot;:&quot;%&quot;,&quot;user&quot;:&quot;\$currentUser&quot;}" sort="{&quot;dc:modified&quot;:&quot;desc&quot;}" schemas="dublincore,common" enrichers="permissions" headers="{&quot;X-NXfetch.document&quot;: &quot;properties&quot;}">
+            <nuxeo-page-provider id="collectionsProvider" provider="user_collections" page-size="40" params='{"searchTerm":"%","user":"\$currentUser"}" sort="{"dc:modified":"desc"}" schemas="dublincore,common" enrichers="permissions" headers="{"X-NXfetch.document": "properties"}'>
             </nuxeo-page-provider>
 
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" selected-item="{{selectedCollection}}" selection-enabled select-on-tap as="collection" empty-label="[[i18n('collections.empty')]]" empty-label-when-filtered="[[i18n('collections.empty')]]">

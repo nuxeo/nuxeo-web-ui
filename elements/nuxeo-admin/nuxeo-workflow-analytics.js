@@ -129,7 +129,7 @@ Polymer({
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
-        <chart-pie values="[[_values(initiators)]]" labels="[[_series(initiators)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-pie values="[[_values(initiators)]]" labels="[[_series(initiators)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
       </nuxeo-card>
 
@@ -138,7 +138,7 @@ Polymer({
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
-        <chart-bar labels="[[_labels(numberOfActionsPerUser)]]" series="[[_series(numberOfActionsPerUser)]]" values="[[_values(numberOfActionsPerUser)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-bar labels="[[_labels(numberOfActionsPerUser)]]" series="[[_series(numberOfActionsPerUser)]]" values="[[_values(numberOfActionsPerUser)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-bar>
       </nuxeo-card>
 

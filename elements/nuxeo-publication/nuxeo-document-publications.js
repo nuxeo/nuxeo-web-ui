@@ -84,7 +84,7 @@ Polymer({
     <nuxeo-operation id="publishOp" op="Document.PublishToSection">
     </nuxeo-operation>
 
-    <nuxeo-page-provider id="provider" page-size="40" provider="nxql_search" params="[[_computeParams(_src)]]" sort="{&quot;dc:modified&quot;: &quot;desc&quot;, &quot;uid:major_version&quot;: &quot;desc&quot;, &quot;uid:minor_version&quot;: &quot;desc&quot;}" enrichers="thumbnail, permissions" headers="{&quot;X-NXfetch.document&quot;: &quot;properties&quot;, &quot;X-NXtranslate.directoryEntry&quot;: &quot;label&quot;}" schemas="dublincore,common,uid,rendition">
+    <nuxeo-page-provider id="provider" page-size="40" provider="nxql_search" params="[[_computeParams(_src)]]" sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}" enrichers="thumbnail, permissions" headers="{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}' schemas="dublincore,common,uid,rendition">
     </nuxeo-page-provider>
 
     <nuxeo-card heading="[[i18n('publication.details')]]">

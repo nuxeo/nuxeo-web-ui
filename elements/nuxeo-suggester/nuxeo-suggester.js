@@ -254,7 +254,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-operation id="op" op="Search.SuggestersLauncher" response="{{items}}" params="{&quot;searchTerm&quot;:&quot;[[searchTerm]]&quot;}"></nuxeo-operation>
+    <nuxeo-operation id="op" op="Search.SuggestersLauncher" response="{{items}}" params='{"searchTerm":"[[searchTerm]]"}'></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
       <div id="suggester">
