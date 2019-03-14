@@ -116,10 +116,10 @@ Polymer({
     <nuxeo-page-provider id="provider" query="[[query]]" page-size="[[pageSize]]" page="{{page}}" sort="{&quot;uid:major_version&quot;: &quot;desc&quot;, &quot;uid:minor_version&quot;: &quot;desc&quot;}" schemas="dublincore,common,uid">
     </nuxeo-page-provider>
 
-    <nuxeo-document-create-version document="[[document]]" hidden\$="[[hasVersions(document)]]" label="[[_labelCreate(document)]]">
+    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]" label="[[_labelCreate(document)]]">
     </nuxeo-document-create-version>
 
-    <div hidden\$="[[!hasVersions(document)]]">
+    <div hidden$="[[!hasVersions(document)]]">
       <nuxeo-tag class="toggle" on-tap="_showList">
         <div class="toggle-text">[[_labelTitle(document)]][[_labelCheckedOut(document)]]</div>
         <iron-icon class="toggle-icon" icon="icons:arrow-drop-down"></iron-icon>
@@ -138,7 +138,7 @@ Polymer({
             </div>
           </template>
         </div>
-        <nuxeo-document-create-version slot="actions" document="[[document]]" hidden\$="[[!_isCheckedOut(document)]]" on-dialog-closed="_hideList">
+        <nuxeo-document-create-version slot="actions" document="[[document]]" hidden$="[[!_isCheckedOut(document)]]" on-dialog-closed="_hideList">
         </nuxeo-document-create-version>
       </nuxeo-document-versions-list>
       <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500" on-lower-threshold="_loadMore">

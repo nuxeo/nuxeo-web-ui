@@ -50,7 +50,7 @@ Polymer({
       <template>
         <div class="action" on-tap="_toggleDialog">
           <paper-icon-button id="replaceBtn" icon="[[icon]]" noink=""></paper-icon-button>
-          <span class="label" hidden\$="[[!showLabel]]">[[_label]]</span>
+          <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
         </div>
         <nuxeo-tooltip for="replaceBtn">[[_label]]</nuxeo-tooltip>
       </template>

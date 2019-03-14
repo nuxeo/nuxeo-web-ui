@@ -46,7 +46,7 @@ Polymer({
     <template is="dom-if" if="[[_isAvailable(document, synchronizationRoot)]]">
       <div class="action" on-tap="toggle">
         <paper-icon-button id="syncBut" icon="[[_icon(synchronized)]]"></paper-icon-button>
-        <span class="label" hidden\$="[[!showLabel]]">[[_label]]</span>
+        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
       </div>
       <paper-tooltip for="syncBut">[[_label]]</paper-tooltip>
     </template>

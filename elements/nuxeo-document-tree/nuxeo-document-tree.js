@@ -149,16 +149,16 @@ Polymer({
     <nuxeo-page-provider id="children" provider="tree_children" enrichers="hasFolderishChild" schemas="dublincore,common">
     </nuxeo-page-provider>
 
-    <div class="header" hidden\$="[[!label]]">[[i18n(label)]]</div>
+    <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
 
     <div class="content">
-      <div class="parents" hidden\$="[[_noPermission]]">
-        <a href\$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden\$="[[_hideRoot(document)]]">
+      <div class="parents" hidden$="[[_noPermission]]">
+        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
           <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href\$="[[urlFor('browse', item.path)]]">
+          <a href$="[[urlFor('browse', item.path)]]">
             <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
@@ -167,15 +167,15 @@ Polymer({
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
-            <paper-spinner active\$="[[loading]]"></paper-spinner>
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle="" hidden\$="[[loading]]"></iron-icon>
+            <paper-spinner active$="[[loading]]"></paper-spinner>
+            <iron-icon icon="[[_expandIcon(opened)]]" toggle="" hidden$="[[loading]]"></iron-icon>
           </template>
           <span class="node-name flex">
-            <a href\$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>
+            <a href$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>
           </span>
         </template>
       </nuxeo-tree>
-      <div class="noPermission" hidden\$="[[!_noPermission]]">[[i18n('browse.tree.noDocument')]]</div>
+      <div class="noPermission" hidden$="[[!_noPermission]]">[[i18n('browse.tree.noDocument')]]</div>
     </div>
 `,
 

@@ -42,7 +42,7 @@ Polymer({
     <div class="properties">
       <div class="item">
         <label>[[i18n('pictureViewLayout.date')]]</label>
-        <nuxeo-date datetime="[[document.properties.imd:date_time_original]]" hidden\$="![[document.properties.imd:date_time_original]]"></nuxeo-date>
+        <nuxeo-date datetime="[[document.properties.imd:date_time_original]]" hidden$="![[document.properties.imd:date_time_original]]"></nuxeo-date>
       </div>
       <div class="item">
         <label>[[i18n('pictureViewLayout.orientation')]]</label>

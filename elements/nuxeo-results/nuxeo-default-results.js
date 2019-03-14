@@ -73,7 +73,7 @@ Polymer({
 
       <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="">
         <template>
-          <nuxeo-document-grid-thumbnail class="grid-box" tabindex\$="{{tabIndex}}" selected\$="{{selected}}" selected-items="[[selectedItems]]" index="[[index]]" doc="[[item]]" on-navigate="_navigate">
+          <nuxeo-document-grid-thumbnail class="grid-box" tabindex$="{{tabIndex}}" selected$="{{selected}}" selected-items="[[selectedItems]]" index="[[index]]" doc="[[item]]" on-navigate="_navigate">
           </nuxeo-document-grid-thumbnail>
         </template>
       </nuxeo-data-grid>
@@ -82,7 +82,7 @@ Polymer({
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" field="dc:title" sort-by="dc:title" flex="100">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="title ellipsis" href\$="[[urlFor('browse', item.path)]]" on-tap="_navigateLink" data-index="[[index]]">
+            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigateLink" data-index="[[index]]">
               [[item.title]]
             </a>
           </template>
@@ -122,14 +122,14 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" field="dc:nature" hidden="">
           <template>
-            <nuxeo-tag hidden\$="[[!item.properties.dc:nature]]">
+            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
               [[formatDirectory(item.properties.dc:nature)]]
             </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" field="dc:coverage" hidden="">
           <template>
-            <nuxeo-tag hidden\$="[[!item.properties.dc:coverage]]">
+            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
               [[formatDirectory(item.properties.dc:coverage)]]
             </nuxeo-tag>
           </template>

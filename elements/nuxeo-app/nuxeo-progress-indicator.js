@@ -51,7 +51,7 @@ Polymer({
       }
     </style>
 
-    <paper-progress indeterminate="" hidden\$="[[!visible]]"></paper-progress>
+    <paper-progress indeterminate="" hidden$="[[!visible]]"></paper-progress>
 `,
 
   is: 'nuxeo-progress-indicator',

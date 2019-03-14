@@ -40,7 +40,7 @@ Polymer({
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button id="shareBtn" icon="[[icon]]" noink=""></paper-icon-button>
-        <span class="label" hidden\$="[[!showLabel]]">[[i18n('shareButton.tooltip')]]</span>
+        <span class="label" hidden$="[[!showLabel]]">[[i18n('shareButton.tooltip')]]</span>
       </div>
       <nuxeo-tooltip for="shareBtn">[[i18n('shareButton.tooltip')]]</nuxeo-tooltip>
     </template>

@@ -124,13 +124,13 @@ Polymer({
         <iron-icon src="[[_icon(document, url)]]"></iron-icon>
       </div>
       <div class="doc-path">
-        <a href\$="[[urlFor('browse', document.path)]]" class="current breadcrumb-item breadcrumb-item-current">
+        <a href$="[[urlFor('browse', document.path)]]" class="current breadcrumb-item breadcrumb-item-current">
           [[_title(document)]]
         </a>
         <div class="ancestors">
           <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-            <span class\$="breadcrumb-item [[_computeCssClass(index, document)]]">
-              <a href\$="[[urlFor('browse', item.path)]]">
+            <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
+              <a href$="[[urlFor('browse', item.path)]]">
                 <span class="breadcrumb-item-title">[[item.title]]</span>
               </a>
               <span class="breadcrumb-divider">&gt;</span>

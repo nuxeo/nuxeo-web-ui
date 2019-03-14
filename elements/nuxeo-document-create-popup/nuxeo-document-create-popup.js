@@ -87,7 +87,7 @@ Polymer({
 
     <paper-dialog id="createDocDialog" opened="{{opened}}" modal="" no-auto-focus="">
 
-      <paper-tabs hidden\$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink="">
+      <paper-tabs hidden$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink="">
         <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="holder" class="vertical layout flex">

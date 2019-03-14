@@ -227,7 +227,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" quick-filters="{{_quickFilters}}" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates="" skip-aggregates\$="[[skipAggregates]]" on-error="_onError">
+    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" quick-filters="{{_quickFilters}}" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates="" skip-aggregates$="[[skipAggregates]]" on-error="_onError">
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
@@ -259,36 +259,36 @@ Polymer({
       </div>
 
       <div class="content">
-        <div id="filters" class="filters loadable" hidden\$="{{queue}}">
+        <div id="filters" class="filters loadable" hidden$="{{queue}}">
           <nuxeo-search-form-layout id="layout" provider="[[provider]]" search-name="[[searchName]]" aggregations="[[aggregations]]" params="{{params}}" on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
-          <div class="layout vertical row" hidden\$="[[!displayAutoControl]]">
+          <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
           </div>
           <div class="actions">
-            <paper-button noink="" class="reset" disabled\$="[[!dirty]]" on-tap="_reset" hidden\$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button noink="" class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
               [[i18n('command.Reset')]]
             </paper-button>
             <div class="layout horizontal">
               <paper-button noink="" class="primary clear" on-tap="_clear">
                 [[i18n('command.clear')]]
               </paper-button>
-              <paper-button noink="" class="primary search" on-tap="_search" hidden\$="[[auto]]">
+              <paper-button noink="" class="primary search" on-tap="_search" hidden$="[[auto]]">
                 [[i18n('command.search')]]
               </paper-button>
             </div>
           </div>
-          <paper-spinner-lite active\$="[[loading]]" hidden\$="[[!loading]]"></paper-spinner-lite>
+          <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
-        <div id="queue" hidden\$="{{!queue}}">
+        <div id="queue" hidden$="{{!queue}}">
           <template is="dom-if" if="[[_displayQuickFilters(_quickFilters)]]">
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
           </template>
           <nuxeo-data-list nx-provider="provider" id="list" selected-item="{{selectedDocument}}" empty-label="[[i18n('searchForm.queue.noResults')]]" empty-label-when-filtered="" selection-enabled="" select-on-tap="">
             <template>
-              <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
                   <div class="list-item-info">
                     <div class="vertical layout center">

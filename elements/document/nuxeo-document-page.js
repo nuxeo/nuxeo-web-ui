@@ -197,7 +197,7 @@ Polymer({
           </div>
 
           <!-- collections -->
-          <div class="section" hidden\$="[[!_hasCollections(document)]]">
+          <div class="section" hidden$="[[!_hasCollections(document)]]">
             <h3>[[i18n('documentPage.collections')]]</h3>
             <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
           </div>

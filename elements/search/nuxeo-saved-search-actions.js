@@ -56,13 +56,13 @@ Polymer({
 
     <nuxeo-document auto="" doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
     <div class="horizontal layout center">
-      <paper-button on-tap="_saveSearchAs" hidden\$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]">
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-tap="_saveSearch" hidden\$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
-      <paper-menu-button no-animations="" horizontal-align="right" vertical-offset="40" hidden\$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-menu-button no-animations="" horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
         <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-listbox slot="dropdown-content">
           <paper-item on-tap="_renameSearch">

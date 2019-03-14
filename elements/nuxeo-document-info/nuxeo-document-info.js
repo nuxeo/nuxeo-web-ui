@@ -55,7 +55,7 @@ Polymer({
 
     </style>
 
-    <div class="item" name="process" hidden\$="[[!_showProcess]]">
+    <div class="item" name="process" hidden$="[[!_showProcess]]">
       <label>[[i18n('documentInfo.process')]]</label>
       <div><nuxeo-tag uppercase="">[[i18n('documentInfo.process.running')]]</nuxeo-tag></div>
     </div>
@@ -78,7 +78,7 @@ Polymer({
       <div class="item">
         <label>[[i18n('documentInfo.publications')]]</label>
         <div>
-          <a href\$="[[_urlForPub(document)]]">
+          <a href$="[[_urlForPub(document)]]">
             [[document.contextParameters.publications.resultsCount]]
           </a>
         </div>

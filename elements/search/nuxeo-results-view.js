@@ -85,7 +85,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[_params]]" quick-filters="{{quickFilters}}" schemas="[[schemas]]" loading="{{loading}}" headers="[[headers]]" fetch-aggregates="" skip-aggregates\$="[[skipAggregates]]" on-error="_onError">
+    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[_params]]" quick-filters="{{quickFilters}}" schemas="[[schemas]]" loading="{{loading}}" headers="[[headers]]" fetch-aggregates="" skip-aggregates$="[[skipAggregates]]" on-error="_onError">
     </nuxeo-page-provider>
 
     <template is="dom-if" if="[[showFilters]]">
@@ -95,11 +95,11 @@ Polymer({
             <span><iron-icon icon="[[_expandIcon(opened)]]" toggle=""></iron-icon></span>
             <span class="filter">[[i18n('resultsView.filters.heading')]]</span>
           </a>
-          <div class\$="count [[_hideCounter]]">
+          <div class$="count [[_hideCounter]]">
             <span>[[_getFilterCount(_params.*)]]</span>
           </div>
           <div class="horizontal layout flex center end-justified">
-            <paper-button noink="" on-tap="_clear" class\$="[[_hideCounter]]">
+            <paper-button noink="" on-tap="_clear" class$="[[_hideCounter]]">
               [[i18n('command.clear')]]
             </paper-button>
           </div>
@@ -108,8 +108,8 @@ Polymer({
           <nuxeo-search-form-layout id="form" provider="[[provider]]" search-name="[[searchName]]" aggregations="[[aggregations]]" params="[[_params]]" on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
           <paper-spinner-lite active="[[loading]]"></paper-spinner-lite>
         </iron-collapse>
-        <div class="buttons" hidden\$="[[!opened]]">
-          <paper-button noink="" class="primary search" on-tap="_search" hidden\$="[[auto]]">
+        <div class="buttons" hidden$="[[!opened]]">
+          <paper-button noink="" class="primary search" on-tap="_search" hidden$="[[auto]]">
             [[i18n('command.search')]]
           </paper-button>
           <div class="horizontal layout flex end-justified">

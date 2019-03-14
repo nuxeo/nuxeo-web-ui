@@ -316,12 +316,12 @@ Polymer({
 
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss="" on-tap="_cancel" disabled\$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button dialog-dismiss="" on-tap="_cancel" disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
           </div>
-          <paper-button noink="" class="primary" on-tap="_import" disabled\$="[[!_canImport(_creating,hasFile)]]">
+          <paper-button noink="" class="primary" on-tap="_import" disabled$="[[!_canImport(_creating,hasFile)]]">
                         [[i18n('command.create')]]
                       </paper-button>
-          <div class="layout" hidden\$="[[!_creating]]">
+          <div class="layout" hidden$="[[!_creating]]">
             <span class="importing-label">[[i18n('documentImport.importing')]]</span>
             <paper-spinner-lite active=""></paper-spinner-lite>
           </div>
@@ -330,8 +330,8 @@ Polymer({
 
       <div name="progress" class="vertical layout flex">
         <div id="progress" class="summary">
-          <div hidden\$="[[_hasResult]]">
-            <div hidden\$="[[_error]]">
+          <div hidden$="[[_hasResult]]">
+            <div hidden$="[[_error]]">
               <div class="name status">[[progressLabel]]</div>
               <div class="status">
                 <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate="">
@@ -339,8 +339,8 @@ Polymer({
               </div>
             </div>
           </div>
-          <span class="error" hidden\$="[[!_error]]">[[i18n('csv.import.error')]]</span>
-          <div hidden\$="[[!_hasResult]]">
+          <span class="error" hidden$="[[!_error]]">[[i18n('csv.import.error')]]</span>
+          <div hidden$="[[!_hasResult]]">
             <div class="success"><iron-icon icon="icons:check"></iron-icon>[[i18n('csv.import.success')]]</div>
             <div class="report">
               <div class="line successful layout flex">
@@ -356,7 +356,7 @@ Polymer({
                 <div class="count">[[_importResult.errorLineCount]] / [[_importResult.totalLineCount]]</div>
               </div>
             </div>
-            <div class="brief" hidden\$="[[!receiveEmailReport]]">[[i18n('csv.import.report.notify')]]</div>
+            <div class="brief" hidden$="[[!receiveEmailReport]]">[[i18n('csv.import.report.notify')]]</div>
           </div>
         </div>
 
@@ -366,10 +366,10 @@ Polymer({
               <template>
                 <div class="item">
                   <div class="list-item-info horizontal layout">
-                    <div class="flex-1" failed\$="[[_isError(item)]]" skipped\$="[[_isSkipped(item)]]">
+                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">
                       [[i18n('csv.import.report.line')]] [[item.line]]
                     </div>
-                    <div class="flex-1" failed\$="[[_isError(item)]]" skipped\$="[[_isSkipped(item)]]">[[item.status]]</div>
+                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">[[item.status]]</div>
                     <div class="flex-3 list-item-detail">[[_i18n(item.localizedMessage, item.localizedMessageParams)]]</div>
                   </div>
                 </div>
@@ -379,7 +379,7 @@ Polymer({
         </div>
 
         <div class="buttons horizontal end-justified layout">
-         <paper-button noink="" on-tap="_clear" disabled\$="[[!_hasResult]]">
+         <paper-button noink="" on-tap="_clear" disabled$="[[!_hasResult]]">
                         [[i18n('csv.import.new')]]
           </paper-button>
           <paper-button dialog-dismiss="" on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>

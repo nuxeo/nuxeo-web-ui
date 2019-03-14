@@ -138,7 +138,7 @@ Polymer({
     <div class="content">
       <nuxeo-data-list items="[[documents]]" id="list" selected-item="{{selectedDocument}}" selection-enabled="" select-on-tap="" as="document" empty-label="[[i18n('clipboard.empty')]]" empty-label-when-filtered="[[i18n('clipboard.empty')]]">
         <template>
-          <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">

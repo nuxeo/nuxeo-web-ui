@@ -70,11 +70,11 @@ Polymer({
       }
     </style>
 
-    <nuxeo-card selected\$="[[_selected(name)]]">
+    <nuxeo-card selected$="[[_selected(name)]]">
       <iron-image src="[[_image(name)]]" sizing="contain"></iron-image>
       <div class="details">
         <div class="label">[[_label(name)]]</div>
-        <paper-button on-tap="_apply" noink="" disabled\$="[[_selected(name)]]">
+        <paper-button on-tap="_apply" noink="" disabled$="[[_selected(name)]]">
           [[_button(name)]]
         </paper-button>
       </div>

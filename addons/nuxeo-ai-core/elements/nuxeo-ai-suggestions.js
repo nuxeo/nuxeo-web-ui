@@ -84,7 +84,7 @@ class AISuggestions
   </style>
 
   <template is="dom-repeat" items="[[suggestions]]">
-    <div class\$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
+    <div class$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
       <span>[[idFunction(item.name)]]</span>
       <iron-icon icon="[[_getConfidenceIcon(item.confidence)]]"></iron-icon>
     </div>

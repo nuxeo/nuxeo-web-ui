@@ -79,8 +79,8 @@ Polymer({
     </nuxeo-document>
 
     <div id="tray" on-mouseenter="_onMouseEnter" on-mouseleave="_onMouseLeave">
-      <div id="shortcuts" class\$="[[_animateOpen(shortcutsVisible)]]">
-        <div hidden\$="[[!shortcutsVisible]]">
+      <div id="shortcuts" class$="[[_animateOpen(shortcutsVisible)]]">
+        <div hidden$="[[!shortcutsVisible]]">
           <nuxeo-slot slot="DOCUMENT_CREATE_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
         </div>
       </div>
