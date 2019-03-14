@@ -14,22 +14,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-page`
-@group Nuxeo UI
-@element nuxeo-page
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-header-panel/paper-header-panel.js';
 import '@polymer/paper-toolbar/paper-toolbar.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-page`
+@group Nuxeo UI
+@element nuxeo-page
+*/
 Polymer({
   _template: html`
     <style>

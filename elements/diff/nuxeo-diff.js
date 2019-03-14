@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-diff`
-@group Nuxeo UI
-@element nuxeo-diff
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-checkbox/paper-checkbox.js';
@@ -44,6 +34,12 @@ import * as jsondiffpatch from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
 
 var _customLoadPromise;
 var typeDataCache = {};
+
+/**
+`nuxeo-diff`
+@group Nuxeo UI
+@element nuxeo-diff
+*/
 Polymer({
   _template: html`
     <style include="iron-flex iron-flex-alignment nuxeo-styles">

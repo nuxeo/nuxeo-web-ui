@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-document-create-button`
-@group Nuxeo UI
-@element nuxeo-document-create-button
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
@@ -36,6 +26,12 @@ import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import '../nuxeo-keys/nuxeo-keys.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-document-create-button`
+@group Nuxeo UI
+@element nuxeo-document-create-button
+*/
 Polymer({
   _template: html`
     <style>

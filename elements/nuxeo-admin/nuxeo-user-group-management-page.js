@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-user-group-management-page`
-@group Nuxeo UI
-@element nuxeo-user-group-management-page
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
@@ -34,6 +24,12 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-user-group-la
 import '../nuxeo-app/nuxeo-page.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-user-group-management-page`
+@group Nuxeo UI
+@element nuxeo-user-group-management-page
+*/
 Polymer({
   _template: html`
     <nuxeo-page>

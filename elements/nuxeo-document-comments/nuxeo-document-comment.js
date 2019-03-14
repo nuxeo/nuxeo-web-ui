@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-document-comment`
-@group Nuxeo UI
-@element nuxeo-document-comment
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
@@ -37,6 +27,12 @@ import './nuxeo-document-comment-thread.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+
+/**
+`nuxeo-document-comment`
+@group Nuxeo UI
+@element nuxeo-document-comment
+*/
 Polymer({
   _template: html`
     <style include="nuxeo-styles">

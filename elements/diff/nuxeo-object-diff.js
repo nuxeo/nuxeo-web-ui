@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-object-diff`
-@group Nuxeo UI
-@element nuxeo-object-diff
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import { DiffBehavior } from './nuxeo-diff-behavior.js';
@@ -70,6 +60,11 @@ Diff.getElement = function(rules) {
   return id || Diff.registry.default;
 }
 
+/**
+`nuxeo-object-diff`
+@group Nuxeo UI
+@element nuxeo-object-diff
+*/
 Polymer({
   _template: html`
     <style include="nuxeo-diff-styles">

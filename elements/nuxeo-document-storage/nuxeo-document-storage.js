@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-document-storage`
-@group Nuxeo UI
-@element nuxeo-document-storage
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
@@ -31,6 +21,12 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-document-storage`
+@group Nuxeo UI
+@element nuxeo-document-storage
+*/
 Polymer({
   _template: html`
     <style>

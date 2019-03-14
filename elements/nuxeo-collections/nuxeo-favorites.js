@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-favorites`
-@group Nuxeo UI
-@element nuxeo-favorites
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-icon/iron-icon.js';
@@ -38,6 +28,12 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-favorites`
+@group Nuxeo UI
+@element nuxeo-favorites
+*/
 Polymer({
   _template: html`
     <style include="nuxeo-styles">

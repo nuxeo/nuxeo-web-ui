@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-document-import`
-@group Nuxeo UI
-@element nuxeo-document-import
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
@@ -51,6 +41,12 @@ import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import './nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-document-import`
+@group Nuxeo UI
+@element nuxeo-document-import
+*/
 Polymer({
   _template: html`
     <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
