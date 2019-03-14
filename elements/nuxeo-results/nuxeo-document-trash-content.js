@@ -76,7 +76,7 @@ Polymer({
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <nuxeo-operation id="opEmptyTrash" op="Document.EmptyTrash" params="{&quot;parent&quot;: &quot;[[document.uid]]&quot;}" sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="opEmptyTrash" op="Document.EmptyTrash" params='{"parent": "[[document.uid]]"}' sync-indexing></nuxeo-operation>
 
     <nuxeo-page-provider id="nxProvider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates>
     </nuxeo-page-provider>

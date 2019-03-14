@@ -85,7 +85,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-resource id="directory" path="/directory" params="{&quot;pageSize&quot;: 0}"></nuxeo-resource>
+    <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
     <nuxeo-resource id="schema"></nuxeo-resource>
 
     <nuxeo-page>

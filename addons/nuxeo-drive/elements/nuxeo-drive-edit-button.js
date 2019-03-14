@@ -29,7 +29,7 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-resource id="token" path="/token" params="{&quot;application&quot;: &quot;Nuxeo Drive&quot;}"></nuxeo-resource>
+    <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">

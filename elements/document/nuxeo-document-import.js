@@ -307,7 +307,7 @@ Polymer({
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="blobRemover"></nuxeo-resource>
     <nuxeo-operation id="fileManagerImport" op="FileManager.Import" sync-indexing></nuxeo-operation>
-    <nuxeo-document id="docRequest" doc-path="[[targetPath]]" data="[[document]]" sync-indexing headers="{&quot;X-Batch-No-Drop&quot;: &quot;true&quot;}" response="{{createResponse}}"></nuxeo-document>
+    <nuxeo-document id="docRequest" doc-path="[[targetPath]]" data="[[document]]" sync-indexing headers='{"X-Batch-No-Drop": "true"}" response="{{createResponse}}'></nuxeo-document>
     <nuxeo-document id="parentFetcher" doc-path="[[targetPath]]"></nuxeo-document>
 
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>

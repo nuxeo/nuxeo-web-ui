@@ -102,7 +102,7 @@ Polymer({
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
-        <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
       </nuxeo-card>
 
@@ -111,7 +111,7 @@ Polymer({
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">
-        <chart-bar labels="[[_range(0,23)]]" values="[[_aggregatePerHourOfDay(callsPerHour)]]" series="[[_range(0,23)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: false }, &quot;animation&quot;: false }">
+        <chart-bar labels="[[_range(0,23)]]" values="[[_aggregatePerHourOfDay(callsPerHour)]]" series="[[_range(0,23)]]" options='{ "legend": { "display": false }, "animation": false }'>
         </chart-bar>
       </nuxeo-card>
 

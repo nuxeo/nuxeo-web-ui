@@ -107,7 +107,7 @@ Polymer({
     <div class="flex-layout">
 
       <!-- Top Downloads -->
-      <nuxeo-audit-data event-id="download" where="{&quot;extended.downloadReason&quot;: &quot;download&quot;}" grouped-by="docUUID" group-limit="10" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{downloads}}">
+      <nuxeo-audit-data event-id="download" where='{"extended.downloadReason": "download"}" grouped-by="docUUID" group-limit="10" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{downloads}}'>
       </nuxeo-audit-data>
 
       <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" schemas="dublincore, common" current-page="{{downloadedDocs}}">
@@ -143,7 +143,7 @@ Polymer({
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
-        <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
       </nuxeo-card>
 
@@ -152,7 +152,7 @@ Polymer({
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
-        <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
       </nuxeo-card>
 
@@ -161,7 +161,7 @@ Polymer({
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
-        <chart-line labels="[[_labels(docsCreatedPerWeek)]]" values="[[_values(docsCreatedPerWeek)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: false }, &quot;animation&quot;: false }">
+        <chart-line labels="[[_labels(docsCreatedPerWeek)]]" values="[[_values(docsCreatedPerWeek)]]" options='{ "legend": { "display": false }, "animation": false }'>
         </chart-line>
       </nuxeo-card>
 
@@ -170,7 +170,7 @@ Polymer({
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
-        <chart-line labels="[[_labels(docsModifiedPerWeek)]]" values="[[_values(docsModifiedPerWeek)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: false }, &quot;animation&quot;: false }">
+        <chart-line labels="[[_labels(docsModifiedPerWeek)]]" values="[[_values(docsModifiedPerWeek)]]" options='{ "legend": { "display": false }, "animation": false }'>
         </chart-line>
       </nuxeo-card>
 
@@ -179,7 +179,7 @@ Polymer({
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
-        <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]" options="{ &quot;legend&quot;: { &quot;display&quot;: true, &quot;position&quot;: &quot;bottom&quot;, &quot;labels&quot;: { &quot;boxWidth&quot;: 12 } }, &quot;animation&quot;: false }">
+        <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
         </chart-pie>
       </nuxeo-card>
 
