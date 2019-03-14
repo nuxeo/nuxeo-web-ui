@@ -14,21 +14,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-document-edit`
-@group Nuxeo UI
-@element nuxeo-document-edit
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import './nuxeo-document-form-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+/**
+`nuxeo-document-edit`
+@group Nuxeo UI
+@element nuxeo-document-edit
+*/
 Polymer({
   _template: html`
     <nuxeo-document-form-layout document="{{document}}" layout="edit" headers="[[headers]]"></nuxeo-document-form-layout>

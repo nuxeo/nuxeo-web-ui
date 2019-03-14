@@ -14,22 +14,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-search-results-layout`
-@group Nuxeo UI
-@element nuxeo-search-results-layout
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+
+/**
+`nuxeo-search-results-layout`
+@group Nuxeo UI
+@element nuxeo-search-results-layout
+*/
 Polymer({
   _template: html`
     <nuxeo-layout id="results" href="[[_resultsHref(searchName)]]" model="[[_resultsModel(searchName,nxProvider)]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]" on-element-changed="_formChanged"></nuxeo-layout>

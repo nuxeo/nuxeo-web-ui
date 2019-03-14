@@ -14,6 +14,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import '@polymer/polymer/polymer-legacy.js';
+
+import '@polymer/iron-localstorage/iron-localstorage.js';
+import '@polymer/iron-pages/iron-pages.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-sort-select.js';
+import '../nuxeo-selection/nuxeo-selection-toolbar.js';
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 /**
 An element to display results from a page provider.
 
@@ -36,27 +53,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 @group Nuxeo UI
 @element nuxeo-results
 */
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
-import '@polymer/polymer/polymer-legacy.js';
-
-import '@polymer/iron-localstorage/iron-localstorage.js';
-import '@polymer/iron-pages/iron-pages.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
-import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-sort-select.js';
-import '../nuxeo-selection/nuxeo-selection-toolbar.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style>

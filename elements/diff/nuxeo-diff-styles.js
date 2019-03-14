@@ -14,6 +14,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import '@polymer/polymer/polymer-legacy.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+
 /*
   Styles module to be used by elements extending `Nuxeo.DiffBehavior`, providing styles to represent arrays and both
   simple and complex objects.
@@ -29,14 +33,6 @@ limitations under the License.
   `--nuxeo-complex-diff-added` | Mixin applied to the additions of complex objects | {}
   `--nuxeo-complex-diff-deleted` | Mixin applied to the deletions of complex objects | {}
 */
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
-import '@polymer/polymer/polymer-legacy.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-
 const template = html`
 <dom-module id="nuxeo-diff-styles">
   <template>

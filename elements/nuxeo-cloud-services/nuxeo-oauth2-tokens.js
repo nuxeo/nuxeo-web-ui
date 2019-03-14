@@ -14,16 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/**
-`nuxeo-oauth2-tokens`
-@group Nuxeo UI
-@element nuxeo-oauth2-tokens
-*/
-/*
-  FIXME(polymer-modulizer): the above comments were extracted
-  from HTML and may be out of place here. Review them and
-  then delete this comment!
-*/
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-form/iron-form.js';
@@ -45,6 +35,11 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 var OAUTH2_PROVIDER_TOKENS_PATH = 'oauth2/token/provider/';
 var OAUTH2_CLIENT_TOKENS_PATH = 'oauth2/token/client/';
 
+/**
+`nuxeo-oauth2-tokens`
+@group Nuxeo UI
+@element nuxeo-oauth2-tokens
+*/
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
