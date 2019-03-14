@@ -191,7 +191,7 @@ Polymer({
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
             <template is="dom-if" if="[[!truncated]]">
-              <iron-icon name="reply" class="main-option opaque" icon="reply" on-tap="_reply" hidden\$="[[!_isRootElement(level)]]"></iron-icon>
+              <iron-icon name="reply" class="main-option opaque" icon="reply" on-tap="_reply" hidden$="[[!_isRootElement(level)]]"></iron-icon>
             </template>
           </div>
           <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">

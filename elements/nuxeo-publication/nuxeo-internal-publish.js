@@ -85,7 +85,7 @@ Polymer({
       <div class="horizontal layout flex">
         <nuxeo-select id="rendition" label="[[i18n('publication.internal.renditons.label')]]" placeholder="[[i18n('publication.internal.renditons.placeholder')]]" selected="{{selectedRendition}}" attr-for-selected="name">
           <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
-            <paper-item name\$="[[rendition.id]]">[[rendition.label]]</paper-item>
+            <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
           </template>
         </nuxeo-select>
         <template is="dom-if" if="[[!_isMultiple]]">
@@ -105,7 +105,7 @@ Polymer({
         <div class="flex start-justified">
           <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button id="publish" noink="" class="primary" on-tap="_publish" disabled\$="[[!_canPublish(document,publishSpace)]]">
+        <paper-button id="publish" noink="" class="primary" on-tap="_publish" disabled$="[[!_canPublish(document,publishSpace)]]">
             [[i18n('publication.publish')]]
         </paper-button>
       </div>

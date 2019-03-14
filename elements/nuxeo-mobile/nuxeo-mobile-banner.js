@@ -59,7 +59,7 @@ Polymer({
         <paper-icon-button icon="icons:close" on-tap="_dismiss"></paper-icon-button>
         <div class="mobileAppLinkContainer">
           <template is="dom-if" if="[[isAndroid]]">
-            <a class="mobileAppLink" href\$="[[_computeUrl(document)]]">[[i18n('label.mobile.openInApp')]]</a>
+            <a class="mobileAppLink" href$="[[_computeUrl(document)]]">[[i18n('label.mobile.openInApp')]]</a>
           </template>
           <template is="dom-if" if="[[isIOS]]">
             <a class="mobileAppLink" on-tap="_openIOSAppOrAppStore">[[i18n('label.mobile.openInApp')]]</a>

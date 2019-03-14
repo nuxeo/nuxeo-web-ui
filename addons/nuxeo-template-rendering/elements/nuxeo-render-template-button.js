@@ -42,7 +42,7 @@ Polymer({
     <nuxeo-operation id="renderTemplateOp" op="[[renderOp]]"></nuxeo-operation>
     <div id="render" class="action" on-tap="_toggleDialog">
       <paper-icon-button noink="" icon="[[icon]]" src="[[iconSrc]]"></paper-icon-button>
-      <span class="label" hidden\$="[[!showLabel]]">[[i18n(label)]]</span>
+      <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
     </div>
     <paper-tooltip for="render">[[i18n(tooltip)]]</paper-tooltip>
 
@@ -57,7 +57,7 @@ Polymer({
               </template>
             </paper-listbox>
           </paper-dropdown-menu>
-          <div hidden\$="[[!selectedTemplate.properties.dc:description]]">
+          <div hidden$="[[!selectedTemplate.properties.dc:description]]">
             <label>[[i18n('renderTemplateButton.dialog.template.description')]]</label>
             <div class="multiline">[[selectedTemplate.properties.dc:description]]</div>
           </div>

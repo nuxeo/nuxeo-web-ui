@@ -138,7 +138,7 @@ Polymer({
 
       </nuxeo-selection-toolbar>
 
-      <div class="resultActions" hidden\$="[[hideContentViewActions]]">
+      <div class="resultActions" hidden$="[[hideContentViewActions]]">
 
         <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
           <nuxeo-sort-select options="[[_sortOptions(view, sortOptions)]]" selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
@@ -147,7 +147,7 @@ Polymer({
           <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch">
           </nuxeo-quick-filters>
         </template>
-        <span class="resultsCount" hidden\$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[i18n('results.heading.count', resultsCount)]]</span>
+        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[i18n('results.heading.count', resultsCount)]]</span>
 
         <div class="rightHand">
           <slot name="actions"></slot>
@@ -159,7 +159,7 @@ Polymer({
 
           <div class="viewModes">
             <template is="dom-repeat" items="[[_displayModes]]">
-              <paper-icon-button class="displayMode" icon="[[item.icon]]" title\$="[[_displayModeTitle(item, i18n)]]" selected\$="[[_isCurrentDisplayMode(item, displayMode)]]" disabled\$="[[_isCurrentDisplayMode(item, displayMode)]]" on-tap="_toggleDisplayMode">
+              <paper-icon-button class="displayMode" icon="[[item.icon]]" title$="[[_displayModeTitle(item, i18n)]]" selected$="[[_isCurrentDisplayMode(item, displayMode)]]" disabled$="[[_isCurrentDisplayMode(item, displayMode)]]" on-tap="_toggleDisplayMode">
               </paper-icon-button>
             </template>
           </div>

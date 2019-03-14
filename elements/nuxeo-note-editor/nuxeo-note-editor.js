@@ -94,7 +94,7 @@ Polymer({
 
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <paper-icon-button id="editHtml" class="edit" icon="[[_computeHtmlEditIcon(_viewMode)]]" on-tap="_toggleHtmlSource" hidden\$="[[!_canEdit(document)]]"></paper-icon-button>
+          <paper-icon-button id="editHtml" class="edit" icon="[[_computeHtmlEditIcon(_viewMode)]]" on-tap="_toggleHtmlSource" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
           <paper-tooltip for="editHtml" position="right">[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip>
           <template is="dom-if" if="[[_viewMode]]">
             <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
@@ -103,14 +103,14 @@ Polymer({
             <paper-textarea value="{{_value}}" no-label-float="" placeholder="[[i18n('noteViewLayout.placeholder')]]"></paper-textarea>
           </template>
           <div class="layout horizontal end-justified">
-            <paper-button name="editorSave" noink="" class="primary" on-tap="_editorSave" hidden\$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
+            <paper-button name="editorSave" noink="" class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]">[[i18n('command.save')]]</paper-button>
           </div>
         </div>
       </template>
 
       <template is="dom-if" if="[[!_isHTML(document)]]">
         <template is="dom-if" if="[[_viewMode]]">
-          <paper-icon-button id="editNote" class="edit" icon="nuxeo:edit" on-tap="_edit" hidden\$="[[!_canEdit(document)]]"></paper-icon-button>
+          <paper-icon-button id="editNote" class="edit" icon="nuxeo:edit" on-tap="_edit" hidden$="[[!_canEdit(document)]]"></paper-icon-button>
           <paper-tooltip for="editNote" position="bottom">[[i18n('command.edit')]]</paper-tooltip>
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>

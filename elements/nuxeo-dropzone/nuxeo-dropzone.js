@@ -136,7 +136,7 @@ Polymer({
 
     <input hidden="" id="input" type="file" on-change="_uploadInputFiles">
 
-    <div id="details" hidden\$="[[!hasFiles]]">
+    <div id="details" hidden$="[[!hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
         <div class="file">
           <div class="info">
@@ -146,14 +146,14 @@ Polymer({
               <paper-progress class="progress" indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
             </template>
           </div>
-          <div class="actions" hidden\$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
+          <div class="actions" hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
             <paper-icon-button noink="" icon="nuxeo:delete" on-tap="_deleteFile"></paper-icon-button>
           </div>
         </div>
       </template>
     </div>
 
-    <div id="dropzone" hidden\$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
       <div id="container">
         <a href="javascript:undefined" on-tap="open">[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a>
         <div class="actions">

@@ -194,13 +194,13 @@ Polymer({
       <neon-animated-pages class="content" id="queues" selected="[[_selectedPage]]" entry-animation="[[_entryAnimation]]" exit-animation="[[_exitAnimation]]">
         <neon-animatable>
 
-          <div id="collections" class="collections" hidden\$="{{_isDisplayMembers}}">
+          <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
             <nuxeo-page-provider id="collectionsProvider" provider="user_collections" page-size="40" params="{&quot;searchTerm&quot;:&quot;%&quot;,&quot;user&quot;:&quot;\$currentUser&quot;}" sort="{&quot;dc:modified&quot;:&quot;desc&quot;}" schemas="dublincore,common" enrichers="permissions" headers="{&quot;X-NXfetch.document&quot;: &quot;properties&quot;}">
             </nuxeo-page-provider>
 
             <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" selected-item="{{selectedCollection}}" selection-enabled="" select-on-tap="" as="collection" empty-label="[[i18n('collections.empty')]]" empty-label-when-filtered="[[i18n('collections.empty')]]">
               <template>
-                <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                   <div class="collection-box">
                     <div class="collection-info horizontal layout center">
                       <iron-icon class="collection-name-icon" icon="nuxeo:collections"></iron-icon>
@@ -226,10 +226,10 @@ Polymer({
 
         <neon-animatable>
 
-          <div id="queue" hidden\$="{{!_isDisplayMembers}}">
+          <div id="queue" hidden$="{{!_isDisplayMembers}}">
             <nuxeo-data-list id="membersList" selected-item="{{selectedMember}}" selection-enabled="" select-on-tap="" as="member" empty-label="[[i18n('collections.members.empty')]]" empty-label-when-filtered="[[i18n('collections.members.empty')]]">
               <template>
-                <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
+                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
 
                   <div class="list-item-box">
                     <div class="list-item-info horizontal layout center">
@@ -240,7 +240,7 @@ Polymer({
                         <span class="list-item-title ellipsis">[[member.title]]</span>
                         <span class="list-item-property ellipsis">[[formatDocType(member.type)]]</span>
                       </div>
-                      <iron-icon id="removeFromCollection" class="remove" hidden\$="[[!_canRemove(selectedCollection)]]" icon="nuxeo:remove" data-uid\$="[[member.uid]]" on-tap="_removeFromCollection">
+                      <iron-icon id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]" icon="nuxeo:remove" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
                       </iron-icon>
                     </div>
                   </div>

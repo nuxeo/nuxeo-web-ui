@@ -256,16 +256,16 @@ Polymer({
     <nuxeo-connection id="nxcon"></nuxeo-connection>
     <nuxeo-operation id="op" op="Search.SuggestersLauncher" response="{{items}}" params="{&quot;searchTerm&quot;:&quot;[[searchTerm]]&quot;}"></nuxeo-operation>
 
-    <div hidden\$="[[!toggled]]">
+    <div hidden$="[[!toggled]]">
       <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar">
           <paper-input noink="" id="searchInput" value="{{searchTerm}}" type="search" auto-focus="" label="[[i18n('suggester.label')]]" no-label-float=""></paper-input>
         </div>
-        <div id="results" hidden\$="[[!_canShowResults(searchTerm, items, items.splices)]]">
+        <div id="results" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
           <iron-selector id="selector">
             <template is="dom-repeat" items="{{items}}">
-              <a class="item" href\$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
+              <a class="item" href$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
                 <div class="thumbnailContainer">
                   <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
                   </iron-image>

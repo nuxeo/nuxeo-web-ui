@@ -205,7 +205,7 @@ Polymer({
 
     </style>
 
-    <div class="listBox grid-box" selection-mode\$="[[selectionMode]]">
+    <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick">
           <img src="[[_thumbnail(doc)]]">

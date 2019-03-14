@@ -97,7 +97,7 @@ Polymer({
         <nuxeo-card>
           <nuxeo-select label="[[i18n('vocabularyManagement.vocabulary')]]" placeholder="[[i18n('vocabularyManagement.select')]]" selected="{{selectedVocabulary}}" attr-for-selected="name">
             <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
-              <paper-item name\$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+              <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
             </template>
           </nuxeo-select>
         </nuxeo-card>

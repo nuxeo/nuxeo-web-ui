@@ -83,19 +83,19 @@ Polymer({
 
     <nuxeo-results id="results" display-mode="table" name="[[document.uid]]" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" document="[[document]]" display-quick-filters="" display-sort="[[_canSort(document, sortOptions)]]" sort-options="[[sortOptions]]">
       <!-- Grid view -->
-      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="" draggable\$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails" class="results" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="" draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
         <template>
-          <nuxeo-document-grid-thumbnail class="grid-box" tabindex\$="{{tabIndex}}" selected\$="{{selected}}" index="[[index]]" doc="[[item]]" on-navigate="_navigate" selected-items="[[selectedItems]]">
+          <nuxeo-document-grid-thumbnail class="grid-box" tabindex$="{{tabIndex}}" selected$="{{selected}}" index="[[index]]" doc="[[item]]" on-navigate="_navigate" selected-items="[[selectedItems]]">
           </nuxeo-document-grid-thumbnail>
         </template>
       </nuxeo-data-grid>
 
       <!-- Table view -->
-      <nuxeo-data-table name="table" icon="nuxeo:view-list" class="results" settings-enabled="" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="" on-row-clicked="_navigate" draggable\$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
+      <nuxeo-data-table name="table" icon="nuxeo:view-list" class="results" settings-enabled="" empty-label="[[emptyLabel]]" empty-label-when-filtered="[[emptyLabelWhenFiltered]]" selection-enabled="" on-row-clicked="_navigate" draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" field="dc:title" sort-by="[[_displaySort(document, 'dc:title')]]" filter-by="title" flex="100">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="title ellipsis" href\$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
+            <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.type')]]" field="type" hidden="">
@@ -141,14 +141,14 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.nature')]]" field="dc:nature" hidden="">
           <template>
-            <nuxeo-tag hidden\$="[[!item.properties.dc:nature]]">
+            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">
               [[formatDirectory(item.properties.dc:nature)]]
             </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.coverage')]]" field="dc:coverage" hidden="">
           <template>
-            <nuxeo-tag hidden\$="[[!item.properties.dc:coverage]]">
+            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">
               [[formatDirectory(item.properties.dc:coverage)]]
             </nuxeo-tag>
           </template>

@@ -554,14 +554,14 @@ Polymer({
       <div slot="drawer">
 
         <!-- logo -->
-        <a id="logo" href\$="[[urlFor('home')]]">
-          <img src\$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]">
+        <a id="logo" href$="[[urlFor('home')]]">
+          <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]">
         </a>
 
         <!-- menu -->
         <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
           <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon" hidden\$="[[!_hasAdministrationPermissions(currentUser)]]">
+          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
           </nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile" src="[[currentUser.contextParameters.userprofile.avatar.data]]" icon="nuxeo:user-settings" label="app.account" class="profile-icon">
           </nuxeo-menu-icon>
@@ -592,7 +592,7 @@ Polymer({
 
           </iron-pages>
 
-          <div class="toggle" on-tap="_closeDrawer" hidden\$="[[!drawerOpened]]">
+          <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
             <iron-icon icon="icons:chevron-left"></iron-icon>
           </div>
 
@@ -632,19 +632,19 @@ Polymer({
 
         </iron-pages>
 
-        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" hidden\$="[[!isNarrow]]"></paper-icon-button>
+        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" hidden$="[[!isNarrow]]"></paper-icon-button>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
 
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <nuxeo-document-create-button class\$="[[page]]" parent="[[currentParent]]" hidden\$="[[isMobile]]"></nuxeo-document-create-button>
+    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]" hidden$="[[isMobile]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/"></nuxeo-document-create-popup>
 
     <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
 
     <paper-toast id="toast">
-      <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden\$="[[!_dismissible]]"></paper-icon-button>
+      <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden$="[[!_dismissible]]"></paper-icon-button>
     </paper-toast>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>

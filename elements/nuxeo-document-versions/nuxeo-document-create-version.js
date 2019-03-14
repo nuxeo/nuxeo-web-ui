@@ -100,7 +100,7 @@ Polymer({
 
     <nuxeo-operation id="opCreateVersion" op="Document.CreateVersion" input="[[document.uid]]" headers="[[headers]]" response="{{version}}" sync-indexing=""></nuxeo-operation>
 
-    <nuxeo-tag class="create" disabled\$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase="">[[label]]</nuxeo-tag>
+    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase="">[[label]]</nuxeo-tag>
 
     <nuxeo-dialog id="dialog" class="dialog" with-backdrop="" on-iron-overlay-opened="_dialogOpened" on-iron-overlay-closed="_dialogClosed">
       <h2>[[i18n('documentCreateVersion.title',

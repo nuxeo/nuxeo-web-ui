@@ -51,10 +51,10 @@ Polymer({
     <nuxeo-document id="srcDoc" loading="{{loadingSrc}}">
     </nuxeo-document>
 
-    <div class="layout horizontal" hidden\$="[[loadingSrc]]">
+    <div class="layout horizontal" hidden$="[[loadingSrc]]">
       <iron-icon icon="icons:info"></iron-icon>
       <div>
-        <a href\$="[[_srcUrl(_src)]]" disabled\$="[[_srcDeleted]]">
+        <a href$="[[_srcUrl(_src)]]" disabled$="[[_srcDeleted]]">
           [[_infoLabel(_srcDeleted)]]
         </a>
       </div>

@@ -122,14 +122,14 @@ Polymer({
     <div class="content">
       <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList" selected-item="{{selectedFavorite}}" items="{{favorites}}" selection-enabled="" select-on-tap="" as="favorite" empty-label="[[i18n('favorites.empty')]]" empty-label-when-filtered="[[i18n('favorites.empty')]]">
         <template>
-          <div tabindex\$="{{tabIndex}}" class\$="[[_computedClass(selected)]]">
+          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
                   <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
                 <div class="list-item-title">[[favorite.title]]</div>
-                <iron-icon id="removeFromFavorites" class="remove" icon="nuxeo:remove" data-uid\$="[[favorite.uid]]" on-tap="_removeFromFavorites">
+                <iron-icon id="removeFromFavorites" class="remove" icon="nuxeo:remove" data-uid$="[[favorite.uid]]" on-tap="_removeFromFavorites">
                 </iron-icon>
               </div>
             </div>

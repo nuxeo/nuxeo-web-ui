@@ -45,7 +45,7 @@ Polymer({
       <iron-pages selected="[[configMode]]" attr-for-selected="name" class="vertical layout flex">
         <div name="view">
 
-          <div hidden\$="[[!document.properties.tmpl:applicableTypes]]">
+          <div hidden$="[[!document.properties.tmpl:applicableTypes]]">
             <label>[[i18n('templateRenderingPage.validDocTypes')]]</label>
             <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{document.properties.tmpl:applicableTypes}}" min-chars="0" multiple="" readonly=""></nuxeo-selectivity>
           </div>
@@ -60,7 +60,7 @@ Polymer({
             </template>
           </div>
 
-          <div hidden\$="[[!document.properties.tmpl:templateType]]">
+          <div hidden$="[[!document.properties.tmpl:templateType]]">
             <label>[[i18n('templateRenderingPage.processor.label')]]</label>
             <div>[[_getProcessorLabel(document.properties.tmpl:templateType)]]</div>
           </div>

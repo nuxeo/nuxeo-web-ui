@@ -73,8 +73,8 @@ Polymer({
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <nuxeo-tag>
        <div class="item">
-         <a class="title ellipsis" href\$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-         <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid\$="[[item.uid]]"></iron-icon>
+         <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+         <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid$="[[item.uid]]"></iron-icon>
        </div>
      </nuxeo-tag>
     </template>

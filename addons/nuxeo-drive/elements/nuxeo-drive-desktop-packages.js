@@ -94,7 +94,7 @@ Polymer({
         <div class="row">
           <div class="cell flex"><span class="platform">[[pkg.platform]]</span></div>
           <div class="cell flex-3">
-            <a href\$="[[pkg.url]]" tabindex="-1" target="_blank">
+            <a href$="[[pkg.url]]" tabindex="-1" target="_blank">
               <paper-button noink="">
                 [[pkg.name]]
               </paper-button>

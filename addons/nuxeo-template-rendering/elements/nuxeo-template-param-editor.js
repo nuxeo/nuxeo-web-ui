@@ -122,7 +122,7 @@ Polymer({
 
     <iron-pages selected="[[mode]]" attr-for-selected="name" class="vertical flex">
       <div name="view">
-        <div class="horizontal-layout signature justified" hidden\$="[[!_hasParams(params)]]">
+        <div class="horizontal-layout signature justified" hidden$="[[!_hasParams(params)]]">
           <div class="horizontal-layout start-justified">
             <label>[[i18n('templateRenderingPage.parameters.name')]]</label>
           </div>
@@ -162,7 +162,7 @@ Polymer({
           </div>
         </div>
         <template is="dom-repeat" items="[[_getParams(params)]]" as="param">
-          <div class\$="horizontal-layout signature justified [[_formatSignature(param, params)]]">
+          <div class$="horizontal-layout signature justified [[_formatSignature(param, params)]]">
             <div class="horizontal-layout start-justified">
               <span>[[_getParamAttribute(param, 'name', params)]]</span>
             </div>
@@ -175,14 +175,14 @@ Polymer({
             <div class="horizontal-layout end-justified">
               <paper-icon-button id="[[_computeBtnId(param, 'edit')]]" icon="icons:create" on-tap="_editParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
               <paper-tooltip for="[[_computeBtnId(param, 'edit')]]">[[i18n('templateRenderingPage.parameters.edit.tooltip')]]</paper-tooltip>
-              <div hidden\$="[[!allowDelete]]">
+              <div hidden$="[[!allowDelete]]">
                 <paper-icon-button id="[[_computeBtnId(param, 'remove')]]" icon="icons:delete" on-tap="_deleteParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
                 <paper-tooltip for="[[_computeBtnId(param, 'remove')]]">[[i18n('templateRenderingPage.parameters.remove.tooltip')]]</paper-tooltip>
               </div>
             </div>
           </div>
         </template>
-        <div class="horizontal-layout end-justified signatureFooter" hidden\$="[[!allowCreate]]">
+        <div class="horizontal-layout end-justified signatureFooter" hidden$="[[!allowCreate]]">
           <paper-icon-button id="addParamBtn" icon="icons:add-circle" on-tap="_addParam"></paper-icon-button>
           <paper-tooltip for="addParamBtn">[[i18n('templateRenderingPage.parameters.add.tooltip')]]</paper-tooltip>
         </div>
@@ -254,7 +254,7 @@ Polymer({
             <div class="flex start-justified">
               <paper-button noink="" dialog-dismiss="" on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
             </div>
-            <paper-button noink="" class="primary" on-tap="_save" disabled\$="[[!_isValid(collection)]]">
+            <paper-button noink="" class="primary" on-tap="_save" disabled$="[[!_isValid(collection)]]">
               [[i18n('command.save')]]
             </paper-button>
           </div>

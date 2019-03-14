@@ -86,7 +86,7 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
           <template>
-            <a href\$="[[_parseComment(item.comment)]]">[[item.comment]]</a>
+            <a href$="[[_parseComment(item.comment)]]">[[item.comment]]</a>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
