@@ -22,7 +22,13 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-merge": "^4.1.4",
-    "workbox-cli": "3.6.3"
+    "workbox-cli": "3.6.3",
+    "@open-wc/eslint-config": "^0.3.0",
+    "@open-wc/prettier-config": "^0.1.0",
+    "@commitlint/cli": "^7.0.0",
+    "@commitlint/config-conventional": "^7.0.0",
+    "husky": "^1.0.0",
+    "lint-staged": "^8.0.0"
   },
   "scripts": {
     "prestart": "npm run prepare:i18n",
@@ -37,8 +43,18 @@
     "fix:ui_elements": "replace '/node_modules/@nuxeo/nuxeo-ui-elements/' '${window.location.pathname}/' target/classes/web/nuxeo.war/ui/*.js",
     "fix:fonts": "replace '\\.\\./fonts' './fonts' target/classes/web/nuxeo.war/ui/*.js",
     "build:analyze": "webpack --env production --analyze",
-    "lint": "gulp lint && polymer lint -i elements/*/*.html",
-    "win-lint": "gulp lint && polymer lint -i elements\\*\\*.html"
+    "lint:polymer": "polymer lint -i elements/**/*.js addons/**/*.js",
+    "win-lint:polymer": "polymer lint -i elements\\**\\*.js addons\\**\\*.js",
+    "format:polymer": "polymer lint -i elements/**/*.js addons/**/*.js --fix",
+    "win-format:polymer": "polymer lint -i elements\\**\\*.js addons\\**\\*.js --fix",
+    "lint:eslint": "eslint --ext .js,.html .",
+    "format:eslint": "eslint --ext .js,.html . --fix",
+    "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
+    "format:prettier": "prettier \"**/*.{js,html}\" --write",
+    "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:polymer",
+    "win-lint": "npm run lint:eslint && npm run lint:prettier && npm run win-lint:polymer",
+    "format": "npm run format:polymer && npm run format:prettier && npm run format:eslint",
+    "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint"
   },
   "engines": {
     "node": ">=8.0"
@@ -82,5 +98,18 @@
     "jsplumb": "^2.9.0",
     "three": "~0.81.0",
     "web-animations-js": "^2.3.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{js,html}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
   }
 }
