@@ -1,39 +1,6 @@
 {
   "entrypoint": "index.html",
-  "shell": "elements/nuxeo-app.js",
-  "fragments": [
-    "elements/elements.js",
-    "elements/routing.js"
-  ],
-  "sources": [
-    "elements/**/*",
-    "themes/**/*",
-    "images/**/*",
-    "fonts/**/*"
-  ],
-  "extraDependencies": [
-    "sw.js",
-    "manifest.json",
-    "index.css",
-    "node_modules/@webcomponents/webcomponentsjs/*",
-    "node_modules/@webcomponents/html-imports//html-imports.min.js",
-    "node_modules/web-animations-js/web-animations-next-lite.min.js",
-    "node_modules/moment/min/moment-with-locales.min.js",
-    "node_modules/jsondiffpatch/dist/jsondiffpatch.umd.js",
-    "node_modules/cropperjs/dist/cropper.css",
-    "node_modules/@nuxeo/nuxeo-ui-elements/viewers/pdfjs/**/*",
-    "node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/**/*",
-    "node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-view-user.html",
-    "node_modules/@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-edit-user.html"
-  ],
-  "moduleResolution": "node",
-  "npm": true,
   "lint": {
-    "rules": ["polymer-1"],
-    "ignoreWarnings": [
-      "polymer-expression-parse-error",
-      "databind-with-unknown-property",
-      "set-unknown-attribute"
-    ]
+    "rules": ["polymer-3"]
   }
 }
