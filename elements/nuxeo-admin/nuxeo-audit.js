@@ -79,7 +79,7 @@ Polymer({
           <div class="row-container">
             <nuxeo-date-picker role="widget" class="item" value="{{startDate}}" label="[[i18n('audit.from')]]">
             </nuxeo-date-picker>
-            <nuxeo-date-picker role="widget" class="item" value="{{endDate}}" label="[[i18n('audit.to')]]">
+            <nuxeo-date-picker role="widget" class="item" value="{{endDate}}" default-time="{{defaultTime}}" label="[[i18n('audit.to')]]">
             </nuxeo-date-picker>
           </div>
 
@@ -147,6 +147,14 @@ Polymer({
       type: String,
       value: ''
     },
+    defaultTime: {
+      type: String,
+<<<<<<< HEAD
+      value: ''
+=======
+      value: '23'
+>>>>>>> a060d81c... NXP-27025: add defaultTime to endDate picker
+    },
     principalName: {
       type: String,
       value: ''
@@ -154,7 +162,7 @@ Polymer({
   },
 
   observers: [
-    '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
+    '_refresh(startDate, endDate, defaultTime, selectedEventTypes.*, selectedEventCategory, principalName)'
   ],
 
   _formati18n: function(path, key) {
@@ -183,6 +191,9 @@ Polymer({
     }
     if (this.selectedEventCategory) {
       params.eventCategory = this.selectedEventCategory;
+    }
+    if (this.startDate === this.endDate) {
+      params.defaultTime = "23:59:59";
     }
     return params;
   },
