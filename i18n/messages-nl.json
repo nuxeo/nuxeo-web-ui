@@ -581,6 +581,7 @@
   "label.description": "Beschrijving",
   "label.document.type.audio": "Audio",
   "label.document.type.collection": "Collectie",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Domein",
   "label.document.type.easysharefolder": "Easyshare-map",
   "label.document.type.file": "Bestand",

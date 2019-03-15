@@ -581,6 +581,7 @@
   "label.description": "描述",
   "label.document.type.audio": "音频",
   "label.document.type.collection": "集合",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "域",
   "label.document.type.easysharefolder": "Easyshare 文件夹",
   "label.document.type.file": "文件",

@@ -581,6 +581,7 @@
   "label.description": "Descripción",
   "label.document.type.audio": "Audio",
   "label.document.type.collection": "Coleccion",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Dominio",
   "label.document.type.easysharefolder": "Carpeta EasyShare",
   "label.document.type.file": "Archivo",

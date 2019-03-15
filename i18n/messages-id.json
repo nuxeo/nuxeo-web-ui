@@ -581,6 +581,7 @@
   "label.description": "Deskripsi",
   "label.document.type.audio": "Audio",
   "label.document.type.collection": "Koleksi",
+  "label.document.type.collections": "Collections",
   "label.document.type.domain": "Domain",
   "label.document.type.easysharefolder": "Folder Easyshare",
   "label.document.type.file": "Berkas",
