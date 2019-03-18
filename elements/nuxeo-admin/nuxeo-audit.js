@@ -79,7 +79,7 @@ Polymer({
           <div class="row-container">
             <nuxeo-date-picker role="widget" class="item" value="{{startDate}}" label="[[i18n('audit.from')]]">
             </nuxeo-date-picker>
-            <nuxeo-date-picker role="widget" class="item" value="{{endDate}}" label="[[i18n('audit.to')]]">
+            <nuxeo-date-picker role="widget" class="item" value="{{endDate}}" default-time="23:59:59" label="[[i18n('audit.to')]]">
             </nuxeo-date-picker>
           </div>
 
