@@ -38,11 +38,11 @@ Polymer({
   properties: {
     result: {
       type: String,
-      observer: '_observeResult'
-    }
+      observer: '_observeResult',
+    },
   },
 
-  _observeResult: function() {
+  _observeResult() {
     this.root.innerHTML = this.result;
-  }
+  },
 });

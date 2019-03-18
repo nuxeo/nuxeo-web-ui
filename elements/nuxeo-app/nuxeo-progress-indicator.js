@@ -59,26 +59,26 @@ Polymer({
       type: Boolean,
       value: false,
       reflectToAttribute: true,
-      observer: '_visibleChanged'
+      observer: '_visibleChanged',
     },
 
     animationConfig: {
       type: Object,
-      value: function() {
+      value() {
         return {
           'fadein': [{
             name: 'fade-in-animation',
             timing: {delay: 1000, duration: 1500},
-            node: this
-          }]
+            node: this,
+          }],
         };
-      }
-    }
+      },
+    },
   },
 
-  _visibleChanged: function(visible) {
+  _visibleChanged(visible) {
     if (visible) {
       this.playAnimation('fadein');
     }
-  }
+  },
 });

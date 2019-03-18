@@ -97,88 +97,88 @@ Polymer({
   properties: {
     parent: {
       type: Object,
-      observer: '_parentChanged'
+      observer: '_parentChanged',
     },
     subtypes: {
-      type: Array
+      type: Array,
     },
     shortcutsVisible: {
       type: Boolean,
-      value: false
+      value: false,
     },
     actionContext: {
       type: Object,
-      value: function() {
+      value() {
         return {};
       },
-      computed: '_actionContext(shortcutsVisible,subtypes)'
-    }
+      computed: '_actionContext(shortcutsVisible,subtypes)',
+    },
   },
 
   listeners: {
-    'create-document': '_hideShortcuts'
+    'create-document': '_hideShortcuts',
   },
 
-  _parentChanged: function() {
+  _parentChanged() {
     if (this.parent) {
       if (!this.parent.contextParameters || !this.parent.contextParameters.subtypes ||
         !this.parent.contextParameters.permissions) {
         this.$.defaultDoc.get();
       } else {
-        var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-          this.parent.contextParameters.subtypes.map(function(type) {
+        const subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+          this.parent.contextParameters.subtypes.map((type) => {
             type.id = type.type.toLowerCase();
             return type;
           }) : [];
-        var filteredSubtypes = [];
+        const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
-          subtypes.forEach(function(type) {
+          subtypes.forEach((type) => {
             if (type.facets.indexOf('HiddenInCreation') === -1) {
               filteredSubtypes.push(type.id);
             }
-          }.bind(this));
+          });
         }
         this.set('subtypes', filteredSubtypes);
       }
     }
   },
 
-  _canCreateIn: function(document) {
+  _canCreateIn(document) {
     if (document && document.contextParameters && document.contextParameters.permissions) {
       return document.contextParameters.permissions.indexOf('Write') > -1 ||
         document.contextParameters.permissions.indexOf('Everything') > -1;
-    } else {
+    } 
       return false;
-    }
+    
   },
 
-  _actionContext: function() {
+  _actionContext() {
     return {hostVisible: this.shortcutsVisible, subtypes: this.subtypes};
   },
 
-  _showShortcuts: function() {
+  _showShortcuts() {
     this.shortcutsVisible = true;
   },
 
-  _hideShortcuts: function() {
+  _hideShortcuts() {
     this.shortcutsVisible = false;
   },
 
-  _onMouseEnter: function() {
+  _onMouseEnter() {
     this._showShortcuts();
   },
 
-  _onMouseLeave: function() {
+  _onMouseLeave() {
     this._hideShortcuts();
   },
 
-  _displayWizard: function(e) {
+  _displayWizard(e) {
     if (!this.hidden) {
       this.fire('create-document', e.detail);
     }
   },
 
-  _animateOpen: function() {
+  _animateOpen() {
     return this.shortcutsVisible ? 'open' : '';
-  }
+  },
 });

@@ -121,52 +121,52 @@ Polymer({
 
   properties: {
     visible: {
-      type: Boolean
+      type: Boolean,
     },
     entries: {
       type: Array,
-      value: []
+      value: [],
     },
     selectedEventTypes: {
       type: Array,
-      value: []
+      value: [],
     },
     selectedEventCategory: {
       type: String,
-      value: ''
+      value: '',
     },
     startDate: {
       type: String,
-      value: ''
+      value: '',
     },
     endDate: {
       type: String,
-      value: ''
+      value: '',
     },
     principalName: {
       type: String,
-      value: ''
-    }
+      value: '',
+    },
   },
 
   observers: [
-    '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'
+    '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)',
   ],
 
-  _formati18n: function(path, key) {
+  _formati18n(path, key) {
     return key ? this.i18n(path + key) : '';
   },
 
-  _formatDocument: function(item) {
+  _formatDocument(item) {
     if (item) {
-      return (item.docUUID || '') + (item.docType ? ' (' + item.docType + ') ' : '') + (item.docPath || '');
+      return (item.docUUID || '') + (item.docType ? ` (${  item.docType  }) ` : '') + (item.docPath || '');
     }
   },
 
   /* Builds the parameters object to be used on the query */
-  _buildParams: function() {
-    var params = {
-      principalName: this.principalName
+  _buildParams() {
+    const params = {
+      principalName: this.principalName,
     };
     if (this.startDate) {
       params.startDate = this.startDate;
@@ -183,10 +183,10 @@ Polymer({
     return params;
   },
 
-  _refresh: function() {
+  _refresh() {
     if (this.visible) {
       this.$.provider.params = this._buildParams();
       this.$.table.fetch();
     }
-  }
+  },
 });

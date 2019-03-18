@@ -16,7 +16,7 @@ limitations under the License.
 */
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
 /**
  * @polymerBehavior Nuxeo.DocumentContentBehavior
@@ -32,44 +32,44 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
      */
     visible: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * The currently selected items in the results view.
      */
     selectedItems: {
       type: Array,
-      notify: true
+      notify: true,
     },
     params: {
       type: Object,
-      computed: '_computeParams(document)'
+      computed: '_computeParams(document)',
     },
     /**
      * The sort options.
      */
     sortOptions: {
       type: Array,
-      computed: '_computeSortOptions(i18n)'
+      computed: '_computeSortOptions(i18n)',
     },
     _dropTargetFilter: {
       type: Function,
-      value: function() {
+      value() {
         return this._dropTargetFilter.bind(this);
-      }
-    }
+      },
+    },
   },
 
   listeners: {
     'document-created': '_handleDocumentCreated',
-    'iron-resize': '_computeVisible'
+    'iron-resize': '_computeVisible',
   },
 
   observers: [
-    '_refresh(params, visible)'
+    '_refresh(params, visible)',
   ],
 
-  attached: function() {
+  attached() {
     this.nxProvider = this.pageProvider;
     this._dragoverHandler = this._dragoverImport.bind(this);
     this._dragleaveHandler = this._dragleaveImport.bind(this);
@@ -77,7 +77,7 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
     this._setupDnD();
   },
 
-  detached: function() {
+  detached() {
     this._teardownDnD();
     this._dragoverHandler = null;
     this._dragleaveHandler = null;
@@ -106,69 +106,69 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
     return this.$$('nuxeo-page-provider');
   },
 
-  _navigate: function(e) {
+  _navigate(e) {
     this.fire('navigate', {doc: (e.model || e.detail).item});
     e.stopPropagation();
   },
 
-  _refresh: function() {
+  _refresh() {
     if (this.document && this.visible) {
       this.results.fetch();
     }
   },
 
-  _canSort: function(document, options) {
+  _canSort(document, options) {
     return !(document && this.hasFacet(document, 'Orderable')) && Array.isArray(options) && options.length > 0;
   },
 
-  _displaySort: function(document, field) {
+  _displaySort(document, field) {
     return this._canSort(document) ? field : undefined;
   },
 
   // function used by nuxeo-data-grid and nuxeo-data-table to check if a list item is a drop target
-  _dropTargetFilter: function(el, model) {
+  _dropTargetFilter(el, model) {
     return model && (this.hasFacet(model.item, 'Folderish') || this.hasFacet(model.item, 'Collection'));
   },
 
-  _hasWritePermission: function (doc) {
+  _hasWritePermission (doc) {
     return doc && this.hasPermission(doc, 'Write');
   },
 
-  _handleDocumentCreated: function() {
+  _handleDocumentCreated() {
     this.fire('document-updated');
   },
 
-  _computeVisible: function() {
+  _computeVisible() {
     this.visible = Boolean(this.offsetWidth || this.offsetHeight);
   },
 
-  _dragoverImport: function(e) {
+  _dragoverImport(e) {
     e.preventDefault();
     this.fire('notify', { message: this.i18n('documentContentView.drag.import'), duration: 0 });
     this._toggleDragging(true);
   },
 
-  _dragleaveImport: function() {
+  _dragleaveImport() {
     this.fire('notify', { close: true });
     this._toggleDragging(false);
   },
 
-  _dropImport: function(e) {
+  _dropImport(e) {
     e.preventDefault();
     this.fire('notify', { close: true });
     this._toggleDragging(false);
     this.fire('create-document', { files: e.dataTransfer.files });
   },
 
-  _toggleDragging: function(flag) {
-    var view = this.view;
+  _toggleDragging(flag) {
+    const {view} = this;
     if (view) {
       this.toggleClass('dragging', flag, view);
     }
   },
 
-  _setupDnD: function() {
-    var results = this.results;
+  _setupDnD() {
+    const {results} = this;
     if (results) {
       results.addEventListener('dragover', this._dragoverHandler);
       results.addEventListener('dragleave', this._dragleaveHandler);
@@ -176,8 +176,8 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
     }
   },
 
-  _teardownDnD: function() {
-    var results = this.results;
+  _teardownDnD() {
+    const {results} = this;
     if (results) {
       results.removeEventListener('dragover', this._dragoverHandler);
       results.removeEventListener('dragleave', this._dragleaveHandler);
@@ -185,11 +185,11 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
     }
   },
 
-  _computeParams: function(document) {
+  _computeParams(document) {
     return document ? { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) } : {};
   },
 
-  _computeSortOptions: function() {
+  _computeSortOptions() {
     return [
       {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
       {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
@@ -197,7 +197,7 @@ export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
       {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
       {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
       {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
-      {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'}
+      {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'},
     ];
-  }
+  },
 }];

@@ -89,73 +89,71 @@ limitations under the License.
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
       properties: {
         document: {
-          type: Object
+          type: Object,
         },
         selectedTab: {
           type: String,
           value: 'view',
           notify: true,
-          observer: '_updateUrl'
+          observer: '_updateUrl',
         },
         cvParams: {
           type: Object,
-          notify: true
+          notify: true,
         },
         clipboard: {
-          type: Object
+          type: Object,
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(document, clipboard)'
+          computed: '_actionContext(document, clipboard)',
         },
         viewsContext: {
           type: Object,
-          computed: '_viewsContext(document)'
-        }
+          computed: '_viewsContext(document)',
+        },
       },
 
       listeners: {
         'aceupdated': '_documentUpdated',
         'acedeleted': '_documentUpdated',
         'added-to-collection': '_documentUpdated',
-        'removed-from-collection': '_documentUpdated'
+        'removed-from-collection': '_documentUpdated',
       },
 
-      _documentUpdated: function() {
+      _documentUpdated() {
         this.fire('document-updated');
       },
 
-      download: function() {
-        location.href = this.document.properties['file:content'].data;
+      download() {
+        window.location.href = this.document.properties['file:content'].data;
       },
 
       get _enrichers() {
-        if (this.document) {
-          return this.document.contextParameters;
-        }
+        return this.document && this.document.contextParameters;
       },
 
       get _canReadChildren() {
         return this._enrichers && this._enrichers.permissions.indexOf('ReadChildren') !== -1;
       },
 
-      _actionContext: function() {
+      _actionContext() {
         return {document: this.document, clipboard: this.clipboard};
       },
 
-      _viewsContext: function() {
+      _viewsContext() {
         return {document: this.document};
       },
 
-      _navigateToView: function() {
+      _navigateToView() {
         this.navigateTo('browse', this.document.path);
       },
 
-      _updateUrl: function() {
-        var currentUrl = window.location.href;
-        var newUrl;
-        var queryParamsIdx = currentUrl.lastIndexOf('?');
-        var queryParams;
+      _updateUrl() {
+        const currentUrl = window.location.href;
+        let newUrl;
+        const queryParamsIdx = currentUrl.lastIndexOf('?');
+        let queryParams;
         if (queryParamsIdx > -1) {
           newUrl = currentUrl.slice(0, queryParamsIdx);
           queryParams = new URLSearchParams(currentUrl.substring(queryParamsIdx));
@@ -170,14 +168,14 @@ limitations under the License.
           queryParams.set('p', this.selectedTab);
         }
         if (queryParams.toString().length > 0) {
-          newUrl += '?' + queryParams.toString();
+          newUrl += `?${  queryParams.toString()}`;
         }
         if (newUrl !== currentUrl) {
-          history.pushState(null, window.title, newUrl);
+          window.history.pushState(null, window.title, newUrl);
         } else {
-          history.replaceState(null, window.title, newUrl);
+          window.history.replaceState(null, window.title, newUrl);
         }
-      }
+      },
 
     });
   </script>

@@ -81,19 +81,19 @@ Polymer({
      * The 18n label key
      */
     label: {
-      type: String
+      type: String,
     },
 
     /**
      * The icon
      */
     icon: {
-      type: String
+      type: String,
     },
 
     src: {
       type: String,
-      value: ''
+      value: '',
     },
 
     /**
@@ -101,7 +101,7 @@ Polymer({
      */
     route: {
       type: String,
-      value: ''
+      value: '',
     },
 
     /**
@@ -109,22 +109,22 @@ Polymer({
      */
     link: {
       type: String,
-      value: ''
+      value: '',
     },
 
     /**
      * A badge associated with the icon
      */
     badge: {
-      type: String
-    }
+      type: String,
+    },
   },
 
   observers: [
-    '_srcOrIcon(icon, src)'
+    '_srcOrIcon(icon, src)',
   ],
 
-  _srcOrIcon: function() {
+  _srcOrIcon() {
     if (this.src && this.src.length > 0) {
       this.$.button.icon = '';
       this.$.button.src = this.src;
@@ -133,7 +133,7 @@ Polymer({
     }
   },
 
-  _href: function() {
+  _href() {
     if (!this.route) {
       return;
     }
@@ -141,10 +141,10 @@ Polymer({
       return this.link;
     }
     if (this.urlFor) {
-      var parts = this.route.split(':');
-      var name = parts[0];
-      var args = (parts[1] && parts[1].split('/')) || [];
-      return this.urlFor.apply(this, [name].concat(args));
+      const parts = this.route.split(':');
+      const name = parts[0];
+      const args = (parts[1] && parts[1].split('/')) || [];
+      return this.urlFor(...[name].concat(args));
     }
-  }
+  },
 });

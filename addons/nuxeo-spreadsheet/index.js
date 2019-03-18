@@ -17,6 +17,7 @@ limitations under the License.
 import './elements/nuxeo-spreadsheet-button.js';
 
 import html from './nuxeo-spreadsheet.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

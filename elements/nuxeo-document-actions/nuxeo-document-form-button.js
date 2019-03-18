@@ -70,7 +70,7 @@ Polymer({
      * Input document.
      */
     document: {
-      type: Object
+      type: Object,
     },
 
     /**
@@ -78,7 +78,7 @@ Polymer({
      */
     layout: {
       type: String,
-      value: 'edit'
+      value: 'edit',
     },
 
     /**
@@ -90,36 +90,36 @@ Polymer({
     },
 
     label: {
-      type: String
+      type: String,
     },
 
     icon: {
       type: String,
-      value: 'nuxeo:edit'
+      value: 'nuxeo:edit',
     },
   },
 
   get dialog() {
-    return this.root.getElementById(this.layout + '-dialog');
+    return this.root.getElementById(`${this.layout  }-dialog`);
   },
 
   get button() {
-    return this.root.getElementById(this.layout + '-button');
+    return this.root.getElementById(`${this.layout  }-button`);
   },
 
-  _isAvailable: function(doc) {
+  _isAvailable(doc) {
     return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
   },
 
-  _isMutable: function(doc) {
+  _isMutable(doc) {
     return doc && !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && !this.isTrashed(doc);
   },
 
-  _openDialog: function() {
+  _openDialog() {
     this.dialog.open();
   },
 
-  _closeDialog: function() {
+  _closeDialog() {
     this.dialog.close();
-  }
+  },
 });

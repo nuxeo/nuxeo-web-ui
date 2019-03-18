@@ -16,6 +16,7 @@ Contributors:
     Tiago Cardoso <tcardoso@nuxeo.com>
     Miguel Nixo <mnixo@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
@@ -83,7 +84,7 @@ Polymer({
   is: 'nuxeo-3d-viewer',
 
   behaviors: [
-    IronResizableBehavior
+    IronResizableBehavior,
   ],
 
   properties: {
@@ -96,7 +97,7 @@ Polymer({
     loader: {
       type: String,
       value: 'simple',
-      observer: '_loaderChanged'
+      observer: '_loaderChanged',
     },
 
     /**
@@ -104,7 +105,7 @@ Polymer({
      */
     src: {
       type: String,
-      observer: '_sourceChanged'
+      observer: '_sourceChanged',
     },
 
     /**
@@ -115,7 +116,7 @@ Polymer({
       value: [0, 0],
       notify: true,
       reflectToAttribute: true,
-      observer: '_sphericalCoordsChanged'
+      observer: '_sphericalCoordsChanged',
     },
 
     /**
@@ -125,20 +126,20 @@ Polymer({
       type: Boolean,
       readOnly: true,
       value: false,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
   listeners: {
     'iron-resize': '_resize',
-    'on-setup-finished': 'load'
+    'on-setup-finished': 'load',
   },
 
-  attached: function() {
+  attached() {
     this.async(this.notifyResize, 1000);
   },
 
-  ready: function() {
+  ready() {
     this._setupDone = false;
     this.$.threed.width = this.width;
     this.$.threed.height = this.height;
@@ -146,11 +147,11 @@ Polymer({
     this._loaderChanged();
   },
 
-  load: function() {
+  load() {
 
-    var onLoadFromSrc = function(src) {
+    const onLoadFromSrc = function(src) {
       return function(gltf) {
-        if(src != this.src) {
+        if(src !== this.src) {
           return;
         }
         this.clear();
@@ -160,9 +161,9 @@ Polymer({
       }.bind(this);
     }.bind(this);
 
-    var onProgressFromTS = function(timestamp) {
+    const onProgressFromTS = function(timestamp) {
       return function(event) {
-        if (timestamp != this.latestLoadTS) {
+        if (timestamp !== this.latestLoadTS) {
           return;
         }
         this.$.progress.value = event.loaded / event.total * 100;
@@ -177,9 +178,9 @@ Polymer({
     }
   },
 
-  clear: function() {
+  clear() {
     if (this.scene) {
-      var objects = this.scene.children;
+      const objects = this.scene.children;
       while ( objects.length > 0 ) {
         this._removeObject( objects[ 0 ] );
       }
@@ -187,28 +188,28 @@ Polymer({
 
   },
 
-  _loaderChanged: function () {
-    if (this.loader == 'complete') {
-      this.gltfLoader = new THREE.glTFLoader();
+  _loaderChanged () {
+    if (this.loader === 'complete') {
+      this.gltfLoader = new THREE.glTFLoader(); // eslint-disable-line new-cap
     } else {
       this.gltfLoader = new THREE.GLTFLoader();
     }
   },
 
-  _removeObject: function ( object ) {
+  _removeObject ( object ) {
     if ( object.parent === null ) return; // avoid deleting the camera or scene
     object.parent.remove( object );
   },
 
-  _sourceChanged: function() {
+  _sourceChanged() {
     this.load();
   },
 
-  _sphericalCoordsChanged: function() {
+  _sphericalCoordsChanged() {
     this.setCameraFromAngles(this.sphericalCoords[0], this.sphericalCoords[1]);
   },
 
-  _setup: function() {
+  _setup() {
     this._setupScene();
     this._setupCameras();
     this._setupLights();
@@ -217,12 +218,12 @@ Polymer({
     this._setSetupFinished(true);
   },
 
-  _setupScene: function() {
+  _setupScene() {
     this.root = new THREE.Scene();
     this.scene = new THREE.Scene();
     this.root.add(this.scene);
-    var geometry = new THREE.PlaneGeometry(0.5, 0.5);
-    var material = new THREE.MeshPhongMaterial({color: 0xffffff});
+    const geometry = new THREE.PlaneGeometry(0.5, 0.5);
+    const material = new THREE.MeshPhongMaterial({color: 0xffffff});
     this.ground = new THREE.Mesh(geometry, material);
     this.ground.rotation.x = -Math.PI / 2;
     this.ground.scale.multiplyScalar(3);
@@ -231,18 +232,18 @@ Polymer({
     this.root.add(this.ground);
   },
 
-  _setupCameras: function() {
+  _setupCameras() {
     this.cameras = {};
     this.camera = new THREE.PerspectiveCamera(25, 0.5 , 0.001, 2000);
     this.root.add(this.camera);
     this._cameraComposition(this.camera);
   },
 
-  _setupLights: function() {
-    var ambient = new THREE.AmbientLight(0xffffff, 0.5);
+  _setupLights() {
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
     this.root.add(ambient);
 
-    var spot = new THREE.SpotLight(0xffffff, 0.5);
+    const spot = new THREE.SpotLight(0xffffff, 0.5);
     spot.position.set(0, 5, 0);
     spot.target.position.set(0, 0, 0);
     spot.shadow.camera.far = 10;
@@ -254,10 +255,10 @@ Polymer({
     this.root.add(spot);
   },
 
-  _setupRenderer: function() {
+  _setupRenderer() {
     this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    //this.renderer.setSize(400, 400);
+    // this.renderer.setSize(400, 400);
 
     // enable shadows
     this.renderer.shadowMap.enabled = true;
@@ -266,22 +267,22 @@ Polymer({
     dom(this.$.threed).appendChild(this.renderer.domElement);
   },
 
-  _setupControls: function() {
+  _setupControls() {
     this.controls = new THREE.OrbitControls(this.camera, this.$.threed);
     this.controls.addEventListener('change', this._controlsUpdated.bind(this));
     this._sphericalCoordsChanged();
   },
 
-  _controlsUpdated: function() {
+  _controlsUpdated() {
     this._render();
   },
 
-  _resize: function() {
+  _resize() {
     if (this.setupFinished) {
       this.camera.aspect = this.$.threed.offsetWidth / this.$.threed.offsetHeight;
       this.camera.updateProjectionMatrix();
 
-      var i, len = this.cameras.length;
+      let i; const len = this.cameras.length;
       for (i = 0; i < len; i++) {
         this.cameras[i].aspect = this.$.threed.offsetWidth / this.$.threed.offsetHeight;
         this.cameras[i].updateProjectionMatrix();
@@ -292,31 +293,31 @@ Polymer({
     }
   },
 
-  _render: function() {
-    if (this.loader == 'complete') {
+  _render() {
+    if (this.loader === 'complete') {
       THREE.glTFShaders.update(this.scene, this.camera);
     }
     this.renderer.render(this.root, this.camera);
   },
 
-  setCameraFromAngles: function(azimuthDegrees, zenithDegrees) {
-    if (!this.controls || azimuthDegrees == undefined || zenithDegrees == undefined) {
+  setCameraFromAngles(azimuthDegrees, zenithDegrees) {
+    if (!this.controls || azimuthDegrees == null || zenithDegrees == null) {
       return;
     }
     this.controls.reset();
-    var azimuth = (azimuthDegrees % 360) * (Math.PI / 180);
+    const azimuth = (azimuthDegrees % 360) * (Math.PI / 180);
     // edge case in the top pole of the sphere (zenith = 0)
-    var zenith = ((zenithDegrees % 360) == 0) ? 1.0E-15 : (zenithDegrees % 360) * (Math.PI / 180);
-    var radius = this.cameraDistance;
+    const zenith = ((zenithDegrees % 360) === 0) ? 1.0E-15 : (zenithDegrees % 360) * (Math.PI / 180);
+    const radius = this.cameraDistance;
     this.camera.position.set(
       -radius * Math.cos(azimuth) * Math.sin(zenith),
       radius * Math.cos(zenith),
-      radius * Math.sin(azimuth) * Math.sin(zenith)
+      radius * Math.sin(azimuth) * Math.sin(zenith),
     );
     this.controls.update();
   },
 
-  _animate: function() {
+  _animate() {
     window.requestAnimationFrame(this._animate.bind(this));
     THREE.glTFAnimator.update();
     THREE.glTFShaders.update(this.scene, this.camera);
@@ -324,18 +325,20 @@ Polymer({
     this._render();
   },
 
-  _processLoad: function(data) {
-    var object = data.scene;
+  _processLoad(data) {
+    const object = data.scene;
 
     if (data.cameras && data.cameras.length) {
-      for (var dataCamera of data.cameras) {
-        var cameraName = dataCamera.parent.name;
+      for (let i = 0; i < data.cameras.length; i++) {
+        const dataCamera = data.cameras[i];
+        const cameraName = dataCamera.parent.name;
         this.cameras[cameraName] = dataCamera;
       }
     }
 
     if (data.animations && data.animations.length) {
-      for (var animation of data.animations) {
+      for (let i = 0; i < data.animations.length; i++) {
+        const animation = data.animations[i];
         animation.loop = true;
         animation.play();
         this.animations.push(animation);
@@ -348,48 +351,48 @@ Polymer({
     this._animate();
   },
 
-  _objectComposition: function(object) {
-    var rotObjectMatrix = new THREE.Matrix4();
+  _objectComposition(object) {
+    const rotObjectMatrix = new THREE.Matrix4();
     rotObjectMatrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI);
     object.matrix.multiply(rotObjectMatrix);
     object.rotation.setFromRotationMatrix(object.matrix);
 
-    var box3 = new THREE.Box3();
+    const box3 = new THREE.Box3();
     box3.setFromObject(object);
 
-    var dists = new THREE.Vector3().copy(box3.max).sub(box3.min);
-    var maxSize = Math.max.apply(null, [dists.x, dists.y, dists.z]);
-    var scale = 1 / maxSize;
-    var center = new THREE.Vector3().sub(box3.getCenter());
-    var matrix = new THREE.Matrix4().identity();
+    const dists = new THREE.Vector3().copy(box3.max).sub(box3.min);
+    const maxSize = Math.max.apply(null, [dists.x, dists.y, dists.z]);
+    const scale = 1 / maxSize;
+    const center = new THREE.Vector3().sub(box3.getCenter());
+    const matrix = new THREE.Matrix4().identity();
     matrix.makeTranslation(center.x, center.y, center.z);
     matrix.multiplyScalar(scale);
     object.applyMatrix(matrix);
 
-    var prepare = function(object, hasShadow) {
-      if (object.geometry) {
-        object.castShadow = hasShadow;
-        object.geometry.computeFaceNormals();
-        object.geometry.computeVertexNormals();
-        object.geometry.computeBoundingSphere();
-        object.geometry.elementsNeedUpdate = true;
-        object.geometry.verticesNeedUpdate = true;
-        object.geometry.normalsNeedUpdate = true;
+    const prepare = function(obj, hasShadow) {
+      if (obj.geometry) {
+        obj.castShadow = hasShadow;
+        obj.geometry.computeFaceNormals();
+        obj.geometry.computeVertexNormals();
+        obj.geometry.computeBoundingSphere();
+        obj.geometry.elementsNeedUpdate = true;
+        obj.geometry.verticesNeedUpdate = true;
+        obj.geometry.normalsNeedUpdate = true;
       }
-      if (object.material && object.material.bumpMap) {
-        object.material.bumpScale = scale;
+      if (obj.material && obj.material.bumpMap) {
+        obj.material.bumpScale = scale;
       }
 
     };
     prepare(object, true);
-    object.traverse(function (child) {
+    object.traverse((child) => {
       prepare(child, true);
     });
   },
 
-  _cameraComposition: function(camera) {
+  _cameraComposition() {
     this.sphericalCoords = [225, 45];
     this.camera.fov = 25;
     this.cameraDistance = 4;
-  }
+  },
 });

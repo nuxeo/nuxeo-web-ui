@@ -83,23 +83,23 @@ Polymer({
     searchDoc: Object,
     searchForm: {
       type: Object,
-      observer: '_searchFormChanged'
+      observer: '_searchFormChanged',
     },
-    _dirty: Boolean
+    _dirty: Boolean,
   },
 
-  _searchFormChanged: function() {
+  _searchFormChanged() {
     this._dirty = this.searchForm && this.searchForm.dirty;
     if (this.searchForm) {
-      this.searchForm.addEventListener('dirty-changed', function() {
+      this.searchForm.addEventListener('dirty-changed', () => {
         this._dirty = this.searchForm.dirty;
-      }.bind(this));
-      this.searchForm.addEventListener('selected-search-changed', function() {
+      });
+      this.searchForm.addEventListener('selected-search-changed', () => {
         if (this.searchForm.selectedSearch) {
           this.searchId = this.searchForm.selectedSearch.id;
           this.isSavedSearch = !!this.searchId;
         }
-      }.bind(this));
+      });
 
       if (this.searchForm.selectedSearch) {
         this.searchId = this.searchForm.selectedSearch.id;
@@ -108,40 +108,40 @@ Polymer({
     this.isSavedSearch = !!this.searchId;
   },
 
-  _saveSearch: function() {
+  _saveSearch() {
     this.searchForm.save();
   },
 
-  _saveSearchAs: function() {
+  _saveSearchAs() {
     this.searchForm.saveAs();
   },
 
-  _renameSearch: function() {
+  _renameSearch() {
     this.searchForm.rename();
   },
 
-  _shareSearch: function() {
+  _shareSearch() {
     this.searchForm.share();
   },
 
-  _deleteSearch: function() {
+  _deleteSearch() {
     this.searchForm.delete();
   },
 
-  _showSaveAs: function() {
+  _showSaveAs() {
     return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty);
   },
 
-  _showSave: function() {
+  _showSave() {
     return this.isSavedSearch && this._dirty && this._hasPermissions();
   },
 
-  _showOtherSearchActions: function() {
+  _showOtherSearchActions() {
     return this.isSavedSearch && this._hasPermissions();
   },
 
-  _hasPermissions: function() {
+  _hasPermissions() {
     return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
             this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
-  }
+  },
 });

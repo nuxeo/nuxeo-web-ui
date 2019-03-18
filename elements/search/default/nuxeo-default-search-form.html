@@ -126,25 +126,25 @@ limitations under the License.
         params: {
           type: Object,
           value: {},
-          notify: true
+          notify: true,
         },
         aggregations: {
           type: Object,
           value: {},
-          notify: true
+          notify: true,
         },
         searchTerm: {
           type: String,
-          notify: true
-        }
+          notify: true,
+        },
       },
 
-      clear: function() {
+      clear() {
         this.searchTerm = '';
         this._search();
       },
 
-      _search: function() {
+      _search() {
         if (this.searchTerm) {
           this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
           this.set('params.highlight',
@@ -156,11 +156,11 @@ limitations under the License.
         }
       },
 
-      _checkForEnter: function(e) {
+      _checkForEnter(e) {
         if (e.keyCode === 13) {
           this._search();
         }
-      }
+      },
 
     });
   </script>

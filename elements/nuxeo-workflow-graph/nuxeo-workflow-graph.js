@@ -24,8 +24,9 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
-import 'jsplumb/dist/js/jsplumb.js';
+// import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+
+import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb */
 
 /**
 `nuxeo-workflow-graph`
@@ -154,22 +155,22 @@ Polymer({
 
   properties: {
     workflowId: {
-      type: String
+      type: String,
     },
 
     graph: {
-      type: Object
+      type: Object,
     },
 
     dynamicAnchors: {
       type: Array,
-      value: [0.5, 0.25, 0.75, 0, 1, 0.375, 0.625, 0.125, 0.875]
+      value: [0.5, 0.25, 0.75, 0, 1, 0.375, 0.625, 0.125, 0.875],
     },
 
     connectionColors: {
       type: Array,
       value: ['#92e1aa', '#F7BE81', '#BDBDBD', '#5882FA', '#E1F5A9',
-        '#FA5858', '#FFFF00', '#FF0000', '#D8F781']
+        '#FA5858', '#FFFF00', '#FF0000', '#D8F781'],
     },
 
     sourceEndpointOptions: {
@@ -177,111 +178,111 @@ Polymer({
       value: {
         connector: ['Flowchart', {cornerRadius: 5}],
         paintStyle: {
-          fill: '#92e1aa'
+          fill: '#92e1aa',
         },
         isSource: true,
         isTarget: false,
         uniqueEndpoint: true,
-        maxConnections: 1
-      }
+        maxConnections: 1,
+      },
     },
 
     targetEndpointOptions: {
       type: Object,
       value: {
         paintStyle: {
-          fill: '#003f7d'
+          fill: '#003f7d',
         },
         isSource: false,
         isTarget: true,
         reattach: true,
         // without specifying this the targetEndpoint doesn't accept multiple connections
-        maxConnections: -1
-      }
+        maxConnections: -1,
+      },
     },
 
     _jsPlumbInstance: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
   observers: [
-    '_updateGraph(graph)'
+    '_updateGraph(graph)',
   ],
 
   listeners: {
-    'iron-resize': '_resize'
+    'iron-resize': '_resize',
   },
 
-  ready: function() {
+  ready() {
     this.scopeSubtree(this.$.container, true);
     this._initialize();
   },
 
-  show: function() {
-    this.$.graphResource.execute().then(function() {
+  show() {
+    this.$.graphResource.execute().then(() => {
       this.$.graphDialog.toggle();
-    }.bind(this)).catch((error) => {
+    }).catch((error) => {
       this.fire('notify', {message: this.i18n('documentPage.route.view.graph.error')});
       throw error;
     });
   },
 
-  _initialize: function() {
+  _initialize() {
     this._jsPlumbInstance = jsPlumb.getInstance({
       DragOptions: {
         cursor: 'pointer',
-        zIndex: 2000
+        zIndex: 2000,
       },
       PaintStyle: {
         stroke: '#92e1aa',
         strokeWidth: 3,
         outlineWidth: 2,
         outlineStroke: 'white',
-        joinstyle: 'round'
+        joinstyle: 'round',
       },
       Endpoint: ['Dot', {
-        radius: 6
+        radius: 6,
       }],
       ConnectionOverlays: [['Arrow', {
-        location: 0.8
+        location: 0.8,
       }, {
         foldback: 0.9,
         fill: '#92e1aa',
-        width: 14
-      }]]
+        width: 14,
+      }]],
     });
     this._jsPlumbInstance.setContainer(this.$.container);
   },
 
-  _transitionOverlay: function(transition) {
+  _transitionOverlay(transition) {
     return [
       ['Arrow', {location: 0.8}, {foldback: 0.9, fill: '#92e1aa', width: 14}],
       ['Label', {
-        label: '<span title="' + transition.label + '">' + transition.label + '</span>',
+        label: `<span title="${  transition.label  }">${  transition.label  }</span>`,
         cssClass: 'workflow_connection_label',
-        location: 0.6
-      }]
+        location: 0.6,
+      }],
     ];
   },
 
-  _nodeClass: function(node) {
+  _nodeClass(node) {
     if (node.isStartNode) {
       return 'workflow_start_node';
-    } else if (node.isEndNode) {
+    } if (node.isEndNode) {
       return 'workflow_end_node';
-    } else if (node.isMerge) {
+    } if (node.isMerge) {
       return 'workflow_merge_node';
-    } else if (node.isMultiTask) {
+    } if (node.isMultiTask) {
       return 'workflow_multiple_task';
-    } else if (node.hasSubWorkflow) {
+    } if (node.hasSubWorkflow) {
       return 'workflow_subworkflow_task';
-    } else {
-      return 'workflow_simple_task';
     }
+      return 'workflow_simple_task';
+
   },
 
-  _updateGraph: function(data) {
+  _updateGraph(data) {
     if (!data) {
       return;
     }
@@ -293,10 +294,10 @@ Polymer({
     this._jsPlumbInstance.reset();
 
     // XXX: build these in the template
-    data.nodes.forEach(function(node) {
-      var element = this.create('div', {id: node.id, innerHTML: node.title});
-      element.style.left = node.x + 'px';
-      element.style.top = node.y + 'px';
+    data.nodes.forEach((node) => {
+      const element = this.create('div', {id: node.id, innerHTML: node.title});
+      element.style.left = `${node.x  }px`;
+      element.style.top = `${node.y  }px`;
 
       element.classList.add('workflow_node');
       element.classList.add(this._nodeClass(node));
@@ -304,37 +305,38 @@ Polymer({
         element.classList.add('workflow_node_suspended');
       }
       this.$.container.appendChild(element);
-    }.bind(this));
+    });
 
     // initialize connection source points
-    var nodes = [];
+    const nodes = [];
 
     // determine number of source endpoints per node
-    var sourceEndpoints = {};
-    data.transitions.forEach(function(transition) {
+    const sourceEndpoints = {};
+    data.transitions.forEach((transition) => {
       sourceEndpoints[transition.nodeSourceId] = (sourceEndpoints[transition.nodeSourceId] || 0) + 1;
     });
 
     // use fixed dynamic anchors, only 9 items supported, after this everything
     // is displayed on the center
-    data.transitions.forEach(function(transition) {
-      var source = transition.nodeSourceId,
-          target = transition.nodeTargetId;
+    data.transitions.forEach((transition) => {
+      const source = transition.nodeSourceId;
 
-      var anchorIndex = nodes.filter(function(v) { return v === source; }).length;
+      let anchorIndex = nodes.filter((v) => v === source).length;
       if (anchorIndex > 9) {
         anchorIndex = 0;
       }
       nodes.push(source);
 
+      /*
+      const target = transition.nodeTargetId;
       // determine anchors for transition node
-      var anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
+      const anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
       // add endpoints
-      var endPointSource = this._addSourceEndpoint(dom(this.$.container).querySelector('#' + source),
-            anchors[anchorIndex]),
-          endPointTarget = this._addTargetEndpoint(dom(this.$.container).querySelector('#' + target));
+      const endPointSource = this._addSourceEndpoint(dom(this.$.container).querySelector(`#${  source}`),
+            anchors[anchorIndex]);
+          const endPointTarget = this._addTargetEndpoint(dom(this.$.container).querySelector(`#${  target}`));
 
-      var connection = this._jsPlumbInstance.connect({
+      const connection = this._jsPlumbInstance.connect({
         connector: 'Flowchart',
         source: endPointSource,
         target: endPointTarget,
@@ -348,6 +350,7 @@ Polymer({
         },
         detachable: false
       });
+      */
 
       // TODO: fix transition path
       // prepare the transition's path
@@ -365,20 +368,20 @@ Polymer({
         }
       }
       */
-    }.bind(this));
+    });
 
   },
 
-  _addTargetEndpoint: function(target) {
+  _addTargetEndpoint(target) {
     return this._jsPlumbInstance.addEndpoint(target, {anchor: 'TopCenter'}, this.targetEndpointOptions);
   },
 
-  _addSourceEndpoint: function(source, pos) {
-    var anchor = [pos, 1, 0, 1];
-    return this._jsPlumbInstance.addEndpoint(source, {anchor: anchor}, this.sourceEndpointOptions);
+  _addSourceEndpoint(source, pos) {
+    const anchor = [pos, 1, 0, 1];
+    return this._jsPlumbInstance.addEndpoint(source, {anchor}, this.sourceEndpointOptions);
   },
 
-  _resize: function() {
+  _resize() {
     this._jsPlumbInstance.repaintEverything();
-  }
+  },
 });

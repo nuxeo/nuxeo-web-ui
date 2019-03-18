@@ -67,6 +67,6 @@ Polymer({
 
   properties: {
     visible: Boolean,
-    selected: String
-  }
+    selected: String,
+  },
 });

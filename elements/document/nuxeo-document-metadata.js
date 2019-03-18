@@ -40,6 +40,6 @@ Polymer({
   is: 'nuxeo-document-metadata',
 
   properties: {
-    document: Object
-  }
+    document: Object,
+  },
 });

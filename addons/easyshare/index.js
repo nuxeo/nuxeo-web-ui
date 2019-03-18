@@ -17,6 +17,7 @@ limitations under the License.
 import './elements/nuxeo-easyshare-share-link.js';
 
 import html from './easyshare.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

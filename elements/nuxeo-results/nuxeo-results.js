@@ -195,12 +195,12 @@ Polymer({
      */
     displayMode: {
       type: String,
-      notify: true
+      notify: true,
     },
 
     view: {
       type: Object,
-      observer: '_viewChanged'
+      observer: '_viewChanged',
     },
 
     /**
@@ -210,24 +210,24 @@ Polymer({
 
     actionContext: {
       type: Object,
-      notify: true
+      notify: true,
     },
     _settings: {
-      type: Object
+      type: Object,
     },
     selectedItems: {
       type: Array,
       value: [],
-      notify: true
+      notify: true,
     },
     columns: {
       type: Array,
-      value: []
+      value: [],
     },
     hideContentViewActions: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
     /**
      * If enabled, it displays the list of quickfilters defined on the associated
@@ -243,7 +243,7 @@ Polymer({
      * Expected format : ['quickfilter1','quickfilter2']
      */
     quickFilters: {
-      type: Array
+      type: Array,
     },
     /**
      * If enabled, it allows to sort the results of the search results.
@@ -292,20 +292,20 @@ Polymer({
 
     _displayModes:  Array,
 
-    _localStorageName: String
+    _localStorageName: String,
 
   },
 
   observers: [
     '_updateStorage(name)',
-    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns, document)'
+    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns, document)',
   ],
 
   listeners: {
-    'settings-changed': '_updateActionContext'
+    'settings-changed': '_updateActionContext',
   },
 
-  ready: function() {
+  ready() {
     this.$.nxcon.connect().then(this._updateStorage.bind(this));
   },
 
@@ -317,7 +317,7 @@ Polymer({
     return (this.view && this.view.$.list) ? this.view.$.list.items : [];
   },
 
-  detached: function() {
+  detached() {
     if (this.view) {
       this.unlisten(this.view, 'columns-changed', '_columnsChanged');
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
@@ -327,57 +327,57 @@ Polymer({
     this.view = null;
   },
 
-  _displayQuickFilters: function() {
+  _displayQuickFilters() {
     // XXX check previous view properties for compatibility
     return this.view && !this.view.handlesFiltering &&
       (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters);
   },
 
-  _displaySort: function() {
+  _displaySort() {
     // XXX check previous view properties for compatibility
     return this.view && !this.view.handlesSorting && (this.view.hasAttribute('display-sort') || this.displaySort);
   },
 
-  _sortOptions: function() {
+  _sortOptions() {
     // XXX check previous view properties for compatibility
     return (this.view && this.view.sortOptions) || this.sortOptions;
   },
 
-  _sortChanged: function() {
+  _sortChanged() {
     if (this.sortSelected && this.nxProvider) {
-      var sort = {};
+      const sort = {};
       sort[this.sortSelected.field] = this.sortSelected.order;
       this.nxProvider.sort = sort;
       this.fetch();
     }
   },
 
-  _sortSelectedChanged: function(newSort, oldSort) {
+  _sortSelectedChanged(newSort, oldSort) {
     // do not trigger fetch results when sort options are being initialized
     if (newSort && oldSort) {
       this._sortChanged();
     }
   },
 
-  fetch: function() {
-    return new Promise(function(resolve, error) {
-      this.debounce('fetch', function() {
+  fetch() {
+    return new Promise(((resolve, error) => {
+      this.debounce('fetch', () => {
         if (this.view) {
           this.view.fetch().then(resolve).catch(error);
         } else {
           resolve();
         }
-      }.bind(this), 100);
-    }.bind(this));
+      }, 100);
+    }));
   },
 
-  reset: function() {
+  reset() {
     if (this.view) {
       this.view.reset();
     }
   },
 
-  _viewChanged: function(view, oldView) {
+  _viewChanged(view, oldView) {
     if (oldView) {
       this.unlisten(oldView, 'columns-changed', '_columnsChanged');
       this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
@@ -411,16 +411,16 @@ Polymer({
       // update view
       this.reset();
       this.fetch();
-      this.fire('search-results-view', {view: view, name: this.name});
+      this.fire('search-results-view', {view, name: this.name});
     }
   },
 
-  _updateViews: function() {
-    var hasDisplayMode;
+  _updateViews() {
+    let hasDisplayMode;
     this._displayModes = [];
-    this.$.views.items.forEach(function(view) {
-      var name = view.getAttribute("name"),
-          icon = view.getAttribute("icon");
+    this.$.views.items.forEach((view) => {
+      const name = view.getAttribute("name");
+          const icon = view.getAttribute("icon");
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
         view.settings = this._settings[name];
@@ -428,8 +428,8 @@ Polymer({
       if (name === this.displayMode) {
         hasDisplayMode = true;
       }
-      this.push('_displayModes', {name: name, icon: icon});
-    }.bind(this));
+      this.push('_displayModes', {name, icon});
+    });
 
     // if current selected display mode is not available use the first one
     if (!hasDisplayMode) {
@@ -438,32 +438,32 @@ Polymer({
 
   },
 
-  _displayModeTitle: function(item) {
-    return this.i18n('displayModeButton.display.' + item.name);
+  _displayModeTitle(item) {
+    return this.i18n(`displayModeButton.display.${  item.name}`);
   },
 
-  _isCurrentDisplayMode: function(item) {
+  _isCurrentDisplayMode(item) {
     return item.name === this.displayMode;
   },
 
-  _toggleDisplayMode: function(e) {
+  _toggleDisplayMode(e) {
     this.displayMode = e.model.item.name;
   },
 
-  _refreshAndFetch: function() {
+  _refreshAndFetch() {
     if (this.view) {
       this.view.reset();
       this.fetch();
     }
   },
 
-  _updateStorage: function() {
+  _updateStorage() {
     if (this.$.nxcon.user && this.name) {
-      this._localStorageName = this.$.nxcon.user.id + '-nuxeo-results-' + this.name;
+      this._localStorageName = `${this.$.nxcon.user.id  }-nuxeo-results-${  this.name}`;
     }
   },
 
-  _updateActionContext: function() {
+  _updateActionContext() {
     this.actionContext = {
       baseUrl: this.$.nxcon.url,
       displayMode: this.displayMode,
@@ -471,19 +471,19 @@ Polymer({
       selectedItems: this.selectedItems,
       items: this.items,
       columns: this.columns,
-      document: this.document
+      document: this.document,
     };
   },
 
-  _clearSelectedItems: function() {
+  _clearSelectedItems() {
     this.clearSelection();
   },
 
-  initializeSettings: function() {
+  initializeSettings() {
     this._settings = {};
   },
 
-  restoreSettings: function() {
+  restoreSettings() {
     if (this._settings && this.name) {
       if (this._settings.displayMode && this._settings.displayMode.length > 0) {
         this.displayMode = this._settings.displayMode;
@@ -494,31 +494,31 @@ Polymer({
     }
   },
 
-  saveSettings: function() {
+  saveSettings() {
     if (this.name && this._localStorageName) {
       this.$.prefStorage.save();
     }
   },
 
-  _columnsChanged: function(e) {
+  _columnsChanged(e) {
     this.columns = e.target.columns;
   },
 
-  _selectedItemsChanged: function() {
+  _selectedItemsChanged() {
     this.selectedItems = [];
     this.set('selectedItems', this.view.selectedItems);
   },
 
-  _refreshDisplay: function(e) {
+  _refreshDisplay(e) {
     this.refresh();
 
     if (this.selectedItems && this.selectedItems.length > 0) {
-      var tmp = this.selectedItems.slice();
+      const tmp = this.selectedItems.slice();
       this.selectedItems = [];
       if (e.detail.focusIndex || e.detail.focusIndex === 0) {
         this.selectItems(tmp);
-        if (e.detail.focusIndex > -1) {
-          this.view.focusOnIndexIfNotVisible && this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
+        if (e.detail.focusIndex > -1 && this.view.focusOnIndexIfNotVisible) {
+          this.view.focusOnIndexIfNotVisible(e.detail.focusIndex);
         }
       }
     }
@@ -528,28 +528,28 @@ Polymer({
     return this.view.size;
   },
 
-  clearSelection: function() {
+  clearSelection() {
     this.view.clearSelection();
   },
 
-  selectItems: function(items) {
+  selectItems(items) {
     this.clearSelection();
     this.view.selectItems(items);
     this.view.notifyResize();
   },
 
-  refresh: function() {
+  refresh() {
     this.view.notifyResize();
   },
 
-  _saveViewSettings: function() {
+  _saveViewSettings() {
     if (this.view.settings) {
-      this.set('_settings.' + this.displayMode, this.view.settings);
+      this.set(`_settings.${  this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
   },
 
-  _providerChanged: function(provider, oldProvider) {
+  _providerChanged(provider, oldProvider) {
     if (oldProvider) {
       this.unlisten(oldProvider, 'loading-changed', '_loadingChanged');
     }
@@ -559,23 +559,23 @@ Polymer({
     }
   },
 
-  _loadingChanged: function() {
+  _loadingChanged() {
     this._setLoading(this.nxProvider.loading);
   },
 
-  _showResultsCount: function() {
+  _showResultsCount() {
     return this.nxProvider && this.resultsCount;
   },
 
-  _itemsChanged: function(e) {
+  _itemsChanged(e) {
     if (this.nxProvider && e.detail.value) {
       this.resultsCount = this.nxProvider.resultsCount;
     }
   },
 
-  _quickFiltersChanged: function(e) {
+  _quickFiltersChanged(e) {
     if (this.nxProvider && e.detail.value) {
       this.quickFilters = this.nxProvider.quickFilters;
     }
-  }
+  },
 });

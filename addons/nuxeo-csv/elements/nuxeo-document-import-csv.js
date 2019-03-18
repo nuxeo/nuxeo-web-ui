@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { DocumentCreationBehavior } from '../../../elements/nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 
 /**
@@ -254,7 +256,7 @@ Polymer({
       <div name="upload" class="upload vertical">
         <div class="suggester">
           <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" enrichers="permissions, subtypes" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
-          <span class="error">​[[targetLocationError]]</span>
+          <span class="error">[[targetLocationError]]</span>
         </div>
 
 
@@ -392,123 +394,122 @@ Polymer({
 `,
 
   is: 'nuxeo-document-import-csv',
-  behaviors: [I18nBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
+  behaviors: [I18nBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior, RoutingBehavior],
 
   properties: {
     accept: {
       type: String,
-      value: '.csv'
+      value: '.csv',
     },
     hasFile: {
       type: Boolean,
-      value: false
+      value: false,
     },
     file: {
-      type: Object
+      type: Object,
     },
     complete: {
       type: Boolean,
-      value: false
+      value: false,
     },
     _importDocTypes: {
       type: Array,
-      computed: '_computeImportDocTypes(subtypes)'
+      computed: '_computeImportDocTypes(subtypes)',
     },
     visible: {
-      type: Boolean
+      type: Boolean,
     },
     _creating: {
       type: Boolean,
-      value: false
+      value: false,
     },
     _importResult: {
-      type: Object
+      type: Object,
     },
     _importLogs: {
       type: Array,
-      value: []
+      value: [],
     },
     _hasResult: {
       type: Boolean,
-      value: false
+      value: false,
     },
     stage: {
       type: String,
-      value: 'upload'
+      value: 'upload',
     },
     _count: {
       type: Number,
-      value: 0
+      value: 0,
     },
     _total: {
       type: Number,
-      value: 0
+      value: 0,
     },
     _error: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     receiveEmailReport: {
       type: Boolean,
-      value: false
+      value: false,
     },
     enableImportMode: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     progressLabel: {
       type: String,
-      value: ''
-    }
+      value: '',
+    },
   },
 
-  _canImport: function() {
+  _canImport() {
     return this.hasFile && !this._creating;
   },
 
-  ready: function() {
+  ready() {
     this.connection = this.$.nx;
     this.setupDropZone(this.$.dropzone);
     this._clear();
   },
 
-  observers: [
-    '_observeFiles(files.*)'
-  ],
-
   listeners: {
-    'nx-document-creation-parent-validated': '_parentValidated'
+    'nx-document-creation-parent-validated': '_parentValidated',
   },
 
   observers: [
     '_observeFiles(files.*)',
     '_visibleOnStage(visible,stage)',
-    '_observeVisible(visible)'
+    '_observeVisible(visible)',
   ],
 
-  _i18n: function(label, params){
-    return !params || params.length === 0 ? this.i18n(label)
-        : (params.length === 1 ? this.i18n(label, params[0]) : this.i18n(label, params[0], params[1]));
+  _i18n(label, params){
+    if (!params || params.length === 0) {
+      return this.i18n(label);
+    }
+    if (params.length === 1) {
+      return this.i18n(label, params[0]);
+    }
+    return this.i18n(label, params[0], params[1])
   },
 
-  _filterLogs: function(items){
-    return items.filter(function (item) {
-      return this._isError(item) || this._isSkipped(item);
-    }.bind(this));
+  _filterLogs(items){
+    return items.filter((item) => this._isError(item) || this._isSkipped(item));
 
   },
 
-  _isError: function(log){
+  _isError(log){
     return log.status === 'ERROR';
   },
 
-  _isSkipped: function(log){
+  _isSkipped(log){
     return log.status === 'SKIPPED';
   },
 
-  _observeVisible: function() {
+  _observeVisible() {
     if (this.visible) {
       this._clear();
     } else if (this._waitProgressId) {
@@ -516,7 +517,7 @@ Polymer({
     }
   },
 
-  _parentValidated: function() {
+  _parentValidated() {
     if (this.isValidTargetPath) {
       if (this.suggesterParent && this.suggesterParent.contextParameters && this.suggesterParent.contextParameters.permissions) {
         // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren, so we had to rely on Write.
@@ -530,30 +531,30 @@ Polymer({
     this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
   },
 
-  _removeBlob: function(e) {
-    this.$.csvImportRes.path = 'upload/' + this.batchId + '/0';
-    this.$.csvImportRes.remove().then(function() {
+  _removeBlob() {
+    this.$.csvImportRes.path = `upload/${  this.batchId  }/0`;
+    this.$.csvImportRes.remove().then(() => {
       this.file = {};
       this.hasFile = false;
       this.$.uploadFiles.value = '';
-    }.bind(this), this._handleError.bind(this));
+    }, this._handleError.bind(this));
   },
 
-  _computeImportDocTypes: function() {
+  _computeImportDocTypes() {
     if (this.subtypes) {
       return this.subtypes.filter(this._filterImportDocTypes);
     }
   },
 
-  _filterImportDocTypes: function(type) {
+  _filterImportDocTypes(type) {
     return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
   },
 
-  _observeFiles: function(changeRecord) {
+  _observeFiles(changeRecord) {
     if (changeRecord) {
       if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
         if (this.files && this.files.length > 0) {
-          this.file = this.files[0];
+          [ this.file ] = this.files;
           this.hasFile = true;
           this._creating = true;
         }
@@ -564,20 +565,20 @@ Polymer({
     }
   },
 
-  _showUploadDialog: function() {
+  _showUploadDialog() {
     this.$.uploadFiles.click();
   },
 
-  _fileChanged: function(e) {
+  _fileChanged(e) {
     this.uploadFiles(e.target.files);
     this.hasFile = true;
   },
 
-  _visibleOnStage: function() {
+  _visibleOnStage() {
     this.$.pathSuggesterUpload.disabled = !this.visible || this.stage !== 'upload';
   },
 
-  _clear: function() {
+  _clear() {
     this.stage = 'upload';
     this.files = [];
     this.file = {};
@@ -594,16 +595,16 @@ Polymer({
     this._importLogs = [];
   },
 
-  _handleError: function(error) {
-    this._toast('ERROR: ' + error.message);
+  _handleError(error) {
+    this._toast(`ERROR: ${  error.message}`);
   },
 
-  _toast: function(msg) {
+  _toast(msg) {
     this.$.toast.text = msg;
     this.$.toast.open();
   },
 
-  _cancel: function() {
+  _cancel() {
   if (this.batchId) {
       this.cancelBatch();
     }
@@ -612,25 +613,25 @@ Polymer({
     this.fire('nx-creation-wizard-show-tabs');
   },
 
-  _import: function() {
-    this.$.csvImportRes.path = 'upload/' + this.batchId + '/0/execute/CSV.Import';
+  _import() {
+    this.$.csvImportRes.path = `upload/${  this.batchId  }/0/execute/CSV.Import`;
     this.$.csvImportRes.data = {
       params: {
         path: this.targetPath,
         sendReport: this.receiveEmailReport,
-        documentMode: this.enableImportMode
-      }
+        documentMode: this.enableImportMode,
+      },
     };
-    this.$.csvImportRes.post().then(function(res) {
+    this.$.csvImportRes.post().then((res) => {
       this.stage = 'progress';
       this._waitProgressId = window.setTimeout(this._waitForProgress.bind(this), 500, res);
-    }.bind(this), this._handleError.bind(this));
+    }, this._handleError.bind(this));
   },
 
-  _waitForProgress: function(importId) {
+  _waitForProgress(importId) {
     this.$.cvsImportStatus.input = importId;
-    this.$.cvsImportStatus.execute().then(function(res) {
-      var status = res.value;
+    this.$.cvsImportStatus.execute().then((res) => {
+      const status = res.value;
       this._total = status.totalNumberOfDocument;
       if (this._total >= 0) {
         this.$.importProgress.indeterminate = false;
@@ -652,31 +653,31 @@ Polymer({
           this._error = true;
         } else {
           this.$.cvsImportLogOp.input = importId;
-          this.$.cvsImportLogOp.execute().then(function(res) {
-            this._importLogs = this._filterLogs(res.value);
+          this.$.cvsImportLogOp.execute().then((res1) => {
+            this._importLogs = this._filterLogs(res1.value);
             this.$.list.notifyResize();
-          }.bind(this));
+          });
 
           this.$.cvsImportResultOp.input = importId;
-          this.$.cvsImportResultOp.execute().then(function(res) {
-            this._importResult = res.value;
+          this.$.cvsImportResultOp.execute().then((res2) => {
+            this._importResult = res2.value;
             this._hasResult = true;
-          }.bind(this));
+          });
         }
       } else {
         this._handleError({message: 'Error while processing: unknown status.'})
       }
 
-    }.bind(this), this._handleError.bind(this))
+    }, this._handleError.bind(this))
   },
 
-  _close: function() {
+  _close() {
     if (this.stage === 'progress' && this._count > 0) {
       this.fire('document-updated');
-      page('/browse' + this.targetPath);
+      this.navigateTo('browse', this.targetPath);
     }
     if (this._waitProgressId) {
       clearTimeout(this._waitProgressId);
     }
-  }
+  },
 });

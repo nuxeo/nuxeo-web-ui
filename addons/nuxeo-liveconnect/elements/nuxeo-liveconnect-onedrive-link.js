@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-liveconnect-onedrive-provider.js';
@@ -66,11 +67,11 @@ Polymer({
   is: 'nuxeo-liveconnect-onedrive-link',
   behaviors: [I18nBehavior],
 
-  ready: function() {
+  ready() {
     this.$.provider.updateProviderInfo();
   },
 
-  _openPicker: function() {
+  _openPicker() {
     this.$.provider.openPicker();
-  }
+  },
 });

@@ -74,18 +74,18 @@ Polymer({
     open: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     message: {
       type: String,
-      value: 'Your session has expired! Click here to login again.'
-    }
+      value: 'Your session has expired! Click here to login again.',
+    },
   },
 
-  ready: function() {
-    document.addEventListener('unauthorized-request', function() {
+  ready() {
+    document.addEventListener('unauthorized-request', () => {
       this.open = true;
-    }.bind(this));
-  }
+    });
+  },
 });

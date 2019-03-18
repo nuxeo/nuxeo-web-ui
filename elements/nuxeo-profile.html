@@ -37,14 +37,14 @@ limitations under the License.
       is: 'nuxeo-profile',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
-        user: Object
+        user: Object,
       },
 
-      _username: function(user) {
+      _username(user) {
         if (user) {
           return user.id;
         }
-      }
+      },
     });
   </script>
 

@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
-var serializer = new XMLSerializer();
-var parser = new DOMParser();
+const serializer = new XMLSerializer();
+const parser = new DOMParser();
 
 
 /**
@@ -269,21 +270,21 @@ Polymer({
   properties: {
     templateData: {
       type: String,
-      observer: '_readTemplateParams'
+      observer: '_readTemplateParams',
     },
     mode: {
       type: String,
-      value: 'view'
+      value: 'view',
     },
     params: Object,
     param: Object,
     paramTypes: {
       type: Array,
-      value: ['String', 'Boolean', 'Date', 'source', 'picture', 'content']
+      value: ['String', 'Boolean', 'Date', 'source', 'picture', 'content'],
     },
     contentTypes: {
       type: Array,
-      value: ['htmlPreview', 'blobContent', 'xpath']
+      value: ['htmlPreview', 'blobContent', 'xpath'],
     },
     selectedParamProperties: {
       type: Object,
@@ -292,82 +293,82 @@ Polymer({
         type: '',
         loop: '',
         value: '',
-        contentType: ''
-      }
+        contentType: '',
+      },
     },
     allowDelete: {
       type: Boolean,
-      value: false
+      value: false,
     },
     allowCreate: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
   },
 
-  generateTemplateData: function() {
+  generateTemplateData() {
     return serializer.serializeToString(this.params.node);
   },
 
-  reset: function() {
+  reset() {
     this._readTemplateParams();
   },
 
-  commitChanges: function() {
-    this._getParams().forEach(function(param) {
-      var change = this._getParamAttribute(param, 'change');
+  commitChanges() {
+    this._getParams().forEach((param) => {
+      const change = this._getParamAttribute(param, 'change');
       if (change) {
         if (change === 'deleted') {
           this.params.querySelector('templateParams').removeChild(param);
         }
         this._removeParamAttribute(param, 'change');
       }
-    }.bind(this));
+    });
   },
 
-  _templateDataChanged: function() {
+  _templateDataChanged() {
     this._readTemplateParams();
   },
 
-  _getParamTypeLabel: function(type) {
-    return this.i18n('templateRenderingPage.paramType.' + type);
+  _getParamTypeLabel(type) {
+    return this.i18n(`templateRenderingPage.paramType.${  type}`);
   },
 
-  _getContentTypeLabel: function(type) {
-    return this.i18n('templateRenderingPage.paramType.content.' + type);
+  _getContentTypeLabel(type) {
+    return this.i18n(`templateRenderingPage.paramType.content.${  type}`);
   },
 
-  _readTemplateParams: function() {
+  _readTemplateParams() {
     this.set('params', dom(parser.parseFromString(this.templateData ? this.templateData :
         '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>', 'text/xml')));
   },
 
-  _getParams: function() {
+  _getParams() {
     return this.params ? this.params.querySelectorAll('templateParams field') : [];
   },
 
-  _hasParams: function() {
+  _hasParams() {
     return this._getParams().length > 0;
   },
 
-  _getParamAttribute: function(param, attrname) {
+  _getParamAttribute(param, attrname) {
     return param ? param.getAttribute(attrname) : '';
   },
 
-  _setParamAttribute: function(param, attrname, attrvale) {
+  _setParamAttribute(param, attrname, attrvale) {
     param.setAttribute(attrname, attrvale);
   },
 
-  _removeParamAttribute: function(param, attrname) {
+  _removeParamAttribute(param, attrname) {
     param.removeAttribute(attrname);
   },
 
-  _checkParamAttribute: function(param, attrname, attrvalue) {
+  _checkParamAttribute(param, attrname, attrvalue) {
     return this._getParamAttribute(param, attrname) === attrvalue;
   },
 
-  _getParamValue: function(param) {
-    var type = this._getParamAttribute(param, 'type');
+  _getParamValue(param) {
+    const type = this._getParamAttribute(param, 'type');
     switch (type) {
       case 'source':
       case 'picture':
@@ -378,8 +379,8 @@ Polymer({
     }
   },
 
-  _setParamValue: function(param, value) {
-    var type = this._getParamAttribute(param, 'type');
+  _setParamValue(param, value) {
+    const type = this._getParamAttribute(param, 'type');
     switch (type) {
       case 'source':
       case 'picture':
@@ -392,41 +393,41 @@ Polymer({
     }
   },
 
-  _getParamTypeTranslated: function(param) {
+  _getParamTypeTranslated(param) {
     return this._getParamTypeLabel(this._getParamAttribute(param, 'type'));
   },
 
-  _getParamValueWithLoop: function(param) {
-    var loop = this._getParamAttribute(param, 'autoloop');
+  _getParamValueWithLoop(param) {
+    const loop = this._getParamAttribute(param, 'autoloop');
     return this._getParamValue(param) + (loop ?
-        ' (' + this.i18n('templateRenderingPage.parameters.autoloop') + ')' : '')
+        ` (${  this.i18n('templateRenderingPage.parameters.autoloop')  })` : '')
   },
 
-  _refreshParams: function() {
+  _refreshParams() {
     // because this.params is a complex element, using this.set won't notify changes for sub-properties, which in
     // this case are inner elements. We need to override dirty checking:
     // https://www.polymer-project.org/1.0/docs/devguide/model-data#override-dirty-check
-    var params = this.params;
+    const {params} = this;
     this.set('params', null);
     this.set('params', params);
   },
 
-  _deleteParam: function(e) {
+  _deleteParam(e) {
     this._setParamAttribute(e.model.param, 'change', 'deleted');
     this._refreshParams();
   },
 
-  _loadEditParamDialog: function(param) {
+  _loadEditParamDialog(param) {
     this.set('param', param);
     this.set('selectedParamProperties.name', this._getParamAttribute(this.param, 'name'));
     this.set('selectedParamProperties.type', this._getParamAttribute(this.param, 'type'));
-    var loop = this._getParamAttribute(this.param, 'autoloop');
-    this.set('selectedParamProperties.loop', (!loop || loop === 'false') ? false : true);
-    var value = this._getParamValue(this.param);
+    const loop = this._getParamAttribute(this.param, 'autoloop');
+    this.set('selectedParamProperties.loop', !((!loop || loop === 'false')));
+    let value = this._getParamValue(this.param);
     if (this.selectedParamProperties.type === 'Date') {
       value = this.formatDate(value, 'yyyy-MM-ddTHH:mm:ss')
     } else if (this.selectedParamProperties.type === 'Boolean') {
-      value = (!value || value === 'false') ? false : true;
+      value = !((!value || value === 'false'));
     }
     if (this.selectedParamProperties.type === 'content') {
       if (value !== 'htmlPreview' && value !== 'blobContent') {
@@ -441,12 +442,12 @@ Polymer({
     this.set('selectedParamProperties.value', value);
   },
 
-  _editParam: function(e) {
+  _editParam(e) {
     this._loadEditParamDialog(e.model.param);
     this.$.editParamDialog.toggle();
   },
 
-  _addParam: function() {
+  _addParam() {
     this.new = true;
     this.param = document.createElementNS('http://www.nuxeo.org/DocumentTemplate', 'nxdt:field');
     this._setParamAttribute(this.param, 'name', '');
@@ -456,15 +457,15 @@ Polymer({
     this.$.editParamDialog.toggle();
   },
 
-  _save: function() {
+  _save() {
     this.$.form.submit();
   },
 
-  _cancel: function() {
+  _cancel() {
     this.new = false;
   },
 
-  _submitSaveParam: function() {
+  _submitSaveParam() {
     this._setParamAttribute(this.param, 'name', this.selectedParamProperties.name);
     this._setParamAttribute(this.param, 'type', this.selectedParamProperties.type);
     if ((this.selectedParamProperties.type === 'source' ||
@@ -492,45 +493,39 @@ Polymer({
     this.$.editParamDialog.toggle();
   },
 
-  _computeBtnId: function(param, action) {
-    return action + '_btn_' + param.attributes.item('name').value;
+  _computeBtnId(param, action) {
+    return `${action  }_btn_${  param.attributes.item('name').value}`;
   },
 
-  _computeParamNamePattern: function() {
-    var params = this._getParams();
+  _computeParamNamePattern() {
+    const params = this._getParams();
     if (params && params.length > 0) {
-      var fiteredParams = Array.from(this._getParams()).filter(function(param) {
-        return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
-      }.bind(this));
+      const fiteredParams = Array.from(this._getParams()).filter((param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'));
       if (fiteredParams.length > 0) {
         // return a pattern that prevents the name from being equal to the name of an already existing parameter
         // ex: /^((?!(^name1$|^name2$|^name3$)).)*$/g
-        return '^((?!(' + Array.from(this._getParams())
-            .filter(function(param) {
-              return this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name');
-            }.bind(this))
-            .map(function(param) {
-              return '^' + this._getParamAttribute(param, 'name') + '$';
-            }.bind(this)).join('|') + ')).)*$'
+        return `^((?!(${  Array.from(this._getParams())
+            .filter((param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'))
+            .map((param) => `^${  this._getParamAttribute(param, 'name')  }$`).join('|')  })).)*$`
       }
     }
     return '.*';
   },
 
-  _isSelectedParamType: function(type) {
+  _isSelectedParamType(type) {
     return this.selectedParamProperties.type === type;
   },
 
-  _isSelectedContentTypeXPath: function(selectedContentType) {
+  _isSelectedContentTypeXPath(selectedContentType) {
     return selectedContentType !== 'htmlPreview' && selectedContentType !== 'blobContent';
   },
 
-  _formatSignature: function(param) {
-    var change = this._getParamAttribute(param, 'change');
-    return change ? change : '';
+  _formatSignature(param) {
+    const change = this._getParamAttribute(param, 'change');
+    return change || '';
   },
 
-  _canEdit: function(param) {
+  _canEdit(param) {
     return this._getParamAttribute(param, 'change') !== 'deleted';
-  }
+  },
 });

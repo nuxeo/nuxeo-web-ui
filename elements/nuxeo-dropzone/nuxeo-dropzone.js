@@ -168,13 +168,13 @@ Polymer({
      */
     document: {
       type: Object,
-      notify: true
+      notify: true,
     },
     /**
      * The label for this element.
      */
     label: {
-      type: String
+      type: String,
     },
     /**
      * Dropzone clickable link translated text or key to be translated.
@@ -182,14 +182,14 @@ Polymer({
      */
     message: {
       type: String,
-      value: 'dropzone.add'
+      value: 'dropzone.add',
     },
     /**
      * This flag determines whether the dropzone allows multiple files or not.
      */
     blobList: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * Path to which the file(s) should be uploaded.
@@ -198,7 +198,7 @@ Polymer({
      */
     xpath: {
       type: String,
-      value: 'file:content'
+      value: 'file:content',
     },
     /**
      * This flag determines whether the file should be immediately uploaded or not.
@@ -206,7 +206,7 @@ Polymer({
     updateDocument: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
     /**
      * Message to show when file is uploaded successfully.
@@ -215,7 +215,7 @@ Polymer({
      */
     uploadedMessage: {
       type: String,
-      value: 'dropzone.uploaded'
+      value: 'dropzone.uploaded',
     },
     /**
      * Message to show when files are being dragged into the dropzone.
@@ -224,7 +224,7 @@ Polymer({
      */
     dragContentMessage: {
       type: String,
-      value: 'dropzone.dropFile'
+      value: 'dropzone.dropFile',
     },
     /**
      * Flag that indicates if there are any files being dragged into the dropzone.
@@ -249,7 +249,7 @@ Polymer({
      */
     _parsedXpath: {
       type: String,
-      computed: '_computeParsedXpath(xpath)'
+      computed: '_computeParsedXpath(xpath)',
     },
     /**
      * Content enrichers to be passed on to `nuxeo-document` resource.
@@ -257,125 +257,125 @@ Polymer({
      */
     enrichers: {
       type: Object,
-      value: function() {
+      value() {
         return this._computeEnrichers();
-      }
-    }
+      },
+    },
   },
 
   listeners: {
     'batchFinished': 'importBatch',
-    'nx-blob-picked': '_blobPicked'
+    'nx-blob-picked': '_blobPicked',
   },
 
   observers: [
     '_reset(document)',
-    '_filesChanged(files.splices)'
+    '_filesChanged(files.splices)',
   ],
 
-  attached: function() {
+  attached() {
     this.connection = this.$.nx;
     this.setupDropZone(this.$.dropzone);
   },
 
-  detached: function() {
+  detached() {
     this.connection = null;
     this.teardownDropZone();
   },
 
-  open: function() {
+  open() {
     this.$$('input').click();
   },
 
-  _computeParsedXpath: function(xpath) {
+  _computeParsedXpath(xpath) {
     return this.formatPropertyXpath(xpath);
   },
 
-  importBatch: function(data) {
+  importBatch(data) {
     data.stopPropagation();
     if (this.blobList) {
-      if (!this.get('document.properties.' + this._parsedXpath)) {
-        this.set('document.properties.' + this._parsedXpath, []);
+      if (!this.get(`document.properties.${  this._parsedXpath}`)) {
+        this.set(`document.properties.${  this._parsedXpath}`, []);
       }
-      this.files.forEach(function(file, index) {
-        var uploadedFile = {
+      this.files.forEach((file, index) => {
+        const uploadedFile = {
           'upload-batch': data.detail.batchId,
-          'upload-fileId': index.toString()
+          'upload-fileId': index.toString(),
         };
-        this.push('document.properties.' + this._parsedXpath,
+        this.push(`document.properties.${  this._parsedXpath}`,
           // Handle special case when using files:files
           this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
-      }.bind(this));
+      });
     } else {
-      this.set('document.properties.' + this._parsedXpath, {
+      this.set(`document.properties.${  this._parsedXpath}`, {
         'upload-batch': data.detail.batchId,
-        'upload-fileId': '0'
+        'upload-fileId': '0',
       });
     }
     this._handleBlobUploaded();
   },
 
-  _blobPicked: function(e) {
+  _blobPicked(e) {
     this.set('files', e.detail.blobs);
     if (this.blobList) {
-      if (!this.get('document.properties.' + this._parsedXpath)) {
-        this.set('document.properties.' + this._parsedXpath, []);
+      if (!this.get(`document.properties.${  this._parsedXpath}`)) {
+        this.set(`document.properties.${  this._parsedXpath}`, []);
       }
-      this.files.forEach(function(file) {
-        var uploadedFile = {
+      this.files.forEach((file) => {
+        const uploadedFile = {
           'providerId': file.providerId,
           'user': file.user,
-          'fileId': file.fileId
+          'fileId': file.fileId,
         };
-        this.push('document.properties.' + this._parsedXpath,
+        this.push(`document.properties.${  this._parsedXpath}`,
           // Handle special case when using files:files
           this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
-      }.bind(this));
+      });
     } else {
-      var file = e.detail.blobs[0];
-      this.set('document.properties.' + this._parsedXpath, {
+      const file = e.detail.blobs[0];
+      this.set(`document.properties.${  this._parsedXpath}`, {
         'providerId': file.providerId,
         'user': file.user,
-        'fileId': file.fileId
+        'fileId': file.fileId,
       });
     }
     this._handleBlobUploaded();
   },
 
-  _handleBlobUploaded: function() {
+  _handleBlobUploaded() {
     if (this.updateDocument) {
-      var props = {};
+      const props = {};
       this._createNestedObjectRecursive(
         props, this._parsedXpath.split('.'),
-        this.get('document.properties.' + this._parsedXpath)
+        this.get(`document.properties.${  this._parsedXpath}`),
       );
       this.$.doc.data = {
         "entity-type": "document",
         "repository": this.document.repository,
         "uid": this.document.uid,
-        "properties": props
+        "properties": props,
       };
-      this.$.doc.put().then(function(response) {
+      this.$.doc.put().then((response) => {
         this.document = response;
         this.fire('notify', { message: this.i18n(this.uploadedMessage) });
         this.fire('document-updated');
-      }.bind(this));
+      });
     } else {
       this.fire('notify', { message: this.i18n(this.uploadedMessage) });
     }
   },
 
-  _deleteFile: function(e) {
-    if (!this.updateDocument && this.blobList && Array.isArray(this.get('document.properties.' + this._parsedXpath))) {
-      this.splice('document.properties.' + this._parsedXpath, e.model.itemsIndex, 1);
+  _deleteFile(e) {
+    if (!this.updateDocument && this.blobList && Array.isArray(this.get(`document.properties.${  this._parsedXpath}`))) {
+      this.splice(`document.properties.${  this._parsedXpath}`, e.model.itemsIndex, 1);
       this.splice('files', e.model.itemsIndex, 1);
     } else {
       this._reset();
-      this.set('document.properties.' + this._parsedXpath, '');
+      this.set(`document.properties.${  this._parsedXpath}`, '');
     }
   },
 
-  _reset: function(document) {
+  _reset(document) {
     if (document === undefined) {
       this.cancelBatch();
     }
@@ -383,56 +383,56 @@ Polymer({
     this.files = [];
   },
 
-  _uploadInputFiles: function(e) {
+  _uploadInputFiles(e) {
     this._upload(e.target.files);
   },
 
-  _filesChanged: function() {
+  _filesChanged() {
     this._setHasFiles(this.files.length > 0);
   },
 
-  _upload: function(files) {
+  _upload(files) {
     if (files && files.length > 0) {
       this.uploadFiles(files);
     }
   },
 
-  _dragover: function(e) {
+  _dragover(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
     this._setDraggingFiles(true);
   },
 
-  _dragleave: function() {
+  _dragleave() {
     this._setDraggingFiles(false);
   },
 
-  _drop: function(e) {
+  _drop(e) {
     e.preventDefault();
     this._setDraggingFiles(false);
     this._upload(e.dataTransfer.files);
   },
 
-  _computeMessage: function() {
+  _computeMessage() {
     return this.i18n && this.draggingFiles ? this.i18n(this.dragContentMessage) : this.i18n(this.message);
   },
 
-  _isDropzoneVisible: function() {
+  _isDropzoneVisible() {
     // Area to drop files should stay visible when the element is attached to a blob list property
     // and `updateDocument` is false (e.g when using the element on a form: creation or edition of documents).
     // This will allow the user to manage the list of files.
     return (!this.updateDocument && this.blobList) || !this.hasFiles;
   },
 
-  _areActionsVisible: function() {
+  _areActionsVisible() {
     return !this.updateDocument && this.hasFiles && !this.uploading;
   },
 
-  _computeEnrichers: function() {
+  _computeEnrichers() {
     return {
       document: ['preview'],
       blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob)
-        || ['appLinks']
+        || ['appLinks'],
     };
   },
 
@@ -450,7 +450,7 @@ Polymer({
    *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'), 'should set this value');
    *
    */
-  _createNestedObjectRecursive: function(obj, path, value) {
+  _createNestedObjectRecursive(obj, path, value) {
     if (path.length === 0) {
       return;
     }
@@ -458,5 +458,5 @@ Polymer({
       obj[path[0]] = path.length === 1 && value ? value : {};
     }
     return this._createNestedObjectRecursive(obj[path[0]], path.slice(1), value);
-  }
+  },
 });

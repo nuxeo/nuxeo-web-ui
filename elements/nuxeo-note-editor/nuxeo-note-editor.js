@@ -20,10 +20,9 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
-import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-html-editor.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -128,68 +127,68 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
     _viewMode: {
       type: Boolean,
-      value: true
+      value: true,
     },
     _value: {
       type: String,
-      value: ''
-    }
+      value: '',
+    },
   },
 
-  _documentChanged: function() {
+  _documentChanged() {
     this._value = this.document.properties['note:note'];
   },
 
-  _isHTML: function() {
+  _isHTML() {
     return this.document && this.document.properties['note:mime_type'] === 'text/html';
   },
 
-  _computeHtmlEditIcon: function() {
+  _computeHtmlEditIcon() {
     return this._viewMode ? 'icons:code' : 'nuxeo:edit';
   },
 
-  _computeHtmlEditLabel: function() {
+  _computeHtmlEditLabel() {
     return this._viewMode ? this.i18n('noteEditor.editSource') : this.i18n('noteEditor.editRich');
   },
 
-  _editorSave: function() {
+  _editorSave() {
     this.$.note.data = {
       'entity-type': 'document',
       uid: this.document.uid,
       properties: {
-        'note:note': this._value
-      }
+        'note:note': this._value,
+      },
     };
-    this.$.note.put().then(function() {
+    this.$.note.put().then(() => {
       this.fire('notify', {message: this.i18n('noteViewLayout.note.saved')});
       this._viewMode = true;
       this.fire('document-updated');
-    }.bind(this));
+    });
   },
 
-  _isMutable: function(document) {
+  _isMutable(document) {
     return !this.hasFacet(document, 'Immutable') && document.type !== 'Root' && !this.isTrashed(document);
   },
 
-  _canEdit: function(document) {
+  _canEdit(document) {
     return document.type !== 'Root' && this.hasPermission(document, 'Write') && this._isMutable(document);
   },
 
-  _edit: function() {
+  _edit() {
     this._value = this.document.properties['note:note'];
     this._viewMode = false;
   },
 
-  _cancel: function() {
+  _cancel() {
     this._value = '';
     this._viewMode = true;
   },
 
-  _toggleHtmlSource: function() {
+  _toggleHtmlSource() {
     this._viewMode = !this._viewMode;
-  }
+  },
 });

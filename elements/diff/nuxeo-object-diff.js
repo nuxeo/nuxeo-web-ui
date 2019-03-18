@@ -16,13 +16,14 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import { DiffBehavior } from './nuxeo-diff-behavior.js';
 import './nuxeo-diff-styles.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { DiffBehavior } from './nuxeo-diff-behavior.js';
+
 export const Diff = {};
 Diff.registry = {
-  default: 'nuxeo-default-diff'
+  default: 'nuxeo-default-diff',
 };
 
 /**
@@ -44,13 +45,13 @@ Diff.registerElement = function(id, rules) {
     }
     Diff.registry.properties[rules.property] = id;
   }
-},
+}
 
 /**
  * Retrieves a custom element for a given set of rules, or the default element if none is found.
  */
 Diff.getElement = function(rules) {
-  var id = null;
+  let id = null;
   if (Diff.registry.properties && rules.property) {
     id = Diff.registry.properties[rules.property];
   }
@@ -77,37 +78,38 @@ Polymer({
   behaviors: [DiffBehavior],
   observers: ['_updateContainer(type, property)'],
 
-  created: function() {
-    for (var prop in this.properties) {
+  created() {
+    Object.keys(this.properties).forEach((prop) => {
       // XXX: use a method observer per property to keep databinding between the object diff and it's child
       // Note: we're not using a property observer here because we need to pass not only the value but also the
       // property name, in order to be able to set it on the child.
-      this._createMethodObserver('_forwardProp("' + prop + '", ' + prop + ')');
-    }
+      this._createMethodObserver(`_forwardProp("${  prop  }", ${  prop  })`);
+
+    });
   },
 
-  _forwardProp: function(prop, value) {
+  _forwardProp(prop, value) {
     if (this._instance) {
       this._instance[prop] = value;
     }
   },
 
-  _updateContainer: function(type, property) {
+  _updateContainer(type, property) {
     // retrieve a custom element for the given type and property combination,
     // or the default element if none is found.
-    this._instance = document.createElement(Diff.getElement({type: type,
+    this._instance = document.createElement(Diff.getElement({type,
       property: [this.schema && (this.schema.prefix || this.schema.name), property].filter(Boolean).join(':')}));
 
-    for (var prop in this.properties) {
+    Object.keys(this.properties).forEach((prop) => {
       this._instance[prop] = this[prop];
-    }
+    });
 
     if (this.$.container.hasChildNodes()) {
       this.$.container.replaceChild(this._instance, this.$.container.firstChild);
     } else {
       this.$.container.appendChild(this._instance);
     }
-  }
+  },
 });
 
 Nuxeo.Diff = Diff;

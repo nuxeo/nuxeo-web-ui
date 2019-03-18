@@ -62,20 +62,20 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
 
     activities: {
       type: Array,
-      value: []
-    }
+      value: [],
+    },
   },
 
-  _activity: function(event) {
-    return this.i18n('activity.' + event.eventId);
+  _activity(event) {
+    return this.i18n(`activity.${  event.eventId}`);
   },
 
-  _documentChanged: function() {
+  _documentChanged() {
     if (this.document && this.document.contextParameters && this.document.contextParameters.audit) {
       this.activities = this._gatherDuplicatedActivities(this.document.contextParameters.audit);
     }
@@ -84,13 +84,13 @@ Polymer({
   /**
    * Returns a copy of the given array with "repeated" gathered
    */
-  _gatherDuplicatedActivities: function(original) {
-    var activities = original.slice();
-    for (var i = 0; i < activities.length - 1; i++) {
-      for (var j = i + 1;  j < activities.length; j++) {
+  _gatherDuplicatedActivities(original) {
+    const activities = original.slice();
+    for (let i = 0; i < activities.length - 1; i++) {
+      for (let j = i + 1;  j < activities.length; j++) {
         if (this._areGatherableActivities(activities[i], activities[j])) {
           activities.splice(j,1);
-          j--;  //After remove duplicated element, decrease j to keep same index
+          j--;  // After remove duplicated element, decrease j to keep same index
 
         }
       }
@@ -103,12 +103,12 @@ Polymer({
    * Activities are gatharable if they are both "download", have the same author
    * and have less than 24 hours between them.
    */
-  _areGatherableActivities: function(a, b){
-    var delta = new Date(a.eventDate) - new Date(b.eventDate);
-    delta = delta / 1000 / 60 / 60 ; //Converts ms to hours
+  _areGatherableActivities(a, b){
+    let delta = new Date(a.eventDate) - new Date(b.eventDate);
+    delta = delta / 1000 / 60 / 60 ; // Converts ms to hours
     return a.eventId === b.eventId
         && a.eventId === 'download'
         && a.principalName === b.principalName
         && delta < 24;
-  }
+  },
 });

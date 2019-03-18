@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -64,24 +65,22 @@ Polymer({
       type: Boolean,
       reflectToAttribute: true,
       value: false,
-    }
+    },
   },
 
-  _isAvailable: function(doc, blob) {
+  _isAvailable(doc, blob) {
     return doc && blob && this.hasPermission(doc, 'Write') && (!blob.appLinks || blob.appLinks.length === 0);
   },
 
-  _go: function() {
-    this.$.token.get().then(function(response) {
-      var tokens = response.entries.map(function(token) {
-        return token.id;
-      });
+  _go() {
+    this.$.token.get().then((response) => {
+      const tokens = response.entries.map((token) => token.id);
       if (!tokens || !tokens.length) {
         this.$.dialog.toggle();
         return;
       }
       window.open(this.driveEditURL, '_top');
-    }.bind(this));
+    });
 
   },
 
@@ -90,9 +89,9 @@ Polymer({
       return '';
     }
 
-    var parts = this.blob.data.split('/nxfile/');
-    var baseUrl = parts[0];
-    var downloadUrl = 'nxfile/' + parts[1];
+    const parts = this.blob.data.split('/nxfile/');
+    const baseUrl = parts[0];
+    const downloadUrl = `nxfile/${  parts[1]}`;
 
     return [
       'nxdrive://edit',
@@ -102,5 +101,5 @@ Polymer({
       'nxdocid', this.document.uid,
       'filename', encodeURIComponent(this.blob.name),
       'downloadUrl', downloadUrl].join('/');
-  }
+  },
 });

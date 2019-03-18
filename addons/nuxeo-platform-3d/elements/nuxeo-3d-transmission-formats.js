@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -146,57 +147,57 @@ Polymer({
      */
     document: {
       type: Object,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
   behaviors: [I18nBehavior],
 
-  _hasItems: function(list) {
+  _hasItems(list) {
     return list.length > 0;
   },
 
-  _formatAsReadable: function(value, base, unit) {
+  _formatAsReadable(value, base, unit) {
     value = Number(value);
     if (value < base) {
-      return value + ' ' + unit;
+      return `${value  } ${  unit}`;
     }
-    var exp = parseInt((Math.log(value) / Math.log(base)));
-    var pre = String(('kMGTPE').charAt(exp - 1));
-    return (Math.round(value / Math.pow(base, exp) * 10) / 10) + ' ' + pre + unit;
+    const exp = parseInt((Math.log(value) / Math.log(base)), 0);
+    const pre = String(('kMGTPE').charAt(exp - 1));
+    return `${Math.round(value / (base ** exp) * 10) / 10  } ${  pre  }${unit}`;
   },
 
-  _getPolyInfo: function(f) {
-    var perc = f.percPoly == null ? '' : f.percPoly + ' %';
-    var max = f.maxPoly == null ? '' : '< ' + this._formatAsReadable(f.maxPoly, 1000, '');
-    return f.percPoly != null && f.maxPoly != null ? perc + ' | ' + max : perc + max;
+  _getPolyInfo(f) {
+    const perc = f.percPoly == null ? '' : `${f.percPoly  } %`;
+    const max = f.maxPoly == null ? '' : `< ${  this._formatAsReadable(f.maxPoly, 1000, '')}`;
+    return f.percPoly != null && f.maxPoly != null ? `${perc  } | ${  max}` : perc + max;
   },
 
-  _getPolyNumber: function(f) {
+  _getPolyNumber(f) {
     return this._formatAsReadable(f.info.polygons, 1000, '');
   },
 
-  _hasTextures: function(f) {
+  _hasTextures(f) {
     return f.info.textures_size > 0;
   },
 
-  _getTexInfo: function(f) {
-    var perc = f.percTex == null ? '' : f.percTex + ' %';
-    var max = f.maxTex == null ? '' : '< ' + f.maxTex;
-    return f.percTex != null && f.maxTex != null ? perc + ' | ' + max : perc + max;
+  _getTexInfo(f) {
+    const perc = f.percTex == null ? '' : `${f.percTex  } %`;
+    const max = f.maxTex == null ? '' : `< ${  f.maxTex}`;
+    return f.percTex != null && f.maxTex != null ? `${perc  } | ${  max}` : perc + max;
   },
 
-  _getTexSize: function(f) {
+  _getTexSize(f) {
     return this._hasTextures(f) ? this._formatAsReadable(f.info.textures_size, 1024, 'B') : null;
   },
 
-  _loadFormat: function(e) {
+  _loadFormat(e) {
     this.fire('3d-viewer-content-change', {
-      content: e.model.format.content.data
+      content: e.model.format.content.data,
     });
   },
 
-  _downloadFormat: function(e) {
-    location.href = e.model.format.content.data;
-  }
+  _downloadFormat(e) {
+    window.location.href = e.model.format.content.data;
+  },
 });

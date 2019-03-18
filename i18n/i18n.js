@@ -16,11 +16,11 @@ limitations under the License.
 */
 import { XHRLocaleResolver } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
-var baseUrl = window.nuxeo.I18n.baseUrl || location.origin + location.pathname;
-var msgFolder = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'i18n';
+const baseUrl = window.nuxeo.I18n.baseUrl || window.location.origin + window.location.pathname;
+const msgFolder = `${baseUrl + (baseUrl.endsWith('/') ? '' : '/')  }i18n`;
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
 window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
-window.nuxeo.I18n.loadLocale().then(function(){
+window.nuxeo.I18n.loadLocale().then(() => {
   /* Set html lang attribute. Required by the better-dateinput element */
   document.getElementsByTagName("html")[0].lang =  window.nuxeo.I18n.language;
 });

@@ -55,29 +55,29 @@ Contributors:
       properties: {
         document: {
           type: Object,
-          notify: true
-        }
+          notify: true,
+        },
       },
 
       behaviors: [Nuxeo.I18nBehavior],
 
       listeners: {
         '3d-viewer-coords-change': '_onViewerCoordsChange',
-        '3d-viewer-content-change': '_onViewerContentChange'
+        '3d-viewer-content-change': '_onViewerContentChange',
       },
 
-      _getViewer: function() {
+      _getViewer() {
         return !this.shadowRoot ? this.querySelector('#threedViewer') :
           this.shadowRoot.querySelector('nuxeo-3d-preview').shadowRoot.querySelector('#threedViewer');
       },
 
-      _onViewerCoordsChange: function(e) {
+      _onViewerCoordsChange(e) {
         this._getViewer().set('sphericalCoords', [e.detail.azimuth, e.detail.zenith]);
       },
 
-      _onViewerContentChange: function(e) {
+      _onViewerContentChange(e) {
         this._getViewer().set('src', e.detail.content);
-      }
+      },
     });
   </script>
 

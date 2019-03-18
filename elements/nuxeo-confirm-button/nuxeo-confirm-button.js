@@ -72,35 +72,35 @@ Polymer({
   properties: {
     dialogTitle: {
       type: String,
-      value: 'Are you sure?'
+      value: 'Are you sure?',
     },
     dialogConfirm: {
       type: String,
-      value: 'Yes'
+      value: 'Yes',
     },
     dialogDismiss: {
       type: String,
-      value: 'No'
+      value: 'No',
     },
     _model: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
-  ready: function() {
+  ready() {
     this.$.dialog.positionTarget = this.$.button;
   },
 
-  _toggleDialog: function(e) {
+  _toggleDialog(e) {
     this._model = e.model;
     this.$.dialog.toggle();
   },
 
-  _confirm: function() {
+  _confirm() {
     this.fire('confirm', {model: this._model});
   },
 
-  _dismiss: function() {
+  _dismiss() {
     this.fire('dismiss', {model: this._model});
-  }
+  },
 });

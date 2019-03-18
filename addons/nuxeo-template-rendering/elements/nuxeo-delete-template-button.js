@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -67,26 +68,26 @@ Polymer({
   properties: {
     /**
      * The template to be deleted
-     **/
+     * */
     document: Object,
     /**
      * `true` if the action should display the label, `false` otherwise.
-     **/
+     * */
     showLabel: {
       type: Boolean,
       value: false,
-    }
+    },
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.$.dialog.toggle();
   },
 
-  _delete: function() {
+  _delete() {
     this.$.deleteTemplatesOp.input = this.document.uid;
     this.$.deleteTemplatesOp.execute().then(this.$.template.remove.bind(this.$.template))
-                                      .then(function() {
+                                      .then(() => {
                                         window.location = this.urlFor('document', this.document.parentRef);
-                                      }.bind(this));
-  }
+                                      });
+  },
 });

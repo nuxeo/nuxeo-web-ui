@@ -26,11 +26,11 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/chart-elements/chart-pie.js';
 import '@nuxeo/chart-elements/chart-line.js';
-import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
-import { mimeTypes } from './nuxeo-mime-types.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import moment from 'moment';
+import { mimeTypes } from './nuxeo-mime-types.js';
+import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 
 /**
 `nuxeo-repository-analytics`
@@ -187,51 +187,47 @@ Polymer({
   properties: {
     index: {
       type: String,
-      value: '_all'
+      value: '_all',
     },
     startDate: String,
-    endDate: String
+    endDate: String,
   },
 
-  ready: function() {
+  ready() {
     this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
-  _types: function(data) {
-    return data.map(function(obj) {
-      var mimeType = mimeTypes[obj.key];
+  _types(data) {
+    return data.map((obj) => {
+      const mimeType = mimeTypes[obj.key];
       if (mimeType) {
         if (mimeType.name) {
           return mimeType.name;
-        } else if (mimeType.extensions && mimeType.extensions.length > 0) {
+        } if (mimeType.extensions && mimeType.extensions.length > 0) {
           return mimeType.extensions[0].toUpperCase();
-        } else {
+        } 
           return obj.key;
-        }
-      } else {
+        
+      } 
         return obj.key;
-      }
+      
     });
   },
 
   // builds page provider query to get info about downloaded docs
-  _downloadsQuery: function(entries) {
+  _downloadsQuery(entries) {
     if (entries.length > 0) {
-      var values = entries.map(function(entry) {
-        return '\'' + entry.key + '\'';
-      }).join(',');
-      return 'SELECT * FROM Document WHERE ecm:uuid IN (' + values + ')';
+      const values = entries.map((entry) => `'${  entry.key  }'`).join(',');
+      return `SELECT * FROM Document WHERE ecm:uuid IN (${  values  })`;
     }
   },
 
-  _numberOfDownloads: function(doc) {
-    return this.downloads.find(function(entry) {
-      return entry.key === doc.uid;
-    }).value;
+  _numberOfDownloads(doc) {
+    return this.downloads.find((entry) => entry.key === doc.uid).value;
   },
 
-  _isEmpty: function(array) {
+  _isEmpty(array) {
     return !array || array.length === 0;
-  }
+  },
 });

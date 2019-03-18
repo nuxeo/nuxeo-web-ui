@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -91,24 +92,24 @@ Polymer({
      */
     document: {
       type: Object,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
   behaviors: [I18nBehavior],
 
-  _hasItems: function(list) {
+  _hasItems(list) {
     return list.length > 0;
   },
 
-  _setCoords: function(e) {
+  _setCoords(e) {
     this.fire('3d-viewer-coords-change', {
       azimuth: e.model.renderView.azimuth,
-      zenith: e.model.renderView.zenith
+      zenith: e.model.renderView.zenith,
     });
   },
 
-  _downloadView: function(e) {
-    location.href = e.model.renderView.content.data;
-  }
+  _downloadView(e) {
+    window.location.href = e.model.renderView.content.data;
+  },
 });

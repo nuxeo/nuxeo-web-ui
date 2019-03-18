@@ -26,10 +26,10 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/chart-elements/chart-bar.js';
 import '@nuxeo/chart-elements/chart-pie.js';
-import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import moment from 'moment';
+import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 
 /**
 `nuxeo-workflow-analytics`
@@ -161,39 +161,37 @@ Polymer({
   properties: {
     workflow: {
       type: String,
-      value: 'ParallelDocumentReview'
+      value: 'ParallelDocumentReview',
     },
     index: {
       type: String,
-      value: 'nuxeo'
+      value: 'nuxeo',
     },
     startDate: String,
     endDate: String,
-    workflows: Array
+    workflows: Array,
   },
 
-  ready: function() {
+  ready() {
     this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
   // override _labels and _values from nuxeo-chart-data-behavior.html
-  _labels: function(data) {
+  _labels(data) {
     if (!data) { return []; }
     if (data.value) {
-      return data.value.map(function(obj) {
-        return obj.key;
-      });
-    } else {
+      return data.value.map((obj) => obj.key);
+    } 
       return this._labels(data[0]);
-    }
+    
   },
 
-  _values: function(data) {
-    var values = [];
-    data.forEach(function(entry) {
+  _values(data) {
+    const values = [];
+    data.forEach((entry) => {
       if (Array.isArray(entry.value)) {
-        values.push(entry.value.map(function(e) { return e.value; }));
+        values.push(entry.value.map((e) => e.value));
       } else {
         values.push(entry.value);
       }
@@ -201,44 +199,44 @@ Polymer({
     return values;
   },
 
-  _asDuration: function(duration) {
-    var seconds = Math.floor(duration / 1000),
-        minutes = Math.floor(seconds / 60),
-        hours = Math.floor(minutes / 60),
-        days = Math.floor(hours / 24),
-        result = '';
-    hours = hours - (days * 24);
+  _asDuration(duration) {
+    let seconds = Math.floor(duration / 1000);
+        let minutes = Math.floor(seconds / 60);
+        let hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        let result = '';
+    hours -= (days * 24);
     minutes = minutes - (days * 24 * 60) - (hours * 60);
     seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
     if (days > 0) {
-      result += days + ' Days ';
+      result += `${days  } Days `;
     }
     if (hours > 0) {
-      result += hours + 'h ';
+      result += `${hours  }h `;
     }
     if (minutes > 0) {
-      result += minutes + 'm ';
+      result += `${minutes  }m `;
     }
     if (seconds > 0) {
-      result += seconds + 's ';
+      result += `${seconds  }s `;
     }
     return result;
   },
 
-  _table: function(data) {
-    return data.map(function(e) {
+  _table(data) {
+    return data.map((e) => {
       return {key: e.key, value: this._asDuration(e.value)};
-    }.bind(this));
+    });
   },
 
-  _handleWorkflowModelResponse: function(response) {
-    var _workflowModels = response.detail.response.entries;
-    this.workflows = _workflowModels.map(function(wfm) {
+  _handleWorkflowModelResponse(response) {
+    const _workflowModels = response.detail.response.entries;
+    this.workflows = _workflowModels.map((wfm) => {
       return {
         id: wfm.name,
-        label: this.i18n(wfm.title)
+        label: this.i18n(wfm.title),
       }
-    }.bind(this));
+    });
     this.workflow = this.workflows[0].id;
-  }
+  },
 });

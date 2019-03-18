@@ -23,7 +23,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-delete-document-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-untrash-document-button.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '../nuxeo-publication/nuxeo-publication-info-bar.js';
@@ -150,68 +150,68 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
+      type: Object,
     },
     tasks: {
       type: Array,
-      computed: '_tasks(document)'
+      computed: '_tasks(document)',
     },
     workflows: {
       type: Array,
-      computed: '_workflows(document)'
+      computed: '_workflows(document)',
     },
-    _wfTasks: Array
+    _wfTasks: Array,
   },
 
-  _tasks: function(doc) {
+  _tasks(doc) {
     return doc && doc.contextParameters && doc.contextParameters.pendingTasks
       ? doc.contextParameters.pendingTasks : [];
   },
 
-  _workflows: function(doc) {
+  _workflows(doc) {
     return doc && doc.contextParameters && doc.contextParameters.runningWorkflows
       ? doc.contextParameters.runningWorkflows : [];
   },
 
-  _processTask: function(e) {
+  _processTask(e) {
     this.fire('workflowTaskProcess', { task: e.model.task });
   },
 
-  ready: function() {
-    this.$.nxcon.connect().then(function(user) {
+  ready() {
+    this.$.nxcon.connect().then((user) => {
       this.currentUser = user;
-    }.bind(this))
+    })
   },
 
-  _isCurrentUser: function(userId) {
+  _isCurrentUser(userId) {
     return this.currentUser && this.currentUser.id === userId;
   },
 
-  _labelForInitiatedWf: function(workflow) {
+  _labelForInitiatedWf(workflow) {
     if (this._isCurrentUser(workflow.initiator)) {
       return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
-    } else {
-      return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
     }
+      return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
+
   },
 
-  _abandonWorkflow: function(e) {
-    if (confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
-      this.$.worfklow.path = '/workflow/' + e.model.workflow.id;
-      this.$.worfklow.remove().then(function() {
+  _abandonWorkflow(e) {
+    if (window.confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
+      this.$.worfklow.path = `/workflow/${  e.model.workflow.id}`;
+      this.$.worfklow.remove().then(() => {
         this.fire('workflowAbandoned', { workflow: e.model.workflow });
-      }.bind(this));
+      });
     }
   },
 
   /**
    * Checks if current user has permission to abandon a workflow.
    */
-  _hasPermissionToAbandon: function(initiator) {
+  _hasPermissionToAbandon(initiator) {
     return this._isCurrentUser(initiator) || (this.currentUser && this.currentUser.isAdministrator);
   },
 
-  _toggleGraphDialog: function(e) {
-    this.$$('#graph-' + e.model.workflow.id).show();
-  }
+  _toggleGraphDialog(e) {
+    this.$$(`#graph-${  e.model.workflow.id}`).show();
+  },
 });

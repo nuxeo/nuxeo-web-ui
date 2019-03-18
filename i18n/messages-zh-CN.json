@@ -279,7 +279,7 @@
   "command.save": "保存",
   "command.search": "搜索",
   "command.submit": "提交",
-  "command.unlock": "解锁​​​​",
+  "command.unlock": "解锁",
   "command.view": "查看",
   "comments.creation.error.comment": "An error occurred while creating the comment.",
   "comments.creation.error.reply": "An error occurred while creating the reply.",

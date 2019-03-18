@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import moment from 'moment';
@@ -130,38 +131,38 @@ Polymer({
     application: String,
     tokens: {
       type: Array,
-      value: []
-    }
+      value: [],
+    },
   },
 
   behaviors: [I18nBehavior],
 
-  _params: function(application) {
+  _params(application) {
     return {'application': application};
   },
 
-  _handleTokens: function(e) {
+  _handleTokens(e) {
     this.tokens = e.detail.response.entries;
   },
 
-  _revoke: function(e) {
-    this.$.token.path = '/token/' + e.model.token.id;
+  _revoke(e) {
+    this.$.token.path = `/token/${  e.model.token.id}`;
     this.$.token.remove()
       .then(this.refresh.bind(this))
-      .then(function() {
+      .then(() => {
         this.$.toast.open();
-      }.bind(this));
+      });
   },
 
-  refresh: function() {
+  refresh() {
     return this.$.tokens.execute(this);
   },
 
-  _empty: function(arr) {
+  _empty(arr) {
     return !arr.length;
   },
 
-  _formatDate: function(date) {
+  _formatDate(date) {
     return moment(date).format('MMMM D, YYYY');
-  }
+  },
 });

@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
@@ -41,29 +42,29 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
+      type: Object,
     },
     aRenderUrl: {
       type: String,
-      value: ''
+      value: '',
     },
     visible: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
 
   observers: [
-    '_observeDocument(document, visible)'
+    '_observeDocument(document, visible)',
   ],
 
-  _observeDocument: function() {
+  _observeDocument() {
     this.aRenderUrl = '';
     if (this.visible && this.document) {
-      this.$.aRenderOp.execute().then(function(res) {
+      this.$.aRenderOp.execute().then((res) => {
         this.set('aRenderUrl', res.previewerUrl);
-      }.bind(this)).catch(function(err) {
+      }).catch((err) => {
         console.error(err);
       });
     }
-  }
+  },
 });

@@ -17,7 +17,8 @@ limitations under the License.
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-var schemaFetcher = null;
+
+let schemaFetcher = null;
 
 /**
  * `Nuxeo.DocumentCreationBehavior`
@@ -28,99 +29,99 @@ export const DocumentCreationBehavior = [FormatBehavior, RoutingBehavior, {
   properties: {
     parent: {
       type: Object,
-      observer: '_parentChanged'
+      observer: '_parentChanged',
     },
 
     targetPath: {
       type: Object,
-      notify: true
+      notify: true,
     },
 
     suggesterParent: {
-      type: Object
+      type: Object,
     },
 
     suggesterChildren: {
       type: Array,
       observer: '_suggesterChildrenChanged',
-      notify: true
+      notify: true,
     },
 
     isValidTargetPath: {
       type: Boolean,
-      notify: true
+      notify: true,
     },
 
     canCreate: {
       type: Boolean,
-      notify: true
+      notify: true,
     },
 
     targetLocationError: {
       type: String,
-      notify: true
+      notify: true,
     },
 
     document: {
-      type: Object
+      type: Object,
     },
 
     selectedDocType: {
-      type: String
+      type: String,
     },
 
     subtypes: {
-      type: Array
-    }
+      type: Array,
+    },
 
   },
 
   observers: [
     '_validateLocation(isValidTargetPath,suggesterChildren)',
-    '_updateDocument(selectedDocType, parent)'
+    '_updateDocument(selectedDocType, parent)',
   ],
 
-  newDocument: function(type, properties) {
+  newDocument(type, properties) {
     if (!schemaFetcher) {
       schemaFetcher = document.createElement('nuxeo-resource');
       this._attachDom(schemaFetcher);
     }
-    schemaFetcher.path = 'path/' + this.targetPath + '/@emptyWithDefault';
+    schemaFetcher.path = `path/${  this.targetPath  }/@emptyWithDefault`;
     schemaFetcher.params = { type: this.selectedDocType.type };
     schemaFetcher.headers = {
       properties: '*',
       'X-NXfetch.document': 'properties',
-      'X-NXtranslate.directoryEntry': 'label'
+      'X-NXtranslate.directoryEntry': 'label',
     };
-    return schemaFetcher.get().then(function(doc) {
+    return schemaFetcher.get().then((doc) => {
       if (properties) {
-        for (var prop in properties) {
+        Object.keys(properties).forEach((prop) => {
           doc.properties[prop] = properties[prop];
-        }
+        });
       }
       return doc;
     });
   },
 
-  _parentChanged: function() {
+  _parentChanged() {
     if (this.parent) {
       if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, "$1") !== this.parent.path) {
         this.set('targetPath', this.parent.path);
       }
-      var subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-                            this.parent.contextParameters.subtypes.map(function(type) {
+      const subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
+                            this.parent.contextParameters.subtypes.map((type) => {
                               type.id = type.type.toLowerCase();
                               return type;
                             }) : [];
-      var filteredSubtypes = [];
+      const filteredSubtypes = [];
       if (this._canCreateIn(this.parent)) {
-        subtypes.forEach(function(type) {
+        subtypes.forEach((type) => {
           if (type.facets.indexOf('HiddenInCreation') === -1) {
             filteredSubtypes.push(type);
           }
-        }.bind(this));
+        });
       }
-      this.set('subtypes', filteredSubtypes.sort(function(a, b) {
+      this.set('subtypes', filteredSubtypes.sort((a, b) => {
         if (a.id < b.id) {
           return -1;
         }
@@ -133,18 +134,16 @@ export const DocumentCreationBehavior = [FormatBehavior, RoutingBehavior, {
     this._validateLocation();
   },
 
-  _suggesterChildrenChanged: function() {
-    var valid = (this.parent ? this.targetPath.replace(/(.+)\/$/, "$1") === this.parent.path : false) ||
+  _suggesterChildrenChanged() {
+    const valid = (this.parent ? this.targetPath.replace(/(.+)\/$/, "$1") === this.parent.path : false) ||
                 (this.suggesterParent ?
                 this.targetPath.replace(/(.+)\/$/, "$1") === this.suggesterParent.path : false) ||
-                (this.suggesterChildren ? this.suggesterChildren.some(function(child) {
-                  return this.targetPath === child.path;
-                }.bind(this)) : false);
+                (this.suggesterChildren ? this.suggesterChildren.some((child) => this.targetPath === child.path) : false);
     this.set('isValidTargetPath', valid);
     this.fire('nx-document-creation-suggester-parent-changed', {isValidTargetPath: valid});
   },
 
-  _validateLocation: function() {
+  _validateLocation() {
     if (!this.isValidTargetPath) {
       this.set('canCreate', false);
       this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidLocation'));
@@ -166,8 +165,8 @@ export const DocumentCreationBehavior = [FormatBehavior, RoutingBehavior, {
     this.fire('nx-document-creation-parent-validated');
   },
 
-  _notify: function(response, close) {
-    this.fire('document-created', {response: response});
+  _notify(response, close) {
+    this.fire('document-created', {response});
     if (close === undefined) {
       close = true;
     }
@@ -176,47 +175,45 @@ export const DocumentCreationBehavior = [FormatBehavior, RoutingBehavior, {
     }
   },
 
-  _formatErrorMessage: function() {
+  _formatErrorMessage() {
     return this.errorMessage ? 'error' : '';
   },
 
-  _canCreateIn: function(document) {
+  _canCreateIn(document) {
     if (document && document.contextParameters && document.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
       // so we had to rely on Write.
       return document.contextParameters.permissions.indexOf('Write') > -1 ||
             document.contextParameters.permissions.indexOf('AddChildren') > -1;
-    } else {
-      return false;
     }
+      return false;
+
   },
 
-  _sanitizeName: function(name) {
+  _sanitizeName(name) {
     return name.replace(/[\\/]/gi, '-');
   },
 
-  _isValidType: function(type) {
+  _isValidType(type) {
     return type && this.subtypes && this.subtypes.findIndex(
-        function(t) {
-          return t._id === type._id && t.type === type.type && t.icon === type.icon;
-        }) > -1;
+        (t) => t._id === type._id && t.type === type.type && t.icon === type.icon) > -1;
   },
 
-  _getTypeLabel: function(type) {
+  _getTypeLabel(type) {
     return this._isValidType(type) ? this.formatDocType(type.id) : '';
   },
 
-  _getTypeIcon: function(type) {
-    return this._isValidType(type) ? 'images/doctypes/' + type.id + '.svg' : '';
+  _getTypeIcon(type) {
+    return this._isValidType(type) ? `images/doctypes/${  type.id  }.svg` : '';
   },
 
   // extension point
-  _getDocumentProperties: function() {
+  _getDocumentProperties() {
     return null;
   },
 
   // extension point
-  _updateDocument: function() {
+  _updateDocument() {
 
-  }
+  },
 }];

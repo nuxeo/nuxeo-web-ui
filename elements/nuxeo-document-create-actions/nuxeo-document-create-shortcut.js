@@ -63,10 +63,10 @@ Polymer({
   properties: {
     type: String,
     icon: String,
-    label: String
+    label: String,
   },
 
-  _tap: function() {
+  _tap() {
     this.fire('create-document', {type: this.type});
-  }
+  },
 });

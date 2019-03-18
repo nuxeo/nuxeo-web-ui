@@ -75,24 +75,24 @@ Polymer({
 
   properties: {
     visible: {
-      type: Boolean
+      type: Boolean,
     },
 
     selectedTab: {
       type: String,
-      value: 'providers'
+      value: 'providers',
     },
 
     page: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
   observers: ['refresh(visible, page)'],
 
-  refresh: function() {
+  refresh() {
     if (this.page && this.visible) {
       this.page.refresh();
     }
-  }
+  },
 });

@@ -95,48 +95,48 @@ Polymer({
   properties: {
     documents: {
       type: Array,
-      notify: true
+      notify: true,
     },
     maxSize: {
       type: Number,
-      value: 10
+      value: 10,
     },
     selectedRecent: {
       type: Object,
       observer: '_selectedRecentChanged',
-      notify: true
-    }
+      notify: true,
+    },
   },
 
-  add: function(doc) {
+  add(doc) {
     this.$.storage.add(doc);
     if (this.documents.length > this.maxSize) {
       this.splice('documents', -1, 1);
     }
   },
 
-  contains: function(doc) {
+  contains(doc) {
     return this.$.storage.contains(doc);
   },
 
-  remove: function(doc) {
+  remove(doc) {
     this.$.storage.remove(doc);
   },
 
-  update: function(doc) {
+  update(doc) {
     this.$.storage.remove(doc);
     this.$.storage.add(doc);
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
   },
 
-  _selectedRecentChanged: function(doc) {
+  _selectedRecentChanged(doc) {
     if (doc) {
       if (doc.isVersion) {
         this.navigateTo('document', doc.uid);
@@ -144,5 +144,5 @@ Polymer({
         this.navigateTo('browse', doc.path);
       }
     }
-  }
+  },
 });

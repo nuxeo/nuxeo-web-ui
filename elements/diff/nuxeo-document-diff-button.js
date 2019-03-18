@@ -48,11 +48,11 @@ Polymer({
   properties: {
     selectedDocuments: {
       type: Array,
-      value: []
+      value: [],
     },
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -64,21 +64,21 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     return this.selectedDocuments && this.selectedDocuments.length > 1;
   },
 
-  _doDiff: function() {
+  _doDiff() {
     this.fire('nuxeo-diff-documents', {
-      documents: this.selectedDocuments
+      documents: this.selectedDocuments,
     });
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('documentDiffButton.tooltip');
-  }
+  },
 });

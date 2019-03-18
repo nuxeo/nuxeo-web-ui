@@ -141,7 +141,7 @@ class AISuggestions
 
       _inputMatches: {
         type: Object,
-      }
+      },
     };
   }
 
@@ -157,7 +157,7 @@ class AISuggestions
     }
     // XXX: this method memoizes matching between the property value and the suggestions
     const matches = new Map();
-    let currentValue = this.get(this._parsePropertyPath());
+    const currentValue = this.get(this._parsePropertyPath());
     if (this.suggestions.length > 0) {
       const isArray = Array.isArray(currentValue);
       this.suggestions.forEach((suggestion) => {

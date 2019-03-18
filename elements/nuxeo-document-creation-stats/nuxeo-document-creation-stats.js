@@ -45,59 +45,55 @@ Polymer({
     name: String,
     recencySize: {
       type: Number,
-      value: 5
+      value: 5,
     },
     creationStats: {
       type: Object,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
-  ready: function() {
-    this.$.nxcon.connect().then(function(res) {
-      this.name =  res.id + '-document-creation-stats';
-    }.bind(this));
+  ready() {
+    this.$.nxcon.connect().then((res) => {
+      this.name =  `${res.id  }-document-creation-stats`;
+    });
   },
 
-  initialize: function() {
+  initialize() {
     this.creationStats = {
       recency: [],
       frequency: {},
-      total: 0
+      total: 0,
     };
   },
 
-  storeType: function(type) {
+  storeType(type) {
     this.$.storage.reload();
 
     if (this.creationStats.recency.length === this.recencySize) {
       this.splice('creationStats.recency', 0, 1);
     }
     if (!(type in this.creationStats.frequency)) {
-      this.set('creationStats.frequency.' + type, 0);
+      this.set(`creationStats.frequency.${  type}`, 0);
     }
 
     this.push('creationStats.recency', type);
-    this.set('creationStats.frequency.' + type, this.creationStats.frequency[type] + 1);
+    this.set(`creationStats.frequency.${  type}`, this.creationStats.frequency[type] + 1);
     this.set('creationStats.total', this.creationStats.total + 1);
     this.$.storage.save();
   },
 
-  lastType: function(n) {
+  lastType(n) {
     this.$.storage.reload();
     if (this.creationStats.recency.length === 0) {
       return [];
     }
-    return this.creationStats.recency.slice(Math.max(this.creationStats.recency.length - (n ? n : 1), 0));
+    return this.creationStats.recency.slice(Math.max(this.creationStats.recency.length - (n || 1), 0));
   },
 
-  mostCommonType: function(n) {
+  mostCommonType(n) {
     this.$.storage.reload();
-    var sorted = Object.keys(this.creationStats.frequency).sort(function(a, b) {
-      return this.creationStats.frequency[a] < this.creationStats.frequency[b];
-    }.bind(this)).filter(function(elem, index, self) {
-      return index === self.indexOf(elem);
-    });
-    return sorted.slice(0, Math.min((n ? n : 1), sorted.length));
-  }
+    const sorted = Object.keys(this.creationStats.frequency).sort((a, b) => this.creationStats.frequency[a] < this.creationStats.frequency[b]).filter((elem, index, self) => index === self.indexOf(elem));
+    return sorted.slice(0, Math.min((n || 1), sorted.length));
+  },
 });

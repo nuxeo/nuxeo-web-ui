@@ -5,6 +5,7 @@ import './elements/nuxeo-app.js';
 
 // load Web UI bundle
 import html from './elements/nuxeo-web-ui-bundle.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
@@ -14,11 +15,11 @@ document.head.appendChild(tmpl.content);
 Promise.all(Nuxeo.UI.bundles.map((url) => {
   if (url.endsWith('.html')) {
     return new Promise((resolve, reject) => importHref(url, resolve, reject));
-  } else {
+  }
     return import(
       /* webpackChunkName: "[request]" */
       /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
-      `./addons/${url}`
+      `./addons/${url}` // eslint-disable-line comma-dangle
     );
-  }
+
 })).then(() => import(/* webpackMode: "eager" */ './elements/routing.js'));

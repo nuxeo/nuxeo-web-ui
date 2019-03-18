@@ -77,22 +77,22 @@ Polymer({
     status: {
       type: Object,
       notify: true,
-    }
+    },
   },
 
-  ready: function() {
+  ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
   },
 
-  _params: function() {
-    var actionParams = {};
-    var schemas = this.schemas != null ? this.schemas : this.provider && this.provider.schemas;
+  _params() {
+    const actionParams = {};
+    const schemas = this.schemas != null ? this.schemas : this.provider && this.provider.schemas;
     if (schemas) {
-      actionParams.schemas = schemas.split(',').map(function(s) { return s.trim(); });
+      actionParams.schemas = schemas.split(',').map((s) => s.trim());
     }
     if (this.fields) {
-      actionParams.xpaths = this.fields.split(',').map(function(s) { return s.trim(); });
+      actionParams.xpaths = this.fields.split(',').map((s) => s.trim());
     }
     return {
       action: 'csvExport',
@@ -100,11 +100,11 @@ Polymer({
     };
   },
 
-  _onPollStart: function() {
+  _onPollStart() {
     this.fire('notify', { message: this.i18n('csvExportButton.action.poll') });
   },
 
-  _onResponse: function() {
+  _onResponse() {
     this.fire('notify', { message: this.i18n('csvExportButton.action.completed') });
-  }
+  },
 });

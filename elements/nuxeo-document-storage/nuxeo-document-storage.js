@@ -46,28 +46,28 @@ Polymer({
   properties: {
     name: {
       type: String,
-      value: 'nuxeo-document-storage'
+      value: 'nuxeo-document-storage',
     },
     documents: {
       type: Array,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
-  initialize: function() {
+  initialize() {
     this.documents = [];
   },
 
-  add: function(doc) {
+  add(doc) {
     if (this.contains(doc)) {
       return;
     }
-    var document = {
+    const document = {
       uid: doc.uid,
       title: doc.title,
       type: doc.type,
       path: doc.path,
-      lastViewed: new Date()
+      lastViewed: new Date(),
     };
     if (doc.contextParameters && doc.contextParameters.thumbnail && doc.contextParameters.thumbnail.url) {
       document.contextParameters = {thumbnail: {url: doc.contextParameters.thumbnail.url}}
@@ -75,49 +75,45 @@ Polymer({
     return this.unshift('documents', document);
   },
 
-  contains: function(doc) {
+  contains(doc) {
     return this.documents && this._indexOf(doc) !== -1;
   },
 
-  remove: function(doc) {
-    var index = this._indexOf(doc);
+  remove(doc) {
+    const index = this._indexOf(doc);
     if (index !== -1) {
       this.splice('documents', index, 1);
     }
   },
 
-  update: function(doc, properties) {
-    var index = this._indexOf(doc);
+  update(doc, properties) {
+    const index = this._indexOf(doc);
     if (index !== -1) {
-      for (var key in properties) {
-        if (properties.hasOwnProperty(key)) {
-          this.set("documents." + index + "." + key, properties[key]);
-        }
-      }
+      Object.keys(properties).forEach((key) => {
+        this.set(`documents.${  index  }.${  key}`, properties[key]);
+      });
     }
   },
 
-  get: function(doc) {
-    var index = this._indexOf(doc);
+  get(doc) {
+    const index = this._indexOf(doc);
     if (index !== -1) {
       return this.documents[index];
     }
     return null;
   },
 
-  _indexOf: function(doc) {
-    return this.documents.findIndex(function(e) {
-      return e.uid === doc.uid;
+  _indexOf(doc) {
+    return this.documents.findIndex((e) => e.uid === doc.uid);
+  },
+
+  ready() {
+    this.$.nxcon.connect().then((res) => {
+      this.name = `${res.id  }-${  this.name}`;
     });
   },
 
-  ready: function() {
-    this.$.nxcon.connect().then(function(res) {
-      this.name = res.id + '-' + this.name;
-    }.bind(this));
-  },
-
-  reload: function() {
+  reload() {
     this.$.storage.reload();
-  }
+  },
 });

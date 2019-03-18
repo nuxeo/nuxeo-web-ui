@@ -23,18 +23,16 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
+import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@polymer/paper-drawer-panel/paper-drawer-panel.js';
 import '@polymer/paper-header-panel/paper-header-panel.js';
 import '@polymer/paper-listbox/paper-listbox.js';
@@ -70,7 +68,7 @@ import '../themes/base.js';
 import '../themes/loader.js';
 import './nuxeo-search-page.js';
 import './search/nuxeo-search-form.js';
-//import './nuxeo-admin/nuxeo-user-group-management-page.js';
+// import './nuxeo-admin/nuxeo-user-group-management-page.js';
 import './nuxeo-mobile/nuxeo-mobile-banner.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -83,13 +81,13 @@ import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
 window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
-  'Workspace', 'Folder', 'OrderedFolder', 'Collection', 'Domain', 'Root'
+  'Workspace', 'Folder', 'OrderedFolder', 'Collection', 'Domain', 'Root',
 ];
 
 // expose behaviors for compat
 Nuxeo.I18nBehavior = I18nBehavior;
 Nuxeo.RoutingBehavior = RoutingBehavior;
-Nuxeo.LayoutBehavior  = LayoutBehavior;
+Nuxeo.LayoutBehavior = LayoutBehavior;
 Nuxeo.FiltersBehavior = FiltersBehavior;
 Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
@@ -103,209 +101,198 @@ window.importHref = importHref;
 // inspired by https://github.com/treosh/uxm
 export const Performance = {
 
-  /** metrics **/
+  /** metrics * */
 
-  getFirstPaint: function() {
+  getFirstPaint() {
     if (typeof PerformancePaintTiming !== 'undefined') {
-      var fp = performance.getEntriesByType('paint').find(function(entry) {
-        return entry.name === 'first-paint';
-      });
+      const fp = performance.getEntriesByType('paint').find((entry) => entry.name === 'first-paint');
       return fp ? Math.round(fp.startTime) : null;
-    } else {
-      // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
-      var fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
-      return fpt ? fpt - performance.timing.fetchStart : null;
     }
+      // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
+      const fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
+      return fpt ? fpt - performance.timing.fetchStart : null;
+
 
   },
 
-  getFirstContentfulPaint: function() {
+  getFirstContentfulPaint() {
     if (typeof PerformancePaintTiming === 'undefined') {
       return null;
     }
-    var fcp = performance.getEntriesByType('paint').find(function(entry) {
-      return entry.name === 'first-contentful-paint';
-    });
+    const fcp = performance.getEntriesByType('paint').find((entry) => entry.name === 'first-contentful-paint');
     return fcp ? Math.round(fcp.startTime) : null;
   },
 
-  getOnLoad: function() {
+  getOnLoad() {
     if (!performance || !performance.timing) {
       return null;
     }
     return performance.timing.loadEventEnd - performance.timing.fetchStart;
   },
 
-  getDomContentLoaded: function() {
+  getDomContentLoaded() {
     if (!performance || !performance.timing) {
       return null;
     }
     return performance.timing.domContentLoadedEventEnd - performance.timing.fetchStart;
   },
 
-  /** optional metrics **/
+  /** optional metrics * */
 
-  getDeviceType: function(ua) {
+  getDeviceType(ua) {
     // get device type
     // based on https://github.com/matthewhudson/current-device/blob/master/src/index.js
     // returns “phone”, “tablet”, or “desktop”
     ua = (ua || this.getUserAgent()).toLowerCase();
-    var find = function(str) {
+    const find = function(str) {
       return ua.indexOf(str) !== -1;
     }
 
     // windows
-    var isWindows = find('windows');
-    var isWindowsPhone = isWindows && find('phone');
-    var isWindowsTablet = isWindows && (find('touch') && !isWindowsPhone);
+    const isWindows = find('windows');
+    const isWindowsPhone = isWindows && find('phone');
+    const isWindowsTablet = isWindows && (find('touch') && !isWindowsPhone);
 
     // ios
-    var isIphone = !isWindows && find('iphone');
-    var isIpod = find('ipod');
-    var isIpad = find('ipad');
+    const isIphone = !isWindows && find('iphone');
+    const isIpod = find('ipod');
+    const isIpad = find('ipad');
 
     // android
-    var isAndroid = !isWindows && find('android');
-    var isAndroidPhone = isAndroid && find('mobile');
-    var isAndroidTablet = isAndroid && !find('mobile');
+    const isAndroid = !isWindows && find('android');
+    const isAndroidPhone = isAndroid && find('mobile');
+    const isAndroidTablet = isAndroid && !find('mobile');
 
     // detect device
-    var isPhone = isAndroidPhone || isIphone || isIpod || isWindowsPhone;
-    var isTablet = isIpad || isAndroidTablet || isWindowsTablet;
-    return isPhone ? 'phone' : isTablet ? 'tablet' : 'desktop';
+    const isPhone = isAndroidPhone || isIphone || isIpod || isWindowsPhone;
+    const isTablet = isIpad || isAndroidTablet || isWindowsTablet;
+    if (isPhone) {
+      return 'phone';
+    }
+    return isTablet ? 'tablet' : 'desktop';
   },
 
-  getEffectiveConnectionType: function() {
-    var conn = typeof navigator !== 'undefined' ?
+  getEffectiveConnectionType() {
+    const conn = typeof navigator !== 'undefined' ?
                navigator.connection || navigator.mozConnection || navigator.webkitConnection :
                null;
     return conn ? conn.effectiveType : null;
   },
 
-  getUrl: function() {
+  getUrl() {
     return window.location.href;
   },
 
-  getUserAgent: function() {
+  getUserAgent() {
     return window.navigator.userAgent;
   },
 
-  getUserTiming: function() {
+  getUserTiming() {
     if (!performance || typeof PerformanceMark === 'undefined') {
       return null;
     }
-    var marks = performance.getEntriesByType('mark').map(function(mark) {
+    const marks = performance.getEntriesByType('mark').map((mark) => {
       return { type: 'mark', name: mark.name, startTime: Math.round(mark.startTime) };
     });
-    var measures = performance.getEntriesByType('measure').map(function(measure) {
+    const measures = performance.getEntriesByType('measure').map((measure) => {
       return {
         type: 'measure',
         name: measure.name,
         startTime: Math.round(measure.startTime),
-        duration: Math.round(measure.duration)
+        duration: Math.round(measure.duration),
       }
     });
     return marks.concat(measures);
   },
 
-  getResources: function() {
+  getResources() {
     if (!performance || typeof PerformanceResourceTiming === 'undefined') {
       return null;
     }
     return performance.getEntriesByType('navigation').concat(performance.getEntriesByType('resource'))
-      .map(function(entry) {
+      .map((entry) => {
         return {
           url: entry.name,
           type: entry.initiatorType,
           transfered: entry.transferSize,
           size: entry.decodedBodySize,
           startTime: Math.round(entry.startTime),
-          duration: Math.round(entry.duration)
+          duration: Math.round(entry.duration),
         }
       });
   },
 
-  getLongTasks: function() {
+  getLongTasks() {
     if (typeof window.__lt === 'undefined') {
       return null;
     }
-    return window.__lt.e.map(function(longTask) {
+    return window.__lt.e.map((longTask) => {
       return {
         startTime: Math.round(longTask.startTime),
-        duration: Math.round(longTask.duration)
+        duration: Math.round(longTask.duration),
       };
     });
   },
 
-  getNetworkStats: function() {
-    var resources = this.getResources();
-    var lastResource = this.getResources().sort(function(a, b) {
-      return a.startTime > b.startTime;
-    }).pop();
+  getNetworkStats() {
+    const resources = this.getResources();
+    const lastResource = this.getResources().sort((a, b) => a.startTime > b.startTime).pop();
     return {
       finish: lastResource && (lastResource.startTime + lastResource.duration),
       requestCount: resources.length,
-      transferSize: resources.map(function(resource) {
-        return resource.transfered;
-      }).reduce(function(a, b) {
-        return a + b;
-      }),
-      size: resources.map(function(resource) {
-        return resource.size;
-      }).reduce(function(a, b) {
-        return a + b;
-      })
+      transferSize: resources.map((resource) => resource.transfered).reduce((a, b) => a + b),
+      size: resources.map((resource) => resource.size).reduce((a, b) => a + b),
     }
   },
 
-  /** reporting **/
+  /** reporting * */
 
-  mark: function() {
+  mark(...args) {
     if (performance && performance.mark) {
-      performance.mark.apply(performance, arguments);
+      performance.mark(...args);
     }
   },
 
-  clearMarks: function() {
+  clearMarks(...args) {
     if (performance && performance.clearMarks) {
-      performance.clearMarks.apply(performance, arguments);
+      performance.clearMarks(...args);
     }
   },
 
-  markUnique: function() {
-    this.clearMarks(arguments[0]);
-    this.mark.apply(this, arguments);
+  markUnique(...args) {
+    this.clearMarks(args[0]);
+    this.mark(...args);
   },
 
-  measure: function() {
+  measure(...args) {
     if (performance && performance.measure) {
       // temporary fix for Edge: https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/4933422/
-      performance.measure.apply(performance, Array.from(arguments).filter(Boolean));
+      performance.measure(...Array.from(args).filter(Boolean));
     }
   },
 
-  clearMeasures: function() {
+  clearMeasures(...args) {
     if (performance && performance.clearMarks) {
-      performance.clearMeasures.apply(performance, arguments);
+      performance.clearMeasures(...args);
     }
   },
 
-  measureUnique: function() {
-    this.clearMeasures(arguments[0]);
-    this.measure.apply(this, arguments);
+  measureUnique(...args) {
+    this.clearMeasures(args[0]);
+    this.measure(...args);
   },
 
-  report: function(options) {
+  report(options) {
     if (typeof options === 'undefined') {
       options = {};
     }
-    var result = {
+    const result = {
       domContentLoaded: this.getDomContentLoaded(),
       firstContentfulPaint: this.getFirstContentfulPaint(),
       firstPaint: this.getFirstPaint(),
       onLoad: this.getOnLoad(),
       userAgent: this.getUserAgent(),
-      userTiming: this.getUserTiming()
+      userTiming: this.getUserTiming(),
     }
     if (options.deviceType || options.all) {
       result.deviceType = this.getDeviceType();
@@ -326,7 +313,7 @@ export const Performance = {
       result.networkStats = this.getNetworkStats();
     }
     return result;
-  }
+  },
 };
 
 setPassiveTouchGestures(true);
@@ -643,23 +630,23 @@ Polymer({
 
     productName: {
       type: String,
-      value: 'Nuxeo'
+      value: 'Nuxeo',
     },
 
     baseUrl: {
       type: String,
       value: '/',
-      observer: '_baseUrlChanged'
+      observer: '_baseUrlChanged',
     },
 
     loading: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     page: {
       type: String,
-      observer: '_pageChanged'
+      observer: '_pageChanged',
     },
 
     selectedTab: String,
@@ -671,12 +658,12 @@ Polymer({
     docPath: String,
     docAction: {
       type: String,
-      value: 'view'
+      value: 'view',
     },
 
     searchName: {
       type: String,
-      observer: '_updateSearch'
+      observer: '_updateSearch',
     },
 
     tasks: Array,
@@ -685,55 +672,55 @@ Polymer({
 
     drawerWidth: {
       type: String,
-      value: '52px'
+      value: '52px',
     },
 
     drawerOpened: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     keyEventTarget: {
       type: Object,
-      value: function() {
+      value() {
         return document.body;
-      }
+      },
     },
 
     currentTask: {
       type: Object,
-      value: null
+      value: null,
     },
 
     currentUser: {
       type: Object,
-      observer: '_observeCurrentUser'
+      observer: '_observeCurrentUser',
     },
 
     userWorkspace: {
-      type: String
+      type: String,
     },
 
     actionContext: {
       type: Object,
       computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-      ' clipboard, clipboardDocCount, userWorkspace, routeParams)'
+      ' clipboard, clipboardDocCount, userWorkspace, routeParams)',
     },
 
     clipboard: {
       type: Object,
-      value: null
+      value: null,
     },
 
     clipboardDocCount: {
       type: Number,
       value: 0,
-      notify: true
+      notify: true,
     },
 
     _dismissible: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     routeParams: String,
@@ -771,24 +758,24 @@ Polymer({
     'nuxeo-documents-deleted': '_documentsDeleted',
     'nuxeo-documents-untrashed': '_documentsUntrashed',
     'nuxeo-documents-dropped': '_documentsDropped',
-    'nuxeo-diff-documents': '_diffDocuments'
+    'nuxeo-diff-documents': '_diffDocuments',
   },
 
   observers: ['_computeSharedActionContext(currentUser)'],
 
-  ready: function() {
+  ready() {
 
     this.$.drawerPanel.closeDrawer();
 
-    this.$.drawerPanel.$.drawer.addEventListener('transitionend', function() {
+    this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
-    }.bind(this));
+    });
 
-    window.addEventListener('unhandledrejection', function(e) {
+    window.addEventListener('unhandledrejection', (e) => {
       if (e.reason && e.reason.status === 404) {
         this.showError(404, e.reason.message, this._errorUrl());
       }
-    }.bind(this));
+    });
 
     // NXP-25311: stop loading bar if an error occures
     window.onerror = function() {
@@ -800,51 +787,51 @@ Polymer({
     Performance.mark('nuxeo-app.ready');
   },
 
-  refresh: function() {
+  refresh() {
     if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
       this.load('browse', this.docId, this.docPath, this.docAction);
     } else {
-      page('/');
+      this.navigateTo('page');
     }
   },
 
-  loadTask: function(id) {
+  loadTask(id) {
     if (id && id.length > 0){
       this.loading = true;
       this.currentTaskId = id;
-      this.$.task.get().then(function(task) {
+      this.$.task.get().then((task) => {
         this._defineTaskAndNavigate(task);
         this.loading = false;
-      }.bind(this)).catch(function(error) {
+      }).catch((error) => {
         if(error.status === 403){
           this._fetchTasks();
           this.navigateTo('tasks');
           this.loading = false;
         }
-      }.bind(this));
+      });
     } else {
       this._defineTaskAndNavigate();
     }
   },
 
-  _defineTaskAndNavigate: function(task) {
+  _defineTaskAndNavigate(task) {
     this.currentTask = task;
     this.show('tasks');
   },
 
-  load: function(page, id, path, action) {
+  load(page, id, path, action) {
     this.loading = true;
     this.docId = id;
     this.docPath = path;
     this.docAction = action;
     this.$.doc.headers = this._computeHeaders();
     this.$.doc.enrichers = this._computeEnrichers();
-    this.$.doc.get().then(function(doc) {
+    this.$.doc.get().then((doc) => {
       if (this.docId && !doc.isVersion) {
         this.docId = '';
         this.docPath = doc.path;
       }
-      var recent = this.$$('#recent');
+      const recent = this.$$('#recent');
       if (recent && !doc.isTrashed) {
         if(recent.contains(doc)) {
           recent.update(doc);
@@ -857,35 +844,33 @@ Polymer({
       this.set('currentDocument', doc);
       this.loading = false;
       this.show(page);
-    }.bind(this)).catch(function(err) {
+    }).catch((err) => {
       this.showError(err.status, this.i18n('browse.error'), err.message)
-    }.bind(this));
+    });
   },
 
-  showError: function(code, msg, url) {
+  showError(code, msg, url) {
     this.loading = false;
-    var errorEl = this.$.error;
+    const errorEl = this.$.error;
     errorEl.code = code;
     errorEl.message = msg;
     errorEl.url = url;
     this.show('error');
   },
 
-  show: function(page, route) {
+  show(page, route) {
     this.page = page;
     this.routeParams = route;
     this._updateTitle();
   },
 
-  showDiff: function(id1, id2) {
+  showDiff(id1, id2) {
     this.show('diff');
-    var params = [id1, id2];
+    const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
     if (this.$.diff.docIds &&
-        params.every(function(el) { return this.$.diff.docIds.indexOf(el) > -1; }.bind(this))) {
-      var otherIds = this.$.diff.docIds.find(function(id) {
-        return params.indexOf(id) === -1;
-      });
+        params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
+      const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
     } else {
@@ -893,16 +878,14 @@ Polymer({
     }
   },
 
-  _diffDocuments: function(e) {
+  _diffDocuments(e) {
     this.navigateTo('page', 'diff');
     this.$.diff.docIds = null;
-    this.$.diff.docIds = e.detail.documents.map(function(doc) {
-      return doc.uid;
-    });
+    this.$.diff.docIds = e.detail.documents.map((doc) => doc.uid);
   },
 
-  _updateTitle: function() {
-    var title = [];
+  _updateTitle() {
+    const title = [];
     switch (this.page) {
       case 'browse':
         if (this.currentDocument && this.currentDocument.title) {
@@ -924,7 +907,7 @@ Polymer({
           if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
             title.push(this.searchForm.selectedSearch.title);
           } else if (this.searchForm.searchName) {
-            title.push(this.i18n('app.title.search.' + this.searchForm.searchName));
+            title.push(this.i18n(`app.title.search.${  this.searchForm.searchName}`));
           }
         }
         title.push(this.i18n('app.title.search'));
@@ -935,38 +918,38 @@ Polymer({
           title.push(this.i18n(this.currentTask.workflowModelName));
           title.push(this.i18n(this.currentTask.name));
         } else {
-          title.push(this.i18n('app.title.' + this.page));
+          title.push(this.i18n(`app.title.${  this.page}`));
         }
         break;
 
       case 'admin':
         if (this.selectedAdminTab) {
-          title.push(this.i18n('app.title.admin.' + this.selectedAdminTab));
+          title.push(this.i18n(`app.title.admin.${  this.selectedAdminTab}`));
         }
-        title.push(this.i18n('app.title.' + this.page));
+        title.push(this.i18n(`app.title.${  this.page}`));
         break;
 
       default:
-        title.push(this.i18n('app.title.' + this.page));
+        title.push(this.i18n(`app.title.${  this.page}`));
     }
     title.push(this.productName);
     document.title = title.join(' - ');
   },
 
-  _baseUrlChanged: function() {
+  _baseUrlChanged() {
     RoutingBehavior.baseUrl = this.baseUrl;
   },
 
-  _logo: function(baseUrl) {
-    return baseUrl + 'themes/' + (localStorage.getItem('theme') || 'default') + '/logo.png';
+  _logo(baseUrl) {
+    return `${baseUrl  }themes/${  localStorage.getItem('theme') || 'default'  }/logo.png`;
   },
 
-  showHome: function(e) {
+  showHome(e) {
     e.detail.keyboardEvent.preventDefault();
     this.show('home');
   },
 
-  _actionContext: function() {
+  _actionContext() {
     return {
       document: this.currentDocument,
       user: this.currentUser,
@@ -977,27 +960,27 @@ Polymer({
       clipboard: this.clipboard,
       actionContext: this.actionContext,
       userWorkspace: this.userWorkspace,
-      routeParams: this.routeParams
+      routeParams: this.routeParams,
     };
   },
 
-  _computeSharedActionContext: function() {
+  _computeSharedActionContext() {
     if (this.currentUser) {
       window.nuxeo.slots.setSharedModel({user: this.currentUser});
     }
   },
 
-  _focusMenu: function(e) {
+  _focusMenu(e) {
     e.detail.keyboardEvent.preventDefault();
     this.$.menu.focus();
   },
 
-  _showSuggester: function(e) {
+  _showSuggester(e) {
     e.detail.keyboardEvent.preventDefault();
     this.$.suggester.toggle();
   },
 
-  _showDocumentCreationWizard: function(e) {
+  _showDocumentCreationWizard(e) {
     if (e.detail.keyboardEvent) {
       e.detail.keyboardEvent.preventDefault();
     }
@@ -1010,7 +993,7 @@ Polymer({
     }
   },
 
-  _navigate: function(e) {
+  _navigate(e) {
     if (e.detail.doc) {
       this.navigateTo('browse', e.detail.doc.path);
       if (e.detail.isFromCollection) {
@@ -1020,8 +1003,8 @@ Polymer({
   },
 
   // lookup the search
-  _updateSearch: function() {
-    this.searchForm = this.$$("[search-name='" + this.searchName + "']");
+  _updateSearch() {
+    this.searchForm = this.$$(`[search-name='${  this.searchName  }']`);
     if (this.searchForm && this._searchOnLoad) {
       this.searchForm._search();
       this._searchOnLoad = false;
@@ -1032,25 +1015,25 @@ Polymer({
    * Gets current search form (if any) and refreshes it. Useful to handle file deletion/restore when the user has a
    * search page open.
    */
-  _refreshSearch: function() {
-    this.searchForm = this.$$("[search-name='" + this.searchName + "']");
+  _refreshSearch() {
+    this.searchForm = this.$$(`[search-name='${  this.searchName  }']`);
     if (this.searchForm) {
       this.searchForm.refresh();
     }
   },
 
-  _updateCollectionMenu: function(e) {
+  _updateCollectionMenu(e) {
     if (e.detail.provider) {
       this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
     }
   },
 
-  _showSearchResults: function(e) {
-    var target = e.composedPath()[0];
+  _showSearchResults(e) {
+    const target = e.composedPath()[0];
     this.navigateTo('search', target.searchName);
   },
 
-  _toggleDrawer: function(e) {
+  _toggleDrawer(e) {
     if (this._selected === e.detail.selected && this.drawerOpened) {
       this._closeDrawer();
     } else {
@@ -1059,81 +1042,81 @@ Polymer({
     this._selected = e.detail.selected;
   },
 
-  _openDrawer: function() {
+  _openDrawer() {
     this.drawerWidth = '350px';
     this.drawerOpened = true;
-    var drawerPanel = this.$.drawerPanel;
+    const {drawerPanel} = this.$;
     if (drawerPanel.narrow) {
       drawerPanel.openDrawer();
     }
     if (!this.selectedTab){
-      var drawer = this.$['drawer-pages'];
+      const drawer = this.$['drawer-pages'];
       drawer.selectIndex(0);
       this.selectedTab = drawer.selected
     }
   },
 
-  _closeDrawer: function() {
+  _closeDrawer() {
     this.drawerWidth = '52px';
     this.drawerOpened = false;
     this.$.drawerPanel.closeDrawer();
   },
 
-  _fetchTasks: function() {
+  _fetchTasks() {
     this.$.tasks.params = {'userId': this.currentUser.id};
-    this.$.tasks.get().then(function(response) {
+    this.$.tasks.get().then((response) => {
       this.tasks = response.entries;
       this.taskCount = this.tasks.length;
-    }.bind(this));
+    });
   },
 
-  _refreshAndFetchTasks: function() {
+  _refreshAndFetchTasks() {
     // let's refresh the current document since it might have been changed (ex: state and version)
     this.refresh();
     this._fetchTasks();
   },
 
-  _workflowTaskProcess: function(e) {
+  _workflowTaskProcess(e) {
     this.navigateTo('tasks', e.detail.task.id);
   },
 
-  _workflowTaskAssigned: function() {
+  _workflowTaskAssigned() {
     this.loadTask(this.currentTaskId);
   },
 
-  _onAddedToClipboard: function(e) {
+  _onAddedToClipboard(e) {
     this._toast(
       this.i18n(e.detail.docIds && e.detail.docIds.length > 1
-        ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard')
+        ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard'),
     );
   },
 
-  _onAddToClipboard: function(e) {
+  _onAddToClipboard(e) {
     if (e.detail.documents && this.clipboard) {
       this.clipboard.add(e.detail.documents)
     }
   },
 
-  _observeCurrentUser: function() {
+  _observeCurrentUser() {
     if (this.currentUser) {
-      this.$.userWorkspace.execute().then(function(response) {
+      this.$.userWorkspace.execute().then((response) => {
         this.userWorkspace = response.path;
-      }.bind(this));
+      });
       this._fetchTasks();
     }
   },
 
-  _displayUser: function(user) {
+  _displayUser(user) {
     if (user) {
-      var result = '';
-      if (user.properties['firstName']) {
-        result += user.properties['firstName'];
+      let result = '';
+      if (user.properties.firstName) {
+        result += user.properties.firstName;
       }
-      if (user.properties['lastName']) {
+      if (user.properties.lastName) {
         if (result.length > 0) {
           result += ' ';
         }
-        result += user.properties['lastName'];
+        result += user.properties.lastName;
       }
       if (result.length === 0) {
         result = user.id;
@@ -1142,60 +1125,60 @@ Polymer({
     }
   },
 
-  _toast: function(text) {
+  _toast(text) {
     this._notify({detail: {message: text}});
   },
 
-  _documentAddedToCollection: function(e) {
+  _documentAddedToCollection(e) {
     this._toast(
-      this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection')
+      this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'),
     );
   },
 
-  _documentRemovedFromCollection: function() {
+  _documentRemovedFromCollection() {
     this._toast(this.i18n('app.document.removedFromCollection'));
   },
 
-  _documentRemovedFromClipboard: function() {
+  _documentRemovedFromClipboard() {
     this._toast(this.i18n('app.document.removedFromClipboard'));
   },
 
-  _documentAddedToFavorites: function() {
+  _documentAddedToFavorites() {
     this._toast(this.i18n('app.document.addedToFavorites'));
   },
 
-  _documentRemovedFromFavorites: function() {
+  _documentRemovedFromFavorites() {
     this._toast(this.i18n('app.document.removedFromFavorites'));
   },
 
-  _documentSubscribed: function() {
+  _documentSubscribed() {
     this._toast(this.i18n('app.document.subscribed'));
   },
 
-  _documentUnsubscribed: function() {
+  _documentUnsubscribed() {
     this._toast(this.i18n('app.document.unsubscribed'));
   },
 
-  _documentLocked: function() {
+  _documentLocked() {
     this._toast(this.i18n('app.document.locked'));
   },
 
-  _documentUnlocked: function() {
+  _documentUnlocked() {
     this._toast(this.i18n('app.document.unlocked'));
   },
 
-  _documentDeleted: function(e) {
-    this._toast(this.i18n('app.document.deleted.' + (e.detail.error ? 'error' : 'success') ));
+  _documentDeleted(e) {
+    this._toast(this.i18n(`app.document.deleted.${  e.detail.error ? 'error' : 'success'}` ));
     // navigate to parent
     if (!e.detail.error) {
       this._removeFromClipboard([e.detail.doc]);
       this._removeFromRecentlyViewed([e.detail.doc]);
-      var enrichers = e.detail.doc.contextParameters;
+      const enrichers = e.detail.doc.contextParameters;
       if (enrichers) {
         if (enrichers.firstAccessibleAncestor) {
           this._navigate({'detail': {'doc': enrichers.firstAccessibleAncestor}});
         } else if (enrichers.breadcrumb) {
-          var entries = enrichers.breadcrumb.entries;
+          const {entries} = enrichers.breadcrumb;
           if (entries.length > 1) {
             this._navigate({'detail': {'doc': entries[entries.length - 2]}});
           }
@@ -1205,20 +1188,20 @@ Polymer({
     }
   },
 
-  _documentUntrashed: function(e) {
-    this._toast(this.i18n('app.document.untrashed.' + (e.detail.error ? 'error' : 'success') ));
+  _documentUntrashed(e) {
+    this._toast(this.i18n(`app.document.untrashed.${  e.detail.error ? 'error' : 'success'}` ));
     if (e.detail.doc && !e.detail.error) {
       this._navigate({'detail': {'doc': e.detail.doc}});
       this._refreshSearch();
     }
   },
 
-  _documentsDeleted: function(e) {
+  _documentsDeleted(e) {
     if (e.detail.error) {
-      var docs = e.detail.documents;
-      var msg = this.i18n(docs && docs.length > 1 ? 'app.documents.deleted.error' : 'app.document.deleted.error');
+      const docs = e.detail.documents;
+      let msg = this.i18n(docs && docs.length > 1 ? 'app.documents.deleted.error' : 'app.document.deleted.error');
       if (e.detail.error.response.status === 403) {
-        msg = msg + ' ' + this.i18n('error.403');
+        msg = `${msg  } ${  this.i18n('error.403')}`;
       }
       this._toast(msg);
     } else {
@@ -1230,31 +1213,31 @@ Polymer({
     }
   },
 
-  _documentsUntrashed: function(e) {
-    this._toast(this.i18n('app.documents.untrashed.' + (e.detail.error ? 'error' : 'success') ));
+  _documentsUntrashed(e) {
+    this._toast(this.i18n(`app.documents.untrashed.${  e.detail.error ? 'error' : 'success'}` ));
     this._refreshSearch();
   },
 
-  _documentFileDeleted: function() {
+  _documentFileDeleted() {
     this._toast(this.i18n('app.document.fileDeleted'));
     this.fire('document-updated');
   },
 
-  _themeChanged: function() {
+  _themeChanged() {
     this._toast(this.i18n('themes.applying'));
-    location.reload();
+    window.location.reload();
   },
 
-  _handleDocumentCreated: function(e) {
+  _handleDocumentCreated(e) {
     if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
-      var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-      this._toast(this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title));
+      const doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
+      this._toast(this.i18n('app.createdDocument', `${doc.type.toLowerCase()  } ${  doc.title}`));
     } else {
       this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
     }
   },
 
-  _documentsDropped: function(e) {
+  _documentsDropped(e) {
     if (this.hasFacet(e.detail.targetDocument, 'Collection')) {
       this._addDocumentsToCollection(e.detail.documents, e.detail.targetDocument);
     } else {
@@ -1262,55 +1245,51 @@ Polymer({
     }
   },
 
-  _moveDocumentsToContainer: function(documents, target) {
+  _moveDocumentsToContainer(documents, target) {
     this.$.moveDocumentsOp.op = 'Document.Move';
     this.$.moveDocumentsOp.params = {target: target.uid};
-    this.$.moveDocumentsOp.input = 'docs:' + documents.map(function(doc) {
-      return doc.uid;
-    }).join(',');
-    this.$.moveDocumentsOp.execute().then(function() {
+    this.$.moveDocumentsOp.input = `docs:${  documents.map((doc) => doc.uid).join(',')}`;
+    this.$.moveDocumentsOp.execute().then(() => {
       this.fire('document-updated');
       this._toast(this.i18n('app.documents.moved', documents.length, target.title));
-    }.bind(this));
+    });
   },
 
-  _addDocumentsToCollection: function(documents, target) {
+  _addDocumentsToCollection(documents, target) {
     this.$.moveDocumentsOp.op = 'Document.AddToCollection';
     this.$.moveDocumentsOp.params = {collection: target.uid};
-    this.$.moveDocumentsOp.input = 'docs:' + documents.map(function(doc) {
-      return doc.uid;
-    }).join(',');
-    this.$.moveDocumentsOp.execute().then(function() {
+    this.$.moveDocumentsOp.input = `docs:${  documents.map((doc) => doc.uid).join(',')}`;
+    this.$.moveDocumentsOp.execute().then(() => {
       this.fire('document-updated');
       this._toast(
-          this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection')
+          this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection'),
       );
-    }.bind(this));
+    });
   },
 
-  _hasAdministrationPermissions: function(user) {
+  _hasAdministrationPermissions(user) {
     return user.isAdministrator || this.isMember(user, 'powerusers');
   },
 
-  _errorUrl: function() {
+  _errorUrl() {
     return window.location.href;
   },
 
-  _onError: function(e) {
+  _onError(e) {
     this.showError(e.detail.code, e.detail.message, this._errorUrl());
   },
 
-  _logout: function() {
-    return this.$.nxcon.url + '/logout';
+  _logout() {
+    return `${this.$.nxcon.url  }/logout`;
   },
 
-  _pageChanged: function(page, oldPage) {
+  _pageChanged(page, oldPage) {
     if (page !== null) {
-      var el = this.$.pages.selectedItem;
+      let el = this.$.pages.selectedItem;
       // selectItem might be undefined
       // https://github.com/PolymerElements/iron-pages/issues/52
       if (!el) {
-        el = dom(this.$.pages).querySelector('[name=' + page + ']');
+        el = dom(this.$.pages).querySelector(`[name=${  page  }]`);
       }
       if (!el) {
         this.showError(404, '', page);
@@ -1319,27 +1298,27 @@ Polymer({
       // if we are switching from a previous page, then we need to remove the performance listener from it
       // and create a mark to be used for next measurements
       if (oldPage !== undefined) {
-        var oldPageEl = dom(this.$.pages).querySelector('[name=' + oldPage + ']');
+        const oldPageEl = dom(this.$.pages).querySelector(`[name=${  oldPage  }]`);
         oldPageEl.removeEventListener('dom-change', this.__performanceListener);
         Performance.markUnique('nuxeo-app.page-changed');
       }
       // add performance listener to current page to track the last dom-change event
       this.__performanceListener = function() {
-        var name = el.tagName.toLocaleLowerCase() + '.dom-changed';
+        const name = `${el.tagName.toLocaleLowerCase()  }.dom-changed`;
         // a measure will be performed from the last page switch or, if this is the first page load,
         // from when navigation started to the current moment
-        var mark = performance.getEntriesByName('nuxeo-app.page-changed', 'mark').pop();
+        const mark = performance.getEntriesByName('nuxeo-app.page-changed', 'mark').pop();
         Performance.measureUnique(name, mark && mark.name);
         Performance.markUnique('nuxeo-app.page-loaded');
-      }.bind(this);
+      };
       el.addEventListener('dom-change', this.__performanceListener);
       this.loading = true;
       // check if page is already registered (vulcanized)
       if (!(el instanceof PolymerElement)) {
-        var tag = el.tagName.toLowerCase();
-        importHref(this.resolveUrl(tag + '.html'), this._loadElements.bind(this), function() {
-          this.showError(404, '', tag + '.html');
-        }.bind(this), true);
+        const tag = el.tagName.toLowerCase();
+        importHref(this.resolveUrl(`${tag  }.html`), this._loadElements.bind(this), () => {
+          this.showError(404, '', `${tag  }.html`);
+        }, true);
       } else {
         // load elements if navigating directly to pages which are not lazy loaded (e.g. searches)
         this._loadElements();
@@ -1347,14 +1326,14 @@ Polymer({
     }
   },
 
-  _loadElements: function() {
+  _loadElements() {
     afterNextRender(this, () => {
-      import(/* webpackChunkName: "elements" */'./elements.js').then(() => this.loading = false);
+      import(/* webpackChunkName: "elements" */'./elements.js').then(() => { this.loading = false; });
     });
   },
 
-  _notify: function(e) {
-    var options = e.detail;
+  _notify(e) {
+    const options = e.detail;
     if (options.close) {
       this.$.toast.close();
     }
@@ -1366,51 +1345,51 @@ Polymer({
     }
   },
 
-  _dismissToast: function() {
+  _dismissToast() {
     this.$.toast.toggle();
   },
 
-  _clipboardUpdated: function(e) {
+  _clipboardUpdated(e) {
     this.clipboard = this.clipboard || this.$$('#clipboard');
     this.set('clipboardDocCount', e.detail.docCount);
   },
 
-  _removeFromClipboard: function(docs) {
+  _removeFromClipboard(docs) {
     if (Array.isArray(docs)) {
-      docs.forEach(function(doc) {
+      docs.forEach((doc) => {
         this.clipboard.remove(doc);
-      }.bind(this));
+      });
     }
   },
 
-  _removeFromRecentlyViewed: function(docs) {
+  _removeFromRecentlyViewed(docs) {
     if (Array.isArray(docs)) {
-      var recent = this.$$('#recent');
+      const recent = this.$$('#recent');
       if (recent) {
-        docs.forEach(function(doc) {
+        docs.forEach((doc) => {
           recent.remove(doc);
-        }.bind(this));
+        });
       }
     }
   },
 
-  _computeEnrichers: function() {
+  _computeEnrichers() {
     return Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers;
   },
 
-  _computeHeaders: function() {
-    var headers = {
+  _computeHeaders() {
+    const headers = {
       'translate-directoryEntry': 'label',
     }
 
-    var fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
+    const fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
 
     // add required fetchers
-    var required = {document: ['lock'], directoryEntry: ['parent'], task: ['actors']};
+    const required = {document: ['lock'], directoryEntry: ['parent'], task: ['actors']};
 
-    Object.keys(required).forEach(function (k) {
+    Object.keys(required).forEach((k) => {
       fetch[k] = fetch[k] || [];
-      required[k].forEach(function (v) {
+      required[k].forEach((v) => {
         if (!fetch[k].includes(v)) {
           fetch[k].push(v);
         }
@@ -1418,10 +1397,10 @@ Polymer({
     });
 
     // generate fetch headers
-    Object.keys(fetch).forEach(function (f) {
-      headers['fetch-' + f] = fetch[f].join(',');
+    Object.keys(fetch).forEach((f) => {
+      headers[`fetch-${  f}`] = fetch[f].join(',');
     });
 
     return headers;
-  }
+  },
 });

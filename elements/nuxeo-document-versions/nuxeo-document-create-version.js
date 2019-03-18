@@ -132,59 +132,59 @@ Polymer({
     version: Object,
     headers: {
       type: Object,
-      computed: '_computeHeaders(versionType)'
+      computed: '_computeHeaders(versionType)',
     },
     versionType: {
       type: String,
-      value: 'major'
+      value: 'major',
     },
-    response: Object
+    response: Object,
   },
 
-  ready: function() {
+  ready() {
     if (!this.label) {
       this.label = this.i18n('versions.create');
     }
   },
 
-  _dialogOpened: function(e) {
+  _dialogOpened(e) {
     e.target.parentNode.insertBefore(e.target.backdropElement, e.target);
   },
 
-  _dialogClosed: function() {
+  _dialogClosed() {
     this.fire('dialog-closed');
   },
 
-  _computeHeaders: function(versionType) {
+  _computeHeaders(versionType) {
     return {
-      'X-Versioning-Option': versionType
+      'X-Versioning-Option': versionType,
     };
   },
 
-  _isAvailable: function(doc) {
+  _isAvailable(doc) {
     return !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
   },
 
-  _nextMinor: function(doc) {
-    return (doc) ? doc.properties['uid:major_version'] + '.' + (doc.properties['uid:minor_version'] + 1) : '';
+  _nextMinor(doc) {
+    return (doc) ? `${doc.properties['uid:major_version']  }.${  doc.properties['uid:minor_version'] + 1}` : '';
   },
 
-  _nextMajor: function(doc) {
-    return (doc) ? (doc.properties['uid:major_version'] + 1) + '.0' : '';
+  _nextMajor(doc) {
+    return (doc) ? `${doc.properties['uid:major_version'] + 1  }.0` : '';
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     if (this._isAvailable(this.document)) {
       this.$.dialog.open();
     }
   },
 
-  _create: function() {
+  _create() {
     if (this._isAvailable(this.document)) {
       this.$.opCreateVersion.params = {increment: this.versionType, saveDocument: true};
-      this.$.opCreateVersion.execute().then(function () {
+      this.$.opCreateVersion.execute().then(() => {
         this.fire('document-updated');
-      }.bind(this));
+      });
     }
-  }
+  },
 });

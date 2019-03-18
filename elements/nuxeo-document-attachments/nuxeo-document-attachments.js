@@ -77,30 +77,30 @@ Polymer({
 
     xpath: {
       type: String,
-      value: 'files:files'
-    }
+      value: 'files:files',
+    },
   },
 
-  _hasFiles: function(doc) {
+  _hasFiles(doc) {
     return doc && doc.properties && doc.properties[this.xpath] && doc.properties[this.xpath].length > 0;
   },
 
-  _hasWritePermission: function (doc) {
+  _hasWritePermission (doc) {
     return doc && this.hasPermission(doc, 'Write') &&
       !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
   },
 
-  _computeFiles: function() {
+  _computeFiles() {
     if (this._hasFiles(this.document)) {
       return this.document.properties[this.xpath];
     }
     return [];
   },
 
-  _computeBlobXpath: function(xpath, index) {
+  _computeBlobXpath(xpath, index) {
     if (xpath === 'files:files') {
-      return 'files:files/' + index + '/file';
+      return `files:files/${  index  }/file`;
     }
-    return xpath + '/' + index;
-  }
+    return `${xpath  }/${  index}`;
+  },
 });

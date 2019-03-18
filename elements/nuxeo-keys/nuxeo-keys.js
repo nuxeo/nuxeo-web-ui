@@ -46,9 +46,9 @@ Polymer({
      */
     target: {
       type: Object,
-      value: function() {
+      value() {
         return document.body;
-      }
+      },
     },
 
     invasive: {
@@ -57,14 +57,14 @@ Polymer({
     },
   },
 
-  _keysPressed: function(e) {
-    var keyboardEvent = e.detail.keyboardEvent;
+  _keysPressed(e) {
+    const {keyboardEvent} = e.detail;
     if (this._getMatchingKeyBindings(keyboardEvent).length === 0) {
       return;
     }
 
     if (this.target === document.body) {
-      var element = keyboardEvent.composedPath()[0];
+      const element = keyboardEvent.composedPath()[0];
       switch (element.tagName) {
         case 'INPUT':
         case 'TEXTAREA':
@@ -88,18 +88,20 @@ Polymer({
         case 'PAPER-RADIO-BUTTON':
           e.preventDefault();
           return;
+        default:
+          return;
       }
     }
     this.fire('pressed', e.detail, {});
   },
 
-  _getMatchingKeyBindings: function(keyboardEvent) {
-    return this.$.a11y._keyBindings[keyboardEvent.type].filter(function(entry) {
-      var bind = entry[0];
+  _getMatchingKeyBindings(keyboardEvent) {
+    return this.$.a11y._keyBindings[keyboardEvent.type].filter((entry) => {
+      const bind = entry[0];
       return bind.key.toLowerCase() === this._transformKey(keyboardEvent.key)
         && keyboardEvent.altKey === !!bind.altKey && keyboardEvent.ctrlKey === !!bind.ctrlKey
         && keyboardEvent.metaKey === !!bind.metaKey && keyboardEvent.shiftKey === !!bind.shiftKey;
-    }.bind(this));
+    });
   },
 
   /**
@@ -108,10 +110,10 @@ Polymer({
    *
    * @see https://github.com/PolymerElements/iron-a11y-keys-behavior/blob/v2.1.1/iron-a11y-keys-behavior.html#L102-L130
    */
-  _transformKey: function(key) {
-    var validKey = '';
+  _transformKey(key) {
+    let validKey = '';
     if (key) {
-      var lKey = key.toLowerCase();
+      const lKey = key.toLowerCase();
       if (lKey === ' ' || /^space(bar)?/.test(lKey)) {
         validKey = 'space';
       } else if (/^escape$/.test(lKey)) {
@@ -125,5 +127,5 @@ Polymer({
       }
     }
     return validKey;
-  }
+  },
 });

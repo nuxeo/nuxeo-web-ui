@@ -56,11 +56,11 @@ Polymer({
   is: 'nuxeo-document-versions-list',
 
   behaviors: [
-    IronOverlayBehavior
+    IronOverlayBehavior,
   ],
 
-  ready: function() {
+  ready() {
     this.horizontalAlign = 'left';
     this.verticalAlign = 'auto';
-  }
+  },
 });

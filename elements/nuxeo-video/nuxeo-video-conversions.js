@@ -62,6 +62,6 @@ Polymer({
   behaviors: [I18nBehavior, FormatBehavior],
 
   properties: {
-    document: Object
-  }
+    document: Object,
+  },
 });

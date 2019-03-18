@@ -53,7 +53,7 @@ Polymer({
      * The 18n label key
      */
     label: {
-      type: String
+      type: String,
     },
 
     /**
@@ -61,7 +61,7 @@ Polymer({
      */
     route: {
       type: String,
-      value: ''
+      value: '',
     },
 
     /**
@@ -69,19 +69,19 @@ Polymer({
      */
     link: {
       type: String,
-      value: ''
-    }
+      value: '',
+    },
   },
 
-  _href: function() {
+  _href() {
     if (this.link) {
       return this.link;
     }
     if (this.urlFor) {
-      var parts = this.route.split(':');
-      var name = parts[0];
-      var args = (parts[1] && parts[1].split('/')) || [];
-      return this.urlFor.apply(this, [name].concat(args));
+      const parts = this.route.split(':');
+      const name = parts[0];
+      const args = (parts[1] && parts[1].split('/')) || [];
+      return this.urlFor(...[name].concat(args));
     }
-  }
+  },
 });

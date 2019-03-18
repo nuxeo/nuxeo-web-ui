@@ -142,47 +142,45 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
-  _breadcrumb: function() {
+  _breadcrumb() {
     if (this._enrichers) {
       return this._enrichers.breadcrumb.entries.slice(0, this._enrichers.breadcrumb.entries.length - 1);
     }
   },
 
-  _computeCssClass: function(index) {
+  _computeCssClass(index) {
     if (this._enrichers) {
       if (index === this._enrichers.breadcrumb.entries.length - 1) {
         return 'breadcrumb-item-current';
-      } else if (index === this._enrichers.breadcrumb.entries.length - 2) {
+      } if (index === this._enrichers.breadcrumb.entries.length - 2) {
         return 'breadcrumb-item-parent';
-      } else if (index === this._enrichers.breadcrumb.entries.length - 3) {
+      } if (index === this._enrichers.breadcrumb.entries.length - 3) {
         return 'breadcrumb-item-grand-parent';
-      } else {
-        return 'breadcrumb-item-ancestor';
       }
+        return 'breadcrumb-item-ancestor';
+
     }
   },
 
-  _title: function(document) {
+  _title(document) {
     if (document) {
       return (document.type === 'Root') ? this.i18n('browse.root') : document.title;
     }
   },
 
-  _icon: function(document, url)  {
+  _icon(document, url)  {
     if (document && document.properties && document.properties['common:icon']) {
       return url ? url + document.properties['common:icon'] : '';
-    } else {
-      return '';
     }
+      return '';
+
   },
 
   get _enrichers() {
-    if (this.document) {
-      return this.document.contextParameters;
-    }
-  }
+    return this.document && this.document.contextParameters;
+  },
 });

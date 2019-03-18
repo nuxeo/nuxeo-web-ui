@@ -232,40 +232,40 @@ Polymer({
   properties: {
     doc: {
       type: Object,
-      notify: true
+      notify: true,
     },
 
     offset: {
       type: Number,
-      value: -1
+      value: -1,
     },
 
     selected: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     selectedItems: {
       type: Array,
-      value: []
+      value: [],
     },
 
     index: {
-      type: Number
-    }
+      type: Number,
+    },
   },
 
   observers: [
-    '_selectedItemsChanged(selectedItems.splices)'
+    '_selectedItemsChanged(selectedItems.splices)',
   ],
 
-  _thumbnail: function(doc) {
+  _thumbnail(doc) {
     return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
            doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
   },
 
-  handleClick: function(e) {
+  handleClick(e) {
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
@@ -273,16 +273,16 @@ Polymer({
     }
   },
 
-  _onCheckBoxTap: function(e) {
+  _onCheckBoxTap(e) {
     this._toogleSelect(e);
   },
 
-  _toogleSelect: function(e) {
+  _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', {index: this.index, shiftKey: e.detail.sourceEvent.shiftKey});
   },
 
-  _selectedItemsChanged: function() {
+  _selectedItemsChanged() {
     this.selectionMode = this.selectedItems && this.selectedItems.length > 0;
-  }
+  },
 });

@@ -82,12 +82,13 @@ limitations under the License.
   <script defer src="vendor/alloy/alloy-editor-all.js"></script>
 
   <script>
+    /* eslint-disable no-var, no-unused-vars */
     var Nuxeo = {
       UI: {
         bundles: [/* 'nuxeo-dam', ... */],
         config: {
           fetch: {
-            document: ['properties']
+            document: ['properties'],
           },
           enrichers: {
             document: [
@@ -107,15 +108,16 @@ limitations under the License.
               'audit',
               'subtypes',
               'tags',
-              'publications'
+              'publications',
             ],
-            blob: ['appLinks']
+            blob: ['appLinks'],
           },
           dateFormat: 'LL',
-          dateTimeFormat: 'LLL'
-        }
-      }
+          dateTimeFormat: 'LLL',
+        },
+      },
     };
+    /* eslint-enable no-var, no-unused-vars */
   </script>
 
   <script src="main.bundle.js"></script>

@@ -27,10 +27,10 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '../nuxeo-data-grid/nuxeo-document-grid-thumbnail.js';
-import { DocumentContentBehavior } from './nuxeo-document-content-behavior.js';
 import './nuxeo-results.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { DocumentContentBehavior } from './nuxeo-document-content-behavior.js';
 
 /**
 `nuxeo-document-content`
@@ -168,21 +168,21 @@ Polymer({
      * The parameters to be passed on to `provider`.
      */
     params: {
-      type: Object
+      type: Object,
     },
     /**
      * The name of the page provider to be used.
      */
     provider: {
       type: String,
-      value: 'advanced_document_content'
+      value: 'advanced_document_content',
     },
     /**
      * The number of results per page.
      */
     pageSize: {
       type: Number,
-      value: 40
+      value: 40,
     },
     /**
      * List of comma separated values of the document schemas to be returned.
@@ -190,7 +190,7 @@ Polymer({
      */
     schemas: {
       type: String,
-      value: 'dublincore,common,uid,file'
+      value: 'dublincore,common,uid,file',
     },
     /**
      * List of content enrichers passed on to `provider`.
@@ -198,7 +198,7 @@ Polymer({
      */
     enrichers: {
       type: String,
-      value: 'thumbnail, permissions'
+      value: 'thumbnail, permissions',
     },
     /**
      * The headers passed on to `provider`.
@@ -206,7 +206,7 @@ Polymer({
      */
     headers: {
       type: String,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
     },
     /**
      * The label to be dislayed when there are no results.
@@ -215,10 +215,10 @@ Polymer({
     /**
      * The label to be dislayed when there are no results with filtering applied.
      */
-    emptyLabelWhenFiltered: String
+    emptyLabelWhenFiltered: String,
   },
 
-  _computeParams: function(document) {
+  _computeParams(document) {
     if (document) {
       if (this.hasFacet(document, 'Orderable')) {
         this.$.nxProvider.set('sort', { 'ecm:pos': 'ASC' });
@@ -228,5 +228,5 @@ Polymer({
       return { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) }
     }
     return {};
-  }
+  },
 });

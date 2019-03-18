@@ -31,7 +31,8 @@ import '../nuxeo-keys/nuxeo-keys.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-var commands = [];
+
+const commands = [];
 
 export const _Suggester = {};
 /**
@@ -43,9 +44,7 @@ _Suggester.addCommand = function(command) {
   if (!command) {
     return;
   }
-  var index = commands.indexOf(function(c) {
-    return c.id === command.id
-  });
+  const index = commands.indexOf((c) => c.id === command.id);
   if (index > -1) {
     commands.splice(index, 1, command);
   } else {
@@ -292,30 +291,30 @@ Polymer({
     toggled: {
       type: Boolean,
       notify: true,
-      value: false
+      value: false,
     },
     searchTerm: {
       type: String,
       value: '',
       notify: true,
-      observer: '_searchTermChanged'
+      observer: '_searchTermChanged',
     },
     searchDelay: {
       type: Number,
-      value: 200
+      value: 200,
     },
     target: {
       type: Object,
-      value: function() {
+      value() {
         return this;
-      }
+      },
     },
     items: {
-      type: Array
-    }
+      type: Array,
+    },
   },
 
-  toggle: function() {
+  toggle() {
     this.toggled = !this.toggled;
     this.searchTerm = '';
     this.toggleClass('toggled', this.toggled, this.$.searchButton);
@@ -324,25 +323,25 @@ Polymer({
     }
   },
 
-  closeResults: function(e) {
+  closeResults(e) {
     e.detail.keyboardEvent.preventDefault();
     this.toggle();
   },
 
-  _searchTermChanged: function() {
+  _searchTermChanged() {
     this.$.selector.selected = 0;
     if (this.searchTerm === '') {
       this.items = [];
     } else {
-      this.debounce('suggester-search', function() {
-        this.$.op.execute().then(function() {
-          commands.forEach(function(command) {
-            var addSuggestion = false;
+      this.debounce('suggester-search', () => {
+        this.$.op.execute().then(() => {
+          commands.forEach((command) => {
+            let addSuggestion = false;
             if (command.trigger.regex) {
               addSuggestion = this.searchTerm.match(command.trigger.regex);
             } else if (command.trigger.searchTerm) {
-              var commandTerm = command.trigger.searchTerm.trim().toLowerCase();
-              var searchTerm = this.searchTerm.trim().toLowerCase();
+              const commandTerm = command.trigger.searchTerm.trim().toLowerCase();
+              const searchTerm = this.searchTerm.trim().toLowerCase();
               addSuggestion = command.trigger.startsWith ?
                                     commandTerm.startsWith(searchTerm) :
                                     commandTerm === searchTerm;
@@ -350,29 +349,29 @@ Polymer({
             if (addSuggestion) {
               this.push('items', command.suggestion);
             }
-          }.bind(this));
-        }.bind(this));
-      }.bind(this), this.searchDelay);
+          });
+        });
+      }, this.searchDelay);
     }
   },
 
-  _canShowResults: function() {
+  _canShowResults() {
     return this.searchTerm !== '' && this.items &&
       (Array.isArray(this.items) ? this.items.length > 0 : true);
   },
 
-  _getIcon: function(item) {
+  _getIcon(item) {
     if (item.command) {
       return item.icon;
-    } else if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
-      return this.$.nxcon.url + '/' + item.thumbnailUrl;
-    } else {
+    } if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
+      return `${this.$.nxcon.url  }/${  item.thumbnailUrl}`;
+    } 
       return this.$.nxcon.url + item.icon;
-    }
+    
   },
 
-  _getUrl: function(item, replaceHashbang) {
-    var url;
+  _getUrl(item, replaceHashbang) {
+    let url;
     if (!item.command) {
       url = item.type && this.urlFor(item.type, item.id)
     }
@@ -382,27 +381,27 @@ Polymer({
     return url;
   },
 
-  _upPressed: function(e) {
+  _upPressed(e) {
     e.detail.keyboardEvent.preventDefault();
     this.$.selector.selectPrevious();
   },
 
-  _downPressed: function(e) {
+  _downPressed(e) {
     e.detail.keyboardEvent.preventDefault();
     this.$.selector.selectNext();
   },
 
-  _enterPressed: function(e) {
+  _enterPressed(e) {
     if (this.$.selector.items.length > 0) {
       e.detail.keyboardEvent.preventDefault();
       this.$.selector.items[this.$.selector.selected].click();
     }
   },
 
-  _itemClicked: function(e) {
+  _itemClicked(e) {
     if (e.model.item.command && e.model.item.command.run) {
       e.model.item.command.run(this.searchTerm);
     }
     this.toggle();
-  }
+  },
 });

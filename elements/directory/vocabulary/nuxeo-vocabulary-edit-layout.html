@@ -70,26 +70,26 @@ limitations under the License.
 
         entry: {
           type: Object,
-          observer: '_entryChanged'
+          observer: '_entryChanged',
         },
 
         new: {
           type: Boolean,
-          value: false
-        }
+          value: false,
+        },
       },
 
-      _entryChanged: function() {
+      _entryChanged() {
         this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
       },
 
-      _isObsolete: function(obsolete) {
+      _isObsolete(obsolete) {
         return obsolete === 1;
       },
 
-      _obsoleteChanged: function() {
+      _obsoleteChanged() {
         this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
-      }
+      },
 
     });
   </script>

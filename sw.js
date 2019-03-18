@@ -1,7 +1,9 @@
+/* eslint-disable no-restricted-globals, no-return-await */
+/* global importScripts, workbox */
 importScripts('workbox/workbox-sw.js');
 workbox.loadModule('workbox-strategies');
 
-self.addEventListener('install', event => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 
   const params = new URL(self.location.href).searchParams;

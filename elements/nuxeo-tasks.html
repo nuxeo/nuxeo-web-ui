@@ -159,77 +159,78 @@ limitations under the License.
   </template>
 
   <script>
+    /* global moment */
     Polymer({
       is: 'nuxeo-tasks',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
       properties: {
         tasks: {
-          type: Array
+          type: Array,
         },
 
         current: {
           type: Object,
           value: null,
-          observer: '_currentChanged'
+          observer: '_currentChanged',
         },
 
-        currentTaskDocument: Object
+        currentTaskDocument: Object,
       },
 
-      _process: function(e) {
+      _process(e) {
         this.navigateTo('tasks', e.model.task.id);
       },
 
-      _currentChanged: function() {
+      _currentChanged() {
         if (this.current) {
           this.$.currentTaskDoc.get();
         }
       },
 
-      _hasCurrent: function() {
-        return this.current ? true : false;
+      _hasCurrent() {
+        return !!this.current;
       },
 
-      _href: function(doc) {
+      _href(doc) {
         if (doc) {
           return this.urlFor('browse', doc.path);
         }
       },
 
-      _getPath: function(path){
+      _getPath(path){
         return path.substr(0, path.lastIndexOf("/"));
       },
 
-      _date: function(date) {
+      _date(date) {
         return moment(date).format('MMMM D, YYYY');
       },
 
-      _count: function() {
+      _count() {
         if (this.tasks) {
           return this.tasks.length;
         }
       },
 
-      _docId: function() {
+      _docId() {
         if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
           return this.current.targetDocumentIds[0].uid;
         }
       },
 
-      _empty: function(tasks) {
+      _empty(tasks) {
         return tasks && tasks.length === 0;
       },
 
       get currenIndex() {
         if (this.tasks && this.current) {
-          for (var i = 0; i < this.tasks.length; i++) {
+          for (let i = 0; i < this.tasks.length; i++) {
             if (this.tasks[i].id === this.current.id) {
               return i;
             }
           }
         }
         return -1;
-      }
+      },
 
     });
   </script>

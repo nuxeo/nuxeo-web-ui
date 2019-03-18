@@ -21,7 +21,6 @@ import '@polymer/paper-slider/paper-slider.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/dataviz/nuxeo-document-distribution-chart.js';
-import './nuxeo-chart-data-behavior.js';
 import './nuxeo-mime-types.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -100,27 +99,27 @@ Polymer({
   properties: {
     index: {
       type: String,
-      value: '_all'
+      value: '_all',
     },
     path: {
-      type: String
+      type: String,
     },
     depth: {
       type: Number,
-      value: 7
-    }
+      value: 7,
+    },
   },
 
   observers: [
-    '_observeDocPath(path, depth)'
+    '_observeDocPath(path, depth)',
   ],
 
-  _observeDocPath: function() {
+  _observeDocPath() {
     if (this.path && this.path.length && this.path.endsWith('/') &&
       (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
       this.$.chart.maxDepth = this.depth;
       this.$.chart.path = this.path;
       this.$.chart.execute();
     }
-  }
+  },
 });

@@ -108,7 +108,7 @@ Polymer({
     feeling: String,
   },
 
-  ready: function() {
+  ready() {
     this._onkeypress = function(e) {
       if (e.key === 'Escape') {
         this._off();
@@ -124,9 +124,9 @@ Polymer({
       if (this._idleTimeout) {
         clearTimeout(this._idleTimeout);
       }
-      this._idleTimeout = setTimeout(function() {
+      this._idleTimeout = setTimeout(() => {
         this.feeling = '💤';
-      }.bind(this), 15000);
+      }, 15000);
       this._unknownLocation = false;
       // XXX this will only capture the first touch on mobile, because the browser will reclaim the move for itself.
       // see https://developer.mozilla.org/en-US/docs/Web/Events/pointermove for more
@@ -136,9 +136,9 @@ Polymer({
       }
       this._req = requestAnimationFrame(this._animate.bind(this));
     }.bind(this);
-    customElements.whenDefined('nuxeo-suggester').then(function() {
-      this.$.sardine.style.left = Math.random() * window.innerWidth + 'px';
-      this.$.sardine.style.top = Math.random() * window.innerHeight + 'px';
+    customElements.whenDefined('nuxeo-suggester').then(() => {
+      this.$.sardine.style.left = `${Math.random() * window.innerWidth  }px`;
+      this.$.sardine.style.top = `${Math.random() * window.innerHeight  }px`;
       _Suggester.addCommand({
         id: 'sardine',
         trigger: {
@@ -152,10 +152,10 @@ Polymer({
         },
         run: this._on.bind(this),
       });
-    }.bind(this));
+    });
   },
 
-  _on: function() {
+  _on() {
     this.hidden = false;
     this.$.sardine.addEventListener('dblclick', this._ondblclick);
     if (window.PointerEvent) {
@@ -168,17 +168,17 @@ Polymer({
     window.addEventListener('keyup', this._onkeypress, false);
   },
 
-  _animate: function() {
-    var rect = this.$.sardine.getBoundingClientRect();
-    var x1 = rect.left;
-    var y1 = rect.top;
-    var w = rect.width;
-    var h = rect.height;
-    var x2 = this._lastPointerEvent.x;
-    var y2 = this._lastPointerEvent.y;
+  _animate() {
+    const rect = this.$.sardine.getBoundingClientRect();
+    let x1 = rect.left;
+    const y1 = rect.top;
+    const w = rect.width;
+    const h = rect.height;
+    let x2 = this._lastPointerEvent.x;
+    let y2 = this._lastPointerEvent.y;
     x2 = (x2 + w) > window.innerWidth ? window.innerWidth - w : x2;
     y2 = (y2 + h) > window.innerHeight ? window.innerHeight - h : y2;
-    var dist = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    const dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
     if (dist < 32) {
       if (this._unknownLocation) {
         this.feeling = (!this._lastPointerEvent.pointerType || this._lastPointerEvent.pointerType === 'mouse') ?
@@ -190,14 +190,14 @@ Polymer({
       this.feeling = '';
     }
     if (dist > 1) {
-      var newX = this._lerp(x1, x2, 0.05);
-      var newY = this._lerp(y1, y2, 0.05);
-      this.$.sardine.style.left = newX + 'px';
-      this.$.sardine.style.top = newY + 'px';
+      const newX = this._lerp(x1, x2, 0.05);
+      const newY = this._lerp(y1, y2, 0.05);
+      this.$.sardine.style.left = `${newX  }px`;
+      this.$.sardine.style.top = `${newY  }px`;
       x1 = this.$.sardine.getBoundingClientRect().left;
       if (!this._unknownLocation) {
-        var dir = x1 < (this._lastPointerEvent.x - 32) ? 'left' : 'right';
-        if (dir != this.$.sardine._dir) {
+        const dir = x1 < (this._lastPointerEvent.x - 32) ? 'left' : 'right';
+        if (dir !== this.$.sardine._dir) {
           this.$.sardine.classList.remove(this.$.sardine._dir);
           this.$.sardine.classList.add(dir);
         }
@@ -207,7 +207,7 @@ Polymer({
     }
   },
 
-  _off: function() {
+  _off() {
     this.hidden = true;
     if (this._req) {
       cancelAnimationFrame(this._req);
@@ -221,9 +221,9 @@ Polymer({
     this.$.sardine.removeEventListener('dblclick', this._ondblclick);
   },
 
-  _lerp: function (value1, value2, amount) {
+  _lerp (value1, value2, amount) {
     amount = amount < 0 ? 0 : amount;
     amount = amount > 1 ? 1 : amount;
     return value1 + (value2 - value1) * amount;
-  }
+  },
 });

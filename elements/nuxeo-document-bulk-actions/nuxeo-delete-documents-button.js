@@ -55,7 +55,7 @@ Polymer({
     documents: {
       type: Array,
       notify: true,
-      value: []
+      value: [],
     },
 
     /**
@@ -63,12 +63,12 @@ Polymer({
      */
     hard: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
 
     /**
@@ -81,31 +81,29 @@ Polymer({
 
     _icon: {
       type: 'String',
-      computed: '_computeIcon(hard)'
+      computed: '_computeIcon(hard)',
     },
 
     _label: {
       type: 'String',
-      computed: '_computeLabel(hard, i18n)'
-    }
+      computed: '_computeLabel(hard, i18n)',
+    },
   },
 
-  deleteDocuments: function() {
-    if (this.docsHavePermissions && confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
+  deleteDocuments() {
+    if (this.docsHavePermissions && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
       if (this.documents && this.documents.length) {
-        var uids = this.documents.map(function(doc) {
-          return doc.uid;
-        }).join(',');
-        var op = this.hard ? this.$.deleteOp : this.$.trashOp;
-        op.input = 'docs:' + uids;
-        op.execute().then(function() {
+        const uids = this.documents.map((doc) => doc.uid).join(',');
+        const op = this.hard ? this.$.deleteOp : this.$.trashOp;
+        op.input = `docs:${  uids}`;
+        op.execute().then(() => {
           this.fire('nuxeo-documents-deleted', {documents: this.documents});
           this.documents = [];
           this.fire('refresh');
-        }.bind(this),
-        function(error) {
-          this.fire('nuxeo-documents-deleted', {error: error, documents: this.documents});
-        }.bind(this));
+        },
+        (error) => {
+          this.fire('nuxeo-documents-deleted', {error, documents: this.documents});
+        });
       }
     }
   },
@@ -114,7 +112,7 @@ Polymer({
    * Action is available if all selected items are not trashed and `hard` is not active OR if all selected items
    * are trashed and `hard` is active.
    */
-  _isAvailable: function() {
+  _isAvailable() {
     return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
         (this.hard || !this._checkDocsAreTrashed());
   },
@@ -122,32 +120,28 @@ Polymer({
   /**
    * Checks if all selected documents are trashed.
    */
-  _checkDocsAreTrashed: function() {
-    return this.documents.every(function(document) {
-      return this.isTrashed(document);
-    }.bind(this));
+  _checkDocsAreTrashed() {
+    return this.documents.every((document) => this.isTrashed(document));
   },
 
-  _checkDocsPermissions: function() {
+  _checkDocsPermissions() {
     this.docsHavePermissions = this.documents && !(this.documents.some(
-      function(document) {
-        return !this._docHasPermissions(document);
-      }.bind(this)));
+      (document) => !this._docHasPermissions(document)));
     return this.docsHavePermissions;
   },
 
   /*
    * Checks if a single given document has 'Everything' permission to delete or 'Write' to trash
    */
-  _docHasPermissions: function(document) {
+  _docHasPermissions(document) {
     return this.hasPermission(document, 'Everything') || (!this.hard && this.hasPermission(document, 'Write'));
   },
 
-  _computeIcon: function(hard) {
+  _computeIcon(hard) {
     return hard ? 'nuxeo:delete-permanently' : 'nuxeo:delete';
   },
 
-  _computeLabel: function(hard) {
+  _computeLabel(hard) {
     return this.i18n(hard ? 'deleteDocumentsButton.tooltip.permanently' : 'deleteDocumentsButton.tooltip');
-  }
+  },
 });

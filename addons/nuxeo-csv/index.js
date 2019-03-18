@@ -17,6 +17,7 @@ limitations under the License.
 import './elements/nuxeo-document-import-csv.js';
 
 import html from './nuxeo-csv.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

@@ -222,7 +222,7 @@ Polymer({
 
     truncated: {
       type: Boolean,
-      computed: '_computeTruncatedFlag(comment.showFull, comment.text,  maxChars)'
+      computed: '_computeTruncatedFlag(comment.showFull, comment.text,  maxChars)',
     },
 
     maxChars: {
@@ -232,28 +232,28 @@ Polymer({
     },
   },
 
-  connectedCallback : function() {
+  connectedCallback() {
     this.addEventListener('number-of-replies', this._handleRepliesChange);
   },
 
-  disconnectedCallback: function() {
+  disconnectedCallback() {
     this.removeEventListener('number-of-replies', this._handleRepliesChange);
   },
 
-  _deleteComment: function() {
+  _deleteComment() {
     this.fire('delete-comment', {commentId: this.comment.id});
   },
 
-  _editComment: function() {
+  _editComment() {
     this.fire('edit-comment', {commentId: this.comment.id});
   },
 
-  _expand: function () {
+  _expand () {
     this.set('comment.expanded', true);
   },
 
-  _handleRepliesChange: function(event) {
-    var numberOfReplies = event.detail.total;
+  _handleRepliesChange(event) {
+    const numberOfReplies = event.detail.total;
     if(numberOfReplies === 0) {
       this.set('comment.expanded', false);
     }
@@ -261,11 +261,11 @@ Polymer({
     event.stopPropagation();
   },
 
-  _showFullComment: function() {
+  _showFullComment() {
     this.set('comment.showFull', true);
   },
 
-  _reply: function() {
+  _reply() {
     if (!this.comment.expanded) {
       this._expand();
     }
@@ -274,62 +274,62 @@ Polymer({
     });
   },
 
-  _toggleDeletionConfirmation: function() {
+  _toggleDeletionConfirmation() {
     this.$.dialog.toggle();
   },
 
-  _computeAvatarDimensions: function(level) {
+  _computeAvatarDimensions(level) {
     return this._isRootElement(level) ? 24 : 20;
   },
 
-  _computeAvatarFontSize: function(level) {
+  _computeAvatarFontSize(level) {
     return this._isRootElement(level) ? 13 : 11;
   },
 
-  _computeConfirmationLabel: function (replies) {
-    return this.i18n('comments.deletion.dialog.message.' + (replies > 0 ? 'withReplies' : 'withoutReplies'));
+  _computeConfirmationLabel (replies) {
+    return this.i18n(`comments.deletion.dialog.message.${  replies > 0 ? 'withReplies' : 'withoutReplies'}`);
   },
 
-  _computeDateLabel: function (item, option) {
+  _computeDateLabel (item, option) {
     if (item) {
-      var date = this.formatDate(item.creationDate, 'relative');
+      let date = this.formatDate(item.creationDate, 'relative');
       if(option === 'lastReplyDate') {
         date = this.formatDate(item.lastReplyDate, 'relative');
         return this.i18n('comments.lastReply', date);
-      } else if (item.modificationDate) {
+      } if (item.modificationDate) {
         return this.i18n('comments.edited', date)
       }
       return date;
     }
   },
 
-  _computeSubLevel: function (level) {
+  _computeSubLevel (level) {
     return level + 1;
   },
 
-  _computeTextToDisplay: function(text, maxChars, truncated) {
-    var parsedText = text;
+  _computeTextToDisplay(text, maxChars, truncated) {
+    let parsedText = text;
     if(truncated){
-      parsedText = text.substring(0, maxChars - 1) + '…';
+      parsedText = `${text.substring(0, maxChars - 1)  }…`;
     }
     return parsedText;
   },
 
-  _computeTruncatedFlag: function(showFull, text, limit) {
+  _computeTruncatedFlag(showFull, text, limit) {
     return !showFull && text.length > limit;
   },
 
-  /** Visibility Methods **/
+  /** Visibility Methods * */
 
-  _areExtendedOptionsAvailable: function (author, currentUser) {
+  _areExtendedOptionsAvailable (author, currentUser) {
     return currentUser && (currentUser.properties.username === author || currentUser.isAdministrator);
   },
 
-  _isRootElement: function (level) {
+  _isRootElement (level) {
     return level === 1;
   },
 
-  _isSummaryVisible: function (expanded, total) {
+  _isSummaryVisible (expanded, total) {
     return !expanded && total > 0;
-  }
+  },
 });

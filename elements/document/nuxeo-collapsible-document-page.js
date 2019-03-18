@@ -17,7 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
@@ -117,11 +117,11 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
-  _hasCollections: function (doc) {
+  _hasCollections (doc) {
     return this.hasCollections(doc);
-  }
+  },
 });

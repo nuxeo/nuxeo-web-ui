@@ -175,47 +175,45 @@ Polymer({
   properties: {
     documents: {
       type: Array,
-      notify: true
+      notify: true,
     },
     targetDocument: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
     selectedDocument: {
       type: Object,
-      observer: '_observeSelectedDocument'
-    }
+      observer: '_observeSelectedDocument',
+    },
   },
 
   observers: [
-    '_observeDocuments(documents.splices)'
+    '_observeDocuments(documents.splices)',
   ],
 
-  _observeDocuments: function() {
+  _observeDocuments() {
     if (this.documents) {
       this.fire('nx-clipboard-updated', {docCount: this.documents.length});
     }
   },
 
-  _documentChanged: function(newValue) {
+  _documentChanged(newValue) {
     if (newValue && this.contains(newValue)) {
-      var document = this.$.storage.get(newValue);
+      const document = this.$.storage.get(newValue);
       if (document && document.title !== newValue.title) {
         this.$.storage.update(document, { title: newValue.title })
       }
     }
   },
 
-  add: function (docs) {
-    var uids = [];
+  add (docs) {
+    let uids = [];
 
     if (docs instanceof Array) {
-      docs.forEach(function (doc) {
+      docs.forEach((doc) => {
         this.$.storage.add(doc);
-      }.bind(this));
-      uids = docs.map(function(doc) {
-        return doc.uid;
       });
+      uids = docs.map((doc) => doc.uid);
     }
     else {
       this.$.storage.add(docs);
@@ -224,50 +222,48 @@ Polymer({
     this.fire('added-to-clipboard', {docIds : uids});
   },
 
-  contains: function(doc) {
+  contains(doc) {
     return this.$.storage.contains(doc);
   },
 
-  remove: function(doc) {
+  remove(doc) {
     this.$.storage.remove(doc);
   },
 
-  canPaste: function(documents, doc) {
+  canPaste(documents, doc) {
     return documents && documents.length && this.hasFacet(doc, 'Folderish');
   },
 
-  execute: function(evt) {
+  execute(evt) {
     this.$.op.op = evt.currentTarget.dataset.op;
-    this.$.op.execute().then(function() {
+    this.$.op.execute().then(() => {
       this.documents = [];
       this.fire('document-updated');
-    }.bind(this));
+    });
   },
 
-  _remove: function(evt) {
+  _remove(evt) {
     evt.stopImmediatePropagation();
     this.remove(evt.model.document);
     this.fire('removed-from-clipboard', {docId : evt.model.document.uid});
   },
 
-  _uids: function() {
+  _uids() {
     if (this.documents && this.documents !== null) {
-      return this.documents.map(function(doc) {
-        return doc.uid;
-      }).join(',');
+      return this.documents.map((doc) => doc.uid).join(',');
     }
     return '';
   },
 
-  _opParams: function() {
+  _opParams() {
     if (this.targetDocument) {
       return {
-        target: this.targetDocument.uid
+        target: this.targetDocument.uid,
       };
     }
   },
 
-  _observeSelectedDocument: function(doc) {
+  _observeSelectedDocument(doc) {
     if (doc) {
       if (doc.isVersion) {
         this.navigateTo('document', doc.uid);
@@ -277,11 +273,11 @@ Polymer({
     }
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
-  }
+  },
 });

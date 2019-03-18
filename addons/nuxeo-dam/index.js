@@ -17,6 +17,7 @@ limitations under the License.
 import './elements/nuxeo-picture-document-page.js';
 
 import html from './nuxeo-dam.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

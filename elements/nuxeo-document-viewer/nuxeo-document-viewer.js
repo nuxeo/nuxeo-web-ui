@@ -63,16 +63,16 @@ Polymer({
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
-    document: Object
+    document: Object,
   },
 
-  _thumbnail: function(doc) {
+  _thumbnail(doc) {
     return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
     doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
   },
 
-  _hasWritePermission: function (doc) {
+  _hasWritePermission (doc) {
     return doc && this.hasPermission(doc, 'Write') &&
       !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
-  }
+  },
 });

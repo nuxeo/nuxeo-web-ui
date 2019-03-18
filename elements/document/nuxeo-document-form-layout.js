@@ -68,94 +68,92 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      notify: true
+      notify: true,
     },
 
     layout: {
       type: String,
-      value: 'edit'
+      value: 'edit',
     },
 
     headers: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
   observers: [
-    '_documentChanged(document.*)'
+    '_documentChanged(document.*)',
   ],
 
-  _validate: function() {
+  _validate() {
     // run our custom validation function first to allow setting custom native validity
-    var result = this.$.layout.validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
+    const result = this.$.layout.validate() && this._doNativeValidation(this.$.form) && this.$.form.validate();
     if (result) {
       return result;
-    } else {
-      var layout = this.$.layout.$.layout;
-      var nodes = layout._getValidatableElements(layout.element.root);
-      var invalidField = nodes.find(function(node) {
-        return node.invalid;
-      });
+    }
+      const {layout} = this.$.layout.$;
+      const nodes = layout._getValidatableElements(layout.element.root);
+      const invalidField = nodes.find((node) => node.invalid);
       invalidField.scrollIntoView();
       invalidField.focus();
-    }
+
   },
 
-  _doSave: function() {
+  _doSave() {
     if (!this.document.uid) { // create
       this.$.doc.data = this.document;
       return this.$.doc.post()
-    } else { // edit
+    }  // edit
       this.$.doc.data = {
         'entity-type': 'document',
         uid: this.document.uid,
-        properties: this._dirtyProperties
+        properties: this._dirtyProperties,
       };
       return this.$.doc.put();
-    }
+
   },
 
-  save: function() {
+  save() {
     if (!this._validate()) {
       return;
     }
-    this._doSave().then(this._refresh.bind(this), function(err) {
+    this._doSave().then(this._refresh.bind(this), (err) => {
       this.fire('notify', {message: this.i18n('document.saveError')});
       console.error(err);
-    }.bind(this));
+    });
   },
 
-  cancel: function() {
+  cancel() {
     this._refresh();
     this.document = undefined;
   },
 
-  _refresh: function() {
+  _refresh() {
     this.fire('document-updated');
   },
 
-  _documentChanged: function(e) {
+  _documentChanged(e) {
     if (e.path === 'document') {
       this._dirtyProperties = {};
     } else {
       // copy dirty properties (cannot patch complex or list properties)
-      var match = e.path.match(/^document\.properties\.([^\.]*)/);
+      const match = e.path.match(/^document\.properties\.([^.]*)/);
       if (match) {
-        var prop = match[1];
+        const prop = match[1];
         this._dirtyProperties[prop] = this.document.properties[prop];
       }
     }
   },
 
   // trigger native browser invalid-form UI
-  _doNativeValidation: function(/*form*/) {
-    /*var fakeSubmit = document.createElement('input');
+  _doNativeValidation(/* form */) {
+    /* var fakeSubmit = document.createElement('input');
     fakeSubmit.setAttribute('type', 'submit');
     fakeSubmit.style.display = 'none';
     form._form.appendChild(fakeSubmit);
     fakeSubmit.click();
     form._form.removeChild(fakeSubmit);
-    return form._form.checkValidity();*/
+    return form._form.checkValidity(); */
     return true;
-  }
+  },
 });

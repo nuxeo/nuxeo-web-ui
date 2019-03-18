@@ -53,24 +53,24 @@ Polymer({
   properties: {
     visible: {
       type: Boolean,
-      observer: '_visibleChanged'
+      observer: '_visibleChanged',
     },
     page: {
       type: String,
       value: 'search',
-      observer: '_observePage'
+      observer: '_observePage',
     },
     entity: {
       type: Object,
       value: {},
-      observer: '_entityChanged'
+      observer: '_entityChanged',
     },
     /**
      * The route under which this page is available.
      */
     route: {
       type: String,
-      value: 'page'
+      value: 'page',
     },
     /**
      * An array with the route parameters. This page expects two parameters: the first is the entity
@@ -78,17 +78,17 @@ Polymer({
      */
     routeParams: {
       type: Array,
-      observer: '_routeParamsChanged'
+      observer: '_routeParamsChanged',
     },
   },
 
   listeners: {
     'goHome': '_handleUGMgoHome',
     'manageUser': '_handleUGMmanageUser',
-    'manageGroup': '_handleUGMmanageGroup'
+    'manageGroup': '_handleUGMmanageGroup',
   },
 
-  _routeParamsChanged: function(route) {
+  _routeParamsChanged(route) {
     if (route && route.length === 2) {
       this.entity = { type: route[0], id: route[1] };
     } else {
@@ -96,11 +96,11 @@ Polymer({
     }
   },
 
-  _entityChanged: function() {
+  _entityChanged() {
     if (!this.visible) {
       return;
     }
-    var management = this.$$('nuxeo-user-group-management');
+    const management = this.$$('nuxeo-user-group-management');
     if (!management) {
       return;
     }
@@ -118,36 +118,36 @@ Polymer({
     }
   },
 
-  _visibleChanged: function() {
+  _visibleChanged() {
     if (this.visible) {
-      this.async(function() {
+      this.async(() => {
         this._entityChanged();
-      }.bind(this));
+      });
     }
   },
 
-  _displayLatest: function() {
+  _displayLatest() {
     return this.page === 'search';
   },
 
-  _handleUGMgoHome: function() {
+  _handleUGMgoHome() {
     this.entity = {};
     this.navigateTo(this.route, 'user-group-management');
   },
 
-  _handleUGMmanageUser: function(e) {
+  _handleUGMmanageUser(e) {
     this.entity = {type: 'user', id: e.detail.user};
-    var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
+    const url = `${ 'user-group-management' }/${ this.entity.type }/${ this.entity.id }`;
     this.navigateTo(this.route, url);
   },
 
-  _handleUGMmanageGroup: function(e) {
+  _handleUGMmanageGroup(e) {
     this.entity = {type: 'group', id: e.detail.group};
-    var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
+    const url = `${ 'user-group-management' }/${ this.entity.type }/${ this.entity.id }`;
     this.navigateTo(this.route, url);
   },
 
-  _observePage: function() {
+  _observePage() {
     this._displayLatest = this.page === "search";
-  }
+  },
 });

@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -124,106 +125,106 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
     docTypes: Array,
     processors: {
       type: Array,
-      value: ['auto', 'Freemarker', 'XSLTProcessor', 'Identity', 'JXLSProcessor', 'XDocReportProcessor']
+      value: ['auto', 'Freemarker', 'XSLTProcessor', 'Identity', 'JXLSProcessor', 'XDocReportProcessor'],
     },
     outputFormats: {
       type: Array,
-      value: ['none', 'pdf', 'odt', 'doc', 'docx']
+      value: ['none', 'pdf', 'odt', 'doc', 'docx'],
     },
     editedDocument: Object,
     configMode: {
       type: String,
-      value: 'view'
+      value: 'view',
     },
     paramsMode: {
       type: String,
-      value: 'view'
-    }
+      value: 'view',
+    },
   },
 
-  _getProcessorLabel: function(processor) {
-    return this.i18n('templateRenderingPage.processor.' + processor);
+  _getProcessorLabel(processor) {
+    return this.i18n(`templateRenderingPage.processor.${  processor}`);
   },
 
-  _getOutputFormatLabel: function(format) {
+  _getOutputFormatLabel(format) {
     if (format === 'none') {
-      return this.i18n('templateRenderingPage.outputFormat.' + format);
-    } else {
-      return format ? format.toUpperCase() : null;
+      return this.i18n(`templateRenderingPage.outputFormat.${  format}`);
     }
+      return format ? format.toUpperCase() : null;
+
   },
 
-  _documentChanged: function() {
+  _documentChanged() {
     if (this.document) {
       this.set('document.properties.tmpl:templateType', this.document.properties['tmpl:templateType'] || 'auto');
       this.set('editedDocument' , JSON.parse(JSON.stringify(this.document)));
     }
   },
 
-  _handleDocTypes: function(e) {
-    var docTypes = [{
+  _handleDocTypes(e) {
+    const docTypes = [{
       id: 'all',
       text: this.i18n('templateRenderingPage.label.document.type.all'),
-      displayLabel: this.i18n('templateRenderingPage.label.document.type.all')
+      displayLabel: this.i18n('templateRenderingPage.label.document.type.all'),
     }];
-    Object.keys(e.detail.response.doctypes).sort().forEach(function(docType) {
+    Object.keys(e.detail.response.doctypes).sort().forEach((docType) => {
       docTypes.push({
         id: docType,
         text: docType,
-        displayLabel: docType
+        displayLabel: docType,
       });
     });
     this.set('docTypes', docTypes);
   },
 
-  _resetConfig: function() {
+  _resetConfig() {
     this.set('editedDocument', JSON.parse(JSON.stringify(this.document)));
   },
 
-  _save: function() {
+  _save() {
     delete this.editedDocument.properties['dc:contributors'];
     return this.$.doc.put();
   },
 
-  _editConfig: function() {
+  _editConfig() {
     this.configMode = 'edit';
   },
 
-  _cancelEditConfig: function() {
+  _cancelEditConfig() {
     this.configMode = 'view';
     this._resetConfig();
   },
 
-  _saveEditConfig: function() {
-    return this._save().then(function() {
+  _saveEditConfig() {
+    return this._save().then(() => {
       this.configMode = 'view';
-    }.bind(this));
+    });
   },
 
-  _editParams: function() {
+  _editParams() {
     this.paramsMode = 'edit';
   },
 
-  _cancelEditParams: function() {
+  _cancelEditParams() {
     this.paramsMode = 'view';
     this._resetConfig();
     this.$.paramEditor.reset();
   },
 
-  _saveEditParams: function() {
+  _saveEditParams() {
     this.$.paramEditor.commitChanges();
     this.set('editedDocument.properties.tmpl:templateData', this.$.paramEditor.generateTemplateData());
-    return this._save().then(function() {
+    return this._save().then(() => {
       this.paramsMode = 'view';
-    }.bind(this));
+    });
   },
 
-  _getTemplateData: function() {
+  _getTemplateData() {
     return this.editedDocument.properties['tmpl:templateData'];
-  }
+  },
 });

@@ -38,34 +38,34 @@ limitations under the License.
           type: String,
           value: 'analytics',
           notify: true,
-          observer: '_checkError'
+          observer: '_checkError',
         },
         isAdministrator: {
           type: Boolean,
           value: false,
-          reflectToAttribute: true
+          reflectToAttribute: true,
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(user, routeParams)'
+          computed: '_actionContext(user, routeParams)',
         },
-        routeParams: Object
+        routeParams: Object,
       },
 
-      _actionContext: function() {
+      _actionContext() {
         return {user: this.user, routeParams: this.routeParams};
       },
 
-      _errorUrl: function() {
+      _errorUrl() {
         return window.location.href;
       },
 
-      _checkError: function() {
+      _checkError() {
         // XXX: removed fallback-selection="error"
         if (this.selected === 'error') {
           this.fire('error', {code: 404});
         }
-      }
+      },
     });
   </script>
 </dom-module>

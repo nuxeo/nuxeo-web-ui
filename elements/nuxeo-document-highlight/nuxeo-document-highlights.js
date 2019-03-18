@@ -75,47 +75,47 @@ Polymer({
 
   properties: {
     highlights: {
-      type: Array
-    }
+      type: Array,
+    },
   },
 
-  _highlightFieldLabel: function(highlight) {
-    return this.i18n('searchResults.highlight.field.' + highlight.field);
+  _highlightFieldLabel(highlight) {
+    return this.i18n(`searchResults.highlight.field.${  highlight.field}`);
   },
 
-  _preSegment: function(segment) {
-    var soEmIdx = segment.indexOf('<em>');
+  _preSegment(segment) {
+    const soEmIdx = segment.indexOf('<em>');
     if (soEmIdx > -1) {
       return segment.substring(0, soEmIdx);
-    } else {
+    } 
       return segment;
-    }
+    
   },
 
-  _segment: function(segment) {
-    var soEmIdx = segment.indexOf('<em>');
-    var eoEmIdx = segment.indexOf('</em>');
+  _segment(segment) {
+    const soEmIdx = segment.indexOf('<em>');
+    const eoEmIdx = segment.indexOf('</em>');
     if (soEmIdx > -1 && eoEmIdx > -1) {
       return segment.substring(soEmIdx + 4, eoEmIdx);
-    } else {
+    } 
       return '';
-    }
+    
   },
 
-  _segmentOc: function(segment) {
-    var segmentOc = [];
-    segment.split('<em>').forEach(function(item, idx) {
-      segmentOc.push(idx > 0 ? '<em>' + item: item);
+  _segmentOc(segment) {
+    const segmentOc = [];
+    segment.split('<em>').forEach((item, idx) => {
+      segmentOc.push(idx > 0 ? `<em>${  item}`: item);
     });
     return segmentOc;
   },
 
-  _postSegment: function(segment) {
-    var eoEmIdx = segment.indexOf('</em>');
+  _postSegment(segment) {
+    const eoEmIdx = segment.indexOf('</em>');
     if (eoEmIdx > -1) {
       return segment.substring(eoEmIdx + 5, segment.length);
-    } else {
+    } 
       return '';
-    }
-  }
+    
+  },
 });

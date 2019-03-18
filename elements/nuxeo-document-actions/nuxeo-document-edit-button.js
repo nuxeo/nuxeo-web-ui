@@ -37,7 +37,7 @@ Polymer({
      * Input document.
      */
     document: {
-      type: Object
+      type: Object,
     },
 
     /**
@@ -46,6 +46,6 @@ Polymer({
     showLabel: {
       type: Boolean,
       value: false,
-    }
-  }
+    },
+  },
 });

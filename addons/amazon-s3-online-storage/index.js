@@ -14,8 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
-import AWS from 'aws-sdk';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import AWS from 'aws-sdk';
 
 let _resource;
 
@@ -44,7 +44,7 @@ class S3Provider {
       file.managedUpload = this.uploader.upload({
         Key: this.extraInfo.baseKey.replace(/^\/+/g, '').concat(file.name),
         ContentType: file.type,
-        Body: file
+        Body: file,
       });
       file.managedUpload.on('httpUploadProgress', (evt) => {
         if (typeof callback === 'function') {
@@ -53,14 +53,14 @@ class S3Provider {
       }).send((error, data) => {
         if (error === null) {
           file.managedUpload = null;
-          var resource = this._resource();
+          const resource = this._resource();
           resource.path = ['upload', this.batchId, file.index, 'complete'].join('/');
           resource.data = {
             name: file.name,
             fileSize: file.size,
             key: data.Key,
             bucket: data.Bucket,
-            etag: data.ETag
+            etag: data.ETag,
           };
           resource.post().then(() => {
             if (typeof callback === 'function') {
@@ -87,14 +87,14 @@ class S3Provider {
     AWS.config.update({
       credentials: new AWS.Credentials(options.awsSecretKeyId, options.awsSecretAccessKey, options.awsSessionToken),
       region: options.region,
-      useAccelerateEndpoint: options.useS3Accelerate || false
+      useAccelerateEndpoint: options.useS3Accelerate || false,
     });
 
     AWS.config.credentials.expireTime = new Date(options.expiration);
   }
 
   _newBatch() {
-    var resource = this._resource();
+    const resource = this._resource();
     resource.path = 'upload/new/s3';
     return resource.post().then((response) => {
       this.batchId = response.batchId;
@@ -104,13 +104,13 @@ class S3Provider {
         params: {
           Bucket: this.extraInfo.bucket,
         },
-        computeChecksums: true
+        computeChecksums: true,
       });
     });
   }
 
   get accepts() {
-    return UploaderBehavior.getProviders()['default'].prototype.accepts;
+    return UploaderBehavior.getProviders().default.prototype.accepts;
   }
 
   upload(files, callback) {
@@ -119,9 +119,9 @@ class S3Provider {
         this._refreshBatchInfo();
       }
 
-      var promises = [];
-      for (var i = 0; i < files.length; ++i) {
-        var file = files[i];
+      const promises = [];
+      for (let i = 0; i < files.length; ++i) {
+        const file = files[i];
         file.index = this.files.length;
         this.files.push(file);
         promises.push(this._upload(file, callback));
@@ -140,8 +140,8 @@ class S3Provider {
 
   cancelBatch() {
     if (this.uploader) {
-      for (var i = 0; i < this.files.length; ++i) {
-        var file = this.files[i];
+      for (let i = 0; i < this.files.length; ++i) {
+        const file = this.files[i];
         if (file.managedUpload) {
           file.managedUpload.abort();
         }
@@ -154,12 +154,12 @@ class S3Provider {
 
   batchExecute(operationId, params, headers) {
     return this.connection.operation(operationId).then((operation) => {
-      var options = {
+      const options = {
         url: [operation._nuxeo._restURL, 'upload', this.batchId, 'execute', operationId].join('/')
-            .replace(/\/+/g, '\/')
+            .replace(/\/+/g, '/'),
       };
       if (headers) {
-        options['headers'] = headers;
+        options.headers = headers;
       }
       if (params.context) {
         operation = operation.context(params.context);

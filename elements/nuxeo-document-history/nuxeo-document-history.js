@@ -99,26 +99,26 @@ Polymer({
     visible: {
       type: Boolean,
       value: false,
-      observer: '_refresh'
+      observer: '_refresh',
     },
     startDate: {
       type: String,
       notify: true,
-      observer: '_observeStartDate'
+      observer: '_observeStartDate',
     },
     endDate: {
       type: String,
       notify: true,
-      observer: '_observeEndDate'
-    }
+      observer: '_observeEndDate',
+    },
   },
 
-  _observeStartDate: function() {
+  _observeStartDate() {
     if (this.startDate && this.startDate.length > 0) {
       this.$.provider.params.startDate = this.startDate;
       if (this.endDate && this.endDate.length > 0) {
-        var start = Date.parse(this.startDate);
-        var end = Date.parse(this.endDate);
+        const start = Date.parse(this.startDate);
+        const end = Date.parse(this.endDate);
         if (start > end) {
           this.endDate = moment(start).add(7, 'day').format('YYYY-MM-DD');
         }
@@ -130,12 +130,12 @@ Polymer({
     }
   },
 
-  _observeEndDate: function() {
+  _observeEndDate() {
     if (this.endDate && this.endDate.length > 0) {
       this.$.provider.params.endDate = this.endDate;
       if (this.startDate && this.startDate.length > 0) {
-        var start = Date.parse(this.startDate);
-        var end = Date.parse(this.endDate);
+        const start = Date.parse(this.startDate);
+        const end = Date.parse(this.endDate);
         if (start > end) {
           this.startDate = moment(end).subtract(7, 'day').format('YYYY-MM-DD');
         }
@@ -147,7 +147,7 @@ Polymer({
     }
   },
 
-  _refresh: function() {
+  _refresh() {
     if (this.document && this.visible) {
       this.$.provider.page = 1;
       this.$.provider.docId = this.document.uid;
@@ -155,13 +155,13 @@ Polymer({
     }
   },
 
-  _formatActivity: function(key) {
-    return this.i18n('activity.' + key);
+  _formatActivity(key) {
+    return this.i18n(`activity.${  key}`);
   },
 
-  _parseComment: function(comment) {
+  _parseComment(comment) {
     if (comment) {
-      var split = comment.split(':');
+      const split = comment.split(':');
       if (split.length >= 2) {
         // split[0] is repo name, split[1] is doc id
         return this.urlFor('document', split[1]);
@@ -169,5 +169,5 @@ Polymer({
       return null;
     }
     return null;
-  }
+  },
 });

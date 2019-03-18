@@ -153,45 +153,45 @@ limitations under the License.
       properties: {
         entry: {
           type: Object,
-          observer: '_entryChanged'
+          observer: '_entryChanged',
         },
 
         new: {
           type: Boolean,
-          value: false
+          value: false,
         },
 
         entries: {
-          type: Array
+          type: Array,
         },
 
         _parentLabel: {
-          type: String
+          type: String,
         },
 
         controller: Object,
 
         _root: {
           type: Object,
-          value: {properties: {id: '', parent: ''}, root: true, id: 'root'}
-        }
+          value: {properties: {id: '', parent: ''}, root: true, id: 'root'},
+        },
       },
 
       observers: ['_inputChanged(entry, entries)'],
 
-      _entryChanged: function() {
+      _entryChanged() {
         this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
       },
 
-      _isObsolete: function(obsolete) {
+      _isObsolete(obsolete) {
         return obsolete === 1;
       },
 
-      _obsoleteChanged: function() {
+      _obsoleteChanged() {
         this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
       },
 
-      _inputChanged: function() {
+      _inputChanged() {
         if (this.entry) {
           if (this.entry.properties.parent && this.entry.properties.parent.length > 0) {
             this._parentLabel = this.entry.properties.parent;
@@ -201,48 +201,47 @@ limitations under the License.
           if (this.entries) {
             this.controller = {
               getChildren: function(node) {
-                return new Promise(function(resolve) {
-                  var targetParentId = !node ? '' : node.properties.id;
-                  var children = this.entries.filter(
-                    function(e) {
-                      if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
-                        e.id = e.properties.id;
-                        return true;
-                      }
-                    }.bind(this)
-                  );
-                  resolve(children);
-                }.bind(this));
+                return new Promise(((resolve) => {
+              const targetParentId = !node ? '' : node.properties.id;
+              const children = this.entries.filter(
+                (e) => {
+              if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                e.id = e.properties.id;
+                return true;
+              }
+              return false;
+            },
+              );
+              resolve(children);
+            }));
               }.bind(this),
 
               isLeaf: function(node) {
-                var lookedUpId = node.properties.id;
-                var isNotLeaf = this.entries.some(
-                  function(e) {
-                    return e.properties.parent === lookedUpId;
-                  }
+                const lookedUpId = node.properties.id;
+                const isNotLeaf = this.entries.some(
+                  (e) => e.properties.parent === lookedUpId,
                 );
                 return !isNotLeaf && node.root !== true;
-              }.bind(this)
+              }.bind(this),
             };
             this.$.tree.open.apply(this.$.tree, ['root']);
           }
         }
       },
 
-      _expandIcon: function(opened) {
-        return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+      _expandIcon(opened) {
+        return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
       },
 
-      _selectParent: function(e) {
+      _selectParent(e) {
         this.entry.properties.parent = e.detail.item.properties.id;
         this._parentLabel = this.entry.properties.parent;
         this._toggleParent();
       },
 
-      _toggleParent: function() {
+      _toggleParent() {
         this.$.parentDialog.toggle();
-      }
+      },
 
     });
   </script>

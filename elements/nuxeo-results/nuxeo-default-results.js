@@ -16,7 +16,6 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
@@ -151,14 +150,14 @@ Polymer({
 
     selectedItems: {
       type: Array,
-      notify: true
+      notify: true,
     },
 
     emptyLabel: String,
-    emptyLabelWhenFiltered: String
+    emptyLabelWhenFiltered: String,
   },
 
-  _refreshAndFetch: function() {
+  _refreshAndFetch() {
     this.$.results._refreshAndFetch();
   },
 
@@ -169,13 +168,13 @@ Polymer({
     return null;
   },
 
-  _navigate: function(e) {
+  _navigate(e) {
     this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
     e.stopPropagation();
   },
 
-  _navigateLink: function(e) {
+  _navigateLink(e) {
     e.detail = {item: this.items[e.target.dataIndex], index: e.target.dataIndex};
     this._navigate(e);
-  }
+  },
 });

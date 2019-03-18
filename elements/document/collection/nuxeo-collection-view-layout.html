@@ -62,15 +62,15 @@ limitations under the License.
          */
         document: {
           type: Object,
-          observer: '_documentChanged'
+          observer: '_documentChanged',
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(document, selectedItems)'
-        }
+          computed: '_actionContext(document, selectedItems)',
+        },
       },
 
-      _documentChanged: function () {
+      _documentChanged () {
         if (this.document && this.hasFacet(this.document, 'Collection')) {
           this.$.results.nxProvider = this.$.provider;
           this.$.provider.params = [this.document.uid];
@@ -80,19 +80,19 @@ limitations under the License.
         }
       },
 
-      _actionContext: function () {
+      _actionContext () {
         return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
       },
 
-      _navigate: function(e) {
+      _navigate(e) {
         this.fire('navigate', {
           doc: e.detail.doc,
           index: e.detail.index,
           srcDoc: this.document,
-          isFromCollection: true
+          isFromCollection: true,
         });
         e.stopPropagation();
-      }
+      },
 
     });
   </script>

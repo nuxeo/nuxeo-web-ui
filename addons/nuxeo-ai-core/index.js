@@ -21,6 +21,7 @@ import './elements/admin-ai-export.js';
 import './elements/nuxeo-ai-suggestions.js';
 
 import html from './nuxeo-ai-core.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
@@ -29,6 +30,17 @@ const AISuggestionManager = (() => {
   const _map = new WeakMap(); // store field elements and suggestion widgets without preventing gc
   let _updateDebouncer = null;
   let op = null;
+
+  function _getSuggestionWidget(element) {
+    if (!_map.has(element)) {
+      const suggestionWidget = document.createElement('nuxeo-ai-suggestions');;
+      suggestionWidget.style.marginBottom = '8px';
+      element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
+      _map.set(element, suggestionWidget);
+      return suggestionWidget;
+    }
+    return _map.get(element);
+  }
 
   function _clearSuggestions(model) {
     Object.values(model).forEach((element) => {
@@ -46,7 +58,6 @@ const AISuggestionManager = (() => {
       const node = element.__templateInfo.nodeList[i];
       const field = node.hasAttribute('field') && node.getAttribute('field');
       if (field && field.startsWith(property)) {
-        model[field] = model[part.source] || [];
         model[field] = node;
       }
       nodeInfo.bindings.forEach((binding) => {
@@ -61,17 +72,6 @@ const AISuggestionManager = (() => {
       });
     }
     return model;
-  }
-
-  function _getSuggestionWidget(element) {
-    if (!_map.has(element)) {
-      const suggestionWidget = document.createElement('nuxeo-ai-suggestions');;
-      suggestionWidget.style.marginBottom = '8px';
-      element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
-      _map.set(element, suggestionWidget);
-      return suggestionWidget;
-    }
-    return _map.get(element);
   }
 
   function _getSuggestions(doc) {

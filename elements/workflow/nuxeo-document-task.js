@@ -147,75 +147,75 @@ Polymer({
   importMeta: import.meta,
   properties: {
     task: {
-      type: Object
+      type: Object,
     },
 
     action: {
-      type: String
+      type: String,
     },
 
     _href: {
-      type: String
+      type: String,
     },
 
     _model: {
-      type: Object
+      type: Object,
     },
 
     _selectedTab: {
       type: String,
-      value: 'resolution'
-    }
+      value: 'resolution',
+    },
   },
 
   observers: [
-    '_updateTaskLayout(task)'
+    '_updateTaskLayout(task)',
   ],
 
-  _elementChanged: function() {
+  _elementChanged() {
     this._model = { document: this.task.targetDocumentIds[0], task: this.task };
   },
 
   /**
    * Returns the name for the current layout element
    */
-  _updateTaskLayout: function(task) {
+  _updateTaskLayout(task) {
     if (task) {
       this._href = null;
-      var layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
-      this._href = this.resolveUrl(task.workflowModelName.toLowerCase() + '/' + layout + '.html');
+      const layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
+      this._href = this.resolveUrl(`${task.workflowModelName.toLowerCase()  }/${  layout  }.html`);
     }
   },
 
-  validate: function() {
+  validate() {
     return this.$.layout.validate();
   },
 
-  _processTask: function(e) {
-    var validate = e.model.item.validate;
+  _processTask(e) {
+    const {validate} = e.model.item;
     if (!validate || this.validate()) {
       this.action = e.model.item.name;
       this.taskData = {
         'entity-type': 'task',
         id: this.$.layout.element.task.id,
-        variables: this.$.layout.element.task.variables
+        variables: this.$.layout.element.task.variables,
       };
-      this.$.taskRequest.put().then(function(task) {
-        this.fire('workflowTaskProcessed', { task: task });
-      }.bind(this));
+      this.$.taskRequest.put().then((task) => {
+        this.fire('workflowTaskProcessed', { task });
+      });
     }
   },
 
-  _toggleGraphDialog: function() {
+  _toggleGraphDialog() {
     this.$.graph.show();
   },
 
-  _toggleAssignmentDialog: function(e) {
+  _toggleAssignmentDialog(e) {
     this.action = e.target.dataset.args;
     this.$.assignmentDialog.openPopup();
   },
 
-  _delegatedActorsExist: function(delegatedActors) {
+  _delegatedActorsExist(delegatedActors) {
     return !!delegatedActors && delegatedActors.length > 0;
-  }
+  },
 });

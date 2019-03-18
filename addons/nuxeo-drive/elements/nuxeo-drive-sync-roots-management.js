@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -114,30 +115,30 @@ Polymer({
   properties: {
     roots: {
       type: Array,
-      value: []
-    }
+      value: [],
+    },
   },
 
   behaviors: [I18nBehavior],
 
-  _handleRoots: function(e) {
+  _handleRoots(e) {
     this.roots = e.detail.response.entries;
   },
 
-  _empty: function(arr) {
+  _empty(arr) {
     return !arr.length;
   },
 
-  _disable: function(e) {
+  _disable(e) {
     this.$.disable.input = e.model.doc.uid;
     return this.$.disable.execute()
       .then(this.refresh.bind(this))
-      .then(function() {
+      .then(() => {
         this.$.toast.toggle();
-      }.bind(this));
+      });
   },
 
-  refresh: function() {
+  refresh() {
     return this.$.roots.execute(this);
-  }
+  },
 });
