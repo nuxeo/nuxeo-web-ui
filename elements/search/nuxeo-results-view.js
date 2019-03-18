@@ -130,14 +130,14 @@ Polymer({
      * The id of the `nuxeo-page-provider` instance used to perform the search.
      */
     provider: {
-      type: String
+      type: String,
     },
     /**
      * The number of results per page.
      */
     pageSize: {
       type: Number,
-      value: 40
+      value: 40,
     },
     /**
      * The query parameters passed on to `provider`.
@@ -145,7 +145,7 @@ Polymer({
     params: {
       type: Object,
       observer: '_paramsChanged',
-      value: {}
+      value: {},
     },
     /**
      * List of content enrichers passed on to `provider`.
@@ -153,7 +153,7 @@ Polymer({
      */
     enrichers: {
       type: String,
-      value: 'thumbnail, permissions, highlight'
+      value: 'thumbnail, permissions, highlight',
     },
     /**
      * The headers passed on to `provider`.
@@ -161,14 +161,14 @@ Polymer({
      */
     headers: {
       type: String,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
     },
     /**
      * List of comma separated values of the document schemas to be returned.
      * All document schemas are returned by default.
      */
     schemas: {
-      type: String
+      type: String,
     },
     /**
      * If `true`, requests from `provider` are in flight.
@@ -176,7 +176,7 @@ Polymer({
     loading: {
       type: Boolean,
       reflectToAttribute: true,
-      value: false
+      value: false,
     },
     /**
      * The name of the search layout.
@@ -188,7 +188,7 @@ Polymer({
     aggregations: {
       type: Object,
       observer: '_aggregationsChanged',
-      notify: true
+      notify: true,
     },
     /**
      * Name of the quick filters to be displayed in case you don't want to display all of them.
@@ -196,35 +196,35 @@ Polymer({
      */
     quickFilters: {
       type: Array,
-      notify: true
+      notify: true,
     },
     /**
      * If `true`, the current element is visible.
      */
     visible: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, automatically execute the search when either `provider` or `params` changes.
      */
     auto: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, display the top filtering panel.
      */
     showFilters: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, opens the collapsible top filtering panel.
      */
     opened: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * An external search form (containing its own page provider) will be used, instead of the embeded one.
@@ -235,7 +235,7 @@ Polymer({
     searchForm: {
       type: Object,
       value: null,
-      observer: '_searchFormChanged'
+      observer: '_searchFormChanged',
     },
 
     /**
@@ -249,18 +249,18 @@ Polymer({
     _hideCounter: {
       type: String,
       computed: '_computeHideCounter(opened, _params.*)',
-      value: 'hidden'
-    }
+      value: 'hidden',
+    },
   },
 
-  ready: function() {
+  ready() {
     if (!this._nxProvider) {
       this._nxProvider = this.$.provider;
     }
   },
 
   get form() {
-    var form = this.$$('#form');
+    const form = this.$$('#form');
     return form && form.element;
   },
 
@@ -268,29 +268,29 @@ Polymer({
     return this.$$('#results');
   },
 
-  toggleExpand: function() {
+  toggleExpand() {
     this.$$('#collapse').toggle();
   },
 
-  _expandIcon: function(opened) {
-    return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+  _expandIcon(opened) {
+    return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
   },
 
-  _getFilterCount: function() {
+  _getFilterCount() {
     if (this._params) {
       // subtract the number of original parameters (this._paramsCount)
       return Object.keys(this._params).length - this._paramsCount - ('highlight' in this._params ? 1 : 0);
-    } else {
-      return 0;
     }
+      return 0;
+
   },
 
-  _computeHideCounter: function(opened) {
-    var count = this._getFilterCount();
+  _computeHideCounter(opened) {
+    const count = this._getFilterCount();
     return opened || count === 0 ? 'hidden' : '';
   },
 
-  _paramsChanged: function() {
+  _paramsChanged() {
     if (this.params) {
       // if the supplied params are a string, parse them; otherwise clone the object
       this._params = JSON.parse(typeof this.params === 'string' ? this.params : JSON.stringify(this.params));
@@ -302,25 +302,25 @@ Polymer({
     }
   },
 
-  _search: function() {
+  _search() {
     if (this.results) {
       this.results.reset();
       this.results.fetch();
     }
   },
 
-  _aggregationsChanged: function() {
+  _aggregationsChanged() {
     if (this.form) {
       this.form.aggregations = this.aggregations;
     }
   },
 
-  _onError: function(e) {
+  _onError(e) {
     this.fire('notify', e.detail.error);
     e.stopPropagation();
   },
 
-  _clear: function() {
+  _clear() {
     if (this.form && this.form.clear !== undefined && typeof this.form.clear === 'function') {
       this.form.clear();
     }
@@ -333,50 +333,50 @@ Polymer({
     }
   },
 
-  _formChanged: function(e) {
+  _formChanged(e) {
     this._clear();
-    var form = e.detail.value;
+    const form = e.detail.value;
     // setup data binding
-    form.addEventListener('params-changed', function(e) {
+    form.addEventListener('params-changed', (evt) => {
       // e.detail.path is params.prop_name eg: params.ecm_fulltext
-      if (e.detail.path) {
-        var param = e.detail.path.split('.')[1];
-        this.notifyPath('_params.' + param, e.detail.value);
+      if (evt.detail.path) {
+        const param = evt.detail.path.split('.')[1];
+        this.notifyPath(`_params.${  param}`, evt.detail.value);
         if (this.visible && this.auto) {
           this._search();
         }
       }
-    }.bind(this));
+    });
     this.skipAggregates = form.skipAggregates;
-    form.addEventListener('skip-aggregates-changed', function(e) {
-      this.notifyPath('skipAggregates', e.detail.value);
-    }.bind(this));
+    form.addEventListener('skip-aggregates-changed', (evt) => {
+      this.notifyPath('skipAggregates', evt.detail.value);
+    });
     form.addEventListener('trigger-search', this._search.bind(this));
     this._search();
   },
 
-  _resultsChanged: function() {
-    var results = this.results;
+  _resultsChanged() {
+    const {results} = this;
     if (this.searchForm && results) {
       this.searchForm.results = results.results;
     }
   },
 
-  _searchFormChanged: function(searchForm) {
+  _searchFormChanged(searchForm) {
     if (searchForm) {
       this._nxProvider = searchForm.nxProvider;
       this.provider = this._nxProvider.provider;
       this.searchName = searchForm.searchName;
-      var results = this.results;
+      const {results} = this;
       if (results) {
         searchForm.results = results.results;
       }
     }
   },
 
-  _navigateFromSearch: function(e) {
+  _navigateFromSearch(e) {
     if (this.searchForm) {
       this.searchForm.displayQueue(e.detail.index);
     }
-  }
+  },
 });

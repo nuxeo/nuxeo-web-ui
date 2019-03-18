@@ -32,8 +32,9 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-suggestion.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-var OAUTH2_PROVIDER_TOKENS_PATH = 'oauth2/token/provider/';
-var OAUTH2_CLIENT_TOKENS_PATH = 'oauth2/token/client/';
+
+const OAUTH2_PROVIDER_TOKENS_PATH = 'oauth2/token/provider/';
+const OAUTH2_CLIENT_TOKENS_PATH = 'oauth2/token/client/';
 
 /**
 `nuxeo-oauth2-tokens`
@@ -128,60 +129,60 @@ Polymer({
   properties: {
     tokens: {
       type: Array,
-      value: []
+      value: [],
     },
 
     _selectedEntry: {
-      type: Object
-    }
+      type: Object,
+    },
   },
 
   get _isClientToken() {
-    !!(this._selectedEntry && this._selectedEntry.clientId);
+    return !!(this._selectedEntry && this._selectedEntry.clientId);
   },
 
-  _deleteEntry: function(e) {
-    if (confirm(this.i18n('cloudTokens.confirmDelete'))) {
-      var item = e.target.parentNode.item;
+  _deleteEntry(e) {
+    if (window.confirm(this.i18n('cloudTokens.confirmDelete'))) {
+      const {item} = e.target.parentNode;
 
-      this.$.tokens.path = (item.clientId ? OAUTH2_CLIENT_TOKENS_PATH + '/' + item.clientId :
-                                            OAUTH2_PROVIDER_TOKENS_PATH + item.serviceName) + '/' +
-                                            'user/' + item.nuxeoLogin;
-      this.$.tokens.remove().then(function() {
+      this.$.tokens.path = `${item.clientId ? `${OAUTH2_CLIENT_TOKENS_PATH  }/${  item.clientId}` :
+                                            OAUTH2_PROVIDER_TOKENS_PATH + item.serviceName  }/` +
+                                            `user/${  item.nuxeoLogin}`;
+      this.$.tokens.remove().then(() => {
         this.fire('oauth2-token-deleted');
         this.fire('notify', {message: this.i18n('cloudTokens.successfullyDeleted')});
-      }.bind(this), function() {
-        this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
-          this.i18n('cloudTokens.errorDeleting')
+      }, () => {
+        this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
+          this.i18n('cloudTokens.errorDeleting')}`,
         });
-      }.bind(this));
+      });
     }
   },
 
-  _editEntry: function(e) {
+  _editEntry(e) {
     this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
     this.$.dialog.toggle();
   },
 
-  _save: function() {
-    var valid = this.$.form.validate();
+  _save() {
+    const valid = this.$.form.validate();
     if (valid) {
       this._selectedEntry.creationDate = this.formatDate(this._selectedEntry.creationDate, 'YYYY-MM-DD HH:MM:SS');
       this.$.tokens.data = this._selectedEntry;
-      this.$.tokens.path = (this._isClientToken ? OAUTH2_CLIENT_TOKENS_PATH + '/' + this._selectedEntry.clientId :
-                            OAUTH2_PROVIDER_TOKENS_PATH + this._selectedEntry.serviceName) + '/' +
-                            'user/' + this._selectedEntry.nuxeoLogin;
-      this.$.tokens.put().then(function() {
+      this.$.tokens.path = `${this._isClientToken ? `${OAUTH2_CLIENT_TOKENS_PATH  }/${  this._selectedEntry.clientId}` :
+                            OAUTH2_PROVIDER_TOKENS_PATH + this._selectedEntry.serviceName  }/` +
+                            `user/${  this._selectedEntry.nuxeoLogin}`;
+      this.$.tokens.put().then(() => {
         this.$.dialog.toggle();
         this.fire('oauth2-token-saved');
         this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
-      }.bind(this), function(err) {
+      }, (err) => {
         this.fire('notify', {
-          message: this.i18n('label.error').toUpperCase() + ': ' +
-          (err.message && err.message.length > 0 ? err.message :
-            this.i18n('cloudTokens.errorEditing'))
+          message: `${this.i18n('label.error').toUpperCase()  }: ${
+          err.message && err.message.length > 0 ? err.message :
+            this.i18n('cloudTokens.errorEditing')}`,
         });
-      }.bind(this));
+      });
     }
-  }
+  },
 });

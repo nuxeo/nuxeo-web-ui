@@ -98,28 +98,28 @@ Polymer({
     document: Object,
     xpath: {
       type: String,
-      value: 'file:content'
+      value: 'file:content',
     },
     blob: Object,
-    actionContext: Object
+    actionContext: Object,
   },
 
   observers: [
-    '_update(user, document, xpath)'
+    '_update(user, document, xpath)',
   ],
 
-  _update: function(user, document, xpath) {
+  _update(user, document, xpath) {
     this.blob = document && this._deepFind(document.properties, xpath);
     this.actionContext = {user: this.user, document: this.document, blob: this.blob, xpath: this.xpath};
   },
 
-  _deepFind: function(obj, props) {
-    for (var i = 0, path = props.split('/'), len = path.length; i < len; i++) {
+  _deepFind(obj, props) {
+    for (let i = 0, path = props.split('/'), len = path.length; i < len; i++) {
       if (!obj || obj === []) {
         break;
       }
       obj = obj[path[i]];
     }
     return obj;
-  }
+  },
 });

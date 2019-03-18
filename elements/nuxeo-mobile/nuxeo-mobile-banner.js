@@ -21,6 +21,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 Polymer({
   _template: html`
     <style>
@@ -72,7 +73,7 @@ Polymer({
   is: 'nuxeo-mobile-banner',
 
   behaviors: [
-    I18nBehavior
+    I18nBehavior,
   ],
 
   properties: {
@@ -81,7 +82,7 @@ Polymer({
     isMobile: {
       type: Boolean,
       value: false,
-      notify: true
+      notify: true,
     },
 
     isAndroid: Boolean,
@@ -91,47 +92,47 @@ Polymer({
 
     dismiss: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
   },
 
-  ready: function() {
+  ready() {
     this.isAndroid = /Android/.test(window.navigator.userAgent);
     this.isIOS = /iPhone|iPad|iPod/.test(window.navigator.userAgent);
     this.isMobile = this.isAndroid || this.isIOS;
 
-    var re = new RegExp('(.*' + this.$.nxcon.url + ').*');
-    var match = window.location.href.match(re);
-    if (match && match.length == 2) {
-      this.baseUrl = match[1];
+    const re = new RegExp(`(.*${  this.$.nxcon.url  }).*`);
+    const match = window.location.href.match(re);
+    if (match && match.length === 2) {
+      [ , this.baseUrl ] = match;
     }
   },
 
-  _computeUrl: function() {
+  _computeUrl() {
     if (this.baseUrl) {
-      var appUrl = this.baseUrl.replace('://', '/');
+      let appUrl = this.baseUrl.replace('://', '/');
       if (this.document) {
-        appUrl += '/' + this.document.repository + '/id/' + this.document.uid;
+        appUrl += `/${  this.document.repository  }/id/${  this.document.uid}`;
       }
       if (this.isAndroid) {
-        return 'android-app://com.nuxeomobile/nuxeo/' + appUrl;
-      } else if (this.isIOS) {
-        return 'nuxeo://' + appUrl;
+        return `android-app://com.nuxeomobile/nuxeo/${  appUrl}`;
+      } if (this.isIOS) {
+        return `nuxeo://${  appUrl}`;
       }
     }
   },
 
-  _openIOSAppOrAppStore: function() {
+  _openIOSAppOrAppStore() {
 
-    var appUrl = this._computeUrl(this.document);
-    var storeUrl = 'https://itunes.apple.com/app/id1103802613';
+    const appUrl = this._computeUrl(this.document);
+    const storeUrl = 'https://itunes.apple.com/app/id1103802613';
     if (!appUrl) {
       window.location = storeUrl;
       return;
     }
 
-    var openIOSAppTimer;
-    var openAppStoreTimer;
+    let openIOSAppTimer;
+    let openAppStoreTimer;
 
     function clearTimers() {
       clearInterval(openIOSAppTimer);
@@ -139,13 +140,13 @@ Polymer({
     }
 
     window.location = appUrl;
-    var click = Date.now();
-    openIOSAppTimer = setInterval(function() {
+    const click = Date.now();
+    openIOSAppTimer = setInterval(() => {
       if (document.hidden || document.webkitHidden) {
         clearTimers();
       }
     }, 200);
-    openAppStoreTimer = setInterval(function() {
+    openAppStoreTimer = setInterval(() => {
       if (!document.hidden && !document.webkitHidden && Date.now() - click > 2000) {
         clearTimers();
         window.location = storeUrl;
@@ -153,11 +154,11 @@ Polymer({
     }, 200);
   },
 
-  _displayBanner: function() {
+  _displayBanner() {
     return this.isMobile && !this.dismiss;
   },
 
-  _dismiss: function() {
+  _dismiss() {
     this.dismiss = true;
-  }
+  },
 });

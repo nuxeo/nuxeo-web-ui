@@ -1,4 +1,5 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.OneDriveFilePicker = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* eslint-disable */
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{let g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.OneDriveFilePicker = f()}})(() => {let define; let module; let exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){const a=typeof require==="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);const f=new Error(`Cannot find module '${o}'`);throw f.code="MODULE_NOT_FOUND",f}const l=n[o]={exports:{}};t[o][0].call(l.exports,(e) => {const n=t[o][1][e];return s(n || e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require==="function"&&require;for(let o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -9,7 +10,7 @@
  */
 
 (function() {
-    "use strict";
+
     function lib$es6$promise$utils$$objectOrFunction(x) {
       return typeof x === 'function' || (typeof x === 'object' && x !== null);
     }
@@ -22,7 +23,7 @@
       return typeof x === 'object' && x !== null;
     }
 
-    var lib$es6$promise$utils$$_isArray;
+    let lib$es6$promise$utils$$_isArray;
     if (!Array.isArray) {
       lib$es6$promise$utils$$_isArray = function (x) {
         return Object.prototype.toString.call(x) === '[object Array]';
@@ -31,12 +32,12 @@
       lib$es6$promise$utils$$_isArray = Array.isArray;
     }
 
-    var lib$es6$promise$utils$$isArray = lib$es6$promise$utils$$_isArray;
-    var lib$es6$promise$asap$$len = 0;
-    var lib$es6$promise$asap$$vertxNext;
-    var lib$es6$promise$asap$$customSchedulerFn;
+    const lib$es6$promise$utils$$isArray = lib$es6$promise$utils$$_isArray;
+    let lib$es6$promise$asap$$len = 0;
+    let lib$es6$promise$asap$$vertxNext;
+    let lib$es6$promise$asap$$customSchedulerFn;
 
-    var lib$es6$promise$asap$$asap = function asap(callback, arg) {
+    let lib$es6$promise$asap$$asap = function asap(callback, arg) {
       lib$es6$promise$asap$$queue[lib$es6$promise$asap$$len] = callback;
       lib$es6$promise$asap$$queue[lib$es6$promise$asap$$len + 1] = arg;
       lib$es6$promise$asap$$len += 2;
@@ -60,13 +61,13 @@
       lib$es6$promise$asap$$asap = asapFn;
     }
 
-    var lib$es6$promise$asap$$browserWindow = (typeof window !== 'undefined') ? window : undefined;
-    var lib$es6$promise$asap$$browserGlobal = lib$es6$promise$asap$$browserWindow || {};
-    var lib$es6$promise$asap$$BrowserMutationObserver = lib$es6$promise$asap$$browserGlobal.MutationObserver || lib$es6$promise$asap$$browserGlobal.WebKitMutationObserver;
-    var lib$es6$promise$asap$$isNode = typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
+    const lib$es6$promise$asap$$browserWindow = (typeof window !== 'undefined') ? window : undefined;
+    const lib$es6$promise$asap$$browserGlobal = lib$es6$promise$asap$$browserWindow || {};
+    const lib$es6$promise$asap$$BrowserMutationObserver = lib$es6$promise$asap$$browserGlobal.MutationObserver || lib$es6$promise$asap$$browserGlobal.WebKitMutationObserver;
+    const lib$es6$promise$asap$$isNode = typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
 
     // test for web worker but not in IE10
-    var lib$es6$promise$asap$$isWorker = typeof Uint8ClampedArray !== 'undefined' &&
+    const lib$es6$promise$asap$$isWorker = typeof Uint8ClampedArray !== 'undefined' &&
       typeof importScripts !== 'undefined' &&
       typeof MessageChannel !== 'undefined';
 
@@ -87,9 +88,9 @@
     }
 
     function lib$es6$promise$asap$$useMutationObserver() {
-      var iterations = 0;
-      var observer = new lib$es6$promise$asap$$BrowserMutationObserver(lib$es6$promise$asap$$flush);
-      var node = document.createTextNode('');
+      let iterations = 0;
+      const observer = new lib$es6$promise$asap$$BrowserMutationObserver(lib$es6$promise$asap$$flush);
+      const node = document.createTextNode('');
       observer.observe(node, { characterData: true });
 
       return function() {
@@ -99,7 +100,7 @@
 
     // web worker
     function lib$es6$promise$asap$$useMessageChannel() {
-      var channel = new MessageChannel();
+      const channel = new MessageChannel();
       channel.port1.onmessage = lib$es6$promise$asap$$flush;
       return function () {
         channel.port2.postMessage(0);
@@ -114,9 +115,9 @@
 
     var lib$es6$promise$asap$$queue = new Array(1000);
     function lib$es6$promise$asap$$flush() {
-      for (var i = 0; i < lib$es6$promise$asap$$len; i+=2) {
-        var callback = lib$es6$promise$asap$$queue[i];
-        var arg = lib$es6$promise$asap$$queue[i+1];
+      for (let i = 0; i < lib$es6$promise$asap$$len; i+=2) {
+        const callback = lib$es6$promise$asap$$queue[i];
+        const arg = lib$es6$promise$asap$$queue[i+1];
 
         callback(arg);
 
@@ -129,8 +130,8 @@
 
     function lib$es6$promise$asap$$attemptVertx() {
       try {
-        var r = require;
-        var vertx = r('vertx');
+        const r = require;
+        const vertx = r('vertx');
         lib$es6$promise$asap$$vertxNext = vertx.runOnLoop || vertx.runOnContext;
         return lib$es6$promise$asap$$useVertxTimer();
       } catch(e) {
@@ -138,7 +139,7 @@
       }
     }
 
-    var lib$es6$promise$asap$$scheduleFlush;
+    let lib$es6$promise$asap$$scheduleFlush;
     // Decide what async method to use to triggering processing of queued callbacks:
     if (lib$es6$promise$asap$$isNode) {
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$useNextTick();
@@ -152,19 +153,19 @@
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$useSetTimeout();
     }
     function lib$es6$promise$then$$then(onFulfillment, onRejection) {
-      var parent = this;
-      var state = parent._state;
+      const parent = this;
+      const state = parent._state;
 
       if (state === lib$es6$promise$$internal$$FULFILLED && !onFulfillment || state === lib$es6$promise$$internal$$REJECTED && !onRejection) {
         return this;
       }
 
-      var child = new this.constructor(lib$es6$promise$$internal$$noop);
-      var result = parent._result;
+      const child = new this.constructor(lib$es6$promise$$internal$$noop);
+      const result = parent._result;
 
       if (state) {
-        var callback = arguments[state - 1];
-        lib$es6$promise$asap$$asap(function(){
+        const callback = arguments[state - 1];
+        lib$es6$promise$asap$$asap(() => {
           lib$es6$promise$$internal$$invokeCallback(state, child, callback, result);
         });
       } else {
@@ -173,28 +174,28 @@
 
       return child;
     }
-    var lib$es6$promise$then$$default = lib$es6$promise$then$$then;
+    const lib$es6$promise$then$$default = lib$es6$promise$then$$then;
     function lib$es6$promise$promise$resolve$$resolve(object) {
-      /*jshint validthis:true */
-      var Constructor = this;
+      /* jshint validthis:true */
+      const Constructor = this;
 
       if (object && typeof object === 'object' && object.constructor === Constructor) {
         return object;
       }
 
-      var promise = new Constructor(lib$es6$promise$$internal$$noop);
+      const promise = new Constructor(lib$es6$promise$$internal$$noop);
       lib$es6$promise$$internal$$resolve(promise, object);
       return promise;
     }
-    var lib$es6$promise$promise$resolve$$default = lib$es6$promise$promise$resolve$$resolve;
+    const lib$es6$promise$promise$resolve$$default = lib$es6$promise$promise$resolve$$resolve;
 
     function lib$es6$promise$$internal$$noop() {}
 
-    var lib$es6$promise$$internal$$PENDING   = void 0;
+    const lib$es6$promise$$internal$$PENDING   = void 0;
     var lib$es6$promise$$internal$$FULFILLED = 1;
     var lib$es6$promise$$internal$$REJECTED  = 2;
 
-    var lib$es6$promise$$internal$$GET_THEN_ERROR = new lib$es6$promise$$internal$$ErrorObject();
+    const lib$es6$promise$$internal$$GET_THEN_ERROR = new lib$es6$promise$$internal$$ErrorObject();
 
     function lib$es6$promise$$internal$$selfFulfillment() {
       return new TypeError("You cannot resolve a promise with itself");
@@ -222,9 +223,9 @@
     }
 
     function lib$es6$promise$$internal$$handleForeignThenable(promise, thenable, then) {
-       lib$es6$promise$asap$$asap(function(promise) {
-        var sealed = false;
-        var error = lib$es6$promise$$internal$$tryThen(then, thenable, function(value) {
+       lib$es6$promise$asap$$asap((promise) => {
+        let sealed = false;
+        const error = lib$es6$promise$$internal$$tryThen(then, thenable, (value) => {
           if (sealed) { return; }
           sealed = true;
           if (thenable !== value) {
@@ -232,12 +233,12 @@
           } else {
             lib$es6$promise$$internal$$fulfill(promise, value);
           }
-        }, function(reason) {
+        }, (reason) => {
           if (sealed) { return; }
           sealed = true;
 
           lib$es6$promise$$internal$$reject(promise, reason);
-        }, 'Settle: ' + (promise._label || ' unknown promise'));
+        }, `Settle: ${  promise._label || ' unknown promise'}`);
 
         if (!sealed && error) {
           sealed = true;
@@ -252,9 +253,9 @@
       } else if (thenable._state === lib$es6$promise$$internal$$REJECTED) {
         lib$es6$promise$$internal$$reject(promise, thenable._result);
       } else {
-        lib$es6$promise$$internal$$subscribe(thenable, undefined, function(value) {
+        lib$es6$promise$$internal$$subscribe(thenable, undefined, (value) => {
           lib$es6$promise$$internal$$resolve(promise, value);
-        }, function(reason) {
+        }, (reason) => {
           lib$es6$promise$$internal$$reject(promise, reason);
         });
       }
@@ -265,8 +266,7 @@
           then === lib$es6$promise$then$$default &&
           constructor.resolve === lib$es6$promise$promise$resolve$$default) {
         lib$es6$promise$$internal$$handleOwnThenable(promise, maybeThenable);
-      } else {
-        if (then === lib$es6$promise$$internal$$GET_THEN_ERROR) {
+      } else if (then === lib$es6$promise$$internal$$GET_THEN_ERROR) {
           lib$es6$promise$$internal$$reject(promise, lib$es6$promise$$internal$$GET_THEN_ERROR.error);
         } else if (then === undefined) {
           lib$es6$promise$$internal$$fulfill(promise, maybeThenable);
@@ -275,7 +275,6 @@
         } else {
           lib$es6$promise$$internal$$fulfill(promise, maybeThenable);
         }
-      }
     }
 
     function lib$es6$promise$$internal$$resolve(promise, value) {
@@ -316,8 +315,8 @@
     }
 
     function lib$es6$promise$$internal$$subscribe(parent, child, onFulfillment, onRejection) {
-      var subscribers = parent._subscribers;
-      var length = subscribers.length;
+      const subscribers = parent._subscribers;
+      const {length} = subscribers;
 
       parent._onerror = null;
 
@@ -331,14 +330,14 @@
     }
 
     function lib$es6$promise$$internal$$publish(promise) {
-      var subscribers = promise._subscribers;
-      var settled = promise._state;
+      const subscribers = promise._subscribers;
+      const settled = promise._state;
 
       if (subscribers.length === 0) { return; }
 
-      var child, callback, detail = promise._result;
+      let child; let callback; const detail = promise._result;
 
-      for (var i = 0; i < subscribers.length; i += 3) {
+      for (let i = 0; i < subscribers.length; i += 3) {
         child = subscribers[i];
         callback = subscribers[i + settled];
 
@@ -356,7 +355,7 @@
       this.error = null;
     }
 
-    var lib$es6$promise$$internal$$TRY_CATCH_ERROR = new lib$es6$promise$$internal$$ErrorObject();
+    const lib$es6$promise$$internal$$TRY_CATCH_ERROR = new lib$es6$promise$$internal$$ErrorObject();
 
     function lib$es6$promise$$internal$$tryCatch(callback, detail) {
       try {
@@ -368,8 +367,8 @@
     }
 
     function lib$es6$promise$$internal$$invokeCallback(settled, promise, callback, detail) {
-      var hasCallback = lib$es6$promise$utils$$isFunction(callback),
-          value, error, succeeded, failed;
+      const hasCallback = lib$es6$promise$utils$$isFunction(callback);
+          let value; let error; let succeeded; let failed;
 
       if (hasCallback) {
         value = lib$es6$promise$$internal$$tryCatch(callback, detail);
@@ -407,9 +406,9 @@
 
     function lib$es6$promise$$internal$$initializePromise(promise, resolver) {
       try {
-        resolver(function resolvePromise(value){
+        resolver((value) => {
           lib$es6$promise$$internal$$resolve(promise, value);
-        }, function rejectPromise(reason) {
+        }, (reason) => {
           lib$es6$promise$$internal$$reject(promise, reason);
         });
       } catch(e) {
@@ -420,19 +419,19 @@
     function lib$es6$promise$promise$all$$all(entries) {
       return new lib$es6$promise$enumerator$$default(this, entries).promise;
     }
-    var lib$es6$promise$promise$all$$default = lib$es6$promise$promise$all$$all;
+    const lib$es6$promise$promise$all$$default = lib$es6$promise$promise$all$$all;
     function lib$es6$promise$promise$race$$race(entries) {
-      /*jshint validthis:true */
-      var Constructor = this;
+      /* jshint validthis:true */
+      const Constructor = this;
 
-      var promise = new Constructor(lib$es6$promise$$internal$$noop);
+      const promise = new Constructor(lib$es6$promise$$internal$$noop);
 
       if (!lib$es6$promise$utils$$isArray(entries)) {
         lib$es6$promise$$internal$$reject(promise, new TypeError('You must pass an array to race.'));
         return promise;
       }
 
-      var length = entries.length;
+      const {length} = entries;
 
       function onFulfillment(value) {
         lib$es6$promise$$internal$$resolve(promise, value);
@@ -442,23 +441,23 @@
         lib$es6$promise$$internal$$reject(promise, reason);
       }
 
-      for (var i = 0; promise._state === lib$es6$promise$$internal$$PENDING && i < length; i++) {
+      for (let i = 0; promise._state === lib$es6$promise$$internal$$PENDING && i < length; i++) {
         lib$es6$promise$$internal$$subscribe(Constructor.resolve(entries[i]), undefined, onFulfillment, onRejection);
       }
 
       return promise;
     }
-    var lib$es6$promise$promise$race$$default = lib$es6$promise$promise$race$$race;
+    const lib$es6$promise$promise$race$$default = lib$es6$promise$promise$race$$race;
     function lib$es6$promise$promise$reject$$reject(reason) {
-      /*jshint validthis:true */
-      var Constructor = this;
-      var promise = new Constructor(lib$es6$promise$$internal$$noop);
+      /* jshint validthis:true */
+      const Constructor = this;
+      const promise = new Constructor(lib$es6$promise$$internal$$noop);
       lib$es6$promise$$internal$$reject(promise, reason);
       return promise;
     }
-    var lib$es6$promise$promise$reject$$default = lib$es6$promise$promise$reject$$reject;
+    const lib$es6$promise$promise$reject$$default = lib$es6$promise$promise$reject$$reject;
 
-    var lib$es6$promise$promise$$counter = 0;
+    let lib$es6$promise$promise$$counter = 0;
 
     function lib$es6$promise$promise$$needsResolver() {
       throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
@@ -468,7 +467,7 @@
       throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
     }
 
-    var lib$es6$promise$promise$$default = lib$es6$promise$promise$$Promise;
+    const lib$es6$promise$promise$$default = lib$es6$promise$promise$$Promise;
     /**
       Promise objects represent the eventual result of an asynchronous operation. The
       primary way of interacting with a promise is through its `then` method, which
@@ -852,20 +851,20 @@
     };
 
     lib$es6$promise$enumerator$$Enumerator.prototype._enumerate = function() {
-      var length  = this.length;
-      var input   = this._input;
+      const {length} = this;
+      const input   = this._input;
 
-      for (var i = 0; this._state === lib$es6$promise$$internal$$PENDING && i < length; i++) {
+      for (let i = 0; this._state === lib$es6$promise$$internal$$PENDING && i < length; i++) {
         this._eachEntry(input[i], i);
       }
     };
 
     lib$es6$promise$enumerator$$Enumerator.prototype._eachEntry = function(entry, i) {
-      var c = this._instanceConstructor;
-      var resolve = c.resolve;
+      const c = this._instanceConstructor;
+      const {resolve} = c;
 
       if (resolve === lib$es6$promise$promise$resolve$$default) {
-        var then = lib$es6$promise$$internal$$getThen(entry);
+        const then = lib$es6$promise$$internal$$getThen(entry);
 
         if (then === lib$es6$promise$then$$default &&
             entry._state !== lib$es6$promise$$internal$$PENDING) {
@@ -874,11 +873,11 @@
           this._remaining--;
           this._result[i] = entry;
         } else if (c === lib$es6$promise$promise$$default) {
-          var promise = new c(lib$es6$promise$$internal$$noop);
+          const promise = new c(lib$es6$promise$$internal$$noop);
           lib$es6$promise$$internal$$handleMaybeThenable(promise, entry, then);
           this._willSettleAt(promise, i);
         } else {
-          this._willSettleAt(new c(function(resolve) { resolve(entry); }), i);
+          this._willSettleAt(new c(((resolve) => { resolve(entry); })), i);
         }
       } else {
         this._willSettleAt(resolve(entry), i);
@@ -886,7 +885,7 @@
     };
 
     lib$es6$promise$enumerator$$Enumerator.prototype._settledAt = function(state, i, value) {
-      var promise = this.promise;
+      const {promise} = this;
 
       if (promise._state === lib$es6$promise$$internal$$PENDING) {
         this._remaining--;
@@ -904,16 +903,16 @@
     };
 
     lib$es6$promise$enumerator$$Enumerator.prototype._willSettleAt = function(promise, i) {
-      var enumerator = this;
+      const enumerator = this;
 
-      lib$es6$promise$$internal$$subscribe(promise, undefined, function(value) {
+      lib$es6$promise$$internal$$subscribe(promise, undefined, (value) => {
         enumerator._settledAt(lib$es6$promise$$internal$$FULFILLED, i, value);
-      }, function(reason) {
+      }, (reason) => {
         enumerator._settledAt(lib$es6$promise$$internal$$REJECTED, i, reason);
       });
     };
     function lib$es6$promise$polyfill$$polyfill() {
-      var local;
+      let local;
 
       if (typeof global !== 'undefined') {
           local = global;
@@ -927,7 +926,7 @@
           }
       }
 
-      var P = local.Promise;
+      const P = local.Promise;
 
       if (P && Object.prototype.toString.call(P.resolve()) === '[object Promise]' && !P.cast) {
         return;
@@ -935,20 +934,20 @@
 
       local.Promise = lib$es6$promise$promise$$default;
     }
-    var lib$es6$promise$polyfill$$default = lib$es6$promise$polyfill$$polyfill;
+    const lib$es6$promise$polyfill$$default = lib$es6$promise$polyfill$$polyfill;
 
-    var lib$es6$promise$umd$$ES6Promise = {
+    const lib$es6$promise$umd$$ES6Promise = {
       'Promise': lib$es6$promise$promise$$default,
       'polyfill': lib$es6$promise$polyfill$$default
     };
 
     /* global define:true module:true window: true */
-    if (typeof define === 'function' && define['amd']) {
-      define(function() { return lib$es6$promise$umd$$ES6Promise; });
-    } else if (typeof module !== 'undefined' && module['exports']) {
-      module['exports'] = lib$es6$promise$umd$$ES6Promise;
+    if (typeof define === 'function' && define.amd) {
+      define(() => lib$es6$promise$umd$$ES6Promise);
+    } else if (typeof module !== 'undefined' && module.exports) {
+      module.exports = lib$es6$promise$umd$$ES6Promise;
     } else if (typeof this !== 'undefined') {
-      this['ES6Promise'] = lib$es6$promise$umd$$ES6Promise;
+      this.ES6Promise = lib$es6$promise$umd$$ES6Promise;
     }
 
     lib$es6$promise$polyfill$$default();
@@ -957,12 +956,12 @@
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":3}],2:[function(require,module,exports){
-'use strict';
 
-var hasOwn = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
 
-var isArray = function isArray(arr) {
+const hasOwn = Object.prototype.hasOwnProperty;
+const toStr = Object.prototype.toString;
+
+const isArray = function isArray(arr) {
 	if (typeof Array.isArray === 'function') {
 		return Array.isArray(arr);
 	}
@@ -970,13 +969,13 @@ var isArray = function isArray(arr) {
 	return toStr.call(arr) === '[object Array]';
 };
 
-var isPlainObject = function isPlainObject(obj) {
+const isPlainObject = function isPlainObject(obj) {
 	if (!obj || toStr.call(obj) !== '[object Object]') {
 		return false;
 	}
 
-	var hasOwnConstructor = hasOwn.call(obj, 'constructor');
-	var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
+	const hasOwnConstructor = hasOwn.call(obj, 'constructor');
+	const hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
 	// Not own constructor property must be Object
 	if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
 		return false;
@@ -984,18 +983,18 @@ var isPlainObject = function isPlainObject(obj) {
 
 	// Own properties are enumerated firstly, so to speed up,
 	// if last one is own, then all properties are own.
-	var key;
+	let key;
 	for (key in obj) {/**/}
 
 	return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
 
 module.exports = function extend() {
-	var options, name, src, copy, copyIsArray, clone,
-		target = arguments[0],
-		i = 1,
-		length = arguments.length,
-		deep = false;
+	let options; let name; let src; let copy; let copyIsArray; let clone;
+		let target = arguments[0];
+		let i = 1;
+		const {length} = arguments;
+		let deep = false;
 
 	// Handle a deep copy situation
 	if (typeof target === 'boolean') {
@@ -1047,11 +1046,11 @@ module.exports = function extend() {
 },{}],3:[function(require,module,exports){
 // shim for using process in browser
 
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
+const process = module.exports = {};
+let queue = [];
+let draining = false;
+let currentQueue;
+let queueIndex = -1;
 
 function cleanUpNextTick() {
     draining = false;
@@ -1069,10 +1068,10 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    const timeout = setTimeout(cleanUpNextTick);
     draining = true;
 
-    var len = queue.length;
+    let len = queue.length;
     while(len) {
         currentQueue = queue;
         queue = [];
@@ -1090,9 +1089,9 @@ function drainQueue() {
 }
 
 process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
+    const args = new Array(arguments.length - 1);
     if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
+        for (let i = 1; i < arguments.length; i++) {
             args[i - 1] = arguments[i];
         }
     }
@@ -1138,17 +1137,17 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],4:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _promise = require('./deps/promise');
+const _promise = require('./deps/promise');
 
-var _promise2 = _interopRequireDefault(_promise);
+const _promise2 = _interopRequireDefault(_promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1160,7 +1159,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * It's not meant to be used directly.
  */
 
-var Api = function () {
+const Api = function () {
 
   /**
    * Creates a new Api instance.
@@ -1180,29 +1179,29 @@ var Api = function () {
   _createClass(Api, [{
     key: 'fetchRootChildren',
     value: function fetchRootChildren() {
-      return this._fetch('/drive/root/children' + (this._business ? '' : '?expand=thumbnails'));
+      return this._fetch(`/drive/root/children${  this._business ? '' : '?expand=thumbnails'}`);
     }
   }, {
     key: 'fetchChildren',
     value: function fetchChildren(itemId) {
-      return this._fetch('/drive/items/' + itemId + '/children' + (this._business ? '' : '?expand=thumbnails'));
+      return this._fetch(`/drive/items/${  itemId  }/children${  this._business ? '' : '?expand=thumbnails'}`);
     }
   }, {
     key: 'search',
     value: function search(_search) {
-      return this._fetch('/drive/root/view.search?q=' + encodeURI(_search) + (this._business ? '' : '&expand=thumbnails'));
+      return this._fetch(`/drive/root/view.search?q=${  encodeURI(_search)  }${this._business ? '' : '&expand=thumbnails'}`);
     }
   }, {
     key: '_fetch',
     value: function _fetch(path) {
-      var _this = this;
+      const _this = this;
 
-      return new _promise2.default(function (resolve, reject) {
+      return new _promise2.default(((resolve, reject) => {
         jQuery.ajax({
           url: _this._baseURL + path,
           type: 'GET',
           beforeSend: function beforeSend(xhr) {
-            xhr.setRequestHeader('Authorization', 'Bearer ' + _this._accessToken);
+            xhr.setRequestHeader('Authorization', `Bearer ${  _this._accessToken}`);
           },
           success: function success(data) {
             resolve(data);
@@ -1211,7 +1210,7 @@ var Api = function () {
             reject(errorThrown);
           }
         });
-      });
+      }));
     }
   }]);
 
@@ -1219,20 +1218,20 @@ var Api = function () {
 }();
 
 exports.default = Api;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./deps/promise":7}],5:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _breadcrumbItem = require('./html/breadcrumb-item');
+const _breadcrumbItem = require('./html/breadcrumb-item');
 
-var _breadcrumbItem2 = _interopRequireDefault(_breadcrumbItem);
+const _breadcrumbItem2 = _interopRequireDefault(_breadcrumbItem);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1244,7 +1243,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * It's not meant to be used directly.
  */
 
-var BreadcrumbItemView = function () {
+const BreadcrumbItemView = function () {
 
   /**
    * Creates a new BreadcrumbItemView instance.
@@ -1252,7 +1251,7 @@ var BreadcrumbItemView = function () {
    */
 
   function BreadcrumbItemView() {
-    var itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    const itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, BreadcrumbItemView);
 
@@ -1273,7 +1272,7 @@ var BreadcrumbItemView = function () {
   }, {
     key: 'build',
     value: function build() {
-      var _item = jQuery(_breadcrumbItem2.default);
+      const _item = jQuery(_breadcrumbItem2.default);
       _item.data('item', this._itemData);
       _item.find('a').html(this._itemData.name);
       return _item;
@@ -1284,31 +1283,31 @@ var BreadcrumbItemView = function () {
 }();
 
 exports.default = BreadcrumbItemView;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./html/breadcrumb-item":8}],6:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _breadcrumb2 = require('./html/breadcrumb');
+const _breadcrumb2 = require('./html/breadcrumb');
 
-var _breadcrumb3 = _interopRequireDefault(_breadcrumb2);
+const _breadcrumb3 = _interopRequireDefault(_breadcrumb2);
 
-var _breadcrumbItemView = require('./breadcrumb-item-view');
+const _breadcrumbItemView = require('./breadcrumb-item-view');
 
-var _breadcrumbItemView2 = _interopRequireDefault(_breadcrumbItemView);
+const _breadcrumbItemView2 = _interopRequireDefault(_breadcrumbItemView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ROOT_ID = 'ROOT';
-var SEARCH_ID = 'SEARCH';
+const ROOT_ID = 'ROOT';
+const SEARCH_ID = 'SEARCH';
 
 /**
  * The BreadcrumbView class used to build the view.
@@ -1316,7 +1315,7 @@ var SEARCH_ID = 'SEARCH';
  * It's not meant to be used directly.
  */
 
-var BreadcrumbView = function () {
+const BreadcrumbView = function () {
 
   /**
    * Creates a new BreadcrumbView instance.
@@ -1338,9 +1337,9 @@ var BreadcrumbView = function () {
   _createClass(BreadcrumbView, [{
     key: 'addItem',
     value: function addItem() {
-      var itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+      const itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-      var item = new _breadcrumbItemView2.default(itemData);
+      const item = new _breadcrumbItemView2.default(itemData);
       this._items.push(item);
       return item;
     }
@@ -1354,7 +1353,7 @@ var BreadcrumbView = function () {
   }, {
     key: 'addSearch',
     value: function addSearch(search) {
-      var item = new _breadcrumbItemView2.default({ id: SEARCH_ID, name: 'Your search', search: search });
+      const item = new _breadcrumbItemView2.default({ id: SEARCH_ID, name: 'Your search', search });
       this._items.push(item);
       return item;
     }
@@ -1367,15 +1366,15 @@ var BreadcrumbView = function () {
   }, {
     key: 'setCurrent',
     value: function setCurrent(itemId) {
-      var items = this._items;
+      const items = this._items;
       this._items = [];
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      let _iteratorNormalCompletion = true;
+      let _didIteratorError = false;
+      let _iteratorError;
 
       try {
         for (var _iterator = items[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var item = _step.value;
+          const item = _step.value;
 
           this._items.push(item);
           if (item.getId() === itemId) {
@@ -1410,18 +1409,18 @@ var BreadcrumbView = function () {
   }, {
     key: 'build',
     value: function build() {
-      var _breadcrumb = jQuery(_breadcrumb3.default);
-      var _element = _breadcrumb.find('[onedrive-insert-breadcrumb-items]');
+      const _breadcrumb = jQuery(_breadcrumb3.default);
+      let _element = _breadcrumb.find('[onedrive-insert-breadcrumb-items]');
       if (_element.length === 0) {
         _element = _breadcrumb;
       }
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+      let _iteratorNormalCompletion2 = true;
+      let _didIteratorError2 = false;
+      let _iteratorError2;
 
       try {
         for (var _iterator2 = this._items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var item = _step2.value;
+          const item = _step2.value;
 
           _element.append(item.build());
         }
@@ -1450,104 +1449,104 @@ var BreadcrumbView = function () {
 }();
 
 exports.default = BreadcrumbView;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./breadcrumb-item-view":5,"./html/breadcrumb":9}],7:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _es6Promise = require('es6-promise');
+const _es6Promise = require('es6-promise');
 
-var _es6Promise2 = _interopRequireDefault(_es6Promise);
+const _es6Promise2 = _interopRequireDefault(_es6Promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _es6Promise2.default.polyfill();
 
 exports.default = Promise;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"es6-promise":1}],8:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var breadcrumbItem = '<li class="odfp-breadcrumb-item">\n  <a href="#">Breadcrumb Item</a>\n</li>';
+const breadcrumbItem = '<li class="odfp-breadcrumb-item">\n  <a href="#">Breadcrumb Item</a>\n</li>';
 
 exports.default = breadcrumbItem;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{}],9:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var breadcrumb = '<ol class="odfp-breadcrumb" onedrive-insert-breadcrumb-items></ol>';
+const breadcrumb = '<ol class="odfp-breadcrumb" onedrive-insert-breadcrumb-items></ol>';
 
 exports.default = breadcrumb;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{}],10:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var item = '<div class="odfp-item">\n  <div class="odfp-thumbnail">\n    <div class="odfp-picture"></div>\n    <div class="odfp-icon"></div>\n  </div>\n  <div class="odfp-name"></div>\n</div>';
+const item = '<div class="odfp-item">\n  <div class="odfp-thumbnail">\n    <div class="odfp-picture"></div>\n    <div class="odfp-icon"></div>\n  </div>\n  <div class="odfp-name"></div>\n</div>';
 
 exports.default = item;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{}],11:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var picker = '<div class="onedrive-file-picker">\n  <div class="odfp-body">\n    <div class="odfp-header">\n      <span>Select a file</span>\n      <span class="odfp-close">Close</span>\n    </div>\n    <div class="odfp-content">\n      <div class="odfp-search">\n        <input class="odfp-search-input" type="text" />\n        <input class="odfp-search-submit odfp-button" type="submit" value="Search" />\n      </div>\n      <div onedrive-insert-breadcrumb></div>\n      <div class="odfp-grid" onedrive-insert-items></div>\n    </div>\n    <div class="odfp-footer">\n      <input class="odfp-select odfp-button" type="submit" value="Select" />\n    </div>\n  </div>\n</div>';
+const picker = '<div class="onedrive-file-picker">\n  <div class="odfp-body">\n    <div class="odfp-header">\n      <span>Select a file</span>\n      <span class="odfp-close">Close</span>\n    </div>\n    <div class="odfp-content">\n      <div class="odfp-search">\n        <input class="odfp-search-input" type="text" />\n        <input class="odfp-search-submit odfp-button" type="submit" value="Search" />\n      </div>\n      <div onedrive-insert-breadcrumb></div>\n      <div class="odfp-grid" onedrive-insert-items></div>\n    </div>\n    <div class="odfp-footer">\n      <input class="odfp-select odfp-button" type="submit" value="Select" />\n    </div>\n  </div>\n</div>';
 
 exports.default = picker;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{}],12:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _onedriveFilePicker = require('./onedrive-file-picker');
+const _onedriveFilePicker = require('./onedrive-file-picker');
 
-var _onedriveFilePicker2 = _interopRequireDefault(_onedriveFilePicker);
+const _onedriveFilePicker2 = _interopRequireDefault(_onedriveFilePicker);
 
-var _promise = require('./deps/promise');
+const _promise = require('./deps/promise');
 
-var _promise2 = _interopRequireDefault(_promise);
+const _promise2 = _interopRequireDefault(_promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _onedriveFilePicker2.default.promiseLibrary(_promise2.default);
 
 exports.default = _onedriveFilePicker2.default;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./deps/promise":7,"./onedrive-file-picker":14}],13:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _item2 = require('./html/item');
+const _item2 = require('./html/item');
 
-var _item3 = _interopRequireDefault(_item2);
+const _item3 = _interopRequireDefault(_item2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1559,7 +1558,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * It's not meant to be used directly.
  */
 
-var ItemView = function () {
+const ItemView = function () {
 
   /**
    * Creates a new ItemView instance.
@@ -1567,7 +1566,7 @@ var ItemView = function () {
    */
 
   function ItemView() {
-    var itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    const itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, ItemView);
 
@@ -1577,13 +1576,13 @@ var ItemView = function () {
   _createClass(ItemView, [{
     key: 'build',
     value: function build() {
-      var _item = jQuery(_item3.default);
+      const _item = jQuery(_item3.default);
       _item.addClass('odfp-item');
       _item.data('item', this._itemData);
       _item.find('.odfp-name').append(this._itemData.name);
-      var thumbnails = this._itemData.thumbnails;
+      const {thumbnails} = this._itemData;
       if (thumbnails && thumbnails.length > 0) {
-        _item.find('.odfp-thumbnail .odfp-picture').attr('style', 'background-image: url("' + thumbnails[0].medium.url + '");');
+        _item.find('.odfp-thumbnail .odfp-picture').attr('style', `background-image: url("${  thumbnails[0].medium.url  }");`);
         _item.find('.odfp-thumbnail .odfp-icon').hide();
       } else {
         _item.find('.odfp-thumbnail .odfp-picture').hide();
@@ -1610,46 +1609,46 @@ var ItemView = function () {
 }();
 
 exports.default = ItemView;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./html/item":10}],14:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _api = require('./api');
+const _api = require('./api');
 
-var _api2 = _interopRequireDefault(_api);
+const _api2 = _interopRequireDefault(_api);
 
-var _pickerView = require('./picker-view');
+const _pickerView = require('./picker-view');
 
-var _pickerView2 = _interopRequireDefault(_pickerView);
+const _pickerView2 = _interopRequireDefault(_pickerView);
 
-var _extend = require('extend');
+const _extend = require('extend');
 
-var _extend2 = _interopRequireDefault(_extend);
+const _extend2 = _interopRequireDefault(_extend);
 
-var _promise = require('./deps/promise');
+const _promise = require('./deps/promise');
 
-var _promise2 = _interopRequireDefault(_promise);
+const _promise2 = _interopRequireDefault(_promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ONEDRIVE_FILE_PICKER_ID = 'onedrive-file-picker';
-var DEFAULT_OPTS = {
+const ONEDRIVE_FILE_PICKER_ID = 'onedrive-file-picker';
+const DEFAULT_OPTS = {
   id: ONEDRIVE_FILE_PICKER_ID,
   // For OneDrive for Business put your resource endpoint here: https://{tenant}-my.sharepoint.com/_api/v2.0
   baseURL: 'https://api.onedrive.com/v1.0',
   accessToken: null
 };
 
-var OneDriveFilePicker = function () {
+const OneDriveFilePicker = function () {
 
   /**
    * Creates a new OneDriveFilePicker instance.
@@ -1659,13 +1658,13 @@ var OneDriveFilePicker = function () {
    */
 
   function OneDriveFilePicker() {
-    var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    const opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, OneDriveFilePicker);
 
-    var options = (0, _extend2.default)(true, {}, DEFAULT_OPTS, opts);
+    const options = (0, _extend2.default)(true, {}, DEFAULT_OPTS, opts);
     this._id = options.id;
-    this._jQuerySelector = '#' + this._id;
+    this._jQuerySelector = `#${  this._id}`;
     this._api = new _api2.default({ baseURL: options.baseURL, accessToken: options.accessToken,
       business: opts.baseURL !== DEFAULT_OPTS.baseURL });
     this._picker = new _pickerView2.default();
@@ -1675,36 +1674,36 @@ var OneDriveFilePicker = function () {
   _createClass(OneDriveFilePicker, [{
     key: 'select',
     value: function select() {
-      var _this = this;
+      const _this = this;
 
       if (jQuery(this._jQuerySelector).length === 0) {
-        jQuery('body').append('<div id="' + this._id + '"></div>');
+        jQuery('body').append(`<div id="${  this._id  }"></div>`);
       }
-      return this._api.fetchRootChildren().then(function (res) {
+      return this._api.fetchRootChildren().then((res) => {
         jQuery(_this._jQuerySelector).replaceWith(_this._buildPicker(res.value));
         _this._applyHandler();
-        var select = new _this.Promise(function (resolve) {
-          jQuery(_this._jQuerySelector + ' input.odfp-select').click(function (event) {
+        const select = new _this.Promise(((resolve) => {
+          jQuery(`${_this._jQuerySelector  } input.odfp-select`).click((event) => {
             if (jQuery(event.currentTarget).hasClass('odfp-active')) {
-              var activeItem = jQuery(_this._jQuerySelector + ' .odfp-item.odfp-active');
+              const activeItem = jQuery(`${_this._jQuerySelector  } .odfp-item.odfp-active`);
               if (activeItem.data('folder') === 'true') {
-                _this._api.fetchChildren(activeItem.data('item').id).then(function (children) {
+                _this._api.fetchChildren(activeItem.data('item').id).then((children) => {
                   _this._replaceItems(children.value);
                 });
               } else {
-                var activeItemData = activeItem.data('item');
+                const activeItemData = activeItem.data('item');
                 _this.close();
                 resolve({ action: 'select', item: activeItemData });
               }
             }
           });
-        });
-        var close = new _this.Promise(function (resolve) {
-          jQuery(_this._jQuerySelector + ' span.odfp-close').click(function () {
+        }));
+        const close = new _this.Promise(((resolve) => {
+          jQuery(`${_this._jQuerySelector  } span.odfp-close`).click(() => {
             _this.close();
             resolve({ action: 'close' });
           });
-        });
+        }));
         return _this.Promise.race([select, close]);
       });
     }
@@ -1716,10 +1715,10 @@ var OneDriveFilePicker = function () {
   }, {
     key: '_buildPicker',
     value: function _buildPicker(items) {
-      var _this2 = this;
+      const _this2 = this;
 
       this._picker.clearItems();
-      items.forEach(function (item) {
+      items.forEach((item) => {
         _this2._picker.addItem(item);
       });
       return this._picker.build().attr('id', ONEDRIVE_FILE_PICKER_ID);
@@ -1732,16 +1731,16 @@ var OneDriveFilePicker = function () {
   }, {
     key: '_applyHandler',
     value: function _applyHandler() {
-      var _this3 = this;
+      const _this3 = this;
 
-      var items = jQuery(this._jQuerySelector + ' .odfp-item');
+      const items = jQuery(`${this._jQuerySelector  } .odfp-item`);
       // Navigation
-      items.dblclick(function (event) {
-        var item = jQuery(event.currentTarget);
+      items.dblclick((event) => {
+        const item = jQuery(event.currentTarget);
         if (item.data('folder') === 'true') {
           (function () {
-            var itemData = item.data('item');
-            _this3._api.fetchChildren(itemData.id).then(function (res) {
+            const itemData = item.data('item');
+            _this3._api.fetchChildren(itemData.id).then((res) => {
               _this3._picker.addItemToBreadcrumb(itemData);
               _this3._replaceItems(res.value);
             });
@@ -1749,20 +1748,20 @@ var OneDriveFilePicker = function () {
         }
       });
       // Selection
-      jQuery(this._jQuerySelector + ' input.odfp-select').removeClass('odfp-active');
-      items.click(function (event) {
+      jQuery(`${this._jQuerySelector  } input.odfp-select`).removeClass('odfp-active');
+      items.click((event) => {
         items.removeClass('odfp-active');
         jQuery(event.currentTarget).addClass('odfp-active');
-        jQuery(_this3._jQuerySelector + ' input.odfp-select').addClass('odfp-active');
+        jQuery(`${_this3._jQuerySelector  } input.odfp-select`).addClass('odfp-active');
       });
       // Breadcrumb
-      jQuery(this._jQuerySelector + ' .odfp-breadcrumb .odfp-breadcrumb-item').click(function (event) {
-        var item = jQuery(event.currentTarget);
+      jQuery(`${this._jQuerySelector  } .odfp-breadcrumb .odfp-breadcrumb-item`).click((event) => {
+        const item = jQuery(event.currentTarget);
         if (!item.hasClass('odfp-active')) {
           (function () {
-            var itemData = item.data('item');
-            var itemId = itemData.id;
-            var promise = undefined;
+            const itemData = item.data('item');
+            const itemId = itemData.id;
+            let promise;
             if (itemData.root) {
               promise = _this3._api.fetchRootChildren();
             } else if (itemData.search) {
@@ -1770,7 +1769,7 @@ var OneDriveFilePicker = function () {
             } else {
               promise = _this3._api.fetchChildren(itemId);
             }
-            promise.then(function (res) {
+            promise.then((res) => {
               _this3._picker.setBreadcrumbTo(itemId);
               _this3._replaceItems(res.value);
             });
@@ -1778,17 +1777,17 @@ var OneDriveFilePicker = function () {
         }
       });
       // Search
-      var searchInputId = this._jQuerySelector + ' .odfp-search .odfp-search-input';
-      var submitInputId = this._jQuerySelector + ' .odfp-search .odfp-search-submit';
-      jQuery(searchInputId).keypress(function (event) {
+      const searchInputId = `${this._jQuerySelector  } .odfp-search .odfp-search-input`;
+      const submitInputId = `${this._jQuerySelector  } .odfp-search .odfp-search-submit`;
+      jQuery(searchInputId).keypress((event) => {
         if (event.which === 13) {
           event.preventDefault();
           jQuery(submitInputId).click();
         }
       });
-      jQuery(submitInputId).click(function () {
-        var search = jQuery(searchInputId).val();
-        _this3._api.search(search).then(function (res) {
+      jQuery(submitInputId).click(() => {
+        const search = jQuery(searchInputId).val();
+        _this3._api.search(search).then((res) => {
           _this3._picker.reinitBreadcrumb();
           _this3._picker.addSearchToBreadcrumb(search);
           _this3._replaceItems(res.value);
@@ -1803,8 +1802,8 @@ var OneDriveFilePicker = function () {
   }, {
     key: '_replaceItems',
     value: function _replaceItems(items) {
-      var content = this._buildPicker(items).find('.odfp-content');
-      jQuery(this._jQuerySelector + ' .odfp-content').replaceWith(content);
+      const content = this._buildPicker(items).find('.odfp-content');
+      jQuery(`${this._jQuerySelector  } .odfp-content`).replaceWith(content);
       this._applyHandler();
     }
   }]);
@@ -1822,28 +1821,28 @@ OneDriveFilePicker.promiseLibrary = function (promiseLibrary) {
 };
 
 exports.default = OneDriveFilePicker;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./api":4,"./deps/promise":7,"./picker-view":15,"extend":2}],15:[function(require,module,exports){
-'use strict';
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+const _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _breadcrumbView = require('./breadcrumb-view');
+const _breadcrumbView = require('./breadcrumb-view');
 
-var _breadcrumbView2 = _interopRequireDefault(_breadcrumbView);
+const _breadcrumbView2 = _interopRequireDefault(_breadcrumbView);
 
-var _itemView = require('./item-view');
+const _itemView = require('./item-view');
 
-var _itemView2 = _interopRequireDefault(_itemView);
+const _itemView2 = _interopRequireDefault(_itemView);
 
-var _picker2 = require('./html/picker');
+const _picker2 = require('./html/picker');
 
-var _picker3 = _interopRequireDefault(_picker2);
+const _picker3 = _interopRequireDefault(_picker2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1855,7 +1854,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * It's not meant to be used directly.
  */
 
-var PickerView = function () {
+const PickerView = function () {
 
   /**
    * Creates a new PickerView instance.
@@ -1877,9 +1876,9 @@ var PickerView = function () {
   _createClass(PickerView, [{
     key: 'addItem',
     value: function addItem() {
-      var itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+      const itemData = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-      var item = new _itemView2.default(itemData);
+      const item = new _itemView2.default(itemData);
       this._items.push(item);
       return item;
     }
@@ -1944,17 +1943,17 @@ var PickerView = function () {
   }, {
     key: 'build',
     value: function build() {
-      var _picker = jQuery(_picker3.default);
-      var _insertBreadcrumb = _picker.find('[onedrive-insert-breadcrumb]');
+      const _picker = jQuery(_picker3.default);
+      const _insertBreadcrumb = _picker.find('[onedrive-insert-breadcrumb]');
       _insertBreadcrumb.append(this._breadcrumb.build());
-      var _insertItems = _picker.find('[onedrive-insert-items]');
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      const _insertItems = _picker.find('[onedrive-insert-items]');
+      let _iteratorNormalCompletion = true;
+      let _didIteratorError = false;
+      let _iteratorError;
 
       try {
         for (var _iterator = this._items[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var item = _step.value;
+          const item = _step.value;
 
           _insertItems.append(item.build());
         }
@@ -1981,7 +1980,7 @@ var PickerView = function () {
 }();
 
 exports.default = PickerView;
-module.exports = exports['default'];
+module.exports = exports.default;
 
 },{"./breadcrumb-view":6,"./html/picker":11,"./item-view":13}]},{},[12])(12)
 });

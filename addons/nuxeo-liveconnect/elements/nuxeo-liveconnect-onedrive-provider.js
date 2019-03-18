@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
@@ -37,56 +38,56 @@ Polymer({
 
   properties: {
     providerId: {
-      value: 'onedrive'
-    }
+      value: 'onedrive',
+    },
   },
 
-  openPicker: function() {
-    this.updateProviderInfo().then(function() {
+  openPicker() {
+    this.updateProviderInfo().then(() => {
       if (this.isUserAuthorized) {
-        return this.getToken().then(function(response) {
+        return this.getToken().then((response) => {
           this.accessToken = response.token;
           this._handleAuthResult(response.token);
-        }.bind(this));
-      } else {
-        this.openPopup(this.authorizationURL, {
-          onMessageReceive: this._parseMessage.bind(this),
-          onClose: this._onOAuthPopupClose.bind(this)
         });
       }
-    }.bind(this));
+        this.openPopup(this.authorizationURL, {
+          onMessageReceive: this._parseMessage.bind(this),
+          onClose: this._onOAuthPopupClose.bind(this),
+        });
+
+    });
   },
 
-  _parseMessage: function(event) {
-    var data = JSON.parse(event.data);
+  _parseMessage(event) {
+    const data = JSON.parse(event.data);
     this.accessToken = data.token;
   },
 
-  _onOAuthPopupClose: function() {
+  _onOAuthPopupClose() {
     if (this.accessToken) {
       if (!this.userId) {
-        this.updateProviderInfo().then(function() {
+        this.updateProviderInfo().then(() => {
           if (!this.userId) {
-            throw 'No username available.';
+            throw new Error('No username available.');
           }
           this._handleAuthResult(this.accessToken);
-        }.bind(this));
+        });
       } else {
         this._handleAuthResult(this.accessToken);
       }
     }
   },
 
-  _handleAuthResult: function(token) {
-    var options = {
-      accessToken: token
+  _handleAuthResult(token) {
+    const options = {
+      accessToken: token,
     };
-    var filePicker = new OneDriveFilePicker(options);
+    const filePicker = new OneDriveFilePicker(options);
 
     // open picker and handle result
-    filePicker.select().then(function(result) {
+    filePicker.select().then((result) => {
       if (result.action === 'select') {
-        var files = [];
+        const files = [];
         files.push({
           providerId: this.providerId,
           providerName: 'One Drive',
@@ -94,10 +95,10 @@ Polymer({
           fileId: result.item.id,
           name: result.item.name,
           size: result.item.size,
-          key: this.generateBlobKey(result.item.id)
+          key: this.generateBlobKey(result.item.id),
         });
         this.notifyBlobPick(files);
       }
-    }.bind(this));
-  }
+    });
+  },
 });

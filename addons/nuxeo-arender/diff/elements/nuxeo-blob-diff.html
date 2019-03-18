@@ -105,9 +105,9 @@ limitations under the License.
     Polymer({
       is: 'nuxeo-blob-diff',
       behaviors: [Nuxeo.DiffBehavior],
-      _hasDiff: function(schema) {
+      _hasDiff(schema) {
         return schema && schema.name;
-      }
+      },
     });
   </script>
 

@@ -65,21 +65,21 @@ Polymer({
     offline: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     message: {
       type: String,
-      value: 'Your network is unavailable. Please check your connection.'
-    }
+      value: 'Your network is unavailable. Please check your connection.',
+    },
   },
 
-  ready: function() {
-    window.addEventListener('online', function() {
+  ready() {
+    window.addEventListener('online', () => {
       this.offline = false;
-    }.bind(this));
-    window.addEventListener('offline', function() {
+    });
+    window.addEventListener('offline', () => {
       this.offline = true;
-    }.bind(this));
-  }
+    });
+  },
 });

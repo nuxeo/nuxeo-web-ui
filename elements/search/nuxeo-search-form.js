@@ -344,40 +344,40 @@ Polymer({
     /**
      * @ignore
      * The selected saved search.
-     **/
+     * */
     selectedSearch: {
       type: Object,
       notify: true,
-      observer: '_selectedSearchChanged'
+      observer: '_selectedSearchChanged',
     },
     /**
      * @ignore
      * The selected saved search index.
-     **/
+     * */
     selectedSearchIdx: {
       type: Number,
       value: 0,
-      observer: '_selectedSearchIdxChanged'
+      observer: '_selectedSearchIdxChanged',
     },
     /**
      * The `nuxeo-page-provider` instance used to perform the search.
-     **/
+     * */
     provider: {
-      type: String
+      type: String,
     },
     /**
      * The page size passed on to `provider` (number of results per page).
-     **/
+     * */
     pageSize: {
       type: Number,
-      value: 40
+      value: 40,
     },
     /**
      * The parameters passed on to `provider`.
      * Useful to do a mapping between the query parameters and the variables.
-     **/
+     * */
     params: {
-      type: Object
+      type: Object,
     },
     /**
      * List of content enrichers passed on to `provider`.
@@ -386,7 +386,7 @@ Polymer({
      */
     enrichers: {
       type: String,
-      value: 'thumbnail, permissions, highlight'
+      value: 'thumbnail, permissions, highlight',
     },
     /**
      * @ignore
@@ -395,73 +395,73 @@ Polymer({
      */
     headers: {
       type: Object,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
     },
     /**
      * The schemas passed on to `provider` (like `dublincore`, `uid`, `file`...).
-     **/
+     * */
     schemas: {
-      type: String
+      type: String,
     },
     /**
      * @ignore
      * Gets or sets the mode, `true` if in queue mode, `false` otherwise.
-     **/
+     * */
     queue: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * @ignore
      * The selected document if in queue mode.
-     **/
+     * */
     selectedDocument: {
       type: Object,
       observer: '_selectedDocChanged',
-      notify: true
+      notify: true,
     },
     /**
      * @ignore
      * If `true`, the parameters for the currently selected search changed.
-     **/
+     * */
     dirty: {
       type: Boolean,
       value: false,
-      notify: true
+      notify: true,
     },
     /**
      * @ignore
      * If `true`, a previously saved search is selected.
-     **/
+     * */
     isSavedSearch: {
       type: Boolean,
       value: false,
-      notify: true
+      notify: true,
     },
     /**
      * @ignore
      * If `true`, only the queue title will be displayed in the header, without the actions dropdown.
-     **/
+     * */
     onlyQueue: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * Method used to build `params` from a loaded saved search.
-     **/
+     * */
     paramMutator: {
       type: Function,
-      value: function() {
+      value() {
         return function(params) {
-          var result = {};
+          const result = {};
           if (params) {
             // filter null values
-            for (var param in params) {
-              var value = params[param];
+            Object.keys(params).forEach((param) => {
+              const value = params[param];
               if (value && param !== 'dc:title') {
                 result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
               }
-            }
+            });
             // allow search to be visible on JSF UI
             if (!('cvd:contentViewName' in result)) {
               result['cvd:contentViewName'] = 'default_search';
@@ -469,46 +469,46 @@ Polymer({
           }
           return result;
         };
-      }
+      },
     },
     /**
      * @ignore
      * If `true`, requests from `provider` are in flight.
-     **/
+     * */
     loading: {
       type: Boolean,
       reflectToAttribute: true,
-      value: false
+      value: false,
     },
     /**
      * The name of the search layout.
      * Usually the page provider name.
-     **/
+     * */
     searchName: String,
     /**
      * The aggregations returned by `provider`.
-     **/
+     * */
     aggregations: {
-      type: Object
+      type: Object,
     },
     /**
      * @ignore
      * If `true`, the current element is visible.
-     **/
+     * */
     visible: Boolean,
     /**
      * If `true`, automatically execute the search each time a param is changed.
      */
     auto: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, display a toggle control to enable or disable auto mode.
      */
     displayAutoControl: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     /**
@@ -525,10 +525,10 @@ Polymer({
   observers: [
     '_resetResults(provider, params.*, _quickFilters.*, query)',
     '_paramsChanged(params.*)',
-    '_visibleChanged(auto, visible)'
+    '_visibleChanged(auto, visible)',
   ],
 
-  _visibleChanged: function() {
+  _visibleChanged() {
     if (this.visible) {
       if (!this.searches) {
         this.$['saved-searches'].get();
@@ -552,7 +552,7 @@ Polymer({
     return this.$.layout.element;
   },
 
-  refresh: function() {
+  refresh() {
     if (this.visible) {
       if (this.queue) {
         this.$.list.fetch();
@@ -564,72 +564,72 @@ Polymer({
     }
   },
 
-  displayQueueAndNavigateToFirst: function() {
+  displayQueueAndNavigateToFirst() {
     this.displayQueue(0);
   },
 
-  displayQueue: function(index) {
+  displayQueue(index) {
     this.queue = true;
     if (this.visible) {
-      this.$.list.fetch().then(function() {
+      this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
           this.$.list.scrollToIndex(index);
           this.$.list.selectIndex(index);
         }
-      }.bind(this));
+      });
     }
   },
 
-  _resetResults: function() {
+  _resetResults() {
     if (this.provider && this.params && this._quickFilters && this.query) {
       this.$.list._resetResults();
     }
   },
 
-  _displayFiltersTapped: function() {
+  _displayFiltersTapped() {
     this.displayFilters();
     this._navigateToResults();
   },
 
-  displayFilters: function() {
+  displayFilters() {
     this.queue = false;
     this.fire('display-filters');
   },
 
-  _navigateToResults: function() {
+  _navigateToResults() {
     this.fire('search-results');
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
   },
 
-  _selectedDocChanged: function(doc, old) {
+  _selectedDocChanged(doc, old) {
     if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
       this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150),
-        function() {
+        () => {
           this.navigateTo('browse', doc.path);
-        }.bind(this));
+        });
     }
   },
 
-  _paramsChanged: function() {
+  _paramsChanged() {
     this.$.provider.page = 1;
     this.dirty = true;
     if (this.results && this.auto && this.visible) {
       this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300),
-        function() {
+        () => {
           this.results.reset();
           this._fetch(this.results);
-        }.bind(this));
+        });
     }
   },
 
-  _selectedSearchIdxChanged: function() {
+  _selectedSearchIdxChanged() {
     if (this._isSavedSearch()) {
       this.isSavedSearch = true;
       this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
@@ -641,7 +641,7 @@ Polymer({
     this.dirty = false;
   },
 
-  _selectedSearchChanged: function() {
+  _selectedSearchChanged() {
     if (this.selectedSearch) {
       this.params = this._mutateParams(this.selectedSearch.params);
       if (this.params && this.params.ecm_fulltext) {
@@ -652,11 +652,11 @@ Polymer({
     }
   },
 
-  _isSavedSearch: function() {
+  _isSavedSearch() {
     return this.selectedSearchIdx > 0;
   },
 
-  _clear: function() {
+  _clear() {
     this.searchTerm = '';
     this.isSavedSearch = false;
     this.selectedSearch = null;
@@ -675,35 +675,35 @@ Polymer({
     }
   },
 
-  _search: function() {
+  _search() {
     if (this.results) {
       this.results.reset();
       return this._fetch(this.results).then(this._navigateToResults.bind(this));
-    } else if (this.visible) {
+    } if (this.visible) {
       // if the view is not initialized yet, navigating to the search will trigger a search and display the results
       this.navigateTo('search', this.searchName);
     }
   },
 
-  _reset: function() {
-    var _el = this.$['saved-search'];
+  _reset() {
+    const _el = this.$['saved-search'];
     _el.searchId = this.selectedSearch.id;
-    _el.get().then(function(response) {
+    _el.get().then((response) => {
       this.params = this._mutateParams(response.params);
       this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
       this.form.searchTerm = this.searchTerm;
       this.dirty = false;
-    }.bind(this));
+    });
   },
 
-  saveAs: function() {
+  saveAs() {
     this.$$('#actionsDropdown').close();
     this.$.savedSearchTitle.value = '';
     this.$.saveDialog.open();
     this._saveAs = true;
   },
 
-  save: function() {
+  save() {
     if (this.selectedSearchIdx === 0) {
       this.saveAs();
     } else {
@@ -711,25 +711,25 @@ Polymer({
     }
   },
 
-  rename: function() {
+  rename() {
     this._renaming = true;
     this.$$('#actionsDropdown').close();
     this.$.renameDialog.open();
     this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
   },
 
-  share: function() {
+  share() {
     this.$$('#actionsDropdown').close();
     this.$.shareDialog.open();
   },
 
-  delete: function() {
+  delete() {
     this.$$('#actionsDropdown').close();
     this.$.deleteDialog.open();
   },
 
-  _saveSearch: function() {
-    var _el = this.$['saved-search'];
+  _saveSearch() {
+    const _el = this.$['saved-search'];
     // save a new search
     if (this.selectedSearchIdx === 0 || this._saveAs) {
       _el.searchId = '';
@@ -737,16 +737,16 @@ Polymer({
         'entity-type': 'savedSearch',
         'pageProviderName': this.provider,
         'params': this.params,
-        'title': this.$.savedSearchTitle.value
+        'title': this.$.savedSearchTitle.value,
       };
-      _el.post().then(function(search) {
-        var id = search.id;
+      _el.post().then((search) => {
+        const {id} = search;
         this.$.saveDialog.close();
         this.selectedSearch = search;
-        this.$['saved-searches'].get().then(function() {
-          this.selectedSearchIdx = this.searches.findIndex(function(s) { return s.id === id; }) + 1;
-        }.bind(this));
-      }.bind(this));
+        this.$['saved-searches'].get().then(() => {
+          this.selectedSearchIdx = this.searches.findIndex((s) => s.id === id) + 1;
+        });
+      });
     } else {
       // update an existing search
       _el.searchId = this.selectedSearch.id;
@@ -757,46 +757,46 @@ Polymer({
       } else {
         _el.data.params = this.params;
       }
-      _el.put().then(function() {
+      _el.put().then(() => {
         if (this._renaming) {
           this.$.renameDialog.close();
-          this.$['saved-searches'].get().then(function() {
-            this.set('searches.' + (this.selectedSearchIdx - 1) + '.title', _el.data.title);
+          this.$['saved-searches'].get().then(() => {
+            this.set(`searches.${  this.selectedSearchIdx - 1  }.title`, _el.data.title);
             // hack required to update the paper-input inside the paper-dropdown-menu
-            var idx = this.selectedSearchIdx;
+            const idx = this.selectedSearchIdx;
             this.selectedSearchIdx = 0;
             this.selectedSearchIdx = idx;
             this._renaming = false;
-          }.bind(this));
+          });
         }
         this.dirty = false;
-      }.bind(this));
+      });
     }
     this._saveAs = false;
   },
 
-  _deleteSearch: function() {
-    var _el = this.$['saved-search'];
+  _deleteSearch() {
+    const _el = this.$['saved-search'];
     _el.searchId = this.selectedSearch.id;
-    _el.remove().then(function() {
+    _el.remove().then(() => {
       this.$.deleteDialog.close();
-      this.$['saved-searches'].get().then(function() {
+      this.$['saved-searches'].get().then(() => {
         // hack required to update the paper-input inside the paper-dropdown-menu
         this.selectedSearchIdx = 0;
         this.selectedSearchIdx = this.searches.length;
-      }.bind(this));
-    }.bind(this));
+      });
+    });
   },
 
-  _mutateParams: function(params) {
+  _mutateParams(params) {
     return this.paramMutator ? this.paramMutator(params) : params;
   },
 
-  _computeSavedSearchesParams: function() {
+  _computeSavedSearchesParams() {
     return {pageProvider: this.provider};
   },
 
-  _formChanged: function() {
+  _formChanged() {
     this._clear();
 
     if (this.queue) {
@@ -806,62 +806,60 @@ Polymer({
     }
 
     // setup data binding
-    this.form.addEventListener('params-changed', function(e) {
+    this.form.addEventListener('params-changed', (e) => {
       // e.detail.path is params.prop_name eg: params.ecm_fulltext
       if (e.detail.path) {
-        var param = e.detail.path.split('.')[1];
-        this.set('params.' + param, e.detail.value);
+        const param = e.detail.path.split('.')[1];
+        this.set(`params.${  param}`, e.detail.value);
         if (this.auto && this.visible) {
           this._navigateToResults();
         }
       }
-    }.bind(this));
+    });
     this.skipAggregates = this.form.skipAggregates;
-    this.form.addEventListener('skip-aggregates-changed', function(e) {
+    this.form.addEventListener('skip-aggregates-changed', (e) => {
       this.notifyPath('skipAggregates', e.detail.value);
-    }.bind(this));
+    });
     this.form.addEventListener('trigger-search', this._search.bind(this));
     if (!this.auto) {
       this.form.addEventListener("keypress", this._keyPressedListener.bind(this));
     }
   },
 
-  _keyPressedListener: function(e) {
+  _keyPressedListener(e) {
     // When Enter is pressed on an input element, the search should be triggered.
     if (e.keyCode === 13 && e.composedPath()[0].tagName.toLowerCase() === 'input') {
       this._search();
     }
   },
 
-  _onError: function(e) {
+  _onError(e) {
     this.fire('notify', e.detail.error);
   },
 
   /**
    * Performs a fetch using the element passed as argument and controls the visibility of the loading spinner.
    */
-  _fetch: function(el) {
+  _fetch(el) {
     this.loading = true;
     // Ensure that objects are not sent as query parameters
-    Object.keys(this.params).forEach(function(k) {
-      var value = this.params[k];
+    Object.keys(this.params).forEach((k) => {
+      const value = this.params[k];
       if (Array.isArray(value)) {
-        this.params[k] = value.map(function(item) {
-          return (item && item['entity-type']) ? (item.uid || item.id) : item;
-        });
+        this.params[k] = value.map((item) => (item && item['entity-type']) ? (item.uid || item.id) : item);
       } else {
         this.params[k] = (value && value['entity-type']) ? (value.uid || value.id) : value;
       }
-    }.bind(this));
-    return el.fetch().then(function() {
+    });
+    return el.fetch().then(() => {
       this.loading = false;
-    }.bind(this)).catch(function(err) {
+    }).catch((err) => {
       this.loading = false;
       throw err;
-    }.bind(this));
+    });
   },
 
-  _displayQuickFilters: function() {
+  _displayQuickFilters() {
     return this._quickFilters && this._quickFilters.length > 0;
-  }
+  },
 });

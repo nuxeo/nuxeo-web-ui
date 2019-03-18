@@ -72,27 +72,27 @@ limitations under the License.
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
         entry: {
-          type: Object
+          type: Object,
         },
 
         new: {
           type: Boolean,
-          value: false
+          value: false,
         },
 
         parentDirectory: {
           type: String,
-          observer: '_observeParent'
+          observer: '_observeParent',
         },
 
         directory: Object,
       },
 
-      _isObsolete: function(obsolete) {
+      _isObsolete(obsolete) {
         return obsolete === 1;
       },
 
-      _obsoleteChanged: function() {
+      _obsoleteChanged() {
         if (this.entry.properties.obsolete > 0) {
           this.entry.properties.obsolete = 0;
         } else {
@@ -100,15 +100,15 @@ limitations under the License.
         }
       },
 
-      _observeParent: function() {
+      _observeParent() {
         if (this.parentDirectory && this.parentDirectory.length > 0) {
           this.$.directory.get();
         }
       },
 
-      _isParentRequired: function() {
+      _isParentRequired() {
         return this.directory && this.parentDirectory && this.directory !== this.parentDirectory
-      }
+      },
 
     });
   </script>

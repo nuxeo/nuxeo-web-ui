@@ -16,12 +16,13 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
 // cache roots
-var roots;
+let roots;
 
 /**
 `nuxeo-drive-sync-toggle-button`
@@ -58,12 +59,12 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      observer: '_update'
+      observer: '_update',
     },
     synchronized: {
       type: Boolean,
       notify: true,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
     synchronizationRoot: String,
     /**
@@ -76,16 +77,16 @@ Polymer({
     },
     _label: {
       type: String,
-      computed: '_computeLabel(synchronized, i18n)'
-    }
+      computed: '_computeLabel(synchronized, i18n)',
+    },
   },
 
-  toggle: function() {
-    var enable = !this.synchronized;
+  toggle() {
+    const enable = !this.synchronized;
     this.$.op.params = {enable: !this.synchronized};
-    return this.$.op.execute().then(function() {
+    return this.$.op.execute().then(() => {
       // update our root cache
-      var idx = roots.indexOf(this.document.uid);
+      const idx = roots.indexOf(this.document.uid);
       if (enable && idx === -1) {
         roots.push(this.document.uid);
       } else if (!enable && idx !== -1) {
@@ -93,41 +94,41 @@ Polymer({
       }
       // as well as the status
       this.synchronized = enable;
-    }.bind(this));
+    });
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     if (!this.document) {
       return false;
     }
     if (this.isVersion(this.document)) {
       return false;
     }
-    var excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
-    var isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
-    var isFolder = this.document.facets.indexOf('Folderish') !== -1;
-    var isSyncRootCandidate = isFolder && !this.isTrashed(this.document);
+    const excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
+    const isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
+    const isFolder = this.document.facets.indexOf('Folderish') !== -1;
+    const isSyncRootCandidate = isFolder && !this.isTrashed(this.document);
     return !isExcluded && isSyncRootCandidate && !this.synchronizationRoot;
   },
 
-  _computeLabel: function(synchronized) {
+  _computeLabel(synchronized) {
     return synchronized ? this.i18n('driveSyncToggleButton.unsync','Unsynchronize')
                         : this.i18n('driveSyncToggleButton.sync','Synchronize');
   },
 
-  _icon: function(synchronized) {
+  _icon(synchronized) {
     return synchronized ? 'notification:sync-disabled' : 'notification:sync';
   },
 
-  _update: function() {
+  _update() {
     if (!this.document || !roots) {
       return;
     }
     this.synchronized = (roots.indexOf(this.document.uid) !== -1);
 
     // determine synchronization root (closest synchronized ancestor)
-    var breadcrumb = this.document.contextParameters.breadcrumb.entries;
-    for (var i = breadcrumb.length - 1; i >= 0; i--) {
+    const breadcrumb = this.document.contextParameters.breadcrumb.entries;
+    for (let i = breadcrumb.length - 1; i >= 0; i--) {
       if (roots.indexOf(breadcrumb[i].parentRef) !== -1) {
         this.synchronizationRoot = breadcrumb[i].parentRef;
         return;
@@ -136,10 +137,8 @@ Polymer({
     this.synchronizationRoot = null;
   },
 
-  _handleRoots: function(e) {
-    roots = e.detail.response.entries.map(function(doc) {
-      return doc.uid;
-    });
+  _handleRoots(e) {
+    roots = e.detail.response.entries.map((doc) => doc.uid);
     this._update();
-  }
+  },
 });

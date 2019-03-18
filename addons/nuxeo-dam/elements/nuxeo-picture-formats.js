@@ -14,8 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
 /**
 `nuxeo-picture-formats`
@@ -77,20 +78,20 @@ Polymer({
     document: Object,
     additionalFormats: {
       type: Object,
-      computed: '_getAdditionalFormats(document)'
-    }
+      computed: '_getAdditionalFormats(document)',
+    },
   },
 
-  _getAdditionalFormats: function(document) {
+  _getAdditionalFormats(document) {
     return (document && document.properties['picture:views']) ? document.properties['picture:views']
-      .map(function(view) {
+      .map((view) => {
         return {
           name: view.description,
-          dimensions: view.width + ' x ' + view.height,
+          dimensions: `${view.width  } x ${  view.height}`,
           size: this.formatSize(view.content.length),
           format: view.info.format,
-          data: view.content.data
+          data: view.content.data,
         };
-      }.bind(this)) : [];
-  }
+      }) : [];
+  },
 });

@@ -16,13 +16,14 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
 // load GAPI client
 const script = document.createElement('script')
 script.src = 'https://apis.google.com/js/client.js'
-document.head.appendChild(script);
+document.head.appendChild(script); /* global google gapi */
 
 /**
 `nuxeo-liveconnect-google-drive-provider`
@@ -45,33 +46,33 @@ Polymer({
 
   properties: {
     providerId: {
-      value: 'googledrive'
-    }
+      value: 'googledrive',
+    },
   },
 
-  openPicker: function() {
+  openPicker() {
     gapi.load('picker', {
-      'callback': this._init.bind(this)
+      'callback': this._init.bind(this),
     });
   },
 
-  _init: function() {
-    this.updateProviderInfo().then(function() {
+  _init() {
+    this.updateProviderInfo().then(() => {
       if (!this.isUserAuthorized) {
         this.openPopup(this.authorizationURL, {
           onMessageReceive: this._parseMessage.bind(this),
-          onClose: this._onOAuthPopupClose.bind(this)
+          onClose: this._onOAuthPopupClose.bind(this),
         });
       } else {
         this._doAuth(true, this._checkAuth.bind(this));
       }
-    }.bind(this));
+    });
   },
 
-  _doAuth: function(immediate, callback) {
-    var obj = {
+  _doAuth(immediate, callback) {
+    const obj = {
       client_id: this.clientId,
-      scope: 'email https://www.googleapis.com/auth/drive'
+      scope: 'email https://www.googleapis.com/auth/drive',
     };
     if (this.userId) {
       obj.user_id = this.userId;
@@ -85,8 +86,8 @@ Polymer({
     gapi.auth.authorize(obj, callback);
   },
 
-  _checkAuth: function() {
-    var token = gapi.auth.getToken();
+  _checkAuth() {
+    const token = gapi.auth.getToken();
     if (token) {
       this._handleAuthResult(token.access_token);
     } else {
@@ -94,32 +95,32 @@ Polymer({
     }
   },
 
-  _parseMessage: function(event) {
-    var data = JSON.parse(event.data);
+  _parseMessage(event) {
+    const data = JSON.parse(event.data);
     this.accessToken = data.token;
   },
 
-  _onOAuthPopupClose: function() {
+  _onOAuthPopupClose() {
     if (this.accessToken) {
       this._handleAuthResult(this.accessToken);
     }
   },
 
-  _handleAuthResult: function(token) {
+  _handleAuthResult(token) {
     if (token) {
-      var xhr = document.createElement('iron-request');
-      xhr.send({url:'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ' + token, handleAs: 'json'})
-          .then(function() {
+      const xhr = document.createElement('iron-request');
+      xhr.send({url:`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ${  token}`, handleAs: 'json'})
+          .then(() => {
             this.userId = xhr.response.email;
             this._showPicker(token);
-          }.bind(this));
+          });
     } else {
       this._checkAuth(false);
     }
   },
 
-  _showPicker: function(accessToken) {
-    var view = new google.picker.DocsView();
+  _showPicker(accessToken) {
+    const view = new google.picker.DocsView();
     view.setIncludeFolders(true);
     view.setOwnedByMe(true);
     new google.picker.PickerBuilder()
@@ -132,11 +133,11 @@ Polymer({
         .setVisible(true);
   },
 
-  _pickerCallback: function(data) {
-    var action = data[google.picker.Response.ACTION];
+  _pickerCallback(data) {
+    const action = data[google.picker.Response.ACTION];
     if (action === google.picker.Action.PICKED) {
-      var files = [];
-      data[google.picker.Response.DOCUMENTS].forEach(function(file) {
+      const files = [];
+      data[google.picker.Response.DOCUMENTS].forEach((file) => {
         files.push({
           providerId: this.providerId,
           providerName: 'Google Drive',
@@ -144,10 +145,10 @@ Polymer({
           fileId: file.id,
           name: file.name,
           size: file.sizeBytes,
-          key: this.generateBlobKey(file.id)
+          key: this.generateBlobKey(file.id),
         });
-      }.bind(this));
+      });
       this.notifyBlobPick(files);
     }
-  }
+  },
 });

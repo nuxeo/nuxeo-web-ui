@@ -90,34 +90,34 @@ limitations under the License.
          */
         document: {
           type: Object,
-          observer: '_documentChanged'
-        }
+          observer: '_documentChanged',
+        },
       },
 
-      _documentChanged: function() {
+      _documentChanged() {
         if (this.document) {
           this.$.templateBasedDatatable.fetch();
         }
       },
 
-      _buildParams: function() {
-        return ['"' + this.document.uid + '"', 0];
+      _buildParams() {
+        return [`"${  this.document.uid  }"`, 0];
       },
 
-      _thumbnail: function(doc) {
+      _thumbnail(doc) {
         if (doc && doc.uid) {
           if (doc.contextParameters && doc.contextParameters.thumbnail.url) {
             return doc.contextParameters.thumbnail.url;
-          } else {
-            var baseUrl = this.$.nxcon.url;
-            return baseUrl + '/api/v1/id/' + doc.uid + '/@rendition/thumbnail';
           }
+          const baseUrl = this.$.nxcon.url;
+          return `${baseUrl  }/api/v1/id/${  doc.uid  }/@rendition/thumbnail`;
+
         }
       },
 
-      _navigate: function(e) {
+      _navigate(e) {
         window.location = this.urlFor('browse', e.detail.item.path);
-      }
+      },
     });
   </script>
 

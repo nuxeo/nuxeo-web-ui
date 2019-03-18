@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-template-param-editor.js';
@@ -98,13 +99,13 @@ Polymer({
   properties: {
     /**
      * The document to be rendered
-     **/
+     * */
     document: Object,
     /**
      * The operation/chain that will retrieve all the suitable templates for the document to be converted.
      *
      * This operation/chain must take as input a document and return a list of documents.
-     **/
+     * */
     filterOp: String,
     /**
      * The operation/chain that will be used to render the template.
@@ -113,61 +114,61 @@ Polymer({
      *    templateName: the name of the template
      *    attach: true if the document should be automatically attached to the template if it's not already
      *    templateData: the templateData containing the parameters to be run
-     **/
+     * */
     renderOp: String,
     /**
      * `true` if the action should display the label, `false` otherwise.
-     **/
+     * */
      showLabel: {
       type: Boolean,
       value: false,
     },
     /**
      * The label to be displayed on menus.
-     **/
+     * */
      label: {
       type: String,
-      value: 'renderTemplateButton.tooltip'
+      value: 'renderTemplateButton.tooltip',
     },
     /**
      * The label for the tooltip.
-     **/
+     * */
     tooltip: {
       type: String,
-      value: 'renderTemplateButton.tooltip'
+      value: 'renderTemplateButton.tooltip',
     },
     /**
      * An icon from an iconset.
-     **/
+     * */
     icon: {
       type: String,
-      value: "icons:all-out"
+      value: "icons:all-out",
     },
     /**
      * The URL for an icon image file. This will take precedence over a given icon attribute.
-     **/
+     * */
     iconSrc: String,
     /**
      * If set to true, the render popup won't be displayed if ony one template is available.
-     **/
+     * */
     skipRenderPopup: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     _templates: {
       type: Array,
-      value: []
+      value: [],
     },
 
-    _templateData: String
+    _templateData: String,
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.set('_templates', []);
     this.set('selectedTemplate', '');
     this.$.getTemplatesOp.input = this.document;
-    this.$.getTemplatesOp.execute().then(function(response) {
+    this.$.getTemplatesOp.execute().then((response) => {
       if (response.entries) {
         this.set('_templates', response.entries);
       }
@@ -181,16 +182,16 @@ Polymer({
           this.$.dialog.toggle();
         }
       }
-    }.bind(this));
+    });
   },
 
-  _render: function() {
+  _render() {
     this.set('_templateData', this.selectedTemplate.properties['tmpl:templateData']);
     if (this.selectedTemplate.properties['tmpl:allowOverride'] && this._templateData) {
       if (this.document.properties['nxts:bindings']) {
-        var binding;
-        for (var i = 0; i < this.document.properties['nxts:bindings'].length; i++) {
-          var b = this.document.properties['nxts:bindings'][i];
+        let binding;
+        for (let i = 0; i < this.document.properties['nxts:bindings'].length; i++) {
+          const b = this.document.properties['nxts:bindings'][i];
           if (b.templateName === this.selectedTemplate.properties['tmpl:templateName']) {
             binding = b;
           }
@@ -209,58 +210,56 @@ Polymer({
     }
   },
 
-  _reset: function() {
+  _reset() {
     this.$.paramEditor.reset();
   },
 
-  _override: function() {
+  _override() {
     this.$.paramEditor.commitChanges();
     this.set('_templateData', this.$.paramEditor.generateTemplateData());
     this._renderOpWithParams();
     this.$.editParamsDialog.toggle();
   },
 
-  _renderOpWithParams: function() {
+  _renderOpWithParams() {
     this.$.renderTemplateOp.input = this.document.uid;
     this.$.renderTemplateOp.params = {
       templateName: this.selectedTemplate.properties['tmpl:templateName'],
       attach: true,
-      templateData: this._templateData
+      templateData: this._templateData,
     };
     this._toast(this.i18n('renderTemplateButton.toast.rendering'), 0);
-    return this.$.renderTemplateOp.execute().then(function(response) {
-      return this._download(response).then(function() {
+    return this.$.renderTemplateOp.execute().then((response) => this._download(response).then(() => {
         this._toast(this.i18n('renderTemplateButton.toast.rendered',
             this.selectedTemplate.properties['dc:title']));
         if (this.selectedTemplate.properties['tmpl:allowOverride']) {
           this.fire('document-updated');
         }
-      }.bind(this));
-    }.bind(this)).catch(function(response) {
+      })).catch((response) => {
       this._toast(this.i18n('renderTemplateButton.toast.render.error', response.message));
-    }.bind(this));
-  },
-
-  _toast: function(msg, duration) {
-    this.fire('notify', {
-      message: msg,
-      close: true,
-      duration: duration
     });
   },
 
-  _download: function(response) {
-    var contentDisposition = response.headers.get('Content-Disposition');
+  _toast(msg, duration) {
+    this.fire('notify', {
+      message: msg,
+      close: true,
+      duration,
+    });
+  },
+
+  _download(response) {
+    const contentDisposition = response.headers.get('Content-Disposition');
     if (contentDisposition) {
-      var filenameMatches = contentDisposition
-          .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/).filter(function(match) { return !!match; });
-      var filename = decodeURI(filenameMatches[filenameMatches.length - 1]);
-      return response.blob().then(function(blob) {
+      const filenameMatches = contentDisposition
+          .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/).filter((match) => !!match);
+      const filename = decodeURI(filenameMatches[filenameMatches.length - 1]);
+      return response.blob().then((blob) => {
         if (navigator.msSaveBlob) {
           // handle IE11 and Edge
           navigator.msSaveBlob(blob, filename);
         } else {
-          var a = document.createElement('a');
+          const a = document.createElement('a');
           a.style = 'display: none';
           a.download = filename;
           a.href = URL.createObjectURL(blob);
@@ -269,9 +268,9 @@ Polymer({
           document.body.removeChild(a);
           URL.revokeObjectURL(a.href);
         }
-      }.bind(this));
-    } else {
-      return Promise.reject(new Error('missing Content-Disposition header'));
+      });
     }
-  }
+      return Promise.reject(new Error('missing Content-Disposition header'));
+
+  },
 });

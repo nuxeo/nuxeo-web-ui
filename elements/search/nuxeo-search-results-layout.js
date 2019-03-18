@@ -37,25 +37,25 @@ Polymer({
   properties: {
     /**
      * The name of the search layout.
-     **/
+     * */
     searchName: String,
     /**
      * The `nuxeo-page-provider` instance used to perform the search.
-     **/
+     * */
     nxProvider: HTMLElement,
     /**
      * An object propagating key/values served by enclosing slot contents.
      */
     model: {
       type: Object,
-      value: function() { return {}; }
+      value() { return {}; },
     },
     /**
      * The `nuxeo-results` element bound to this element.
      */
     results: {
       type: Object,
-      notify: true
+      notify: true,
     },
   },
 
@@ -63,7 +63,7 @@ Polymer({
     return this.$.results && this.$.results.element;
   },
 
-  fetch: function() {
+  fetch() {
     if (this.results) {
       this.results.fetch();
     } else {
@@ -71,34 +71,34 @@ Polymer({
     }
   },
 
-  reset: function() {
+  reset() {
     if (this.results) {
       this.results.reset();
     }
   },
 
-  _resultsHref: function() {
-    var name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-    return this.resolveUrl([this.searchName.toLowerCase(), name + '.html'].join('/'));
+  _resultsHref() {
+    const name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
+    return this.resolveUrl([this.searchName.toLowerCase(), `${name  }.html`].join('/'));
   },
 
-  _resultsModel: function () {
+  _resultsModel () {
     return { nxProvider: this.nxProvider, name: this.searchName };
   },
 
-  _formChanged: function (e) {
+  _formChanged (e) {
     this.results = e.detail.value && this._grabResults([e.detail.value]);
   },
 
-  _grabResults: function(els) {
+  _grabResults(els) {
     if (!Array.isArray(els) || els.length === 0) {
       return;
     }
     // let's find the results element on the local and light dom of the current elements
-    var i, el;
+    let i; let el;
     for (i = 0; i < els.length; i++) {
       el = els[i];
-      var results = dom(el).querySelector('nuxeo-results');
+      let results = dom(el).querySelector('nuxeo-results');
       if (!results && el.root) {
         results = dom(el.root).querySelector('nuxeo-results');
       }
@@ -107,7 +107,7 @@ Polymer({
       }
     }
     // none found; let's do the same for the children of the current elements
-    var children = [];
+    let children = [];
     for (i = 0; i < els.length; i++) {
       el = els[i];
       if (el.root) {
@@ -115,5 +115,5 @@ Polymer({
       }
     }
     return this._grabResults(children);
-  }
+  },
 });

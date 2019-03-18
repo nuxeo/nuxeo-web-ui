@@ -26,9 +26,8 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
-import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-document-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
@@ -36,6 +35,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-document-versions/nuxeo-document-versions.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 Polymer({
   _template: html`
     <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
@@ -130,44 +130,44 @@ Polymer({
 
     selectedRendition: {
       type: String,
-      value: 'none'
+      value: 'none',
     },
 
     _isMultiple: {
       type: Boolean,
-      computed: '_computeMultiple(document, documents.length)'
+      computed: '_computeMultiple(document, documents.length)',
     },
 
     targetFormatter: {
       type: Function,
-      value: function() {
+      value() {
         return this._targetFormatter.bind(this);
-      }
-    }
+      },
+    },
   },
 
-  _computeMultiple: function() {
+  _computeMultiple() {
     return !!(this.documents && this.documents.length > 0);
   },
 
-  _computeRenditionOptions: function() {
-    var options = [
+  _computeRenditionOptions() {
+    const options = [
       {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
-      {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')}
+      {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')},
     ];
     if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
-      this.document.contextParameters.renditions.forEach(function(item) {
+      this.document.contextParameters.renditions.forEach((item) => {
         options.push({'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon});
-      }.bind(this));
+      });
     }
     return options;
   },
 
-  _publish: function() {
+  _publish() {
     this.$.op.params = {
       'target': this.publishSpace.uid,
       'override': this.override,
-      'renditionName': null
+      'renditionName': null,
     }
     if (this.selectedRendition) {
       if (this.selectedRendition === 'default') {
@@ -176,40 +176,42 @@ Polymer({
         this.$.op.params.renditionName = this.selectedRendition;
       }
     }
-    this.$.op.input = this._isMultiple ? 'docs:' + this.documents.map(function(doc) {
-      return doc.uid;
-    }).join(',') : this.document.uid;
-    this.$.op.execute().then(function() {
+    this.$.op.input = this._isMultiple ? `docs:${  this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
+    this.$.op.execute().then(() => {
       this.fire('notify', {
-        'message': this.i18n('publication.internal.publish.success' + (this._isMultiple ? '.multiple' : ''))
+        'message': this.i18n(`publication.internal.publish.success${  this._isMultiple ? '.multiple' : ''}`),
       });
-      this._isMultiple ? this.fire('navigate', {doc: this.publishSpace}) : this.fire('document-updated');
+      if (this._isMultiple) {
+        this.fire('navigate', {doc: this.publishSpace})
+      } else {
+        this.fire('document-updated');
+      }
       this.fire('nx-publish-success');
-    }.bind(this)).catch(function(err) {
+    }).catch((err) => {
       this.fire('notify', {
-        'message': this.i18n('publication.internal.publish.error' + (this._isMultiple ? '.multiple' : ''))
+        'message': this.i18n(`publication.internal.publish.error${  this._isMultiple ? '.multiple' : ''}`),
       });
       throw err;
-    }.bind(this));
+    });
   },
 
-  _canPublish: function() {
+  _canPublish() {
     this.errorMessage = null;
     if(!this.publishSpace) {
       return false;
     }
-    var hasPermission = this.hasPermission(this.publishSpace, 'AddChildren');
+    const hasPermission = this.hasPermission(this.publishSpace, 'AddChildren');
     if(!hasPermission) {
       this.errorMessage = this.i18n('publication.internal.location.error.noPermission');
     }
     return hasPermission;
   },
 
-  _cancel: function() {
+  _cancel() {
     this.fire('cancel');
   },
 
-  _targetFormatter: function(doc) {
+  _targetFormatter(doc) {
     return doc.title;
-  }
+  },
 });

@@ -29,6 +29,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import './nuxeo-unpublish-button.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 Polymer({
   _template: html`
     <style include="nuxeo-styles iron-flex">
@@ -71,45 +72,45 @@ Polymer({
      */
     document: {
       type: Object,
-      observer: '_updateSrc'
+      observer: '_updateSrc',
     },
     _redirectDoc: Object,
     _src: Object,
-    _srcDeleted: Boolean
+    _srcDeleted: Boolean,
   },
 
   listeners: {
-    'nx-unpublish-success': '_redirect'
+    'nx-unpublish-success': '_redirect',
   },
 
-  _updateSrc: function() {
+  _updateSrc() {
     this._src = null;
     this._srcDeleted = false;
     if (this.document && this.document.isProxy) {
       this.$.srcDoc.docId = this.document.properties['rend:sourceId'] || this.document.versionableId;
-      this.$.srcDoc.get().then(function(src) {
+      this.$.srcDoc.get().then((src) => {
         this._src = src;
         this._redirectDoc =
           (this.document.contextParameters && this.document.contextParameters.firstAccessibleAncestor) || src;
-      }.bind(this)).catch(function(err) {
+      }).catch((err) => {
         if (err.status === 404) {
           this._srcDeleted = true;
           return;
         }
         throw err;
-      }.bind(this));
+      });
     }
   },
 
-  _redirect: function() {
+  _redirect() {
     this.fire('navigate', {'doc': this._redirectDoc});
   },
 
-  _infoLabel: function() {
+  _infoLabel() {
     return this._srcDeleted ? this.i18n('publication.info.deleted'): this.i18n('publication.info', this.document.title);
   },
 
-  _srcUrl: function() {
+  _srcUrl() {
     return this._src ? this.urlFor('browse', this._src.path): null;
-  }
+  },
 });

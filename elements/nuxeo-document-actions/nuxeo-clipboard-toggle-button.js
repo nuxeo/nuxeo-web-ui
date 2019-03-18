@@ -56,12 +56,12 @@ Polymer({
      */
     document: {
       type: Object,
-      observer: '_update'
+      observer: '_update',
     },
 
     clipboard: {
       type: Object,
-      observer: '_clipboardChanged'
+      observer: '_clipboardChanged',
     },
 
     /**
@@ -69,13 +69,13 @@ Polymer({
      */
     icon: {
       type: String,
-      value: 'icons:content-paste'
+      value: 'icons:content-paste',
     },
 
     inClipboard: {
       type: Boolean,
       notify: true,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     /**
@@ -88,15 +88,15 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(inClipboard, i18n)'
-    }
+      computed: '_computeLabel(inClipboard, i18n)',
+    },
   },
 
-  _isAvailable: function(doc) {
+  _isAvailable(doc) {
     return !doc.isVersion;
   },
 
-  toggle: function() {
+  toggle() {
     if (this.clipboard.contains(this.document)) {
       this.clipboard.remove(this.document);
       this.fire('removed-from-clipboard', {docId : this.document.uid});
@@ -105,15 +105,15 @@ Polymer({
     }
   },
 
-  _computeLabel: function(inClipboard) {
-    return this.i18n('clipboardToggleButton.tooltip.' + (inClipboard ? 'remove' : 'add'));
+  _computeLabel(inClipboard) {
+    return this.i18n(`clipboardToggleButton.tooltip.${  inClipboard ? 'remove' : 'add'}`);
   },
 
-  _update: function() {
+  _update() {
     this.inClipboard = this.clipboard && this.document && this.clipboard.contains(this.document);
   },
 
-  _clipboardChanged: function(newValue, oldValue) {
+  _clipboardChanged(newValue, oldValue) {
     this._listener = this._listener || this._update.bind(this);
     if (oldValue) {
       oldValue.removeEventListener('documents-changed', this._listener);
@@ -122,5 +122,5 @@ Polymer({
       newValue.addEventListener('documents-changed', this._listener);
     }
     this._update();
-  }
+  },
 });

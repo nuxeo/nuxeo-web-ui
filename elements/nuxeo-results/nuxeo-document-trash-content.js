@@ -20,7 +20,6 @@ import '@polymer/paper-button/paper-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
@@ -29,10 +28,10 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '../nuxeo-data-grid/nuxeo-document-grid-thumbnail.js';
-import { DocumentContentBehavior } from './nuxeo-document-content-behavior.js';
 import './nuxeo-results.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { DocumentContentBehavior } from './nuxeo-document-content-behavior.js';
 
 /**
 `nuxeo-document-trash-content`
@@ -177,14 +176,14 @@ Polymer({
      */
     provider: {
       type: String,
-      value: 'advanced_document_content'
+      value: 'advanced_document_content',
     },
     /**
      * The number of results per page.
      */
     pageSize: {
       type: Number,
-      value: 40
+      value: 40,
     },
     /**
      * List of comma separated values of the document schemas to be returned.
@@ -192,7 +191,7 @@ Polymer({
      */
     schemas: {
       type: String,
-      value: 'dublincore,common,uid,file'
+      value: 'dublincore,common,uid,file',
     },
     /**
      * List of content enrichers passed on to `provider`.
@@ -200,7 +199,7 @@ Polymer({
      */
     enrichers: {
       type: String,
-      value: 'thumbnail, permissions'
+      value: 'thumbnail, permissions',
     },
     /**
      * The headers passed on to `provider`.
@@ -208,7 +207,7 @@ Polymer({
      */
     headers: {
       type: String,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
     },
     /**
      * The label to be dislayed when there are no results.
@@ -217,31 +216,31 @@ Polymer({
     /**
      * The label to be dislayed when there are no results with filtering applied.
      */
-    emptyLabelWhenFiltered: String
+    emptyLabelWhenFiltered: String,
   },
 
-  _emptyTrash: function() {
-    this.$.opEmptyTrash.execute().then(function() {
+  _emptyTrash() {
+    this.$.opEmptyTrash.execute().then(() => {
       this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.success') });
       this._refresh();
-    }.bind(this)).catch(function(error) {
+    }).catch((error) => {
       this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.error') });
       if (error.status !== 404) {
         throw error;
       }
-    }.bind(this));
+    });
   },
 
-  _computeParams: function(document) {
+  _computeParams(document) {
     return document ? {'ecm_parentId': document.uid, 'ecm_trashed': true} : {};
   },
 
-  _computeSortOptions: function() {
+  _computeSortOptions() {
     return [
       {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
       {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
       {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
-      {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'}
+      {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
     ];
-  }
+  },
 });

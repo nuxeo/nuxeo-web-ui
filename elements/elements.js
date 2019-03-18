@@ -95,15 +95,15 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-permissions/nuxeo-document-permissions.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-error.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-filter.js';
-import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
-import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
-import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-tree/nuxeo-tree.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management.js';
@@ -272,13 +272,8 @@ import './nuxeo-document-actions/nuxeo-document-form-button.js';
 import './nuxeo-document-actions/nuxeo-document-edit-button.js';
 import './nuxeo-document-actions/nuxeo-replace-blob-button.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-preview-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-delete-blob-button.js';
-import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-workflow-button.js';
-
-import './nuxeo-document-create-actions/nuxeo-document-create-shortcuts.js';
 
 // Documents bulk actions -->
 import './nuxeo-document-bulk-actions/nuxeo-add-to-collection-documents-button.js';

@@ -60,19 +60,19 @@ Polymer({
   behaviors: [I18nBehavior],
 
   properties: {
-    document: Object
+    document: Object,
   },
 
-  _thumbnail: function(doc) {
+  _thumbnail(doc) {
     return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
            doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
   },
 
-  _error: function() {
+  _error() {
     this.$.img.src = 'images/blank.png';
   },
 
-  _title: function(doc) {
+  _title(doc) {
     return doc && doc.title ? this.i18n('accessibility.thumbnail', doc.title) : '';
-  }
+  },
 });

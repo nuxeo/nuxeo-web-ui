@@ -142,39 +142,39 @@ Polymer({
 
     current: {
       type: Object,
-      observer: '_currentChanged'
+      observer: '_currentChanged',
     },
 
     _selection: {
       type: Object,
-      observer: '_selectionChanged'
+      observer: '_selectionChanged',
     },
 
     /**
      * Set to true to prevent from fire event to navigate to the task.
-     **/
-    noNavigation: Boolean
+     * */
+    noNavigation: Boolean,
   },
 
-  _selectionChanged: function() {
+  _selectionChanged() {
     if (this._selection && !this.noNavigation) {
       this.navigateTo('tasks', this._selection.id);
     }
   },
 
-  _currentChanged: function(newVal, oldVal) {
+  _currentChanged(newVal, oldVal) {
     if (newVal && oldVal && newVal.id === oldVal.id) {
       return;
     }
     if (newVal && this.tasks) {
-      for (var i = 0; i < this.tasks.length; i++) {
+      for (let i = 0; i < this.tasks.length; i++) {
         if (this.tasks[i].id === newVal.id) {
           this.$.list.selectItem(this.tasks[i]);
           break;
         }
       }
     } else {
-      var _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
+      const _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
       // make sure this task still exists to avoid iron-list exceptions
       if (_exists) {
         this.$.list.deselectItem(oldVal);
@@ -182,11 +182,11 @@ Polymer({
     }
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
-  }
+  },
 });

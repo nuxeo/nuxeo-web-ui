@@ -182,98 +182,98 @@ Polymer({
     controller: Object,
     auto: {
       type: Boolean,
-      value: false
+      value: false,
     },
     rootDocPath: {
       type: String,
       value: '/',
-      observer: '_rootDocPathChanged'
+      observer: '_rootDocPathChanged',
     },
     docPath: {
       type: String,
-      value: '/'
+      value: '/',
     },
     document: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
     currentDocument: {
       type: Object,
-      observer: '_currentDocumentChanged'
+      observer: '_currentDocumentChanged',
     },
     parents: {
       type: Array,
-      value: []
+      value: [],
     },
     label: String,
     visible: {
-      type: Boolean
+      type: Boolean,
     },
     cannotSee: {
       type: Boolean,
-      value: false
+      value: false,
     },
     _noPermission: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
   },
 
   observers: [
-    '_fetchDocument(docPath, visible)'
+    '_fetchDocument(docPath, visible)',
   ],
 
-  ready: function() {
-    window.addEventListener('nuxeo-documents-deleted', function(e) {
+  ready() {
+    window.addEventListener('nuxeo-documents-deleted', (e) => {
       this.removeDocuments(e.detail.documents);
-    }.bind(this));
+    });
 
-    window.addEventListener('refresh-display', function() {
+    window.addEventListener('refresh-display', () => {
       this._fetchDocument();
-    }.bind(this));
+    });
 
     this.controller = {
       getChildren: function(node, page) {
         this.$.children.params = [node.uid];
         this.$.children.page = page;
-        return this.$.children.fetch().then(function(data) {
+        return this.$.children.fetch().then((data) => {
           return {
             items: data.entries,
-            isNextAvailable: this.$.children.isNextPageAvailable
+            isNextAvailable: this.$.children.isNextPageAvailable,
           }
-        }.bind(this));
+        });
       }.bind(this),
 
-      isLeaf: function(node) {
-        var hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
+      isLeaf(node) {
+        const hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
         return !hasFolderishChild;
-      }
+      },
     };
   },
 
-  _hideRoot: function(doc) {
+  _hideRoot(doc) {
     return this.rootDocPath !== '/' || (doc && doc.type && doc.type === 'Root');
   },
 
-  _fetchDocument: function() {
+  _fetchDocument() {
     if (this.visible && this.docPath) {
       this._noPermission = false;
-      this.$.doc.execute().catch(function(err) {
+      this.$.doc.execute().catch((err) => {
         if (err && err.status === 403) {
           this._noPermission = true;
         } else {
           throw err;
         }
-      }.bind(this));
+      });
     }
   },
 
-  _currentDocumentChanged: function() {
-    var doc = this.currentDocument;
+  _currentDocumentChanged() {
+    const doc = this.currentDocument;
     if (doc && doc.path && doc.path.startsWith(this.rootDocPath)) {
 
       if (this.docPath === doc.path && this.document && this.document.title !== doc.title) {
-        //If document is the same as before but its name changed, get the document again
+        // If document is the same as before but its name changed, get the document again
         this.$.doc.get();
       }
 
@@ -286,16 +286,16 @@ Polymer({
           return;
         }
 
-        var entries = doc.contextParameters.breadcrumb.entries;
-        var lastEntry = entries[entries.length - 1];
+        const {entries} = doc.contextParameters.breadcrumb;
+        const lastEntry = entries[entries.length - 1];
         if (this.hasFacet(lastEntry, 'Folderish') || entries.length === 1) {
           this.docPath = lastEntry.path;
         } else {
           this.docPath = entries[entries.length - 2].path;
         }
 
-        for (var i = 0; i < entries.length - 1; i++) {
-          var entry = entries[i];
+        for (let i = 0; i < entries.length - 1; i++) {
+          const entry = entries[i];
           if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
             this.push('parents', entry);
           }
@@ -305,32 +305,30 @@ Polymer({
     }
   },
 
-  _documentChanged: function() {
+  _documentChanged() {
     if (this.document) {
       this.$.tree.style.display = 'block';
     }
   },
 
-  _rootDocPathChanged: function() {
+  _rootDocPathChanged() {
     this.docPath = this.rootDocPath;
   },
 
-  _expandIcon: function(opened) {
-    return 'hardware:keyboard-arrow-' + (opened ? 'down' : 'right');
+  _expandIcon(opened) {
+    return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
   },
 
-  _icon: function(opened) {
+  _icon(opened) {
     return opened ? 'icons:folder-open' : 'icons:folder';
   },
 
-  _title: function(item) {
+  _title(item) {
     return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
   },
 
-  removeDocuments: function(documents) {
-    var uids = documents.map(function(doc) {
-      return doc.uid;
-    });
+  removeDocuments(documents) {
+    const uids = documents.map((doc) => doc.uid);
     this.$.tree.removeNodes(uids);
-  }
+  },
 });

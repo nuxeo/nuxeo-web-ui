@@ -59,15 +59,15 @@ limitations under the License.
       properties: {
         document: {
           type: Object,
-          observer: '_documentChanged'
+          observer: '_documentChanged',
         },
         actionContext: {
           type: Object,
-          computed: '_actionContext(document, selectedItems)'
-        }
+          computed: '_actionContext(document, selectedItems)',
+        },
       },
 
-      _documentChanged: function() {
+      _documentChanged() {
         if (this.document) {
           this.$.results.nxProvider = this.$.provider;
           this.$.provider.params = [this.document.uid];
@@ -76,9 +76,9 @@ limitations under the License.
         }
       },
 
-      _actionContext: function() {
+      _actionContext() {
         return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
-      }
+      },
     });
   </script>
 </dom-module>

@@ -18,7 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-app/nuxeo-page-item.js';
@@ -228,12 +228,12 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
+      type: Object,
     },
     selectedTab: {
       type: String,
       value: 'comments',
-      notify: true
+      notify: true,
     },
     opened: {
       type: Boolean,
@@ -241,10 +241,10 @@ Polymer({
       notify: true,
       reflectToAttribute: true,
       observer: '_openedChanged',
-    }
+    },
   },
 
-  _openedChanged: function() {
+  _openedChanged() {
     animationFrame.run(() => {
       // notify that there was a resize
       this.dispatchEvent(new CustomEvent('resize', {
@@ -254,15 +254,15 @@ Polymer({
     });
   },
 
-  _toggleOpened: function() {
+  _toggleOpened() {
     this.opened = !this.opened;
   },
 
-  _isMutable: function(doc) {
+  _isMutable(doc) {
     return !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && !this.isTrashed(doc);
   },
 
-  _hasCollections: function(doc) {
+  _hasCollections(doc) {
     return this.hasCollections(doc);
-  }
+  },
 });

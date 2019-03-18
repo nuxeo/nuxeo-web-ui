@@ -40,7 +40,7 @@ Polymer({
     documents: {
       type: Array,
       notify: true,
-      value: []
+      value: [],
     },
 
     document: {
@@ -56,32 +56,30 @@ Polymer({
     },
   },
 
-  ready: function() {
+  ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
   },
 
-  _params: function() {
-    var params = {};
+  _params() {
+    const params = {};
     if (this.document && (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish'))) {
-      params.filename = this.document.title + '_' + new Date().getTime() + '.zip';
+      params.filename = `${this.document.title  }_${  new Date().getTime()  }.zip`;
     } else {
-      params.filename = this.i18n('bulkDownload.filename.selection') + "-" + new Date().getTime() + ".zip"
+      params.filename = `${this.i18n('bulkDownload.filename.selection')  }-${  new Date().getTime()  }.zip`
     }
     return params;
   },
 
-  _input: function() {
-    return 'docs:' + (this.document ? [this.document] : this.documents).map(function(doc) {
-      return doc.uid;
-    }).join(',');
+  _input() {
+    return `docs:${  (this.document ? [this.document] : this.documents).map((doc) => doc.uid).join(',')}`;
   },
 
-  _onPollStart: function() {
+  _onPollStart() {
     this.fire('notify', { message: this.i18n('bulkDownload.preparing') });
   },
 
-  _onResponse: function() {
+  _onResponse() {
     this.fire('notify', { message: this.i18n('bulkDownload.completed') });
-  }
+  },
 });

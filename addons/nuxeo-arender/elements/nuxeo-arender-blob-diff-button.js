@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -89,31 +90,31 @@ Polymer({
   properties: {
     icon: {
       type: String,
-      value: 'nuxeo:preview'
+      value: 'nuxeo:preview',
     },
     xpath: String,
     leftUid: String,
     rightUid: String,
     _aRenderUrl: {
       type: String,
-      value: ''
+      value: '',
     },
   },
 
-  _openDialog: function() {
+  _openDialog() {
     this.$.aRenderDiffOp.params = {
       leftDocId: this.leftUid,
       rightDocId: this.rightUid,
       leftBlobXPath: this.xpath,
-      rightBlobXPath: this.xpath
+      rightBlobXPath: this.xpath,
     }
-    this.$.aRenderDiffOp.execute().then(function(res) {
+    this.$.aRenderDiffOp.execute().then((res) => {
       this.set('_aRenderUrl', res.previewerUrl);
       this.$.aRenderBlobDiffDialog.open();
-    }.bind(this));
+    });
   },
 
-  _closeDialog: function() {
+  _closeDialog() {
     this.$.aRenderBlobDiffDialog.close();
-  }
+  },
 });

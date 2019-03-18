@@ -89,38 +89,38 @@ Polymer({
     documents: {
       type: Array,
       notify: true,
-      value: []
+      value: [],
     },
 
     collection: {
       type: String,
-      value: ''
+      value: '',
     },
 
     resultsFilter: {
       type: Function,
-      value: function() {
+      value() {
         return this._resultsFilter.bind(this);
-      }
+      },
     },
 
     resultAndSelectionFormatter: {
       type: Function,
-      value: function() {
+      value() {
         return this._resultAndSelectionFormatter.bind(this);
-      }
+      },
     },
 
     newEntryFormatter: {
       type: Function,
-      value: function() {
+      value() {
         return this._newEntryFormatter.bind(this);
-      }
+      },
     },
 
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
 
     /**
@@ -133,87 +133,83 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     if (this.documents && this.documents.length > 0) {
-      return this.documents.every(function(doc) {
-        return !this.hasFacet(doc, 'NotCollectionMember');
-      }.bind(this));
+      return this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.$.dialog.toggle();
   },
 
-  add: function() {
+  add() {
     if (this._isNew()) {
-      var op = this.$$('#createCollectionOp');
-      var name = this.$.nxSelect.selectedItem.displayLabel;
+      const op = this.$$('#createCollectionOp');
+      const name = this.$.nxSelect.selectedItem.displayLabel;
       op.input = undefined;
       op.params = {
         'name': name,
-        'description': this.description
+        'description': this.description,
       };
-      return op.execute().then(function(response) {
+      return op.execute().then((response) => {
         this.collection = response.uid;
         this._addToCollection();
-      }.bind(this));
-    } else {
+      });
+    } 
       this._addToCollection();
-    }
+    
   },
 
-  _addToCollection: function() {
-    var op = this.$$('#addToCollectionOp');
+  _addToCollection() {
+    const op = this.$$('#addToCollectionOp');
     op.params = {
-      'collection': this.collection
+      'collection': this.collection,
     };
-    var uids = this.documents.map(function(doc) {
-      return doc.uid;
-    });
-    var uidsString = uids.join(',');
-    op.input = 'docs:' + uidsString;
-    return op.execute().then(function() {
+    const uids = this.documents.map((doc) => doc.uid);
+    const uidsString = uids.join(',');
+    op.input = `docs:${  uidsString}`;
+    return op.execute().then(() => {
       this.fire('added-to-collection', {docIds: uids, collectionId: this.collection});
       this._resetPopup();
       this._toggleDialog();
-    }.bind(this));
+    });
   },
 
-  _resultsFilter: function(entry) {
+  _resultsFilter(entry) {
     return entry.id.indexOf('-999999') === -1;
   },
 
-  _resultAndSelectionFormatter: function(item) {
-    var label = item.displayLabel || item.title;
+  _resultAndSelectionFormatter(item) {
+    const label = item.displayLabel || item.title;
     // if we are adding a new entry with the _newEntryFormatter
     // we don't want to escape the HTML
     return item.id === -1 ? label : this.$.nxSelect.escapeHTML(label);
   },
 
-  _newEntryFormatter: function(term) {
+  _newEntryFormatter(term) {
     return {id: -1, displayLabel: term};
   },
 
-  _isValid: function() {
+  _isValid() {
     return this.collection !== '';
   },
 
-  _isNew: function() {
+  _isNew() {
     return this.collection === -1;
   },
 
-  _resetPopup: function() {
+  _resetPopup() {
     this.set('collection', null);
     this.description = '';
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('addToCollectionDocumentsButton.tooltip');
-  }
+  },
 });

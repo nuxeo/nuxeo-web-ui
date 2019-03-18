@@ -50,15 +50,15 @@ Polymer({
 
   properties: {
     members: {
-      type: Object
+      type: Object,
     },
     collection: {
-      type: Object
+      type: Object,
     },
 
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
 
     /**
@@ -71,25 +71,23 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  remove: function() {
+  remove() {
     if (this.members && this.members.length > 0) {
-      var uids = this.members.map(function(doc) {
-        return doc.uid;
-      }).join(',');
-      this.$.removeOp.input = 'docs:' + uids;
+      const uids = this.members.map((doc) => doc.uid).join(',');
+      this.$.removeOp.input = `docs:${  uids}`;
       this.$.removeOp.params = {collection: this.collection.uid};
-      this.$.removeOp.execute().then(function() {
+      this.$.removeOp.execute().then(() => {
         this.members = [];
         this.fire('refresh');
-      }.bind(this));
+      });
     }
   },
 
-  _isAvailable: function(members, collection) {
+  _isAvailable(members, collection) {
     if (collection && collection.contextParameters && collection.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
       // Action will therefore not be available
@@ -98,7 +96,7 @@ Polymer({
     return false;
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('collections.remove');
-  }
+  },
 });

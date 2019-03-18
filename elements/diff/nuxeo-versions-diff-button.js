@@ -50,11 +50,11 @@ Polymer({
 
   properties: {
     document: {
-      type: Object
+      type: Object,
     },
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -66,21 +66,19 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  _doDiff: function() {
-    this.$$('#opGetVersions').execute().then(function(result) {
+  _doDiff() {
+    this.$$('#opGetVersions').execute().then((result) => {
       // sort the versions from the most to the least recent
-      var versions = result.entries.reverse();
-      var currentIndex = versions.findIndex(function(doc) {
-        return this._getMajor(doc) === this._getMajor(this.document) &&
-               this._getMinor(doc) === this._getMinor(this.document);
-      }.bind(this));
+      const versions = result.entries.reverse();
+      const currentIndex = versions.findIndex((doc) => this._getMajor(doc) === this._getMajor(this.document) &&
+               this._getMinor(doc) === this._getMinor(this.document));
       // and put the current one if the beginning of the list
       if (currentIndex > 0) {
-        var current = versions[currentIndex];
+        const current = versions[currentIndex];
         versions.splice(currentIndex, 1);
         versions.unshift(current);
       }
@@ -93,20 +91,20 @@ Polymer({
         return;
       }
       this.fire('nuxeo-diff-documents', {
-        documents: versions
+        documents: versions,
       });
-    }.bind(this));
+    });
   },
 
-  _getMajor: function(document) {
+  _getMajor(document) {
     return document.properties['uid:major_version'];
   },
 
-  _getMinor: function(document) {
+  _getMinor(document) {
     return document.properties['uid:minor_version'];
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('versionsDiffButton.tooltip');
-  }
+  },
 });

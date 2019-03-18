@@ -28,11 +28,11 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-a11y-keys/iron-a11y-keys.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
-import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import './nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 
 /**
 `nuxeo-document-create`
@@ -164,7 +164,7 @@ Polymer({
         <div class="container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterChoose" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
-            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
+            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
@@ -193,7 +193,7 @@ Polymer({
         <div id="editor" class="container">
           <div class="suggester">
             <nuxeo-path-suggestion id="pathSuggesterEdit" value="{{targetPath}}" label="[[i18n('documentCreationForm.location')]]" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
-            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
+            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
           </div>
           <paper-dialog-scrollable id="editScrollable">
             <iron-form id="form">
@@ -233,33 +233,31 @@ Polymer({
 
     stage: {
       type: String,
-      value: 'choose'
+      value: 'choose',
     },
 
     visible: {
-      type: Boolean
+      type: Boolean,
     },
 
     creating: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
 
   },
 
   observers: [
-    '_visibleOnStage(visible,stage)'
+    '_visibleOnStage(visible,stage)',
   ],
 
-  ready: function() {
+  ready() {
     this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
   },
 
-  init: function(typeId) {
+  init(typeId) {
     if (typeId) {
-      var typeObj = this.subtypes.find(function(type) {
-        return type.id === typeId;
-      });
+      const typeObj = this.subtypes.find((type) => type.id === typeId);
       if (typeObj) {
         this.selectedDocType = typeObj;
       }
@@ -269,109 +267,107 @@ Polymer({
   /**
    * Retrieves and creates the layout for the current document type
    */
-  _updateDocument: function() {
+  _updateDocument() {
 
     if (!this._isValidType(this.selectedDocType) || !this.parent) {
       this.document = null;
       return;
     }
 
-    this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
+    this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
       document.parentRef = this.parent.uid;
       this.document = document;
       this.stage = 'edit';
       this.$.editScrollable.scrollTarget.scrollTop = 0;
-    }.bind(this));
+    });
   },
 
-  _selectType: function(e) {
+  _selectType(e) {
     this.selectedDocType = e.model.type;
     this.fire('nx-creation-wizard-hide-tabs');
   },
 
-  _validate: function() {
-    var layout = this.$['document-create'];
-    var result = layout.validate() && this._doNativeValidation(this.$.form) &&
+  _validate() {
+    const layout = this.$['document-create'];
+    const result = layout.validate() && this._doNativeValidation(this.$.form) &&
       this.$.form.validate() && this._isValidType(this.selectedDocType);
     if (result) {
       return result;
-    } else {
-      var innerLayout = layout.$.layout;
-      var nodes = innerLayout._getValidatableElements(innerLayout.element.root);
-      var invalidField = nodes.find(function(node) {
-        return node.invalid;
-      });
+    }
+      const innerLayout = layout.$.layout;
+      const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
+      const invalidField = nodes.find((node) => node.invalid);
       invalidField.scrollIntoView();
       invalidField.focus();
-    }
+
   },
 
-  _create: function() {
+  _create() {
     if (!this._validate() || !this.canCreate) {
       return;
     }
     this.document.name = this.document.name || this._sanitizeName(this.document.properties['dc:title']);
     this.set('creating', true);
-    this.$.docRequest.post().then(function(response) {
+    this.$.docRequest.post().then((response) => {
       this.$.creationStats.storeType(this.selectedDocType.id);
       this._clear();
       this.navigateTo('browse', response.path);
       this._notify(response);
       this.set('creating', false);
-    }.bind(this)).catch(function(err) {
+    }).catch((err) => {
       this.set('creating', false);
       this.fire('notify', {message: this.i18n('documentCreationForm.createError')});
       console.error(err);
-    }.bind(this));
+    });
   },
 
-  _back: function() {
+  _back() {
     this._clear();
     this.fire('nx-creation-wizard-show-tabs');
   },
 
-  _cancel: function() {
+  _cancel() {
     this._clear();
     this.document = undefined;
     this.fire('nx-creation-wizard-show-tabs');
   },
 
-  _newDocumentLabel: function() {
+  _newDocumentLabel() {
     return this.i18n('documentCreationForm.newDoc.heading', this._getTypeLabel(this.selectedDocType));
   },
 
-  _clear: function() {
+  _clear() {
     this.stage = 'choose';
     this.selectedDocType = {};
   },
 
-  _visibleOnStage: function() {
+  _visibleOnStage() {
     this.$.pathSuggesterChoose.disabled = !this.visible || this.stage !== 'choose';
     this.$.pathSuggesterEdit.disabled = !this.visible || this.stage !== 'edit';
   },
 
-  _layoutUpdated: function(e) {
-    this.async(function() {
-      var input = e.detail.value.querySelector('[autofocus]');
+  _layoutUpdated(e) {
+    this.async(() => {
+      const input = e.detail.value.querySelector('[autofocus]');
       if (input) {
         input.focus();
       }
     });
   },
 
-  _submitKeyHandler: function(e) {
+  _submitKeyHandler(e) {
     if (e.detail.keyboardEvent.target.tagName === 'INPUT') {
       this._create();
     }
   },
 
-  _canCreate: function() {
+  _canCreate() {
     return this.canCreate && !this.creating;
   },
 
   // trigger native browser invalid-form UI
-  _doNativeValidation: function(/*form*/) {
-    var fakeSubmit = document.createElement('input');
+  _doNativeValidation(/* form */) {
+    const fakeSubmit = document.createElement('input');
     fakeSubmit.setAttribute('type', 'submit');
     fakeSubmit.style.display = 'none';
     // TODO: this breaks fields bound to multivalued nuxeo-directory-suggestion
@@ -380,5 +376,5 @@ Polymer({
     form._form.removeChild(fakeSubmit);
     return form._form.checkValidity(); */
     return true;
-  }
+  },
 });

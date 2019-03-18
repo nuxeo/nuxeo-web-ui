@@ -101,60 +101,60 @@ Polymer({
 
   properties: {
     parent: {
-      type: Object
+      type: Object,
     },
 
     _showTabs: {
       type: Boolean,
-      value: true
+      value: true,
     },
     selectedTab: {
       type: String,
-      value: ''
+      value: '',
     },
     parentPath: {
-      type: String
+      type: String,
     },
     defaultPath: {
-      type: String
+      type: String,
     },
     opened: {
       type: Boolean,
       value: false,
-      observer: '_openedChanged'
+      observer: '_openedChanged',
     },
     importContext: {
       type: Object,
-      computed: '_importContext(parent, i18n)'
-    }
+      computed: '_importContext(parent, i18n)',
+    },
   },
 
   listeners: {
     'nx-creation-wizard-hide-tabs': '_hideTabs',
     'nx-creation-wizard-show-tabs': '_displayTabs',
     'nx-document-creation-finished': '_close',
-    'nx-document-creation-suggester-parent-changed': '_parentPathChanged'
+    'nx-document-creation-suggester-parent-changed': '_parentPathChanged',
   },
 
-  _hideTabs: function() {
+  _hideTabs() {
     this._showTabs = false;
   },
 
-  _displayTabs: function() {
+  _displayTabs() {
     this._showTabs = true;
   },
 
-  _close: function() {
+  _close() {
     if (this.$.createDocDialog.opened) {
       this.$.createDocDialog.toggle();
       this._showTabs = true;
     }
   },
 
-  toggleDialogCreate: function(type) {
+  toggleDialogCreate(type) {
     this.selectedTab = 'create';
     this._showTabs = false;
-    this._fetchParent().then(function() {
+    this._fetchParent().then(() => {
       if (this._noPermission) {
         this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
       } else {
@@ -162,58 +162,58 @@ Polymer({
         this.$$('#bulkCreation').init();
         this.$.createDocDialog.toggle();
       }
-    }.bind(this));
+    });
   },
 
-  toggleDialogImport: function(files) {
+  toggleDialogImport(files) {
     this.selectedTab = 'import';
-    this._fetchParent().then(function() {
+    this._fetchParent().then(() => {
       if (this._noPermission) {
         this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
       } else {
         this.$$('#bulkCreation').init(files);
         this.$.createDocDialog.toggle();
       }
-    }.bind(this));
+    });
   },
 
-  toggleDialog: function() {
-    this._fetchParent().then(function() {
+  toggleDialog() {
+    this._fetchParent().then(() => {
       if (this._noPermission) {
         this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
       } else {
         this.$$('#bulkCreation').init();
         this.$.createDocDialog.toggle();
       }
-    }.bind(this));
+    });
   },
 
-  _fetchParent: function() {
+  _fetchParent() {
     this._noPermission = false;
     if (!this.parentPath) {
       this.set('parentPath', this.defaultPath);
     }
     if (!this.parent || !this.parent.contextParameters) {
-      return this.$.defaultDoc.get().catch(function(err) {
+      return this.$.defaultDoc.get().catch((err) => {
         if (err && err.status === 403) {
           this._noPermission = true;
         } else {
           throw err;
         }
-      }.bind(this));
-    } else {
+      });
+    } 
       return Promise.resolve();
-    }
+    
   },
 
-  _parentPathChanged: function(e) {
+  _parentPathChanged(e) {
     if (e.detail.isValidTargetPath &&
       (!this.parent || (this.parentPath && this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
       this.$.defaultDoc.get();
     }
   },
 
-  _openedChanged: function() {
+  _openedChanged() {
     if (this.opened) {
       if (this.selectedTab === '') {
         this.selectedTab = 'create';
@@ -223,7 +223,7 @@ Polymer({
     }
   },
 
-  _importContext: function() {
+  _importContext() {
     return {parent: this.parent, i18n: this.i18n};
-  }
+  },
 });

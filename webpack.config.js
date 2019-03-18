@@ -1,11 +1,11 @@
 const { resolve, join } = require('path');
 const merge = require('webpack-merge')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+// const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { ProvidePlugin } = require('webpack');
 
-const ENV = process.argv.find(arg => arg.includes('production'))
+const ENV = process.argv.find((arg) => arg.includes('production'))
   ? 'production'
   : 'development';
 
@@ -18,44 +18,44 @@ const polyfills = [
   {
     from: 'node_modules/@webcomponents/webcomponentsjs/*.{js,map}',
     to: join(TARGET, 'vendor/webcomponentsjs'),
-    flatten: true
+    flatten: true,
   },
   {
     from: 'node_modules/@webcomponents/html-imports/html-imports.min.js',
-    to: join(TARGET, 'vendor/html-imports')
+    to: join(TARGET, 'vendor/html-imports'),
   },
   {
     from: 'node_modules/web-animations-js/web-animations-next-lite.min.js',
-    to: join(TARGET, 'vendor/web-animations')
-  }
+    to: join(TARGET, 'vendor/web-animations'),
+  },
 ];
 
-const third_party = [
+const thirdparty = [
   {
     from: 'node_modules/moment/min/moment-with-locales.min.js',
-    to: join(TARGET, 'vendor/moment')
+    to: join(TARGET, 'vendor/moment'),
   },
   {
     from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js',
-    to: join(TARGET, 'vendor/alloy')
-  }
+    to: join(TARGET, 'vendor/alloy'),
+  },
 ]
 
 const layouts = [
   {
     context: 'elements',
     from: '+(document|directory|search|workflow|diff)/**/*.html',
-    to: TARGET
+    to: TARGET,
   }, // '(document|directory|search|workflow)/**/*.html',
   {
     context: 'elements',
     from: 'nuxeo-*.html',
-    to: TARGET
+    to: TARGET,
   },
   {
     context: 'node_modules/@nuxeo/nuxeo-ui-elements',
     from: 'nuxeo-user-group-management/**/*.html',
-    to: TARGET
+    to: TARGET,
   },
 ]
 
@@ -65,14 +65,14 @@ const addons = [{
   ignore: ['*.js'],
   // strip addon folder, copy everything over
   transformPath: (path) => {
-    path = path.replace(/^addons\/([^\/]*)\//, '');
+    path = path.replace(/^addons\/([^/]*)\//, '');
     // prepend elements/ when in dev mode (except images)
     if (ENV === 'development' && !path.startsWith('images/')) {
       path = `elements/${path}`;
     }
     return path;
   },
-  force: true
+  force: true,
 }];
 
 const common = merge([
@@ -83,7 +83,7 @@ const common = merge([
     },
     output: {
       filename: '[name].bundle.js',
-      path: TARGET
+      path: TARGET,
     },
     mode: ENV,
     module: {
@@ -104,17 +104,17 @@ const common = merge([
         },
         {
           test: /\.css$/,
-          use: ['style-loader', 'css-loader']
-        }
+          use: ['style-loader', 'css-loader'],
+        },
       ],
     },
     plugins: [
       new ProvidePlugin({
         THREE: 'three',
-        jQuery: 'jquery'
-      })
-    ]
-  }
+        jQuery: 'jquery',
+      }),
+    ],
+  },
 ]);
 
 const development = merge([
@@ -125,8 +125,8 @@ const development = merge([
         ...tmp,
         ...polyfills,
         ...addons,
-        ...third_party
-      ], { debug: 'info' })
+        ...thirdparty,
+      ], { debug: 'info' }),
     ],
     devServer: {
       contentBase: TARGET,
@@ -136,27 +136,27 @@ const development = merge([
       host: '0.0.0.0',
       historyApiFallback: true,
       proxy: {
-        '/nuxeo': 'http://localhost:8080/'
-      }
-    }
-  }
+        '/nuxeo': 'http://localhost:8080/',
+      },
+    },
+  },
 ]);
 
-const analyzer = process.argv.find(arg => arg.includes('--analyze')) ? [new BundleAnalyzerPlugin()] : [];
+const analyzer = process.argv.find((arg) => arg.includes('--analyze')) ? [new BundleAnalyzerPlugin()] : [];
 
 const assets = [
   'images',
   'fonts',
-  'themes'
-].map(p => ({ from: resolve(`./${p}`), to: join(TARGET, p) }));
+  'themes',
+].map((p) => {return { from: resolve(`./${p}`), to: join(TARGET, p) }});
 
 const production = merge([
   {
     optimization: {
       splitChunks: {
         chunks: 'all',
-        maxInitialRequests: 1 // avoid generating main vendors chunk
-      }
+        maxInitialRequests: 1, // avoid generating main vendors chunk
+      },
     },
     plugins: [
       // clean is done by maven
@@ -164,7 +164,7 @@ const production = merge([
       new CopyWebpackPlugin([
         ...tmp,
         ...polyfills,
-        ...third_party,
+        ...thirdparty,
         ...layouts,
         ...addons,
         ...assets,
@@ -173,9 +173,9 @@ const production = merge([
         { from: 'favicon.ico' },
         { from: 'sw.js' },
       ]),
-      ...analyzer
-    ]
-  }
+      ...analyzer,
+    ],
+  },
 ]);
 
-module.exports = mode => merge(common, mode === 'production' ? production : development, { mode });
+module.exports = (mode) => merge(common, mode === 'production' ? production : development, { mode });

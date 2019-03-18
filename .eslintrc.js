@@ -29,7 +29,7 @@ module.exports = {
         ignoreUrls: true,
         ignoreComments: false,
         // ignore long html atributes and imports
-        ignorePattern: '(^[ \\t]*\\w+\\$?=\\\'[^\']+\\\'$|^[ \\t]*\\w+\\$?=\\"[^"]+\\"$||^imports[^;]+;)',
+        ignorePattern: '(^[ \\t]*\\w+\\$?=\\\'[^\']+\\\'$|^[ \\t]*\\w+\\$?=\\"[^"]+\\"$|^import[^;]+;$)',
       },
     ],
     'no-alert': 'off',

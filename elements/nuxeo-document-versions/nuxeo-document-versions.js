@@ -158,91 +158,91 @@ Polymer({
     versions: {
       type: Array,
       value: [],
-      notify: true
+      notify: true,
     },
     query: String,
     page: {
       type: Number,
-      value: 0
+      value: 0,
     },
     pageSize: {
       type: Number,
-      value: 100
-    }
+      value: 100,
+    },
   },
 
   observers: [
-    '_update(document.*)'
+    '_update(document.*)',
   ],
 
-  _update: function() {
+  _update() {
     if (this.document) {
       if (this.document.isVersion) {
-        this.$.opGetLatest.execute().then(function() {
+        this.$.opGetLatest.execute().then(() => {
           this._query(this.latest.uid);
-        }.bind(this));
+        });
       } else {
         this._query(this.document.uid);
       }
     }
   },
 
-  _isCheckedOut: function(doc) {
+  _isCheckedOut(doc) {
     return doc && doc.isCheckedOut;
   },
 
-  _query: function(id) {
-    this.query = 'SELECT * FROM Document WHERE ecm:versionVersionableId = "' + id + '" AND ecm:isVersion = 1';
+  _query(id) {
+    this.query = `SELECT * FROM Document WHERE ecm:versionVersionableId = "${  id  }" AND ecm:isVersion = 1`;
     this.page = 0;
     this._loadMore();
   },
 
-  _loadMore: function() {
+  _loadMore() {
     this.$.scrollThreshold.clearTriggers();
     if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
       this.page = this.page + 1;
-      this.$.provider.fetch().then(function(results) {
+      this.$.provider.fetch().then((results) => {
         if (this.page === 1) {
           this.set('versions', []);
         }
         if (results) {
-          results.entries.forEach(function(doc) {
+          results.entries.forEach((doc) => {
             this.push('versions', doc);
-          }.bind(this));
+          });
         }
-      }.bind(this));
+      });
     }
   },
 
-  _showList: function() {
+  _showList() {
     this.$.list.open();
   },
 
-  _hideList: function() {
+  _hideList() {
     this.$.list.close();
   },
 
-  _showLatest: function() {
+  _showLatest() {
     this._hideList();
     this.navigateTo('browse', this.document.path);
   },
 
-  _showVersion: function(e) {
+  _showVersion(e) {
     this._hideList();
     this.navigateTo('document', e.model.item.uid);
   },
 
-  _labelCreate: function(doc) {
-    var permission = !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
+  _labelCreate(doc) {
+    const permission = !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
     return this.i18n(permission ? 'versions.create' : 'versions.unversioned');
   },
 
-  _labelLatest: function(doc) {
+  _labelLatest(doc) {
     if (doc) {
-      var number = this.i18n('versions.version',
+      const number = this.i18n('versions.version',
           doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
         ((doc.isCheckedOut) ? '+ ' : ' ');
-      var label = (doc.isCheckedOut) ?
+      const label = (doc.isCheckedOut) ?
         this.i18n('versions.unversionedChanges') :
         this.i18n('versions.latest');
       return number + label;
@@ -251,7 +251,7 @@ Polymer({
     return '';
   },
 
-  _labelTitle: function(doc) {
+  _labelTitle(doc) {
     if (doc) {
       return this.i18n('versions.version',
         doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
@@ -259,16 +259,16 @@ Polymer({
     return '';
   },
 
-  _labelCheckedOut: function(doc) {
+  _labelCheckedOut(doc) {
     return (doc && doc.isCheckedOut) ? '+' : '';
   },
 
-  _labelModified: function(doc) {
+  _labelModified(doc) {
     return this.i18n('versions.modified',
       moment().to(doc.properties['dc:modified']), doc.properties['dc:lastContributor']);
   },
 
-  _date: function(date) {
+  _date(date) {
     return moment(date).format('DD/MM/YYYY HH:mm');
-  }
+  },
 });

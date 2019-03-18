@@ -16,14 +16,14 @@ limitations under the License.
 */
 import './elements/nuxeo-wopi-link.js';
 
+import html from './nuxeo-wopi.html';
+
 const Nuxeo = window.Nuxeo || {};
 Nuxeo.UI = Nuxeo.UI || {};
 Nuxeo.UI.config = Nuxeo.UI.config || {};
 Nuxeo.UI.config.enrichers = Nuxeo.UI.config.enrichers || {};
 Nuxeo.UI.config.enrichers.blob = Nuxeo.UI.config.enrichers.blob || [];
 Nuxeo.UI.config.enrichers.blob.push('wopi');
-
-import html from './nuxeo-wopi.html';
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

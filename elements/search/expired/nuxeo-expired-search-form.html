@@ -61,32 +61,32 @@ limitations under the License.
           type: Object,
           value: {},
           observer: '_paramsChanged',
-          notify: true
+          notify: true,
         },
         aggregations: {
           type: Object,
           value: {},
-          notify: true
+          notify: true,
         },
         searchTerm: {
           type: String,
-          notify: true
-        }
+          notify: true,
+        },
       },
 
-      clear: function() {
+      clear() {
         this.searchTerm = '';
         this._search();
       },
 
-      _paramsChanged: function() {
-        var currentDate = new Date();
+      _paramsChanged() {
+        const currentDate = new Date();
         if (!this.params.expired_max) {
           this.set('params.expired_max', currentDate.toJSON());
         }
       },
 
-      _search: function() {
+      _search() {
         if (this.searchTerm) {
           this.set('params.title', this.formatFulltext(this.searchTerm));
         } else if (this.params.title) {
@@ -95,11 +95,11 @@ limitations under the License.
         }
       },
 
-      _checkForEnter: function(e) {
+      _checkForEnter(e) {
         if (e.keyCode === 13) {
           this._search();
         }
-      }
+      },
     });
   </script>
 </dom-module>

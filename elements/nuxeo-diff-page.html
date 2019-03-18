@@ -58,11 +58,11 @@ limitations under the License.
       properties: {
         docIds: {
           type: Array,
-          value: []
+          value: [],
         },
         visible: Boolean,
         _leftUid: String,
-        _rightUid: String
+        _rightUid: String,
       },
 
       observers: ['_updateUrl(_leftUid, _rightUid)'],
@@ -70,25 +70,25 @@ limitations under the License.
       /**
        * Update url with the left and right documents' ids
        */
-      _updateUrl: function(leftUid, rightUid) {
+      _updateUrl(leftUid, rightUid) {
         if (!leftUid || !rightUid || leftUid === rightUid) {
           return;
         }
-        var matches = window.location.href.match(/^.*\/#!\/diff/g);
+        const matches = window.location.href.match(/^.*\/#!\/diff/g);
         if (matches.length) {
-          var needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
-          var newUrl = [matches[0], leftUid, rightUid].join('/');
+          const needsReplace = !!window.location.href.match(/^.*\/#!\/diff$/g);
+          const newUrl = [matches[0], leftUid, rightUid].join('/');
           if (needsReplace) {
-            history.replaceState(null, window.title, newUrl);
+            window.history.replaceState(null, window.title, newUrl);
           } else if (newUrl !== window.location.href) {
-            history.pushState(null, window.title, newUrl);
+            window.history.pushState(null, window.title, newUrl);
           }
         }
       },
 
-      _buildPermalink: function(document) {
-        return document ? location.origin + location.pathname + '#!/doc/' + document.uid : '';
-      }
+      _buildPermalink(document) {
+        return document ? `${ window.location.origin + window.location.pathname }#!/doc/${  document.uid}` : '';
+      },
     });
   </script>
 

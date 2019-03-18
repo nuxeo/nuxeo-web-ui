@@ -18,6 +18,7 @@ import './elements/nuxeo-arender-blob-diff-button.js';
 import './elements/nuxeo-arender-page.js';
 
 import html from './nuxeo-arender.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

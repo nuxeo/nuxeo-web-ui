@@ -19,6 +19,7 @@ import './elements/nuxeo-drive-edit-button.js';
 import './elements/nuxeo-drive-page.js';
 
 import html from './nuxeo-drive.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

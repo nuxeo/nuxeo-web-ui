@@ -49,17 +49,17 @@ Polymer({
 
   properties: {
     members: {
-      type: Object
+      type: Object,
     },
     allMembers: {
-      type: Object
+      type: Object,
     },
     collection: {
-      type: Object
+      type: Object,
     },
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -70,36 +70,36 @@ Polymer({
     },
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
+      computed: '_computeLabel(i18n)',
     },
     _member1Idx: {
-      type: Number
+      type: Number,
     },
     _member2Idx: {
-      type: Number
-    }
+      type: Number,
+    },
   },
 
-  moveUp: function() {
+  moveUp() {
     if (this.members && this.members.length === 1 && this.allMembers) {
-      var member2 = this.members[0].uid;
-      var i = 0;
+      const member2 = this.members[0].uid;
+      let i = 0;
       for (; i < this.allMembers.length; i++) {
         if (this.allMembers[i].uid === member2) {
           if (i > 0) {
             this._member2Idx = i;
             this._member1Idx = i - 1;
-            var member1 = this.allMembers[this._member1Idx].uid;
+            const member1 = this.allMembers[this._member1Idx].uid;
             this.$.moveUpOp.input = this.collection.uid;
             this.$.moveUpOp.params = {
-              member1: member1,
-              member2: member2
+              member1,
+              member2,
             };
-            this.$.moveUpOp.execute().then(function() {
-              this.allMembers[this._member2Idx] = this.allMembers.splice(this._member1Idx, 1,
-                this.allMembers[this._member2Idx])[0];
+            this.$.moveUpOp.execute().then(() => {
+              [ this.allMembers[this._member2Idx] ] = this.allMembers.splice(this._member1Idx, 1,
+                this.allMembers[this._member2Idx]);
               this.fire('refresh-display', {focusIndex: this._member1Idx});
-            }.bind(this));
+            });
           }
           break;
         }
@@ -107,7 +107,7 @@ Polymer({
     }
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     if (this.members && this.members.length === 1) {
       if (this.allMembers && this.allMembers.length <= 1) {
         return false;
@@ -120,7 +120,7 @@ Polymer({
     return false;
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('collections.moveUp');
-  }
+  },
 });

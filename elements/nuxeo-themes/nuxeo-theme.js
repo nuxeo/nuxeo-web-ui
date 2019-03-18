@@ -83,28 +83,28 @@ Polymer({
   properties: {
     name: String,
     title: String,
-    preview: String
+    preview: String,
   },
 
-  _image: function(name) {
-    return (this.preview) ? this.preview : 'themes/' + name + '/preview.jpg';
+  _image(name) {
+    return (this.preview) ? this.preview : `themes/${  name  }/preview.jpg`;
   },
 
-  _label: function(name) {
-    return (this.title) ? this.title : this.i18n('themes.' + name);
+  _label(name) {
+    return (this.title) ? this.title : this.i18n(`themes.${  name}`);
   },
 
-  _button: function(name) {
-    return this.i18n('themes.' + (this._selected(name) ? 'current' : 'apply'));
+  _button(name) {
+    return this.i18n(`themes.${  this._selected(name) ? 'current' : 'apply'}`);
   },
 
-  _selected: function(name) {
-    var theme = localStorage.getItem('theme');
+  _selected(name) {
+    const theme = localStorage.getItem('theme');
     return (theme) ? theme === name : name === 'default';
   },
 
-  _apply: function() {
+  _apply() {
     localStorage.setItem('theme', this.name);
     this.fire('theme-changed', {theme: this.name});
-  }
+  },
 });

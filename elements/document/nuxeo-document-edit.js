@@ -35,11 +35,11 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      notify: true
+      notify: true,
     },
 
     headers: {
-      type: Object
-    }
-  }
+      type: Object,
+    },
+  },
 });

@@ -42,13 +42,13 @@ Polymer({
   properties: {
     tokens: {
       type: Array,
-      value: []
-    }
+      value: [],
+    },
   },
 
-  refresh: function() {
-    this.$.tokens.get().then(function(response) {
+  refresh() {
+    this.$.tokens.get().then((response) => {
       this.tokens = response.entries;
-    }.bind(this));
-  }
+    });
+  },
 });

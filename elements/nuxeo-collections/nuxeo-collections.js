@@ -262,38 +262,38 @@ Polymer({
 
     selectedSearch: {
       type: String,
-      value: 'faceted'
+      value: 'faceted',
     },
     _isDisplayMembers: {
       type: Boolean,
       value: false,
-      observer: '_observeIsDisplayMembers'
+      observer: '_observeIsDisplayMembers',
     },
     selectedCollection: {
       type: Object,
       observer: '_selectedCollectionChanged',
-      notify: true
+      notify: true,
     },
     selectedMember: {
       type: Object,
       observer: '_selectedMemberChanged',
-      notify: true
+      notify: true,
     },
     _entryAnimation: {
       type: String,
-      value: 'slide-from-right-animation'
+      value: 'slide-from-right-animation',
     },
     _exitAnimation: {
       type: String,
-      value: 'slide-left-animation'
+      value: 'slide-left-animation',
     },
     visible: {
       type: Boolean,
-      observer: '_visibleChanged'
-    }
+      observer: '_visibleChanged',
+    },
   },
 
-  _navigateOnRight: function(e) {
+  _navigateOnRight(e) {
     if (!this._isDisplayMembers) {
       e.detail.keyboardEvent.preventDefault();
       if (this.selectedCollection) {
@@ -307,7 +307,7 @@ Polymer({
     }
   },
 
-  _navigateOnLeft: function(e) {
+  _navigateOnLeft(e) {
     if (this._isDisplayMembers) {
       e.detail.keyboardEvent.preventDefault();
       this.displayCollections();
@@ -316,39 +316,35 @@ Polymer({
     this._tmpJustLeft = true;
   },
 
-  _navigateOnDown: function(e) {
+  _navigateOnDown(e) {
     if (this._isDisplayMembers) {
       e.detail.keyboardEvent.preventDefault();
       if (this._tmpJustRight) {
         this.$.membersList.selectNext();
         this._tmpJustRight = false;
       }
-    } else {
-      if (this._tmpJustLeft) {
+    } else if (this._tmpJustLeft) {
         e.detail.keyboardEvent.preventDefault();
         this.$.collectionsList.selectNext();
         this._tmpJustLeft = false;
       }
-    }
   },
 
-  _navigateOnUp: function(e) {
+  _navigateOnUp(e) {
     if (this._isDisplayMembers) {
       if (this._tmpJustRight) {
         e.detail.keyboardEvent.preventDefault();
         this.$.membersList.selectPrevious();
         this._tmpJustRight = false;
       }
-    } else {
-      if (this._tmpJustLeft) {
+    } else if (this._tmpJustLeft) {
         e.detail.keyboardEvent.preventDefault();
         this.$.collectionsList.selectPrevious();
         this._tmpJustLeft = false;
       }
-    }
   },
 
-  _observeIsDisplayMembers: function() {
+  _observeIsDisplayMembers() {
     if (this._isDisplayMembers) {
       this._entryAnimation = 'slide-from-right-animation';
       this._exitAnimation = 'slide-left-animation';
@@ -363,7 +359,7 @@ Polymer({
     }
   },
 
-  displayMembers: function(collection, index) {
+  displayMembers(collection, index) {
     this._isDisplayMembers = true;
     if (typeof index === 'number') {
       if (this.selectedCollection && collection && this.selectedCollection.uid === collection.uid) {
@@ -373,34 +369,32 @@ Polymer({
     }
   },
 
-  displayCollections: function() {
+  displayCollections() {
     this._isDisplayMembers = false;
   },
 
-  _removeFromCollection: function(evt) {
-    var op = this.$.removeFromCollectionOp;
-    var memberId = evt.currentTarget.dataset.uid;
+  _removeFromCollection(evt) {
+    const op = this.$.removeFromCollectionOp;
+    const memberId = evt.currentTarget.dataset.uid;
     op.input = memberId;
     op.params = {
-      'collection': this.selectedCollection.uid
+      'collection': this.selectedCollection.uid,
     };
-    op.execute().then(function() {
+    op.execute().then(() => {
       this._removeFromMembers(memberId)
       this.fire('removed-from-collection',
         {
           innerRemove: true,
           doc: memberId,
-          collectionId: evt.target.dataset.uid
+          collectionId: evt.target.dataset.uid,
 
-        }
+        },
       );
-    }.bind(this));
+    });
   },
 
-  _removeFromMembers: function(uid) {
-    var memberIndex = memberIndex = this.$.membersList.items.findIndex(function(el) {
-      return el.uid === uid;
-    });
+  _removeFromMembers(uid) {
+    const memberIndex = this.$.membersList.items.findIndex((el) => el.uid === uid);
     if (memberIndex > -1) {
       this.$.membersList.splice('items', memberIndex, 1);
       if (this.$.membersList.items.length > memberIndex) {
@@ -411,15 +405,15 @@ Polymer({
     }
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
   },
 
-  _selectedMemberChanged: function(doc) {
+  _selectedMemberChanged(doc) {
     if (doc) {
       if (doc.isVersion) {
         this.navigateTo('document', doc.uid);
@@ -429,23 +423,23 @@ Polymer({
     }
   },
 
-  _selectedCollectionChanged: function(collection) {
+  _selectedCollectionChanged(collection) {
     if (collection) {
       this.fire('navigate', {doc: collection});
     }
   },
 
-  _isEmpty: function(items) {
+  _isEmpty(items) {
     return items && items.length === 0;
   },
 
-  ready: function() {
-    window.addEventListener('added-to-collection', function() {
+  ready() {
+    window.addEventListener('added-to-collection', () => {
       if (this.visible) {
         this._refreshCollections();
       }
-    }.bind(this));
-    window.addEventListener('removed-from-collection', function(e) {
+    });
+    window.addEventListener('removed-from-collection', (e) => {
       if (this.visible) {
         if (e.detail.innerRemove) {
           return;
@@ -456,11 +450,11 @@ Polymer({
           this._refreshCollections();
         }
       }
-    }.bind(this));
+    });
 
   },
 
-  _visibleChanged: function() {
+  _visibleChanged() {
     if (this.visible) {
       this.selectedCollection = null;
       this._refreshCollections();
@@ -468,7 +462,7 @@ Polymer({
     }
   },
 
-  _canRemove: function(collection) {
+  _canRemove(collection) {
     if (collection && collection.contextParameters && collection.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
       // Action will therefore not be available
@@ -477,12 +471,12 @@ Polymer({
     return false;
   },
 
-  _refreshCollections: function() {
+  _refreshCollections() {
     this.$.collectionsList.reset();
     this.$.collectionsList.fetch();
   },
 
-  loadCollection: function(collection, provider) {
+  loadCollection(collection, provider) {
     if (provider) {
       this.$.membersList.nxProvider = provider;
       if (collection && this.selectedCollection && this.selectedCollection.uid === collection.uid) {
@@ -491,5 +485,5 @@ Polymer({
         this.displayCollections();
       }
     }
-  }
+  },
 });

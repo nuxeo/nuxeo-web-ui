@@ -80,16 +80,16 @@ Polymer({
   behaviors: [RoutingBehavior],
 
   properties: {
-    document: Object
+    document: Object,
   },
 
-  remove: function(evt) {
-    var op = this.$.op;
+  remove(evt) {
+    const {op} = this.$;
     op.params = {
-      'collection': evt.currentTarget.dataset.uid
+      'collection': evt.currentTarget.dataset.uid,
     };
-    op.execute().then(function() {
+    op.execute().then(() => {
       this.fire('removed-from-collection', {doc: this.document, collectionId: evt.target.dataset.uid});
-    }.bind(this));
-  }
+    });
+  },
 });

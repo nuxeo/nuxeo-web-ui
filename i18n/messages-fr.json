@@ -230,7 +230,7 @@
   "cloudServices.providers": "Fournisseurs",
   "cloudServices.tokens": "Jetons",
   "cloudTokens.creationDate": "Création",
-  "cloudTokens.confirmDelete": "Supprimer l'élément sélectionné ?",
+  "cloudTokens.confirmDelete": "Supprimer l'élément sélectionné ?",
   "cloudTokens.delete": "Supprimer",
   "cloudTokens.edit": "Modifier",
   "cloudTokens.emptyResult": "Aucun jeton n'est défini.",

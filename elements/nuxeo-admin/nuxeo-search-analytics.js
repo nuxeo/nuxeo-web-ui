@@ -23,10 +23,10 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/chart-elements/chart-pie.js';
 import '@nuxeo/chart-elements/chart-bar.js';
-import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import moment from 'moment';
+import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 
 /**
 `nuxeo-search-analytics`
@@ -189,44 +189,44 @@ Polymer({
   properties: {
     index: {
       type: String,
-      value: 'audit'
+      value: 'audit',
     },
     startDate: String,
     endDate: String,
     hoursBounds: {
-      value: {min: 0, max: 23}
-    }
+      value: {min: 0, max: 23},
+    },
   },
 
-  ready: function() {
+  ready() {
     this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
-  _range: function(start, end) {
-    var res = [];
-    for (var i = start; i <= end; i++) {
+  _range(start, end) {
+    const res = [];
+    for (let i = start; i <= end; i++) {
       res.push(i);
     }
     return res;
   },
 
-  _aggregatePerHourOfDay: function(entries) {
+  _aggregatePerHourOfDay(entries) {
     // aggregate our buckets by key
-    var agg = {};
-    entries.forEach(function(e) {
+    const agg = {};
+    entries.forEach((e) => {
       agg[e.key] = agg[e.key] || [];
       agg[e.key].push(e.value);
     });
     // build our total per bucket
-    var hours = this._range(this.hoursBounds.min, this.hoursBounds.max);
-    return [hours.map(function(i) {
+    const hours = this._range(this.hoursBounds.min, this.hoursBounds.max);
+    return [hours.map((i) => {
       if (!agg[i] || !agg[i].length) { return 0; }
       // TODO: use Array.reduce once prototype.js is removed!
       // return agg[i].reduce(function(a, b) { return a + b; });
-      var sum = 0;
-      agg[i].forEach(function(v) { sum += v; });
+      let sum = 0;
+      agg[i].forEach((v) => { sum += v; });
       return sum;
     })];
-  }
+  },
 });

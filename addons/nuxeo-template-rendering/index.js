@@ -19,6 +19,7 @@ import './elements/nuxeo-delete-template-button.js';
 import './elements/nuxeo-template-rendering-page.js';
 
 import html from './nuxeo-template-rendering.html';
+
 const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);

@@ -29,7 +29,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-var OAUTH2_PROVIDERS_BASE_PATH = 'oauth2/provider/';
+
+const OAUTH2_PROVIDERS_BASE_PATH = 'oauth2/provider/';
 
 /**
 `nuxeo-cloud-providers`
@@ -129,33 +130,33 @@ Polymer({
 
   properties: {
     _selectedEntry: {
-      type: Object
+      type: Object,
     },
 
     oauth2Providers: {
       type: Array,
-      value: []
+      value: [],
     },
 
     _isNew: {
-      type: Boolean
+      type: Boolean,
     },
 
     _selectedServiceName: {
-      type: String
-    }
+      type: String,
+    },
   },
 
-  refresh: function() {
+  refresh() {
     this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH;
-    this.$.oauth.get().then(function(response) {
+    this.$.oauth.get().then((response) => {
       this.oauth2Providers = response.entries;
       // ELEMENTS-322 - fix this on nuxeo-data-table
       this.async(this.$.table.$.list.notifyResize.bind(this.$.table.$.list), 1000);
-    }.bind(this));
+    });
   },
 
-  _editEntry: function(e) {
+  _editEntry(e) {
     this._isNew = false;
     this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
     this._selectedServiceName = this._selectedEntry.serviceName;
@@ -165,18 +166,18 @@ Polymer({
     this.$.dialog.toggle();
   },
 
-  _addEntry: function() {
+  _addEntry() {
     this._isNew = true;
     this._selectedEntry = {
       'entity-type': 'nuxeoOAuth2ServiceProvider',
       scopes: '',
-      isEnabled: false
+      isEnabled: false,
     };
     this.$.dialog.toggle();
   },
 
-  _save: function() {
-    var valid = this.$.form.validate();
+  _save() {
+    const valid = this.$.form.validate();
     if (valid){
       this._selectedEntry.scopes = this._selectedEntry.scopes ? this._selectedEntry.scopes.split(',') : [];
       this.$.oauth.data = this._selectedEntry;
@@ -189,51 +190,51 @@ Polymer({
     }
   },
 
-  _create: function(entry) {
+  _create(entry) {
     this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH;
     this.$.oauth.data = entry;
-    this.$.oauth.post().then(function() {
+    this.$.oauth.post().then(() => {
       this.refresh();
       this.$.dialog.toggle();
       this.fire('notify', {message: this.i18n('cloudProviders.successfullyCreated')});
-    }.bind(this), function(err) {
+    }, (err) => {
       this.fire('notify', {
-        message: this.i18n('label.error').toUpperCase() + ': ' +
-        (err.message && err.message.length > 0 ? err.message :
-          this.i18n('cloudProviders.errorCreating'))
+        message: `${this.i18n('label.error').toUpperCase()  }: ${
+        err.message && err.message.length > 0 ? err.message :
+          this.i18n('cloudProviders.errorCreating')}`,
       });
-    }.bind(this));
+    });
   },
 
-  _update: function(serviceName, entry) {
+  _update(serviceName, entry) {
     this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + serviceName;
     this.$.oauth.data = entry;
-    this.$.oauth.put().then(function() {
+    this.$.oauth.put().then(() => {
       this.$.dialog.toggle();
       this.fire('notify', {message: this.i18n('cloudProviders.successfullyEdited')});
       this.refresh();
-    }.bind(this), function(err) {
+    }, (err) => {
       this.fire('notify', {
-        message: this.i18n('label.error').toUpperCase() + ': ' +
-        (err.message && err.message.length > 0 ? err.message :
-          this.i18n('cloudProviders.errorEditing'))
+        message: `${this.i18n('label.error').toUpperCase()  }: ${
+        err.message && err.message.length > 0 ? err.message :
+          this.i18n('cloudProviders.errorEditing')}`,
       });
-    }.bind(this));
+    });
   },
 
-  _deleteEntry: function(e) {
-    if (confirm(this.i18n('cloudProviders.confirmDelete'))) {
-      var item =  e.target.parentNode.item;
+  _deleteEntry(e) {
+    if (window.confirm(this.i18n('cloudProviders.confirmDelete'))) {
+      const {item} = e.target.parentNode;
       this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + item.serviceName;
-      this.$.oauth.remove().then(function() {
+      this.$.oauth.remove().then(() => {
         this.refresh();
         this.fire('notify', {message: this.i18n('cloudProviders.successfullyDeleted')});
-      }.bind(this), function() {
+      }, () => {
         this.fire('notify', {
-          message: this.i18n('label.error').toUpperCase() + ': ' +
-          this.i18n('cloudProviders.errorDeleting')
+          message: `${this.i18n('label.error').toUpperCase()  }: ${
+          this.i18n('cloudProviders.errorDeleting')}`,
         });
-      }.bind(this));
+      });
     }
-  }
+  },
 });

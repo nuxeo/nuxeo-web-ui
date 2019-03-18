@@ -53,55 +53,55 @@ Polymer({
   properties: {
     hostVisible: {
       type: Boolean,
-      observer: '_observeVisibility'
+      observer: '_observeVisibility',
     },
     subtypes: {
-      type: Array
-    }
+      type: Array,
+    },
   },
 
-  _observeVisibility: function() {
+  _observeVisibility() {
     if (this.hostVisible) {
       this._updateShortcuts();
     }
   },
 
-  _updateShortcuts: function() {
-    var types = this.$.creationStats.lastType(1);
-    this.$.creationStats.mostCommonType(2).forEach(function(type) {
+  _updateShortcuts() {
+    const types = this.$.creationStats.lastType(1);
+    this.$.creationStats.mostCommonType(2).forEach((type) => {
       if (types.indexOf(type) < 0) {
         types.push(type);
       }
     });
 
-    var shorcuts = [];
-    types.forEach(function(type) {
+    const shorcuts = [];
+    types.forEach((type) => {
       if (this.subtypes && this.subtypes.indexOf(type) > -1) {
-        var el = document.createElement('nuxeo-document-create-shortcut');
+        const el = document.createElement('nuxeo-document-create-shortcut');
         el.type = type;
-        el.icon =  'images/doctypes/' + type + '.svg';
+        el.icon =  `images/doctypes/${  type  }.svg`;
         el.label = this.formatDocType(type);
         shorcuts.push(el);
       }
-    }.bind(this));
+    });
 
     this._putNodes(dom(this.$.shortcuts), shorcuts.reverse());
   },
 
-  _putNodes: function(parent) {
+  _putNodes(parent, ...args) {
     while (parent.firstChild) {
       parent.removeChild(parent.firstChild);
     }
-    if (arguments && arguments.length > 1) {
-      for (var i = 1; i < arguments.length; i++) {
-        if (Array.isArray(arguments[i])) {
-          for (var j = 0; j < arguments[i].length; j++) {
-            parent.appendChild(arguments[i][j]);
+    if (args && args.length > 0) {
+      for (let i = 0; i < args.length; i++) {
+        if (Array.isArray(args[i])) {
+          for (let j = 0; j < args[i].length; j++) {
+            parent.appendChild(args[i][j]);
           }
         } else {
-          parent.appendChild(arguments[i]);
+          parent.appendChild(args[i]);
         }
       }
     }
-  }
+  },
 });

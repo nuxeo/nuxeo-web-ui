@@ -67,40 +67,40 @@ Polymer({
 
   properties: {
     task: {
-      type: Object
+      type: Object,
     },
 
     action: {
-      type: String
-    }
+      type: String,
+    },
   },
 
-  openPopup: function() {
+  openPopup() {
     this._resetPopup();
     this.$.assignmentDialog.open();
   },
 
-  _getActionLabel: function(action, i18n) {
-    return i18n('tasks.' + action);
+  _getActionLabel(action, i18n) {
+    return i18n(`tasks.${  action}`);
   },
 
-  _processAssignment: function() {
+  _processAssignment() {
     if (this.$.assignmentForm.validate()) {
-      this.params['comment'] = this.comment;
+      this.params.comment = this.comment;
       this.params[this.action === 'delegate' ? 'delegatedActors' : 'actors'] = this.actors;
 
-      this.$.taskAssignment.put().then(function(task) {
+      this.$.taskAssignment.put().then((task) => {
         this.$.assignmentDialog.close();
-        this.fire('workflowTaskAssignment', { task: task });
-      }.bind(this));
+        this.fire('workflowTaskAssignment', { task });
+      });
     }
   },
 
-  _resetPopup: function() {
+  _resetPopup() {
     this.actors = [];
     this.comment = null;
     this.params = {};
 
     this.$.assignmentForm.reset();
-  }
+  },
 });

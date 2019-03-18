@@ -20,37 +20,35 @@ import moment from 'moment';
  * @polymerBehavior Nuxeo.ChartDataBehavior
  */
 export const ChartDataBehavior = {
-  _labels: function(data) {
+  _labels(data) {
     return data.map(function(entry) {
       if (Array.isArray(entry.value)) {
         return entry.value.map(this._labels.bind(this));
-      } else {
+      } 
         return entry.key;
-      }
+      
     });
   },
-  _series: function(data) {
-    return data.map(function(obj) {
-      return obj.key;
-    });
+  _series(data) {
+    return data.map((obj) => obj.key);
   },
-  _values: function(data) {
+  _values(data) {
     return [data.map(function(entry) {
       if (Array.isArray(entry.value)) {
         return entry.value.map(this._values.bind(this));
-      } else {
+      } 
         return entry.value;
-      }
+      
     })];
   },
-  _extendEndDate: function(date) {
+  _extendEndDate(date) {
     if (date && moment) {
       return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());
     }
     return date;
   },
 
-  _formatDate: function(date) {
+  _formatDate(date) {
     return moment(date).format('YYYY-MM-DD');
-  }
+  },
 };

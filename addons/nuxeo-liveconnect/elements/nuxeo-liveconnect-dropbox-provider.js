@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
   Gabriel Barata <gbarata@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
@@ -39,21 +40,21 @@ Polymer({
 
   properties: {
     providerId: {
-      value: 'dropbox'
-    }
+      value: 'dropbox',
+    },
   },
 
-  openPicker: function() {
+  openPicker() {
     this.updateProviderInfo().then(this._init.bind(this));
   },
 
-  _init: function() {
-    var self = this;
+  _init() {
+    const self = this;
     function auth() {
       if (!self.isUserAuthorized) {
         self.openPopup(self.authorizationURL, {
           onMessageReceive: self._parseMessage.bind(self),
-          onClose: self._onOAuthPopupClose.bind(self)
+          onClose: self._onOAuthPopupClose.bind(self),
         });
       } else {
         self._showPicker();
@@ -62,68 +63,68 @@ Polymer({
     if (window.Dropbox) {
       auth();
     } else {
-      var script = document.createElement('script');
+      const script = document.createElement('script');
       script.type = 'text/javascript';
       script.id = 'dropboxjs';
       script.setAttribute('data-app-key', this.clientId);
       script.src = 'https://www.dropbox.com/static/api/2/dropins.js';
       script.onload = auth.bind(this);
-      document.head.appendChild(script);
+      document.head.appendChild(script); /* global Dropbox */
     }
   },
 
-  _parseMessage: function(event) {
-    var data = JSON.parse(event.data);
+  _parseMessage(event) {
+    const data = JSON.parse(event.data);
     this.accessToken = data.token;
   },
 
-  _onOAuthPopupClose: function() {
+  _onOAuthPopupClose() {
     if (this.accessToken) {
       if (!this.userId) {
-        this.updateProviderInfo().then(function() {
+        this.updateProviderInfo().then(() => {
           if (!this.userId) {
-            throw 'No username available.';
+            throw new Error('No username available.');
           }
           this._showPicker();
-        }.bind(this));
+        });
       } else {
         this._showPicker();
       }
     }
   },
 
-  _showPicker: function() {
-    var options = {
+  _showPicker() {
+    const options = {
       success: function(files) {
-        var blobs = [];
-        files.forEach(function(file) {
-          var fileId = this._getPathFromUrl(file.link); // NXP-22530: Replace path with dropbox file id
+        const blobs = [];
+        files.forEach((file) => {
+          const fileId = this._getPathFromUrl(file.link); // NXP-22530: Replace path with dropbox file id
           blobs.push({
             providerId: this.providerId,
             providerName: 'Dropbox',
             user: this.userId,
-            fileId: fileId,
+            fileId,
             name: file.name,
             size: file.bytes,
-            key: this.generateBlobKey(fileId)
+            key: this.generateBlobKey(fileId),
           });
-        }.bind(this));
+        });
         this.notifyBlobPick(blobs);
       }.bind(this),
 
-      cancel: function() {
+      cancel() {
       },
 
       linkType: 'direct',
 
-      multiselect: true
+      multiselect: true,
     };
 
     Dropbox.choose(options);
   },
 
-  _getPathFromUrl: function(url) {
-    var path = url.replace(/https:\/\/dl.dropboxusercontent.com\/1\/view\/[\w]*/g, '');
+  _getPathFromUrl(url) {
+    const path = url.replace(/https:\/\/dl.dropboxusercontent.com\/1\/view\/[\w]*/g, '');
     return decodeURIComponent(path);
-  }
+  },
 });

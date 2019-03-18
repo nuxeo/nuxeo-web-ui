@@ -139,32 +139,32 @@ Polymer({
     hidden: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
     selectedItems: {
       type: Object,
       value: [],
-      notify: true
+      notify: true,
     },
     _isDisplayToolbar: {
       type: Boolean,
-      value: false
-    }
+      value: false,
+    },
   },
 
   observers: [
-    '_observeSelectedItems(selectedItems)'
+    '_observeSelectedItems(selectedItems)',
   ],
 
-  _observeSelectedItems: function() {
+  _observeSelectedItems() {
     this.hidden = !this.selectedItems || (this.selectedItems.length === 0);
   },
 
-  toogleSelectedItemsPopup: function() {
+  toogleSelectedItemsPopup() {
     this.$$('#selectedItemsPopup').toggle();
   },
 
-  clearSelection: function() {
+  clearSelection() {
     this.fire('clear-selected-items');
-  }
+  },
 });

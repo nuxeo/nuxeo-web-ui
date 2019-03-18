@@ -56,24 +56,24 @@ Polymer({
   properties: {
     showSavedSearchActions: {
       type: Boolean,
-      value: false
+      value: false,
     },
     heading: String,
     /**
      * The `nuxeo-page-provider` instance used to perform the search.
-     **/
+     * */
     provider: String,
     /**
      * The page size passed on to `provider`.
-     **/
+     * */
     pageSize: Number,
     /**
      * The parameters passed on to `provider`.
-     **/
+     * */
     params: Object,
     /**
      * The schemas passed on to `provider`.
-     **/
+     * */
     schemas: String,
     /**
      * List of content enrichers passed on to `provider`.
@@ -85,57 +85,57 @@ Polymer({
     headers: String,
     /**
      * If `true`, requests from `provider` are in flight.
-     **/
+     * */
     loading: {
       type: Boolean,
       reflectToAttribute: true,
-      value: false
+      value: false,
     },
     /**
      * The name of the search layout.
-     **/
+     * */
     searchName: String,
     /**
      * The aggregations returned by `provider`.
-     **/
+     * */
     aggregations: {
       type: Object,
-      notify: true
+      notify: true,
     },
     /**
      * Quick filters state of `provider`.
      */
     quickFilters: {
       type: Array,
-      notify: true
+      notify: true,
     },
     /**
      * If `true`, the current element is visible.
-     **/
+     * */
     visible: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, automatically execute the search each time a param is changed.
      */
     auto: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * If `true`, display the top filtering panel.
      */
     showFilters: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /*
      * If `true`, opens the collapsible top filtering panel.
      */
     opened: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /*
      * An external search form (containing its own page provider) will be used, instead of the embeded one.
@@ -143,6 +143,6 @@ Polymer({
      * controlled by the search form: `provider`, `pageSize`, `params`, `schemas`, `enrichers`, `headers`,
      * `loading`, `aggregations`, `quickFilters` and `auto`.
      */
-    searchForm: Object
-  }
+    searchForm: Object,
+  },
 });

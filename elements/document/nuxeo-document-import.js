@@ -32,15 +32,15 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
-import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import './nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 
 /**
 `nuxeo-document-import`
@@ -315,7 +315,7 @@ Polymer({
 
         <div class="suggester">
           <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
-          <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
+          <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
         </div>
 
         <div id="dropzone" class="vertical layout flex">
@@ -431,7 +431,7 @@ Polymer({
           <paper-dialog-scrollable id="blobEditor">
             <div class="suggester">
               <nuxeo-path-suggestion id="pathSuggesterCustomize" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
-              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">​[[errorMessage]]</span>
+              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
             </div>
             <iron-form id="form">
               <form class="form vertical layout flex">
@@ -527,112 +527,112 @@ Polymer({
   properties: {
 
     batchAppend: {
-      value: true
+      value: true,
     },
 
     stage: {
       type: String,
-      value: 'upload'
+      value: 'upload',
     },
 
     docIdx: {
       type: Number,
-      value: -1
+      value: -1,
     },
 
     localFiles: {
       type: Array,
-      value: []
+      value: [],
     },
 
     remoteFiles: {
       type: Array,
-      value: []
+      value: [],
     },
 
     selectedDocType: {
       type: String,
-      observer: '_selectedDocTypeChanged'
+      observer: '_selectedDocTypeChanged',
     },
 
     documentBlobProperties: {
       type: Object,
       value: {
         default: 'file:content',
-        note: 'note:note'
-      }
+        note: 'note:note',
+      },
     },
 
     hasLocalFiles: {
       type: Boolean,
       value: false,
-      notify: true
+      notify: true,
     },
 
     hasRemoteFiles: {
       type: Boolean,
       value: false,
-      notify: true
+      notify: true,
     },
 
     hasFiles: {
       type: Boolean,
       value: false,
-      computed: '_computeHasFiles(hasLocalFiles,hasRemoteFiles)'
+      computed: '_computeHasFiles(hasLocalFiles,hasRemoteFiles)',
     },
 
     visible: {
-      type: Boolean
+      type: Boolean,
     },
 
     _doNotCreate: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
     _docProperties: {
       type: Object,
-      value: {}
+      value: {},
     },
 
     _hasVisibleContributions: {
-      type: Boolean
+      type: Boolean,
     },
 
     _importDocTypes: {
       type: Array,
-      computed: '_computeImportDocTypes(subtypes)'
+      computed: '_computeImportDocTypes(subtypes)',
     },
 
     _creating: {
       type: Boolean,
-      value: false
+      value: false,
     },
 
-    _importWithPropertiesError: String
+    _importWithPropertiesError: String,
 
   },
 
   listeners: {
     'batchFinished': '_batchReady',
     'nx-blob-picked': '_blobPicked',
-    'nx-document-creation-parent-validated': '_parentValidated'
+    'nx-document-creation-parent-validated': '_parentValidated',
   },
 
   observers: [
     '_observeFiles(files.*)',
     '_observeRemoteFiles(remoteFiles.splices)',
-    '_visibleOnStage(visible,stage)'
+    '_visibleOnStage(visible,stage)',
   ],
 
-  ready: function() {
+  ready() {
     this.connection = this.$.nx;
     this.setupDropZone(this.$.dropzone);
     this._clear();
     this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
   },
 
-  init: function(files) {
+  init(files) {
     if (files) {
       this.uploadFiles(files);
     }
@@ -640,74 +640,70 @@ Polymer({
               this.hasContributions && !!this.$$('.importActions > *:not([hidden]):not(nuxeo-slot)'));
   },
 
-  _observeFiles: function(changeRecord) {
+  _observeFiles(changeRecord) {
     if (changeRecord) {
       if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
         changeRecord.value.indexSplices.forEach(function(s) {
-          for (var i = 0; i < s.addedCount; i++) {
-            var index = s.index + i;
+          for (let i = 0; i < s.addedCount; i++) {
+            const index = s.index + i;
             this.push('localFiles', this.files[index]);
           }
         }, this);
         this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
         this.hasLocalFilesUploaded = false;
       } else {
-        var match = changeRecord.path.match(/(files\.\d+)\.(\w+)/);
+        const match = changeRecord.path.match(/(files\.\d+)\.(\w+)/);
         if (match) {
           // this is needed because the client doesn't account for removed blobs
-          var localFilesIdx = this.localFiles.indexOf(this.get(match[1]));
+          const localFilesIdx = this.localFiles.indexOf(this.get(match[1]));
           // hack: refresh on the dom repeat
           this.notifyPath(['localFiles', localFilesIdx, match[2]].join('.'));
           if (match[2] === 'complete') {
-            this.hasLocalFilesUploaded = this.hasLocalFiles && this.localFiles.every(function(file) {
-              return !file || file.complete;
-            });
+            this.hasLocalFilesUploaded = this.hasLocalFiles && this.localFiles.every((file) => !file || file.complete);
           }
         }
       }
     }
   },
 
-  _observeRemoteFiles: function() {
+  _observeRemoteFiles() {
     this.hasRemoteFiles = this.remoteFiles && this.remoteFiles.length > 0;
   },
 
-  _showDropzoneFileHeadings: function() {
+  _showDropzoneFileHeadings() {
     return this.hasLocalFiles && this.hasRemoteFiles;
   },
 
-  _canImport: function() {
+  _canImport() {
     return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles)
       && this.canCreate && !this._creating;
   },
 
-  _isUploadingOrImporting: function() {
+  _isUploadingOrImporting() {
     return this._creating || (this.hasLocalFiles ? !this.hasLocalFilesUploaded : false);
   },
 
-  _canImportWithMetadata: function() {
-    return this._getAllFiles().every(function(file) {
-      return 'checked' in file
-    }) && this._canImport();
+  _canImportWithMetadata() {
+    return this._getAllFiles().every((file) => 'checked' in file) && this._canImport();
   },
 
-  _canAddProperties: function() {
+  _canAddProperties() {
     return this.hasFiles && this.canCreate && !this._creating;
   },
 
-  _showUploadDialog: function() {
+  _showUploadDialog() {
     this.$.uploadFiles.click();
   },
 
-  _filesChanged: function(e) {
+  _filesChanged(e) {
     this.uploadFiles(e.target.files);
   },
 
-  _selectedDocTypeChanged: function() {
+  _selectedDocTypeChanged() {
     this._validate();
   },
 
-  _toggleCustomize: function() {
+  _toggleCustomize() {
     if (this.stage === 'upload') {
       this.stage = 'customize';
       this.customizing = true;
@@ -721,69 +717,69 @@ Polymer({
     }
   },
 
-  _computeHasFiles: function() {
+  _computeHasFiles() {
     return this.hasLocalFiles || this.hasRemoteFiles;
   },
 
-  _getAllFiles: function() {
+  _getAllFiles() {
     if (this.localFiles && this.remoteFiles) {
       return this.localFiles.concat(this.remoteFiles);
-    } else {
-      return this.localFiles ? this.localFiles : this.remoteFiles;
     }
+      return this.localFiles ? this.localFiles : this.remoteFiles;
+
   },
 
-  _getTotalFileCount: function() {
+  _getTotalFileCount() {
     return (this.localFiles ? this.localFiles.length : 0) + (this.remoteFiles ? this.remoteFiles.length : 0);
   },
 
-  _getCurrentFile: function() {
-    var arr = this._getAllFiles();
+  _getCurrentFile() {
+    const arr = this._getAllFiles();
     return arr[this.docIdx];
   },
 
-  _isValidFileIndex: function(index) {
-    var length = this._getTotalFileCount();
+  _isValidFileIndex(index) {
+    const length = this._getTotalFileCount();
     return length > 0 && index >= 0 && index < length;
   },
 
-  _getFile: function(index) {
+  _getFile(index) {
     if (this._isValidFileIndex(index)) {
       return this._getAllFiles()[index];
     }
   },
 
-  _setFileProp: function(index, prop, value) {
+  _setFileProp(index, prop, value) {
     if (this._isValidFileIndex(index)) {
-      var pos = index;
-      var arr = 'localFiles';
+      let pos = index;
+      let arr = 'localFiles';
       if (pos >= this.localFiles.length) {
         arr = 'remoteFiles';
-        pos = pos - this.localFiles.length;
+        pos -= this.localFiles.length;
       }
       this._setFilePropEx(arr, pos, prop, value);
     }
   },
 
-  _setFilePropEx: function(arrName, index, prop, value) {
+  _setFilePropEx(arrName, index, prop, value) {
     this.set([arrName, index,prop].join('.'), value);
   },
 
-  _getCurrentFileTitle: function() {
-    var currentFile = this._getCurrentFile();
+  _getCurrentFileTitle() {
+    const currentFile = this._getCurrentFile();
     return currentFile ? currentFile.name : '';
   },
 
-  _getRemainingDocs: function() {
-    var count = this._getTotalFileCount();
+  _getRemainingDocs() {
+    const count = this._getTotalFileCount();
     return count > 1 ? this.i18n('documentImportForm.addProperties.otherDocuments', count - 1 - this.docIdx) : '';
   },
 
-  _copyFileData: function(originIdx, destIdx) {
-    var originFile = this._getFile(originIdx);
-    var destFile = this._getFile(destIdx);
-    var docData = originFile.docData;
-    var copiedDocData = {};
+  _copyFileData(originIdx, destIdx) {
+    const originFile = this._getFile(originIdx);
+    const destFile = this._getFile(destIdx);
+    const {docData} = originFile;
+    let copiedDocData = {};
 
     if (docData && Object.keys(docData).length > 0) {
       copiedDocData = JSON.parse(JSON.stringify(docData));
@@ -793,13 +789,13 @@ Polymer({
     this._setFileProp(destIdx, 'checked', true);
   },
 
-  _storeFile: function(index) {
+  _storeFile(index) {
     if (this._isValidFileIndex(index)) {
-      var pos = index;
-      var propName = 'localFiles';
+      let pos = index;
+      let propName = 'localFiles';
       if (pos >= this.localFiles.length) {
         propName = 'remoteFiles';
-        pos = pos - this.localFiles.length;
+        pos -= this.localFiles.length;
       }
       this.set([propName, pos, 'docData'].join('.'), {
         parent: this.targetPath,
@@ -812,14 +808,12 @@ Polymer({
     }
   },
 
-  _loadFile: function(docData, title) {
-    var properties = {};
+  _loadFile(docData, title) {
+    let properties = {};
     if (docData && Object.keys(docData).length > 0) {
       this.targetPath = docData.parent;
-      this.selectedDocType = this._importDocTypes.find(function(type) {
-        return type.id === docData.type.id;
-      });
-      properties = JSON.parse(JSON.stringify(docData.document)).properties;
+      this.selectedDocType = this._importDocTypes.find((type) => type.id === docData.type.id);
+      ({ properties } = JSON.parse(JSON.stringify(docData.document)));
     }
     if (title) {
       properties['dc:title'] = title;
@@ -828,38 +822,38 @@ Polymer({
     this._updateDocument();
   },
 
-  _nextFile: function() {
+  _nextFile() {
     if (this._hasNextFile()) {
       this._selectDoc(this.docIdx + 1);
     }
   },
 
-  _previousFile: function() {
+  _previousFile() {
     if (this._hasPreviousFile()) {
       this._selectDoc(this.docIdx - 1);
     }
   },
 
-  _hasNextFile: function() {
-    var length = this._getTotalFileCount();
+  _hasNextFile() {
+    const length = this._getTotalFileCount();
     return length > 1 && this.docIdx < length - 1 && this.canCreate && !this._creating;
   },
 
-  _hasPreviousFile: function() {
-    var length = this._getTotalFileCount();
+  _hasPreviousFile() {
+    const length = this._getTotalFileCount();
     return length > 1 && this.docIdx > 0  && this.canCreate && !this._creating;
   },
 
-  _selectDoc: function(index) {
+  _selectDoc(index) {
     if (!this._isValidFileIndex(index)) {
-      throw 'invalid file index: ' + index;
+      throw new Error(`invalid file index: ${  index}`);
     } else if (this.docIdx !== index && (this.docIdx < 0 || this._validate())) {
       if (this.docIdx > -1) {
         this._storeFile(this.docIdx);
       }
-      var previousFile = this._getCurrentFile();
+      const previousFile = this._getCurrentFile();
       this.docIdx = index;
-      var currentFile = this._getCurrentFile();
+      const currentFile = this._getCurrentFile();
       if (currentFile.checked) {
         // load the file's own data
         this._loadFile(currentFile.docData);
@@ -875,49 +869,47 @@ Polymer({
     }
   },
 
-  _validate: function() {
+  _validate() {
     // run our custom validation function first to allow setting custom native validity
-    var layout = this.$$('#document-import');
+    const layout = this.$$('#document-import');
 
     // run our custom validation function first to allow setting custom native validity
-    var result = (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
+    const result = (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
 
     if (result || !layout) {
       return result;
-    } else {
-      var innerLayout = layout.$.layout;
-      var nodes = innerLayout._getValidatableElements(innerLayout.element.root);
-      var invalidField = nodes.find(function(node) {
-        return node.invalid;
-      });
+    }
+      const innerLayout = layout.$.layout;
+      const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
+      const invalidField = nodes.find((node) => node.invalid);
       if (invalidField) {
         invalidField.scrollIntoView();
         invalidField.focus();
       }
-    }
+
   },
 
-  _tapLocalDoc: function(e) {
+  _tapLocalDoc(e) {
     if (this.canCreate) {
       this._selectDoc(e.model.index);
     }
   },
 
-  _tapRemoteDoc: function(e) {
+  _tapRemoteDoc(e) {
     if (this.canCreate) {
       this._selectDoc(e.model.index + this.localFiles.length);
     }
   },
 
-  _selectedLocalDocStyle: function(index) {
+  _selectedLocalDocStyle(index) {
     return index === this.docIdx ? 'selected' : '';
   },
 
-  _selectedRemoteDocStyle: function(index) {
+  _selectedRemoteDocStyle(index) {
     return (index + this.localFiles.length) === this.docIdx ? 'selected' : '';
   },
 
-  _cancel: function() {
+  _cancel() {
     if (this.batchId) {
       this.cancelBatch();
     }
@@ -926,7 +918,7 @@ Polymer({
     this.fire('nx-creation-wizard-show-tabs');
   },
 
-  _clear: function() {
+  _clear() {
     this.stage = 'upload';
     this.files = [];
     this.localFiles = [];
@@ -944,7 +936,7 @@ Polymer({
     this.$.uploadFiles.value = '';
   },
 
-  _importWithProperties: function() {
+  _importWithProperties() {
     if (this._validate()) {
       this._creating = true;
       this._storeFile(this.docIdx);
@@ -952,22 +944,22 @@ Polymer({
     }
   },
 
-  _import: function() {
+  _import() {
     this._creating = true;
-    var params = {
+    const params = {
       context: {
-        currentDocument: this.targetPath
-      }
+        currentDocument: this.targetPath,
+      },
     };
-    var doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
-    var doRemote = this.remoteFiles && this.remoteFiles.length > 0;
+    const doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
+    const doRemote = this.remoteFiles && this.remoteFiles.length > 0;
     if (doLocal && doRemote) {
       this._smartImportLocalFiles(params)
-          .then(function(response1) {
-            this._smartImportRemoteFiles(params).then(function(response2) {
+          .then((response1) => {
+            this._smartImportRemoteFiles(params).then((response2) => {
               this._handleSuccess(this._mergeResponses(response1, response2));
-            }.bind(this), this._handleError.bind(this));
-          }.bind(this), this._handleError.bind(this));
+            }, this._handleError.bind(this));
+          }, this._handleError.bind(this));
     } else if (doLocal) {
       this._smartImportLocalFiles(params)
           .then(this._handleSuccess.bind(this), this._handleError.bind(this));
@@ -977,17 +969,17 @@ Polymer({
     }
   },
 
-  _handleSuccess: function(response, close) {
+  _handleSuccess(response, close) {
     if (close === undefined) {
       close = true;
     }
     this._notify(response, close);
     // store creation data
     if (response.entries && Array.isArray(response.entries)) {
-      response.entries.forEach(function(f) {
+      response.entries.forEach((f) => {
         // XXX remove this to lower as soon as we get type information from the server
         this.$.creationStats.storeType(f.type.toLowerCase());
-      }.bind(this));
+      });
     } else if (response.type) {
       this.$.creationStats.storeType(response.type);
     }
@@ -1003,16 +995,16 @@ Polymer({
     }
   },
 
-  _handleError: function(error) {
+  _handleError(error) {
     this.set('_creating', false);
     this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
-    this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' + error.message});
+    this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${  error.message}`});
   },
 
-  _mergeResponses: function() {
-    var response = {'entity-type': 'Documents', 'entries': []};
-    for (var i = 0; i < arguments.length; i++) {
-      var current = arguments[i];
+  _mergeResponses(...args) {
+    const response = {'entity-type': 'Documents', 'entries': []};
+    for (let i = 0; i < args.length; i++) {
+      const current = args[i];
       if (current && current.entries) {
         response.entries.concat(current.entries);
       } else {
@@ -1022,164 +1014,162 @@ Polymer({
     return response;
   },
 
-  _smartImportLocalFiles: function(params) {
+  _smartImportLocalFiles(params) {
     return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true', 'X-Batch-No-Drop': 'true'});
   },
 
-  _smartImportRemoteFiles: function(params) {
-    this.$.fileManagerImport.input = 'blobs:' + this.remoteFiles.map(function(file) {
-      return file.key;
-    }).join();
+  _smartImportRemoteFiles(params) {
+    this.$.fileManagerImport.input = `blobs:${  this.remoteFiles.map((file) => file.key).join()}`;
     this.$.fileManagerImport.params = params;
     this.$.fileManagerImport.params.noMimeTypeCheck = true;
     return this.$.fileManagerImport.execute();
   },
 
-  _processFilesWithMetadata: function() {
+  _processFilesWithMetadata() {
     this._importWithPropertiesError = '';
-    var length = this._getTotalFileCount();
-    var self = this;
-    var promises = [];
-    var localIndexes = [];
-    var remoteIndexes = [];
-    for (var i = 0; i < length; i++) {
-      var arr = self.localFiles, index = i;
+    const length = this._getTotalFileCount();
+    const self = this;
+    const promises = [];
+    const localIndexes = [];
+    const remoteIndexes = [];
+    for (let i = 0; i < length; i++) {
+      let arr = self.localFiles;
+      let index = i;
       if (i >= self.localFiles.length) {
         arr = self.remoteFiles;
         index = i - self.localFiles.length;
       }
       promises.push(
-        (function(indexesToRemove, index){
-          return ((arr[index].docData && arr[index].checked) ?
-                    self._processFileWithMetadata(arr[index]) :
-                    Promise.resolve({'entity-type': 'Documents', 'entries': []})).then(function(result) {
-                      indexesToRemove.push(index);
+        (function(indexesToRemove, idx){
+          return ((arr[idx].docData && arr[idx].checked) ?
+                    self._processFileWithMetadata(arr[idx]) :
+                    Promise.resolve({'entity-type': 'Documents', 'entries': []})).then((result) => {
+                      indexesToRemove.push(idx);
                       return result;
-                    }.bind(this)).catch(function(error) {
-                      return error;
-                    }.bind(this))
-        }.bind(this))(i >= self.localFiles.length ? remoteIndexes : localIndexes, index));
+                    }).catch((error) => error)
+        })(i >= self.localFiles.length ? remoteIndexes : localIndexes, index));
     }
-    Promise.all(promises).then(function(results) {
-      var errorFree = results.filter(function(result) {
-        return !(result instanceof Error);
-      });
+    Promise.all(promises).then((results) => {
+      const errorFree = results.filter((result) => !(result instanceof Error));
       this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
-        localIndexes.sort().reverse().forEach(function(index) {
+        localIndexes.sort().reverse().forEach((index) => {
           this.splice('localFiles', index, 1);
-        }.bind(this));
-        remoteIndexes.sort().reverse().forEach(function(index) {
+        });
+        remoteIndexes.sort().reverse().forEach((index) => {
           this.splice('remoteFiles', index, 1);
-        }.bind(this));
+        });
         this._selectDoc(0);
       }
 
-    }.bind(this));
+    });
   },
 
-  _processFileWithMetadata: function(file) {
+  _processFileWithMetadata(file) {
     this.document = file.docData.document;
     this.targetPath = file.docData.parent;
     this.document.name = file.sanitizedName || file.name;
-    var blobProperty = this.documentBlobProperties[file.docData.type.id] ||
-                       this.documentBlobProperties['default'];
+    const blobProperty = this.documentBlobProperties[file.docData.type.id] ||
+                       this.documentBlobProperties.default;
     // XXX if fileData.type == Note, then the file's contents should be passed instead
     this.document.properties[blobProperty] = file.providerId ? {
       'providerId': file.providerId,
       'user': file.user,
-      'fileId': file.fileId
+      'fileId': file.fileId,
     } : {
       'upload-batch': this.batchId,
-      'upload-fileId': String(file.index)
+      'upload-fileId': String(file.index),
     };
     return this.$.docRequest.post();
   },
 
-  _removeBlob: function(e) {
+  _removeBlob(e) {
     if (e.model.file.providerId) {
       this.splice('remoteFiles', e.model.index, 1);
     } else {
-      this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.file.index;
-      this.$.blobRemover.remove().then(function() {
+      this.$.blobRemover.path = `upload/${  this.batchId  }/${  e.model.file.index}`;
+      this.$.blobRemover.remove().then(() => {
         this.splice('localFiles', e.model.index, 1);
         this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
         this.$.uploadFiles.value = '';
-      }.bind(this), this._handleError.bind(this));
+      }, this._handleError.bind(this));
     }
   },
 
-  _batchReady: function(data) {
+  _batchReady(data) {
     data.stopPropagation();
     this.properties = [];
-    for (var i = 0; i < this.localFiles.length; i++) {
+    for (let i = 0; i < this.localFiles.length; i++) {
       this.properties.push({});
     }
-    var div = this.$$('div[name="upload"]');
+    const div = this.$$('div[name="upload"]');
     if (div) {
       div.focus();
     }
   },
 
-  _blobPicked: function(e) {
+  _blobPicked(e) {
     this.hasRemoteFiles = true;
     this.notifyPath('remoteFiles', this.remoteFiles.concat(e.detail.blobs));
   },
 
-  _getDocumentProperties: function() {
+  _getDocumentProperties() {
     return this._docProperties;
   },
 
-  _styleFileCheck: function(e) {
-    return (e.base && ('checked' in e.base)) ? (e.base.checked ? 'checked' : 'unchecked') : 'hidden';
+  _styleFileCheck(e) {
+    if (e.base && ('checked' in e.base)) {
+      return e.base.checked ? 'checked' : 'unchecked';
+    }
+    return 'hidden';
   },
 
-  _checkTappedLocal: function(e) {
+  _checkTappedLocal(e) {
     e.stopPropagation();
     this._setFilePropEx('localFiles', e.model.index, 'checked', !e.model.file.checked);
   },
 
-  _checkTappedRemote: function(e) {
+  _checkTappedRemote(e) {
     e.stopPropagation();
     this._setFilePropEx('remoteFiles', e.model.index, 'checked', !e.model.file.checked);
   },
 
-  _canApplyToAll: function() {
+  _canApplyToAll() {
     return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 &&
       this.canCreate && !this._creating;
   },
 
-  _applyToAll: function() {
-    var lastIdx = this._getTotalFileCount() - 1;
+  _applyToAll() {
+    const lastIdx = this._getTotalFileCount() - 1;
     if (this._isValidFileIndex(this.docIdx) && this._isValidFileIndex(lastIdx) && this._validate()) {
       this._storeFile(0);
-      for (var i = 1; i <= lastIdx; i++) {
+      for (let i = 1; i <= lastIdx; i++) {
         this._copyFileData(0, i);
       }
       this._selectDoc(lastIdx);
     }
   },
 
-  _filterImportDocTypes: function(type) {
+  _filterImportDocTypes(type) {
     return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
   },
 
-  _computeImportDocTypes: function() {
+  _computeImportDocTypes() {
     if (this.subtypes) {
       return this.subtypes.filter(this._filterImportDocTypes);
     }
   },
 
-  _parentValidated: function() {
+  _parentValidated() {
     if (this.canCreate && this._importDocTypes && this._importDocTypes.length === 0) {
       this.set('canCreate', false);
       this.set('errorMessage', this.i18n('documentImport.error.cannotImport'));
     }
   },
 
-  _visibleOnStage: function() {
+  _visibleOnStage() {
     this.$.pathSuggesterUpload.disabled = !this.visible || this.stage !== 'upload';
     this.$.pathSuggesterCustomize.disabled = !this.visible || this.stage !== 'customize';
   },
@@ -1187,7 +1177,7 @@ Polymer({
   /**
    * Retrieves and creates the layout for the current document type
    */
-  _updateDocument: function() {
+  _updateDocument() {
 
     if (!this._isValidType(this.selectedDocType) || !this.parent) {
       this.document = null;
@@ -1196,22 +1186,22 @@ Polymer({
       return;
     }
 
-    this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
+    this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
       document.parentRef = this.parent.uid;
       this.document = document;
-    }.bind(this));
+    });
   },
 
-  _layoutUpdated: function(e) {
-    this.async(function() {
-      var input = e.detail.value.querySelector('[autofocus]');
+  _layoutUpdated(e) {
+    this.async(() => {
+      const input = e.detail.value.querySelector('[autofocus]');
       if (input) {
         input.focus();
       }
     });
   },
 
-  _submitKeyHandler: function(e) {
+  _submitKeyHandler(e) {
     if (this.stage === 'upload' && this._canImport()) {
       this._import();
     }
@@ -1225,14 +1215,14 @@ Polymer({
   },
 
   // trigger native browser invalid-form UI
-  _doNativeValidation: function(/*form*/) {
-    /*var fakeSubmit = document.createElement('input');
+  _doNativeValidation(/* form */) {
+    /* var fakeSubmit = document.createElement('input');
     fakeSubmit.setAttribute('type', 'submit');
     fakeSubmit.style.display = 'none';
     form._form.appendChild(fakeSubmit);
     fakeSubmit.click();
     form._form.removeChild(fakeSubmit);
-    return form._form.checkValidity();*/
+    return form._form.checkValidity(); */
     return true;
-  }
+  },
 });

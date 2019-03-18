@@ -128,12 +128,12 @@ limitations under the License.
       is: 'nuxeo-assets-search-results',
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
-        nxProvider: Object
+        nxProvider: Object,
       },
 
-      _navigate: function(e) {
+      _navigate(e) {
         this.fire('navigate', {doc: (e.model || e.detail).item});
-      }
+      },
     });
   </script>
 

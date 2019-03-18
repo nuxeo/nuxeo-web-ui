@@ -66,14 +66,14 @@ Polymer({
 
   properties: {
     document: Object,
-    latest: Object
+    latest: Object,
   },
 
   observers: [
-    '_update(document)'
+    '_update(document)',
   ],
 
-  _update: function() {
+  _update() {
     if (this.document.isVersion) {
       this.$.opGetLatest.execute();
     } else {
@@ -81,25 +81,25 @@ Polymer({
     }
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     if (this.document && this.latest) {
-      var v1 = this.document.properties['uid:major_version'] + '.' +
-        this.document.properties['uid:minor_version'];
-      var v2 = this.latest.properties['uid:major_version'] + '.' +
-        this.latest.properties['uid:minor_version'];
+      const v1 = `${this.document.properties['uid:major_version']  }.${ 
+        this.document.properties['uid:minor_version']}`;
+      const v2 = `${this.latest.properties['uid:major_version']  }.${ 
+        this.latest.properties['uid:minor_version']}`;
       return v1 === v2 ? this.latest.isCheckedOut : true;
     }
     return false;
   },
 
-  _restore: function() {
+  _restore() {
     if (this.document) {
       this.$.opRestoreVersion.input = this.document.uid;
       this.$.opRestoreVersion.params = {checkout: true};
-      this.$.opRestoreVersion.execute().then(function() {
+      this.$.opRestoreVersion.execute().then(() => {
         this.fire('document-updated');
         this.navigateTo('browse', this.document.path);
-      }.bind(this));
+      });
     }
-  }
+  },
 });

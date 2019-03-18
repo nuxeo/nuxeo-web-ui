@@ -53,11 +53,11 @@ limitations under the License.
           type: Object,
           value: {},
           notify: true,
-          observer: '_observeParams'
-        }
+          observer: '_observeParams',
+        },
       },
 
-      _observeParams: function() {
+      _observeParams() {
         if (!this.params || !this.params.queryParams || this.params.queryParams.length !== 0) {
           if (this.params['saved:queryParams']) {
             this.set('params.queryParams', this.params['saved:queryParams']);
@@ -68,11 +68,11 @@ limitations under the License.
         }
       },
 
-      _checkForEnter: function(e) {
+      _checkForEnter(e) {
         if (e.keyCode === 13 && e.ctrlKey) {
           this.fire('trigger-search');
         }
-      }
+      },
 
     });
   </script>

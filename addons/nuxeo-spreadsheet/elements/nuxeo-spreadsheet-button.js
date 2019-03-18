@@ -16,6 +16,7 @@ limitations under the License.
 Contributors:
    Adilio Araujo <aaraujo@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -24,9 +25,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
   return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-          return String.fromCharCode('0x' + p1);
-  }));
+      (match, p1) => String.fromCharCode(`0x${  p1}`)));
 }
 
 /**
@@ -72,11 +71,11 @@ Polymer({
   properties: {
     nxProvider: {
       type: HTMLElement,
-      value: null
+      value: null,
     },
     columns: {
       type: Array,
-      value: []
+      value: [],
     },
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -88,72 +87,72 @@ Polymer({
     _label: {
       type: String,
       computed: '_computeLabel(i18n)',
-    }
+    },
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     return (this.nxProvider !== null) && this.columns.length;
   },
 
-  _show: function() {
-    var provider = this.nxProvider;
+  _show() {
+    const provider = this.nxProvider;
 
     // convert from provider.sort to sortInfos
-    var sortInfos = [];
-    Object.keys(provider.sort).forEach(function(key) {
+    const sortInfos = [];
+    Object.keys(provider.sort).forEach((key) => {
       sortInfos.push({'sortColumn': key, 'sortAscending': provider.sort[key] === 'asc'});
     });
 
     // convert provider.params and provider.aggregations to properties
-    var properties = {};
+    const properties = {};
     if (provider.params) {
-      Object.keys(provider.params).forEach(function(key) {
+      Object.keys(provider.params).forEach((key) => {
         properties[key] = provider.params[key];
       });
     }
     if (provider.aggregations) {
-      Object.keys(provider.aggregations).forEach(function(key) {
+      Object.keys(provider.aggregations).forEach((key) => {
         properties[key] = provider.aggregations[key].selection;
       });
     }
 
     // convert datatable.columns to columns
-    var columns = [];
-    this.columns.forEach(function(c) {
+    const columns = [];
+    this.columns.forEach((c) => {
       if (c.field && !c.hidden) {
         columns.push({label: c.name ? c.name : c.field, field: c.field});
       }
     });
 
-    var state = {
+    const state = {
       pageProviderName: provider.provider,
       pageSize: provider.pageSize,
       currentPage: provider.page,
       namedParameters: provider.params,
-      searchDocument: {properties: properties},
-      sortInfos: sortInfos,
+      searchDocument: {properties},
+      sortInfos,
       resultColumns: columns,
-      executed: false
+      executed: false,
     };
 
-    this.$.iframe.src = this.$.nxconn.url + '/spreadsheet/?cv=' +
-      encodeURIComponent(b64EncodeUnicode(JSON.stringify(state)));
+    this.$.iframe.src = `${this.$.nxconn.url  }/spreadsheet/?cv=${
+      encodeURIComponent(b64EncodeUnicode(JSON.stringify(state)))}`;
     this.$.dialog.toggle();
   },
 
-  _close: function() {
+  _close() {
     this.$.dialog.toggle();
     this.nxProvider.fetch();
   },
 
-  _onLoad: function() {
-    var close = (this.$.iframe.contentDocument || this.$.iframe.contentWindow.document).querySelector('#close');
+  _onLoad() {
+    const close = (this.$.iframe.contentDocument || this.$.iframe.contentWindow.document).querySelector('#close');
     if (close) {
       close.addEventListener('click', this._close.bind(this));
     }
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('spreadsheetButton.tooltip');
-  }
+  },
 });

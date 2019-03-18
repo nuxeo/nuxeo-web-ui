@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -70,7 +71,7 @@ Polymer({
      * Input document.
      */
     document: {
-      type: Object
+      type: Object,
     },
 
     /**
@@ -78,7 +79,7 @@ Polymer({
      */
     icon: {
       type: String,
-      value: 'nuxeo:share'
+      value: 'nuxeo:share',
     },
 
     /**
@@ -90,25 +91,25 @@ Polymer({
     },
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.$.dialog.toggle();
     this.$.permalink.inputElement.inputElement.select();
   },
 
-  _isAvailable: function(document) {
+  _isAvailable(document) {
     return document;
   },
 
-  _isEasyshare: function(document) {
+  _isEasyshare(document) {
     return document && document.type === 'EasyShareFolder';
   },
 
-  _buildPermalink: function(document) {
-    return document ? location.origin + location.pathname + '#!/doc/' + document.uid : '';
+  _buildPermalink(document) {
+    return document ? `${ window.location.origin + window.location.pathname }#!/doc/${ document.uid }` : '';
   },
 
-  _buildEasysharelink: function(document) {
-    var baseUrl = location.origin + this.$.nxcon.url;
-    return document ? baseUrl + '/site/easyshare/' + this.document.uid : '';
-  }
+  _buildEasysharelink(document) {
+    const baseUrl = window.location.origin + this.$.nxcon.url;
+    return document ? `${ baseUrl }/site/easyshare/${ this.document.uid }` : '';
+  },
 });

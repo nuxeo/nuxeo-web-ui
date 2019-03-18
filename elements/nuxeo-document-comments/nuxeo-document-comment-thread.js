@@ -122,9 +122,9 @@ Polymer({
 
     comments: {
       type: Array,
-      value: function() {
+      value() {
         return [];
-      }
+      },
     },
 
     level: {
@@ -156,23 +156,23 @@ Polymer({
     },
   },
 
-  connectedCallback : function() {
+  connectedCallback() {
     this.addEventListener('delete-comment', this._handleDeleteEvent);
     this.addEventListener('edit-comment', this._handleEditEvent);
     this.addEventListener('comments-changed', this._handleCommentsChange);
   },
 
-  disconnectedCallback: function() {
+  disconnectedCallback() {
     this.removeEventListener('delete-comment', this._handleDeleteEvent);
     this.removeEventListener('edit-comment', this._handleEditEvent);
     this.removeEventListener('comments-changed', this._handleCommentsChange);
   },
 
-  focusInput: function() {
+  focusInput() {
     this.$$('#replyContainer').focus();
   },
 
-  _checkForEnter: function(e) {
+  _checkForEnter(e) {
     if (e.keyCode === 13 && e.ctrlKey) {
       if(!this._isBlank(this.reply)) {
         this._submitReply();
@@ -180,18 +180,18 @@ Polymer({
     }
   },
 
-  _clearReply: function() {
+  _clearReply() {
     this.$.selector.clearSelection();
     this.set('reply', '');
   },
 
-  _clearRequest: function() {
+  _clearRequest() {
     this.$.commentRequest.data = {};
     this.$.commentRequest.headers = {};
     this.$.commentRequest.params = {};
   },
 
-  _fetchComments: function(loadAll) {
+  _fetchComments(loadAll) {
     this._clearRequest();
     this.$.commentRequest.path = this._computeResourcePath();
     this.$.commentRequest.params = {
@@ -199,71 +199,69 @@ Polymer({
       currentPageIndex: 0,
     };
     this.$.commentRequest.headers = {
-      'X-NXfetch.comment': 'repliesSummary'
+      'X-NXfetch.comment': 'repliesSummary',
     };
     this.$.commentRequest.get()
-      .then(function (response) {
+      .then((response) => {
         /* Reconciliation of local and server comments */
-        var olderComment = this.comments.length > 0 ? this.comments[0] : null;
-        var newComments = response.entries;
+        const olderComment = this.comments.length > 0 ? this.comments[0] : null;
+        const newComments = response.entries;
         while (newComments.length > 0 && !!olderComment
         && (newComments[0].creationDate > olderComment.creationDate || newComments[0].id === olderComment.id)) {
           newComments.shift();
         }
-        response.entries.forEach(function (entry) {
+        response.entries.forEach((entry) => {
           this.unshift('comments', entry);
-        }.bind(this));
+        });
         this._setTotal(response.totalSize);
         this._setAllCommentsLoaded(!!loadAll);
-      }.bind(this))
-      .catch(function (error) {
+      })
+      .catch((error) => {
         if (error.status === 404) {
           this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
         } else {
           this.fire('notify', {message: this._computeTextLabel(this.level, 'fetch.error')});
           throw error;
         }
-      }.bind(this));
+      });
   },
 
-  _getCommentIndexById: function(commentId) {
-    return this.comments.findIndex(function (entry) {
-      return entry.id === commentId;
-    });
+  _getCommentIndexById(commentId) {
+    return this.comments.findIndex((entry) => entry.id === commentId);
   },
 
-  _handleCommentsChange: function(event) {
+  _handleCommentsChange(event) {
     if (event.detail.path === 'comments.length') {
       this.fire('number-of-replies', {total: this.comments.length});
     }
   },
 
-  _handleDeleteEvent: function(event) {
-    var index = this._getCommentIndexById(event.detail.commentId);
+  _handleDeleteEvent(event) {
+    const index = this._getCommentIndexById(event.detail.commentId);
     if (index !== -1) {
       this._clearRequest();
       this.$.commentRequest.path = this._computeResourcePath(this.comments[index].id);
       this.$.commentRequest.remove()
-        .then(function () {
+        .then(() => {
           this.splice('comments', index, 1);
           this._setTotal(this.total - 1);
-        }.bind(this))
-        .catch(function (error) {
+        })
+        .catch((error) => {
           if (error.status === 404) {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
           } else {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'deletion.error')});
             throw error;
           }
-        }.bind(this));
+        });
       event.stopPropagation();
     }
   },
 
-  _handleEditEvent: function(event) {
-    var index = this._getCommentIndexById(event.detail.commentId);
+  _handleEditEvent(event) {
+    const index = this._getCommentIndexById(event.detail.commentId);
     if (index !== -1) {
-      var comment = this.comments[index];
+      const comment = this.comments[index];
       this.$.commentList.itemForElement(comment);
       this.$.selector.select(comment);
       this.set('reply', comment.text);
@@ -272,15 +270,15 @@ Polymer({
     event.stopPropagation();
   },
 
-  _loadMore: function() {
+  _loadMore() {
     this._fetchComments(true);
   },
 
-  _refresh: function() {
+  _refresh() {
     this._fetchComments(this.allCommentsLoaded);
   },
 
-  _submitReply: function(e) {
+  _submitReply(e) {
     if (e) {
       e.preventDefault();
     }
@@ -290,74 +288,74 @@ Polymer({
       'entity-type': 'comment',
       parentId: this.uid,
       author: this.selectedComment ? this.selectedComment.author : this.currentUser.properties.username,
-      text: this.reply.trim()
+      text: this.reply.trim(),
     };
 
     if (this.selectedComment) {
       this.$.commentRequest.put()
-        .then(function (response){
-          var index = this._getCommentIndexById(this.selectedComment.id);
+        .then((response) => {
+          const index = this._getCommentIndexById(this.selectedComment.id);
           if (index !== -1) {
-            this.set('comments.' + index + '.modificationDate', response.modificationDate);
-            this.set('comments.' + index + '.text', response.text);
+            this.set(`comments.${  index  }.modificationDate`, response.modificationDate);
+            this.set(`comments.${  index  }.text`, response.text);
           }
           this._clearReply();
-        }.bind(this))
-        .catch(function (error){
+        })
+        .catch((error) => {
           if (error.status === 404) {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
           } else {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'edition.error')});
             throw error;
           }
-        }.bind(this));
+        });
     } else {
       this.$.commentRequest.post()
-        .then(function (response) {
+        .then((response) => {
           this._clearReply();
           this.push('comments', response);
           this._setTotal(this.total + 1);
-        }.bind(this))
-        .catch(function (error) {
+        })
+        .catch((error) => {
           if (error.status === 404) {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
           } else {
             this.fire('notify', {message: this._computeTextLabel(this.level, 'creation.error')});
             throw error;
           }
-        }.bind(this));
+        });
     }
   },
 
-  _computeMaxRows: function() {
-    var lineHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-line-height'));
-    var maxHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-max-height'));
-    return Math.round( (isNaN(maxHeight) ? 80 : maxHeight) / (isNaN(lineHeight) ? 20 : lineHeight) );
+  _computeMaxRows() {
+    const lineHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-line-height'));
+    const maxHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-max-height'));
+    return Math.round( (Number.isNaN(maxHeight) ? 80 : maxHeight) / (Number.isNaN(lineHeight) ? 20 : lineHeight) );
   },
 
-  _computeResourcePath: function(commentId) {
-    return "/id/" + this.uid + "/@comment/" + (commentId ? commentId : '');
+  _computeResourcePath(commentId) {
+    return `/id/${  this.uid  }/@comment/${  commentId || ''}`;
   },
 
-  _computeSubLevel: function(level) {
+  _computeSubLevel(level) {
     return level + 1;
   },
 
-  _computeTextLabel: function(level, option, placeholder) {
-    return level === 1 ? this.i18n('comments.' + option + '.comment', placeholder)
-      : this.i18n('comments.' + option + '.reply', placeholder);
+  _computeTextLabel(level, option, placeholder) {
+    return level === 1 ? this.i18n(`comments.${  option  }.comment`, placeholder)
+      : this.i18n(`comments.${  option  }.reply`, placeholder);
   },
 
-  /** Visibility Methods **/
-  _allowReplies: function(level) {
+  /** Visibility Methods * */
+  _allowReplies(level) {
     return level <= 2;
   },
 
-  _isBlank: function(reply) {
+  _isBlank(reply) {
     return !reply || typeof reply !== 'string' || reply.trim().length === 0;
   },
 
-  _moreAvailable: function(length, total, allCommentsLoaded) {
+  _moreAvailable(length, total, allCommentsLoaded) {
     return length < total && !allCommentsLoaded;
-  }
+  },
 });

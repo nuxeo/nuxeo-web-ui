@@ -173,76 +173,74 @@ limitations under the License.
       properties: {
         visible: {
           type: Boolean,
-          observer: '_visibleChanged'
+          observer: '_visibleChanged',
         },
 
         _recentDocuments: {
           type: Array,
           value: [],
-          observer: '_recentDocumentsChanged'
-        }
+          observer: '_recentDocumentsChanged',
+        },
       },
 
-      _visibleChanged: function(visible) {
+      _visibleChanged(visible) {
         if (visible) {
           this._refresh();
         }
       },
 
-      _refresh: function() {
+      _refresh() {
         this.$.latestEditedDocs.fetch();
         this.$.recentStorage.reload();
-        this._fetchFavorite().then(function(favorite) {
+        this._fetchFavorite().then((favorite) => {
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
           this.$.favoriteDocs.fetch();
-        }.bind(this));
+        });
       },
 
-      _navigate: function(e) {
-        var detail;
+      _navigate(e) {
+        let detail;
         if (e.detail.item) {
           detail = {
-            doc: e.detail.item
+            doc: e.detail.item,
           };
           this.navigateTo('browse', detail.doc.path);
         } else {
           detail = {
-            doc: e.model.item
+            doc: e.model.item,
           };
         }
         this.fire('navigate', detail);
       },
 
-      _fetchFavorite: function() {
+      _fetchFavorite() {
         if (this.favorite) {
           return Promise.resolve(this.favorite);
-        } else {
-          return this.$.fetchFavOp.execute()
-            .then(function(resp) {
-              this.favorite = resp;
-              return resp;
-            }.bind(this));
         }
+        return this.$.fetchFavOp.execute().then((resp) => {
+          this.favorite = resp;
+          return resp;
+        });
       },
 
-      _recentDocumentsChanged: function(docs) {
+      _recentDocumentsChanged(docs) {
         if (docs && docs.length > 0) {
-          var storage = this.$.recentStorage;
-          var provider = this.$.recentProvider;
-          var ids = docs.map(function(doc) {return "'" + doc.uid + "'"}).join(',');
-          provider.query = 'SELECT * FROM Document WHERE ecm:uuid IN (' + ids + ') AND ecm:isTrashed = 0';
-          provider.fetch().then(function(result) {
-            docs.forEach(function(doc) {
-              if (result.entries.findIndex(function(entry) {return entry.uid === doc.uid;}) === -1) {
+          const storage = this.$.recentStorage;
+          const provider = this.$.recentProvider;
+          const ids = docs.map((doc) => `'${  doc.uid  }'`).join(',');
+          provider.query = `SELECT * FROM Document WHERE ecm:uuid IN (${  ids  }) AND ecm:isTrashed = 0`;
+          provider.fetch().then((result) => {
+            docs.forEach((doc) => {
+              if (result.entries.findIndex((entry) => entry.uid === doc.uid) === -1) {
                 storage.remove(doc);
               }
             });
             this.$.latestViewedDocs.items = docs;
             this.$.latestViewedDocs.notifyResize(); // XXX: force rendering for Edge (NXP-26244)
-          }.bind(this));
+          });
         }
-      }
+      },
 
     });
   </script>

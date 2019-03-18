@@ -39,21 +39,21 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      notify: true
+      notify: true,
     },
     layout: {
       type: String,
-      value: 'view'
+      value: 'view',
     },
     _model: {
       type: Object,
       notify: true,
-      value: {}
+      value: {},
     },
     _href: {
       type: String,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
   observers: ['_loadLayout(document, layout)'],
@@ -62,40 +62,40 @@ Polymer({
     return this.$.layout.element;
   },
 
-  validate: function() {
+  validate() {
     return this.$.layout.validate();
   },
 
-  _loadLayout: function(document, layout) {
+  _loadLayout(document, layout) {
     if (document) {
       if (!this.previousDocument || (document.type === this.previousDocument.type)) {
-        this._model = {document: document};
+        this._model = {document};
       }
       if (!this.previousDocument || (document.uid !== this.previousDocument.uid)) {
         this._href = null; // force layout restamp
       }
-      var doctype = document.type.toLowerCase();
-      var name = ['nuxeo', doctype, layout, 'layout'].join('-');
-      this._href = this.resolveUrl(doctype + '/' + name + '.html');
+      const doctype = document.type.toLowerCase();
+      const name = ['nuxeo', doctype, layout, 'layout'].join('-');
+      this._href = this.resolveUrl(`${doctype  }/${  name  }.html`);
     } else if (document === undefined) {
       // XXX undefined is used to notify a cancel to inner elements
-      this._model = {document: document};
+      this._model = {document};
     }
     this.previousDocument = document;
   },
 
-  _elementChanged: function() {
+  _elementChanged() {
     this._model = {document: this.document};
     // forward document path change events
-    this.element.addEventListener('document-changed', function(e) {
+    this.element.addEventListener('document-changed', (e) => {
       this.notifyPath(e.detail.path, e.detail.value);
-    }.bind(this));
-    afterNextRender(this, function() {
+    });
+    afterNextRender(this, () => {
       // fire the `document-layout-changed` event only after flush
       this.fire('document-layout-changed', {
         element: this.element,
-        layout: this.layout
+        layout: this.layout,
       });
-    }.bind(this));
-  }
+    });
+  },
 });

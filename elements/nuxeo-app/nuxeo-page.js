@@ -98,5 +98,5 @@ Polymer({
     </div>
 `,
 
-  is: 'nuxeo-page'
+  is: 'nuxeo-page',
 });

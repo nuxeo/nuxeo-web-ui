@@ -142,47 +142,47 @@ Polymer({
   properties: {
     favorites: {
       type: Object,
-      notify: true
+      notify: true,
     },
     selectedFavorite: {
       type: Object,
       observer: '_selectedFavoriteChanged',
-      notify: true
+      notify: true,
     },
     visible: {
       type: Boolean,
-      observer: '_visibleChanged'
-    }
+      observer: '_visibleChanged',
+    },
   },
 
-  _visibleChanged: function() {
+  _visibleChanged() {
     if (this.visible && !this.favorite) {
       this._refresh();
     }
   },
 
-  ready: function() {
+  ready() {
     window.addEventListener('added-to-favorites', this._refresh.bind(this));
     window.addEventListener('removed-from-favorites', this._refresh.bind(this));
   },
 
-  _refresh: function() {
-    this._fetchFavorite().then(function(favorite) {
+  _refresh() {
+    this._fetchFavorite().then((favorite) => {
       if (!favorite) {
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
       this.$.favoritesProvider.page = 1;
       this.$.favoritesList.fetch();
-    }.bind(this));
+    });
   },
 
-  _fetchFavorite: function() {
+  _fetchFavorite() {
     if (this.favorite) {
       return Promise.resolve(this.favorite);
-    } else {
+    } 
       return this.$.fetchFavOp.execute()
-        .then(function(resp) {
+        .then((resp) => {
           if (resp.status === 204) {
             // Pas de bras, pas de chocolat.
             this.favorite = null;
@@ -190,19 +190,19 @@ Polymer({
             this.favorite = resp;
           }
           return this.favorite;
-        }.bind(this));
-    }
+        });
+    
   },
 
-  _computedClass: function(isSelected) {
-    var classes = 'list-item';
+  _computedClass(isSelected) {
+    let classes = 'list-item';
     if (isSelected) {
       classes += ' selected';
     }
     return classes;
   },
 
-  _selectedFavoriteChanged: function(doc) {
+  _selectedFavoriteChanged(doc) {
     if (doc) {
       if (doc.isVersion) {
         this.navigateTo('document', doc.uid);
@@ -212,12 +212,12 @@ Polymer({
     }
   },
 
-  _removeFromFavorites: function(e) {
+  _removeFromFavorites(e) {
     e.stopImmediatePropagation();
-    var docUid = e.model.favorite.uid;
+    const docUid = e.model.favorite.uid;
     this.$.removeFromFavOp.input = docUid;
-    this.$.removeFromFavOp.execute().then(function() {
-      this.fire('removed-from-favorites', {docUid: docUid});
-    }.bind(this));
-  }
+    this.$.removeFromFavOp.execute().then(() => {
+      this.fire('removed-from-favorites', {docUid});
+    });
+  },
 });

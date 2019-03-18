@@ -52,81 +52,81 @@ Polymer({
   properties: {
     /**
      * The `nuxeo-page-provider` instance used to perform the search.
-     **/
+     * */
     provider: String,
     /**
      * The name of the search layout.
-     **/
+     * */
     searchName: String,
     /**
      * The parameters passed on to `provider`.
-     **/
+     * */
     params: {
       type: Object,
-      notify: true
+      notify: true,
     },
     skipAggregates: {
       type: Boolean,
-      notify: true
+      notify: true,
     },
     /**
      * The aggregations returned by `provider`.
-     **/
+     * */
     aggregations: {
       type: Object,
-      observer: '_aggregationsChanged'
+      observer: '_aggregationsChanged',
     },
     /**
      * An object propagating key/values served by enclosing slot contents.
      */
     model: {
       type: Object,
-      value: function() { return {}; }
-    }
+      value() { return {}; },
+    },
   },
 
   observers: [
-    '_paramsChanged(params.*)'
+    '_paramsChanged(params.*)',
   ],
 
   get element() {
     return this.$.layout.element;
   },
 
-  _paramsChanged: function() {
+  _paramsChanged() {
     if (this.element) {
       this.element.params = this.params;
     }
   },
 
-  _aggregationsChanged: function () {
+  _aggregationsChanged () {
     if (this.element) {
       this.element.aggregations = this.aggregations;
     }
   },
 
-  _formHref: function (provider, searchName) {
-    var name = (searchName || provider).toLowerCase();
-    return this.resolveUrl(name + '/' + ['nuxeo', name, 'search-form'].join('-') + '.html');
+  _formHref (provider, searchName) {
+    const name = (searchName || provider).toLowerCase();
+    return this.resolveUrl(`${name  }/${  ['nuxeo', name, 'search-form'].join('-')  }.html`);
   },
 
-  _formModel: function () {
+  _formModel () {
     return {
       provider: this.provider,
       params: this.params,
-      aggregations: this.aggregations
+      aggregations: this.aggregations,
     };
   },
 
-  _formChanged: function (e) {
+  _formChanged (e) {
     this.fire('search-form-layout-changed', e.detail);
     // forward params change events
-    this.element.addEventListener('params-changed', function(e) {
-      this.notifyPath(e.detail.path || 'params', e.detail.value);
-    }.bind(this));
+    this.element.addEventListener('params-changed', (evt) => {
+      this.notifyPath(evt.detail.path || 'params', evt.detail.value);
+    });
     this.skipAggregates = this.element.skipAggregates;
-    this.element.addEventListener('skip-aggregates-changed', function(e) {
-      this.notifyPath(e.detail.path || 'skipAggregates', e.detail.value);
-    }.bind(this));
-  }
+    this.element.addEventListener('skip-aggregates-changed', (evt) => {
+      this.notifyPath(evt.detail.path || 'skipAggregates', evt.detail.value);
+    });
+  },
 });

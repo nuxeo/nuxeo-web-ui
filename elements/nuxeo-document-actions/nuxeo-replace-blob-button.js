@@ -116,10 +116,10 @@ Polymer({
     _label: {
       type: String,
       computed: '_computeLabel(i18n)',
-    }
+    },
   },
 
-  _cancel: function() {
+  _cancel() {
     this.$.dropzone._deleteFile();
   },
 
@@ -136,7 +136,7 @@ Polymer({
    *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'));
    *
    */
-  _createNestedObjectRecursive: function(obj, path) {
+  _createNestedObjectRecursive(obj, path) {
     if (path.length === 0) {
       return;
     }
@@ -154,8 +154,8 @@ Polymer({
    * @param pieces Array containing the inner object keys.
    * @param properties Document properties object.
    */
-  _getRootProperty: function(pieces, properties) {
-    var path = '';
+  _getRootProperty(pieces, properties) {
+    let path = '';
     while(pieces.length > 0) {
       path += (path === '' ? '' : '.' ) + pieces.shift();
       if(Array.isArray(this.get(path, properties))) {
@@ -165,35 +165,35 @@ Polymer({
     return path;
   },
 
-  _replaceBlob: function() {
+  _replaceBlob() {
     // When xpath contains sub properties is important to check which is the root property.
-    var rootProperty = this.xpath.includes('/')
+    const rootProperty = this.xpath.includes('/')
       ? this._getRootProperty(this.xpath.split('/'), this.document.properties)
       : this.xpath;
-    var dirtyProperties = {};
+    const dirtyProperties = {};
     this._createNestedObjectRecursive(dirtyProperties, rootProperty.split('.'));
     this.set(rootProperty, this.get(rootProperty, this.document.properties), dirtyProperties);
 
     this.$.doc.data = {
       'entity-type': 'document',
       uid: this.document.uid,
-      properties: dirtyProperties
+      properties: dirtyProperties,
     };
-    this.$.doc.put().then(function() {
+    this.$.doc.put().then(() => {
       this.fire('document-updated');
-    }.bind(this));
+    });
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.$.dialog.toggle();
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('replaceBlobButton.tooltip');
   },
 
-  _isAvailable: function(doc) {
+  _isAvailable(doc) {
     return doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') && !this.isTrashed(doc);
-  }
+  },
 });

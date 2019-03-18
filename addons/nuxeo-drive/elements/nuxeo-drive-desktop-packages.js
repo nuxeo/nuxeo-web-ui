@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
@@ -110,42 +111,42 @@ Polymer({
   properties: {
     packages: {
       type: Array,
-      computed: '_computeUrls(_tp)'
+      computed: '_computeUrls(_tp)',
     },
-    _tp: String
+    _tp: String,
   },
 
   behaviors: [I18nBehavior],
 
-  _computeUrls: function(tp) {
+  _computeUrls(tp) {
     if (!tp) {
       return;
     }
-    var pkgs = [];
+    const pkgs = [];
 
-    var prefix = 'nuxeo-drive';
-    var baseUrl = 'https://community.nuxeo.com/static/drive-updates';
+    const prefix = 'nuxeo-drive';
+    const baseUrl = 'https://community.nuxeo.com/static/drive-updates';
 
-    var name = prefix + '.dmg';
+    let name = `${prefix  }.dmg`;
     pkgs.push({
-      name: name,
+      name,
       platform: 'osx',
-      url: baseUrl + '/' + name
+      url: `${baseUrl  }/${  name}`,
     });
 
-    name = prefix + '.exe';
+    name = `${prefix  }.exe`;
     pkgs.push({
-      name: name,
+      name,
       platform: 'windows',
-      url: baseUrl + '/' + name
+      url: `${baseUrl  }/${  name}`,
     });
 
     pkgs.push({
       name: window.nuxeo.I18n.translate('driveDesktopPackages.ubuntu.name',
                                         'Read the documentation about the Linux client'),
       platform: 'ubuntu',
-      url: 'https://github.com/nuxeo/nuxeo-drive#debian-based-distributions-and-other-gnulinux-variants-client'
+      url: 'https://github.com/nuxeo/nuxeo-drive#debian-based-distributions-and-other-gnulinux-variants-client',
     });
     return pkgs;
-  }
+  },
 });

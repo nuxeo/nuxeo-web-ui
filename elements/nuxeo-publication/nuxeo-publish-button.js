@@ -33,6 +33,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles">
@@ -121,11 +122,11 @@ Polymer({
 
     selectedTab: {
       type: String,
-      value: 'internal'
+      value: 'internal',
     },
     publishContext: {
       type: Object,
-      computed: '_publishContext(document, documents.splices, i18n, opened)'
+      computed: '_publishContext(document, documents.splices, i18n, opened)',
     },
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -136,43 +137,39 @@ Polymer({
     },
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
   listeners: {
     'nx-publish-success': '_close',
-    'cancel': '_close'
+    'cancel': '_close',
   },
 
-  _toggleDialog: function() {
+  _toggleDialog() {
     this.$.publishDialog.toggle();
   },
 
-  _close: function() {
+  _close() {
     this.$.publishDialog.close();
   },
 
-  _publishContext: function() {
+  _publishContext() {
     return this.opened ? {document: this.document, documents: this.documents, i18n: this.i18n} : {};
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('publication.button.tooltip');
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     return (this.document && this.isPublishable(this.document)) || (this.documents && this.documents.every(
-      function(doc) {
-        return this.isPublishable(doc);
-      }.bind(this)));
+      (doc) => this.isPublishable(doc)));
   },
 
-  _checkDocsPermissions: function() {
+  _checkDocsPermissions() {
     this.docsHavePermissions = this.documents && !(this.documents.some(
-      function(document) {
-        return !this._docHasPermissions(document);
-      }.bind(this)));
+      (document) => !this._docHasPermissions(document)));
     return this.docsHavePermissions;
-  }
+  },
 });

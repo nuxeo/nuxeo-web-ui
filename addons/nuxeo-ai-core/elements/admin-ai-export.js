@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
@@ -86,85 +87,81 @@ Polymer({
   properties: {
       inProps: {
           type: String,
-          value: 'dc:title,file:content'
+          value: 'dc:title,file:content',
       },
       outProps: {
           type: String,
-          value: 'dc:lastContributor'
+          value: 'dc:lastContributor',
       },
       splitProp: {
           type: String,
-          value: '80'
+          value: '80',
       },
       query: {
           type: String,
-          value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'"
+          value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'",
       },
       _exportText: {
           type: String,
-          value: ''
+          value: '',
       },
       _stats: {
-          type: String
-      }
+          type: String,
+      },
   },
 
-  _displayVal: function (val) {
+  _displayVal (val) {
       if (val.numericValue != null) {
           return val.numericValue;
       }
       if (val.type === 'terms') {
-          var toReturn = '';
-          for (i = 0, len = val.value.length; i < len; i++) {
-              toReturn += ' ' + val.value[i].key + ' (' + val.value[i].docCount + ')';
+          let toReturn = '';
+          for (let i = 0, len = val.value.length; i < len; i++) {
+              toReturn += ` ${  val.value[i].key  } (${  val.value[i].docCount  })`;
           }
           return toReturn;
-      } else {
-          return JSON.stringify(val.value);
       }
+          return JSON.stringify(val.value);
+
   },
 
-  _filter: function (items) {
-      return items && items.filter(function (item) {
-          return !(item.type === 'total' || item.type === 'count');
-      });
+  _filter (items) {
+      return items && items.filter((item) => !(item.type === 'total' || item.type === 'count'));
   },
 
-  _computeLabel: function (theStats, fieldName) {
-      var foundItem = theStats && theStats.find(function (item) {
-          return item.type === fieldName;
-      });
-      return foundItem && this.i18n('admin.ai.export.' + fieldName, foundItem.numericValue);
+  _computeLabel (theStats, fieldName) {
+      const foundItem = theStats && theStats.find((item) => item.type === fieldName);
+      return foundItem && this.i18n(`admin.ai.export.${  fieldName}`, foundItem.numericValue);
   },
 
-  _recompute: function () {
+  _recompute () {
       this.$.aiStats.params = {
           'query': this.query,
           'inputs': this.inProps,
-          'outputs': this.outProps
+          'outputs': this.outProps,
       };
-      this.$.aiStats.execute().then(function (response) {
+      this.$.aiStats.execute().then((response) => {
           if (response === undefined || response.length === 0) {
               this.fire('notify', {message: this.i18n('admin.ai.stats.none')});
           }
-      }.bind(this)).catch(function () {
+      }).catch(() => {
           this.fire('notify', {message: this.i18n('admin.ai.stats.error')});
-      }.bind(this));
+      });
   },
 
-  _export: function () {
+  _export () {
       this.$.aiExport.params = {
           'query': this.query,
           'inputs': this.inProps,
           'outputs': this.outProps,
-          'split': this.splitProp
+          'split': this.splitProp,
       };
-      this.$.aiExport.execute().then(function (response) {
+      this.$.aiExport.execute().then((response) => {
           this._exportText = this.i18n('admin.ai.export.id', response.value);
           this.fire('notify', {message: this.i18n('admin.ai.export.success')});
-      }.bind(this)).catch(function () {
+      }).catch(() => {
           this._exportText = '';
           this.fire('notify', {message: this.i18n('admin.ai.export.error')});
-      }.bind(this));
-  }
+      });
+  },
 });

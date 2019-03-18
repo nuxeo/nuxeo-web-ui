@@ -53,12 +53,12 @@ Polymer({
     documents: {
       type: Array,
       notify: true,
-      value: []
+      value: [],
     },
 
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
 
     /**
@@ -71,59 +71,51 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  untrashDocuments: function() {
-    if (this.docsHavePermissions && confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
+  untrashDocuments() {
+    if (this.docsHavePermissions && window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
       if (this.documents && this.documents.length) {
-        var uids = this.documents.map(function(doc) {
-          return doc.uid;
-        }).join(',');
-        this.$.operation.input = 'docs:' + uids;
-        var uidsArray = this.documents.map(function(doc) {
-          return doc.uid;
-        });
-        this.$.operation.execute().then(function() {
+        const uids = this.documents.map((doc) => doc.uid).join(',');
+        this.$.operation.input = `docs:${  uids}`;
+        const uidsArray = this.documents.map((doc) => doc.uid);
+        this.$.operation.execute().then(() => {
           this.fire('nuxeo-documents-untrashed', {documentIds: uidsArray});
           this.documents = [];
           this.fire('refresh');
-        }.bind(this),
-        function(error) {
-          this.fire('nuxeo-documents-untrashed', {error: error,  documents: uidsArray});
-        }.bind(this));
+        },
+        (error) => {
+          this.fire('nuxeo-documents-untrashed', {error,  documents: uidsArray});
+        });
       }
     }
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     return this.documents && this.documents.length > 0 && this._checkDocsPermissions()
         && this._checkDocsAreTrashed();
   },
 
-  _checkDocsAreTrashed: function() {
-    return this.documents.every(function(document) {
-      return this.isTrashed(document);
-    }.bind(this));
+  _checkDocsAreTrashed() {
+    return this.documents.every((document) => this.isTrashed(document));
   },
 
-  _checkDocsPermissions: function() {
+  _checkDocsPermissions() {
     this.docsHavePermissions = !(this.documents.some(
-      function(document) {
-        return !this._docHasPermissions(document);
-      }.bind(this)));
+      (document) => !this._docHasPermissions(document)));
     return this.docsHavePermissions;
   },
 
   /*
    * Checks if a single given document has 'Write' permission
    */
-  _docHasPermissions: function(document) {
+  _docHasPermissions(document) {
     return this.hasPermission(document, 'Write');
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('untrashDocumentsButton.tooltip');
-  }
+  },
 });

@@ -49,6 +49,6 @@ Polymer({
 
   properties: {
     tasks: Array,
-    currentTask: Object
-  }
+    currentTask: Object,
+  },
 });

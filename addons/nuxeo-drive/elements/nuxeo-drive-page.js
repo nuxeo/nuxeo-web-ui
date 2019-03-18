@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
   Nelson Silva <nsilva@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-authentication-tokens-management.js';
@@ -51,5 +52,5 @@ Polymer({
 `,
 
   is: 'nuxeo-drive-page',
-  behaviors: [I18nBehavior]
+  behaviors: [I18nBehavior],
 });

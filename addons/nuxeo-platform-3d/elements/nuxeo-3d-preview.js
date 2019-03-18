@@ -15,6 +15,7 @@ limitations under the License.
 Contributors:
     Miguel Nixo <mnixo@nuxeo.com>
 */
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-3d-viewer.js';
@@ -92,13 +93,13 @@ Polymer({
      */
     document: {
       type: Object,
-      notify: true
-    }
+      notify: true,
+    },
   },
 
   behaviors: [I18nBehavior],
 
-  _hasItems: function(list) {
+  _hasItems(list) {
     return list.length > 0;
-  }
+  },
 });

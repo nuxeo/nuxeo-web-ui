@@ -69,19 +69,17 @@ Polymer({
   behaviors: [I18nBehavior],
 
   properties: {
-    document: Object
+    document: Object,
   },
 
-  _filterRenditions: function(document) {
+  _filterRenditions(document) {
     if (document && document.contextParameters) {
-      return document.contextParameters.renditions.filter(function(rendition) {
-        return rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion';
-      }).map(function(item) {
-        item.name = 'documentExport.' + item.name;
+      return document.contextParameters.renditions.filter((rendition) => rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion').map((item) => {
+        item.name = `documentExport.${  item.name}`;
         return item;
       });
-    } else {
+    } 
       return [];
-    }
-  }
+    
+  },
 });

@@ -60,19 +60,19 @@ Polymer({
   behaviors: [I18nBehavior, RoutingBehavior, FiltersBehavior],
 
   properties: {
-    document: Object
+    document: Object,
   },
 
-  _isAvailable: function() {
+  _isAvailable() {
     return this.document && this.document.isProxy && this.hasPermission(this.document, 'Write');
   },
 
-  _unpublish: function() {
-    this.$.unpublishOp.execute().then(function() {
+  _unpublish() {
+    this.$.unpublishOp.execute().then(() => {
       this.fire('notify', {'message': this.i18n('publication.unpublish.success')});
       this.fire('nx-unpublish-success');
-    }.bind(this)).catch(function() {
+    }).catch(() => {
       this.fire('notify', {'message': this.i18n('publication.unpublish.error')});
-    }.bind(this));
-  }
+    });
+  },
 });

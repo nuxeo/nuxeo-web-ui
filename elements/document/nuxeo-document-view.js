@@ -36,6 +36,6 @@ Polymer({
   is: 'nuxeo-document-view',
 
   properties: {
-    document: Object
-  }
+    document: Object,
+  },
 });

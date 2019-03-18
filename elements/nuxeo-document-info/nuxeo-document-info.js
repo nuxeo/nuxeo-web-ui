@@ -17,7 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tags.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
@@ -104,28 +104,28 @@ Polymer({
   properties: {
     document: {
       type: Object,
-      observer: '_documentChanged'
+      observer: '_documentChanged',
     },
     _showProcess: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
-    }
+      reflectToAttribute: true,
+    },
   },
 
-  _showPub: function(doc) {
+  _showPub(doc) {
     return doc && doc.contextParameters &&
       doc.contextParameters.publications && doc.contextParameters.publications.resultsCount > 0;
   },
 
-  _documentChanged: function() {
+  _documentChanged() {
     this._showProcess = this.document && this.document.contextParameters &&
       this.document.contextParameters.runningWorkflows && this.document.contextParameters.runningWorkflows.length > 0;
   },
 
-  _urlForPub: function() {
+  _urlForPub() {
     if (this.document) {
       return this.urlFor('browse', this.document.path, 'publication');
     }
-  }
+  },
 });

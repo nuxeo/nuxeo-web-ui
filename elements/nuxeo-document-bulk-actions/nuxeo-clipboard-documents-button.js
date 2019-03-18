@@ -49,12 +49,12 @@ Polymer({
     documents: {
       type: Array,
       notify: true,
-      value: []
+      value: [],
     },
 
     tooltipPosition: {
       type: String,
-      value: 'bottom'
+      value: 'bottom',
     },
 
     /**
@@ -67,22 +67,20 @@ Polymer({
 
     _label: {
       type: String,
-      computed: '_computeLabel(i18n)'
-    }
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  addToClipBoard: function() {
+  addToClipBoard() {
     this.fire('add-to-clipboard', {documents: this.documents});
     this.fire ('clear-selected-items');
   },
 
-  _isAvailable: function() {
-    return this.documents.every(function(doc) {
-      return this.isCollectionMember(doc) && !this.isTrashed(doc);
-    }.bind(this));
+  _isAvailable() {
+    return this.documents.every((doc) => this.isCollectionMember(doc) && !this.isTrashed(doc));
   },
 
-  _computeLabel: function() {
+  _computeLabel() {
     return this.i18n('clipboardDocumentsButton.addToClipboard');
-  }
+  },
 });

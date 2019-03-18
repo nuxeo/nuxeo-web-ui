@@ -18,7 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
@@ -29,6 +29,7 @@ import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-unpublish-button.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
@@ -151,128 +152,128 @@ Polymer({
     visible: Boolean,
     hasPublications: {
       type: Boolean,
-      computed: '_hasPublications(publishedDocs)'
-    }
+      computed: '_hasPublications(publishedDocs)',
+    },
   },
 
   observers: [
     '_fetchPublications(_src, visible)',
-    '_observeDocument(document, visible)'
+    '_observeDocument(document, visible)',
   ],
 
   listeners : {
     'nx-publish-success': '_fetchPublications',
-    'nx-unpublish-success': '_fetchPublications'
+    'nx-unpublish-success': '_fetchPublications',
   },
 
-  _observeDocument: function() {
+  _observeDocument() {
     if (this.document && this.visible) {
       if (!this.document.isVersion) {
         this._src = this.document;
       } else {
-        this.$.srcDocOp.execute().then(function(src) {
+        this.$.srcDocOp.execute().then((src) => {
           this._src = src;
-        }.bind(this));
+        });
       }
     } else {
       this._src = null;
     }
   },
 
-  _computeParams: function() {
+  _computeParams() {
     if (this._src) {
-      var uid = this._src.uid;
-      return {queryParams: 'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
-        'AND (rend:sourceVersionableId = "' +
-        uid +
-        '" OR ecm:proxyVersionableId = "' +
-        uid +
-        '")'
+      const {uid} = this._src;
+      return {queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
+        'AND (rend:sourceVersionableId = "'}${
+        uid
+        }" OR ecm:proxyVersionableId = "${
+        uid
+        }")`,
       };
     }
   },
 
-  _fetchPublications: function() {
+  _fetchPublications() {
     if (this.visible && this._src) {
       this.$.table.fetch();
     }
   },
 
-  _unpublish: function(e) {
+  _unpublish(e) {
     if (e && e.target) {
-      if (!confirm(this.i18n('publication.unpublish.confirm'))) {
+      if (!window.confirm(this.i18n('publication.unpublish.confirm'))) {
         return;
       }
-      var doc = e.target.parentNode.item;
+      const doc = e.target.parentNode.item;
       this.$.unpublishOp.input = doc;
-      this.$.unpublishOp.execute().then(function() {
+      this.$.unpublishOp.execute().then(() => {
         this.fire('notify', {'message': this.i18n('publication.unpublish.success')});
         this._fetchPublications();
-      }.bind(this)).catch(function() {
+      }).catch(() => {
         this.fire('notify', {'message': this.i18n('publication.unpublish.error')});
-      }.bind(this));
+      });
     }
   },
 
-  _republish: function(e) {
+  _republish(e) {
     if (e && e.target) {
-      if (!confirm(this.i18n('publication.republish.confirm'))) {
+      if (!window.confirm(this.i18n('publication.republish.confirm'))) {
         return;
       }
-      var obsolete = e.target.parentNode.item;
+      const obsolete = e.target.parentNode.item;
       this.$.publishOp.params = {
         'target': obsolete.parentRef,
         'override': true,
-        'renditionName': obsolete.properties['rend:renditionName']
+        'renditionName': obsolete.properties['rend:renditionName'],
       }
       this.$.publishOp.input = this._src.uid;
-      this.$.publishOp.execute().then(function() {
+      this.$.publishOp.execute().then(() => {
         this.fire('notify', {
-          'message': this.i18n('publication.internal.publish.success')
+          'message': this.i18n('publication.internal.publish.success'),
         });
         this.fire('document-updated');
         this.fire('nx-publish-success');
-      }.bind(this)).catch(function(err) {
+      }).catch((err) => {
         this.fire('notify', {
-          'message': this.i18n('publication.internal.publish.error')
+          'message': this.i18n('publication.internal.publish.error'),
         });
         throw err;
-      }.bind(this));
+      });
     }
   },
 
-  _canUnpublish: function(doc) {
+  _canUnpublish(doc) {
     return doc && this.hasPermission(doc, 'Write');
   },
 
-  _canRepublish: function(doc) {
+  _canRepublish(doc) {
     if (this._src && this._canUnpublish(doc)) {
-      var pubMaj = doc.properties['uid:major_version'];
-      var srcMaj = this._src.properties['uid:major_version'];
+      const pubMaj = doc.properties['uid:major_version'];
+      const srcMaj = this._src.properties['uid:major_version'];
       if (pubMaj < srcMaj) {
         return true;
-      } else if (pubMaj === srcMaj) {
-        var pubMin = doc.properties['uid:minor_version'];
-        var srcMin = this._src.properties['uid:minor_version'];
+      } if (pubMaj === srcMaj) {
+        const pubMin = doc.properties['uid:minor_version'];
+        const srcMin = this._src.properties['uid:minor_version'];
         return pubMin < srcMin || (pubMin === srcMin && this._src.isCheckedOut);
       }
     }
     return false;
   },
 
-  _hasPublications: function(docs) {
+  _hasPublications(docs) {
     return docs && docs.length > 0;
   },
 
-  _unpublishAll: function() {
-    if (!confirm(this.i18n('publication.unpublish.all.confirm'))) {
+  _unpublishAll() {
+    if (!window.confirm(this.i18n('publication.unpublish.all.confirm'))) {
       return;
     }
-    this.$.unpublishAllOp.execute().then(function() {
+    this.$.unpublishAllOp.execute().then(() => {
       this.fire('notify', {'message': this.i18n('publication.unpublish.all.success')});
       this._fetchPublications();
-    }.bind(this)).catch(function() {
+    }).catch(function() {
       this.fire('notify', {'message': this.i18n('publication.unpublish.all.error')});
     });
-  }
+  },
 });
