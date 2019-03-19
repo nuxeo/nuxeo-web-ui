@@ -62,11 +62,6 @@ Polymer({
         opacity: .5;
       }
 
-      .actions ::content paper-icon-button {
-        width: 36px;
-        height: 36px;
-      }
-
       nuxeo-actions-menu {
         height: 100%;
         max-width: var(--nuxeo-document-blob-actions-menu-max-width, 160px);
