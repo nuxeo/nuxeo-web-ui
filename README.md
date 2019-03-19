@@ -10,7 +10,7 @@
 ### Install dependencies
 
 ```sh
-npm install -g gulp bower && npm install && bower install
+npm install
 ```
 
 ### Development workflow
@@ -18,26 +18,32 @@ npm install -g gulp bower && npm install && bower install
 #### Serve / watch
 
 ```sh
-gulp serve
+npm start
 ```
 
 This outputs an IP address you can use to locally test and another that can be used on devices connected to your network.
 
-#### Run tests
+#### Linting & Code Formatting
 
 ```sh
-gulp test:local
+npm run lint
 ```
 
-This runs the unit tests defined in the `app/test` directory through [web-component-tester](https://github.com/Polymer/web-component-tester).
+To lint your files and check for formatting, using [ESLint](https://eslint.org/), [Prettier](https://prettier.io/) and [Polymer Lint](https://polymer-library.polymer-project.org/3.0/docs/tools/polymer-cli-commands#lint).
+
+```sh
+npm run format
+```
+
+To automatically fix problems and format the code.
 
 #### Build & Vulcanize
 
 ```sh
-gulp
+npm run build
 ```
 
-Build and optimize the current project, ready for deployment. This includes linting as well as vulcanization, image, script, stylesheet and HTML optimization and minification.
+Build and optimize the current project, ready for deployment, using webpack.
 
 ## License
 
