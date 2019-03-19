@@ -73,16 +73,15 @@ Polymer({
         --paper-input-container-input: {
           font-size: 1em;
           line-height: var(--nuxeo-comment-line-height, 20px);
-        };
+        }
 
         --paper-input-container-color: var(--secondary-text-color, #939caa);
 
         --iron-autogrow-textarea-placeholder: {
           color: var(--secondary-text-color, #939caa);
           font-size: 0.86em;
-        };
+        }
       }
-
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
@@ -94,13 +93,19 @@ Polymer({
       <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span>
     </template>
     <template id="commentList" is="dom-repeat" items="[[comments]]" as="comment">
-      <nuxeo-document-comment comment="{{comment}}" level="[[level]]">
-      </nuxeo-document-comment>
+      <nuxeo-document-comment comment="{{comment}}" level="[[level]]"></nuxeo-document-comment>
     </template>
 
     <template is="dom-if" if="[[_allowReplies(level)]]">
       <div class="reply-area">
-        <paper-textarea id="replyContainer" placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]" value="{{reply}}" max-rows="[[_computeMaxRows()]]" no-label-float on-keydown="_checkForEnter">
+        <paper-textarea
+          id="replyContainer"
+          placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
+          value="{{reply}}"
+          max-rows="[[_computeMaxRows()]]"
+          no-label-float
+          on-keydown="_checkForEnter"
+        >
         </paper-textarea>
         <template is="dom-if" if="[[!_isBlank(reply)]]">
           <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
@@ -109,7 +114,7 @@ Polymer({
         </template>
       </div>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-comment-thread',
   behaviors: [FormatBehavior],
@@ -174,7 +179,7 @@ Polymer({
 
   _checkForEnter(e) {
     if (e.keyCode === 13 && e.ctrlKey) {
-      if(!this._isBlank(this.reply)) {
+      if (!this._isBlank(this.reply)) {
         this._submitReply();
       }
     }
@@ -201,13 +206,17 @@ Polymer({
     this.$.commentRequest.headers = {
       'X-NXfetch.comment': 'repliesSummary',
     };
-    this.$.commentRequest.get()
+    this.$.commentRequest
+      .get()
       .then((response) => {
         /* Reconciliation of local and server comments */
         const olderComment = this.comments.length > 0 ? this.comments[0] : null;
         const newComments = response.entries;
-        while (newComments.length > 0 && !!olderComment
-        && (newComments[0].creationDate > olderComment.creationDate || newComments[0].id === olderComment.id)) {
+        while (
+          newComments.length > 0 &&
+          !!olderComment &&
+          (newComments[0].creationDate > olderComment.creationDate || newComments[0].id === olderComment.id)
+        ) {
           newComments.shift();
         }
         response.entries.forEach((entry) => {
@@ -218,9 +227,9 @@ Polymer({
       })
       .catch((error) => {
         if (error.status === 404) {
-          this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
         } else {
-          this.fire('notify', {message: this._computeTextLabel(this.level, 'fetch.error')});
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'fetch.error') });
           throw error;
         }
       });
@@ -232,7 +241,7 @@ Polymer({
 
   _handleCommentsChange(event) {
     if (event.detail.path === 'comments.length') {
-      this.fire('number-of-replies', {total: this.comments.length});
+      this.fire('number-of-replies', { total: this.comments.length });
     }
   },
 
@@ -241,16 +250,17 @@ Polymer({
     if (index !== -1) {
       this._clearRequest();
       this.$.commentRequest.path = this._computeResourcePath(this.comments[index].id);
-      this.$.commentRequest.remove()
+      this.$.commentRequest
+        .remove()
         .then(() => {
           this.splice('comments', index, 1);
           this._setTotal(this.total - 1);
         })
         .catch((error) => {
           if (error.status === 404) {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
           } else {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'deletion.error')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'deletion.error') });
             throw error;
           }
         });
@@ -292,25 +302,27 @@ Polymer({
     };
 
     if (this.selectedComment) {
-      this.$.commentRequest.put()
+      this.$.commentRequest
+        .put()
         .then((response) => {
           const index = this._getCommentIndexById(this.selectedComment.id);
           if (index !== -1) {
-            this.set(`comments.${  index  }.modificationDate`, response.modificationDate);
-            this.set(`comments.${  index  }.text`, response.text);
+            this.set(`comments.${index}.modificationDate`, response.modificationDate);
+            this.set(`comments.${index}.text`, response.text);
           }
           this._clearReply();
         })
         .catch((error) => {
           if (error.status === 404) {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
           } else {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'edition.error')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'edition.error') });
             throw error;
           }
         });
     } else {
-      this.$.commentRequest.post()
+      this.$.commentRequest
+        .post()
         .then((response) => {
           this._clearReply();
           this.push('comments', response);
@@ -318,9 +330,9 @@ Polymer({
         })
         .catch((error) => {
           if (error.status === 404) {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'notFound')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
           } else {
-            this.fire('notify', {message: this._computeTextLabel(this.level, 'creation.error')});
+            this.fire('notify', { message: this._computeTextLabel(this.level, 'creation.error') });
             throw error;
           }
         });
@@ -330,11 +342,11 @@ Polymer({
   _computeMaxRows() {
     const lineHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-line-height'));
     const maxHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-max-height'));
-    return Math.round( (Number.isNaN(maxHeight) ? 80 : maxHeight) / (Number.isNaN(lineHeight) ? 20 : lineHeight) );
+    return Math.round((Number.isNaN(maxHeight) ? 80 : maxHeight) / (Number.isNaN(lineHeight) ? 20 : lineHeight));
   },
 
   _computeResourcePath(commentId) {
-    return `/id/${  this.uid  }/@comment/${  commentId || ''}`;
+    return `/id/${this.uid}/@comment/${commentId || ''}`;
   },
 
   _computeSubLevel(level) {
@@ -342,8 +354,9 @@ Polymer({
   },
 
   _computeTextLabel(level, option, placeholder) {
-    return level === 1 ? this.i18n(`comments.${  option  }.comment`, placeholder)
-      : this.i18n(`comments.${  option  }.reply`, placeholder);
+    return level === 1
+      ? this.i18n(`comments.${option}.comment`, placeholder)
+      : this.i18n(`comments.${option}.reply`, placeholder);
   },
 
   /** Visibility Methods * */

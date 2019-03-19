@@ -49,20 +49,26 @@ Polymer({
         @apply --nuxeo-liveconnect-anchor-layout;
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
       }
     </style>
 
-    <nuxeo-liveconnect-dropbox-provider id="provider" is-available="{{isProviderAvailable}}"></nuxeo-liveconnect-dropbox-provider>
+    <nuxeo-liveconnect-dropbox-provider
+      id="provider"
+      is-available="{{isProviderAvailable}}"
+    ></nuxeo-liveconnect-dropbox-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
       <a href="javascript:undefined" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/dropbox.png"></iron-icon>
         [[i18n('liveconnectImportActions.dropbox', 'Dropbox')]]
       </a>
     </template>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-dropbox-link',
   behaviors: [I18nBehavior],

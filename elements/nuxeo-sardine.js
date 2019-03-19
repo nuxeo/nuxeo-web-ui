@@ -65,23 +65,51 @@ Polymer({
       }
 
       @keyframes upDown {
-        0%    { transform: translateY(0); }
-        25%   { transform: translateY(-8px); }
-        50%   { transform: translateY(0); }
-        75%   { transform: translateY(8px); }
-        100%  { transform: translateY(0);}
+        0% {
+          transform: translateY(0);
+        }
+        25% {
+          transform: translateY(-8px);
+        }
+        50% {
+          transform: translateY(0);
+        }
+        75% {
+          transform: translateY(8px);
+        }
+        100% {
+          transform: translateY(0);
+        }
       }
 
       @keyframes rotate {
-        0%    { transform: rotate(4deg); }
-        12.5% { transform: rotate(2deg); }
-        25%   { transform: rotate(0deg); }
-        37.5% { transform: rotate(-2deg); }
-        50%   { transform: rotate(-4deg); }
-        62.5% { transform: rotate(-2deg); }
-        75%   { transform: rotate(0deg); }
-        87.5% { transform: rotate(2deg); }
-        100%  { transform: rotate(4deg); }
+        0% {
+          transform: rotate(4deg);
+        }
+        12.5% {
+          transform: rotate(2deg);
+        }
+        25% {
+          transform: rotate(0deg);
+        }
+        37.5% {
+          transform: rotate(-2deg);
+        }
+        50% {
+          transform: rotate(-4deg);
+        }
+        62.5% {
+          transform: rotate(-2deg);
+        }
+        75% {
+          transform: rotate(0deg);
+        }
+        87.5% {
+          transform: rotate(2deg);
+        }
+        100% {
+          transform: rotate(4deg);
+        }
       }
     </style>
 
@@ -89,11 +117,11 @@ Polymer({
       <div id="wrapper">
         <span id="feeling">[[feeling]]</span>
         <template is="dom-if" if="[[!hidden]]">
-          <img src="images/sardine.png">
+          <img src="images/sardine.png" />
         </template>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-sardine',
 
@@ -137,8 +165,8 @@ Polymer({
       this._req = requestAnimationFrame(this._animate.bind(this));
     }.bind(this);
     customElements.whenDefined('nuxeo-suggester').then(() => {
-      this.$.sardine.style.left = `${Math.random() * window.innerWidth  }px`;
-      this.$.sardine.style.top = `${Math.random() * window.innerHeight  }px`;
+      this.$.sardine.style.left = `${Math.random() * window.innerWidth}px`;
+      this.$.sardine.style.top = `${Math.random() * window.innerHeight}px`;
       _Suggester.addCommand({
         id: 'sardine',
         trigger: {
@@ -176,13 +204,13 @@ Polymer({
     const h = rect.height;
     let x2 = this._lastPointerEvent.x;
     let y2 = this._lastPointerEvent.y;
-    x2 = (x2 + w) > window.innerWidth ? window.innerWidth - w : x2;
-    y2 = (y2 + h) > window.innerHeight ? window.innerHeight - h : y2;
+    x2 = x2 + w > window.innerWidth ? window.innerWidth - w : x2;
+    y2 = y2 + h > window.innerHeight ? window.innerHeight - h : y2;
     const dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
     if (dist < 32) {
       if (this._unknownLocation) {
-        this.feeling = (!this._lastPointerEvent.pointerType || this._lastPointerEvent.pointerType === 'mouse') ?
-          '❗' : '😍';
+        this.feeling =
+          !this._lastPointerEvent.pointerType || this._lastPointerEvent.pointerType === 'mouse' ? '❗' : '😍';
       } else if (!this._lastPointerEvent.pointerType || this._lastPointerEvent.pointerType !== 'touch') {
         this.feeling = '❤️';
       }
@@ -192,11 +220,11 @@ Polymer({
     if (dist > 1) {
       const newX = this._lerp(x1, x2, 0.05);
       const newY = this._lerp(y1, y2, 0.05);
-      this.$.sardine.style.left = `${newX  }px`;
-      this.$.sardine.style.top = `${newY  }px`;
+      this.$.sardine.style.left = `${newX}px`;
+      this.$.sardine.style.top = `${newY}px`;
       x1 = this.$.sardine.getBoundingClientRect().left;
       if (!this._unknownLocation) {
-        const dir = x1 < (this._lastPointerEvent.x - 32) ? 'left' : 'right';
+        const dir = x1 < this._lastPointerEvent.x - 32 ? 'left' : 'right';
         if (dir !== this.$.sardine._dir) {
           this.$.sardine.classList.remove(this.$.sardine._dir);
           this.$.sardine.classList.add(dir);
@@ -221,7 +249,7 @@ Polymer({
     this.$.sardine.removeEventListener('dblclick', this._ondblclick);
   },
 
-  _lerp (value1, value2, amount) {
+  _lerp(value1, value2, amount) {
     amount = amount < 0 ? 0 : amount;
     amount = amount > 1 ? 1 : amount;
     return value1 + (value2 - value1) * amount;

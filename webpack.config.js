@@ -1,18 +1,16 @@
 const { resolve, join } = require('path');
-const merge = require('webpack-merge')
+const merge = require('webpack-merge');
 // const CleanWebpackPlugin = require('clean-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { ProvidePlugin } = require('webpack');
 
-const ENV = process.argv.find((arg) => arg.includes('production'))
-  ? 'production'
-  : 'development';
+const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
 // we can copy things to 'src' in dev mode since if uses a mem fs
 const TARGET = ENV === 'production' ? resolve('target/classes/web/nuxeo.war/ui') : resolve('.');
 
-const tmp = [{ from: `.tmp`, to: join(TARGET)}];
+const tmp = [{ from: `.tmp`, to: join(TARGET) }];
 
 const polyfills = [
   {
@@ -39,7 +37,7 @@ const thirdparty = [
     from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js',
     to: join(TARGET, 'vendor/alloy'),
   },
-]
+];
 
 const layouts = [
   {
@@ -57,23 +55,25 @@ const layouts = [
     from: 'nuxeo-user-group-management/**/*.html',
     to: TARGET,
   },
-]
+];
 
-const addons = [{
-  from: 'addons/**/*',
-  to: TARGET,
-  ignore: ['*.js'],
-  // strip addon folder, copy everything over
-  transformPath: (path) => {
-    path = path.replace(/^addons\/([^/]*)\//, '');
-    // prepend elements/ when in dev mode (except images)
-    if (ENV === 'development' && !path.startsWith('images/')) {
-      path = `elements/${path}`;
-    }
-    return path;
+const addons = [
+  {
+    from: 'addons/**/*',
+    to: TARGET,
+    ignore: ['*.js'],
+    // strip addon folder, copy everything over
+    transformPath: (path) => {
+      path = path.replace(/^addons\/([^/]*)\//, '');
+      // prepend elements/ when in dev mode (except images)
+      if (ENV === 'development' && !path.startsWith('images/')) {
+        path = `elements/${path}`;
+      }
+      return path;
+    },
+    force: true,
   },
-  force: true,
-}];
+];
 
 const common = merge([
   {
@@ -120,14 +120,7 @@ const common = merge([
 const development = merge([
   {
     devtool: 'cheap-module-source-map',
-    plugins: [
-      new CopyWebpackPlugin([
-        ...tmp,
-        ...polyfills,
-        ...addons,
-        ...thirdparty,
-      ], { debug: 'info' }),
-    ],
+    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty], { debug: 'info' })],
     devServer: {
       contentBase: TARGET,
       compress: true,
@@ -144,11 +137,9 @@ const development = merge([
 
 const analyzer = process.argv.find((arg) => arg.includes('--analyze')) ? [new BundleAnalyzerPlugin()] : [];
 
-const assets = [
-  'images',
-  'fonts',
-  'themes',
-].map((p) => {return { from: resolve(`./${p}`), to: join(TARGET, p) }});
+const assets = ['images', 'fonts', 'themes'].map((p) => {
+  return { from: resolve(`./${p}`), to: join(TARGET, p) };
+});
 
 const production = merge([
   {

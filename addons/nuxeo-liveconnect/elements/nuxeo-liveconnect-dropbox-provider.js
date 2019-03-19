@@ -33,7 +33,7 @@ Polymer({
       }
     </style>
     <nuxeo-resource id="oauth2"></nuxeo-resource>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-dropbox-provider',
   behaviors: [LiveConnectBehavior],
@@ -112,8 +112,7 @@ Polymer({
         this.notifyBlobPick(blobs);
       }.bind(this),
 
-      cancel() {
-      },
+      cancel() {},
 
       linkType: 'direct',
 

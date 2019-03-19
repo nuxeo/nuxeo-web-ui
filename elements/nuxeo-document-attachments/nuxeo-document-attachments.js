@@ -45,7 +45,7 @@ Polymer({
       }
 
       .empty {
-        opacity: .5;
+        opacity: 0.5;
         padding-bottom: 8px;
         font-size: 1.1em;
       }
@@ -64,10 +64,18 @@ Polymer({
     </div>
 
     <template is="dom-if" if="[[_hasWritePermission(document)]]">
-      <nuxeo-dropzone document="{{document}}" xpath="[[xpath]]" uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]" message="[[i18n('documentAttachments.upload.add')]]" drag-content-message="[[i18n('documentAttachments.upload.drop')]]" blob-list update-document>
+      <nuxeo-dropzone
+        document="{{document}}"
+        xpath="[[xpath]]"
+        uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
+        message="[[i18n('documentAttachments.upload.add')]]"
+        drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
+        blob-list
+        update-document
+      >
       </nuxeo-dropzone>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-attachments',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -85,9 +93,10 @@ Polymer({
     return doc && doc.properties && doc.properties[this.xpath] && doc.properties[this.xpath].length > 0;
   },
 
-  _hasWritePermission (doc) {
-    return doc && this.hasPermission(doc, 'Write') &&
-      !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
+  _hasWritePermission(doc) {
+    return (
+      doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc)
+    );
   },
 
   _computeFiles() {
@@ -99,8 +108,8 @@ Polymer({
 
   _computeBlobXpath(xpath, index) {
     if (xpath === 'files:files') {
-      return `files:files/${  index  }/file`;
+      return `files:files/${index}/file`;
     }
-    return `${xpath  }/${  index}`;
+    return `${xpath}/${index}`;
   },
 });

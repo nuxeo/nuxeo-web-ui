@@ -22,26 +22,34 @@ limitations under the License.
 @element nuxeo-task38e-layout
 -->
 <dom-module id="nuxeo-task38e-layout">
-
   <template>
     <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
-    <nuxeo-user-suggestion role="widget" label="[[i18n('wf.serialDocumentReview.participants')]]"
-                           search-type="USER_GROUP_TYPE"
-                           multiple="true"
-                           value="{{task.variables.participants}}"
-                           required
-                           prefixed>
+    <nuxeo-user-suggestion
+      role="widget"
+      label="[[i18n('wf.serialDocumentReview.participants')]]"
+      search-type="USER_GROUP_TYPE"
+      multiple="true"
+      value="{{task.variables.participants}}"
+      required
+      prefixed
+    >
     </nuxeo-user-suggestion>
 
-    <nuxeo-select role="widget"
-                  label="[[i18n('wf.serialDocumentReview.review.type')]]"
-                  options="[[types]]"
-                  selected="{{task.variables.validationOrReview}}">
+    <nuxeo-select
+      role="widget"
+      label="[[i18n('wf.serialDocumentReview.review.type')]]"
+      options="[[types]]"
+      selected="{{task.variables.validationOrReview}}"
+    >
     </nuxeo-select>
 
-    <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
-                    value="{{task.variables.comment}}" always-float-label>
+    <paper-textarea
+      role="widget"
+      label="[[i18n('wf.serialDocumentReview.comment')]]"
+      value="{{task.variables.comment}}"
+      always-float-label
+    >
     </paper-textarea>
   </template>
 
@@ -62,13 +70,12 @@ limitations under the License.
         types: Array,
       },
 
-      ready () {
+      ready() {
         this.types = [
-          {id: 'simpleReview', label: this.i18n('wf.serialDocumentReview.simpleReview')},
-          {id: 'validation', label: this.i18n('wf.serialDocumentReview.validation')},
+          { id: 'simpleReview', label: this.i18n('wf.serialDocumentReview.simpleReview') },
+          { id: 'validation', label: this.i18n('wf.serialDocumentReview.validation') },
         ];
       },
     });
   </script>
-
 </dom-module>

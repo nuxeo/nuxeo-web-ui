@@ -31,9 +31,9 @@ Polymer({
         position: fixed;
         z-index: 110;
         bottom: 0;
-        left:0;
+        left: 0;
         right: 0;
-        background-color: rgba(255, 255, 255, .8);
+        background-color: rgba(255, 255, 255, 0.8);
         padding: 1vh;
       }
 
@@ -46,11 +46,10 @@ Polymer({
       a.mobileAppLink:hover {
         background-color: #00adff;
         border-radius: 3em;
-        padding: .4em 1.5em;
+        padding: 0.4em 1.5em;
         font-size: 2.5vh;
         color: #fff !important;
       }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
@@ -68,13 +67,11 @@ Polymer({
         </div>
       </div>
     </template>
-`,
+  `,
 
   is: 'nuxeo-mobile-banner',
 
-  behaviors: [
-    I18nBehavior,
-  ],
+  behaviors: [I18nBehavior],
 
   properties: {
     document: Object,
@@ -101,10 +98,10 @@ Polymer({
     this.isIOS = /iPhone|iPad|iPod/.test(window.navigator.userAgent);
     this.isMobile = this.isAndroid || this.isIOS;
 
-    const re = new RegExp(`(.*${  this.$.nxcon.url  }).*`);
+    const re = new RegExp(`(.*${this.$.nxcon.url}).*`);
     const match = window.location.href.match(re);
     if (match && match.length === 2) {
-      [ , this.baseUrl ] = match;
+      [, this.baseUrl] = match;
     }
   },
 
@@ -112,18 +109,18 @@ Polymer({
     if (this.baseUrl) {
       let appUrl = this.baseUrl.replace('://', '/');
       if (this.document) {
-        appUrl += `/${  this.document.repository  }/id/${  this.document.uid}`;
+        appUrl += `/${this.document.repository}/id/${this.document.uid}`;
       }
       if (this.isAndroid) {
-        return `android-app://com.nuxeomobile/nuxeo/${  appUrl}`;
-      } if (this.isIOS) {
-        return `nuxeo://${  appUrl}`;
+        return `android-app://com.nuxeomobile/nuxeo/${appUrl}`;
+      }
+      if (this.isIOS) {
+        return `nuxeo://${appUrl}`;
       }
     }
   },
 
   _openIOSAppOrAppStore() {
-
     const appUrl = this._computeUrl(this.document);
     const storeUrl = 'https://itunes.apple.com/app/id1103802613';
     if (!appUrl) {

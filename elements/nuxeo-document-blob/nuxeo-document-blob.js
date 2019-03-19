@@ -59,7 +59,7 @@ Polymer({
       }
 
       .detail {
-        opacity: .5;
+        opacity: 0.5;
       }
 
       nuxeo-actions-menu {
@@ -83,7 +83,7 @@ Polymer({
         </div>
       </div>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-blob',
   behaviors: [I18nBehavior, FormatBehavior],
@@ -99,13 +99,11 @@ Polymer({
     actionContext: Object,
   },
 
-  observers: [
-    '_update(user, document, xpath)',
-  ],
+  observers: ['_update(user, document, xpath)'],
 
   _update(user, document, xpath) {
     this.blob = document && this._deepFind(document.properties, xpath);
-    this.actionContext = {user: this.user, document: this.document, blob: this.blob, xpath: this.xpath};
+    this.actionContext = { user: this.user, document: this.document, blob: this.blob, xpath: this.xpath };
   },
 
   _deepFind(obj, props) {

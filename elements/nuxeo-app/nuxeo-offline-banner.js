@@ -43,7 +43,7 @@ Polymer({
         visibility: hidden;
         transform: translateY(-100%);
         -webkit-transform: translateY(-100%);
-        transition-duration: .5s;
+        transition-duration: 0.5s;
         transition-property: visibility, -webkit-transform, opacity;
         transition-property: visibility, transform, opacity;
         will-change: transform;
@@ -57,7 +57,7 @@ Polymer({
     </style>
 
     <span>[[message]]</span>
-`,
+  `,
 
   is: 'nuxeo-offline-banner',
 

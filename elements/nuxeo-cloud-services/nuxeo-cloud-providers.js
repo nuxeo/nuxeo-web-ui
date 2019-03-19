@@ -54,15 +54,28 @@ Polymer({
         </paper-button>
       </div>
 
-      <nuxeo-data-table id="table" name="table" icon="nuxeo:view-list" empty-label="[[i18n('cloudProviders.emptyResult')]]" items="[[oauth2Providers]]">
-
-        <nuxeo-data-table-column name="[[i18n('cloudProviders.serviceName')]]" field="serviceName" sort-by="serviceName">
+      <nuxeo-data-table
+        id="table"
+        name="table"
+        icon="nuxeo:view-list"
+        empty-label="[[i18n('cloudProviders.emptyResult')]]"
+        items="[[oauth2Providers]]"
+      >
+        <nuxeo-data-table-column
+          name="[[i18n('cloudProviders.serviceName')]]"
+          field="serviceName"
+          sort-by="serviceName"
+        >
           <template>
             <span name="serviceName">[[item.serviceName]]</span>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('cloudProviders.description')]]" field="description" sort-by="description">
+        <nuxeo-data-table-column
+          name="[[i18n('cloudProviders.description')]]"
+          field="description"
+          sort-by="description"
+        >
           <template>
             <span>[[item.description]]</span>
           </template>
@@ -76,8 +89,18 @@ Polymer({
 
         <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
           <template>
-            <paper-icon-button name="edit" icon="nuxeo:edit" on-tap="_editEntry" title="[[i18n('cloudProviders.edit')]]"></paper-icon-button>
-            <paper-icon-button name="delete" icon="nuxeo:delete" on-tap="_deleteEntry" title="[[i18n('cloudProviders.delete')]]"></paper-icon-button>
+            <paper-icon-button
+              name="edit"
+              icon="nuxeo:edit"
+              on-tap="_editEntry"
+              title="[[i18n('cloudProviders.edit')]]"
+            ></paper-icon-button>
+            <paper-icon-button
+              name="delete"
+              icon="nuxeo:delete"
+              on-tap="_deleteEntry"
+              title="[[i18n('cloudProviders.delete')]]"
+            ></paper-icon-button>
           </template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>
@@ -88,25 +111,57 @@ Polymer({
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-input required label="[[i18n('cloudProviderEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
+            <nuxeo-input
+              required
+              label="[[i18n('cloudProviderEdit.serviceName')]]"
+              name="serviceName"
+              value="{{_selectedEntry.serviceName}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.description')]]" name="description" value="{{_selectedEntry.description}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.description')]]"
+              name="description"
+              value="{{_selectedEntry.description}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.clientId')]]" name="clientId" value="{{_selectedEntry.clientId}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.clientId')]]"
+              name="clientId"
+              value="{{_selectedEntry.clientId}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.clientSecret')]]" name="clientSecret" value="{{_selectedEntry.clientSecret}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.clientSecret')]]"
+              name="clientSecret"
+              value="{{_selectedEntry.clientSecret}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.authorizationServerURL')]]" name="authorizationServerURL" pattern="(http[s]?:\\/\\/).*" value="{{_selectedEntry.authorizationServerURL}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.authorizationServerURL')]]"
+              name="authorizationServerURL"
+              pattern="(http[s]?:\\/\\/).*"
+              value="{{_selectedEntry.authorizationServerURL}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.tokenServerURL')]]" name="tokenServerURL" pattern="(http[s]?:\\/\\/).*" value="{{_selectedEntry.tokenServerURL}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.tokenServerURL')]]"
+              name="tokenServerURL"
+              pattern="(http[s]?:\\/\\/).*"
+              value="{{_selectedEntry.tokenServerURL}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.userAuthorizationURL')]]" name="userAuthorizationURL" pattern="(http[s]?:\\/\\/).*" value="{{_selectedEntry.userAuthorizationURL}}">
+            <nuxeo-input
+              label="[[i18n('cloudProviderEdit.userAuthorizationURL')]]"
+              name="userAuthorizationURL"
+              pattern="(http[s]?:\\/\\/).*"
+              value="{{_selectedEntry.userAuthorizationURL}}"
+            >
             </nuxeo-input>
 
             <nuxeo-input label="[[i18n('cloudProviderEdit.scopes')]]" name="scopes" value="{{_selectedEntry.scopes}}">
@@ -123,7 +178,7 @@ Polymer({
         <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-cloud-providers',
   behaviors: [FormatBehavior],
@@ -178,7 +233,7 @@ Polymer({
 
   _save() {
     const valid = this.$.form.validate();
-    if (valid){
+    if (valid) {
       this._selectedEntry.scopes = this._selectedEntry.scopes ? this._selectedEntry.scopes.split(',') : [];
       this.$.oauth.data = this._selectedEntry;
 
@@ -193,48 +248,56 @@ Polymer({
   _create(entry) {
     this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH;
     this.$.oauth.data = entry;
-    this.$.oauth.post().then(() => {
-      this.refresh();
-      this.$.dialog.toggle();
-      this.fire('notify', {message: this.i18n('cloudProviders.successfullyCreated')});
-    }, (err) => {
-      this.fire('notify', {
-        message: `${this.i18n('label.error').toUpperCase()  }: ${
-        err.message && err.message.length > 0 ? err.message :
-          this.i18n('cloudProviders.errorCreating')}`,
-      });
-    });
+    this.$.oauth.post().then(
+      () => {
+        this.refresh();
+        this.$.dialog.toggle();
+        this.fire('notify', { message: this.i18n('cloudProviders.successfullyCreated') });
+      },
+      (err) => {
+        this.fire('notify', {
+          message: `${this.i18n('label.error').toUpperCase()}: ${
+            err.message && err.message.length > 0 ? err.message : this.i18n('cloudProviders.errorCreating')
+          }`,
+        });
+      },
+    );
   },
 
   _update(serviceName, entry) {
     this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + serviceName;
     this.$.oauth.data = entry;
-    this.$.oauth.put().then(() => {
-      this.$.dialog.toggle();
-      this.fire('notify', {message: this.i18n('cloudProviders.successfullyEdited')});
-      this.refresh();
-    }, (err) => {
-      this.fire('notify', {
-        message: `${this.i18n('label.error').toUpperCase()  }: ${
-        err.message && err.message.length > 0 ? err.message :
-          this.i18n('cloudProviders.errorEditing')}`,
-      });
-    });
+    this.$.oauth.put().then(
+      () => {
+        this.$.dialog.toggle();
+        this.fire('notify', { message: this.i18n('cloudProviders.successfullyEdited') });
+        this.refresh();
+      },
+      (err) => {
+        this.fire('notify', {
+          message: `${this.i18n('label.error').toUpperCase()}: ${
+            err.message && err.message.length > 0 ? err.message : this.i18n('cloudProviders.errorEditing')
+          }`,
+        });
+      },
+    );
   },
 
   _deleteEntry(e) {
     if (window.confirm(this.i18n('cloudProviders.confirmDelete'))) {
-      const {item} = e.target.parentNode;
+      const { item } = e.target.parentNode;
       this.$.oauth.path = OAUTH2_PROVIDERS_BASE_PATH + item.serviceName;
-      this.$.oauth.remove().then(() => {
-        this.refresh();
-        this.fire('notify', {message: this.i18n('cloudProviders.successfullyDeleted')});
-      }, () => {
-        this.fire('notify', {
-          message: `${this.i18n('label.error').toUpperCase()  }: ${
-          this.i18n('cloudProviders.errorDeleting')}`,
-        });
-      });
+      this.$.oauth.remove().then(
+        () => {
+          this.refresh();
+          this.fire('notify', { message: this.i18n('cloudProviders.successfullyDeleted') });
+        },
+        () => {
+          this.fire('notify', {
+            message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n('cloudProviders.errorDeleting')}`,
+          });
+        },
+      );
     }
   },
 });

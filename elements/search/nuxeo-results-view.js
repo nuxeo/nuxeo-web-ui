@@ -48,7 +48,8 @@ Polymer({
         padding: 0;
       }
 
-      .header, #collapse {
+      .header,
+      #collapse {
         padding: 16px;
       }
 
@@ -81,7 +82,21 @@ Polymer({
       }
     </style>
 
-    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[_params]]" quick-filters="{{quickFilters}}" schemas="[[schemas]]" loading="{{loading}}" headers="[[headers]]" fetch-aggregates skip-aggregates$="[[skipAggregates]]" on-error="_onError">
+    <nuxeo-page-provider
+      id="provider"
+      provider="[[provider]]"
+      page-size="[[pageSize]]"
+      aggregations="{{aggregations}}"
+      enrichers="[[enrichers]]"
+      params="[[_params]]"
+      quick-filters="{{quickFilters}}"
+      schemas="[[schemas]]"
+      loading="{{loading}}"
+      headers="[[headers]]"
+      fetch-aggregates
+      skip-aggregates$="[[skipAggregates]]"
+      on-error="_onError"
+    >
     </nuxeo-page-provider>
 
     <template is="dom-if" if="[[showFilters]]">
@@ -101,7 +116,14 @@ Polymer({
           </div>
         </div>
         <iron-collapse id="collapse" opened="{{opened}}">
-          <nuxeo-search-form-layout id="form" provider="[[provider]]" search-name="[[searchName]]" aggregations="[[aggregations]]" params="[[_params]]" on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
+          <nuxeo-search-form-layout
+            id="form"
+            provider="[[provider]]"
+            search-name="[[searchName]]"
+            aggregations="[[aggregations]]"
+            params="[[_params]]"
+            on-search-form-layout-changed="_formChanged"
+          ></nuxeo-search-form-layout>
           <paper-spinner-lite active="[[loading]]"></paper-spinner-lite>
         </iron-collapse>
         <div class="buttons" hidden$="[[!opened]]">
@@ -118,9 +140,15 @@ Polymer({
     </template>
 
     <template is="dom-if" if="[[visible]]">
-      <nuxeo-search-results-layout id="results" search-name="[[searchName]]" nx-provider="[[_nxProvider]]" on-navigate="_navigateFromSearch" on-results-changed="_resultsChanged"></nuxeo-search-results-layout>
+      <nuxeo-search-results-layout
+        id="results"
+        search-name="[[searchName]]"
+        nx-provider="[[_nxProvider]]"
+        on-navigate="_navigateFromSearch"
+        on-results-changed="_resultsChanged"
+      ></nuxeo-search-results-layout>
     </template>
-`,
+  `,
 
   is: 'nuxeo-results-view',
   behaviors: [I18nBehavior],
@@ -161,7 +189,7 @@ Polymer({
      */
     headers: {
       type: String,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
+      value: { 'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label' },
     },
     /**
      * List of comma separated values of the document schemas to be returned.
@@ -273,7 +301,7 @@ Polymer({
   },
 
   _expandIcon(opened) {
-    return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
+    return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
   },
 
   _getFilterCount() {
@@ -281,8 +309,7 @@ Polymer({
       // subtract the number of original parameters (this._paramsCount)
       return Object.keys(this._params).length - this._paramsCount - ('highlight' in this._params ? 1 : 0);
     }
-      return 0;
-
+    return 0;
   },
 
   _computeHideCounter(opened) {
@@ -341,7 +368,7 @@ Polymer({
       // e.detail.path is params.prop_name eg: params.ecm_fulltext
       if (evt.detail.path) {
         const param = evt.detail.path.split('.')[1];
-        this.notifyPath(`_params.${  param}`, evt.detail.value);
+        this.notifyPath(`_params.${param}`, evt.detail.value);
         if (this.visible && this.auto) {
           this._search();
         }
@@ -356,7 +383,7 @@ Polymer({
   },
 
   _resultsChanged() {
-    const {results} = this;
+    const { results } = this;
     if (this.searchForm && results) {
       this.searchForm.results = results.results;
     }
@@ -367,7 +394,7 @@ Polymer({
       this._nxProvider = searchForm.nxProvider;
       this.provider = this._nxProvider.provider;
       this.searchName = searchForm.searchName;
-      const {results} = this;
+      const { results } = this;
       if (results) {
         searchForm.results = results.results;
       }

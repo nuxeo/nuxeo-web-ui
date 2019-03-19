@@ -47,11 +47,12 @@ Polymer({
       }
 
       .task-property {
-        opacity: .5;
-        margin-right: .5rem;
+        opacity: 0.5;
+        margin-right: 0.5rem;
       }
 
-      .taskDoc .doc-title, .date {
+      .taskDoc .doc-title,
+      .date {
         text-overflow: ellipsis;
         white-space: nowrap;
         max-width: 85%;
@@ -109,7 +110,15 @@ Polymer({
       }
     </style>
 
-    <nuxeo-data-list items="[[tasks]]" id="list" as="task" selected-item="{{_selection}}" empty-label="[[i18n('tasksList.noTasks')]]" selection-enabled select-on-tap>
+    <nuxeo-data-list
+      items="[[tasks]]"
+      id="list"
+      as="task"
+      selected-item="{{_selection}}"
+      empty-label="[[i18n('tasksList.noTasks')]]"
+      selection-enabled
+      select-on-tap
+    >
       <template>
         <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
           <div class="task-box">
@@ -122,7 +131,9 @@ Polymer({
               </div>
               <div class="horizontal">
                 <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
-                <span class="date"> <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
+                <span class="date">
+                  <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
+                </span>
               </div>
             </div>
             <div class="horizontal">
@@ -132,7 +143,7 @@ Polymer({
         </div>
       </template>
     </nuxeo-data-list>
-`,
+  `,
 
   is: 'nuxeo-tasks-list',
   behaviors: [RoutingBehavior, I18nBehavior],

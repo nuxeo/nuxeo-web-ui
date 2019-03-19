@@ -40,7 +40,7 @@ Polymer({
       </div>
       <nuxeo-tooltip for="clipboardButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-clipboard-documents-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -72,8 +72,8 @@ Polymer({
   },
 
   addToClipBoard() {
-    this.fire('add-to-clipboard', {documents: this.documents});
-    this.fire ('clear-selected-items');
+    this.fire('add-to-clipboard', { documents: this.documents });
+    this.fire('clear-selected-items');
   },
 
   _isAvailable() {

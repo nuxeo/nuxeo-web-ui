@@ -60,7 +60,7 @@ Polymer({
         z-index: 199;
         padding: 0 2em;
         font-weight: 300;
-        box-shadow: 0 0 3px rgba(0,0,0,0.4);
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
         background: var(--nuxeo-selection-toolbar-background, #000);
         color: var(--nuxeo-selection-toolbar-text, #fff);
         @apply --nuxeo-selection-toolbar;
@@ -87,7 +87,10 @@ Polymer({
       }
 
       /* links */
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         display: inline-block;
         vertical-align: bottom;
         text-decoration: underline;
@@ -122,7 +125,8 @@ Polymer({
       <paper-dialog-scrollable>
         <template is="dom-repeat" items="[[selectedItems]]">
           <div class="layout horizontal center">
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail><div>[[item.title]]</div>
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <div>[[item.title]]</div>
           </div>
         </template>
       </paper-dialog-scrollable>
@@ -130,7 +134,7 @@ Polymer({
         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-selection-toolbar',
   behaviors: [I18nBehavior],
@@ -152,12 +156,10 @@ Polymer({
     },
   },
 
-  observers: [
-    '_observeSelectedItems(selectedItems)',
-  ],
+  observers: ['_observeSelectedItems(selectedItems)'],
 
   _observeSelectedItems() {
-    this.hidden = !this.selectedItems || (this.selectedItems.length === 0);
+    this.hidden = !this.selectedItems || this.selectedItems.length === 0;
   },
 
   toogleSelectedItemsPopup() {

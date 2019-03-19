@@ -22,31 +22,44 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-easysharefolder-edit-layout">
   <template>
-    <nuxeo-input role="widget"
-                 label="[[i18n('title')]]"
-                 name="title"
-                 value="{{document.properties.dc:title}}"
-                 autofocus required>
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('title')]]"
+      name="title"
+      value="{{document.properties.dc:title}}"
+      autofocus
+      required
+    >
     </nuxeo-input>
 
-    <nuxeo-textarea role="widget"
-                    label="[[i18n('label.description')]]"
-                    name="description"
-                    value="{{document.properties.dc:description}}">
+    <nuxeo-textarea
+      role="widget"
+      label="[[i18n('label.description')]]"
+      name="description"
+      value="{{document.properties.dc:description}}"
+    >
     </nuxeo-textarea>
 
-    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]" name="expired"
-                       value="{{document.properties.dc:expired}}" required>
+    <nuxeo-date-picker
+      role="widget"
+      label="[[i18n('label.dublincore.expire')]]"
+      name="expired"
+      value="{{document.properties.dc:expired}}"
+      required
+    >
     </nuxeo-date-picker>
 
-    <paper-checkbox noink name="notification"
-                    checked="{{document.properties.eshare:hasNotification}}">
+    <paper-checkbox noink name="notification" checked="{{document.properties.eshare:hasNotification}}">
       [[i18n('easysharefolder.notification')]]
     </paper-checkbox>
 
-    <nuxeo-input role="widget" name="email" type="email"
-                 label="[[i18n('easysharefolder.contactEmail')]]"
-                 value="{{document.properties.eshare:contactEmail}}">
+    <nuxeo-input
+      role="widget"
+      name="email"
+      type="email"
+      label="[[i18n('easysharefolder.contactEmail')]]"
+      value="{{document.properties.eshare:contactEmail}}"
+    >
     </nuxeo-input>
   </template>
   <script>

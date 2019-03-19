@@ -43,133 +43,133 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles iron-flex">
-    :host {
-      @apply --layout-vertical;
-      @apply --layout-flex;
-      display: block;
-    }
+      :host {
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        display: block;
+      }
 
-    .header {
-      line-height: 4.2rem;
-      display: inline-block !important;
-      white-space: nowrap;
-      max-width: 70%;
-      overflow: hidden;
-    }
+      .header {
+        line-height: 4.2rem;
+        display: inline-block !important;
+        white-space: nowrap;
+        max-width: 70%;
+        overflow: hidden;
+      }
 
-    nuxeo-data-list {
-      height: calc(100vh - 61px - var(--nuxeo-app-top));
-    }
+      nuxeo-data-list {
+        height: calc(100vh - 61px - var(--nuxeo-app-top));
+      }
 
-    nuxeo-data-list {
-      display: block;
-      position: relative;
-    }
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+      }
 
-    .collections {
-      height: calc(100vh - 61px - var(--nuxeo-app-top));
-      overflow: auto;
-    }
+      .collections {
+        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        overflow: auto;
+      }
 
-    neon-animatable.nuxeo-collections {
-      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
-    }
+      neon-animatable.nuxeo-collections {
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+      }
 
-    .switch {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 60px;
-      height: 53px;
-      padding: 16px;
-      z-index: 101;
-      border-left: 1px solid var(--divider-color);
-    }
+      .switch {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60px;
+        height: 53px;
+        padding: 16px;
+        z-index: 101;
+        border-left: 1px solid var(--divider-color);
+      }
 
-    .switch:hover {
-      background-color: var(--nuxeo-button-primary);
-      color: var(--nuxeo-button-primary-text);
-    }
+      .switch:hover {
+        background-color: var(--nuxeo-button-primary);
+        color: var(--nuxeo-button-primary-text);
+      }
 
-    .content {
-      @apply --layout-flex;
-      @apply --layout-vertical;
-      height: calc(100vh - 61px - var(--nuxeo-app-top));
-      width: 293px;
-    }
+      .content {
+        @apply --layout-flex;
+        @apply --layout-vertical;
+        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        width: 293px;
+      }
 
-    .collection-box {
-      line-height: 155%;
-    }
+      .collection-box {
+        line-height: 155%;
+      }
 
-    .collection-box + .collection-box {
-      border-top: 1px solid var(--divider-color);
-    }
+      .collection-box + .collection-box {
+        border-top: 1px solid var(--divider-color);
+      }
 
-    iron-icon.collection-name-icon {
-      height: .9em;
-      width: .9em;
-      border-radius: 50px;
-      background-color: var(--dark-primary-color);
-      color: white;
-      padding: .4em;
-    }
+      iron-icon.collection-name-icon {
+        height: 0.9em;
+        width: 0.9em;
+        border-radius: 50px;
+        background-color: var(--dark-primary-color);
+        color: white;
+        padding: 0.4em;
+      }
 
-    .collection-name {
-      font-weight: 700;
-      margin-left: .5em;
-    }
+      .collection-name {
+        font-weight: 700;
+        margin-left: 0.5em;
+      }
 
-    .collection-detail {
-      margin-left: 2.2em;
-    }
+      .collection-detail {
+        margin-left: 2.2em;
+      }
 
-    .collection-property {
-      opacity: .5;
-      margin-right: .2em;
-    }
+      .collection-property {
+        opacity: 0.5;
+        margin-right: 0.2em;
+      }
 
-    .list-item {
-      cursor: pointer;
-      padding: 1em;
-      border-bottom: 1px solid var(--nuxeo-border);
-    }
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
 
-    .list-item:hover {
-      @apply --nuxeo-block-hover;
-    }
+      .list-item:hover {
+        @apply --nuxeo-block-hover;
+      }
 
-    .list-item.selected,
-    .list-item:focus,
-    .list-item.selected:focus {
-      @apply --nuxeo-block-selected;
-    }
+      .list-item.selected,
+      .list-item:focus,
+      .list-item.selected:focus {
+        @apply --nuxeo-block-selected;
+      }
 
-    .list-item iron-icon {
-      @apply --nuxeo-action;
-    }
+      .list-item iron-icon {
+        @apply --nuxeo-action;
+      }
 
-    .list-item iron-icon:hover {
-      @apply --nuxeo-action-hover;
-    }
+      .list-item iron-icon:hover {
+        @apply --nuxeo-action-hover;
+      }
 
-    .remove {
-      width: 1.7em;
-      height: 1.7em;
-      margin-left: 1em;
-    }
+      .remove {
+        width: 1.7em;
+        height: 1.7em;
+        margin-left: 1em;
+      }
 
-    .list-item-property {
-      opacity: .5;
-      display: block;
-      margin: .2em 0;
-      font-size: .8rem;
-    }
+      .list-item-property {
+        opacity: 0.5;
+        display: block;
+        margin: 0.2em 0;
+        font-size: 0.8rem;
+      }
 
-    .horizontal {
-      @apply --layout-flex;
-      @apply --layout-horizontal;
-    }
+      .horizontal {
+        @apply --layout-flex;
+        @apply --layout-horizontal;
+      }
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
@@ -186,80 +186,111 @@ Polymer({
       </template>
     </div>
 
+    <neon-animated-pages
+      class="content"
+      id="queues"
+      selected="[[_selectedPage]]"
+      entry-animation="[[_entryAnimation]]"
+      exit-animation="[[_exitAnimation]]"
+    >
+      <neon-animatable>
+        <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
+          <nuxeo-page-provider
+            id="collectionsProvider"
+            provider="user_collections"
+            page-size="40"
+            params='{"searchTerm":"%","user": "\$currentUser"}'
+            sort='{"dc:modified": "desc"}'
+            schemas="dublincore,common"
+            enrichers="permissions"
+            headers='{"X-NXfetch.document": "properties"}'
+          >
+          </nuxeo-page-provider>
 
-      <neon-animated-pages class="content" id="queues" selected="[[_selectedPage]]" entry-animation="[[_entryAnimation]]" exit-animation="[[_exitAnimation]]">
-        <neon-animatable>
-
-          <div id="collections" class="collections" hidden$="{{_isDisplayMembers}}">
-            <nuxeo-page-provider id="collectionsProvider" provider="user_collections" page-size="40" params='{"searchTerm":"%","user":"\$currentUser"}" sort="{"dc:modified":"desc"}" schemas="dublincore,common" enrichers="permissions" headers="{"X-NXfetch.document": "properties"}'>
-            </nuxeo-page-provider>
-
-            <nuxeo-data-list nx-provider="collectionsProvider" id="collectionsList" selected-item="{{selectedCollection}}" selection-enabled select-on-tap as="collection" empty-label="[[i18n('collections.empty')]]" empty-label-when-filtered="[[i18n('collections.empty')]]">
-              <template>
-                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-                  <div class="collection-box">
-                    <div class="collection-info horizontal layout center">
-                      <iron-icon class="collection-name-icon" icon="nuxeo:collections"></iron-icon>
-                      <span class="collection-name title">[[collection.title]]</span>
+          <nuxeo-data-list
+            nx-provider="collectionsProvider"
+            id="collectionsList"
+            selected-item="{{selectedCollection}}"
+            selection-enabled
+            select-on-tap
+            as="collection"
+            empty-label="[[i18n('collections.empty')]]"
+            empty-label-when-filtered="[[i18n('collections.empty')]]"
+          >
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="collection-box">
+                  <div class="collection-info horizontal layout center">
+                    <iron-icon class="collection-name-icon" icon="nuxeo:collections"></iron-icon>
+                    <span class="collection-name title">[[collection.title]]</span>
+                  </div>
+                  <div class="collection-detail">
+                    <div class="date horizontal layout center">
+                      <span class="collection-property">[[i18n('collections.lastModified')]] </span>
+                      <nuxeo-date datetime="[[collection.properties.dc:modified]]"></nuxeo-date>
                     </div>
-                    <div class="collection-detail">
-                      <div class="date horizontal layout center">
-                        <span class="collection-property">[[i18n('collections.lastModified')]] </span>
-                        <nuxeo-date datetime="[[collection.properties.dc:modified]]"></nuxeo-date>
-                      </div>
-                      <div class="layout center">
-                        <span class="collection-property">[[i18n('collections.ownedBy')]]</span>
-                        <nuxeo-user-tag user="[[collection.properties.dc:creator]]"></nuxeo-user-tag>
-                      </div>
+                    <div class="layout center">
+                      <span class="collection-property">[[i18n('collections.ownedBy')]]</span>
+                      <nuxeo-user-tag user="[[collection.properties.dc:creator]]"></nuxeo-user-tag>
                     </div>
                   </div>
                 </div>
-              </template>
-            </nuxeo-data-list>
-          </div>
+              </div>
+            </template>
+          </nuxeo-data-list>
+        </div>
+      </neon-animatable>
 
-        </neon-animatable>
-
-        <neon-animatable>
-
-          <div id="queue" hidden$="{{!_isDisplayMembers}}">
-            <nuxeo-data-list id="membersList" selected-item="{{selectedMember}}" selection-enabled select-on-tap as="member" empty-label="[[i18n('collections.members.empty')]]" empty-label-when-filtered="[[i18n('collections.members.empty')]]">
-              <template>
-                <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
-
-                  <div class="list-item-box">
-                    <div class="list-item-info horizontal layout center">
-                      <div class="vertical layout center">
-                        <nuxeo-document-thumbnail document="[[member]]"></nuxeo-document-thumbnail>
-                      </div>
-                      <div class="flex">
-                        <span class="list-item-title ellipsis">[[member.title]]</span>
-                        <span class="list-item-property ellipsis">[[formatDocType(member.type)]]</span>
-                      </div>
-                      <iron-icon id="removeFromCollection" class="remove" hidden$="[[!_canRemove(selectedCollection)]]" icon="nuxeo:remove" data-uid$="[[member.uid]]" on-tap="_removeFromCollection">
-                      </iron-icon>
+      <neon-animatable>
+        <div id="queue" hidden$="{{!_isDisplayMembers}}">
+          <nuxeo-data-list
+            id="membersList"
+            selected-item="{{selectedMember}}"
+            selection-enabled
+            select-on-tap
+            as="member"
+            empty-label="[[i18n('collections.members.empty')]]"
+            empty-label-when-filtered="[[i18n('collections.members.empty')]]"
+          >
+            <template>
+              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+                <div class="list-item-box">
+                  <div class="list-item-info horizontal layout center">
+                    <div class="vertical layout center">
+                      <nuxeo-document-thumbnail document="[[member]]"></nuxeo-document-thumbnail>
                     </div>
+                    <div class="flex">
+                      <span class="list-item-title ellipsis">[[member.title]]</span>
+                      <span class="list-item-property ellipsis">[[formatDocType(member.type)]]</span>
+                    </div>
+                    <iron-icon
+                      id="removeFromCollection"
+                      class="remove"
+                      hidden$="[[!_canRemove(selectedCollection)]]"
+                      icon="nuxeo:remove"
+                      data-uid$="[[member.uid]]"
+                      on-tap="_removeFromCollection"
+                    >
+                    </iron-icon>
                   </div>
-
                 </div>
-              </template>
-            </nuxeo-data-list>
-          </div>
-
-        </neon-animatable>
-      </neon-animated-pages>
+              </div>
+            </template>
+          </nuxeo-data-list>
+        </div>
+      </neon-animatable>
+    </neon-animated-pages>
 
     <nuxeo-keys keys="right l" on-pressed="_navigateOnRight"></nuxeo-keys>
     <nuxeo-keys keys="left h" on-pressed="_navigateOnLeft"></nuxeo-keys>
     <nuxeo-keys keys="down j" on-pressed="_navigateOnDown"></nuxeo-keys>
     <nuxeo-keys keys="up k" on-pressed="_navigateOnUp"></nuxeo-keys>
-`,
+  `,
 
   is: 'nuxeo-collections',
   behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
 
   properties: {
-
     selectedSearch: {
       type: String,
       value: 'faceted',
@@ -324,10 +355,10 @@ Polymer({
         this._tmpJustRight = false;
       }
     } else if (this._tmpJustLeft) {
-        e.detail.keyboardEvent.preventDefault();
-        this.$.collectionsList.selectNext();
-        this._tmpJustLeft = false;
-      }
+      e.detail.keyboardEvent.preventDefault();
+      this.$.collectionsList.selectNext();
+      this._tmpJustLeft = false;
+    }
   },
 
   _navigateOnUp(e) {
@@ -338,10 +369,10 @@ Polymer({
         this._tmpJustRight = false;
       }
     } else if (this._tmpJustLeft) {
-        e.detail.keyboardEvent.preventDefault();
-        this.$.collectionsList.selectPrevious();
-        this._tmpJustLeft = false;
-      }
+      e.detail.keyboardEvent.preventDefault();
+      this.$.collectionsList.selectPrevious();
+      this._tmpJustLeft = false;
+    }
   },
 
   _observeIsDisplayMembers() {
@@ -354,7 +385,7 @@ Polymer({
       this._exitAnimation = 'slide-right-animation';
       this._selectedPage = 0;
       if (this.selectedCollection) {
-        this.fire('navigate', {doc: this.selectedCollection});
+        this.fire('navigate', { doc: this.selectedCollection });
       }
     }
   },
@@ -378,18 +409,15 @@ Polymer({
     const memberId = evt.currentTarget.dataset.uid;
     op.input = memberId;
     op.params = {
-      'collection': this.selectedCollection.uid,
+      collection: this.selectedCollection.uid,
     };
     op.execute().then(() => {
-      this._removeFromMembers(memberId)
-      this.fire('removed-from-collection',
-        {
-          innerRemove: true,
-          doc: memberId,
-          collectionId: evt.target.dataset.uid,
-
-        },
-      );
+      this._removeFromMembers(memberId);
+      this.fire('removed-from-collection', {
+        innerRemove: true,
+        doc: memberId,
+        collectionId: evt.target.dataset.uid,
+      });
     });
   },
 
@@ -425,7 +453,7 @@ Polymer({
 
   _selectedCollectionChanged(collection) {
     if (collection) {
-      this.fire('navigate', {doc: collection});
+      this.fire('navigate', { doc: collection });
     }
   },
 
@@ -451,7 +479,6 @@ Polymer({
         }
       }
     });
-
   },
 
   _visibleChanged() {

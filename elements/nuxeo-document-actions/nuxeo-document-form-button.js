@@ -56,16 +56,20 @@ Polymer({
 
     <nuxeo-dialog id="[[layout]]-dialog" no-auto-focus with-backdrop modal>
       <div class="container">
-        <nuxeo-document-form-layout id="layout" document="[[document]]" layout="[[layout]]" on-document-updated="_closeDialog"></nuxeo-document-form-layout>
+        <nuxeo-document-form-layout
+          id="layout"
+          document="[[document]]"
+          layout="[[layout]]"
+          on-document-updated="_closeDialog"
+        ></nuxeo-document-form-layout>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-document-form-button',
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
-
     /**
      * Input document.
      */
@@ -100,11 +104,11 @@ Polymer({
   },
 
   get dialog() {
-    return this.root.getElementById(`${this.layout  }-dialog`);
+    return this.root.getElementById(`${this.layout}-dialog`);
   },
 
   get button() {
-    return this.root.getElementById(`${this.layout  }-button`);
+    return this.root.getElementById(`${this.layout}-button`);
   },
 
   _isAvailable(doc) {

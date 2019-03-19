@@ -119,19 +119,19 @@ Polymer({
       paper-input {
         --paper-input-container-input: {
           font-family: var(--nuxeo-app-font);
-        };
+        }
 
         --paper-input-container-underline: {
           background-color: white;
-        };
+        }
 
         --paper-input-container-underline-focus: {
           background-color: white;
-        };
+        }
 
         --paper-input-container-label: {
           font-family: var(--nuxeo-app-font);
-        };
+        }
       }
 
       .content {
@@ -150,7 +150,7 @@ Polymer({
 
       .header h1 {
         font-size: 1rem;
-        margin: .1em .2em 0 1.1em;
+        margin: 0.1em 0.2em 0 1.1em;
         font-weight: 500;
       }
 
@@ -206,16 +206,16 @@ Polymer({
       }
 
       .list-item-property {
-        opacity: .5;
-        margin-right: .2em;
+        opacity: 0.5;
+        margin-right: 0.2em;
       }
 
       nuxeo-quick-filters {
-        padding: .3em .5em;
+        padding: 0.3em 0.5em;
         border-bottom: 1px solid var(--nuxeo-border);
         max-height: 7em;
         overflow: auto;
-        font-size: .8rem;
+        font-size: 0.8rem;
       }
 
       #checkbox.paper-checkbox {
@@ -223,14 +223,32 @@ Polymer({
       }
     </style>
 
-    <nuxeo-page-provider id="provider" provider="[[provider]]" page-size="[[pageSize]]" aggregations="{{aggregations}}" enrichers="[[enrichers]]" params="[[params]]" quick-filters="{{_quickFilters}}" schemas="[[schemas]]" headers="[[headers]]" fetch-aggregates skip-aggregates$="[[skipAggregates]]" on-error="_onError">
+    <nuxeo-page-provider
+      id="provider"
+      provider="[[provider]]"
+      page-size="[[pageSize]]"
+      aggregations="{{aggregations}}"
+      enrichers="[[enrichers]]"
+      params="[[params]]"
+      quick-filters="{{_quickFilters}}"
+      schemas="[[schemas]]"
+      headers="[[headers]]"
+      fetch-aggregates
+      skip-aggregates$="[[skipAggregates]]"
+      on-error="_onError"
+    >
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
-        <nuxeo-search id="saved-searches" headers="[[headers]]" searches="{{searches}}" params="[[_computeSavedSearchesParams(provider)]]"></nuxeo-search>
+        <nuxeo-search
+          id="saved-searches"
+          headers="[[headers]]"
+          searches="{{searches}}"
+          params="[[_computeSavedSearchesParams(provider)]]"
+        ></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
             <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
@@ -244,7 +262,12 @@ Polymer({
             <nuxeo-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</nuxeo-tooltip>
           </template>
           <template is="dom-if" if="[[!queue]]">
-            <paper-icon-button class="switch" icon="nuxeo:view-list" id="toogleQueue" on-tap="displayQueueAndNavigateToFirst">
+            <paper-icon-button
+              class="switch"
+              icon="nuxeo:view-list"
+              id="toogleQueue"
+              on-tap="displayQueueAndNavigateToFirst"
+            >
             </paper-icon-button>
             <nuxeo-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</nuxeo-tooltip>
           </template>
@@ -256,13 +279,26 @@ Polymer({
 
       <div class="content">
         <div id="filters" class="filters loadable" hidden$="{{queue}}">
-          <nuxeo-search-form-layout id="layout" provider="[[provider]]" search-name="[[searchName]]" aggregations="[[aggregations]]" params="{{params}}" on-search-form-layout-changed="_formChanged"></nuxeo-search-form-layout>
+          <nuxeo-search-form-layout
+            id="layout"
+            provider="[[provider]]"
+            search-name="[[searchName]]"
+            aggregations="[[aggregations]]"
+            params="{{params}}"
+            on-search-form-layout-changed="_formChanged"
+          ></nuxeo-search-form-layout>
           <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
             <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
             <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
           </div>
           <div class="actions">
-            <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset" hidden$="[[!_isSavedSearch(selectedSearchIdx)]]">
+            <paper-button
+              noink
+              class="reset"
+              disabled$="[[!dirty]]"
+              on-tap="_reset"
+              hidden$="[[!_isSavedSearch(selectedSearchIdx)]]"
+            >
               [[i18n('command.Reset')]]
             </paper-button>
             <div class="layout horizontal">
@@ -282,7 +318,15 @@ Polymer({
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
           </template>
-          <nuxeo-data-list nx-provider="provider" id="list" selected-item="{{selectedDocument}}" empty-label="[[i18n('searchForm.queue.noResults')]]" empty-label-when-filtered selection-enabled select-on-tap>
+          <nuxeo-data-list
+            nx-provider="provider"
+            id="list"
+            selected-item="{{selectedDocument}}"
+            empty-label="[[i18n('searchForm.queue.noResults')]]"
+            empty-label-when-filtered
+            selection-enabled
+            select-on-tap
+          >
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
@@ -312,7 +356,12 @@ Polymer({
 
     <nuxeo-dialog id="renameDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.renamePopup.heading')]]</h2>
-      <paper-input id="savedSearchRenameTitle" label="[[i18n('searchForm.renamePopup.label')]]" autofocus no-label-float>
+      <paper-input
+        id="savedSearchRenameTitle"
+        label="[[i18n('searchForm.renamePopup.label')]]"
+        autofocus
+        no-label-float
+      >
       </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
@@ -322,7 +371,10 @@ Polymer({
 
     <nuxeo-dialog id="shareDialog" with-backdrop reparent opened="{{permissionsVisible}}">
       <h2>[[i18n('searchForm.shared.heading')]]</h2>
-      <nuxeo-document-permissions doc-id="[[selectedSearch.id]]" visible="[[permissionsVisible]]"></nuxeo-document-permissions>
+      <nuxeo-document-permissions
+        doc-id="[[selectedSearch.id]]"
+        visible="[[permissionsVisible]]"
+      ></nuxeo-document-permissions>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
@@ -335,7 +387,7 @@ Polymer({
         <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-search-form',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -395,7 +447,7 @@ Polymer({
      */
     headers: {
       type: Object,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
+      value: { 'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label' },
     },
     /**
      * The schemas passed on to `provider` (like `dublincore`, `uid`, `file`...).
@@ -610,10 +662,9 @@ Polymer({
 
   _selectedDocChanged(doc, old) {
     if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
-      this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150),
-        () => {
-          this.navigateTo('browse', doc.path);
-        });
+      this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150), () => {
+        this.navigateTo('browse', doc.path);
+      });
     }
   },
 
@@ -621,11 +672,10 @@ Polymer({
     this.$.provider.page = 1;
     this.dirty = true;
     if (this.results && this.auto && this.visible) {
-      this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300),
-        () => {
-          this.results.reset();
-          this._fetch(this.results);
-        });
+      this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300), () => {
+        this.results.reset();
+        this._fetch(this.results);
+      });
     }
   },
 
@@ -679,7 +729,8 @@ Polymer({
     if (this.results) {
       this.results.reset();
       return this._fetch(this.results).then(this._navigateToResults.bind(this));
-    } if (this.visible) {
+    }
+    if (this.visible) {
       // if the view is not initialized yet, navigating to the search will trigger a search and display the results
       this.navigateTo('search', this.searchName);
     }
@@ -735,12 +786,12 @@ Polymer({
       _el.searchId = '';
       _el.data = {
         'entity-type': 'savedSearch',
-        'pageProviderName': this.provider,
-        'params': this.params,
-        'title': this.$.savedSearchTitle.value,
+        pageProviderName: this.provider,
+        params: this.params,
+        title: this.$.savedSearchTitle.value,
       };
       _el.post().then((search) => {
-        const {id} = search;
+        const { id } = search;
         this.$.saveDialog.close();
         this.selectedSearch = search;
         this.$['saved-searches'].get().then(() => {
@@ -761,7 +812,7 @@ Polymer({
         if (this._renaming) {
           this.$.renameDialog.close();
           this.$['saved-searches'].get().then(() => {
-            this.set(`searches.${  this.selectedSearchIdx - 1  }.title`, _el.data.title);
+            this.set(`searches.${this.selectedSearchIdx - 1}.title`, _el.data.title);
             // hack required to update the paper-input inside the paper-dropdown-menu
             const idx = this.selectedSearchIdx;
             this.selectedSearchIdx = 0;
@@ -793,7 +844,7 @@ Polymer({
   },
 
   _computeSavedSearchesParams() {
-    return {pageProvider: this.provider};
+    return { pageProvider: this.provider };
   },
 
   _formChanged() {
@@ -810,7 +861,7 @@ Polymer({
       // e.detail.path is params.prop_name eg: params.ecm_fulltext
       if (e.detail.path) {
         const param = e.detail.path.split('.')[1];
-        this.set(`params.${  param}`, e.detail.value);
+        this.set(`params.${param}`, e.detail.value);
         if (this.auto && this.visible) {
           this._navigateToResults();
         }
@@ -822,7 +873,7 @@ Polymer({
     });
     this.form.addEventListener('trigger-search', this._search.bind(this));
     if (!this.auto) {
-      this.form.addEventListener("keypress", this._keyPressedListener.bind(this));
+      this.form.addEventListener('keypress', this._keyPressedListener.bind(this));
     }
   },
 
@@ -846,17 +897,20 @@ Polymer({
     Object.keys(this.params).forEach((k) => {
       const value = this.params[k];
       if (Array.isArray(value)) {
-        this.params[k] = value.map((item) => (item && item['entity-type']) ? (item.uid || item.id) : item);
+        this.params[k] = value.map((item) => (item && item['entity-type'] ? item.uid || item.id : item));
       } else {
-        this.params[k] = (value && value['entity-type']) ? (value.uid || value.id) : value;
+        this.params[k] = value && value['entity-type'] ? value.uid || value.id : value;
       }
     });
-    return el.fetch().then(() => {
-      this.loading = false;
-    }).catch((err) => {
-      this.loading = false;
-      throw err;
-    });
+    return el
+      .fetch()
+      .then(() => {
+        this.loading = false;
+      })
+      .catch((err) => {
+        this.loading = false;
+        throw err;
+      });
   },
 
   _displayQuickFilters() {

@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-templatesource-metadata-layout">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -62,15 +62,17 @@ limitations under the License.
       <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
-    <nuxeo-directory-suggestion role="widget"
-                                name="subjects"
-                                label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                value="{{document.properties.dc:subjects}}"
-                                hidden$="[[!document.properties.dc:subjects.length]]"
-                                multiple="true"
-                                dbl10n="true"
-                                readonly>
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="subjects"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      value="{{document.properties.dc:subjects}}"
+      hidden$="[[!document.properties.dc:subjects.length]]"
+      multiple="true"
+      dbl10n="true"
+      readonly
+    >
     </nuxeo-directory-suggestion>
 
     <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
@@ -90,8 +92,8 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         /**
-        * @doctype TemplateSource
-        */
+         * @doctype TemplateSource
+         */
         document: Object,
       },
     });

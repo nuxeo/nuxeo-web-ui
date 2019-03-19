@@ -38,15 +38,17 @@ limitations under the License.
       <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
-    <nuxeo-directory-suggestion role="widget"
-                                label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                name="subjects"
-                                value="{{document.properties.dc:subjects}}"
-                                hidden$="[[!document.properties.dc:subjects.length]]"
-                                multiple="true"
-                                dbl10n="true"
-                                readonly>
+    <nuxeo-directory-suggestion
+      role="widget"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      name="subjects"
+      value="{{document.properties.dc:subjects}}"
+      hidden$="[[!document.properties.dc:subjects.length]]"
+      multiple="true"
+      dbl10n="true"
+      readonly
+    >
     </nuxeo-directory-suggestion>
 
     <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
@@ -60,9 +62,7 @@ limitations under the License.
     </div>
 
     <div role="widget" hidden$="[[!document.properties.eshare:hasNotification]]">
-      <paper-checkbox name="notification"
-                      checked$="[[document.properties.eshare:hasNotification]]"
-                      noink disabled>
+      <paper-checkbox name="notification" checked$="[[document.properties.eshare:hasNotification]]" noink disabled>
         [[i18n('easysharefolder.notification')]]
       </paper-checkbox>
     </div>

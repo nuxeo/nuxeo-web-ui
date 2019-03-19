@@ -62,7 +62,7 @@ Polymer({
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
-   </style>
+    </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]"></paper-icon-button>
@@ -71,7 +71,7 @@ Polymer({
         <paper-badge label="[[badge]]" for="button"></paper-badge>
       </template>
     </a>
-`,
+  `,
 
   is: 'nuxeo-menu-icon',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -120,9 +120,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_srcOrIcon(icon, src)',
-  ],
+  observers: ['_srcOrIcon(icon, src)'],
 
   _srcOrIcon() {
     if (this.src && this.src.length > 0) {

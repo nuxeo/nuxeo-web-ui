@@ -49,7 +49,7 @@ Polymer({
         </nuxeo-card>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-drive-page',
   behaviors: [I18nBehavior],

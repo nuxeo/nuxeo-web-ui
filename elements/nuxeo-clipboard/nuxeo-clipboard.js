@@ -116,23 +116,36 @@ Polymer({
       }
 
       .tip {
-        opacity: .5;
+        opacity: 0.5;
         display: block;
         font-weight: 300;
         padding: 8px;
         text-align: center;
         font-size: 1rem;
       }
-
     </style>
 
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
-    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]" params="[[_opParams(targetDocument)]]" sync-indexing></nuxeo-operation>
+    <nuxeo-operation
+      id="op"
+      input="docs:[[_uids(documents.*)]]"
+      params="[[_opParams(targetDocument)]]"
+      sync-indexing
+    ></nuxeo-operation>
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
     <div class="content">
-      <nuxeo-data-list items="[[documents]]" id="list" selected-item="{{selectedDocument}}" selection-enabled select-on-tap as="document" empty-label="[[i18n('clipboard.empty')]]" empty-label-when-filtered="[[i18n('clipboard.empty')]]">
+      <nuxeo-data-list
+        items="[[documents]]"
+        id="list"
+        selected-item="{{selectedDocument}}"
+        selection-enabled
+        select-on-tap
+        as="document"
+        empty-label="[[i18n('clipboard.empty')]]"
+        empty-label-when-filtered="[[i18n('clipboard.empty')]]"
+      >
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
@@ -154,12 +167,26 @@ Polymer({
 
       <div class="toolbar">
         <div class="actions">
-          <paper-button id="paste" on-tap="execute" data-op="Document.Copy" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+          <paper-button
+            id="paste"
+            on-tap="execute"
+            data-op="Document.Copy"
+            disabled="[[!canPaste(documents, targetDocument)]]"
+            noink
+            class="primary clear"
+          >
             <iron-icon icon="nuxeo:copy"></iron-icon>
             [[i18n('clipboard.copy')]]
           </paper-button>
           <nuxeo-tooltip for="paste">[[i18n('clipboard.copy')]]</nuxeo-tooltip>
-          <paper-button id="move" on-tap="execute" data-op="Document.Move" disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+          <paper-button
+            id="move"
+            on-tap="execute"
+            data-op="Document.Move"
+            disabled="[[!canPaste(documents, targetDocument)]]"
+            noink
+            class="primary clear"
+          >
             <iron-icon icon="nuxeo:move"></iron-icon>
             [[i18n('clipboard.move')]]
           </paper-button>
@@ -167,7 +194,7 @@ Polymer({
         </div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-clipboard',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
@@ -187,13 +214,11 @@ Polymer({
     },
   },
 
-  observers: [
-    '_observeDocuments(documents.splices)',
-  ],
+  observers: ['_observeDocuments(documents.splices)'],
 
   _observeDocuments() {
     if (this.documents) {
-      this.fire('nx-clipboard-updated', {docCount: this.documents.length});
+      this.fire('nx-clipboard-updated', { docCount: this.documents.length });
     }
   },
 
@@ -201,12 +226,12 @@ Polymer({
     if (newValue && this.contains(newValue)) {
       const document = this.$.storage.get(newValue);
       if (document && document.title !== newValue.title) {
-        this.$.storage.update(document, { title: newValue.title })
+        this.$.storage.update(document, { title: newValue.title });
       }
     }
   },
 
-  add (docs) {
+  add(docs) {
     let uids = [];
 
     if (docs instanceof Array) {
@@ -214,12 +239,11 @@ Polymer({
         this.$.storage.add(doc);
       });
       uids = docs.map((doc) => doc.uid);
-    }
-    else {
+    } else {
       this.$.storage.add(docs);
       uids.push(docs.uid);
     }
-    this.fire('added-to-clipboard', {docIds : uids});
+    this.fire('added-to-clipboard', { docIds: uids });
   },
 
   contains(doc) {
@@ -245,7 +269,7 @@ Polymer({
   _remove(evt) {
     evt.stopImmediatePropagation();
     this.remove(evt.model.document);
-    this.fire('removed-from-clipboard', {docId : evt.model.document.uid});
+    this.fire('removed-from-clipboard', { docId: evt.model.document.uid });
   },
 
   _uids() {

@@ -70,30 +70,41 @@ Polymer({
       }
 
       .resultActions paper-icon-button {
-        padding: .3em;
+        padding: 0.3em;
         margin-left: 4px;
       }
-
     </style>
 
-    <nuxeo-operation id="unpublishOp" op="Document.Delete" sync-indexing>
-    </nuxeo-operation>
-    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[_src]]">
-    </nuxeo-operation>
-    <nuxeo-operation id="srcDocOp" op="Proxy.GetSourceDocument" input="[[document.uid]]">
-    </nuxeo-operation>
-    <nuxeo-operation id="publishOp" op="Document.PublishToSection">
-    </nuxeo-operation>
+    <nuxeo-operation id="unpublishOp" op="Document.Delete" sync-indexing></nuxeo-operation>
+    <nuxeo-operation id="unpublishAllOp" op="Document.UnpublishAll" sync-indexing input="[[_src]]"></nuxeo-operation>
+    <nuxeo-operation id="srcDocOp" op="Proxy.GetSourceDocument" input="[[document.uid]]"></nuxeo-operation>
+    <nuxeo-operation id="publishOp" op="Document.PublishToSection"></nuxeo-operation>
 
-    <nuxeo-page-provider id="provider" page-size="40" provider="nxql_search" params="[[_computeParams(_src)]]" sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}" enrichers="thumbnail, permissions" headers="{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}' schemas="dublincore,common,uid,rendition">
+    <nuxeo-page-provider
+      id="provider"
+      page-size="40"
+      provider="nxql_search"
+      params="[[_computeParams(_src)]]"
+      sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
+      enrichers="thumbnail, permissions"
+      headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+      schemas="dublincore,common,uid,rendition"
+    >
     </nuxeo-page-provider>
 
     <nuxeo-card heading="[[i18n('publication.details')]]">
-
       <div class="resultActions">
-        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]">[[i18n('publication.unpublishAll')]]</paper-button>
+        <paper-button class="uppercase" on-tap="_unpublishAll" disabled$="[[!hasPublications]]"
+          >[[i18n('publication.unpublishAll')]]</paper-button
+        >
       </div>
-      <nuxeo-data-table id="table" nx-provider="provider" class="results" items="{{publishedDocs}}" empty-label="[[i18n('publication.noPublications')]]">
+      <nuxeo-data-table
+        id="table"
+        nx-provider="provider"
+        class="results"
+        items="{{publishedDocs}}"
+        empty-label="[[i18n('publication.noPublications')]]"
+      >
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.path')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -128,20 +139,24 @@ Polymer({
         <nuxeo-data-table-column flex="10">
           <template>
             <template is="dom-if" if="[[_canUnpublish(item)]]">
-              <paper-button class="uppercase unpublish" on-tap="_unpublish">[[i18n('publication.unpublish')]]</paper-button>
+              <paper-button class="uppercase unpublish" on-tap="_unpublish"
+                >[[i18n('publication.unpublish')]]</paper-button
+              >
             </template>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
           <template>
             <template is="dom-if" if="[[_canRepublish(item)]]">
-              <paper-button class="uppercase primary republish" on-tap="_republish">[[i18n('publication.republish')]]</paper-button>
+              <paper-button class="uppercase primary republish" on-tap="_republish"
+                >[[i18n('publication.republish')]]</paper-button
+              >
             </template>
           </template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-card>
-`,
+  `,
 
   is: 'nuxeo-document-publications',
   behaviors: [LayoutBehavior],
@@ -156,12 +171,9 @@ Polymer({
     },
   },
 
-  observers: [
-    '_fetchPublications(_src, visible)',
-    '_observeDocument(document, visible)',
-  ],
+  observers: ['_fetchPublications(_src, visible)', '_observeDocument(document, visible)'],
 
-  listeners : {
+  listeners: {
     'nx-publish-success': '_fetchPublications',
     'nx-unpublish-success': '_fetchPublications',
   },
@@ -182,13 +194,10 @@ Polymer({
 
   _computeParams() {
     if (this._src) {
-      const {uid} = this._src;
-      return {queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
-        'AND (rend:sourceVersionableId = "'}${
-        uid
-        }" OR ecm:proxyVersionableId = "${
-        uid
-        }")`,
+      const { uid } = this._src;
+      return {
+        queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
+          'AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
       };
     }
   },
@@ -206,12 +215,15 @@ Polymer({
       }
       const doc = e.target.parentNode.item;
       this.$.unpublishOp.input = doc;
-      this.$.unpublishOp.execute().then(() => {
-        this.fire('notify', {'message': this.i18n('publication.unpublish.success')});
-        this._fetchPublications();
-      }).catch(() => {
-        this.fire('notify', {'message': this.i18n('publication.unpublish.error')});
-      });
+      this.$.unpublishOp
+        .execute()
+        .then(() => {
+          this.fire('notify', { message: this.i18n('publication.unpublish.success') });
+          this._fetchPublications();
+        })
+        .catch(() => {
+          this.fire('notify', { message: this.i18n('publication.unpublish.error') });
+        });
     }
   },
 
@@ -222,23 +234,26 @@ Polymer({
       }
       const obsolete = e.target.parentNode.item;
       this.$.publishOp.params = {
-        'target': obsolete.parentRef,
-        'override': true,
-        'renditionName': obsolete.properties['rend:renditionName'],
-      }
+        target: obsolete.parentRef,
+        override: true,
+        renditionName: obsolete.properties['rend:renditionName'],
+      };
       this.$.publishOp.input = this._src.uid;
-      this.$.publishOp.execute().then(() => {
-        this.fire('notify', {
-          'message': this.i18n('publication.internal.publish.success'),
+      this.$.publishOp
+        .execute()
+        .then(() => {
+          this.fire('notify', {
+            message: this.i18n('publication.internal.publish.success'),
+          });
+          this.fire('document-updated');
+          this.fire('nx-publish-success');
+        })
+        .catch((err) => {
+          this.fire('notify', {
+            message: this.i18n('publication.internal.publish.error'),
+          });
+          throw err;
         });
-        this.fire('document-updated');
-        this.fire('nx-publish-success');
-      }).catch((err) => {
-        this.fire('notify', {
-          'message': this.i18n('publication.internal.publish.error'),
-        });
-        throw err;
-      });
     }
   },
 
@@ -252,7 +267,8 @@ Polymer({
       const srcMaj = this._src.properties['uid:major_version'];
       if (pubMaj < srcMaj) {
         return true;
-      } if (pubMaj === srcMaj) {
+      }
+      if (pubMaj === srcMaj) {
         const pubMin = doc.properties['uid:minor_version'];
         const srcMin = this._src.properties['uid:minor_version'];
         return pubMin < srcMin || (pubMin === srcMin && this._src.isCheckedOut);
@@ -269,11 +285,14 @@ Polymer({
     if (!window.confirm(this.i18n('publication.unpublish.all.confirm'))) {
       return;
     }
-    this.$.unpublishAllOp.execute().then(() => {
-      this.fire('notify', {'message': this.i18n('publication.unpublish.all.success')});
-      this._fetchPublications();
-    }).catch(function() {
-      this.fire('notify', {'message': this.i18n('publication.unpublish.all.error')});
-    });
+    this.$.unpublishAllOp
+      .execute()
+      .then(() => {
+        this.fire('notify', { message: this.i18n('publication.unpublish.all.success') });
+        this._fetchPublications();
+      })
+      .catch(function() {
+        this.fire('notify', { message: this.i18n('publication.unpublish.all.error') });
+      });
   },
 });

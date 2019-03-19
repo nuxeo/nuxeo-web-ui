@@ -46,7 +46,7 @@ Polymer({
       </div>
       <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-delete-documents-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -95,15 +95,17 @@ Polymer({
       if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         const op = this.hard ? this.$.deleteOp : this.$.trashOp;
-        op.input = `docs:${  uids}`;
-        op.execute().then(() => {
-          this.fire('nuxeo-documents-deleted', {documents: this.documents});
-          this.documents = [];
-          this.fire('refresh');
-        },
-        (error) => {
-          this.fire('nuxeo-documents-deleted', {error, documents: this.documents});
-        });
+        op.input = `docs:${uids}`;
+        op.execute().then(
+          () => {
+            this.fire('nuxeo-documents-deleted', { documents: this.documents });
+            this.documents = [];
+            this.fire('refresh');
+          },
+          (error) => {
+            this.fire('nuxeo-documents-deleted', { error, documents: this.documents });
+          },
+        );
       }
     }
   },
@@ -113,8 +115,12 @@ Polymer({
    * are trashed and `hard` is active.
    */
   _isAvailable() {
-    return this.documents && this.documents.length > 0 && this._checkDocsPermissions() &&
-        (this.hard || !this._checkDocsAreTrashed());
+    return (
+      this.documents &&
+      this.documents.length > 0 &&
+      this._checkDocsPermissions() &&
+      (this.hard || !this._checkDocsAreTrashed())
+    );
   },
 
   /**
@@ -125,8 +131,7 @@ Polymer({
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = this.documents && !(this.documents.some(
-      (document) => !this._docHasPermissions(document)));
+    this.docsHavePermissions = this.documents && !this.documents.some((document) => !this._docHasPermissions(document));
     return this.docsHavePermissions;
   },
 

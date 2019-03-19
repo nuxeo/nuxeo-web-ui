@@ -36,7 +36,6 @@ Polymer({
         @apply --buttons-bar;
         margin: 16px -16px -16px -16px;
       }
-
     </style>
 
     <nuxeo-document id="doc" doc-id="[[editedDocument.uid]]" data="{{editedDocument}}" response="{{document}}">
@@ -45,10 +44,16 @@ Polymer({
     <nuxeo-card heading="[[i18n('templateRenderingPage.config.heading')]]">
       <iron-pages selected="[[configMode]]" attr-for-selected="name" class="vertical layout flex">
         <div name="view">
-
           <div hidden$="[[!document.properties.tmpl:applicableTypes]]">
             <label>[[i18n('templateRenderingPage.validDocTypes')]]</label>
-            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{document.properties.tmpl:applicableTypes}}" min-chars="0" multiple readonly></nuxeo-selectivity>
+            <nuxeo-selectivity
+              data="[[docTypes]]"
+              placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]"
+              value="{{document.properties.tmpl:applicableTypes}}"
+              min-chars="0"
+              multiple
+              readonly
+            ></nuxeo-selectivity>
           </div>
 
           <div>
@@ -77,12 +82,26 @@ Polymer({
             <nuxeo-resource path="config/types/" on-response="_handleDocTypes" auto></nuxeo-resource>
 
             <label>[[i18n('templateRenderingPage.validDocTypes')]]</label>
-            <nuxeo-selectivity data="[[docTypes]]" placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]" value="{{editedDocument.properties.tmpl:applicableTypes}}" min-chars="0" multiple></nuxeo-selectivity>
+            <nuxeo-selectivity
+              data="[[docTypes]]"
+              placeholder="[[i18n('templateRenderingPage.validDocTypes.placeholder')]]"
+              value="{{editedDocument.properties.tmpl:applicableTypes}}"
+              min-chars="0"
+              multiple
+            ></nuxeo-selectivity>
             <label>[[i18n('templateRenderingPage.parametersOverride')]]</label>
             <paper-checkbox checked="{{editedDocument.properties.tmpl:allowOverride}}"></paper-checkbox>
 
-            <paper-dropdown-menu label="[[i18n('templateRenderingPage.processor.label')]]" horizontal-align="left" always-float-label>
-              <paper-listbox slot="dropdown-content" selected="{{editedDocument.properties.tmpl:templateType}}" attr-for-selected="name">
+            <paper-dropdown-menu
+              label="[[i18n('templateRenderingPage.processor.label')]]"
+              horizontal-align="left"
+              always-float-label
+            >
+              <paper-listbox
+                slot="dropdown-content"
+                selected="{{editedDocument.properties.tmpl:templateType}}"
+                attr-for-selected="name"
+              >
                 <template is="dom-repeat" items="[[processors]]">
                   <paper-item name="[[item]]">[[_getProcessorLabel(item)]]</paper-item>
                 </template>
@@ -101,7 +120,13 @@ Polymer({
 
     <nuxeo-card heading="[[i18n('templateRenderingPage.parameters.heading')]]">
       <div class="vertical layout">
-        <nuxeo-template-param-editor id="paramEditor" template-data="[[_getTemplateData(editedDocument)]]" mode="[[paramsMode]]" allow-create allow-delete></nuxeo-template-param-editor>
+        <nuxeo-template-param-editor
+          id="paramEditor"
+          template-data="[[_getTemplateData(editedDocument)]]"
+          mode="[[paramsMode]]"
+          allow-create
+          allow-delete
+        ></nuxeo-template-param-editor>
       </div>
       <div class="buttons">
         <div class="horizontal layout start-justified">
@@ -117,7 +142,7 @@ Polymer({
         </div>
       </div>
     </nuxeo-card>
-`,
+  `,
 
   is: 'nuxeo-template-rendering-page',
   behaviors: [I18nBehavior, FormatBehavior],
@@ -148,37 +173,40 @@ Polymer({
   },
 
   _getProcessorLabel(processor) {
-    return this.i18n(`templateRenderingPage.processor.${  processor}`);
+    return this.i18n(`templateRenderingPage.processor.${processor}`);
   },
 
   _getOutputFormatLabel(format) {
     if (format === 'none') {
-      return this.i18n(`templateRenderingPage.outputFormat.${  format}`);
+      return this.i18n(`templateRenderingPage.outputFormat.${format}`);
     }
-      return format ? format.toUpperCase() : null;
-
+    return format ? format.toUpperCase() : null;
   },
 
   _documentChanged() {
     if (this.document) {
       this.set('document.properties.tmpl:templateType', this.document.properties['tmpl:templateType'] || 'auto');
-      this.set('editedDocument' , JSON.parse(JSON.stringify(this.document)));
+      this.set('editedDocument', JSON.parse(JSON.stringify(this.document)));
     }
   },
 
   _handleDocTypes(e) {
-    const docTypes = [{
-      id: 'all',
-      text: this.i18n('templateRenderingPage.label.document.type.all'),
-      displayLabel: this.i18n('templateRenderingPage.label.document.type.all'),
-    }];
-    Object.keys(e.detail.response.doctypes).sort().forEach((docType) => {
-      docTypes.push({
-        id: docType,
-        text: docType,
-        displayLabel: docType,
+    const docTypes = [
+      {
+        id: 'all',
+        text: this.i18n('templateRenderingPage.label.document.type.all'),
+        displayLabel: this.i18n('templateRenderingPage.label.document.type.all'),
+      },
+    ];
+    Object.keys(e.detail.response.doctypes)
+      .sort()
+      .forEach((docType) => {
+        docTypes.push({
+          id: docType,
+          text: docType,
+          displayLabel: docType,
+        });
       });
-    });
     this.set('docTypes', docTypes);
   },
 

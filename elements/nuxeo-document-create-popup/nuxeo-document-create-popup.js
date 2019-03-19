@@ -36,7 +36,6 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="iron-flex">
-
       :host {
         --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
         display: block;
@@ -73,7 +72,8 @@ Polymer({
       }
 
       /* IE11 fix (NXP-23550) */
-      *::-ms-backdrop, iron-pages * {
+      *::-ms-backdrop,
+      iron-pages * {
         height: 80vh;
       }
     </style>
@@ -82,19 +82,30 @@ Polymer({
     </nuxeo-document>
 
     <paper-dialog id="createDocDialog" opened="{{opened}}" modal no-auto-focus>
-
       <paper-tabs hidden$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="holder" class="vertical layout flex">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
           <nuxeo-slot slot="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
-          <nuxeo-document-create id="simpleCreation" name="create" parent="[[parent]]" target-path="{{parentPath}}" suggester-children="{{suggesterChildren}}"></nuxeo-document-create>
-          <nuxeo-document-import id="bulkCreation" name="import" parent="[[parent]]" target-path="{{parentPath}}" suggester-children="{{suggesterChildren}}"></nuxeo-document-import>
+          <nuxeo-document-create
+            id="simpleCreation"
+            name="create"
+            parent="[[parent]]"
+            target-path="{{parentPath}}"
+            suggester-children="{{suggesterChildren}}"
+          ></nuxeo-document-create>
+          <nuxeo-document-import
+            id="bulkCreation"
+            name="import"
+            parent="[[parent]]"
+            target-path="{{parentPath}}"
+            suggester-children="{{suggesterChildren}}"
+          ></nuxeo-document-import>
         </iron-pages>
       </div>
     </paper-dialog>
-`,
+  `,
 
   is: 'nuxeo-document-create-popup',
   behaviors: [I18nBehavior],
@@ -156,7 +167,7 @@ Polymer({
     this._showTabs = false;
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#simpleCreation').init(type);
         this.$$('#bulkCreation').init();
@@ -169,7 +180,7 @@ Polymer({
     this.selectedTab = 'import';
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#bulkCreation').init(files);
         this.$.createDocDialog.toggle();
@@ -180,7 +191,7 @@ Polymer({
   toggleDialog() {
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', {message: this.i18n('documentCreationBehavior.error.noPermission')});
+        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#bulkCreation').init();
         this.$.createDocDialog.toggle();
@@ -201,14 +212,15 @@ Polymer({
           throw err;
         }
       });
-    } 
-      return Promise.resolve();
-    
+    }
+    return Promise.resolve();
   },
 
   _parentPathChanged(e) {
-    if (e.detail.isValidTargetPath &&
-      (!this.parent || (this.parentPath && this.parent.path !== this.parentPath.replace(/(.+)\/$/, "$1")))) {
+    if (
+      e.detail.isValidTargetPath &&
+      (!this.parent || (this.parentPath && this.parent.path !== this.parentPath.replace(/(.+)\/$/, '$1')))
+    ) {
       this.$.defaultDoc.get();
     }
   },
@@ -224,6 +236,6 @@ Polymer({
   },
 
   _importContext() {
-    return {parent: this.parent, i18n: this.i18n};
+    return { parent: this.parent, i18n: this.i18n };
   },
 });

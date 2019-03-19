@@ -55,20 +55,18 @@ Polymer({
 
       nuxeo-path-suggestion {
         --nuxeo-path-suggestion-results: {
-           z-index: 2;
-         };
-         --paper-input-container-underline: {
-           display: none;
-         };
-         --paper-input-container-underline-focus: {
-           display: none;
-         };
+          z-index: 2;
+        }
+        --paper-input-container-underline: {
+          display: none;
+        }
+        --paper-input-container-underline-focus: {
+          display: none;
+        }
       }
-
     </style>
 
     <div class="flex-layout">
-
       <nuxeo-card>
         <div class="suggestion-wrapper horizontal layout center">
           <iron-icon icon="icons:folder"></iron-icon>
@@ -77,7 +75,15 @@ Polymer({
           </div>
         </div>
 
-        <nuxeo-document-distribution-chart id="chart" index="_all" path="[[path]]" mode="count" include-version include-hidden include-deleted>
+        <nuxeo-document-distribution-chart
+          id="chart"
+          index="_all"
+          path="[[path]]"
+          mode="count"
+          include-version
+          include-hidden
+          include-deleted
+        >
         </nuxeo-document-distribution-chart>
 
         <div class="horizontal layout center">
@@ -89,9 +95,8 @@ Polymer({
           </div>
         </div>
       </nuxeo-card>
-
     </div>
-`,
+  `,
 
   is: 'nuxeo-distribution-analytics',
   behaviors: [I18nBehavior],
@@ -110,13 +115,15 @@ Polymer({
     },
   },
 
-  observers: [
-    '_observeDocPath(path, depth)',
-  ],
+  observers: ['_observeDocPath(path, depth)'],
 
   _observeDocPath() {
-    if (this.path && this.path.length && this.path.endsWith('/') &&
-      (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
+    if (
+      this.path &&
+      this.path.length &&
+      this.path.endsWith('/') &&
+      (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)
+    ) {
       this.$.chart.maxDepth = this.depth;
       this.$.chart.path = this.path;
       this.$.chart.execute();

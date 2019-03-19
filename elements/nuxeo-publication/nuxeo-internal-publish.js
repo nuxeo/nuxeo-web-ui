@@ -53,7 +53,8 @@ Polymer({
         @apply --layout-vertical;
       }
 
-      .versions, .options {
+      .versions,
+      .options {
         margin-left: 3em;
       }
 
@@ -69,21 +70,36 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing>
-    </nuxeo-operation>
+    <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing></nuxeo-operation>
 
-    <nuxeo-document id="srcDoc">
-    </nuxeo-document>
+    <nuxeo-document id="srcDoc"></nuxeo-document>
 
     <div class="container">
-      <nuxeo-document-suggestion id="target" required label="[[i18n('publication.internal.location')]]" placeholder="[[i18n('publication.internal.location.placeholder')]]" selected-item="{{publishSpace}}" min-chars="0" selection-formatter="[[targetFormatter]]" enrichers="permissions" page-provider="publish_space_suggestion" repository="[[document.repository]]">
+      <nuxeo-document-suggestion
+        id="target"
+        required
+        label="[[i18n('publication.internal.location')]]"
+        placeholder="[[i18n('publication.internal.location.placeholder')]]"
+        selected-item="{{publishSpace}}"
+        min-chars="0"
+        selection-formatter="[[targetFormatter]]"
+        enrichers="permissions"
+        page-provider="publish_space_suggestion"
+        repository="[[document.repository]]"
+      >
       </nuxeo-document-suggestion>
       <template is="dom-if" if="[[errorMessage]]">
         <span class="horizontal layout error">[[errorMessage]]</span>
       </template>
 
       <div class="horizontal layout flex">
-        <nuxeo-select id="rendition" label="[[i18n('publication.internal.renditons.label')]]" placeholder="[[i18n('publication.internal.renditons.placeholder')]]" selected="{{selectedRendition}}" attr-for-selected="name">
+        <nuxeo-select
+          id="rendition"
+          label="[[i18n('publication.internal.renditons.label')]]"
+          placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
+          selected="{{selectedRendition}}"
+          attr-for-selected="name"
+        >
           <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
             <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
           </template>
@@ -105,12 +121,18 @@ Polymer({
         <div class="flex start-justified">
           <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
         </div>
-        <paper-button id="publish" noink class="primary" on-tap="_publish" disabled$="[[!_canPublish(document,publishSpace)]]">
-            [[i18n('publication.publish')]]
+        <paper-button
+          id="publish"
+          noink
+          class="primary"
+          on-tap="_publish"
+          disabled$="[[!_canPublish(document,publishSpace)]]"
+        >
+          [[i18n('publication.publish')]]
         </paper-button>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-internal-publish',
   behaviors: [I18nBehavior, LayoutBehavior],
@@ -152,12 +174,12 @@ Polymer({
 
   _computeRenditionOptions() {
     const options = [
-      {'id': 'none', 'label': this.i18n('publication.internal.renditon.none')},
-      {'id': 'default', 'label': this.i18n('publication.internal.renditon.default')},
+      { id: 'none', label: this.i18n('publication.internal.renditon.none') },
+      { id: 'default', label: this.i18n('publication.internal.renditon.default') },
     ];
     if (this.document && this.document.contextParameters && this.document.contextParameters.renditions) {
       this.document.contextParameters.renditions.forEach((item) => {
-        options.push({'id': item.name, 'label': this.formatRendition(item.name), 'icon': item.icon});
+        options.push({ id: item.name, label: this.formatRendition(item.name), icon: item.icon });
       });
     }
     return options;
@@ -165,10 +187,10 @@ Polymer({
 
   _publish() {
     this.$.op.params = {
-      'target': this.publishSpace.uid,
-      'override': this.override,
-      'renditionName': null,
-    }
+      target: this.publishSpace.uid,
+      override: this.override,
+      renditionName: null,
+    };
     if (this.selectedRendition) {
       if (this.selectedRendition === 'default') {
         this.$.op.params.defaultRendition = true;
@@ -176,32 +198,35 @@ Polymer({
         this.$.op.params.renditionName = this.selectedRendition;
       }
     }
-    this.$.op.input = this._isMultiple ? `docs:${  this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
-    this.$.op.execute().then(() => {
-      this.fire('notify', {
-        'message': this.i18n(`publication.internal.publish.success${  this._isMultiple ? '.multiple' : ''}`),
+    this.$.op.input = this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
+    this.$.op
+      .execute()
+      .then(() => {
+        this.fire('notify', {
+          message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
+        });
+        if (this._isMultiple) {
+          this.fire('navigate', { doc: this.publishSpace });
+        } else {
+          this.fire('document-updated');
+        }
+        this.fire('nx-publish-success');
+      })
+      .catch((err) => {
+        this.fire('notify', {
+          message: this.i18n(`publication.internal.publish.error${this._isMultiple ? '.multiple' : ''}`),
+        });
+        throw err;
       });
-      if (this._isMultiple) {
-        this.fire('navigate', {doc: this.publishSpace})
-      } else {
-        this.fire('document-updated');
-      }
-      this.fire('nx-publish-success');
-    }).catch((err) => {
-      this.fire('notify', {
-        'message': this.i18n(`publication.internal.publish.error${  this._isMultiple ? '.multiple' : ''}`),
-      });
-      throw err;
-    });
   },
 
   _canPublish() {
     this.errorMessage = null;
-    if(!this.publishSpace) {
+    if (!this.publishSpace) {
       return false;
     }
     const hasPermission = this.hasPermission(this.publishSpace, 'AddChildren');
-    if(!hasPermission) {
+    if (!hasPermission) {
       this.errorMessage = this.i18n('publication.internal.location.error.noPermission');
     }
     return hasPermission;

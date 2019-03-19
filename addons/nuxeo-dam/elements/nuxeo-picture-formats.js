@@ -31,7 +31,7 @@ Polymer({
       }
 
       label {
-        opacity: .5;
+        opacity: 0.5;
         min-width: 30%;
         display: inline-block;
       }
@@ -50,7 +50,6 @@ Polymer({
       iron-icon:hover {
         @apply --nuxeo-action-hover;
       }
-
     </style>
 
     <h3>[[label]]</h3>
@@ -68,7 +67,7 @@ Polymer({
         </div>
       </template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-picture-formats',
   behaviors: [LayoutBehavior],
@@ -83,15 +82,16 @@ Polymer({
   },
 
   _getAdditionalFormats(document) {
-    return (document && document.properties['picture:views']) ? document.properties['picture:views']
-      .map((view) => {
-        return {
-          name: view.description,
-          dimensions: `${view.width  } x ${  view.height}`,
-          size: this.formatSize(view.content.length),
-          format: view.info.format,
-          data: view.content.data,
-        };
-      }) : [];
+    return document && document.properties['picture:views']
+      ? document.properties['picture:views'].map((view) => {
+          return {
+            name: view.description,
+            dimensions: `${view.width} x ${view.height}`,
+            size: this.formatSize(view.content.length),
+            format: view.info.format,
+            data: view.content.data,
+          };
+        })
+      : [];
   },
 });

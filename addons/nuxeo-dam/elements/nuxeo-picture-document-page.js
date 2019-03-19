@@ -65,7 +65,7 @@ Polymer({
         <nuxeo-picture-iptc role="widget" document="[[document]]"></nuxeo-picture-iptc>
       </nuxeo-card>
     </div>
-`,
+  `,
 
   is: 'nuxeo-picture-document-page',
   behaviors: [LayoutBehavior],

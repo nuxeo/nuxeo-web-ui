@@ -76,12 +76,13 @@ Polymer({
         margin-top: 50px;
       }
 
-      chart-line, chart-pie {
+      chart-line,
+      chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
         min-width: 30em;
         display: block;
-        font-size: .8rem;
+        font-size: 0.8rem;
       }
 
       @media (max-width: 1024px) {
@@ -89,7 +90,6 @@ Polymer({
           flex: 1 0 calc(100% - 2em);
         }
       }
-
     </style>
 
     <nuxeo-card class="dates">
@@ -100,22 +100,39 @@ Polymer({
     </nuxeo-card>
 
     <div class="flex-layout">
-
       <!-- Top Downloads -->
-      <nuxeo-audit-data event-id="download" where='{"extended.downloadReason": "download"}" grouped-by="docUUID" group-limit="10" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{downloads}}'>
+      <nuxeo-audit-data
+        event-id="download"
+        where='{"extended.downloadReason": "download"}'
+        grouped-by="docUUID"
+        group-limit="10"
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        data="{{downloads}}"
+      >
       </nuxeo-audit-data>
 
-      <nuxeo-page-provider auto page-size="10" query="[[_downloadsQuery(downloads)]]" schemas="dublincore, common" current-page="{{downloadedDocs}}">
+      <nuxeo-page-provider
+        auto
+        page-size="10"
+        query="[[_downloadsQuery(downloads)]]"
+        schemas="dublincore, common"
+        current-page="{{downloadedDocs}}"
+      >
       </nuxeo-page-provider>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
         <template is="dom-if" if="[[!_isEmpty(downloads)]]">
           <nuxeo-data-table items="[[downloadedDocs]]">
             <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
-              <template>[[item.title]]</template>
+              <template
+                >[[item.title]]</template
+              >
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads')]]">
-              <template>[[_numberOfDownloads(item)]]</template>
+              <template
+                >[[_numberOfDownloads(item)]]</template
+              >
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </template>
@@ -125,7 +142,13 @@ Polymer({
       </nuxeo-card>
 
       <!-- Number of documents -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" metrics="cardinality(ecm:uuid)" data="{{totalCount}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        metrics="cardinality(ecm:uuid)"
+        data="{{totalCount}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documents.heading')]]">
@@ -134,52 +157,105 @@ Polymer({
       </nuxeo-card>
 
       <!-- Document count per type -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="ecm:primaryType" group-limit="10" data="{{typeCount}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="ecm:primaryType"
+        group-limit="10"
+        data="{{typeCount}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
-        <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-pie
+          values="[[_values(typeCount)]]"
+          labels="[[_labels(typeCount)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-pie>
       </nuxeo-card>
 
       <!-- Top 10 creators -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="dc:creator" group-limit="10" data="{{topCreators}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="dc:creator"
+        group-limit="10"
+        data="{{topCreators}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
-        <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-pie
+          values="[[_values(topCreators)]]"
+          labels="[[_labels(topCreators)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-pie>
       </nuxeo-card>
 
       <!-- Documents created per week -->
-      <nuxeo-repository-data start-date="[[_formatDate(startDate)]]" end-date="[[_extendEndDate(endDate)]]" with-date-intervals="week" date-field="dc:created" data="{{docsCreatedPerWeek}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[_formatDate(startDate)]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        with-date-intervals="week"
+        date-field="dc:created"
+        data="{{docsCreatedPerWeek}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
-        <chart-line labels="[[_labels(docsCreatedPerWeek)]]" values="[[_values(docsCreatedPerWeek)]]" options='{ "legend": { "display": false }, "animation": false }'>
+        <chart-line
+          labels="[[_labels(docsCreatedPerWeek)]]"
+          values="[[_values(docsCreatedPerWeek)]]"
+          options='{ "legend": { "display": false }, "animation": false }'
+        >
         </chart-line>
       </nuxeo-card>
 
       <!-- Documents modified per week -->
-      <nuxeo-repository-data start-date="[[_formatDate(startDate)]]" end-date="[[_extendEndDate(endDate)]]" with-date-intervals="week" date-field="dc:modified" data="{{docsModifiedPerWeek}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[_formatDate(startDate)]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        with-date-intervals="week"
+        date-field="dc:modified"
+        data="{{docsModifiedPerWeek}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
-        <chart-line labels="[[_labels(docsModifiedPerWeek)]]" values="[[_values(docsModifiedPerWeek)]]" options='{ "legend": { "display": false }, "animation": false }'>
+        <chart-line
+          labels="[[_labels(docsModifiedPerWeek)]]"
+          values="[[_values(docsModifiedPerWeek)]]"
+          options='{ "legend": { "display": false }, "animation": false }'
+        >
         </chart-line>
       </nuxeo-card>
 
       <!-- Files by mime-type -->
-      <nuxeo-repository-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="file:content.mime-type" data="{{filesByMimeType}}" index="[[index]]">
+      <nuxeo-repository-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="file:content.mime-type"
+        data="{{filesByMimeType}}"
+        index="[[index]]"
+      >
       </nuxeo-repository-data>
 
       <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
-        <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-pie
+          values="[[_values(filesByMimeType)]]"
+          labels="[[_types(filesByMimeType)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-pie>
       </nuxeo-card>
-
     </div>
-`,
+  `,
 
   is: 'nuxeo-repository-analytics',
   behaviors: [ChartDataBehavior, I18nBehavior],
@@ -194,7 +270,9 @@ Polymer({
   },
 
   ready() {
-    this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+    this.startDate = moment()
+      .subtract(1, 'month')
+      .format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
@@ -204,22 +282,21 @@ Polymer({
       if (mimeType) {
         if (mimeType.name) {
           return mimeType.name;
-        } if (mimeType.extensions && mimeType.extensions.length > 0) {
+        }
+        if (mimeType.extensions && mimeType.extensions.length > 0) {
           return mimeType.extensions[0].toUpperCase();
-        } 
-          return obj.key;
-        
-      } 
+        }
         return obj.key;
-      
+      }
+      return obj.key;
     });
   },
 
   // builds page provider query to get info about downloaded docs
   _downloadsQuery(entries) {
     if (entries.length > 0) {
-      const values = entries.map((entry) => `'${  entry.key  }'`).join(',');
-      return `SELECT * FROM Document WHERE ecm:uuid IN (${  values  })`;
+      const values = entries.map((entry) => `'${entry.key}'`).join(',');
+      return `SELECT * FROM Document WHERE ecm:uuid IN (${values})`;
     }
   },
 

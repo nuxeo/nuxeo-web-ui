@@ -28,7 +28,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <iron-a11y-keys id="a11y" keys="[[keys]]" target="[[target]]" on-keys-pressed="_keysPressed"></iron-a11y-keys>
-`,
+  `,
 
   is: 'nuxeo-keys',
 
@@ -58,7 +58,7 @@ Polymer({
   },
 
   _keysPressed(e) {
-    const {keyboardEvent} = e.detail;
+    const { keyboardEvent } = e.detail;
     if (this._getMatchingKeyBindings(keyboardEvent).length === 0) {
       return;
     }
@@ -98,9 +98,13 @@ Polymer({
   _getMatchingKeyBindings(keyboardEvent) {
     return this.$.a11y._keyBindings[keyboardEvent.type].filter((entry) => {
       const bind = entry[0];
-      return bind.key.toLowerCase() === this._transformKey(keyboardEvent.key)
-        && keyboardEvent.altKey === !!bind.altKey && keyboardEvent.ctrlKey === !!bind.ctrlKey
-        && keyboardEvent.metaKey === !!bind.metaKey && keyboardEvent.shiftKey === !!bind.shiftKey;
+      return (
+        bind.key.toLowerCase() === this._transformKey(keyboardEvent.key) &&
+        keyboardEvent.altKey === !!bind.altKey &&
+        keyboardEvent.ctrlKey === !!bind.ctrlKey &&
+        keyboardEvent.metaKey === !!bind.metaKey &&
+        keyboardEvent.shiftKey === !!bind.shiftKey
+      );
     });
   },
 

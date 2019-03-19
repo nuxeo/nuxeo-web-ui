@@ -68,7 +68,7 @@ Polymer({
         </iron-pages>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-cloud-services',
   behaviors: [I18nBehavior],

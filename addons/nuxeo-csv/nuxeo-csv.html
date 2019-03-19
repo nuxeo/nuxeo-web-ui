@@ -22,10 +22,12 @@ limitations under the License.
 
 <nuxeo-slot-content name="csvDocumentCreatePopup" slot="CREATE_POPUP_PAGES">
   <template>
-    <nuxeo-document-import-csv id="csvCreation"
+    <nuxeo-document-import-csv
+      id="csvCreation"
       name="importCSV"
       parent="[[parent]]"
       target-path="{{parentPath}}"
-      suggester-children="{{suggesterChildren}}"></nuxeo-document-import-csv>
+      suggester-children="{{suggesterChildren}}"
+    ></nuxeo-document-import-csv>
   </template>
 </nuxeo-slot-content>

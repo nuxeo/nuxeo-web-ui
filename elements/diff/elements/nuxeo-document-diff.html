@@ -51,7 +51,9 @@ limitations under the License.
           <!-- old value -->
           <template is="dom-if" if="[[_getModificationOldValue(delta)]]">
             <div class="deletion">
-              <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
+              <a href$="[[urlFor('browse', originalValue.path)]]"
+                ><span class="deleted">[[originalValue.title]]</span></a
+              >
             </div>
           </template>
         </template>
@@ -94,5 +96,4 @@ limitations under the License.
       behaviors: [Nuxeo.DiffBehavior, Nuxeo.RoutingBehavior],
     });
   </script>
-
 </dom-module>

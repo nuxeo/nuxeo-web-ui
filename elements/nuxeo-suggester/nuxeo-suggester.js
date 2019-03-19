@@ -74,15 +74,15 @@ Polymer({
           color: var(--nuxeo-quicksearch-text);
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
-        };
+        }
 
         --paper-input-container-underline: {
           background-color: transparent;
-        };
+        }
 
         --paper-input-container-underline-focus: {
           background-color: transparent;
-        };
+        }
 
         --paper-input-container-label: {
           color: var(--nuxeo-text-default);
@@ -90,14 +90,14 @@ Polymer({
           font-family: var(--nuxeo-app-font);
           line-height: unset;
           padding-left: 5px;
-        };
+        }
 
         --paper-input-container-label-focus: {
           color: #e8e8e8;
           font-size: 1rem;
           line-height: unset;
           padding-left: 5px;
-        };
+        }
       }
 
       .input-content.paper-input-container label {
@@ -105,12 +105,12 @@ Polymer({
       }
 
       #searchButton {
-        border-left: 1px solid rgba(0,0,0,0.1);
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
         position: fixed;
         z-index: 100;
         top: 0;
         color: var(--nuxeo-app-header);
-        @apply --nuxeo-suggester-button
+        @apply --nuxeo-suggester-button;
       }
 
       #searchButton:hover {
@@ -152,7 +152,7 @@ Polymer({
 
       #results {
         width: var(--nuxeo-suggester-width, 65%);
-        margin: .5em 0 3em;
+        margin: 0.5em 0 3em;
         height: calc(100% - 130px);
         padding: 0 2em;
         box-sizing: border-box;
@@ -197,8 +197,8 @@ Polymer({
       }
 
       a .itemPath {
-        opacity: .7;
-        font-size: .8em;
+        opacity: 0.7;
+        font-size: 0.8em;
       }
 
       a:hover .itemName {
@@ -211,7 +211,7 @@ Polymer({
         width: 100%;
         height: 100%;
         position: fixed;
-        opacity: .8;
+        opacity: 0.8;
         z-index: -1;
         background: var(--primary-text-color);
       }
@@ -223,7 +223,7 @@ Polymer({
       }
 
       nuxeo-document-highlights {
-        font-size: .85rem;
+        font-size: 0.85rem;
       }
 
       @media (max-width: 1024px) {
@@ -249,13 +249,26 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-operation id="op" op="Search.SuggestersLauncher" response="{{items}}" params='{"searchTerm":"[[searchTerm]]"}'></nuxeo-operation>
+    <nuxeo-operation
+      id="op"
+      op="Search.SuggestersLauncher"
+      response="{{items}}"
+      params='{"searchTerm":"[[searchTerm]]"}'
+    ></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
       <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar">
-          <paper-input noink id="searchInput" value="{{searchTerm}}" type="search" auto-focus label="[[i18n('suggester.label')]]" no-label-float></paper-input>
+          <paper-input
+            noink
+            id="searchInput"
+            value="{{searchTerm}}"
+            type="search"
+            auto-focus
+            label="[[i18n('suggester.label')]]"
+            no-label-float
+          ></paper-input>
         </div>
         <div id="results" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
           <iron-selector id="selector">
@@ -282,7 +295,7 @@ Polymer({
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="esc" on-pressed="closeResults"></nuxeo-keys>
-`,
+  `,
 
   is: 'nuxeo-suggester',
   behaviors: [RoutingBehavior, I18nBehavior],
@@ -333,47 +346,50 @@ Polymer({
     if (this.searchTerm === '') {
       this.items = [];
     } else {
-      this.debounce('suggester-search', () => {
-        this.$.op.execute().then(() => {
-          commands.forEach((command) => {
-            let addSuggestion = false;
-            if (command.trigger.regex) {
-              addSuggestion = this.searchTerm.match(command.trigger.regex);
-            } else if (command.trigger.searchTerm) {
-              const commandTerm = command.trigger.searchTerm.trim().toLowerCase();
-              const searchTerm = this.searchTerm.trim().toLowerCase();
-              addSuggestion = command.trigger.startsWith ?
-                                    commandTerm.startsWith(searchTerm) :
-                                    commandTerm === searchTerm;
-            }
-            if (addSuggestion) {
-              this.push('items', command.suggestion);
-            }
+      this.debounce(
+        'suggester-search',
+        () => {
+          this.$.op.execute().then(() => {
+            commands.forEach((command) => {
+              let addSuggestion = false;
+              if (command.trigger.regex) {
+                addSuggestion = this.searchTerm.match(command.trigger.regex);
+              } else if (command.trigger.searchTerm) {
+                const commandTerm = command.trigger.searchTerm.trim().toLowerCase();
+                const searchTerm = this.searchTerm.trim().toLowerCase();
+                addSuggestion = command.trigger.startsWith
+                  ? commandTerm.startsWith(searchTerm)
+                  : commandTerm === searchTerm;
+              }
+              if (addSuggestion) {
+                this.push('items', command.suggestion);
+              }
+            });
           });
-        });
-      }, this.searchDelay);
+        },
+        this.searchDelay,
+      );
     }
   },
 
   _canShowResults() {
-    return this.searchTerm !== '' && this.items &&
-      (Array.isArray(this.items) ? this.items.length > 0 : true);
+    return this.searchTerm !== '' && this.items && (Array.isArray(this.items) ? this.items.length > 0 : true);
   },
 
   _getIcon(item) {
     if (item.command) {
       return item.icon;
-    } if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
-      return `${this.$.nxcon.url  }/${  item.thumbnailUrl}`;
-    } 
-      return this.$.nxcon.url + item.icon;
-    
+    }
+    if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
+      return `${this.$.nxcon.url}/${item.thumbnailUrl}`;
+    }
+    return this.$.nxcon.url + item.icon;
   },
 
   _getUrl(item, replaceHashbang) {
     let url;
     if (!item.command) {
-      url = item.type && this.urlFor(item.type, item.id)
+      url = item.type && this.urlFor(item.type, item.id);
     }
     if (url && replaceHashbang) {
       url = url.replace('/#!', '');

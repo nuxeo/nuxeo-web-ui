@@ -49,12 +49,12 @@ Polymer({
 
       .bubbleBox {
         display: block;
-        margin: 0 .4em .8em;
+        margin: 0 0.4em 0.8em;
         position: relative;
         width: 220px;
         height: 260px;
         background-color: var(--nuxeo-box);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
         filter: 0.1s ease-out, filter 0.1s ease-out;
         -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
@@ -65,11 +65,11 @@ Polymer({
       .bubbleBox:focus {
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
       .bubbleBox .title {
-        margin-bottom: .4em;
+        margin-bottom: 0.4em;
       }
 
       .bubbleBox:hover .title {
@@ -77,7 +77,7 @@ Polymer({
       }
 
       .thumbnailContainer {
-        background-color: rgba(0,0,0,0.1);
+        background-color: rgba(0, 0, 0, 0.1);
         width: 100%;
         height: 190px;
         position: relative;
@@ -97,12 +97,12 @@ Polymer({
       }
 
       .dataContainer {
-        padding: .3em .8em;
+        padding: 0.3em 0.8em;
       }
 
       .dataContainer p {
-        margin: 0 0 .4em;
-        font-size: .75rem;
+        margin: 0 0 0.4em;
+        font-size: 0.75rem;
       }
 
       .bubbleBox .select {
@@ -118,7 +118,7 @@ Polymer({
 
       .select paper-icon-button {
         margin: 0;
-        padding: .3em;
+        padding: 0.3em;
         box-sizing: border-box;
       }
 
@@ -181,18 +181,17 @@ Polymer({
 
       :host([selected]) .bubbleBox {
         border: 2px solid var(--nuxeo-grid-selected);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
       :host(.droptarget-hover) .bubbleBox {
         border: 2px dashed var(--nuxeo-grid-selected);
       }
-
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick">
-        <img src="[[_thumbnail(doc)]]">
+        <img src="[[_thumbnail(doc)]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
@@ -210,7 +209,7 @@ Polymer({
         </div>
       </template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-grid-thumbnail',
   behaviors: [FormatBehavior, RoutingBehavior],
@@ -242,20 +241,23 @@ Polymer({
     },
   },
 
-  observers: [
-    '_selectedItemsChanged(selectedItems.splices)',
-  ],
+  observers: ['_selectedItemsChanged(selectedItems.splices)'],
 
   _thumbnail(doc) {
-    return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-           doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
+    return doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+      ? doc.contextParameters.thumbnail.url
+      : '';
   },
 
   handleClick(e) {
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
-      this.fire('navigate', {item: this.doc, index: this.index});
+      this.fire('navigate', { item: this.doc, index: this.index });
     }
   },
 
@@ -265,10 +267,10 @@ Polymer({
 
   _toogleSelect(e) {
     this.selected = !this.selected;
-    this.fire('selected', {index: this.index, shiftKey: e.detail.sourceEvent.shiftKey});
+    this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
   },
 
-  _selectedItemsChanged(){
+  _selectedItemsChanged() {
     this.selectionMode = this.selectedItems && this.selectedItems.length > 0;
   },
 

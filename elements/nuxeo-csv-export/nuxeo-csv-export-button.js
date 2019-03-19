@@ -29,9 +29,21 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-operation-button id="btn" operation="Bulk.RunAction" input="[[provider]]" params="[[_params(provider, schemas, fields)]]" icon="nuxeo:csv-export" label="csvExportButton.label" show-label$="[[showLabel]]" poll-interval="[[pollInterval]]" error-label="csvExportButton.action.error" async download>
+    <nuxeo-operation-button
+      id="btn"
+      operation="Bulk.RunAction"
+      input="[[provider]]"
+      params="[[_params(provider, schemas, fields)]]"
+      icon="nuxeo:csv-export"
+      label="csvExportButton.label"
+      show-label$="[[showLabel]]"
+      poll-interval="[[pollInterval]]"
+      error-label="csvExportButton.action.error"
+      async
+      download
+    >
     </nuxeo-operation-button>
-`,
+  `,
 
   is: 'nuxeo-csv-export-button',
   behaviors: [I18nBehavior, FiltersBehavior],

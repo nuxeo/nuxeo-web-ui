@@ -21,7 +21,6 @@ limitations under the License.
 @element nuxeo-video-view-layout
 -->
 <dom-module id="nuxeo-video-view-layout">
-
   <template>
     <style>
       nuxeo-document-viewer,
@@ -32,7 +31,11 @@ limitations under the License.
     </style>
     <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
     <nuxeo-video-info role="widget" document="[[document]]"></nuxeo-video-info>
-    <nuxeo-video-conversions role="widget" document="[[document]]" label="[[i18n('videoViewLayout.conversions')]]"></nuxeo-video-conversions>
+    <nuxeo-video-conversions
+      role="widget"
+      document="[[document]]"
+      label="[[i18n('videoViewLayout.conversions')]]"
+    ></nuxeo-video-conversions>
   </template>
 
   <script>
@@ -47,5 +50,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

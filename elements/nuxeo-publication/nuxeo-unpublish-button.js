@@ -43,18 +43,21 @@ Polymer({
       nuxeo-confirm-button .label {
         font-weight: 500;
       }
-
     </style>
 
-    <nuxeo-operation id="unpublishOp" op="Document.Delete" input="[[document]]" sync-indexing>
-    </nuxeo-operation>
+    <nuxeo-operation id="unpublishOp" op="Document.Delete" input="[[document]]" sync-indexing></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <nuxeo-confirm-button dialog-title="[[i18n('publication.unpublish.confirm')]]" dialog-dismiss="[[i18n('label.no')]]" dialog-confirm="[[i18n('label.yes')]]" on-confirm="_unpublish">
+      <nuxeo-confirm-button
+        dialog-title="[[i18n('publication.unpublish.confirm')]]"
+        dialog-dismiss="[[i18n('label.no')]]"
+        dialog-confirm="[[i18n('label.yes')]]"
+        on-confirm="_unpublish"
+      >
         <span class="label">[[i18n('publication.unpublish')]]</span>
       </nuxeo-confirm-button>
     </template>
-`,
+  `,
 
   is: 'nuxeo-unpublish-button',
   behaviors: [I18nBehavior, RoutingBehavior, FiltersBehavior],
@@ -68,11 +71,14 @@ Polymer({
   },
 
   _unpublish() {
-    this.$.unpublishOp.execute().then(() => {
-      this.fire('notify', {'message': this.i18n('publication.unpublish.success')});
-      this.fire('nx-unpublish-success');
-    }).catch(() => {
-      this.fire('notify', {'message': this.i18n('publication.unpublish.error')});
-    });
+    this.$.unpublishOp
+      .execute()
+      .then(() => {
+        this.fire('notify', { message: this.i18n('publication.unpublish.success') });
+        this.fire('nx-unpublish-success');
+      })
+      .catch(() => {
+        this.fire('notify', { message: this.i18n('publication.unpublish.error') });
+      });
   },
 });

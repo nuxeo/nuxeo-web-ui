@@ -67,7 +67,8 @@ Polymer({
       }
 
       #header::slotted(*), /* chrome, safari */
-      #toolbar::slotted(*){ /* firefox */
+      #toolbar::slotted(*) {
+        /* firefox */
         @apply --layout-horizontal;
         @apply --layout-center;
         width: 100%;
@@ -77,12 +78,12 @@ Polymer({
 
       @media (max-width: 720px) {
         #header::slotted(*), /* chrome, safari */
-        #toolbar::slotted(*){ /* firefox */
+        #toolbar::slotted(*) {
+          /* firefox */
           overflow-y: scroll;
           padding-left: 48px;
         }
       }
-
     </style>
 
     <div class="page">
@@ -96,7 +97,7 @@ Polymer({
         <slot></slot>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-page',
 });

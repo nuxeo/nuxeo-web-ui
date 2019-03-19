@@ -44,13 +44,12 @@ Polymer({
       </div>
       <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-clipboard-toggle-button',
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
-
     /**
      * Input document.
      */
@@ -99,14 +98,14 @@ Polymer({
   toggle() {
     if (this.clipboard.contains(this.document)) {
       this.clipboard.remove(this.document);
-      this.fire('removed-from-clipboard', {docId : this.document.uid});
+      this.fire('removed-from-clipboard', { docId: this.document.uid });
     } else {
       this.clipboard.add(this.document);
     }
   },
 
   _computeLabel(inClipboard) {
-    return this.i18n(`clipboardToggleButton.tooltip.${  inClipboard ? 'remove' : 'add'}`);
+    return this.i18n(`clipboardToggleButton.tooltip.${inClipboard ? 'remove' : 'add'}`);
   },
 
   _update() {

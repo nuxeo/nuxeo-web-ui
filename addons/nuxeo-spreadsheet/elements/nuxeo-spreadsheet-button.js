@@ -24,8 +24,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 
 // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      (match, p1) => String.fromCharCode(`0x${  p1}`)));
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(`0x${p1}`)));
 }
 
 /**
@@ -63,7 +62,7 @@ Polymer({
     <paper-dialog id="dialog" class="dialog" with-backdrop>
       <iframe id="iframe" frameborder="0" scrolling="auto" on-load="_onLoad"></iframe>
     </paper-dialog>
-`,
+  `,
 
   is: 'nuxeo-spreadsheet-button',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
@@ -80,7 +79,7 @@ Polymer({
     /**
      * `true` if the action should display the label, `false` otherwise.
      */
-     showLabel: {
+    showLabel: {
       type: Boolean,
       value: false,
     },
@@ -91,7 +90,7 @@ Polymer({
   },
 
   _isAvailable() {
-    return (this.nxProvider !== null) && this.columns.length;
+    return this.nxProvider !== null && this.columns.length;
   },
 
   _show() {
@@ -100,7 +99,7 @@ Polymer({
     // convert from provider.sort to sortInfos
     const sortInfos = [];
     Object.keys(provider.sort).forEach((key) => {
-      sortInfos.push({'sortColumn': key, 'sortAscending': provider.sort[key] === 'asc'});
+      sortInfos.push({ sortColumn: key, sortAscending: provider.sort[key] === 'asc' });
     });
 
     // convert provider.params and provider.aggregations to properties
@@ -120,7 +119,7 @@ Polymer({
     const columns = [];
     this.columns.forEach((c) => {
       if (c.field && !c.hidden) {
-        columns.push({label: c.name ? c.name : c.field, field: c.field});
+        columns.push({ label: c.name ? c.name : c.field, field: c.field });
       }
     });
 
@@ -129,14 +128,15 @@ Polymer({
       pageSize: provider.pageSize,
       currentPage: provider.page,
       namedParameters: provider.params,
-      searchDocument: {properties},
+      searchDocument: { properties },
       sortInfos,
       resultColumns: columns,
       executed: false,
     };
 
-    this.$.iframe.src = `${this.$.nxconn.url  }/spreadsheet/?cv=${
-      encodeURIComponent(b64EncodeUnicode(JSON.stringify(state)))}`;
+    this.$.iframe.src = `${this.$.nxconn.url}/spreadsheet/?cv=${encodeURIComponent(
+      b64EncodeUnicode(JSON.stringify(state)),
+    )}`;
     this.$.dialog.toggle();
   },
 

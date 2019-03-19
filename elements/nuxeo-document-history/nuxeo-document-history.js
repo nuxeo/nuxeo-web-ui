@@ -68,16 +68,24 @@ Polymer({
     <nuxeo-card>
       <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
         <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
-          <template>[[_formatActivity(item.eventId)]]</template>
+          <template
+            >[[_formatActivity(item.eventId)]]</template
+          >
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
-          <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+          <template
+            ><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date
+          ></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
-          <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+          <template
+            ><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag
+          ></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]" sort-by="category">
-          <template>[[_formatActivity(item.category)]]</template>
+          <template
+            >[[_formatActivity(item.category)]]</template
+          >
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
           <template>
@@ -85,11 +93,13 @@ Polymer({
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-          <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
+          <template
+            ><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template
+          >
         </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-card>
-`,
+  `,
 
   is: 'nuxeo-document-history',
   behaviors: [FormatBehavior, RoutingBehavior],
@@ -120,11 +130,13 @@ Polymer({
         const start = Date.parse(this.startDate);
         const end = Date.parse(this.endDate);
         if (start > end) {
-          this.endDate = moment(start).add(7, 'day').format('YYYY-MM-DD');
+          this.endDate = moment(start)
+            .add(7, 'day')
+            .format('YYYY-MM-DD');
         }
       }
       this._refresh();
-    } else if(this.$.provider.params.startDate) {
+    } else if (this.$.provider.params.startDate) {
       delete this.$.provider.params.startDate;
       this._refresh();
     }
@@ -137,11 +149,13 @@ Polymer({
         const start = Date.parse(this.startDate);
         const end = Date.parse(this.endDate);
         if (start > end) {
-          this.startDate = moment(end).subtract(7, 'day').format('YYYY-MM-DD');
+          this.startDate = moment(end)
+            .subtract(7, 'day')
+            .format('YYYY-MM-DD');
         }
       }
       this._refresh();
-    } else if(this.$.provider.params.endDate) {
+    } else if (this.$.provider.params.endDate) {
       delete this.$.provider.params.endDate;
       this._refresh();
     }
@@ -156,7 +170,7 @@ Polymer({
   },
 
   _formatActivity(key) {
-    return this.i18n(`activity.${  key}`);
+    return this.i18n(`activity.${key}`);
   },
 
   _parseComment(comment) {

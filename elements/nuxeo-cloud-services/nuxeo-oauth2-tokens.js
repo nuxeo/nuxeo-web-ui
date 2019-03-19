@@ -50,8 +50,12 @@ Polymer({
     </style>
     <nuxeo-resource id="tokens"></nuxeo-resource>
 
-    <nuxeo-data-table name="table" icon="nuxeo:view-list" empty-label="[[i18n('cloudTokens.emptyResult')]]" items="[[tokens]]">
-
+    <nuxeo-data-table
+      name="table"
+      icon="nuxeo:view-list"
+      empty-label="[[i18n('cloudTokens.emptyResult')]]"
+      items="[[tokens]]"
+    >
       <nuxeo-data-table-column name="[[i18n('cloudTokens.serviceName')]]" field="serviceName" sort-by="serviceName">
         <template>
           <span>[[item.serviceName]]</span>
@@ -84,8 +88,18 @@ Polymer({
 
       <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
         <template>
-          <paper-icon-button name="edit" icon="nuxeo:edit" on-tap="_editEntry" title="[[i18n('cloudTokens.edit')]]"></paper-icon-button>
-          <paper-icon-button name="delete" icon="nuxeo:delete" on-tap="_deleteEntry" title="[[i18n('cloudTokens.delete')]]"></paper-icon-button>
+          <paper-icon-button
+            name="edit"
+            icon="nuxeo:edit"
+            on-tap="_editEntry"
+            title="[[i18n('cloudTokens.edit')]]"
+          ></paper-icon-button>
+          <paper-icon-button
+            name="delete"
+            icon="nuxeo:delete"
+            on-tap="_deleteEntry"
+            title="[[i18n('cloudTokens.delete')]]"
+          ></paper-icon-button>
         </template>
       </nuxeo-data-table-column>
     </nuxeo-data-table>
@@ -95,23 +109,48 @@ Polymer({
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
-            <nuxeo-input disabled label="[[i18n('cloudTokenEdit.serviceName')]]" name="serviceName" value="{{_selectedEntry.serviceName}}">
+            <nuxeo-input
+              disabled
+              label="[[i18n('cloudTokenEdit.serviceName')]]"
+              name="serviceName"
+              value="{{_selectedEntry.serviceName}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input disabled label="[[i18n('cloudTokenEdit.nuxeoLogin')]]" name="description" value="{{_selectedEntry.nuxeoLogin}}">
+            <nuxeo-input
+              disabled
+              label="[[i18n('cloudTokenEdit.nuxeoLogin')]]"
+              name="description"
+              value="{{_selectedEntry.nuxeoLogin}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-input required label="[[i18n('cloudTokenEdit.serviceLogin')]]" name="clientId" value="{{_selectedEntry.serviceLogin}}">
+            <nuxeo-input
+              required
+              label="[[i18n('cloudTokenEdit.serviceLogin')]]"
+              name="clientId"
+              value="{{_selectedEntry.serviceLogin}}"
+            >
             </nuxeo-input>
 
-            <nuxeo-date-picker name="creationDate" required label="[[i18n('cloudTokenEdit.creationDate')]]" value="{{_selectedEntry.creationDate}}">
+            <nuxeo-date-picker
+              name="creationDate"
+              required
+              label="[[i18n('cloudTokenEdit.creationDate')]]"
+              value="{{_selectedEntry.creationDate}}"
+            >
             </nuxeo-date-picker>
 
             <paper-checkbox noink checked="{{_selectedEntry.isShared}}">
               [[i18n('cloudTokenEdit.isShared')]]
             </paper-checkbox>
 
-            <nuxeo-user-suggestion label="[[i18n('cloudTokenEdit.shareWith')]]" value="{{_selectedEntry.sharedWith}}" prefixed multiple>
+            <nuxeo-user-suggestion
+              label="[[i18n('cloudTokenEdit.shareWith')]]"
+              value="{{_selectedEntry.sharedWith}}"
+              prefixed
+              multiple
+            >
             </nuxeo-user-suggestion>
           </form>
         </iron-form>
@@ -121,7 +160,7 @@ Polymer({
         <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-oauth2-tokens',
   behaviors: [FormatBehavior],
@@ -143,19 +182,22 @@ Polymer({
 
   _deleteEntry(e) {
     if (window.confirm(this.i18n('cloudTokens.confirmDelete'))) {
-      const {item} = e.target.parentNode;
+      const { item } = e.target.parentNode;
 
-      this.$.tokens.path = `${item.clientId ? `${OAUTH2_CLIENT_TOKENS_PATH  }/${  item.clientId}` :
-                                            OAUTH2_PROVIDER_TOKENS_PATH + item.serviceName  }/` +
-                                            `user/${  item.nuxeoLogin}`;
-      this.$.tokens.remove().then(() => {
-        this.fire('oauth2-token-deleted');
-        this.fire('notify', {message: this.i18n('cloudTokens.successfullyDeleted')});
-      }, () => {
-        this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
-          this.i18n('cloudTokens.errorDeleting')}`,
-        });
-      });
+      this.$.tokens.path = `${
+        item.clientId ? `${OAUTH2_CLIENT_TOKENS_PATH}/${item.clientId}` : OAUTH2_PROVIDER_TOKENS_PATH + item.serviceName
+      }/user/${item.nuxeoLogin}`;
+      this.$.tokens.remove().then(
+        () => {
+          this.fire('oauth2-token-deleted');
+          this.fire('notify', { message: this.i18n('cloudTokens.successfullyDeleted') });
+        },
+        () => {
+          this.fire('notify', {
+            message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n('cloudTokens.errorDeleting')}`,
+          });
+        },
+      );
     }
   },
 
@@ -169,20 +211,25 @@ Polymer({
     if (valid) {
       this._selectedEntry.creationDate = this.formatDate(this._selectedEntry.creationDate, 'YYYY-MM-DD HH:MM:SS');
       this.$.tokens.data = this._selectedEntry;
-      this.$.tokens.path = `${this._isClientToken ? `${OAUTH2_CLIENT_TOKENS_PATH  }/${  this._selectedEntry.clientId}` :
-                            OAUTH2_PROVIDER_TOKENS_PATH + this._selectedEntry.serviceName  }/` +
-                            `user/${  this._selectedEntry.nuxeoLogin}`;
-      this.$.tokens.put().then(() => {
-        this.$.dialog.toggle();
-        this.fire('oauth2-token-saved');
-        this.fire('notify', {message: this.i18n('cloudTokens.successfullyEdited')});
-      }, (err) => {
-        this.fire('notify', {
-          message: `${this.i18n('label.error').toUpperCase()  }: ${
-          err.message && err.message.length > 0 ? err.message :
-            this.i18n('cloudTokens.errorEditing')}`,
-        });
-      });
+      this.$.tokens.path = `${
+        this._isClientToken
+          ? `${OAUTH2_CLIENT_TOKENS_PATH}/${this._selectedEntry.clientId}`
+          : OAUTH2_PROVIDER_TOKENS_PATH + this._selectedEntry.serviceName
+      }/user/${this._selectedEntry.nuxeoLogin}`;
+      this.$.tokens.put().then(
+        () => {
+          this.$.dialog.toggle();
+          this.fire('oauth2-token-saved');
+          this.fire('notify', { message: this.i18n('cloudTokens.successfullyEdited') });
+        },
+        (err) => {
+          this.fire('notify', {
+            message: `${this.i18n('label.error').toUpperCase()}: ${
+              err.message && err.message.length > 0 ? err.message : this.i18n('cloudTokens.errorEditing')
+            }`,
+          });
+        },
+      );
     }
   },
 });

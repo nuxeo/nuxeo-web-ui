@@ -49,21 +49,26 @@ Polymer({
         @apply --nuxeo-liveconnect-anchor-layout;
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
       }
-
     </style>
 
-    <nuxeo-liveconnect-google-drive-provider id="provider" is-available="{{isProviderAvailable}}"></nuxeo-liveconnect-google-drive-provider>
+    <nuxeo-liveconnect-google-drive-provider
+      id="provider"
+      is-available="{{isProviderAvailable}}"
+    ></nuxeo-liveconnect-google-drive-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
       <a href="javascript:undefined" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/google_drive.png"></iron-icon>
         [[i18n('liveconnectImportActions.googledrive', 'Google Drive')]]
       </a>
     </template>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-google-drive-link',
   behaviors: [I18nBehavior],

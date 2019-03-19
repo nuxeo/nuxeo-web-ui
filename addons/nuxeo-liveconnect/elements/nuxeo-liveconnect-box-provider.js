@@ -21,8 +21,8 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
 // load Box picker
-const script = document.createElement('script')
-script.src = 'https://app.box.com/js/static/select.js'
+const script = document.createElement('script');
+script.src = 'https://app.box.com/js/static/select.js';
 document.head.appendChild(script); /* global BoxSelect */
 
 /**
@@ -38,7 +38,7 @@ Polymer({
       }
     </style>
     <nuxeo-resource id="oauth2"></nuxeo-resource>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-box-provider',
   behaviors: [LiveConnectBehavior],
@@ -86,10 +86,10 @@ Polymer({
 
   _showPicker() {
     const options = {
-          clientId: this.clientId,
-          linkType: 'direct',
-          multiselect: true,
-        };
+      clientId: this.clientId,
+      linkType: 'direct',
+      multiselect: true,
+    };
     const boxSelect = new BoxSelect(options);
 
     boxSelect.success((response) => {

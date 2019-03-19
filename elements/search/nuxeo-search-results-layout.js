@@ -28,8 +28,14 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-layout id="results" href="[[_resultsHref(searchName)]]" model="[[_resultsModel(searchName,nxProvider)]]" error="[[i18n('searchResults.layoutNotFound', searchName)]]" on-element-changed="_formChanged"></nuxeo-layout>
-`,
+    <nuxeo-layout
+      id="results"
+      href="[[_resultsHref(searchName)]]"
+      model="[[_resultsModel(searchName,nxProvider)]]"
+      error="[[i18n('searchResults.layoutNotFound', searchName)]]"
+      on-element-changed="_formChanged"
+    ></nuxeo-layout>
+  `,
 
   is: 'nuxeo-search-results-layout',
   behaviors: [I18nBehavior],
@@ -48,7 +54,9 @@ Polymer({
      */
     model: {
       type: Object,
-      value() { return {}; },
+      value() {
+        return {};
+      },
     },
     /**
      * The `nuxeo-results` element bound to this element.
@@ -79,14 +87,14 @@ Polymer({
 
   _resultsHref() {
     const name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-    return this.resolveUrl([this.searchName.toLowerCase(), `${name  }.html`].join('/'));
+    return this.resolveUrl([this.searchName.toLowerCase(), `${name}.html`].join('/'));
   },
 
-  _resultsModel () {
+  _resultsModel() {
     return { nxProvider: this.nxProvider, name: this.searchName };
   },
 
-  _formChanged (e) {
+  _formChanged(e) {
     this.results = e.detail.value && this._grabResults([e.detail.value]);
   },
 
@@ -95,7 +103,8 @@ Polymer({
       return;
     }
     // let's find the results element on the local and light dom of the current elements
-    let i; let el;
+    let i;
+    let el;
     for (i = 0; i < els.length; i++) {
       el = els[i];
       let results = dom(el).querySelector('nuxeo-results');

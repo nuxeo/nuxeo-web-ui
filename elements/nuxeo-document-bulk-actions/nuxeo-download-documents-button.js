@@ -30,8 +30,19 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-operation-button id="btn" operation="Blob.BulkDownload" input="[[_input(document, documents)]]" params="[[_params(document, documents)]]" icon="nuxeo:download" label="bulkDownload.tooltip" show-label$="[[showLabel]]" error-label="bulkDownload.error" async download></nuxeo-operation-button>
-`,
+    <nuxeo-operation-button
+      id="btn"
+      operation="Blob.BulkDownload"
+      input="[[_input(document, documents)]]"
+      params="[[_params(document, documents)]]"
+      icon="nuxeo:download"
+      label="bulkDownload.tooltip"
+      show-label$="[[showLabel]]"
+      error-label="bulkDownload.error"
+      async
+      download
+    ></nuxeo-operation-button>
+  `,
 
   is: 'nuxeo-download-documents-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -64,15 +75,15 @@ Polymer({
   _params() {
     const params = {};
     if (this.document && (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish'))) {
-      params.filename = `${this.document.title  }_${  new Date().getTime()  }.zip`;
+      params.filename = `${this.document.title}_${new Date().getTime()}.zip`;
     } else {
-      params.filename = `${this.i18n('bulkDownload.filename.selection')  }-${  new Date().getTime()  }.zip`
+      params.filename = `${this.i18n('bulkDownload.filename.selection')}-${new Date().getTime()}.zip`;
     }
     return params;
   },
 
   _input() {
-    return `docs:${  (this.document ? [this.document] : this.documents).map((doc) => doc.uid).join(',')}`;
+    return `docs:${(this.document ? [this.document] : this.documents).map((doc) => doc.uid).join(',')}`;
   },
 
   _onPollStart() {

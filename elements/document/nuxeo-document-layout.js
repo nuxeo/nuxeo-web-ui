@@ -29,9 +29,15 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-layout id="layout" href="[[_href]]" model="[[_model]]" error="[[i18n('documentView.layoutNotFound', document.type)]]" on-element-changed="_elementChanged">
+    <nuxeo-layout
+      id="layout"
+      href="[[_href]]"
+      model="[[_model]]"
+      error="[[i18n('documentView.layoutNotFound', document.type)]]"
+      on-element-changed="_elementChanged"
+    >
     </nuxeo-layout>
-`,
+  `,
 
   is: 'nuxeo-document-layout',
   behaviors: [I18nBehavior],
@@ -68,24 +74,24 @@ Polymer({
 
   _loadLayout(document, layout) {
     if (document) {
-      if (!this.previousDocument || (document.type === this.previousDocument.type)) {
-        this._model = {document};
+      if (!this.previousDocument || document.type === this.previousDocument.type) {
+        this._model = { document };
       }
-      if (!this.previousDocument || (document.uid !== this.previousDocument.uid)) {
+      if (!this.previousDocument || document.uid !== this.previousDocument.uid) {
         this._href = null; // force layout restamp
       }
       const doctype = document.type.toLowerCase();
       const name = ['nuxeo', doctype, layout, 'layout'].join('-');
-      this._href = this.resolveUrl(`${doctype  }/${  name  }.html`);
+      this._href = this.resolveUrl(`${doctype}/${name}.html`);
     } else if (document === undefined) {
       // XXX undefined is used to notify a cancel to inner elements
-      this._model = {document};
+      this._model = { document };
     }
     this.previousDocument = document;
   },
 
   _elementChanged() {
-    this._model = {document: this.document};
+    this._model = { document: this.document };
     // forward document path change events
     this.element.addEventListener('document-changed', (e) => {
       this.notifyPath(e.detail.path, e.detail.value);

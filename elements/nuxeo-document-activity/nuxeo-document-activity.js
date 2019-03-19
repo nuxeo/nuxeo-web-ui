@@ -40,7 +40,7 @@ Polymer({
       }
 
       .datetime {
-        opacity: .5;
+        opacity: 0.5;
         margin-left: 3px;
       }
     </style>
@@ -54,7 +54,7 @@ Polymer({
         </div>
       </div>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-activity',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -72,7 +72,7 @@ Polymer({
   },
 
   _activity(event) {
-    return this.i18n(`activity.${  event.eventId}`);
+    return this.i18n(`activity.${event.eventId}`);
   },
 
   _documentChanged() {
@@ -87,11 +87,10 @@ Polymer({
   _gatherDuplicatedActivities(original) {
     const activities = original.slice();
     for (let i = 0; i < activities.length - 1; i++) {
-      for (let j = i + 1;  j < activities.length; j++) {
+      for (let j = i + 1; j < activities.length; j++) {
         if (this._areGatherableActivities(activities[i], activities[j])) {
-          activities.splice(j,1);
-          j--;  // After remove duplicated element, decrease j to keep same index
-
+          activities.splice(j, 1);
+          j--; // After remove duplicated element, decrease j to keep same index
         }
       }
     }
@@ -103,12 +102,9 @@ Polymer({
    * Activities are gatharable if they are both "download", have the same author
    * and have less than 24 hours between them.
    */
-  _areGatherableActivities(a, b){
+  _areGatherableActivities(a, b) {
     let delta = new Date(a.eventDate) - new Date(b.eventDate);
-    delta = delta / 1000 / 60 / 60 ; // Converts ms to hours
-    return a.eventId === b.eventId
-        && a.eventId === 'download'
-        && a.principalName === b.principalName
-        && delta < 24;
+    delta = delta / 1000 / 60 / 60; // Converts ms to hours
+    return a.eventId === b.eventId && a.eventId === 'download' && a.principalName === b.principalName && delta < 24;
   },
 });

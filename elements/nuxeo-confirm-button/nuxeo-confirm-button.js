@@ -58,14 +58,21 @@ Polymer({
       <slot></slot>
     </paper-button>
 
-    <nuxeo-dialog id="dialog" class="dialog" no-overlap horizontal-align="auto" vertical-align="auto" on-iron-overlay-closed="_dismiss">
+    <nuxeo-dialog
+      id="dialog"
+      class="dialog"
+      no-overlap
+      horizontal-align="auto"
+      vertical-align="auto"
+      on-iron-overlay-closed="_dismiss"
+    >
       <div class="title">[[dialogTitle]]</div>
       <div class="actions">
         <paper-button noink dialog-dismiss>[[dialogDismiss]]</paper-button>
         <paper-button noink dialog-confirm class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-confirm-button',
 
@@ -97,10 +104,10 @@ Polymer({
   },
 
   _confirm() {
-    this.fire('confirm', {model: this._model});
+    this.fire('confirm', { model: this._model });
   },
 
   _dismiss() {
-    this.fire('dismiss', {model: this._model});
+    this.fire('dismiss', { model: this._model });
   },
 });

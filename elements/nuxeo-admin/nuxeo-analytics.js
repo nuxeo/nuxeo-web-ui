@@ -60,7 +60,7 @@ Polymer({
         </template>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-analytics',
   behaviors: [I18nBehavior],

@@ -23,7 +23,6 @@ Contributors:
 @element threed-view-layout
 -->
 <dom-module id="nuxeo-threed-view-layout">
-
   <template>
     <style>
       :host {
@@ -46,7 +45,6 @@ Contributors:
     <nuxeo-3d-render-views class="card-section" document="{{document}}"></nuxeo-3d-render-views>
     <nuxeo-3d-transmission-formats class="card-section" document="{{document}}"></nuxeo-3d-transmission-formats>
     <nuxeo-document-attachments class="card-section attachments" document="{{document}}"></nuxeo-document-attachments>
-
   </template>
 
   <script>
@@ -67,8 +65,9 @@ Contributors:
       },
 
       _getViewer() {
-        return !this.shadowRoot ? this.querySelector('#threedViewer') :
-          this.shadowRoot.querySelector('nuxeo-3d-preview').shadowRoot.querySelector('#threedViewer');
+        return !this.shadowRoot
+          ? this.querySelector('#threedViewer')
+          : this.shadowRoot.querySelector('nuxeo-3d-preview').shadowRoot.querySelector('#threedViewer');
       },
 
       _onViewerCoordsChange(e) {
@@ -80,5 +79,4 @@ Contributors:
       },
     });
   </script>
-
 </dom-module>

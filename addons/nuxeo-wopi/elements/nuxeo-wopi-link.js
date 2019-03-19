@@ -26,9 +26,14 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 Polymer({
   _template: html`
     <template is="dom-if" if="[[_isAvailable(url)]]">
-      <nuxeo-link-button href="[[url]]" icon-src="[[_wopiIcon(appName)]]" label="[[_wopiTooltip(appName)]]" target="_blank"></nuxeo-link-button>
+      <nuxeo-link-button
+        href="[[url]]"
+        icon-src="[[_wopiIcon(appName)]]"
+        label="[[_wopiTooltip(appName)]]"
+        target="_blank"
+      ></nuxeo-link-button>
     </template>
-`,
+  `,
 
   is: 'nuxeo-wopi-link',
   behaviors: [FiltersBehavior],
@@ -47,10 +52,7 @@ Polymer({
   },
 
   _appName() {
-    return this.blob
-      && this.blob.wopi
-      && this.blob.wopi.appName
-      && this.blob.wopi.appName.toLowerCase();
+    return this.blob && this.blob.wopi && this.blob.wopi.appName && this.blob.wopi.appName.toLowerCase();
   },
 
   _isAvailable() {
@@ -58,11 +60,11 @@ Polymer({
   },
 
   _wopiIcon() {
-    return `images/${  this.appName  }.png`
+    return `images/${this.appName}.png`;
   },
 
   _wopiTooltip() {
-    return `wopiLink.${  this.appName  }.tooltip`;
+    return `wopiLink.${this.appName}.tooltip`;
   },
 
   _wopiURL() {

@@ -32,29 +32,48 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-results name="default"
-                   nx-provider="[[nxProvider]]"
-                   selected-items="{{selectedItems}}"
-                   display-mode="list"
-                   sort-options="[[sortOptions]]"
-                   display-sort display-quick-filters>
-
-      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
-                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled>
+    <nuxeo-results
+      name="default"
+      nx-provider="[[nxProvider]]"
+      selected-items="{{selectedItems}}"
+      display-mode="list"
+      sort-options="[[sortOptions]]"
+      display-sort
+      display-quick-filters
+    >
+      <nuxeo-data-grid
+        name="grid"
+        icon="nuxeo:view-thumbnails"
+        empty-label="[[i18n('searchResults.noResults')]]"
+        selection-enabled
+      >
         <template>
-          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
-                                         on-navigate="_navigate" selected-items="[[selectedItems]]">
+          <nuxeo-document-grid-thumbnail
+            tabindex$="{{tabIndex}}"
+            selected$="{{selected}}"
+            doc="[[item]]"
+            index="[[index]]"
+            on-navigate="_navigate"
+            selected-items="[[selectedItems]]"
+          >
           </nuxeo-document-grid-thumbnail>
         </template>
       </nuxeo-data-grid>
 
-      <nuxeo-data-table name="table" icon="nuxeo:view-list"
-                        settings-enabled
-                        empty-label="[[i18n('searchResults.noResults')]]"
-                        selection-enabled
-                        on-row-clicked="_navigate">
-
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="100">
+      <nuxeo-data-table
+        name="table"
+        icon="nuxeo:view-list"
+        settings-enabled
+        empty-label="[[i18n('searchResults.noResults')]]"
+        selection-enabled
+        on-row-clicked="_navigate"
+      >
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.title')]]"
+          field="dc:title"
+          sort-by="dc:title"
+          flex="100"
+        >
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
             <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
@@ -67,13 +86,23 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.modified')]]" field="dc:modified" sort-by="dc:modified" flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.modified')]]"
+          field="dc:modified"
+          sort-by="dc:modified"
+          flex="50"
+        >
           <template>
             <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.lastContributor')]]" field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.lastContributor')]]"
+          field="dc:lastContributor"
+          sort-by="dc:lastContributor"
+          flex="50"
+        >
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
           </template>
@@ -91,13 +120,24 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.created')]]" field="dc:created" sort-by="dc:created" flex="50" hidden>
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.created')]]"
+          field="dc:created"
+          sort-by="dc:created"
+          flex="50"
+          hidden
+        >
           <template>
             <nuxeo-date datetime="[[item.properties.dc:created]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.author')]]" field="dc:creator" sort-by="dc:creator" hidden>
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.author')]]"
+          field="dc:creator"
+          sort-by="dc:creator"
+          hidden
+        >
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:creator]]"></nuxeo-user-tag>
           </template>
@@ -105,13 +145,17 @@ limitations under the License.
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.nature')]]" field="dc:nature" hidden>
           <template>
-            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag>
+            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]"
+              >[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag
+            >
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.coverage')]]" field="dc:coverage" hidden>
           <template>
-            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag>
+            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]"
+              >[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag
+            >
           </template>
         </nuxeo-data-table-column>
 
@@ -122,20 +166,27 @@ limitations under the License.
             </template>
           </template>
         </nuxeo-data-table-column>
-
       </nuxeo-data-table>
 
-      <nuxeo-data-list name="list" icon="nuxeo:view-headline"
-                       empty-label="[[emptyLabel]]" multi-selection
-                       empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
-                       selection-enabled>
+      <nuxeo-data-list
+        name="list"
+        icon="nuxeo:view-headline"
+        empty-label="[[emptyLabel]]"
+        multi-selection
+        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
+        selection-enabled
+      >
         <template>
-          <nuxeo-document-list-item selected$="{{selected}}" doc="[[item]]" index="[[index]]"
-                                    on-navigate="_navigate" selected-items="[[selectedItems]]">
+          <nuxeo-document-list-item
+            selected$="{{selected}}"
+            doc="[[item]]"
+            index="[[index]]"
+            on-navigate="_navigate"
+            selected-items="[[selectedItems]]"
+          >
           </nuxeo-document-list-item>
         </template>
       </nuxeo-data-list>
-
     </nuxeo-results>
   </template>
 
@@ -154,20 +205,19 @@ limitations under the License.
 
       attached() {
         this.sortOptions = [
-          {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
-          {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
-          {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
-          {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
-          {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
-          {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
-          {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'},
+          { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc' },
+          { field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true },
+          { field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc' },
+          { field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc' },
+          { field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc' },
+          { field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc' },
+          { field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc' },
         ];
       },
 
       _navigate(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
+        this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.model || e.detail).index });
       },
     });
   </script>
-
 </dom-module>

@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-default-search-form">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -32,61 +32,64 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-input role="widget"
-                 id="searchInput"
-                 type="search"
-                 label="[[i18n('defaultSearch.fullText')]]"
-                 value="{{searchTerm}}"
-                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                 autofocus
-                 on-keydown="_checkForEnter">
+    <nuxeo-input
+      role="widget"
+      id="searchInput"
+      type="search"
+      label="[[i18n('defaultSearch.fullText')]]"
+      value="{{searchTerm}}"
+      placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+      autofocus
+      on-keydown="_checkForEnter"
+    >
     </nuxeo-input>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.modifiedDate')]]</label>
-      <nuxeo-checkbox-aggregation
-        data="[[aggregations.dc_modified_agg]]"
-        value="{{params.dc_modified_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.dc_modified_agg]]" value="{{params.dc_modified_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+      <nuxeo-dropdown-aggregation
+        placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true"
-        name="authors">
+        name="authors"
+      >
       </nuxeo-dropdown-aggregation>
     </div>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.collections')]]</label>
-      <nuxeo-selectivity operation="User.GetCollections"
-                     min-chars="0"
-                     placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
-                     value="{{params.ecm_collections}}"
-                     multiple="true"
-                     name="collections">
+      <nuxeo-selectivity
+        operation="User.GetCollections"
+        min-chars="0"
+        placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
+        value="{{params.ecm_collections}}"
+        multiple="true"
+        name="collections"
+      >
       </nuxeo-selectivity>
     </div>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.tags')]]</label>
-      <nuxeo-tag-suggestion min-chars="1"
-                     placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
-                     value="{{params.ecm_tags}}"
-                     multiple="true"
-                     name="tags">
+      <nuxeo-tag-suggestion
+        min-chars="1"
+        placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
+        value="{{params.ecm_tags}}"
+        multiple="true"
+        name="tags"
+      >
       </nuxeo-tag-suggestion>
     </div>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.nature')]]</label>
-      <nuxeo-checkbox-aggregation
-        data="[[aggregations.dc_nature_agg]]"
-        value="{{params.dc_nature_agg}}"
-        name="nature">
+      <nuxeo-checkbox-aggregation data="[[aggregations.dc_nature_agg]]" value="{{params.dc_nature_agg}}" name="nature">
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -95,7 +98,8 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
         value="{{params.dc_subjects_agg}}"
-        name="subject">
+        name="subject"
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -104,7 +108,8 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
         value="{{params.dc_coverage_agg}}"
-        name="coverage">
+        name="coverage"
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -113,7 +118,8 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
-        name="size">
+        name="size"
+      >
       </nuxeo-checkbox-aggregation>
     </div>
   </template>
@@ -147,8 +153,10 @@ limitations under the License.
       _search() {
         if (this.searchTerm) {
           this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
-          this.set('params.highlight',
-            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+          this.set(
+            'params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name',
+          );
         } else if (this.params.ecm_fulltext) {
           this.set('params.ecm_fulltext', '');
           delete this.params.ecm_fulltext;
@@ -161,7 +169,6 @@ limitations under the License.
           this._search();
         }
       },
-
     });
   </script>
 </dom-module>

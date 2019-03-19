@@ -76,7 +76,7 @@ Polymer({
         <div>[[document.properties.vid:info.frameRate]]</div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-video-info',
   behaviors: [I18nBehavior],

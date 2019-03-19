@@ -47,10 +47,10 @@ Polymer({
 
       .listBox {
         display: block;
-        margin: 0 .4em .8em;
+        margin: 0 0.4em 0.8em;
         position: relative;
         background-color: var(--nuxeo-box);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
         filter: 0.1s ease-out, filter 0.1s ease-out;
         -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
@@ -60,11 +60,11 @@ Polymer({
       .listBox:hover,
       .listBox:focus {
         border: 2px solid var(--nuxeo-link-hover-color);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
       .listBox .title {
-        margin-bottom: .4em;
+        margin-bottom: 0.4em;
       }
 
       .listBox:hover .title {
@@ -72,7 +72,7 @@ Polymer({
       }
 
       .thumbnailContainer {
-        background-color: rgba(0,0,0,0.1);
+        background-color: rgba(0, 0, 0, 0.1);
         width: 10rem;
         height: 10rem;
         position: relative;
@@ -92,12 +92,12 @@ Polymer({
       }
 
       .dataContainer {
-        padding: .5rem 1rem;
+        padding: 0.5rem 1rem;
       }
 
       .dataContainer p {
-        margin: 0 0 .4em;
-        font-size: .75rem;
+        margin: 0 0 0.4em;
+        font-size: 0.75rem;
       }
 
       .listBox .select {
@@ -113,7 +113,7 @@ Polymer({
 
       .select paper-icon-button {
         margin: 0;
-        padding: .3em;
+        padding: 0.3em;
         box-sizing: border-box;
       }
 
@@ -169,7 +169,7 @@ Polymer({
 
       :host([selected]) .listBox {
         border: 2px solid var(--nuxeo-grid-selected);
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
       :host(.droptarget-hover) .listBox {
@@ -184,19 +184,18 @@ Polymer({
       }
 
       nuxeo-document-highlights {
-        font-size: .85rem;
+        font-size: 0.85rem;
       }
 
       .vignette {
         display: flex;
       }
-
     </style>
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick">
-          <img src="[[_thumbnail(doc)]]">
+          <img src="[[_thumbnail(doc)]]" />
         </div>
         <div class="dataContainer flex" on-tap="handleClick">
           <div class="horizontal layout center">
@@ -216,7 +215,7 @@ Polymer({
         </div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-list-item',
   behaviors: [FormatBehavior, RoutingBehavior],
@@ -248,20 +247,23 @@ Polymer({
     },
   },
 
-  observers: [
-    '_selectedItemsChanged(selectedItems.splices)',
-  ],
+  observers: ['_selectedItemsChanged(selectedItems.splices)'],
 
   _thumbnail(doc) {
-    return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-           doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
+    return doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+      ? doc.contextParameters.thumbnail.url
+      : '';
   },
 
   handleClick(e) {
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
-      this.fire('navigate', {item: this.doc, index: this.index});
+      this.fire('navigate', { item: this.doc, index: this.index });
     }
   },
 
@@ -271,7 +273,7 @@ Polymer({
 
   _toogleSelect(e) {
     this.selected = !this.selected;
-    this.fire('selected', {index: this.index, shiftKey: e.detail.sourceEvent.shiftKey});
+    this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
   },
 
   _selectedItemsChanged() {

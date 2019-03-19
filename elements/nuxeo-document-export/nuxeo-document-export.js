@@ -29,7 +29,6 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style>
-
       iron-icon {
         width: 1em;
         height: 1em;
@@ -57,13 +56,13 @@ Polymer({
       }
     </style>
 
-  <template is="dom-repeat" items="[[_filterRenditions(document)]]">
-    <div class="rendition-container">
-      <iron-icon src="[[item.icon]]"></iron-icon>
-      <a href="[[item.url]]">[[i18n(item.name)]]</a>
-    </div>
-  </template>
-`,
+    <template is="dom-repeat" items="[[_filterRenditions(document)]]">
+      <div class="rendition-container">
+        <iron-icon src="[[item.icon]]"></iron-icon>
+        <a href="[[item.url]]">[[i18n(item.name)]]</a>
+      </div>
+    </template>
+  `,
 
   is: 'nuxeo-document-export',
   behaviors: [I18nBehavior],
@@ -74,12 +73,15 @@ Polymer({
 
   _filterRenditions(document) {
     if (document && document.contextParameters) {
-      return document.contextParameters.renditions.filter((rendition) => rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion').map((item) => {
-        item.name = `documentExport.${  item.name}`;
-        return item;
-      });
-    } 
-      return [];
-    
+      return document.contextParameters.renditions
+        .filter(
+          (rendition) => rendition.kind !== 'nuxeo:video:conversion' && rendition.kind !== 'nuxeo:picture:conversion',
+        )
+        .map((item) => {
+          item.name = `documentExport.${item.name}`;
+          return item;
+        });
+    }
+    return [];
   },
 });

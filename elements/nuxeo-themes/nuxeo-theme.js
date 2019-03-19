@@ -44,7 +44,7 @@ Polymer({
         width: 100%;
         height: 250px;
         margin-bottom: 8px;
-        background-color: rgba(0,0,0,0.05);
+        background-color: rgba(0, 0, 0, 0.05);
       }
 
       .details {
@@ -75,7 +75,7 @@ Polymer({
         </paper-button>
       </div>
     </nuxeo-card>
-`,
+  `,
 
   is: 'nuxeo-theme',
   behaviors: [I18nBehavior],
@@ -87,24 +87,24 @@ Polymer({
   },
 
   _image(name) {
-    return (this.preview) ? this.preview : `themes/${  name  }/preview.jpg`;
+    return this.preview ? this.preview : `themes/${name}/preview.jpg`;
   },
 
   _label(name) {
-    return (this.title) ? this.title : this.i18n(`themes.${  name}`);
+    return this.title ? this.title : this.i18n(`themes.${name}`);
   },
 
   _button(name) {
-    return this.i18n(`themes.${  this._selected(name) ? 'current' : 'apply'}`);
+    return this.i18n(`themes.${this._selected(name) ? 'current' : 'apply'}`);
   },
 
   _selected(name) {
     const theme = localStorage.getItem('theme');
-    return (theme) ? theme === name : name === 'default';
+    return theme ? theme === name : name === 'default';
   },
 
   _apply() {
     localStorage.setItem('theme', this.name);
-    this.fire('theme-changed', {theme: this.name});
+    this.fire('theme-changed', { theme: this.name });
   },
 });

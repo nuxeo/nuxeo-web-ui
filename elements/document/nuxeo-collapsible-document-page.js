@@ -93,7 +93,12 @@ Polymer({
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h3>[[i18n('documentPage.tags')]]</h3>
-              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!hasPermission(document, 'Write')]]">&gt;
+              <nuxeo-tag-suggestion
+                document="[[document]]"
+                allow-new-tags
+                placeholder="[[i18n('documentPage.tags.placeholder')]]"
+                readonly="[[!hasPermission(document, 'Write')]]"
+                >&gt;
               </nuxeo-tag-suggestion>
             </div>
           </template>
@@ -110,7 +115,7 @@ Polymer({
         <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-collapsible-document-page',
   behaviors: [LayoutBehavior],
@@ -121,7 +126,7 @@ Polymer({
     },
   },
 
-  _hasCollections (doc) {
+  _hasCollections(doc) {
     return this.hasCollections(doc);
   },
 });

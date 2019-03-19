@@ -33,7 +33,6 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-
       .content {
         @apply --layout-vertical;
       }
@@ -41,7 +40,7 @@ Polymer({
       nuxeo-data-list {
         display: block;
         position: relative;
-        min-height: calc(100vh - 61px - var(--nuxeo-app-top))
+        min-height: calc(100vh - 61px - var(--nuxeo-app-top));
       }
 
       .list-item {
@@ -72,11 +71,24 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
+    <nuxeo-document-storage
+      id="storage"
+      name="nuxeo-recent-documents"
+      documents="{{documents}}"
+    ></nuxeo-document-storage>
 
     <div class="header">[[i18n('app.recentlyViewed')]]</div>
     <div class="content">
-      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document" selected-item="{{selectedRecent}}" selection-enabled select-on-tap empty-label="[[i18n('recentDocuments.empty')]]" empty-label-when-filtered="[[i18n('recentDocuments.empty')]]">
+      <nuxeo-data-list
+        items="[[documents]]"
+        id="recentDocumentsList"
+        as="document"
+        selected-item="{{selectedRecent}}"
+        selection-enabled
+        select-on-tap
+        empty-label="[[i18n('recentDocuments.empty')]]"
+        empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
+      >
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-info">
@@ -87,7 +99,7 @@ Polymer({
         </template>
       </nuxeo-data-list>
     </div>
-`,
+  `,
 
   is: 'nuxeo-recent-documents',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],

@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-vocabulary-edit-layout">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -32,33 +32,37 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.id')]]"
-                 name="id"
-                 value="{{entry.properties.id::change}}"
-                 required
-                 readonly$="[[!new]]">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.id')]]"
+      name="id"
+      value="{{entry.properties.id::change}}"
+      required
+      readonly$="[[!new]]"
+    >
     </nuxeo-input>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.label')]]"
-                 name="label"
-                 value="{{entry.properties.label::change}}">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.label')]]"
+      name="label"
+      value="{{entry.properties.label::change}}"
+    >
     </nuxeo-input>
 
     <div role="widget">
       <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
-      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
-                           on-change="_obsoleteChanged"
-                           noink>
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]" on-change="_obsoleteChanged" noink>
       </paper-toggle-button>
     </div>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.ordering')]]"
-                 name="ordering"
-                 type="number"
-                 value="{{entry.properties.ordering::change}}">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.ordering')]]"
+      name="ordering"
+      type="number"
+      value="{{entry.properties.ordering::change}}"
+    >
     </nuxeo-input>
   </template>
 
@@ -67,7 +71,6 @@ limitations under the License.
       is: 'nuxeo-vocabulary-edit-layout',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
-
         entry: {
           type: Object,
           observer: '_entryChanged',
@@ -90,7 +93,6 @@ limitations under the License.
       _obsoleteChanged() {
         this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
       },
-
     });
   </script>
 </dom-module>

@@ -22,15 +22,20 @@ limitations under the License.
 @element nuxeo-task2169-layout
 -->
 <dom-module id="nuxeo-task2169-layout">
-
   <template>
     <div role="widget">
       <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
-      <nuxeo-document-task-review-result class="review-result"
-                                         result="[[task.variables.review_result]]"></nuxeo-document-task-review-result>
+      <nuxeo-document-task-review-result
+        class="review-result"
+        result="[[task.variables.review_result]]"
+      ></nuxeo-document-task-review-result>
     </div>
-    <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
-                    value="{{task.variables.comment}}" always-float-label>
+    <paper-textarea
+      role="widget"
+      label="[[i18n('wf.parallelDocumentReview.comment')]]"
+      value="{{task.variables.comment}}"
+      always-float-label
+    >
     </paper-textarea>
   </template>
 
@@ -51,5 +56,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

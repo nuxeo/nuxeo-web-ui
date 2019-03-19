@@ -32,64 +32,63 @@ import './nuxeo-ai-icons.js';
  *
  * @memberof Nuxeo
  */
-class AISuggestions
-  extends mixinBehaviors([I18nBehavior, IronFormElementBehavior], Nuxeo.Element) {
+class AISuggestions extends mixinBehaviors([I18nBehavior, IronFormElementBehavior], Nuxeo.Element) {
   static get template() {
     return html`
-  <style>
-    :host {
-      display: block;
-      @apply --layout-horizontal;
-      @apply --layout-wrap;
-      @apply --layout-flex;
-    }
+      <style>
+        :host {
+          display: block;
+          @apply --layout-horizontal;
+          @apply --layout-wrap;
+          @apply --layout-flex;
+        }
 
-    :host([hidden]) {
-      display: none;
-    }
+        :host([hidden]) {
+          display: none;
+        }
 
-    .suggestion {
-      margin: 0 10px 10px 0;
-      padding: 5px 9px 5px;
+        .suggestion {
+          margin: 0 10px 10px 0;
+          padding: 5px 9px 5px;
 
-      border-radius: 2em;
-      background-color: var(--nuxeo-tag-background, transparent);
+          border-radius: 2em;
+          background-color: var(--nuxeo-tag-background, transparent);
 
-      cursor: pointer;
+          cursor: pointer;
 
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
 
-      @apply --layout-horizontal;
-      @apply --layout-center;
-    }
+          @apply --layout-horizontal;
+          @apply --layout-center;
+        }
 
-    .suggestion:hover {
-      background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
-    }
+        .suggestion:hover {
+          background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
+        }
 
-    .chosen {
-      opacity: 0.3;
-      pointer-events:none;
-    }
+        .chosen {
+          opacity: 0.3;
+          pointer-events: none;
+        }
 
-    iron-icon {
-      --iron-icon-fill-color: var(--nuxeo-artificial-intelligence-confidence-color, #4A90E2);
-      margin-left: 7px;
-      height: 1.2em;
-    }
-  </style>
+        iron-icon {
+          --iron-icon-fill-color: var(--nuxeo-artificial-intelligence-confidence-color, #4a90e2);
+          margin-left: 7px;
+          height: 1.2em;
+        }
+      </style>
 
-  <template is="dom-repeat" items="[[suggestions]]">
-    <div class$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
-      <span>[[idFunction(item.name)]]</span>
-      <iron-icon icon="[[_getConfidenceIcon(item.confidence)]]"></iron-icon>
-    </div>
-  </template>
-`;
+      <template is="dom-repeat" items="[[suggestions]]">
+        <div class$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
+          <span>[[idFunction(item.name)]]</span>
+          <iron-icon icon="[[_getConfidenceIcon(item.confidence)]]"></iron-icon>
+        </div>
+      </template>
+    `;
   }
 
   static get is() {
@@ -146,9 +145,7 @@ class AISuggestions
   }
 
   static get observers() {
-    return [
-      '_matchInput(property, suggestions, document.properties.*)',
-    ];
+    return ['_matchInput(property, suggestions, document.properties.*)'];
   }
 
   _matchInput() {
@@ -170,7 +167,7 @@ class AISuggestions
   }
 
   _styleSuggestion(suggestion) {
-    return (this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name)) ? 'chosen' : '';
+    return this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name) ? 'chosen' : '';
   }
 
   _getConfidenceIcon(confidenceLevel) {
@@ -178,9 +175,9 @@ class AISuggestions
     let icon;
     if (confidenceLevel >= this.threshold && confidenceLevel < this.threshold + interval) {
       icon = 'nuxeo-ai:confidence-level-low';
-    } else if (confidenceLevel >= this.threshold + interval && confidenceLevel < this.threshold + (2 * interval)) {
+    } else if (confidenceLevel >= this.threshold + interval && confidenceLevel < this.threshold + 2 * interval) {
       icon = 'nuxeo-ai:confidence-level-medium';
-    } else if (confidenceLevel >= this.threshold + (2 * interval) && confidenceLevel <= 1) {
+    } else if (confidenceLevel >= this.threshold + 2 * interval && confidenceLevel <= 1) {
       icon = 'nuxeo-ai:confidence-level-high';
     }
     return icon;
@@ -252,7 +249,7 @@ class AISuggestions
     let composedPath = startingPath;
     path.forEach((piece) => {
       obj = this.get(composedPath);
-      composedPath += (`${composedPath.length === 0 ? '' : '.'}${piece}`);
+      composedPath += `${composedPath.length === 0 ? '' : '.'}${piece}`;
       if (!this.get(composedPath)) {
         obj[piece] = {};
       }

@@ -22,7 +22,6 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-favorites-view-layout">
   <template>
-
     <style>
       :host {
         display: inline-block;
@@ -33,24 +32,28 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-page-provider id="provider"
-                         provider="ordered_content_collection"
-                         schemas="dublincore,common"
-                         page-size="40"
-                         enrichers="thumbnail, permissions">
+    <nuxeo-page-provider
+      id="provider"
+      provider="ordered_content_collection"
+      schemas="dublincore,common"
+      page-size="40"
+      enrichers="thumbnail, permissions"
+    >
     </nuxeo-page-provider>
 
-    <nuxeo-default-results id="results" name="[[document.uid]]"
-                   items="{{items}}"
-                   selected-items="{{selectedItems}}"
-                   empty-label="[[i18n('collections.noDocument')]]"
-                   empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]"
-                   hide-content-view-actions>
+    <nuxeo-default-results
+      id="results"
+      name="[[document.uid]]"
+      items="{{items}}"
+      selected-items="{{selectedItems}}"
+      empty-label="[[i18n('collections.noDocument')]]"
+      empty-label-when-filtered="[[i18n('collections.noDocumentWhenFiltered')]]"
+      hide-content-view-actions
+    >
       <div slot="selectionActions">
         <nuxeo-slot slot="COLLECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
     </nuxeo-default-results>
-
   </template>
   <script>
     Polymer({
@@ -77,7 +80,7 @@ limitations under the License.
       },
 
       _actionContext() {
-        return {collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items};
+        return { collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items };
       },
     });
   </script>

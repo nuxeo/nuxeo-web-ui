@@ -37,12 +37,14 @@ Polymer({
         display: block;
       }
 
-      iron-image, nuxeo-document-preview {
+      iron-image,
+      nuxeo-document-preview {
         width: 100%;
         height: calc(80vh - 100px);
       }
 
-      nuxeo-document-blob, nuxeo-dropzone {
+      nuxeo-document-blob,
+      nuxeo-dropzone {
         margin-top: 8px;
       }
     </style>
@@ -57,7 +59,7 @@ Polymer({
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
       <nuxeo-document-blob document="[[document]]"></nuxeo-document-blob>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-viewer',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -67,12 +69,18 @@ Polymer({
   },
 
   _thumbnail(doc) {
-    return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-    doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
+    return doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+      ? doc.contextParameters.thumbnail.url
+      : '';
   },
 
-  _hasWritePermission (doc) {
-    return doc && this.hasPermission(doc, 'Write') &&
-      !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
+  _hasWritePermission(doc) {
+    return (
+      doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc)
+    );
   },
 });

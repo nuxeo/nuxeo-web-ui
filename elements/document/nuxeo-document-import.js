@@ -57,7 +57,7 @@ Polymer({
         --paper-dialog-scrollable: {
           padding: 0;
           overflow-x: hidden;
-        };
+        }
       }
 
       paper-spinner-lite {
@@ -81,10 +81,10 @@ Polymer({
 
       .file-to-import {
         min-height: 3em;
-        margin: 0 .3em .8em;
+        margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
-        padding: .8em 1em;
-        background-color:var(--nuxeo-box);
+        padding: 0.8em 1em;
+        background-color: var(--nuxeo-box);
         border: 1px solid var(--divider-color);
         position: relative;
       }
@@ -102,7 +102,7 @@ Polymer({
         position: relative;
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
-        background-color: rgba(0,0,0,0.05);
+        background-color: rgba(0, 0, 0, 0.05);
         min-height: 100px;
         margin: 1em 2em 5em;
       }
@@ -148,7 +148,7 @@ Polymer({
       }
 
       .blobCheck.unchecked {
-        opacity: .3;
+        opacity: 0.3;
       }
 
       .blobCheck.hidden {
@@ -184,9 +184,9 @@ Polymer({
       }
 
       .size {
-        font-size: .8rem;
-        opacity: .3;
-        padding: .1em .5em;
+        font-size: 0.8rem;
+        opacity: 0.3;
+        padding: 0.1em 0.5em;
         white-space: nowrap;
       }
 
@@ -200,11 +200,11 @@ Polymer({
         width: 1.5em;
         position: absolute;
         right: 1.5em;
-        top: .8em;
+        top: 0.8em;
         text-align: center;
       }
 
-      .complete iron-icon  {
+      .complete iron-icon {
         width: 1.2em;
         height: 1.3em;
       }
@@ -228,8 +228,8 @@ Polymer({
       .disclaimer {
         display: block;
         font-weight: normal;
-        font-size: .75rem;
-        opacity: .3;
+        font-size: 0.75rem;
+        opacity: 0.3;
       }
 
       .clear {
@@ -238,7 +238,7 @@ Polymer({
       }
 
       .clear paper-icon-button {
-        padding: 0 0 1em .5em;
+        padding: 0 0 1em 0.5em;
       }
 
       .file-to-import:last-of-type {
@@ -257,7 +257,7 @@ Polymer({
         right: 0;
         text-align: center;
         background-color: var(--nuxeo-box);
-        padding: .5em;
+        padding: 0.5em;
       }
 
       .buttons {
@@ -289,42 +289,55 @@ Polymer({
       }
 
       iron-pages,
-      div[name="upload"] ,
-      div[name="customize"] {
+      div[name='upload'],
+      div[name='customize'] {
         /*Firefox fix (NXP-22349)*/
         min-height: 100%;
       }
-      div[name="upload"] {
+      div[name='upload'] {
         outline: none;
       }
-
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="blobRemover"></nuxeo-resource>
     <nuxeo-operation id="fileManagerImport" op="FileManager.Import" sync-indexing></nuxeo-operation>
-    <nuxeo-document id="docRequest" doc-path="[[targetPath]]" data="[[document]]" sync-indexing headers='{"X-Batch-No-Drop": "true"}" response="{{createResponse}}'></nuxeo-document>
+    <nuxeo-document
+      id="docRequest"
+      doc-path="[[targetPath]]"
+      data="[[document]]"
+      sync-indexing
+      headers='{"X-Batch-No-Drop": "true"}'
+      response="{{createResponse}}"
+    ></nuxeo-document>
     <nuxeo-document id="parentFetcher" doc-path="[[targetPath]]"></nuxeo-document>
 
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
-
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
-
         <div class="suggester">
-          <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
+          <nuxeo-path-suggestion
+            id="pathSuggesterUpload"
+            label="[[i18n('documentImportForm.location')]]"
+            value="{{targetPath}}"
+            parent="{{suggesterParent}}"
+            children="{{suggesterChildren}}"
+            disabled
+            always-float-label
+          ></nuxeo-path-suggestion>
           <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
         </div>
 
         <div id="dropzone" class="vertical layout flex">
-          <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple>
+          <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple />
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
                 <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('documentImportForm.clickOrDrop')]]</a>
+                  [[i18n('documentImportForm.clickOrDrop')]]</a
+                >
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout wrap">
@@ -396,8 +409,12 @@ Polymer({
             </paper-dialog-scrollable>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">[[i18n('documentImportForm.addMoreFiles')]]</a>
-                <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span>
+                <a href="javascript:undefined" on-tap="_showUploadDialog"
+                  >[[i18n('documentImportForm.addMoreFiles')]]</a
+                >
+                <span hidden$="[[!_hasVisibleContributions]]"
+                  >&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span
+                >
                 <div class="importActions horizontal layout wrap">
                   <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty="{{!hasContributions}}"></nuxeo-slot>
                 </div>
@@ -407,21 +424,35 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]"
+              >[[i18n('command.cancel')]]</paper-button
+            >
           </div>
-          <paper-button noink id="edit" class="primary" on-tap="_toggleCustomize" hidden$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]">
-                        [[i18n('documentImportForm.addProperties')]]
-                      </paper-button>
-          <paper-button noink id="create" class="primary" on-tap="_import" disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                        <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
-                          [[i18n('command.create')]]
-                        </template>
-                        <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
-                          <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
-                          <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
-                          <paper-spinner-lite active></paper-spinner-lite>
-                        </template>
-                      </paper-button>
+          <paper-button
+            noink
+            id="edit"
+            class="primary"
+            on-tap="_toggleCustomize"
+            hidden$="[[!_canAddProperties(_creating,hasFiles,canCreate)]]"
+          >
+            [[i18n('documentImportForm.addProperties')]]
+          </paper-button>
+          <paper-button
+            noink
+            id="create"
+            class="primary"
+            on-tap="_import"
+            disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]"
+          >
+            <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+              [[i18n('command.create')]]
+            </template>
+            <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
+              <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+              <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
+              <paper-spinner-lite active></paper-spinner-lite>
+            </template>
+          </paper-button>
         </div>
       </div>
 
@@ -430,14 +461,30 @@ Polymer({
         <div class="horizontal layout flex">
           <paper-dialog-scrollable id="blobEditor">
             <div class="suggester">
-              <nuxeo-path-suggestion id="pathSuggesterCustomize" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
+              <nuxeo-path-suggestion
+                id="pathSuggesterCustomize"
+                label="[[i18n('documentImportForm.location')]]"
+                value="{{targetPath}}"
+                parent="{{suggesterParent}}"
+                children="{{suggesterChildren}}"
+                disabled
+                always-float-label
+              ></nuxeo-path-suggestion>
               <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
             </div>
             <iron-form id="form">
               <form class="form vertical layout flex">
                 <div class="horizontal layout center">
                   <div class="flex">
-                    <nuxeo-select id="docTypeDropdown" selected="{{selectedDocType}}" attr-for-selected="key" label="[[i18n('documentImportForm.type.label')]]" placeholder="[[i18n('documentImportForm.type.placeholder')]]" error-message="[[i18n('documentImportForm.type.error')]]" required>
+                    <nuxeo-select
+                      id="docTypeDropdown"
+                      selected="{{selectedDocType}}"
+                      attr-for-selected="key"
+                      label="[[i18n('documentImportForm.type.label')]]"
+                      placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                      error-message="[[i18n('documentImportForm.type.error')]]"
+                      required
+                    >
                       <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
                         <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
                       </template>
@@ -446,7 +493,11 @@ Polymer({
                 </div>
                 <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
                 <template is="dom-if" if="[[document]]" restamp>
-                  <nuxeo-document-layout id="document-import" layout="import" document="[[document]]"></nuxeo-document-layout>
+                  <nuxeo-document-layout
+                    id="document-import"
+                    layout="import"
+                    document="[[document]]"
+                  ></nuxeo-document-layout>
                 </template>
               </form>
             </iron-form>
@@ -454,7 +505,11 @@ Polymer({
           <paper-dialog-scrollable id="sidePanel">
             <div id="blobList" class="flex">
               <template is="dom-repeat" items="[[localFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button
+                  noink
+                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]"
+                  on-tap="_tapLocalDoc"
+                >
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
@@ -466,12 +521,20 @@ Polymer({
                         <paper-progress indeterminate></paper-progress>
                       </template>
                     </div>
-                    <iron-icon icon="icons:check-circle" class$="blobCheck [[_styleFileCheck(file.*)]]" on-tap="_checkTappedLocal"></iron-icon>
+                    <iron-icon
+                      icon="icons:check-circle"
+                      class$="blobCheck [[_styleFileCheck(file.*)]]"
+                      on-tap="_checkTappedLocal"
+                    ></iron-icon>
                   </div>
                 </paper-button>
               </template>
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button
+                  noink
+                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]"
+                  on-tap="_tapLocalDoc"
+                >
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
@@ -480,52 +543,78 @@ Polymer({
                         [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
                     </div>
-                    <iron-icon icon="icons:check-circle" class$="blobCheck [[_styleFileCheck(file.*)]]" on-tap="_checkTappedRemote"></iron-icon>
+                    <iron-icon
+                      icon="icons:check-circle"
+                      class$="blobCheck [[_styleFileCheck(file.*)]]"
+                      on-tap="_checkTappedRemote"
+                    ></iron-icon>
                   </div>
                 </paper-button>
               </template>
-              <span class="horizontal layout error" hidden$="[[!_importWithPropertiesError]]">[[_importWithPropertiesError]]</span>
+              <span class="horizontal layout error" hidden$="[[!_importWithPropertiesError]]"
+                >[[_importWithPropertiesError]]</span
+              >
             </div>
           </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]"
+              >[[i18n('command.cancel')]]</paper-button
+            >
           </div>
 
-          <paper-button noink on-tap="_previousFile" hidden$="[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]">
-                        ❮&nbsp;[[i18n('documentImportForm.previousDocument')]]
-                      </paper-button>
-          <paper-button noink class="primary" on-tap="_nextFile" hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
-                        [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
-                      </paper-button>
+          <paper-button
+            noink
+            on-tap="_previousFile"
+            hidden$="[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]"
+          >
+            ❮&nbsp;[[i18n('documentImportForm.previousDocument')]]
+          </paper-button>
+          <paper-button
+            noink
+            class="primary"
+            on-tap="_nextFile"
+            hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]"
+          >
+            [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
+          </paper-button>
 
-          <paper-button noink class="primary" on-tap="_applyToAll" hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
-                        [[i18n('documentImportForm.applyToAll')]]
-                      </paper-button>
+          <paper-button
+            noink
+            class="primary"
+            on-tap="_applyToAll"
+            hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]"
+          >
+            [[i18n('documentImportForm.applyToAll')]]
+          </paper-button>
 
-          <paper-button noink class="primary" on-tap="_importWithProperties" disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
-                        <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                          [[i18n('command.create')]]
-                        </template>
-                        <template is="dom-if" if="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
-                          <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
-                          <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
-                          <paper-spinner-lite active></paper-spinner-lite>
-                        </template>
-                      </paper-button>
+          <paper-button
+            noink
+            class="primary"
+            on-tap="_importWithProperties"
+            disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
+          >
+            <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+              [[i18n('command.create')]]
+            </template>
+            <template is="dom-if" if="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+              <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+              <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
+              <paper-spinner-lite active></paper-spinner-lite>
+            </template>
+          </paper-button>
         </div>
       </div>
     </iron-pages>
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
-`,
+  `,
 
   is: 'nuxeo-document-import',
   behaviors: [IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
 
   properties: {
-
     batchAppend: {
       value: true,
     },
@@ -610,20 +699,15 @@ Polymer({
     },
 
     _importWithPropertiesError: String,
-
   },
 
   listeners: {
-    'batchFinished': '_batchReady',
+    batchFinished: '_batchReady',
     'nx-blob-picked': '_blobPicked',
     'nx-document-creation-parent-validated': '_parentValidated',
   },
 
-  observers: [
-    '_observeFiles(files.*)',
-    '_observeRemoteFiles(remoteFiles.splices)',
-    '_visibleOnStage(visible,stage)',
-  ],
+  observers: ['_observeFiles(files.*)', '_observeRemoteFiles(remoteFiles.splices)', '_visibleOnStage(visible,stage)'],
 
   ready() {
     this.connection = this.$.nx;
@@ -636,8 +720,10 @@ Polymer({
     if (files) {
       this.uploadFiles(files);
     }
-    this.set('_hasVisibleContributions',
-              this.hasContributions && !!this.$$('.importActions > *:not([hidden]):not(nuxeo-slot)'));
+    this.set(
+      '_hasVisibleContributions',
+      this.hasContributions && !!this.$$('.importActions > *:not([hidden]):not(nuxeo-slot)'),
+    );
   },
 
   _observeFiles(changeRecord) {
@@ -675,8 +761,7 @@ Polymer({
   },
 
   _canImport() {
-    return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles)
-      && this.canCreate && !this._creating;
+    return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate && !this._creating;
   },
 
   _isUploadingOrImporting() {
@@ -725,8 +810,7 @@ Polymer({
     if (this.localFiles && this.remoteFiles) {
       return this.localFiles.concat(this.remoteFiles);
     }
-      return this.localFiles ? this.localFiles : this.remoteFiles;
-
+    return this.localFiles ? this.localFiles : this.remoteFiles;
   },
 
   _getTotalFileCount() {
@@ -762,7 +846,7 @@ Polymer({
   },
 
   _setFilePropEx(arrName, index, prop, value) {
-    this.set([arrName, index,prop].join('.'), value);
+    this.set([arrName, index, prop].join('.'), value);
   },
 
   _getCurrentFileTitle() {
@@ -778,7 +862,7 @@ Polymer({
   _copyFileData(originIdx, destIdx) {
     const originFile = this._getFile(originIdx);
     const destFile = this._getFile(destIdx);
-    const {docData} = originFile;
+    const { docData } = originFile;
     let copiedDocData = {};
 
     if (docData && Object.keys(docData).length > 0) {
@@ -802,8 +886,7 @@ Polymer({
         document: JSON.parse(JSON.stringify(this.document)),
         type: this.selectedDocType,
       });
-      this.set([propName, pos, 'sanitizedName'].join('.'),
-                this._sanitizeName(this.document.properties['dc:title']));
+      this.set([propName, pos, 'sanitizedName'].join('.'), this._sanitizeName(this.document.properties['dc:title']));
       this.set([propName, pos, 'title'].join('.'), this.document.properties['dc:title']);
     }
   },
@@ -841,12 +924,12 @@ Polymer({
 
   _hasPreviousFile() {
     const length = this._getTotalFileCount();
-    return length > 1 && this.docIdx > 0  && this.canCreate && !this._creating;
+    return length > 1 && this.docIdx > 0 && this.canCreate && !this._creating;
   },
 
   _selectDoc(index) {
     if (!this._isValidFileIndex(index)) {
-      throw new Error(`invalid file index: ${  index}`);
+      throw new Error(`invalid file index: ${index}`);
     } else if (this.docIdx !== index && (this.docIdx < 0 || this._validate())) {
       if (this.docIdx > -1) {
         this._storeFile(this.docIdx);
@@ -879,14 +962,13 @@ Polymer({
     if (result || !layout) {
       return result;
     }
-      const innerLayout = layout.$.layout;
-      const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
-      const invalidField = nodes.find((node) => node.invalid);
-      if (invalidField) {
-        invalidField.scrollIntoView();
-        invalidField.focus();
-      }
-
+    const innerLayout = layout.$.layout;
+    const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
+    const invalidField = nodes.find((node) => node.invalid);
+    if (invalidField) {
+      invalidField.scrollIntoView();
+      invalidField.focus();
+    }
   },
 
   _tapLocalDoc(e) {
@@ -906,7 +988,7 @@ Polymer({
   },
 
   _selectedRemoteDocStyle(index) {
-    return (index + this.localFiles.length) === this.docIdx ? 'selected' : '';
+    return index + this.localFiles.length === this.docIdx ? 'selected' : '';
   },
 
   _cancel() {
@@ -954,18 +1036,15 @@ Polymer({
     const doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
     const doRemote = this.remoteFiles && this.remoteFiles.length > 0;
     if (doLocal && doRemote) {
-      this._smartImportLocalFiles(params)
-          .then((response1) => {
-            this._smartImportRemoteFiles(params).then((response2) => {
-              this._handleSuccess(this._mergeResponses(response1, response2));
-            }, this._handleError.bind(this));
-          }, this._handleError.bind(this));
+      this._smartImportLocalFiles(params).then((response1) => {
+        this._smartImportRemoteFiles(params).then((response2) => {
+          this._handleSuccess(this._mergeResponses(response1, response2));
+        }, this._handleError.bind(this));
+      }, this._handleError.bind(this));
     } else if (doLocal) {
-      this._smartImportLocalFiles(params)
-          .then(this._handleSuccess.bind(this), this._handleError.bind(this));
+      this._smartImportLocalFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
     } else {
-      this._smartImportRemoteFiles(params)
-          .then(this._handleSuccess.bind(this), this._handleError.bind(this));
+      this._smartImportRemoteFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
     }
   },
 
@@ -998,11 +1077,11 @@ Polymer({
   _handleError(error) {
     this.set('_creating', false);
     this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
-    this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${  error.message}`});
+    this.fire('notify', { message: `${this.i18n('label.error').toUpperCase()}: ${error.message}` });
   },
 
   _mergeResponses(...args) {
-    const response = {'entity-type': 'Documents', 'entries': []};
+    const response = { 'entity-type': 'Documents', entries: [] };
     for (let i = 0; i < args.length; i++) {
       const current = args[i];
       if (current && current.entries) {
@@ -1015,11 +1094,11 @@ Polymer({
   },
 
   _smartImportLocalFiles(params) {
-    return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true', 'X-Batch-No-Drop': 'true'});
+    return this.batchExecute('FileManager.Import', params, { nx_es_sync: 'true', 'X-Batch-No-Drop': 'true' });
   },
 
   _smartImportRemoteFiles(params) {
-    this.$.fileManagerImport.input = `blobs:${  this.remoteFiles.map((file) => file.key).join()}`;
+    this.$.fileManagerImport.input = `blobs:${this.remoteFiles.map((file) => file.key).join()}`;
     this.$.fileManagerImport.params = params;
     this.$.fileManagerImport.params.noMimeTypeCheck = true;
     return this.$.fileManagerImport.execute();
@@ -1040,14 +1119,18 @@ Polymer({
         index = i - self.localFiles.length;
       }
       promises.push(
-        (function(indexesToRemove, idx){
-          return ((arr[idx].docData && arr[idx].checked) ?
-                    self._processFileWithMetadata(arr[idx]) :
-                    Promise.resolve({'entity-type': 'Documents', 'entries': []})).then((result) => {
-                      indexesToRemove.push(idx);
-                      return result;
-                    }).catch((error) => error)
-        })(i >= self.localFiles.length ? remoteIndexes : localIndexes, index));
+        (function(indexesToRemove, idx) {
+          return (arr[idx].docData && arr[idx].checked
+            ? self._processFileWithMetadata(arr[idx])
+            : Promise.resolve({ 'entity-type': 'Documents', entries: [] })
+          )
+            .then((result) => {
+              indexesToRemove.push(idx);
+              return result;
+            })
+            .catch((error) => error);
+        })(i >= self.localFiles.length ? remoteIndexes : localIndexes, index),
+      );
     }
     Promise.all(promises).then((results) => {
       const errorFree = results.filter((result) => !(result instanceof Error));
@@ -1055,15 +1138,20 @@ Polymer({
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
-        localIndexes.sort().reverse().forEach((index) => {
-          this.splice('localFiles', index, 1);
-        });
-        remoteIndexes.sort().reverse().forEach((index) => {
-          this.splice('remoteFiles', index, 1);
-        });
+        localIndexes
+          .sort()
+          .reverse()
+          .forEach((index) => {
+            this.splice('localFiles', index, 1);
+          });
+        remoteIndexes
+          .sort()
+          .reverse()
+          .forEach((index) => {
+            this.splice('remoteFiles', index, 1);
+          });
         this._selectDoc(0);
       }
-
     });
   },
 
@@ -1071,17 +1159,18 @@ Polymer({
     this.document = file.docData.document;
     this.targetPath = file.docData.parent;
     this.document.name = file.sanitizedName || file.name;
-    const blobProperty = this.documentBlobProperties[file.docData.type.id] ||
-                       this.documentBlobProperties.default;
+    const blobProperty = this.documentBlobProperties[file.docData.type.id] || this.documentBlobProperties.default;
     // XXX if fileData.type == Note, then the file's contents should be passed instead
-    this.document.properties[blobProperty] = file.providerId ? {
-      'providerId': file.providerId,
-      'user': file.user,
-      'fileId': file.fileId,
-    } : {
-      'upload-batch': this.batchId,
-      'upload-fileId': String(file.index),
-    };
+    this.document.properties[blobProperty] = file.providerId
+      ? {
+          providerId: file.providerId,
+          user: file.user,
+          fileId: file.fileId,
+        }
+      : {
+          'upload-batch': this.batchId,
+          'upload-fileId': String(file.index),
+        };
     return this.$.docRequest.post();
   },
 
@@ -1089,7 +1178,7 @@ Polymer({
     if (e.model.file.providerId) {
       this.splice('remoteFiles', e.model.index, 1);
     } else {
-      this.$.blobRemover.path = `upload/${  this.batchId  }/${  e.model.file.index}`;
+      this.$.blobRemover.path = `upload/${this.batchId}/${e.model.file.index}`;
       this.$.blobRemover.remove().then(() => {
         this.splice('localFiles', e.model.index, 1);
         this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
@@ -1120,7 +1209,7 @@ Polymer({
   },
 
   _styleFileCheck(e) {
-    if (e.base && ('checked' in e.base)) {
+    if (e.base && 'checked' in e.base) {
       return e.base.checked ? 'checked' : 'unchecked';
     }
     return 'hidden';
@@ -1137,8 +1226,7 @@ Polymer({
   },
 
   _canApplyToAll() {
-    return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 &&
-      this.canCreate && !this._creating;
+    return this.customizing && this.docIdx === 0 && this._getTotalFileCount() > 1 && this.canCreate && !this._creating;
   },
 
   _applyToAll() {
@@ -1178,7 +1266,6 @@ Polymer({
    * Retrieves and creates the layout for the current document type
    */
   _updateDocument() {
-
     if (!this._isValidType(this.selectedDocType) || !this.parent) {
       this.document = null;
       // prevent error message from being displayed the first time

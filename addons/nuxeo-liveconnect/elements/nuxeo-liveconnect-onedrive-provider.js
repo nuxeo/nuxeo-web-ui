@@ -31,7 +31,7 @@ Polymer({
       }
     </style>
     <nuxeo-resource id="oauth2"></nuxeo-resource>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-onedrive-provider',
   behaviors: [LiveConnectBehavior],
@@ -50,11 +50,10 @@ Polymer({
           this._handleAuthResult(response.token);
         });
       }
-        this.openPopup(this.authorizationURL, {
-          onMessageReceive: this._parseMessage.bind(this),
-          onClose: this._onOAuthPopupClose.bind(this),
-        });
-
+      this.openPopup(this.authorizationURL, {
+        onMessageReceive: this._parseMessage.bind(this),
+        onClose: this._onOAuthPopupClose.bind(this),
+      });
     });
   },
 

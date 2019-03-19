@@ -22,7 +22,6 @@ limitations under the License.
 @element nuxeo-task6d8-layout
 -->
 <dom-module id="nuxeo-task6d8-layout">
-
   <template>
     <div role="widget">
       <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
@@ -34,8 +33,12 @@ limitations under the License.
       <div>[[task.variables.initiatorComment]]</div>
     </div>
 
-    <paper-textarea role="widget" label="[[i18n('wf.serialDocumentReview.comment')]]"
-                    value="{{task.variables.comment}}" always-float-label>
+    <paper-textarea
+      role="widget"
+      label="[[i18n('wf.serialDocumentReview.comment')]]"
+      value="{{task.variables.comment}}"
+      always-float-label
+    >
     </paper-textarea>
   </template>
 
@@ -56,5 +59,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

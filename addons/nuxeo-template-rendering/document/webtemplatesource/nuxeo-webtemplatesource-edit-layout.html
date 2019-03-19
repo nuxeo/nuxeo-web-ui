@@ -20,47 +20,75 @@ limitations under the License.
 @element nuxeo-webtemplatesource-edit-layout
 -->
 <dom-module id="nuxeo-webtemplatesource-edit-layout">
-
   <template>
-    <paper-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title::change}}"
-                 always-float-label required></paper-input>
+    <paper-input
+      role="widget"
+      name="title"
+      label="[[i18n('title')]]"
+      value="{{document.properties.dc:title::change}}"
+      always-float-label
+      required
+    ></paper-input>
 
-    <paper-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label
-                    value="{{document.properties.dc:description::change}}"></paper-textarea>
+    <paper-textarea
+      role="widget"
+      name="description"
+      label="[[i18n('label.description')]]"
+      always-float-label
+      value="{{document.properties.dc:description::change}}"
+    ></paper-textarea>
 
-    <nuxeo-select role="widget"
-                  name="format"
-                  label="[[i18n('noteEditLayout.format')]]"
-                  options='[[formats]]'
-                  selected="{{document.properties.note:mime_type}}">
+    <nuxeo-select
+      role="widget"
+      name="format"
+      label="[[i18n('noteEditLayout.format')]]"
+      options="[[formats]]"
+      selected="{{document.properties.note:mime_type}}"
+    >
     </nuxeo-select>
 
-    <nuxeo-directory-suggestion role="widget" name="nature" label="[[i18n('label.dublincore.nature')]]"
-                                directory-name="nature"
-                                value="{{document.properties.dc:nature}}"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="nature"
+      label="[[i18n('label.dublincore.nature')]]"
+      directory-name="nature"
+      value="{{document.properties.dc:nature}}"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" name="subjects" label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                value="{{document.properties.dc:subjects}}"
-                                multiple="true"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="subjects"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      value="{{document.properties.dc:subjects}}"
+      multiple="true"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" name="coverage" label="[[i18n('label.dublincore.coverage')]]"
-                                directory-name="l10ncoverage"
-                                value="{{document.properties.dc:coverage}}"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="coverage"
+      label="[[i18n('label.dublincore.coverage')]]"
+      directory-name="l10ncoverage"
+      value="{{document.properties.dc:coverage}}"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-date-picker role="widget" name="expireDate" label="[[i18n('label.dublincore.expire')]]"
-                       value="{{document.properties.dc:expired}}">
+    <nuxeo-date-picker
+      role="widget"
+      name="expireDate"
+      label="[[i18n('label.dublincore.expire')]]"
+      value="{{document.properties.dc:expired}}"
+    >
     </nuxeo-date-picker>
   </template>
 
@@ -70,8 +98,8 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         /**
-        * @doctype WebTemplateSource
-        */
+         * @doctype WebTemplateSource
+         */
         document: Object,
       },
     });

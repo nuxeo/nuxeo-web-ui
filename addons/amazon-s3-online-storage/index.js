@@ -20,7 +20,6 @@ import AWS from 'aws-sdk';
 let _resource;
 
 class S3Provider {
-
   constructor(connection, accept, batchAppend) {
     this.connection = connection;
     this.accept = accept;
@@ -46,32 +45,34 @@ class S3Provider {
         ContentType: file.type,
         Body: file,
       });
-      file.managedUpload.on('httpUploadProgress', (evt) => {
-        if (typeof callback === 'function') {
-          callback({ type: 'uploadProgress', fileIdx: file.index, progress: (evt.loaded / evt.total) * 100 });
-        }
-      }).send((error, data) => {
-        if (error === null) {
-          file.managedUpload = null;
-          const resource = this._resource();
-          resource.path = ['upload', this.batchId, file.index, 'complete'].join('/');
-          resource.data = {
-            name: file.name,
-            fileSize: file.size,
-            key: data.Key,
-            bucket: data.Bucket,
-            etag: data.ETag,
-          };
-          resource.post().then(() => {
-            if (typeof callback === 'function') {
-              callback({ type: 'uploadCompleted', fileIdx: file.index })
-            }
-            resolve();
-          });
-        } else {
-          reject(error)
-        }
-      });
+      file.managedUpload
+        .on('httpUploadProgress', (evt) => {
+          if (typeof callback === 'function') {
+            callback({ type: 'uploadProgress', fileIdx: file.index, progress: (evt.loaded / evt.total) * 100 });
+          }
+        })
+        .send((error, data) => {
+          if (error === null) {
+            file.managedUpload = null;
+            const resource = this._resource();
+            resource.path = ['upload', this.batchId, file.index, 'complete'].join('/');
+            resource.data = {
+              name: file.name,
+              fileSize: file.size,
+              key: data.Key,
+              bucket: data.Bucket,
+              etag: data.ETag,
+            };
+            resource.post().then(() => {
+              if (typeof callback === 'function') {
+                callback({ type: 'uploadCompleted', fileIdx: file.index });
+              }
+              resolve();
+            });
+          } else {
+            reject(error);
+          }
+        });
     });
   }
 
@@ -114,24 +115,26 @@ class S3Provider {
   }
 
   upload(files, callback) {
-    this._ensureBatch().then(() => {
-      if ((new Date()).getTime() >= this.extraInfo.expiration) {
-        this._refreshBatchInfo();
-      }
+    this._ensureBatch()
+      .then(() => {
+        if (new Date().getTime() >= this.extraInfo.expiration) {
+          this._refreshBatchInfo();
+        }
 
-      const promises = [];
-      for (let i = 0; i < files.length; ++i) {
-        const file = files[i];
-        file.index = this.files.length;
-        this.files.push(file);
-        promises.push(this._upload(file, callback));
-      }
-      return Promise.all(promises).then(() => {
-        callback({ type: 'batchFinished', batchId: this.batchId });
+        const promises = [];
+        for (let i = 0; i < files.length; ++i) {
+          const file = files[i];
+          file.index = this.files.length;
+          this.files.push(file);
+          promises.push(this._upload(file, callback));
+        }
+        return Promise.all(promises).then(() => {
+          callback({ type: 'batchFinished', batchId: this.batchId });
+        });
+      })
+      .catch((error) => {
+        callback({ type: 'uploadInterrupted', error });
       });
-    }).catch((error) => {
-      callback({ type: 'uploadInterrupted', error });
-    });
   }
 
   hasProgress() {
@@ -155,8 +158,7 @@ class S3Provider {
   batchExecute(operationId, params, headers) {
     return this.connection.operation(operationId).then((operation) => {
       const options = {
-        url: [operation._nuxeo._restURL, 'upload', this.batchId, 'execute', operationId].join('/')
-            .replace(/\/+/g, '/'),
+        url: [operation._nuxeo._restURL, 'upload', this.batchId, 'execute', operationId].join('/').replace(/\/+/g, '/'),
       };
       if (headers) {
         options.headers = headers;

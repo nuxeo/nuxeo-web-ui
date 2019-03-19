@@ -53,8 +53,8 @@ Polymer({
       }
     </style>
 
-    <img id="img" src="[[_thumbnail(document)]]" alt="[[_title(document)]]" on-error="_error">
-`,
+    <img id="img" src="[[_thumbnail(document)]]" alt="[[_title(document)]]" on-error="_error" />
+  `,
 
   is: 'nuxeo-document-thumbnail',
   behaviors: [I18nBehavior],
@@ -64,8 +64,13 @@ Polymer({
   },
 
   _thumbnail(doc) {
-    return doc && doc.uid && doc.contextParameters && doc.contextParameters.thumbnail &&
-           doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
+    return doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+      ? doc.contextParameters.thumbnail.url
+      : '';
   },
 
   _error() {

@@ -41,13 +41,13 @@ Polymer({
         --nuxeo-tree-theme: {
           padding: 1em;
           color: var(--nuxeo-drawer-text);
-        };
+        }
         --nuxeo-tree-node-theme: {
           min-height: 24px;
-        };
+        }
         --nuxeo-tree-children-theme: {
           padding-left: 1em;
-        };
+        }
         --nuxeo-tree-node-more-theme: {
           line-height: 1.3em;
           display: inline-block;
@@ -79,12 +79,15 @@ Polymer({
         @apply --nuxeo-link-hover;
       }
 
-      #root a, a:active, a:visited, a:focus {
+      #root a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-drawer-text);
       }
 
       iron-icon {
-        opacity: .3;
+        opacity: 0.3;
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
@@ -108,7 +111,7 @@ Polymer({
 
       .parents a {
         @apply --layout-horizontal;
-        padding: .35em;
+        padding: 0.35em;
         color: var(--nuxeo-drawer-text);
         border-bottom: 1px solid var(--nuxeo-border);
       }
@@ -122,7 +125,7 @@ Polymer({
       }
 
       .parent {
-        padding: .12em 0 0;
+        padding: 0.12em 0 0;
       }
 
       paper-spinner {
@@ -132,17 +135,27 @@ Polymer({
       }
 
       .noPermission {
-        opacity: .5;
+        opacity: 0.5;
         font-weight: 300;
-        padding: 1.5em .7em;
+        padding: 1.5em 0.7em;
         text-align: center;
         font-size: 1.1rem;
       }
     </style>
 
-    <nuxeo-document id="doc" doc-path="[[docPath]]" response="{{document}}" enrichers="hasFolderishChild"></nuxeo-document>
+    <nuxeo-document
+      id="doc"
+      doc-path="[[docPath]]"
+      response="{{document}}"
+      enrichers="hasFolderishChild"
+    ></nuxeo-document>
 
-    <nuxeo-page-provider id="children" provider="tree_children" enrichers="hasFolderishChild" schemas="dublincore,common">
+    <nuxeo-page-provider
+      id="children"
+      provider="tree_children"
+      enrichers="hasFolderishChild"
+      schemas="dublincore,common"
+    >
     </nuxeo-page-provider>
 
     <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
@@ -173,7 +186,7 @@ Polymer({
       </nuxeo-tree>
       <div class="noPermission" hidden$="[[!_noPermission]]">[[i18n('browse.tree.noDocument')]]</div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-tree',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
@@ -219,9 +232,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_fetchDocument(docPath, visible)',
-  ],
+  observers: ['_fetchDocument(docPath, visible)'],
 
   ready() {
     window.addEventListener('nuxeo-documents-deleted', (e) => {
@@ -240,7 +251,7 @@ Polymer({
           return {
             items: data.entries,
             isNextAvailable: this.$.children.isNextPageAvailable,
-          }
+          };
         });
       }.bind(this),
 
@@ -271,7 +282,6 @@ Polymer({
   _currentDocumentChanged() {
     const doc = this.currentDocument;
     if (doc && doc.path && doc.path.startsWith(this.rootDocPath)) {
-
       if (this.docPath === doc.path && this.document && this.document.title !== doc.title) {
         // If document is the same as before but its name changed, get the document again
         this.$.doc.get();
@@ -286,7 +296,7 @@ Polymer({
           return;
         }
 
-        const {entries} = doc.contextParameters.breadcrumb;
+        const { entries } = doc.contextParameters.breadcrumb;
         const lastEntry = entries[entries.length - 1];
         if (this.hasFacet(lastEntry, 'Folderish') || entries.length === 1) {
           this.docPath = lastEntry.path;
@@ -300,7 +310,6 @@ Polymer({
             this.push('parents', entry);
           }
         }
-
       }
     }
   },
@@ -316,7 +325,7 @@ Polymer({
   },
 
   _expandIcon(opened) {
-    return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
+    return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
   },
 
   _icon(opened) {
@@ -324,7 +333,7 @@ Polymer({
   },
 
   _title(item) {
-    return (item.type === 'Root') ? this.i18n('browse.root') : item.title;
+    return item.type === 'Root' ? this.i18n('browse.root') : item.title;
   },
 
   removeDocuments(documents) {

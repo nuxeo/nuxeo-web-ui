@@ -33,7 +33,7 @@ const AISuggestionManager = (() => {
 
   function _getSuggestionWidget(element) {
     if (!_map.has(element)) {
-      const suggestionWidget = document.createElement('nuxeo-ai-suggestions');;
+      const suggestionWidget = document.createElement('nuxeo-ai-suggestions');
       suggestionWidget.style.marginBottom = '8px';
       element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
       _map.set(element, suggestionWidget);
@@ -78,7 +78,7 @@ const AISuggestionManager = (() => {
     if (!op) {
       op = document.createElement('nuxeo-operation');
       op.op = 'AI.Suggestion';
-      op.headers = {'X-Batch-No-Drop': 'true'};
+      op.headers = { 'X-Batch-No-Drop': 'true' };
       document.querySelector('nuxeo-app').appendChild(op);
     }
     op.input = doc;
@@ -96,38 +96,35 @@ const AISuggestionManager = (() => {
       if (!layout) {
         return;
       }
-      _updateDebouncer = Debouncer.debounce(
-          _updateDebouncer, timeOut.after(500),
-          () => {
-            const model = _getBoundElements(layout, 'document.properties');
-            _getSuggestions(layout.document).then((response) => {
-              /*
-               * Inefficient approach that should be changed as soon as the response from server includes more information (e.g. all output fields)
-               * to only clear the elements in need.
-               * Ticket created to analyse and tackle this need: NXP-26314
-               */
-              _clearSuggestions(model);
-              response.forEach((service) => {
-                service.suggestions.forEach((suggestion) => {
-                  const element = model[`document.properties.${suggestion.property}`];
-                  const suggestionWidget = _getSuggestionWidget(element);
-                  if (!suggestionWidget.property) {
-                    // convert path to xpath
-                    suggestionWidget.property = suggestion.property;
-                  }
-                  suggestionWidget.suggestions = suggestion.values;
-                  suggestionWidget.document = layout.document;
-                  // set up binding
-                  suggestionWidget.addEventListener('document-changed', (evt) => {
-                    if ('path' in evt.detail && 'value' in evt.detail) {
-                      layout.notifyPath(evt.detail.path);
-                    }
-                  });
-                });
+      _updateDebouncer = Debouncer.debounce(_updateDebouncer, timeOut.after(500), () => {
+        const model = _getBoundElements(layout, 'document.properties');
+        _getSuggestions(layout.document).then((response) => {
+          /*
+           * Inefficient approach that should be changed as soon as the response from server includes more information
+           * (e.g. all output fields) to only clear the elements in need.
+           * Ticket created to analyse and tackle this need: NXP-26314
+           */
+          _clearSuggestions(model);
+          response.forEach((service) => {
+            service.suggestions.forEach((suggestion) => {
+              const element = model[`document.properties.${suggestion.property}`];
+              const suggestionWidget = _getSuggestionWidget(element);
+              if (!suggestionWidget.property) {
+                // convert path to xpath
+                suggestionWidget.property = suggestion.property;
+              }
+              suggestionWidget.suggestions = suggestion.values;
+              suggestionWidget.document = layout.document;
+              // set up binding
+              suggestionWidget.addEventListener('document-changed', (evt) => {
+                if ('path' in evt.detail && 'value' in evt.detail) {
+                  layout.notifyPath(evt.detail.path);
+                }
               });
             });
-          },
-      );
+          });
+        });
+      });
     },
   };
 })();

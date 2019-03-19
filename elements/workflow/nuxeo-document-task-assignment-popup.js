@@ -48,19 +48,34 @@ Polymer({
       <paper-dialog-scrollable>
         <iron-form id="assignmentForm">
           <form>
-            <nuxeo-user-suggestion name="userGroup" label="[[i18n('tasks.assignment.userOrGroup')]]" value="{{actors}}" multiple="true" required="true" placeholder="[[i18n('tasks.assignment.placeholder')]]">
+            <nuxeo-user-suggestion
+              name="userGroup"
+              label="[[i18n('tasks.assignment.userOrGroup')]]"
+              value="{{actors}}"
+              multiple="true"
+              required="true"
+              placeholder="[[i18n('tasks.assignment.placeholder')]]"
+            >
             </nuxeo-user-suggestion>
-            <nuxeo-textarea id="commentText" label="[[i18n('tasks.assignment.comment')]]" placeholder="[[i18n('tasks.assignment.placeholder')]]" value="[[comment]]" max-rows="4">
+            <nuxeo-textarea
+              id="commentText"
+              label="[[i18n('tasks.assignment.comment')]]"
+              placeholder="[[i18n('tasks.assignment.placeholder')]]"
+              value="[[comment]]"
+              max-rows="4"
+            >
             </nuxeo-textarea>
           </form>
         </iron-form>
       </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button id="cancel" noink dialog-dismiss>[[i18n('command.close')]]</paper-button>
-        <paper-button id="confirm" noink class="primary" on-click="_processAssignment">[[_getActionLabel(action, i18n)]]</paper-button>
+        <paper-button id="confirm" noink class="primary" on-click="_processAssignment"
+          >[[_getActionLabel(action, i18n)]]</paper-button
+        >
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-document-task-assignment-popup',
   behaviors: [I18nBehavior],
@@ -81,7 +96,7 @@ Polymer({
   },
 
   _getActionLabel(action, i18n) {
-    return i18n(`tasks.${  action}`);
+    return i18n(`tasks.${action}`);
   },
 
   _processAssignment() {

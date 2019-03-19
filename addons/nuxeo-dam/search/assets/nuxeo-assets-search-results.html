@@ -22,7 +22,6 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-assets-search-results">
   <template>
-
     <style include="nuxeo-styles">
       nuxeo-data-table {
         display: block;
@@ -36,21 +35,28 @@ limitations under the License.
     </style>
 
     <nuxeo-results name="assets" nx-provider="[[nxProvider]]">
-
       <nuxeo-justified-grid name="grid" icon="icons:apps" class="results" selection-enabled>
         <template>
           <nuxeo-justified-grid-item></nuxeo-justified-grid-item>
         </template>
       </nuxeo-justified-grid>
 
-      <nuxeo-data-table name="table" icon="icons:list" class="results"
-                        settings-enabled
-                        empty-label="[[i18n('searchResults.noResults')]]"
-                        selection-enabled
-                        display-quick-filters
-                        on-row-clicked="_navigate">
-
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="100">
+      <nuxeo-data-table
+        name="table"
+        icon="icons:list"
+        class="results"
+        settings-enabled
+        empty-label="[[i18n('searchResults.noResults')]]"
+        selection-enabled
+        display-quick-filters
+        on-row-clicked="_navigate"
+      >
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.title')]]"
+          field="dc:title"
+          sort-by="dc:title"
+          flex="100"
+        >
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
             <a class="ellipsis" href$="[[urlFor('browse', item.path)]]" on-click="_navigate">[[item.title]]</a>
@@ -63,13 +69,23 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.modified')]]" field="dc:modified" sort-by="dc:modified" flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.modified')]]"
+          field="dc:modified"
+          sort-by="dc:modified"
+          flex="50"
+        >
           <template>
             <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.lastContributor')]]" field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('label.dublincore.lastContributor')]]"
+          field="dc:lastContributor"
+          sort-by="dc:lastContributor"
+          flex="50"
+        >
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
           </template>
@@ -101,13 +117,17 @@ limitations under the License.
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.nature')]]" field="dc:nature" hidden>
           <template>
-            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]">[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag>
+            <nuxeo-tag hidden$="[[!item.properties.dc:nature]]"
+              >[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag
+            >
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.coverage')]]" field="dc:coverage" hidden>
           <template>
-            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]">[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag>
+            <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]"
+              >[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag
+            >
           </template>
         </nuxeo-data-table-column>
 
@@ -118,7 +138,6 @@ limitations under the License.
             </template>
           </template>
         </nuxeo-data-table-column>
-
       </nuxeo-data-table>
     </nuxeo-results>
   </template>
@@ -132,9 +151,8 @@ limitations under the License.
       },
 
       _navigate(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item});
+        this.fire('navigate', { doc: (e.model || e.detail).item });
       },
     });
   </script>
-
 </dom-module>

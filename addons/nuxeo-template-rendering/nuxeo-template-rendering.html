@@ -25,9 +25,11 @@ limitations under the License.
 
 <nuxeo-slot-content name="templateRenderAction" slot="DOCUMENT_ACTIONS">
   <template>
-    <nuxeo-render-template-button document="[[document]]"
-                                  filter-op="javascript.FilterTemplatesByType"
-                                  render-op="javascript.RenderPdf"></nuxeo-render-template-button>
+    <nuxeo-render-template-button
+      document="[[document]]"
+      filter-op="javascript.FilterTemplatesByType"
+      render-op="javascript.RenderPdf"
+    ></nuxeo-render-template-button>
   </template>
 </nuxeo-slot-content>
 

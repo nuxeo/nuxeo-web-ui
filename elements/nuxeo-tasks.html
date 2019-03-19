@@ -44,7 +44,7 @@ limitations under the License.
       }
 
       .task-info {
-        margin-left: .5em;
+        margin-left: 0.5em;
       }
 
       .task-name {
@@ -54,17 +54,17 @@ limitations under the License.
       }
 
       .task-property {
-        opacity: .5;
-        margin-right: .5rem;
+        opacity: 0.5;
+        margin-right: 0.5rem;
       }
 
       iron-icon.task-name-icon {
-        --iron-icon-height: .9em;
-        --iron-icon-width: .9em;
+        --iron-icon-height: 0.9em;
+        --iron-icon-width: 0.9em;
         border-radius: 50px;
         background-color: var(--dark-primary-color);
         color: white;
-        padding: .4em;
+        padding: 0.4em;
         margin-right: 1em;
       }
 
@@ -86,10 +86,12 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-document id="currentTaskDoc"
-                    doc-id="[[_docId(current)]]"
-                    enrichers="preview, breadcrumb"
-                    response="{{currentTaskDocument}}"></nuxeo-document>
+    <nuxeo-document
+      id="currentTaskDoc"
+      doc-id="[[_docId(current)]]"
+      enrichers="preview, breadcrumb"
+      response="{{currentTaskDocument}}"
+    ></nuxeo-document>
 
     <nuxeo-page>
       <div class="header" slot="header">
@@ -152,10 +154,8 @@ limitations under the License.
             </template>
           </div>
         </template>
-
       </div>
     </nuxeo-page>
-
   </template>
 
   <script>
@@ -197,8 +197,8 @@ limitations under the License.
         }
       },
 
-      _getPath(path){
-        return path.substr(0, path.lastIndexOf("/"));
+      _getPath(path) {
+        return path.substr(0, path.lastIndexOf('/'));
       },
 
       _date(date) {
@@ -212,7 +212,7 @@ limitations under the License.
       },
 
       _docId() {
-        if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]  ) {
+        if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]) {
           return this.current.targetDocumentIds[0].uid;
         }
       },
@@ -231,7 +231,6 @@ limitations under the License.
         }
         return -1;
       },
-
     });
   </script>
 </dom-module>

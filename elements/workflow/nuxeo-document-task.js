@@ -91,20 +91,35 @@ Polymer({
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
 
     <div id="task-body">
-
       <iron-pages selected="[[_selectedTab]]" attr-for-selected="name">
         <div name="resolution">
           <nuxeo-workflow-graph id="graph" workflow-id="[[task.workflowInstanceId]]"></nuxeo-workflow-graph>
-          <nuxeo-document-task-assignment-popup id="assignmentDialog" task="[[task]]" action="[[action]]"></nuxeo-document-task-assignment-popup>
+          <nuxeo-document-task-assignment-popup
+            id="assignmentDialog"
+            task="[[task]]"
+            action="[[action]]"
+          ></nuxeo-document-task-assignment-popup>
 
           <div class="heading">
             <div class="vertical">
               <h3>[[i18n(task.name)]]</h3>
-              <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
+              <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph"
+                >[[i18n('tasks.viewGraph')]]</a
+              >
             </div>
             <div class="options">
-              <paper-button id="reassignBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="reassign" hidden$="[[!task.taskInfo.allowTaskReassignment]]">[[i18n('tasks.reassign')]]</paper-button>
-              <paper-button id="delegateBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="delegate">[[i18n('tasks.delegate')]]</paper-button>
+              <paper-button
+                id="reassignBtn"
+                noink
+                dialog-confirm
+                on-tap="_toggleAssignmentDialog"
+                data-args="reassign"
+                hidden$="[[!task.taskInfo.allowTaskReassignment]]"
+                >[[i18n('tasks.reassign')]]</paper-button
+              >
+              <paper-button id="delegateBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="delegate"
+                >[[i18n('tasks.delegate')]]</paper-button
+              >
             </div>
           </div>
           <div class="horizontal spaced">
@@ -127,20 +142,27 @@ Polymer({
             </div>
           </div>
 
-          <nuxeo-layout id="layout" href="[[_href]]" model="[[_model]]" error="[[i18n('documentView.layoutNotFound', task.nodeName)]]" on-element-changed="_elementChanged"></nuxeo-layout>
+          <nuxeo-layout
+            id="layout"
+            href="[[_href]]"
+            model="[[_model]]"
+            error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"
+            on-element-changed="_elementChanged"
+          ></nuxeo-layout>
 
           <div class="horizontal">
             <div class="options">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-                <paper-button noink dialog-confirm class="primary" name$="[[item.name]]" on-tap="_processTask">[[i18n(item.label)]]</paper-button>
+                <paper-button noink dialog-confirm class="primary" name$="[[item.name]]" on-tap="_processTask"
+                  >[[i18n(item.label)]]</paper-button
+                >
               </template>
             </div>
           </div>
-
         </div>
       </iron-pages>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-task',
   behaviors: [RoutingBehavior, FormatBehavior],
@@ -168,9 +190,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_updateTaskLayout(task)',
-  ],
+  observers: ['_updateTaskLayout(task)'],
 
   _elementChanged() {
     this._model = { document: this.task.targetDocumentIds[0], task: this.task };
@@ -183,7 +203,7 @@ Polymer({
     if (task) {
       this._href = null;
       const layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
-      this._href = this.resolveUrl(`${task.workflowModelName.toLowerCase()  }/${  layout  }.html`);
+      this._href = this.resolveUrl(`${task.workflowModelName.toLowerCase()}/${layout}.html`);
     }
   },
 
@@ -192,7 +212,7 @@ Polymer({
   },
 
   _processTask(e) {
-    const {validate} = e.model.item;
+    const { validate } = e.model.item;
     if (!validate || this.validate()) {
       this.action = e.model.item.name;
       this.taskData = {

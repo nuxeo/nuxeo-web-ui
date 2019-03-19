@@ -49,7 +49,7 @@ Polymer({
       .workflow_node {
         position: absolute;
         text-align: center;
-        font-size: .92em;
+        font-size: 0.92em;
         z-index: 100;
       }
 
@@ -115,7 +115,7 @@ Polymer({
 
       .workflow_connection_label {
         background-color: white;
-        padding: .15em .25em;
+        padding: 0.15em 0.25em;
         font: 12px sans-serif;
         color: #3780b9;
         z-index: 120;
@@ -136,7 +136,12 @@ Polymer({
       }
     </style>
 
-    <nuxeo-resource id="graphResource" path="/workflow/[[workflowId]]/graph" response="{{graph}}" headers='{"Content-Type":"application/json"}'></nuxeo-resource>
+    <nuxeo-resource
+      id="graphResource"
+      path="/workflow/[[workflowId]]/graph"
+      response="{{graph}}"
+      headers='{"Content-Type":"application/json"}'
+    ></nuxeo-resource>
 
     <nuxeo-dialog id="graphDialog" with-backdrop>
       <paper-dialog-scrollable>
@@ -148,7 +153,7 @@ Polymer({
         <paper-button noink class="primary" dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-workflow-graph',
   behaviors: [I18nBehavior, IronResizableBehavior],
@@ -169,14 +174,13 @@ Polymer({
 
     connectionColors: {
       type: Array,
-      value: ['#92e1aa', '#F7BE81', '#BDBDBD', '#5882FA', '#E1F5A9',
-        '#FA5858', '#FFFF00', '#FF0000', '#D8F781'],
+      value: ['#92e1aa', '#F7BE81', '#BDBDBD', '#5882FA', '#E1F5A9', '#FA5858', '#FFFF00', '#FF0000', '#D8F781'],
     },
 
     sourceEndpointOptions: {
       type: Object,
       value: {
-        connector: ['Flowchart', {cornerRadius: 5}],
+        connector: ['Flowchart', { cornerRadius: 5 }],
         paintStyle: {
           fill: '#92e1aa',
         },
@@ -206,9 +210,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_updateGraph(graph)',
-  ],
+  observers: ['_updateGraph(graph)'],
 
   listeners: {
     'iron-resize': '_resize',
@@ -220,12 +222,15 @@ Polymer({
   },
 
   show() {
-    this.$.graphResource.execute().then(() => {
-      this.$.graphDialog.toggle();
-    }).catch((error) => {
-      this.fire('notify', {message: this.i18n('documentPage.route.view.graph.error')});
-      throw error;
-    });
+    this.$.graphResource
+      .execute()
+      .then(() => {
+        this.$.graphDialog.toggle();
+      })
+      .catch((error) => {
+        this.fire('notify', { message: this.i18n('documentPage.route.view.graph.error') });
+        throw error;
+      });
   },
 
   _initialize() {
@@ -241,45 +246,60 @@ Polymer({
         outlineStroke: 'white',
         joinstyle: 'round',
       },
-      Endpoint: ['Dot', {
-        radius: 6,
-      }],
-      ConnectionOverlays: [['Arrow', {
-        location: 0.8,
-      }, {
-        foldback: 0.9,
-        fill: '#92e1aa',
-        width: 14,
-      }]],
+      Endpoint: [
+        'Dot',
+        {
+          radius: 6,
+        },
+      ],
+      ConnectionOverlays: [
+        [
+          'Arrow',
+          {
+            location: 0.8,
+          },
+          {
+            foldback: 0.9,
+            fill: '#92e1aa',
+            width: 14,
+          },
+        ],
+      ],
     });
     this._jsPlumbInstance.setContainer(this.$.container);
   },
 
   _transitionOverlay(transition) {
     return [
-      ['Arrow', {location: 0.8}, {foldback: 0.9, fill: '#92e1aa', width: 14}],
-      ['Label', {
-        label: `<span title="${  transition.label  }">${  transition.label  }</span>`,
-        cssClass: 'workflow_connection_label',
-        location: 0.6,
-      }],
+      ['Arrow', { location: 0.8 }, { foldback: 0.9, fill: '#92e1aa', width: 14 }],
+      [
+        'Label',
+        {
+          label: `<span title="${transition.label}">${transition.label}</span>`,
+          cssClass: 'workflow_connection_label',
+          location: 0.6,
+        },
+      ],
     ];
   },
 
   _nodeClass(node) {
     if (node.isStartNode) {
       return 'workflow_start_node';
-    } if (node.isEndNode) {
+    }
+    if (node.isEndNode) {
       return 'workflow_end_node';
-    } if (node.isMerge) {
+    }
+    if (node.isMerge) {
       return 'workflow_merge_node';
-    } if (node.isMultiTask) {
+    }
+    if (node.isMultiTask) {
       return 'workflow_multiple_task';
-    } if (node.hasSubWorkflow) {
+    }
+    if (node.hasSubWorkflow) {
       return 'workflow_subworkflow_task';
     }
-      return 'workflow_simple_task';
-
+    return 'workflow_simple_task';
   },
 
   _updateGraph(data) {
@@ -295,9 +315,9 @@ Polymer({
 
     // XXX: build these in the template
     data.nodes.forEach((node) => {
-      const element = this.create('div', {id: node.id, innerHTML: node.title});
-      element.style.left = `${node.x  }px`;
-      element.style.top = `${node.y  }px`;
+      const element = this.create('div', { id: node.id, innerHTML: node.title });
+      element.style.left = `${node.x}px`;
+      element.style.top = `${node.y}px`;
 
       element.classList.add('workflow_node');
       element.classList.add(this._nodeClass(node));
@@ -369,16 +389,15 @@ Polymer({
       }
       */
     });
-
   },
 
   _addTargetEndpoint(target) {
-    return this._jsPlumbInstance.addEndpoint(target, {anchor: 'TopCenter'}, this.targetEndpointOptions);
+    return this._jsPlumbInstance.addEndpoint(target, { anchor: 'TopCenter' }, this.targetEndpointOptions);
   },
 
   _addSourceEndpoint(source, pos) {
     const anchor = [pos, 1, 0, 1];
-    return this._jsPlumbInstance.addEndpoint(source, {anchor}, this.sourceEndpointOptions);
+    return this._jsPlumbInstance.addEndpoint(source, { anchor }, this.sourceEndpointOptions);
   },
 
   _resize() {
