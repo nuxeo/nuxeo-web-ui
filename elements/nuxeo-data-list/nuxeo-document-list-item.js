@@ -145,14 +145,6 @@ Polymer({
         width: 10rem;
       }
 
-      .actions ::content paper-icon-button ::content iron-icon {
-        @apply --nuxeo-action;
-      }
-
-      .actions ::content paper-icon-button:hover ::content iron-icon {
-        @apply --nuxeo-action-hover;
-      }
-
       .listBox:hover .actions,
       .listBox:hover .select,
       .listBox[selection-mode] .select {
