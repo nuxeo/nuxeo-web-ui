@@ -40,7 +40,7 @@ Polymer({
       </div>
       <nuxeo-tooltip for="diff" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-diff-button',
   behaviors: [I18nBehavior, FiltersBehavior],

@@ -73,7 +73,7 @@ Polymer({
         color: var(--nuxeo-text-light, #939caa);
         display: block;
         font-weight: 300;
-        padding: 1.5em .7em;
+        padding: 1.5em 0.7em;
         text-align: center;
         font-size: 1.1em;
       }
@@ -83,7 +83,9 @@ Polymer({
     <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params='{"enable": false}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">
-      <div class="emptyResult">[[i18n('driveSyncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]</div>
+      <div class="emptyResult">
+        [[i18n('driveSyncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]
+      </div>
     </template>
 
     <template is="dom-if" if="[[!_empty(roots)]]">
@@ -98,7 +100,11 @@ Polymer({
             <div class="cell flex-1">[[doc.title]]</div>
             <div class="cell flex-3">[[doc.path]]</div>
             <div class="cell actions">
-              <paper-icon-button icon="icons:clear" title="[[i18n('driveSyncRootsManagement.root.disable', 'Disable)]]" on-tap="_disable">
+              <paper-icon-button
+                icon="icons:clear"
+                title="[[i18n('driveSyncRootsManagement.root.disable', 'Disable)]]"
+                on-tap="_disable"
+              >
               </paper-icon-button>
             </div>
           </div>
@@ -106,9 +112,10 @@ Polymer({
       </div>
     </template>
 
-    <paper-toast id="toast">[[i18n('driveSyncRootsManagement.roots.disabled',
-                                   'Synchronization root disabled')]]</paper-toast>
-`,
+    <paper-toast id="toast"
+      >[[i18n('driveSyncRootsManagement.roots.disabled', 'Synchronization root disabled')]]</paper-toast
+    >
+  `,
 
   is: 'nuxeo-drive-sync-roots-management',
 
@@ -131,7 +138,8 @@ Polymer({
 
   _disable(e) {
     this.$.disable.input = e.model.doc.uid;
-    return this.$.disable.execute()
+    return this.$.disable
+      .execute()
       .then(this.refresh.bind(this))
       .then(() => {
         this.$.toast.toggle();

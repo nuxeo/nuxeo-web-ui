@@ -27,8 +27,12 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-document-form-layout document="{{document}}" layout="edit" headers="[[headers]]"></nuxeo-document-form-layout>
-`,
+    <nuxeo-document-form-layout
+      document="{{document}}"
+      layout="edit"
+      headers="[[headers]]"
+    ></nuxeo-document-form-layout>
+  `,
 
   is: 'nuxeo-document-edit',
 

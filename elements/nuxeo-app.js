@@ -81,7 +81,12 @@ import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
 window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
-  'Workspace', 'Folder', 'OrderedFolder', 'Collection', 'Domain', 'Root',
+  'Workspace',
+  'Folder',
+  'OrderedFolder',
+  'Collection',
+  'Domain',
+  'Root',
 ];
 
 // expose behaviors for compat
@@ -100,7 +105,6 @@ window.importHref = importHref;
 
 // inspired by https://github.com/treosh/uxm
 export const Performance = {
-
   /** metrics * */
 
   getFirstPaint() {
@@ -108,11 +112,9 @@ export const Performance = {
       const fp = performance.getEntriesByType('paint').find((entry) => entry.name === 'first-paint');
       return fp ? Math.round(fp.startTime) : null;
     }
-      // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
-      const fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
-      return fpt ? fpt - performance.timing.fetchStart : null;
-
-
+    // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
+    const fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
+    return fpt ? fpt - performance.timing.fetchStart : null;
   },
 
   getFirstContentfulPaint() {
@@ -146,7 +148,7 @@ export const Performance = {
     ua = (ua || this.getUserAgent()).toLowerCase();
     const find = function(str) {
       return ua.indexOf(str) !== -1;
-    }
+    };
 
     // windows
     const isWindows = find('windows');
@@ -173,9 +175,10 @@ export const Performance = {
   },
 
   getEffectiveConnectionType() {
-    const conn = typeof navigator !== 'undefined' ?
-               navigator.connection || navigator.mozConnection || navigator.webkitConnection :
-               null;
+    const conn =
+      typeof navigator !== 'undefined'
+        ? navigator.connection || navigator.mozConnection || navigator.webkitConnection
+        : null;
     return conn ? conn.effectiveType : null;
   },
 
@@ -200,7 +203,7 @@ export const Performance = {
         name: measure.name,
         startTime: Math.round(measure.startTime),
         duration: Math.round(measure.duration),
-      }
+      };
     });
     return marks.concat(measures);
   },
@@ -209,7 +212,9 @@ export const Performance = {
     if (!performance || typeof PerformanceResourceTiming === 'undefined') {
       return null;
     }
-    return performance.getEntriesByType('navigation').concat(performance.getEntriesByType('resource'))
+    return performance
+      .getEntriesByType('navigation')
+      .concat(performance.getEntriesByType('resource'))
       .map((entry) => {
         return {
           url: entry.name,
@@ -218,7 +223,7 @@ export const Performance = {
           size: entry.decodedBodySize,
           startTime: Math.round(entry.startTime),
           duration: Math.round(entry.duration),
-        }
+        };
       });
   },
 
@@ -236,13 +241,15 @@ export const Performance = {
 
   getNetworkStats() {
     const resources = this.getResources();
-    const lastResource = this.getResources().sort((a, b) => a.startTime > b.startTime).pop();
+    const lastResource = this.getResources()
+      .sort((a, b) => a.startTime > b.startTime)
+      .pop();
     return {
-      finish: lastResource && (lastResource.startTime + lastResource.duration),
+      finish: lastResource && lastResource.startTime + lastResource.duration,
       requestCount: resources.length,
       transferSize: resources.map((resource) => resource.transfered).reduce((a, b) => a + b),
       size: resources.map((resource) => resource.size).reduce((a, b) => a + b),
-    }
+    };
   },
 
   /** reporting * */
@@ -293,7 +300,7 @@ export const Performance = {
       onLoad: this.getOnLoad(),
       userAgent: this.getUserAgent(),
       userTiming: this.getUserTiming(),
-    }
+    };
     if (options.deviceType || options.all) {
       result.deviceType = this.getDeviceType();
     }
@@ -336,20 +343,21 @@ Polymer({
         }
       }
 
-      paper-header-panel, iron-pages paper-header-panel {
+      paper-header-panel,
+      iron-pages paper-header-panel {
         --paper-header-panel-body: {
           background: var(--nuxeo-page-background);
-        };
+        }
         height: 100%;
       }
 
       paper-drawer-panel {
         --paper-drawer-panel-left-drawer-container: {
           z-index: 100;
-        };
+        }
         --paper-drawer-panel-scrim: {
           z-index: 2;
-        };
+        }
         top: var(--nuxeo-app-top);
         height: calc(100% - var(--nuxeo-app-top));
       }
@@ -357,7 +365,7 @@ Polymer({
       paper-header-panel {
         --paper-header-panel-container: {
           -webkit-overflow-scrolling: unset; /* NXP-24576: fix for selection toolbar on iOS */
-        };
+        }
       }
 
       /* logo */
@@ -447,7 +455,8 @@ Polymer({
         opacity: 0.6;
       }
 
-      #drawer:hover .toggle iron-icon, #drawer .toggle:hover iron-icon {
+      #drawer:hover .toggle iron-icon,
+      #drawer .toggle:hover iron-icon {
         visibility: visible;
       }
 
@@ -498,7 +507,6 @@ Polymer({
       nuxeo-document-create-button.admin {
         display: none;
       }
-
     </style>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
@@ -507,8 +515,7 @@ Polymer({
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
-    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}">
-    </nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
 
@@ -516,30 +523,62 @@ Polymer({
     <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
     <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
-    <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.document": "properties", "X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-resource
+      id="task"
+      path="/task/[[currentTaskId]]"
+      headers='{"X-NXfetch.document": "properties", "X-NXfetch.task": "targetDocumentIds,actors"}'
+    ></nuxeo-resource>
 
     <!-- app layout -->
-    <paper-drawer-panel id="drawerPanel" narrow="{{isNarrow}}" drawer-width="[[drawerWidth]]" responsive-width="720px" edge-swipe-sensitivity="0">
+    <paper-drawer-panel
+      id="drawerPanel"
+      narrow="{{isNarrow}}"
+      drawer-width="[[drawerWidth]]"
+      responsive-width="720px"
+      edge-swipe-sensitivity="0"
+    >
       <div slot="drawer">
-
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]">
-          <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]">
+          <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
         </a>
 
         <!-- menu -->
-        <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
+        <paper-listbox
+          id="menu"
+          selected="{{selectedTab}}"
+          attr-for-selected="name"
+          selected-class="selected"
+          on-iron-activate="_toggleDrawer"
+        >
           <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon" hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
+          <nuxeo-menu-icon
+            name="administration"
+            icon="nuxeo:admin"
+            label="app.administration"
+            class="admin-icon"
+            hidden$="[[!_hasAdministrationPermissions(currentUser)]]"
+          >
           </nuxeo-menu-icon>
-          <nuxeo-menu-icon name="profile" src="[[currentUser.contextParameters.userprofile.avatar.data]]" icon="nuxeo:user-settings" label="app.account" class="profile-icon">
+          <nuxeo-menu-icon
+            name="profile"
+            src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+            icon="nuxeo:user-settings"
+            label="app.account"
+            class="profile-icon"
+          >
           </nuxeo-menu-icon>
         </paper-listbox>
 
         <!-- drawer -->
         <div id="drawer">
-          <iron-pages id="drawer-pages" selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible" on-iron-items-changed="_updateSearch">
-
+          <iron-pages
+            id="drawer-pages"
+            selected="[[selectedTab]]"
+            attr-for-selected="name"
+            selected-attribute="visible"
+            on-iron-items-changed="_updateSearch"
+          >
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
             <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
@@ -558,31 +597,46 @@ Polymer({
                 <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>
               </iron-selector>
             </div>
-
           </iron-pages>
 
           <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
             <iron-icon icon="icons:chevron-left"></iron-icon>
           </div>
-
         </div>
       </div>
 
       <!-- pages -->
       <paper-header-panel slot="main" mode="seamed">
         <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-
           <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
           <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
 
-          <nuxeo-browser name="browse" id="browser" document="[[currentDocument]]" selected-tab="{{docAction}}" clipboard="[[clipboard]]"></nuxeo-browser>
+          <nuxeo-browser
+            name="browse"
+            id="browser"
+            document="[[currentDocument]]"
+            selected-tab="{{docAction}}"
+            clipboard="[[clipboard]]"
+          ></nuxeo-browser>
 
-          <nuxeo-search-page name="search" id="searchResults" heading="searchResults.results" search-form="[[searchForm]]" show-saved-search-actions></nuxeo-search-page>
+          <nuxeo-search-page
+            name="search"
+            id="searchResults"
+            heading="searchResults.results"
+            search-form="[[searchForm]]"
+            show-saved-search-actions
+          ></nuxeo-search-page>
 
           <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
 
-          <nuxeo-admin name="admin" user="[[currentUser]]" selected="[[selectedAdminTab]]" route-params="[[routeParams]]" on-error="_onError"></nuxeo-admin>
+          <nuxeo-admin
+            name="admin"
+            user="[[currentUser]]"
+            selected="[[selectedAdminTab]]"
+            route-params="[[routeParams]]"
+            on-error="_onError"
+          ></nuxeo-admin>
 
           <nuxeo-profile name="profile" selected="[[selectedProfileTab]]" user="[[currentUser]]"></nuxeo-profile>
 
@@ -598,17 +652,28 @@ Polymer({
               </nuxeo-card>
             </div>
           </nuxeo-page>
-
         </iron-pages>
 
-        <paper-icon-button id="drawerToggle" icon="menu" on-tap="_openDrawer" hidden$="[[!isNarrow]]"></paper-icon-button>
+        <paper-icon-button
+          id="drawerToggle"
+          icon="menu"
+          on-tap="_openDrawer"
+          hidden$="[[!isNarrow]]"
+        ></paper-icon-button>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
-
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]" hidden$="[[isMobile]]"></nuxeo-document-create-button>
-    <nuxeo-document-create-popup id="importPopup" parent="[[currentParent]]" default-path="/"></nuxeo-document-create-popup>
+    <nuxeo-document-create-button
+      class$="[[page]]"
+      parent="[[currentParent]]"
+      hidden$="[[isMobile]]"
+    ></nuxeo-document-create-button>
+    <nuxeo-document-create-popup
+      id="importPopup"
+      parent="[[currentParent]]"
+      default-path="/"
+    ></nuxeo-document-create-popup>
 
     <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
 
@@ -621,13 +686,12 @@ Polymer({
     <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
 
     <nuxeo-mobile-banner document="[[currentDocument]]" is-mobile="{{isMobile}}"></nuxeo-mobile-banner>
-`,
+  `,
 
   is: 'nuxeo-app',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
   importMeta: import.meta,
   properties: {
-
     productName: {
       type: String,
       value: 'Nuxeo',
@@ -703,8 +767,9 @@ Polymer({
 
     actionContext: {
       type: Object,
-      computed: '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
-      ' clipboard, clipboardDocCount, userWorkspace, routeParams)',
+      computed:
+        '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
+        ' clipboard, clipboardDocCount, userWorkspace, routeParams)',
     },
 
     clipboard: {
@@ -730,11 +795,11 @@ Polymer({
     'document-updated': 'refresh',
     'create-document': '_showDocumentCreationWizard',
     'document-created': '_handleDocumentCreated',
-    'workflowStarted': '_refreshAndFetchTasks',
-    'workflowAbandoned': '_refreshAndFetchTasks',
-    'workflowTaskAssignment': '_workflowTaskAssigned',
-    'workflowTaskProcess': '_workflowTaskProcess',
-    'workflowTaskProcessed': '_refreshAndFetchTasks',
+    workflowStarted: '_refreshAndFetchTasks',
+    workflowAbandoned: '_refreshAndFetchTasks',
+    workflowTaskAssignment: '_workflowTaskAssigned',
+    workflowTaskProcess: '_workflowTaskProcess',
+    workflowTaskProcessed: '_refreshAndFetchTasks',
     'added-to-clipboard': '_onAddedToClipboard',
     'add-to-clipboard': '_onAddToClipboard',
     'added-to-collection': '_documentAddedToCollection',
@@ -749,9 +814,9 @@ Polymer({
     'document-unlocked': '_documentUnlocked',
     'theme-changed': '_themeChanged',
     'search-results': '_showSearchResults',
-    'navigate': '_navigate',
+    navigate: '_navigate',
     'collection-loaded': '_updateCollectionMenu',
-    'notify': '_notify',
+    notify: '_notify',
     'nx-clipboard-updated': '_clipboardUpdated',
     'document-deleted': '_documentDeleted',
     'document-untrashed': '_documentUntrashed',
@@ -764,7 +829,6 @@ Polymer({
   observers: ['_computeSharedActionContext(currentUser)'],
 
   ready() {
-
     this.$.drawerPanel.closeDrawer();
 
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
@@ -796,19 +860,22 @@ Polymer({
   },
 
   loadTask(id) {
-    if (id && id.length > 0){
+    if (id && id.length > 0) {
       this.loading = true;
       this.currentTaskId = id;
-      this.$.task.get().then((task) => {
-        this._defineTaskAndNavigate(task);
-        this.loading = false;
-      }).catch((error) => {
-        if(error.status === 403){
-          this._fetchTasks();
-          this.navigateTo('tasks');
+      this.$.task
+        .get()
+        .then((task) => {
+          this._defineTaskAndNavigate(task);
           this.loading = false;
-        }
-      });
+        })
+        .catch((error) => {
+          if (error.status === 403) {
+            this._fetchTasks();
+            this.navigateTo('tasks');
+            this.loading = false;
+          }
+        });
     } else {
       this._defineTaskAndNavigate();
     }
@@ -826,27 +893,31 @@ Polymer({
     this.docAction = action;
     this.$.doc.headers = this._computeHeaders();
     this.$.doc.enrichers = this._computeEnrichers();
-    this.$.doc.get().then((doc) => {
-      if (this.docId && !doc.isVersion) {
-        this.docId = '';
-        this.docPath = doc.path;
-      }
-      const recent = this.$$('#recent');
-      if (recent && !doc.isTrashed) {
-        if(recent.contains(doc)) {
-          recent.update(doc);
-        } else {
-          recent.add(doc);
+    this.$.doc
+      .get()
+      .then((doc) => {
+        if (this.docId && !doc.isVersion) {
+          this.docId = '';
+          this.docPath = doc.path;
         }
-      }
-      this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
-        doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-      this.set('currentDocument', doc);
-      this.loading = false;
-      this.show(page);
-    }).catch((err) => {
-      this.showError(err.status, this.i18n('browse.error'), err.message)
-    });
+        const recent = this.$$('#recent');
+        if (recent && !doc.isTrashed) {
+          if (recent.contains(doc)) {
+            recent.update(doc);
+          } else {
+            recent.add(doc);
+          }
+        }
+        this.currentParent = this.hasFacet(doc, 'Folderish')
+          ? doc
+          : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+        this.set('currentDocument', doc);
+        this.loading = false;
+        this.show(page);
+      })
+      .catch((err) => {
+        this.showError(err.status, this.i18n('browse.error'), err.message);
+      });
   },
 
   showError(code, msg, url) {
@@ -868,8 +939,7 @@ Polymer({
     this.show('diff');
     const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
-    if (this.$.diff.docIds &&
-        params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
+    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
       const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
@@ -907,7 +977,7 @@ Polymer({
           if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
             title.push(this.searchForm.selectedSearch.title);
           } else if (this.searchForm.searchName) {
-            title.push(this.i18n(`app.title.search.${  this.searchForm.searchName}`));
+            title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
           }
         }
         title.push(this.i18n('app.title.search'));
@@ -918,19 +988,19 @@ Polymer({
           title.push(this.i18n(this.currentTask.workflowModelName));
           title.push(this.i18n(this.currentTask.name));
         } else {
-          title.push(this.i18n(`app.title.${  this.page}`));
+          title.push(this.i18n(`app.title.${this.page}`));
         }
         break;
 
       case 'admin':
         if (this.selectedAdminTab) {
-          title.push(this.i18n(`app.title.admin.${  this.selectedAdminTab}`));
+          title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
         }
-        title.push(this.i18n(`app.title.${  this.page}`));
+        title.push(this.i18n(`app.title.${this.page}`));
         break;
 
       default:
-        title.push(this.i18n(`app.title.${  this.page}`));
+        title.push(this.i18n(`app.title.${this.page}`));
     }
     title.push(this.productName);
     document.title = title.join(' - ');
@@ -941,7 +1011,7 @@ Polymer({
   },
 
   _logo(baseUrl) {
-    return `${baseUrl  }themes/${  localStorage.getItem('theme') || 'default'  }/logo.png`;
+    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.png`;
   },
 
   showHome(e) {
@@ -966,7 +1036,7 @@ Polymer({
 
   _computeSharedActionContext() {
     if (this.currentUser) {
-      window.nuxeo.slots.setSharedModel({user: this.currentUser});
+      window.nuxeo.slots.setSharedModel({ user: this.currentUser });
     }
   },
 
@@ -1004,7 +1074,7 @@ Polymer({
 
   // lookup the search
   _updateSearch() {
-    this.searchForm = this.$$(`[search-name='${  this.searchName  }']`);
+    this.searchForm = this.$$(`[search-name='${this.searchName}']`);
     if (this.searchForm && this._searchOnLoad) {
       this.searchForm._search();
       this._searchOnLoad = false;
@@ -1016,7 +1086,7 @@ Polymer({
    * search page open.
    */
   _refreshSearch() {
-    this.searchForm = this.$$(`[search-name='${  this.searchName  }']`);
+    this.searchForm = this.$$(`[search-name='${this.searchName}']`);
     if (this.searchForm) {
       this.searchForm.refresh();
     }
@@ -1045,14 +1115,14 @@ Polymer({
   _openDrawer() {
     this.drawerWidth = '350px';
     this.drawerOpened = true;
-    const {drawerPanel} = this.$;
+    const { drawerPanel } = this.$;
     if (drawerPanel.narrow) {
       drawerPanel.openDrawer();
     }
-    if (!this.selectedTab){
+    if (!this.selectedTab) {
       const drawer = this.$['drawer-pages'];
       drawer.selectIndex(0);
-      this.selectedTab = drawer.selected
+      this.selectedTab = drawer.selected;
     }
   },
 
@@ -1063,7 +1133,7 @@ Polymer({
   },
 
   _fetchTasks() {
-    this.$.tasks.params = {'userId': this.currentUser.id};
+    this.$.tasks.params = { userId: this.currentUser.id };
     this.$.tasks.get().then((response) => {
       this.tasks = response.entries;
       this.taskCount = this.tasks.length;
@@ -1086,14 +1156,17 @@ Polymer({
 
   _onAddedToClipboard(e) {
     this._toast(
-      this.i18n(e.detail.docIds && e.detail.docIds.length > 1
-        ? 'app.documents.addedToClipboard' : 'app.document.addedToClipboard'),
+      this.i18n(
+        e.detail.docIds && e.detail.docIds.length > 1
+          ? 'app.documents.addedToClipboard'
+          : 'app.document.addedToClipboard',
+      ),
     );
   },
 
   _onAddToClipboard(e) {
     if (e.detail.documents && this.clipboard) {
-      this.clipboard.add(e.detail.documents)
+      this.clipboard.add(e.detail.documents);
     }
   },
 
@@ -1126,13 +1199,11 @@ Polymer({
   },
 
   _toast(text) {
-    this._notify({detail: {message: text}});
+    this._notify({ detail: { message: text } });
   },
 
   _documentAddedToCollection(e) {
-    this._toast(
-      this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'),
-    );
+    this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
   },
 
   _documentRemovedFromCollection() {
@@ -1168,7 +1239,7 @@ Polymer({
   },
 
   _documentDeleted(e) {
-    this._toast(this.i18n(`app.document.deleted.${  e.detail.error ? 'error' : 'success'}` ));
+    this._toast(this.i18n(`app.document.deleted.${e.detail.error ? 'error' : 'success'}`));
     // navigate to parent
     if (!e.detail.error) {
       this._removeFromClipboard([e.detail.doc]);
@@ -1176,11 +1247,11 @@ Polymer({
       const enrichers = e.detail.doc.contextParameters;
       if (enrichers) {
         if (enrichers.firstAccessibleAncestor) {
-          this._navigate({'detail': {'doc': enrichers.firstAccessibleAncestor}});
+          this._navigate({ detail: { doc: enrichers.firstAccessibleAncestor } });
         } else if (enrichers.breadcrumb) {
-          const {entries} = enrichers.breadcrumb;
+          const { entries } = enrichers.breadcrumb;
           if (entries.length > 1) {
-            this._navigate({'detail': {'doc': entries[entries.length - 2]}});
+            this._navigate({ detail: { doc: entries[entries.length - 2] } });
           }
         }
       }
@@ -1189,9 +1260,9 @@ Polymer({
   },
 
   _documentUntrashed(e) {
-    this._toast(this.i18n(`app.document.untrashed.${  e.detail.error ? 'error' : 'success'}` ));
+    this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
-      this._navigate({'detail': {'doc': e.detail.doc}});
+      this._navigate({ detail: { doc: e.detail.doc } });
       this._refreshSearch();
     }
   },
@@ -1201,7 +1272,7 @@ Polymer({
       const docs = e.detail.documents;
       let msg = this.i18n(docs && docs.length > 1 ? 'app.documents.deleted.error' : 'app.document.deleted.error');
       if (e.detail.error.response.status === 403) {
-        msg = `${msg  } ${  this.i18n('error.403')}`;
+        msg = `${msg} ${this.i18n('error.403')}`;
       }
       this._toast(msg);
     } else {
@@ -1214,7 +1285,7 @@ Polymer({
   },
 
   _documentsUntrashed(e) {
-    this._toast(this.i18n(`app.documents.untrashed.${  e.detail.error ? 'error' : 'success'}` ));
+    this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
     this._refreshSearch();
   },
 
@@ -1231,7 +1302,7 @@ Polymer({
   _handleDocumentCreated(e) {
     if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
       const doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-      this._toast(this.i18n('app.createdDocument', `${doc.type.toLowerCase()  } ${  doc.title}`));
+      this._toast(this.i18n('app.createdDocument', `${doc.type.toLowerCase()} ${doc.title}`));
     } else {
       this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
     }
@@ -1247,8 +1318,8 @@ Polymer({
 
   _moveDocumentsToContainer(documents, target) {
     this.$.moveDocumentsOp.op = 'Document.Move';
-    this.$.moveDocumentsOp.params = {target: target.uid};
-    this.$.moveDocumentsOp.input = `docs:${  documents.map((doc) => doc.uid).join(',')}`;
+    this.$.moveDocumentsOp.params = { target: target.uid };
+    this.$.moveDocumentsOp.input = `docs:${documents.map((doc) => doc.uid).join(',')}`;
     this.$.moveDocumentsOp.execute().then(() => {
       this.fire('document-updated');
       this._toast(this.i18n('app.documents.moved', documents.length, target.title));
@@ -1257,12 +1328,12 @@ Polymer({
 
   _addDocumentsToCollection(documents, target) {
     this.$.moveDocumentsOp.op = 'Document.AddToCollection';
-    this.$.moveDocumentsOp.params = {collection: target.uid};
-    this.$.moveDocumentsOp.input = `docs:${  documents.map((doc) => doc.uid).join(',')}`;
+    this.$.moveDocumentsOp.params = { collection: target.uid };
+    this.$.moveDocumentsOp.input = `docs:${documents.map((doc) => doc.uid).join(',')}`;
     this.$.moveDocumentsOp.execute().then(() => {
       this.fire('document-updated');
       this._toast(
-          this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection'),
+        this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection'),
       );
     });
   },
@@ -1280,7 +1351,7 @@ Polymer({
   },
 
   _logout() {
-    return `${this.$.nxcon.url  }/logout`;
+    return `${this.$.nxcon.url}/logout`;
   },
 
   _pageChanged(page, oldPage) {
@@ -1289,7 +1360,7 @@ Polymer({
       // selectItem might be undefined
       // https://github.com/PolymerElements/iron-pages/issues/52
       if (!el) {
-        el = dom(this.$.pages).querySelector(`[name=${  page  }]`);
+        el = dom(this.$.pages).querySelector(`[name=${page}]`);
       }
       if (!el) {
         this.showError(404, '', page);
@@ -1298,13 +1369,13 @@ Polymer({
       // if we are switching from a previous page, then we need to remove the performance listener from it
       // and create a mark to be used for next measurements
       if (oldPage !== undefined) {
-        const oldPageEl = dom(this.$.pages).querySelector(`[name=${  oldPage  }]`);
+        const oldPageEl = dom(this.$.pages).querySelector(`[name=${oldPage}]`);
         oldPageEl.removeEventListener('dom-change', this.__performanceListener);
         Performance.markUnique('nuxeo-app.page-changed');
       }
       // add performance listener to current page to track the last dom-change event
       this.__performanceListener = function() {
-        const name = `${el.tagName.toLocaleLowerCase()  }.dom-changed`;
+        const name = `${el.tagName.toLocaleLowerCase()}.dom-changed`;
         // a measure will be performed from the last page switch or, if this is the first page load,
         // from when navigation started to the current moment
         const mark = performance.getEntriesByName('nuxeo-app.page-changed', 'mark').pop();
@@ -1316,9 +1387,14 @@ Polymer({
       // check if page is already registered (vulcanized)
       if (!(el instanceof PolymerElement)) {
         const tag = el.tagName.toLowerCase();
-        importHref(this.resolveUrl(`${tag  }.html`), this._loadElements.bind(this), () => {
-          this.showError(404, '', `${tag  }.html`);
-        }, true);
+        importHref(
+          this.resolveUrl(`${tag}.html`),
+          this._loadElements.bind(this),
+          () => {
+            this.showError(404, '', `${tag}.html`);
+          },
+          true,
+        );
       } else {
         // load elements if navigating directly to pages which are not lazy loaded (e.g. searches)
         this._loadElements();
@@ -1328,7 +1404,9 @@ Polymer({
 
   _loadElements() {
     afterNextRender(this, () => {
-      import(/* webpackChunkName: "elements" */'./elements.js').then(() => { this.loading = false; });
+      import(/* webpackChunkName: "elements" */ './elements.js').then(() => {
+        this.loading = false;
+      });
     });
   },
 
@@ -1380,12 +1458,12 @@ Polymer({
   _computeHeaders() {
     const headers = {
       'translate-directoryEntry': 'label',
-    }
+    };
 
     const fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
 
     // add required fetchers
-    const required = {document: ['lock'], directoryEntry: ['parent'], task: ['actors']};
+    const required = { document: ['lock'], directoryEntry: ['parent'], task: ['actors'] };
 
     Object.keys(required).forEach((k) => {
       fetch[k] = fetch[k] || [];
@@ -1398,7 +1476,7 @@ Polymer({
 
     // generate fetch headers
     Object.keys(fetch).forEach((f) => {
-      headers[`fetch-${  f}`] = fetch[f].join(',');
+      headers[`fetch-${f}`] = fetch[f].join(',');
     });
 
     return headers;

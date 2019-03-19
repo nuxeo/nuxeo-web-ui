@@ -70,20 +70,47 @@ Polymer({
       </div>
       <div>
         <nuxeo-card>
-          <nuxeo-user-suggestion value="{{principalName}}" label="[[i18n('audit.username')]]" placeholder="[[i18n('audit.usernamePlaceholder')]]"></nuxeo-user-suggestion>
+          <nuxeo-user-suggestion
+            value="{{principalName}}"
+            label="[[i18n('audit.username')]]"
+            placeholder="[[i18n('audit.usernamePlaceholder')]]"
+          ></nuxeo-user-suggestion>
 
           <div class="row-container">
             <nuxeo-date-picker role="widget" class="item" value="{{startDate}}" label="[[i18n('audit.from')]]">
             </nuxeo-date-picker>
-            <nuxeo-date-picker role="widget" class="item" value="{{endDate}}" default-time="23:59:59" label="[[i18n('audit.to')]]">
+            <nuxeo-date-picker
+              role="widget"
+              class="item"
+              value="{{endDate}}"
+              default-time="23:59:59"
+              label="[[i18n('audit.to')]]"
+            >
             </nuxeo-date-picker>
           </div>
 
           <div class="row-container">
-            <nuxeo-directory-suggestion class="item" role="widget" label="[[i18n('audit.eventTypes')]]" directory-name="eventTypes" value="{{selectedEventTypes}}" multiple="true" placeholder="[[i18n('audit.selectEventTypes')]]" min-chars="0">
+            <nuxeo-directory-suggestion
+              class="item"
+              role="widget"
+              label="[[i18n('audit.eventTypes')]]"
+              directory-name="eventTypes"
+              value="{{selectedEventTypes}}"
+              multiple="true"
+              placeholder="[[i18n('audit.selectEventTypes')]]"
+              min-chars="0"
+            >
             </nuxeo-directory-suggestion>
 
-            <nuxeo-directory-suggestion class="item" role="widget" label="[[i18n('audit.eventCategory')]]" directory-name="eventCategories" value="{{selectedEventCategory}}" placeholder="[[i18n('audit.selectEventCategory')]]" min-chars="0">
+            <nuxeo-directory-suggestion
+              class="item"
+              role="widget"
+              label="[[i18n('audit.eventCategory')]]"
+              directory-name="eventCategories"
+              value="{{selectedEventCategory}}"
+              placeholder="[[i18n('audit.selectEventCategory')]]"
+              min-chars="0"
+            >
             </nuxeo-directory-suggestion>
           </div>
         </nuxeo-card>
@@ -91,10 +118,14 @@ Polymer({
         <nuxeo-card>
           <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
             <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
-              <template>[[_formati18n('eventType.', item.eventId)]]</template>
+              <template
+                >[[_formati18n('eventType.', item.eventId)]]</template
+              >
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
-              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+              <template
+                ><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date
+              ></template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
               <template>
@@ -102,19 +133,25 @@ Polymer({
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
-              <template>[[_formati18n('eventCategory.', item.category)]]</template>
+              <template
+                >[[_formati18n('eventCategory.', item.category)]]</template
+              >
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.document')]]">
-              <template>[[_formatDocument(item)]]</template>
+              <template
+                >[[_formatDocument(item)]]</template
+              >
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
-              <template>[[item.comment]]</template>
+              <template
+                >[[item.comment]]</template
+              >
             </nuxeo-data-table-column>
           </nuxeo-data-table>
-      </nuxeo-card>
+        </nuxeo-card>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-audit',
   behaviors: [FormatBehavior],
@@ -149,9 +186,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)',
-  ],
+  observers: ['_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'],
 
   _formati18n(path, key) {
     return key ? this.i18n(path + key) : '';
@@ -159,7 +194,7 @@ Polymer({
 
   _formatDocument(item) {
     if (item) {
-      return (item.docUUID || '') + (item.docType ? ` (${  item.docType  }) ` : '') + (item.docPath || '');
+      return (item.docUUID || '') + (item.docType ? ` (${item.docType}) ` : '') + (item.docPath || '');
     }
   },
 

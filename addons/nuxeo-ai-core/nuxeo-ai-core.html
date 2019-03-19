@@ -15,31 +15,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <nuxeo-slot-content name="adminAIMenuItem" slot="ADMINISTRATION_MENU" order="100">
-    <template>
-        <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
-            <template>
-                <nuxeo-menu-item name="aicore" label="app.title.admin.aicore" route="administration:aicore">
-                </nuxeo-menu-item>
-            </template>
-        </nuxeo-filter>
-    </template>
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item name="aicore" label="app.title.admin.aicore" route="administration:aicore"> </nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
+  </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="aiadminslot" slot="ADMINISTRATION_PAGES">
-    <template>
-        <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
-            <template>
-                <nuxeo-admin-ai name="aicore" ></nuxeo-admin-ai>
-            </template>
-        </nuxeo-filter>
-    </template>
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-admin-ai name="aicore"></nuxeo-admin-ai>
+      </template>
+    </nuxeo-filter>
+  </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="adminAiExport" slot="AI_ITEMS" order="20">
-    <template>
-        <nuxeo-page-item name="export" label="Datasets"></nuxeo-page-item>
-    </template>
+  <template>
+    <nuxeo-page-item name="export" label="Datasets"></nuxeo-page-item>
+  </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="adminAiExportPage" slot="AI_PAGES" order="20">
-    <template>
-        <nuxeo-admin-ai-export name="export"></nuxeo-admin-ai-export>
-    </template>
+  <template>
+    <nuxeo-admin-ai-export name="export"></nuxeo-admin-ai-export>
+  </template>
 </nuxeo-slot-content>

@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-expired-search-form">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -32,24 +32,27 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-input role="widget"
-                 id="searchInput"
-                 label="[[i18n('defaultSearch.fullText')]]"
-                 value="{{searchTerm}}"
-                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                 autofocus
-                 on-keydown="_checkForEnter">
+    <nuxeo-input
+      role="widget"
+      id="searchInput"
+      label="[[i18n('defaultSearch.fullText')]]"
+      value="{{searchTerm}}"
+      placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+      autofocus
+      on-keydown="_checkForEnter"
+    >
     </nuxeo-input>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+      <nuxeo-dropdown-aggregation
+        placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
-        multiple="true">
+        multiple="true"
+      >
       </nuxeo-dropdown-aggregation>
     </div>
-
   </template>
 
   <script>

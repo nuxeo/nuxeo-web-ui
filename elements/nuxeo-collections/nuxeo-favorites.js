@@ -37,7 +37,6 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-
       .content {
         @apply --layout-vertical;
       }
@@ -45,7 +44,7 @@ Polymer({
       nuxeo-data-list {
         display: block;
         position: relative;
-        min-height: calc(100vh - 61px - var(--nuxeo-app-top))
+        min-height: calc(100vh - 61px - var(--nuxeo-app-top));
       }
 
       .list-item {
@@ -86,8 +85,8 @@ Polymer({
       }
 
       .list-item-property {
-        opacity: .5;
-        margin-right: .2em;
+        opacity: 0.5;
+        margin-right: 0.2em;
       }
 
       .list-item iron-icon {
@@ -111,12 +110,28 @@ Polymer({
 
     <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
 
-    <nuxeo-page-provider id="favoritesProvider" provider="default_content_collection" page-size="30" schemas="dublincore,common" enrichers="thumbnail">
+    <nuxeo-page-provider
+      id="favoritesProvider"
+      provider="default_content_collection"
+      page-size="30"
+      schemas="dublincore,common"
+      enrichers="thumbnail"
+    >
     </nuxeo-page-provider>
 
     <div class="header">[[i18n('app.favorites')]]</div>
     <div class="content">
-      <nuxeo-data-list nx-provider="favoritesProvider" id="favoritesList" selected-item="{{selectedFavorite}}" items="{{favorites}}" selection-enabled select-on-tap as="favorite" empty-label="[[i18n('favorites.empty')]]" empty-label-when-filtered="[[i18n('favorites.empty')]]">
+      <nuxeo-data-list
+        nx-provider="favoritesProvider"
+        id="favoritesList"
+        selected-item="{{selectedFavorite}}"
+        items="{{favorites}}"
+        selection-enabled
+        select-on-tap
+        as="favorite"
+        empty-label="[[i18n('favorites.empty')]]"
+        empty-label-when-filtered="[[i18n('favorites.empty')]]"
+      >
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
@@ -125,16 +140,21 @@ Polymer({
                   <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
                 <div class="list-item-title">[[favorite.title]]</div>
-                <iron-icon id="removeFromFavorites" class="remove" icon="nuxeo:remove" data-uid$="[[favorite.uid]]" on-tap="_removeFromFavorites">
+                <iron-icon
+                  id="removeFromFavorites"
+                  class="remove"
+                  icon="nuxeo:remove"
+                  data-uid$="[[favorite.uid]]"
+                  on-tap="_removeFromFavorites"
+                >
                 </iron-icon>
               </div>
             </div>
           </div>
         </template>
       </nuxeo-data-list>
-
     </div>
-`,
+  `,
 
   is: 'nuxeo-favorites',
   behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
@@ -180,18 +200,16 @@ Polymer({
   _fetchFavorite() {
     if (this.favorite) {
       return Promise.resolve(this.favorite);
-    } 
-      return this.$.fetchFavOp.execute()
-        .then((resp) => {
-          if (resp.status === 204) {
-            // Pas de bras, pas de chocolat.
-            this.favorite = null;
-          } else {
-            this.favorite = resp;
-          }
-          return this.favorite;
-        });
-    
+    }
+    return this.$.fetchFavOp.execute().then((resp) => {
+      if (resp.status === 204) {
+        // Pas de bras, pas de chocolat.
+        this.favorite = null;
+      } else {
+        this.favorite = resp;
+      }
+      return this.favorite;
+    });
   },
 
   _computedClass(isSelected) {
@@ -217,7 +235,7 @@ Polymer({
     const docUid = e.model.favorite.uid;
     this.$.removeFromFavOp.input = docUid;
     this.$.removeFromFavOp.execute().then(() => {
-      this.fire('removed-from-favorites', {docUid});
+      this.fire('removed-from-favorites', { docUid });
     });
   },
 });

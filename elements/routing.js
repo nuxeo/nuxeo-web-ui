@@ -17,7 +17,6 @@ limitations under the License.
 import page from '@nuxeo/page/page.mjs';
 
 customElements.whenDefined('nuxeo-app').then(() => {
-
   const app = document.querySelector('nuxeo-app');
 
   // strip final /
@@ -51,7 +50,7 @@ customElements.whenDefined('nuxeo-app').then(() => {
       app.currentContentView = null;
     }
     const searchParams = new URLSearchParams(data.querystring);
-    app.load('browse', '', `/${  data.params[0]}`, searchParams.get('p') || 'view');
+    app.load('browse', '', `/${data.params[0]}`, searchParams.get('p') || 'view');
   });
 
   page('/search/:searchName', (data) => {
@@ -74,7 +73,8 @@ customElements.whenDefined('nuxeo-app').then(() => {
     // prevent currentUser from being undefined
     app.$.nxcon.connect().then(() => {
       // block access to admin center to non-admin/non-power users
-      const hasPermission = app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
+      const hasPermission =
+        app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
       if (hasPermission) {
         if (data.params.tab) {
           app.selectedAdminTab = data.params.tab;
@@ -92,11 +92,11 @@ customElements.whenDefined('nuxeo-app').then(() => {
   });
 
   page('/user/:id', (data) => {
-    page.redirect(`/admin/user-group-management/user/${  data.params.id}`);
+    page.redirect(`/admin/user-group-management/user/${data.params.id}`);
   });
 
   page('/group/:id(.*)', (data) => {
-    page.redirect(`/admin/user-group-management/group/${  data.params.id}`);
+    page.redirect(`/admin/user-group-management/group/${data.params.id}`);
   });
 
   page('/tasks/:repo?/:id/', (data) => {
@@ -121,20 +121,26 @@ customElements.whenDefined('nuxeo-app').then(() => {
   });
 
   // add #! before urls
-  page({hashbang: true, click: false, decodeURLComponents: false});
+  page({ hashbang: true, click: false, decodeURLComponents: false });
 
   app.router = {
-
     baseUrl: app.baseUrl,
 
     useHashbang: true,
 
     browse(path, subPage) {
-      return `/browse${   path ? path.split('/').map((n) => encodeURIComponent(n)).join('/') : ''  }${subPage ? `?p=${  encodeURIComponent(subPage)}` : ''}`;
+      return `/browse${
+        path
+          ? path
+              .split('/')
+              .map((n) => encodeURIComponent(n))
+              .join('/')
+          : ''
+      }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
     },
 
     document(id) {
-      return `/doc/${  id}`;
+      return `/doc/${id}`;
     },
 
     home() {
@@ -142,39 +148,37 @@ customElements.whenDefined('nuxeo-app').then(() => {
     },
 
     search(searchId) {
-      return `/search/${  searchId}`;
+      return `/search/${searchId}`;
     },
 
     queue(searchId) {
-      return `/queue/${  searchId}`;
+      return `/queue/${searchId}`;
     },
 
     tasks(id) {
-      return `/tasks${  typeof id === 'undefined' ? '' : `/${  id}`}`;
+      return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
     },
 
     administration(tab) {
-      return `/admin/${  tab}`;
+      return `/admin/${tab}`;
     },
 
     user(name) {
-      return `/user/${  name}`;
+      return `/user/${name}`;
     },
 
     group(name) {
-      return `/group/${  name}`;
+      return `/group/${name}`;
     },
 
     diff(id1, id2) {
-      return `/diff/${  id1  }/${  id2}`;
+      return `/diff/${id1}/${id2}`;
     },
 
     page(name) {
-      return `/${  name}`;
+      return `/${name}`;
     },
 
     navigate: page,
-
   };
-
 });

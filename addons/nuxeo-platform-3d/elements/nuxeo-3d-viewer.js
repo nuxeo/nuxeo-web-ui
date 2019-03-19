@@ -30,7 +30,6 @@ import 'three/examples/js/loaders/gltf/glTFLoaderUtils.js';
 import 'three/examples/js/loaders/gltf/glTFAnimation.js';
 import 'three/examples/js/loaders/gltf/glTFShaders.js';
 
-
 /**
 `nuxeo-3d-viewer` allows viewing 3D content in glTF format.
 
@@ -57,13 +56,13 @@ Polymer({
 
       #threed {
         position: relative;
-        width:100%;
-        height:100%;
+        width: 100%;
+        height: 100%;
       }
 
       #threed canvas {
         display: block;
-        width:100% !important;
+        width: 100% !important;
       }
 
       #progress {
@@ -74,21 +73,17 @@ Polymer({
         background: rgba(255, 255, 255, 0.5);
         transform: translate(-50%, -50%);
       }
-
     </style>
     <div id="threed">
       <paper-progress id="progress" hidden="true"></paper-progress>
     </div>
-`,
+  `,
 
   is: 'nuxeo-3d-viewer',
 
-  behaviors: [
-    IronResizableBehavior,
-  ],
+  behaviors: [IronResizableBehavior],
 
   properties: {
-
     /**
      * The `loader` attribute specifies type of loader.
      * 'simple' : no shaders, annimations, etc. fast and simple.
@@ -122,7 +117,7 @@ Polymer({
     /**
      * The `setupFinished' to indicate if setup process is finished
      */
-    setupFinished : {
+    setupFinished: {
       type: Boolean,
       readOnly: true,
       value: false,
@@ -148,10 +143,9 @@ Polymer({
   },
 
   load() {
-
     const onLoadFromSrc = function(src) {
       return function(gltf) {
-        if(src !== this.src) {
+        if (src !== this.src) {
           return;
         }
         this.clear();
@@ -166,7 +160,7 @@ Polymer({
         if (timestamp !== this.latestLoadTS) {
           return;
         }
-        this.$.progress.value = event.loaded / event.total * 100;
+        this.$.progress.value = (event.loaded / event.total) * 100;
       }.bind(this);
     }.bind(this);
 
@@ -181,14 +175,13 @@ Polymer({
   clear() {
     if (this.scene) {
       const objects = this.scene.children;
-      while ( objects.length > 0 ) {
-        this._removeObject( objects[ 0 ] );
+      while (objects.length > 0) {
+        this._removeObject(objects[0]);
       }
     }
-
   },
 
-  _loaderChanged () {
+  _loaderChanged() {
     if (this.loader === 'complete') {
       this.gltfLoader = new THREE.glTFLoader(); // eslint-disable-line new-cap
     } else {
@@ -196,9 +189,9 @@ Polymer({
     }
   },
 
-  _removeObject ( object ) {
-    if ( object.parent === null ) return; // avoid deleting the camera or scene
-    object.parent.remove( object );
+  _removeObject(object) {
+    if (object.parent === null) return; // avoid deleting the camera or scene
+    object.parent.remove(object);
   },
 
   _sourceChanged() {
@@ -223,7 +216,7 @@ Polymer({
     this.scene = new THREE.Scene();
     this.root.add(this.scene);
     const geometry = new THREE.PlaneGeometry(0.5, 0.5);
-    const material = new THREE.MeshPhongMaterial({color: 0xffffff});
+    const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
     this.ground = new THREE.Mesh(geometry, material);
     this.ground.rotation.x = -Math.PI / 2;
     this.ground.scale.multiplyScalar(3);
@@ -234,7 +227,7 @@ Polymer({
 
   _setupCameras() {
     this.cameras = {};
-    this.camera = new THREE.PerspectiveCamera(25, 0.5 , 0.001, 2000);
+    this.camera = new THREE.PerspectiveCamera(25, 0.5, 0.001, 2000);
     this.root.add(this.camera);
     this._cameraComposition(this.camera);
   },
@@ -256,7 +249,7 @@ Polymer({
   },
 
   _setupRenderer() {
-    this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     // this.renderer.setSize(400, 400);
 
@@ -282,7 +275,8 @@ Polymer({
       this.camera.aspect = this.$.threed.offsetWidth / this.$.threed.offsetHeight;
       this.camera.updateProjectionMatrix();
 
-      let i; const len = this.cameras.length;
+      let i;
+      const len = this.cameras.length;
       for (i = 0; i < len; i++) {
         this.cameras[i].aspect = this.$.threed.offsetWidth / this.$.threed.offsetHeight;
         this.cameras[i].updateProjectionMatrix();
@@ -307,7 +301,7 @@ Polymer({
     this.controls.reset();
     const azimuth = (azimuthDegrees % 360) * (Math.PI / 180);
     // edge case in the top pole of the sphere (zenith = 0)
-    const zenith = ((zenithDegrees % 360) === 0) ? 1.0E-15 : (zenithDegrees % 360) * (Math.PI / 180);
+    const zenith = zenithDegrees % 360 === 0 ? 1.0e-15 : (zenithDegrees % 360) * (Math.PI / 180);
     const radius = this.cameraDistance;
     this.camera.position.set(
       -radius * Math.cos(azimuth) * Math.sin(zenith),
@@ -382,7 +376,6 @@ Polymer({
       if (obj.material && obj.material.bumpMap) {
         obj.material.bumpScale = scale;
       }
-
     };
     prepare(object, true);
     object.traverse((child) => {

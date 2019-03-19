@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-trash-search-form">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -32,25 +32,33 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-input role="widget"
-                 id="searchInput"
-                 type="search"
-                 label="[[i18n('defaultSearch.fullText')]]"
-                 value="{{searchTerm}}"
-                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
-                 autofocus
-                 on-keydown="_checkForEnter">
+    <nuxeo-input
+      role="widget"
+      id="searchInput"
+      type="search"
+      label="[[i18n('defaultSearch.fullText')]]"
+      value="{{searchTerm}}"
+      placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+      autofocus
+      on-keydown="_checkForEnter"
+    >
     </nuxeo-input>
 
-    <nuxeo-path-suggestion value="{{_path}}" label="[[i18n('defaultSearch.path')]]" role="widget"></nuxeo-path-suggestion>
+    <nuxeo-path-suggestion
+      value="{{_path}}"
+      label="[[i18n('defaultSearch.path')]]"
+      role="widget"
+    ></nuxeo-path-suggestion>
 
     <div role="widget">
       <label>[[i18n('defaultSearch.authors')]]</label>
-      <nuxeo-dropdown-aggregation placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+      <nuxeo-dropdown-aggregation
+        placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true"
-        name="authors">
+        name="authors"
+      >
       </nuxeo-dropdown-aggregation>
     </div>
 
@@ -59,7 +67,8 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
-        name="size">
+        name="size"
+      >
       </nuxeo-checkbox-aggregation>
     </div>
   </template>
@@ -99,8 +108,10 @@ limitations under the License.
       _search() {
         if (this.searchTerm) {
           this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm));
-          this.set('params.highlight',
-            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+          this.set(
+            'params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name',
+          );
         } else if (this.params.ecm_fulltext) {
           this.set('params.ecm_fulltext', '');
           delete this.params.ecm_fulltext;
@@ -119,7 +130,6 @@ limitations under the License.
           this._search();
         }
       },
-
     });
   </script>
 </dom-module>

@@ -51,7 +51,13 @@ Polymer({
       <h2>[[i18n('renderTemplateButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">
-          <paper-dropdown-menu label="[[i18n('renderTemplateButton.dialog.instruction')]]" class="typeDropdown" noink always-float-label horizontal-align="left">
+          <paper-dropdown-menu
+            label="[[i18n('renderTemplateButton.dialog.instruction')]]"
+            class="typeDropdown"
+            noink
+            always-float-label
+            horizontal-align="left"
+          >
             <paper-listbox slot="dropdown-content" selected="{{selectedTemplate}}" attr-for-selected="key">
               <template is="dom-repeat" items="[[_templates]]">
                 <paper-item key="[[item]]">[[item.properties.dc:title]]</paper-item>
@@ -78,7 +84,11 @@ Polymer({
       <h2>[[i18n('renderTemplateButton.editParamsDialog.heading', selectedTemplate.properties.dc:title)]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">
-          <nuxeo-template-param-editor id="paramEditor" template-data="[[_templateData]]" mode="edit"></nuxeo-template-param-editor>
+          <nuxeo-template-param-editor
+            id="paramEditor"
+            template-data="[[_templateData]]"
+            mode="edit"
+          ></nuxeo-template-param-editor>
         </div>
       </paper-dialog-scrollable>
       <div class="buttons horizontal end-justified layout">
@@ -91,7 +101,7 @@ Polymer({
         </paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-render-template-button',
   behaviors: [I18nBehavior],
@@ -119,14 +129,14 @@ Polymer({
     /**
      * `true` if the action should display the label, `false` otherwise.
      * */
-     showLabel: {
+    showLabel: {
       type: Boolean,
       value: false,
     },
     /**
      * The label to be displayed on menus.
      * */
-     label: {
+    label: {
       type: String,
       value: 'renderTemplateButton.tooltip',
     },
@@ -142,7 +152,7 @@ Polymer({
      * */
     icon: {
       type: String,
-      value: "icons:all-out",
+      value: 'icons:all-out',
     },
     /**
      * The URL for an icon image file. This will take precedence over a given icon attribute.
@@ -229,15 +239,19 @@ Polymer({
       templateData: this._templateData,
     };
     this._toast(this.i18n('renderTemplateButton.toast.rendering'), 0);
-    return this.$.renderTemplateOp.execute().then((response) => this._download(response).then(() => {
-        this._toast(this.i18n('renderTemplateButton.toast.rendered',
-            this.selectedTemplate.properties['dc:title']));
-        if (this.selectedTemplate.properties['tmpl:allowOverride']) {
-          this.fire('document-updated');
-        }
-      })).catch((response) => {
-      this._toast(this.i18n('renderTemplateButton.toast.render.error', response.message));
-    });
+    return this.$.renderTemplateOp
+      .execute()
+      .then((response) =>
+        this._download(response).then(() => {
+          this._toast(this.i18n('renderTemplateButton.toast.rendered', this.selectedTemplate.properties['dc:title']));
+          if (this.selectedTemplate.properties['tmpl:allowOverride']) {
+            this.fire('document-updated');
+          }
+        }),
+      )
+      .catch((response) => {
+        this._toast(this.i18n('renderTemplateButton.toast.render.error', response.message));
+      });
   },
 
   _toast(msg, duration) {
@@ -252,7 +266,8 @@ Polymer({
     const contentDisposition = response.headers.get('Content-Disposition');
     if (contentDisposition) {
       const filenameMatches = contentDisposition
-          .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/).filter((match) => !!match);
+        .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/)
+        .filter((match) => !!match);
       const filename = decodeURI(filenameMatches[filenameMatches.length - 1]);
       return response.blob().then((blob) => {
         if (navigator.msSaveBlob) {
@@ -270,7 +285,6 @@ Polymer({
         }
       });
     }
-      return Promise.reject(new Error('missing Content-Disposition header'));
-
+    return Promise.reject(new Error('missing Content-Disposition header'));
   },
 });

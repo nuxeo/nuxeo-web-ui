@@ -23,9 +23,9 @@ limitations under the License.
 <dom-module id="nuxeo-diff-page">
   <template>
     <style include="nuxeo-styles">
-    a {
-      color: var(--nuxeo-link-hover_-_color);
-    }
+      a {
+        color: var(--nuxeo-link-hover_-_color);
+      }
     </style>
     <nuxeo-page>
       <div class="header" slot="header">
@@ -41,14 +41,17 @@ limitations under the License.
           <span>[[i18n('diffPage.noDocuments')]]</span>
         </template>
         <template is="dom-if" if="[[docIds.length]]">
-          <nuxeo-diff doc-ids="[[docIds]]"
-            left-uid="{{_leftUid}}" right-uid="{{_rightUid}}"
-            left="{{_left}}" right="{{_right}}">
+          <nuxeo-diff
+            doc-ids="[[docIds]]"
+            left-uid="{{_leftUid}}"
+            right-uid="{{_rightUid}}"
+            left="{{_left}}"
+            right="{{_right}}"
+          >
           </nuxeo-diff>
         </template>
       </div>
     </nuxeo-page>
-
   </template>
 
   <script>
@@ -87,9 +90,8 @@ limitations under the License.
       },
 
       _buildPermalink(document) {
-        return document ? `${ window.location.origin + window.location.pathname }#!/doc/${  document.uid}` : '';
+        return document ? `${window.location.origin + window.location.pathname}#!/doc/${document.uid}` : '';
       },
     });
   </script>
-
 </dom-module>

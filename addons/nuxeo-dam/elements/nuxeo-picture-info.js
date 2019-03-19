@@ -62,7 +62,7 @@ Polymer({
         <div>[[formatSize(document.properties.file:content.length)]]</div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-picture-info',
   behaviors: [I18nBehavior, FormatBehavior],

@@ -43,7 +43,7 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">[[i18n(label)]]</a>
-`,
+  `,
 
   is: 'nuxeo-menu-item',
   behaviors: [I18nBehavior, RoutingBehavior],

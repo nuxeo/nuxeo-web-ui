@@ -42,7 +42,7 @@ Polymer({
       </div>
       <nuxeo-tooltip for="downButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-collection-move-down-action',
   behaviors: [I18nBehavior],
@@ -96,9 +96,12 @@ Polymer({
               member2,
             };
             this.$.moveDownOp.execute().then(() => {
-              [ this.allMembers[this._member2Idx] ] = this.allMembers.splice(this._member1Idx, 1,
-                this.allMembers[this._member2Idx]);
-              this.fire('refresh-display', {focusIndex: this._member1Idx});
+              [this.allMembers[this._member2Idx]] = this.allMembers.splice(
+                this._member1Idx,
+                1,
+                this.allMembers[this._member2Idx],
+              );
+              this.fire('refresh-display', { focusIndex: this._member1Idx });
             });
           }
           break;

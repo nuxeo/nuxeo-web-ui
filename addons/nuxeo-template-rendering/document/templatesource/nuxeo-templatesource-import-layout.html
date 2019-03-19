@@ -22,43 +22,70 @@ limitations under the License.
 <dom-module id="nuxeo-templatesource-import-layout">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 8px;
       }
     </style>
 
-    <nuxeo-input role="widget" name="title" label="[[i18n('title')]]" value="{{document.properties.dc:title}}"
-                 always-float-label required></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      name="title"
+      label="[[i18n('title')]]"
+      value="{{document.properties.dc:title}}"
+      always-float-label
+      required
+    ></nuxeo-input>
 
-    <nuxeo-textarea role="widget" name="description" label="[[i18n('label.description')]]" always-float-label
-                    value="{{document.properties.dc:description}}"></nuxeo-textarea>
+    <nuxeo-textarea
+      role="widget"
+      name="description"
+      label="[[i18n('label.description')]]"
+      always-float-label
+      value="{{document.properties.dc:description}}"
+    ></nuxeo-textarea>
 
-    <nuxeo-directory-suggestion role="widget" name="nature" label="[[i18n('label.dublincore.nature')]]"
-                                directory-name="nature"
-                                value="{{document.properties.dc:nature}}"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="nature"
+      label="[[i18n('label.dublincore.nature')]]"
+      directory-name="nature"
+      value="{{document.properties.dc:nature}}"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" name="subjects" label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                value="{{document.properties.dc:subjects}}"
-                                multiple="true"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="subjects"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      value="{{document.properties.dc:subjects}}"
+      multiple="true"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" name="coverage" label="[[i18n('label.dublincore.coverage')]]"
-                                directory-name="l10ncoverage"
-                                value="{{document.properties.dc:coverage}}"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      name="coverage"
+      label="[[i18n('label.dublincore.coverage')]]"
+      directory-name="l10ncoverage"
+      value="{{document.properties.dc:coverage}}"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-date-picker role="widget" name="expireDate" label="[[i18n('label.dublincore.expire')]]"
-                       value="{{document.properties.dc:expired}}">
+    <nuxeo-date-picker
+      role="widget"
+      name="expireDate"
+      label="[[i18n('label.dublincore.expire')]]"
+      value="{{document.properties.dc:expired}}"
+    >
     </nuxeo-date-picker>
   </template>
 
@@ -74,5 +101,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

@@ -27,8 +27,13 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-document-form-button document="[[document]]" layout="edit" label="documentEditAction.tooltip" show-label$="[[showLabel]]"></nuxeo-document-form-button>
-`,
+    <nuxeo-document-form-button
+      document="[[document]]"
+      layout="edit"
+      label="documentEditAction.tooltip"
+      show-label$="[[showLabel]]"
+    ></nuxeo-document-form-button>
+  `,
 
   is: 'nuxeo-document-edit-button',
 

@@ -17,23 +17,26 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 function generateTextDiffHunks(text) {
-  return text[0].split(/(@@[\s-+,\d]+@@)/).filter(Boolean).reduce((result, value, index, array) => {
-    if (index % 2 === 0) {
-      const pair = array.slice(index, index + 2);
-      let range = pair[0].match(/\d+,\d+/g);
-      range = {
-        original: range[0].split(',').map(Number),
-        new: range[1].split(',').map(Number),
+  return text[0]
+    .split(/(@@[\s-+,\d]+@@)/)
+    .filter(Boolean)
+    .reduce((result, value, index, array) => {
+      if (index % 2 === 0) {
+        const pair = array.slice(index, index + 2);
+        let range = pair[0].match(/\d+,\d+/g);
+        range = {
+          original: range[0].split(',').map(Number),
+          new: range[1].split(',').map(Number),
+        };
+        result.push({
+          range,
+          context: pair[1],
+          hasAdditions: !!pair[1].match(/^\+(.*)$/gm),
+          hasDeletions: !!pair[1].match(/^-(.*)$/gm),
+        });
       }
-      result.push({
-        range,
-        context: pair[1],
-        hasAdditions: !!pair[1].match(/^\+(.*)$/gm),
-        hasDeletions: !!pair[1].match(/^-(.*)$/gm),
-      });
-    }
-    return result;
-  }, []);
+      return result;
+    }, []);
 }
 
 /**
@@ -44,51 +47,51 @@ function generateTextDiffHunks(text) {
 export const DiffBehavior = {
   properties: {
     /**
-    * The property being represented
-    */
+     * The property being represented
+     */
     property: {
       type: String,
       reflectToAttribute: true,
     },
     /**
-    * The property's type.
-    */
+     * The property's type.
+     */
     type: {
       type: String,
       value: 'string',
       reflectToAttribute: true,
     },
     /**
-    * If `true`, the element is being used in single column mode.
-    */
+     * If `true`, the element is being used in single column mode.
+     */
     unified: {
       type: Boolean,
       value: false,
       reflectToAttribute: true,
     },
     /**
-    * If `true`, deletions will not be displayed.
-    */
+     * If `true`, deletions will not be displayed.
+     */
     hideDeletions: {
       type: Boolean,
       value: false,
     },
     /**
-    * If `true`, additions will not be displayed.
-    */
+     * If `true`, additions will not be displayed.
+     */
     hideAdditions: {
       type: Boolean,
       value: false,
     },
     /**
-    * The label to be displayed.
-    */
+     * The label to be displayed.
+     */
     label: {
       type: String,
     },
     /**
-    * The schema to which the property belongs to.
-    */
+     * The schema to which the property belongs to.
+     */
     schema: Object,
     /**
      * The id of the document on the left, where deletions occurred.
@@ -99,42 +102,42 @@ export const DiffBehavior = {
      */
     rightUid: String,
     /**
-    * The difference delta.
-    */
+     * The difference delta.
+     */
     delta: Object,
     /**
-    * The original value.
-    */
+     * The original value.
+     */
     originalValue: Object,
     /**
-    * The new value.
-    */
+     * The new value.
+     */
     newValue: Object,
     /**
-    * If `true`, the element should display all information, including that not covered by `delta`.
-    */
+     * If `true`, the element should display all information, including that not covered by `delta`.
+     */
     showAll: {
       type: Boolean,
       value: false,
     },
     /**
-    * If `true`, the `label` will be displayed.
-    */
+     * If `true`, the `label` will be displayed.
+     */
     displayLabel: {
       type: Boolean,
       value: false,
     },
     /**
-    * If `true`, this element is part of an array. This is mostly used to condition styling.
-    */
+     * If `true`, this element is part of an array. This is mostly used to condition styling.
+     */
     isArrayItem: {
       type: Boolean,
       value: false,
       reflectToAttribute: true,
     },
     /**
-    * The depth level, used to indent labels. Please override `_computeIndentStyle` to change indentation styling.
-    */
+     * The depth level, used to indent labels. Please override `_computeIndentStyle` to change indentation styling.
+     */
     level: {
       type: Number,
       value: 0,
@@ -144,7 +147,7 @@ export const DiffBehavior = {
   observers: ['_computeType(property, schema, delta, originalValue)'],
 
   _computeType(property, schema, delta, originalValue) {
-    let {type} = this;
+    let { type } = this;
     if (property && schema && schema.fields && schema.fields[property]) {
       type = schema.fields[property];
       type = type.type || type;
@@ -182,11 +185,11 @@ export const DiffBehavior = {
   _computeArrayClass(delta, originalValue, newValue, hideAdditions, hideDeletions) {
     if (delta) {
       const arrdelta = this._getArrayDelta(delta, originalValue, newValue, hideAdditions, hideDeletions);
-      return (arrdelta && arrdelta.length > 0) ?
-        this._computeDefaultClass(arrdelta[0].value, arrdelta[0].originalValue) : 'simple';
+      return arrdelta && arrdelta.length > 0
+        ? this._computeDefaultClass(arrdelta[0].value, arrdelta[0].originalValue)
+        : 'simple';
     }
-      return this._computeDefaultClass(undefined, originalValue);
-
+    return this._computeDefaultClass(undefined, originalValue);
   },
 
   _showArrayItem(arrdelta, showAll) {
@@ -198,10 +201,10 @@ export const DiffBehavior = {
   },
 
   /**
-  * Computes the indentation style for labels.
-  */
+   * Computes the indentation style for labels.
+   */
   _computeIndentStyle(level, isArrayItem) {
-    return `margin-left: ${  isArrayItem ? 0 : level * 12  }px;`
+    return `margin-left: ${isArrayItem ? 0 : level * 12}px;`;
   },
 
   /* misc helpers */
@@ -227,7 +230,7 @@ export const DiffBehavior = {
   },
 
   _getPropertySchema(schema, property) {
-    return property ? (schema && schema.fields && schema.fields[property]) : schema;
+    return property ? schema && schema.fields && schema.fields[property] : schema;
   },
 
   _unwrapDelta(delta) {
@@ -252,8 +255,9 @@ export const DiffBehavior = {
   },
 
   _isSimple(delta, originalValue) {
-    return delta ? this._isSimpleDelta(delta) :
-      !this._isObject((Array.isArray(originalValue) && originalValue.length > 0) ? originalValue[0] : originalValue);
+    return delta
+      ? this._isSimpleDelta(delta)
+      : !this._isObject(Array.isArray(originalValue) && originalValue.length > 0 ? originalValue[0] : originalValue);
   },
 
   _getAllKeys(delta, originalValue, showAll) {
@@ -326,11 +330,13 @@ export const DiffBehavior = {
     let start = 0;
     hunks.forEach((hunk) => {
       const end = hunk.range.original[0] - 1 + offset;
-      result += originalValue.substring(start, end) + hunk.context
-        .replace(/^-(.*)$/gm, hideDeletions ? '' : '<span class="deleted">$1</span>') // removals
-        .replace(/^\+(.*)$/gm, hideAdditions ? '' : '<span class="added">$1</span>') // deletions
-        .replace(/^\s/gm, '') // modifier, which will by a black space for unmodified lines
-        .replace(/(\r\n|\r|\n)/gm, ''); // new lines
+      result +=
+        originalValue.substring(start, end) +
+        hunk.context
+          .replace(/^-(.*)$/gm, hideDeletions ? '' : '<span class="deleted">$1</span>') // removals
+          .replace(/^\+(.*)$/gm, hideAdditions ? '' : '<span class="added">$1</span>') // deletions
+          .replace(/^\s/gm, '') // modifier, which will by a black space for unmodified lines
+          .replace(/(\r\n|\r|\n)/gm, ''); // new lines
       offset += hunk.range.original[1] - hunk.range.new[1];
       start += hunk.range.original[1] + (end - start);
     });
@@ -347,45 +353,49 @@ export const DiffBehavior = {
       return { originalValue: val, modified: false, index: String(index), change: 'unchanged', newValue: null };
     });
     // sort and reversing assures that we'll deal first with deletions
-    Object.keys(delta).filter((key) => key !== '_t').sort().reverse().forEach((index) => {
-      let i;
-      if (index.startsWith('_')) {
-        i = Number(index.replace('_', ''));
-        if (hideDeletions) {
-          deltas.splice(i, 1);
+    Object.keys(delta)
+      .filter((key) => key !== '_t')
+      .sort()
+      .reverse()
+      .forEach((index) => {
+        let i;
+        if (index.startsWith('_')) {
+          i = Number(index.replace('_', ''));
+          if (hideDeletions) {
+            deltas.splice(i, 1);
+          } else {
+            deltas.splice(i, 1, {
+              value: delta[index],
+              modified: true,
+              change: 'deleted',
+              originalValue: originalValue[i],
+              newValue: newValue ? newValue[i] : null,
+              index: String(i),
+            });
+          }
         } else {
-          deltas.splice(i, 1, {
-            value: delta[index],
-            modified: true,
-            change: 'deleted',
-            originalValue: originalValue[i],
-            newValue: newValue ? newValue[i] : null,
-            index: String(i),
-          });
+          i = Number(index);
+          if (this._isObject(delta[index])) {
+            deltas.splice(i, 1, {
+              value: delta[index],
+              modified: true,
+              change: 'modified',
+              originalValue: originalValue[i],
+              newValue: newValue ? newValue[i] : null,
+              index: String(i),
+            });
+          } else if (!hideAdditions) {
+            deltas.splice(i, 0, {
+              value: delta[index],
+              modified: true,
+              change: 'added',
+              originalValue: originalValue[i],
+              newValue: newValue ? newValue[i] : null,
+              index: String(i),
+            });
+          }
         }
-      } else {
-        i = Number(index);
-        if (this._isObject(delta[index])) {
-          deltas.splice(i, 1, {
-            value: delta[index],
-            modified: true,
-            change: 'modified',
-            originalValue: originalValue[i],
-            newValue: newValue ? newValue[i] : null,
-            index: String(i),
-          });
-        } else if (!hideAdditions) {
-          deltas.splice(i, 0, {
-            value: delta[index],
-            modified: true,
-            change: 'added',
-            originalValue: originalValue[i],
-            newValue: newValue ? newValue[i] : null,
-            index: String(i),
-          });
-        }
-      }
-    });
+      });
     deltas.sort((a, b) => {
       if (a.index === b.index) {
         if (a.change === b.change) {
@@ -393,8 +403,7 @@ export const DiffBehavior = {
         }
         return a.change === 'added' ? 1 : -1;
       }
-        return a.index > b.index;
-
+      return a.index > b.index;
     });
     return deltas;
   },

@@ -43,23 +43,27 @@ Polymer({
         font-weight: 500;
         padding-left: 8px;
       }
-
     </style>
 
     <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
     </nuxeo-operation>
 
-    <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]">
-    </nuxeo-operation>
+    <nuxeo-operation id="opRestoreVersion" op="Document.RestoreVersion" input="[[document.uid]]"></nuxeo-operation>
 
     <template is="dom-if" if="[[_isAvailable(latest)]]">
-      <nuxeo-confirm-button dialog-title="[[i18n('versions.confirm.title')]]" dialog-dismiss="[[i18n('label.no')]]" dialog-confirm="[[i18n('label.yes')]]" on-confirm="_restore">
+      <nuxeo-confirm-button
+        dialog-title="[[i18n('versions.confirm.title')]]"
+        dialog-dismiss="[[i18n('label.no')]]"
+        dialog-confirm="[[i18n('label.yes')]]"
+        on-confirm="_restore"
+      >
         [[i18n('versions.restore')]]
-        <span class="version">[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
+        <span class="version"
+          >[[document.properties.uid:major_version]].[[document.properties.uid:minor_version]]
         </span>
       </nuxeo-confirm-button>
     </template>
-`,
+  `,
 
   is: 'nuxeo-restore-version-button',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -69,9 +73,7 @@ Polymer({
     latest: Object,
   },
 
-  observers: [
-    '_update(document)',
-  ],
+  observers: ['_update(document)'],
 
   _update() {
     if (this.document.isVersion) {
@@ -83,10 +85,8 @@ Polymer({
 
   _isAvailable() {
     if (this.document && this.latest) {
-      const v1 = `${this.document.properties['uid:major_version']  }.${ 
-        this.document.properties['uid:minor_version']}`;
-      const v2 = `${this.latest.properties['uid:major_version']  }.${ 
-        this.latest.properties['uid:minor_version']}`;
+      const v1 = `${this.document.properties['uid:major_version']}.${this.document.properties['uid:minor_version']}`;
+      const v2 = `${this.latest.properties['uid:major_version']}.${this.latest.properties['uid:minor_version']}`;
       return v1 === v2 ? this.latest.isCheckedOut : true;
     }
     return false;
@@ -95,7 +95,7 @@ Polymer({
   _restore() {
     if (this.document) {
       this.$.opRestoreVersion.input = this.document.uid;
-      this.$.opRestoreVersion.params = {checkout: true};
+      this.$.opRestoreVersion.params = { checkout: true };
       this.$.opRestoreVersion.execute().then(() => {
         this.fire('document-updated');
         this.navigateTo('browse', this.document.path);

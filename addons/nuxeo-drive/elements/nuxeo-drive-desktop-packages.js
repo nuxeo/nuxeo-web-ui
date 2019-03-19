@@ -73,14 +73,14 @@ Polymer({
         background-color: #50c3f0;
         border-radius: 3px;
         color: #fff;
-        font-size: .9em;
-        letter-spacing: .04em;
+        font-size: 0.9em;
+        letter-spacing: 0.04em;
         line-height: 130%;
         margin: 0 0.2em 0.2em 0;
         padding: 0.06em 0.3em;
         text-transform: uppercase;
         vertical-align: baseline;
-        white-space: nowrap
+        white-space: nowrap;
       }
     </style>
 
@@ -104,7 +104,7 @@ Polymer({
         </div>
       </template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-drive-desktop-packages',
 
@@ -127,23 +127,25 @@ Polymer({
     const prefix = 'nuxeo-drive';
     const baseUrl = 'https://community.nuxeo.com/static/drive-updates';
 
-    let name = `${prefix  }.dmg`;
+    let name = `${prefix}.dmg`;
     pkgs.push({
       name,
       platform: 'osx',
-      url: `${baseUrl  }/${  name}`,
+      url: `${baseUrl}/${name}`,
     });
 
-    name = `${prefix  }.exe`;
+    name = `${prefix}.exe`;
     pkgs.push({
       name,
       platform: 'windows',
-      url: `${baseUrl  }/${  name}`,
+      url: `${baseUrl}/${name}`,
     });
 
     pkgs.push({
-      name: window.nuxeo.I18n.translate('driveDesktopPackages.ubuntu.name',
-                                        'Read the documentation about the Linux client'),
+      name: window.nuxeo.I18n.translate(
+        'driveDesktopPackages.ubuntu.name',
+        'Read the documentation about the Linux client',
+      ),
       platform: 'ubuntu',
       url: 'https://github.com/nuxeo/nuxeo-drive#debian-based-distributions-and-other-gnulinux-variants-client',
     });

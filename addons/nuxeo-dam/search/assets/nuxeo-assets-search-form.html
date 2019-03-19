@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-assets-search-form">
   <template>
     <style>
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -33,79 +33,69 @@ limitations under the License.
     </style>
 
     <!-- Full Text -->
-    <nuxeo-input role="widget"
-                 id="searchInput"
-                 label="[[i18n('assetsSearch.fullText')]]"
-                 value="{{searchTerm}}"
-                 type="search"
-                 placeholder="[[i18n('assetsSearch.fullText.placeholder')]]"
-                 autofocus
-                 on-keydown="_checkForEnter">
+    <nuxeo-input
+      role="widget"
+      id="searchInput"
+      label="[[i18n('assetsSearch.fullText')]]"
+      value="{{searchTerm}}"
+      type="search"
+      placeholder="[[i18n('assetsSearch.fullText.placeholder')]]"
+      autofocus
+      on-keydown="_checkForEnter"
+    >
     </nuxeo-input>
 
     <!-- Asset type -->
     <div role="widget">
       <label>[[i18n('assetsSearch.assetType')]]</label>
       <nuxeo-checkbox-aggregation
-          data="[[aggregations.system_primaryType_agg]]"
-          value="{{params.system_primaryType_agg}}">
+        data="[[aggregations.system_primaryType_agg]]"
+        value="{{params.system_primaryType_agg}}"
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset format -->
     <div role="widget">
       <label>[[i18n('assetsSearch.assetFormat')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.system_mimetype_agg]]"
-          value="{{params.system_mimetype_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.system_mimetype_agg]]" value="{{params.system_mimetype_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset Width -->
     <div role="widget">
       <label>[[i18n('assetsSearch.assetWidth')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.asset_width_agg]]"
-          value="{{params.asset_width_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.asset_width_agg]]" value="{{params.asset_width_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset Height -->
     <div role="widget">
       <label>[[i18n('assetsSearch.assetHeight')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.asset_height_agg]]"
-          value="{{params.asset_height_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.asset_height_agg]]" value="{{params.asset_height_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Color Profile -->
     <div role="widget">
       <label>[[i18n('assetsSearch.colorProfile')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.color_profile_agg]]"
-          value="{{params.color_profile_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.color_profile_agg]]" value="{{params.color_profile_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Color Depth -->
     <div role="widget">
       <label>[[i18n('assetsSearch.colorDepth')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.color_depth_agg]]"
-          value="{{params.color_depth_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.color_depth_agg]]" value="{{params.color_depth_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Video Duration -->
     <div role="widget">
       <label>[[i18n('assetsSearch.videoDuration')]]</label>
-      <nuxeo-checkbox-aggregation
-          data="[[aggregations.video_duration_agg]]"
-          value="{{params.video_duration_agg}}">
+      <nuxeo-checkbox-aggregation data="[[aggregations.video_duration_agg]]" value="{{params.video_duration_agg}}">
       </nuxeo-checkbox-aggregation>
     </div>
-
   </template>
   <script>
     Polymer({
@@ -149,7 +139,6 @@ limitations under the License.
           this._search();
         }
       },
-
     });
   </script>
 </dom-module>

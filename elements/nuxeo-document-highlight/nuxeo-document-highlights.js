@@ -29,17 +29,17 @@ Polymer({
   _template: html`
     <style>
       .category {
-        opacity: .7;
+        opacity: 0.7;
         text-transform: uppercase;
-        font-size: .75rem;
-        padding-right: .5rem;
+        font-size: 0.75rem;
+        padding-right: 0.5rem;
       }
 
       .segment em {
-        color: var(--nuxeo-result-highlight, #0066CC);
+        color: var(--nuxeo-result-highlight, #0066cc);
         font-weight: bold;
         font-style: normal;
-        border-bottom: 1px solid var(--nuxeo-result-highlight, #0066CC);
+        border-bottom: 1px solid var(--nuxeo-result-highlight, #0066cc);
       }
 
       .segment + .segment::before {
@@ -56,19 +56,19 @@ Polymer({
             <template is="dom-repeat" items="[[highlight.segments]]" as="segment">
               <span class="segment">
                 <template is="dom-repeat" items="[[_segmentOc(segment)]]" as="segmentOc">
-                    [[_preSegment(segmentOc)]]
-                    <em>
-                      [[_segment(segmentOc)]]
-                    </em>
-                    [[_postSegment(segmentOc)]]
+                  [[_preSegment(segmentOc)]]
+                  <em>
+                    [[_segment(segmentOc)]]
+                  </em>
+                  [[_postSegment(segmentOc)]]
                 </template>
               </span>
             </template>
           </span>
-        <div>
-      </div></div></template>
+          <div></div></div
+      ></template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-highlights',
   behaviors: [I18nBehavior],
@@ -80,16 +80,15 @@ Polymer({
   },
 
   _highlightFieldLabel(highlight) {
-    return this.i18n(`searchResults.highlight.field.${  highlight.field}`);
+    return this.i18n(`searchResults.highlight.field.${highlight.field}`);
   },
 
   _preSegment(segment) {
     const soEmIdx = segment.indexOf('<em>');
     if (soEmIdx > -1) {
       return segment.substring(0, soEmIdx);
-    } 
-      return segment;
-    
+    }
+    return segment;
   },
 
   _segment(segment) {
@@ -97,15 +96,14 @@ Polymer({
     const eoEmIdx = segment.indexOf('</em>');
     if (soEmIdx > -1 && eoEmIdx > -1) {
       return segment.substring(soEmIdx + 4, eoEmIdx);
-    } 
-      return '';
-    
+    }
+    return '';
   },
 
   _segmentOc(segment) {
     const segmentOc = [];
     segment.split('<em>').forEach((item, idx) => {
-      segmentOc.push(idx > 0 ? `<em>${  item}`: item);
+      segmentOc.push(idx > 0 ? `<em>${item}` : item);
     });
     return segmentOc;
   },
@@ -114,8 +112,7 @@ Polymer({
     const eoEmIdx = segment.indexOf('</em>');
     if (eoEmIdx > -1) {
       return segment.substring(eoEmIdx + 5, segment.length);
-    } 
-      return '';
-    
+    }
+    return '';
   },
 });

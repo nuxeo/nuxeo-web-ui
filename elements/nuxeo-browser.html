@@ -53,10 +53,8 @@ limitations under the License.
       }
     </style>
 
-
     <!-- Main content -->
     <nuxeo-page class="main">
-
       <div slot="header">
         <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
         <template is="dom-if" if="[[!isTrashed(document)]]">
@@ -80,7 +78,6 @@ limitations under the License.
         </div>
       </div>
     </nuxeo-page>
-
   </template>
 
   <script>
@@ -115,8 +112,8 @@ limitations under the License.
       },
 
       listeners: {
-        'aceupdated': '_documentUpdated',
-        'acedeleted': '_documentUpdated',
+        aceupdated: '_documentUpdated',
+        acedeleted: '_documentUpdated',
         'added-to-collection': '_documentUpdated',
         'removed-from-collection': '_documentUpdated',
       },
@@ -138,11 +135,11 @@ limitations under the License.
       },
 
       _actionContext() {
-        return {document: this.document, clipboard: this.clipboard};
+        return { document: this.document, clipboard: this.clipboard };
       },
 
       _viewsContext() {
-        return {document: this.document};
+        return { document: this.document };
       },
 
       _navigateToView() {
@@ -168,7 +165,7 @@ limitations under the License.
           queryParams.set('p', this.selectedTab);
         }
         if (queryParams.toString().length > 0) {
-          newUrl += `?${  queryParams.toString()}`;
+          newUrl += `?${queryParams.toString()}`;
         }
         if (newUrl !== currentUrl) {
           window.history.pushState(null, window.title, newUrl);
@@ -176,8 +173,6 @@ limitations under the License.
           window.history.replaceState(null, window.title, newUrl);
         }
       },
-
     });
   </script>
-
 </dom-module>

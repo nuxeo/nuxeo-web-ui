@@ -36,9 +36,12 @@ limitations under the License.
         <span class="flex">[[i18n('authorizedApps.heading')]]</span>
       </div>
       <nuxeo-card>
-        <nuxeo-data-table name="table" icon="nuxeo:view-list"
-                          empty-label="[[i18n('authorizedApps.emptyResult')]]" items="[[clients]]">
-
+        <nuxeo-data-table
+          name="table"
+          icon="nuxeo:view-list"
+          empty-label="[[i18n('authorizedApps.emptyResult')]]"
+          items="[[clients]]"
+        >
           <nuxeo-data-table-column name="[[i18n('authorizedApps.name')]]" flex="100">
             <template>
               <span>[[item.name]]</span>
@@ -53,8 +56,12 @@ limitations under the License.
 
           <nuxeo-data-table-column>
             <template>
-              <paper-icon-button name="revoke" icon="nuxeo:delete" on-tap="_revoke"
-                                 title="[[i18n('authorizedApps.revoke')]]"></paper-icon-button>
+              <paper-icon-button
+                name="revoke"
+                icon="nuxeo:delete"
+                on-tap="_revoke"
+                title="[[i18n('authorizedApps.revoke')]]"
+              ></paper-icon-button>
             </template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
@@ -91,7 +98,9 @@ limitations under the License.
           this.tokens = response.entries;
           if (this.tokens.length > 0) {
             this.$.clients.get().then((innerResponse) => {
-              this.clients = innerResponse.entries.filter((client) => this.tokens.findIndex((token) => token.clientId === client.id) > -1);
+              this.clients = innerResponse.entries.filter(
+                (client) => this.tokens.findIndex((token) => token.clientId === client.id) > -1,
+              );
             });
           } else {
             this.clients = [];
@@ -118,19 +127,24 @@ limitations under the License.
         if (window.confirm(this.i18n('authorizedApps.confirmRevoke', client.name))) {
           const token = this._token(client);
           this.$.tokens.path = [OAUTH2_CLIENT_TOKEN_BASE_PATH, client.id, 'user', token.nuxeoLogin].join('/');
-          return this.$.tokens.remove().then(() => {
-            this.refresh();
-            this.fire('authorized-app-revoked');
-            this.fire('notify', {
-              message: this.i18n('authorizedApps.successfullyRevoked', client.name),
-            });
-          }, () => {
-            this.refresh();
-            this.fire('notify', {
-              message: `${this.i18n('label.error').toUpperCase()  }: ${
-                    this.i18n('authorizedApps.errorRevoking', client.name)}`,
-            });
-          });
+          return this.$.tokens.remove().then(
+            () => {
+              this.refresh();
+              this.fire('authorized-app-revoked');
+              this.fire('notify', {
+                message: this.i18n('authorizedApps.successfullyRevoked', client.name),
+              });
+            },
+            () => {
+              this.refresh();
+              this.fire('notify', {
+                message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
+                  'authorizedApps.errorRevoking',
+                  client.name,
+                )}`,
+              });
+            },
+          );
         }
       },
     });

@@ -43,7 +43,7 @@ Polymer({
         visibility: hidden;
         transform: translateY(-100%);
         -webkit-transform: translateY(-100%);
-        transition-duration: .5s;
+        transition-duration: 0.5s;
         transition-property: visibility, -webkit-transform, opacity;
         transition-property: visibility, transform, opacity;
         will-change: transform;
@@ -55,7 +55,10 @@ Polymer({
         -webkit-transform: translateY(0);
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         @apply --nuxeo-expired-session-link;
       }
       a:hover {
@@ -66,7 +69,7 @@ Polymer({
     </style>
 
     <a href="javascript:window.location.reload();">[[message]]</a>
-`,
+  `,
 
   is: 'nuxeo-expired-session',
 

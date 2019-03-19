@@ -32,9 +32,13 @@ Polymer({
   _template: html`
     <nuxeo-resource id="tokens" path="oauth2/token/"></nuxeo-resource>
     <nuxeo-card heading="[[i18n('cloudTokens.OAuth2Tokens')]]">
-      <nuxeo-oauth2-tokens tokens="[[tokens]]" on-oauth2-token-saved="refresh" on-oauth2-token-deleted="refresh"></nuxeo-oauth2-tokens>
+      <nuxeo-oauth2-tokens
+        tokens="[[tokens]]"
+        on-oauth2-token-saved="refresh"
+        on-oauth2-token-deleted="refresh"
+      ></nuxeo-oauth2-tokens>
     </nuxeo-card>
-`,
+  `,
 
   is: 'nuxeo-cloud-tokens',
   behaviors: [I18nBehavior],

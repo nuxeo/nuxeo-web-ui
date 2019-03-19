@@ -42,9 +42,9 @@ Polymer({
 
       .dates input {
         border: 1px solid #c6c6c6;
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0);
         border-radius: 3px;
-        margin-left: .5em;
+        margin-left: 0.5em;
         width: 125px;
       }
 
@@ -69,11 +69,12 @@ Polymer({
         height: 450px;
       }
 
-      chart-bar, chart-pie {
+      chart-bar,
+      chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
         display: block;
-        font-size: .8rem;
+        font-size: 0.8rem;
       }
 
       @media (max-width: 1024px) {
@@ -81,7 +82,6 @@ Polymer({
           flex: 1 0 calc(100% - 2em);
         }
       }
-
     </style>
 
     <nuxeo-card class="dates">
@@ -93,95 +93,160 @@ Polymer({
 
     <div class="flex-layout">
       <!-- Number of calls per PageProvider -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="pageProviderName" data="{{callsPerProvider}}" index="[[index]]">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="pageProviderName"
+        data="{{callsPerProvider}}"
+        index="[[index]]"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
-        <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-pie
+          values="[[_values(callsPerProvider)]]"
+          labels="[[_labels(callsPerProvider)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-pie>
       </nuxeo-card>
 
       <!-- Number of calls per hour -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" with-date-intervals="hour" without-extended-bounds date-format="HH" data="{{callsPerHour}}" index="[[index]]">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        with-date-intervals="hour"
+        without-extended-bounds
+        date-format="HH"
+        data="{{callsPerHour}}"
+        index="[[index]]"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">
-        <chart-bar labels="[[_range(0,23)]]" values="[[_aggregatePerHourOfDay(callsPerHour)]]" series="[[_range(0,23)]]" options='{ "legend": { "display": false }, "animation": false }'>
+        <chart-bar
+          labels="[[_range(0,23)]]"
+          values="[[_aggregatePerHourOfDay(callsPerHour)]]"
+          series="[[_range(0,23)]]"
+          options='{ "legend": { "display": false }, "animation": false }'
+        >
         </chart-bar>
       </nuxeo-card>
 
       <!-- Result ranges -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" with-ranges="{&quot;resultsCount&quot;:[
-                       {&quot;key&quot;: &quot;no result&quot;, &quot;to&quot;: 1 },
-                       {&quot;key&quot;: &quot;less than 50&quot;, &quot;from&quot; : 1, &quot;to&quot;: 50},
-                       {&quot;key&quot;: &quot;between 51 and 200&quot;, &quot;from&quot; : 51, &quot;to&quot;: 200 },
-                       {&quot;key&quot;: &quot;between 200 and 1000&quot;, &quot;from&quot; : 201, &quot;to&quot;: 1000},
-                       {&quot;key&quot;: &quot;more than 1000&quot;, &quot;from&quot; : 1001 }]}" data="{{callPerNumberOfResults}}" index="[[index]]">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        with-ranges='{"resultsCount":[
+                       {"key": "no result", "to": 1 },
+                       {"key": "less than 50", "from" : 1, "to": 50},
+                       {"key": "between 51 and 200", "from" : 51, "to": 200 },
+                       {"key": "between 200 and 1000", "from" : 201, "to": 1000},
+                       {"key": "more than 1000", "from" : 1001 }]}'
+        data="{{callPerNumberOfResults}}"
+        index="[[index]]"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.numberOfResults.heading')]]">
         <nuxeo-data-table items="[[callPerNumberOfResults]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
-            <template>[[item.key]]</template>
+            <template
+              >[[item.key]]</template
+            >
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.calls')]]">
-            <template>[[item.value]]</template>
+            <template
+              >[[item.value]]</template
+            >
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
 
       <!-- Most used expressions for full text search  -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext" group-limit="5" data="{{callsPerFT}}" index="[[index]]">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="searchDocumentModel.properties.defaults:ecm_fulltext"
+        group-limit="5"
+        data="{{callsPerFT}}"
+        index="[[index]]"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.heading')]]">
         <nuxeo-data-table items="[[callsPerFT]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
-            <template>[[item.key]]</template>
+            <template
+              >[[item.key]]</template
+            >
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfCalls')]]">
-            <template>[[item.value]]</template>
+            <template
+              >[[item.value]]</template
+            >
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
 
       <!-- Searches by number of pages displayed -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" with-ranges="{&quot;pageIndex&quot;:[
-                           {&quot;key&quot;: &quot;First page&quot;, &quot;from&quot; : 0, &quot;to&quot;: 1 },
-                           {&quot;key&quot;: &quot;Page 2&quot;, &quot;from&quot; : 1, &quot;to&quot;: 2},
-                           {&quot;key&quot;: &quot;Pages 3 to 5&quot;, &quot;from&quot; : 2, &quot;to&quot;: 5 },
-                           {&quot;key&quot;: &quot;Pages 6 to 10&quot;, &quot;from&quot; : 6, &quot;to&quot;: 10},
-                           {&quot;key&quot;: &quot;After 10 pages&quot;, &quot;from&quot; : 10 }]}" data="{{callPerNumberOfPages}}" index="[[index]]">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        with-ranges='{"pageIndex":[
+                           {"key": "First page", "from" : 0, "to": 1 },
+                           {"key": "Page 2", "from" : 1, "to": 2},
+                           {"key": "Pages 3 to 5", "from" : 2, "to": 5 },
+                           {"key": "Pages 6 to 10", "from" : 6, "to": 10},
+                           {"key": "After 10 pages", "from" : 10 }]}'
+        data="{{callPerNumberOfPages}}"
+        index="[[index]]"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.heading')]]">
         <nuxeo-data-table items="[[callPerNumberOfPages]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]">
-            <template>[[item.key]]</template>
+            <template
+              >[[item.key]]</template
+            >
           </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.numberOfCalls')]]">
-            <template>[[item.value]]</template>
+          <nuxeo-data-table-column
+            name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.numberOfCalls')]]"
+          >
+            <template
+              >[[item.value]]</template
+            >
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
 
       <!-- Searches by filters used -->
-      <nuxeo-search-data start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" grouped-by="searchFields" group-limit="5" data="{{callByFilters}}">
+      <nuxeo-search-data
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        grouped-by="searchFields"
+        group-limit="5"
+        data="{{callByFilters}}"
+      >
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.filtersUsed.heading')]]">
         <nuxeo-data-table items="[[callByFilters]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
-            <template>[[item.key]]</template>
+            <template
+              >[[item.key]]</template
+            >
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfCalls')]]">
-            <template>[[item.value]]</template>
+            <template
+              >[[item.value]]</template
+            >
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
-
     </div>
-`,
+  `,
 
   is: 'nuxeo-search-analytics',
   behaviors: [ChartDataBehavior, I18nBehavior],
@@ -194,12 +259,14 @@ Polymer({
     startDate: String,
     endDate: String,
     hoursBounds: {
-      value: {min: 0, max: 23},
+      value: { min: 0, max: 23 },
     },
   },
 
   ready() {
-    this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+    this.startDate = moment()
+      .subtract(1, 'month')
+      .format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
@@ -220,13 +287,19 @@ Polymer({
     });
     // build our total per bucket
     const hours = this._range(this.hoursBounds.min, this.hoursBounds.max);
-    return [hours.map((i) => {
-      if (!agg[i] || !agg[i].length) { return 0; }
-      // TODO: use Array.reduce once prototype.js is removed!
-      // return agg[i].reduce(function(a, b) { return a + b; });
-      let sum = 0;
-      agg[i].forEach((v) => { sum += v; });
-      return sum;
-    })];
+    return [
+      hours.map((i) => {
+        if (!agg[i] || !agg[i].length) {
+          return 0;
+        }
+        // TODO: use Array.reduce once prototype.js is removed!
+        // return agg[i].reduce(function(a, b) { return a + b; });
+        let sum = 0;
+        agg[i].forEach((v) => {
+          sum += v;
+        });
+        return sum;
+      }),
+    ];
   },
 });

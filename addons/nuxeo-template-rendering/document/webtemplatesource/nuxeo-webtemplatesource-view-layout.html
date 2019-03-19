@@ -20,9 +20,7 @@ limitations under the License.
 @element nuxeo-webtemplatesource-view-layout
 -->
 <dom-module id="nuxeo-webtemplatesource-view-layout">
-
   <template>
-
     <style>
       .queue-thumbnail {
         height: 32px;
@@ -34,25 +32,29 @@ limitations under the License.
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-page-provider id="templateBasedDocs"
-                         provider="template_based"
-                         page-size="10"
-                         enrichers="thumbnail"
-                         params="[[_buildParams(document)]]">
+    <nuxeo-page-provider
+      id="templateBasedDocs"
+      provider="template_based"
+      page-size="10"
+      enrichers="thumbnail"
+      params="[[_buildParams(document)]]"
+    >
     </nuxeo-page-provider>
 
     <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
 
     <nuxeo-card heading="[[i18n('templateSourceViewLayout.templateBasedDocuments.heading')]]">
       <div class="vertical layout">
-        <nuxeo-data-table id="templateBasedDatatable"
-                          nx-provider="templateBasedDocs"
-                          empty-label="[[i18n('templateSourceViewLayout.templateBasedDocuments.noDocument')]]"
-                          empty-label-when-filtered="[[i18n('templateSourceViewLayout.templateBasedDocuments.noDocumentWhenFiltered')]]"
-                          on-row-clicked="_navigate">
+        <nuxeo-data-table
+          id="templateBasedDatatable"
+          nx-provider="templateBasedDocs"
+          empty-label="[[i18n('templateSourceViewLayout.templateBasedDocuments.noDocument')]]"
+          empty-label-when-filtered="[[i18n('templateSourceViewLayout.templateBasedDocuments.noDocumentWhenFiltered')]]"
+          on-row-clicked="_navigate"
+        >
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]">
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" />
               <a href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
@@ -77,8 +79,8 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         /**
-        * @doctype WebTemplateSource
-        */
+         * @doctype WebTemplateSource
+         */
         document: {
           type: Object,
           observer: '_documentChanged',
@@ -92,7 +94,7 @@ limitations under the License.
       },
 
       _buildParams() {
-        return [`"${  this.document.uid  }"`, 0];
+        return [`"${this.document.uid}"`, 0];
       },
 
       _thumbnail(doc) {
@@ -101,7 +103,7 @@ limitations under the License.
             return doc.contextParameters.thumbnail.url;
           }
           const baseUrl = this.$.nxcon.url;
-          return `${baseUrl  }/api/v1/id/${  doc.uid  }/@rendition/thumbnail`;
+          return `${baseUrl}/api/v1/id/${doc.uid}/@rendition/thumbnail`;
         }
       },
 
@@ -110,5 +112,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

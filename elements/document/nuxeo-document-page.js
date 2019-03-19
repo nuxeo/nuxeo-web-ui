@@ -68,7 +68,7 @@ Polymer({
       }
 
       :host([opened]) .scrollerHeader {
-        box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04) !important;
         border-radius: 0;
         background-color: var(--nuxeo-box) !important;
       }
@@ -135,7 +135,7 @@ Polymer({
         }
 
         .scrollerHeader {
-          box-shadow: 0 3px 5px rgba(0,0,0,0.04) !important;
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04) !important;
           font-family: var(--nuxeo-app-font);
           border-radius: 0;
           background-color: var(--nuxeo-box) !important;
@@ -171,7 +171,6 @@ Polymer({
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
 
     <div class="page">
-
       <div class="main">
         <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
       </div>
@@ -202,7 +201,12 @@ Polymer({
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h3>[[i18n('documentPage.tags')]]</h3>
-              <nuxeo-tag-suggestion document="[[document]]" allow-new-tags placeholder="[[i18n('documentPage.tags.placeholder')]]" readonly="[[!isTaggable(document)]]">
+              <nuxeo-tag-suggestion
+                document="[[document]]"
+                allow-new-tags
+                placeholder="[[i18n('documentPage.tags.placeholder')]]"
+                readonly="[[!isTaggable(document)]]"
+              >
               </nuxeo-tag-suggestion>
             </div>
           </template>
@@ -221,7 +225,7 @@ Polymer({
         </div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-page',
   behaviors: [LayoutBehavior],
@@ -247,10 +251,12 @@ Polymer({
   _openedChanged() {
     animationFrame.run(() => {
       // notify that there was a resize
-      this.dispatchEvent(new CustomEvent('resize', {
-        bubbles: false,
-        composed: true,
-      }));
+      this.dispatchEvent(
+        new CustomEvent('resize', {
+          bubbles: false,
+          composed: true,
+        }),
+      );
     });
   },
 

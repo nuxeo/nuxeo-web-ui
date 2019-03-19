@@ -47,7 +47,13 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document id="doc" doc-id="[[document.uid]]" response="{{document}}" headers="[[headers]]" sync-indexing></nuxeo-document>
+    <nuxeo-document
+      id="doc"
+      doc-id="[[document.uid]]"
+      response="{{document}}"
+      headers="[[headers]]"
+      sync-indexing
+    ></nuxeo-document>
 
     <iron-form id="form">
       <form>
@@ -60,7 +66,7 @@ Polymer({
         </div>
       </form>
     </iron-form>
-`,
+  `,
 
   is: 'nuxeo-document-form-layout',
   behaviors: [IronResizableBehavior, I18nBehavior],
@@ -81,9 +87,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_documentChanged(document.*)',
-  ],
+  observers: ['_documentChanged(document.*)'],
 
   _validate() {
     // run our custom validation function first to allow setting custom native validity
@@ -91,26 +95,25 @@ Polymer({
     if (result) {
       return result;
     }
-      const {layout} = this.$.layout.$;
-      const nodes = layout._getValidatableElements(layout.element.root);
-      const invalidField = nodes.find((node) => node.invalid);
-      invalidField.scrollIntoView();
-      invalidField.focus();
-
+    const { layout } = this.$.layout.$;
+    const nodes = layout._getValidatableElements(layout.element.root);
+    const invalidField = nodes.find((node) => node.invalid);
+    invalidField.scrollIntoView();
+    invalidField.focus();
   },
 
   _doSave() {
-    if (!this.document.uid) { // create
+    if (!this.document.uid) {
+      // create
       this.$.doc.data = this.document;
-      return this.$.doc.post()
-    }  // edit
-      this.$.doc.data = {
-        'entity-type': 'document',
-        uid: this.document.uid,
-        properties: this._dirtyProperties,
-      };
-      return this.$.doc.put();
-
+      return this.$.doc.post();
+    } // edit
+    this.$.doc.data = {
+      'entity-type': 'document',
+      uid: this.document.uid,
+      properties: this._dirtyProperties,
+    };
+    return this.$.doc.put();
   },
 
   save() {
@@ -118,7 +121,7 @@ Polymer({
       return;
     }
     this._doSave().then(this._refresh.bind(this), (err) => {
-      this.fire('notify', {message: this.i18n('document.saveError')});
+      this.fire('notify', { message: this.i18n('document.saveError') });
       console.error(err);
     });
   },

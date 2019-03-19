@@ -57,7 +57,10 @@ Polymer({
         margin-bottom: 8px;
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
       }
@@ -85,7 +88,7 @@ Polymer({
       }
 
       #details {
-        border: 1px solid var(--nuxeo-border, rgba(0,0,0,0.15));
+        border: 1px solid var(--nuxeo-border, rgba(0, 0, 0, 0.15));
         padding: 16px;
         margin-bottom: 8px;
       }
@@ -105,7 +108,7 @@ Polymer({
       }
 
       .file .info .size {
-        opacity: .5;
+        opacity: 0.5;
         margin: 4px 0;
       }
 
@@ -130,7 +133,7 @@ Polymer({
       <label id="label">[[label]]</label>
     </template>
 
-    <input hidden id="input" type="file" on-change="_uploadInputFiles">
+    <input hidden id="input" type="file" on-change="_uploadInputFiles" />
 
     <div id="details" hidden$="[[!hasFiles]]">
       <template is="dom-repeat" items="[[files]]" as="file">
@@ -139,7 +142,11 @@ Polymer({
             <div class="name">[[file.name]]</div>
             <div class="size">[[formatSize(file.size)]]</div>
             <template is="dom-if" if="[[uploading]]">
-              <paper-progress class="progress" indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
+              <paper-progress
+                class="progress"
+                indeterminate="[[!hasProgress()]]"
+                value="[[file.progress]]"
+              ></paper-progress>
             </template>
           </div>
           <div class="actions" hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
@@ -151,13 +158,15 @@ Polymer({
 
     <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, updateDocument, blobList)]]">
       <div id="container">
-        <a href="javascript:undefined" on-tap="open">[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a>
+        <a href="javascript:undefined" on-tap="open"
+          >[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a
+        >
         <div class="actions">
           <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-dropzone',
   behaviors: [UploaderBehavior, FormatBehavior],
@@ -264,14 +273,11 @@ Polymer({
   },
 
   listeners: {
-    'batchFinished': 'importBatch',
+    batchFinished: 'importBatch',
     'nx-blob-picked': '_blobPicked',
   },
 
-  observers: [
-    '_reset(document)',
-    '_filesChanged(files.splices)',
-  ],
+  observers: ['_reset(document)', '_filesChanged(files.splices)'],
 
   attached() {
     this.connection = this.$.nx;
@@ -294,20 +300,22 @@ Polymer({
   importBatch(data) {
     data.stopPropagation();
     if (this.blobList) {
-      if (!this.get(`document.properties.${  this._parsedXpath}`)) {
-        this.set(`document.properties.${  this._parsedXpath}`, []);
+      if (!this.get(`document.properties.${this._parsedXpath}`)) {
+        this.set(`document.properties.${this._parsedXpath}`, []);
       }
       this.files.forEach((file, index) => {
         const uploadedFile = {
           'upload-batch': data.detail.batchId,
           'upload-fileId': index.toString(),
         };
-        this.push(`document.properties.${  this._parsedXpath}`,
+        this.push(
+          `document.properties.${this._parsedXpath}`,
           // Handle special case when using files:files
-          this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
+          this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile,
+        );
       });
     } else {
-      this.set(`document.properties.${  this._parsedXpath}`, {
+      this.set(`document.properties.${this._parsedXpath}`, {
         'upload-batch': data.detail.batchId,
         'upload-fileId': '0',
       });
@@ -318,25 +326,27 @@ Polymer({
   _blobPicked(e) {
     this.set('files', e.detail.blobs);
     if (this.blobList) {
-      if (!this.get(`document.properties.${  this._parsedXpath}`)) {
-        this.set(`document.properties.${  this._parsedXpath}`, []);
+      if (!this.get(`document.properties.${this._parsedXpath}`)) {
+        this.set(`document.properties.${this._parsedXpath}`, []);
       }
       this.files.forEach((file) => {
         const uploadedFile = {
-          'providerId': file.providerId,
-          'user': file.user,
-          'fileId': file.fileId,
+          providerId: file.providerId,
+          user: file.user,
+          fileId: file.fileId,
         };
-        this.push(`document.properties.${  this._parsedXpath}`,
+        this.push(
+          `document.properties.${this._parsedXpath}`,
           // Handle special case when using files:files
-          this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
+          this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile,
+        );
       });
     } else {
       const file = e.detail.blobs[0];
-      this.set(`document.properties.${  this._parsedXpath}`, {
-        'providerId': file.providerId,
-        'user': file.user,
-        'fileId': file.fileId,
+      this.set(`document.properties.${this._parsedXpath}`, {
+        providerId: file.providerId,
+        user: file.user,
+        fileId: file.fileId,
       });
     }
     this._handleBlobUploaded();
@@ -346,14 +356,15 @@ Polymer({
     if (this.updateDocument) {
       const props = {};
       this._createNestedObjectRecursive(
-        props, this._parsedXpath.split('.'),
-        this.get(`document.properties.${  this._parsedXpath}`),
+        props,
+        this._parsedXpath.split('.'),
+        this.get(`document.properties.${this._parsedXpath}`),
       );
       this.$.doc.data = {
-        "entity-type": "document",
-        "repository": this.document.repository,
-        "uid": this.document.uid,
-        "properties": props,
+        'entity-type': 'document',
+        repository: this.document.repository,
+        uid: this.document.uid,
+        properties: props,
       };
       this.$.doc.put().then((response) => {
         this.document = response;
@@ -366,12 +377,12 @@ Polymer({
   },
 
   _deleteFile(e) {
-    if (!this.updateDocument && this.blobList && Array.isArray(this.get(`document.properties.${  this._parsedXpath}`))) {
-      this.splice(`document.properties.${  this._parsedXpath}`, e.model.itemsIndex, 1);
+    if (!this.updateDocument && this.blobList && Array.isArray(this.get(`document.properties.${this._parsedXpath}`))) {
+      this.splice(`document.properties.${this._parsedXpath}`, e.model.itemsIndex, 1);
       this.splice('files', e.model.itemsIndex, 1);
     } else {
       this._reset();
-      this.set(`document.properties.${  this._parsedXpath}`, '');
+      this.set(`document.properties.${this._parsedXpath}`, '');
     }
   },
 
@@ -431,8 +442,9 @@ Polymer({
   _computeEnrichers() {
     return {
       document: ['preview'],
-      blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob)
-        || ['appLinks'],
+      blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob) || [
+        'appLinks',
+      ],
     };
   },
 

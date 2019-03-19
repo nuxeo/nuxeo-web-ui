@@ -33,7 +33,6 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import moment from 'moment';
 
-
 /**
 `nuxeo-document-versions`
 @group Nuxeo UI
@@ -87,9 +86,9 @@ Polymer({
       }
 
       .version .modified {
-        font-size: .8rem;
+        font-size: 0.8rem;
         margin-top: 4px;
-        opacity: .3;
+        opacity: 0.3;
       }
 
       .version .latest {
@@ -109,10 +108,21 @@ Polymer({
     <nuxeo-operation id="opGetLatest" op="Proxy.GetSourceDocument" input="[[document.uid]]" response="{{latest}}">
     </nuxeo-operation>
 
-    <nuxeo-page-provider id="provider" query="[[query]]" page-size="[[pageSize]]" page="{{page}}" sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}' schemas="dublincore,common,uid">
+    <nuxeo-page-provider
+      id="provider"
+      query="[[query]]"
+      page-size="[[pageSize]]"
+      page="{{page}}"
+      sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
+      schemas="dublincore,common,uid"
+    >
     </nuxeo-page-provider>
 
-    <nuxeo-document-create-version document="[[document]]" hidden$="[[hasVersions(document)]]" label="[[_labelCreate(document)]]">
+    <nuxeo-document-create-version
+      document="[[document]]"
+      hidden$="[[hasVersions(document)]]"
+      label="[[_labelCreate(document)]]"
+    >
     </nuxeo-document-create-version>
 
     <div hidden$="[[!hasVersions(document)]]">
@@ -134,10 +144,20 @@ Polymer({
             </div>
           </template>
         </div>
-        <nuxeo-document-create-version slot="actions" document="[[document]]" hidden$="[[!_isCheckedOut(document)]]" on-dialog-closed="_hideList">
+        <nuxeo-document-create-version
+          slot="actions"
+          document="[[document]]"
+          hidden$="[[!_isCheckedOut(document)]]"
+          on-dialog-closed="_hideList"
+        >
         </nuxeo-document-create-version>
       </nuxeo-document-versions-list>
-      <iron-scroll-threshold id="scrollThreshold" scroll-target="list-items" lower-threshold="500" on-lower-threshold="_loadMore">
+      <iron-scroll-threshold
+        id="scrollThreshold"
+        scroll-target="list-items"
+        lower-threshold="500"
+        on-lower-threshold="_loadMore"
+      >
       </iron-scroll-threshold>
     </div>
 
@@ -147,7 +167,7 @@ Polymer({
     <template is="dom-repeat" items="[[versions]]" as="item">
       <nuxeo-tooltip for="version-id-[[index]]" position="right">[[item.title]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-versions',
   behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
@@ -171,9 +191,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_update(document.*)',
-  ],
+  observers: ['_update(document.*)'],
 
   _update() {
     if (this.document) {
@@ -192,7 +210,7 @@ Polymer({
   },
 
   _query(id) {
-    this.query = `SELECT * FROM Document WHERE ecm:versionVersionableId = "${  id  }" AND ecm:isVersion = 1`;
+    this.query = `SELECT * FROM Document WHERE ecm:versionVersionableId = "${id}" AND ecm:isVersion = 1`;
     this.page = 0;
     this._loadMore();
   },
@@ -239,12 +257,10 @@ Polymer({
 
   _labelLatest(doc) {
     if (doc) {
-      const number = this.i18n('versions.version',
-          doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
-        ((doc.isCheckedOut) ? '+ ' : ' ');
-      const label = (doc.isCheckedOut) ?
-        this.i18n('versions.unversionedChanges') :
-        this.i18n('versions.latest');
+      const number =
+        this.i18n('versions.version', doc.properties['uid:major_version'], doc.properties['uid:minor_version']) +
+        (doc.isCheckedOut ? '+ ' : ' ');
+      const label = doc.isCheckedOut ? this.i18n('versions.unversionedChanges') : this.i18n('versions.latest');
       return number + label;
     }
     this._hideList();
@@ -253,19 +269,21 @@ Polymer({
 
   _labelTitle(doc) {
     if (doc) {
-      return this.i18n('versions.version',
-        doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
+      return this.i18n('versions.version', doc.properties['uid:major_version'], doc.properties['uid:minor_version']);
     }
     return '';
   },
 
   _labelCheckedOut(doc) {
-    return (doc && doc.isCheckedOut) ? '+' : '';
+    return doc && doc.isCheckedOut ? '+' : '';
   },
 
   _labelModified(doc) {
-    return this.i18n('versions.modified',
-      moment().to(doc.properties['dc:modified']), doc.properties['dc:lastContributor']);
+    return this.i18n(
+      'versions.modified',
+      moment().to(doc.properties['dc:modified']),
+      doc.properties['dc:lastContributor'],
+    );
   },
 
   _date(date) {

@@ -45,7 +45,7 @@ Diff.registerElement = function(id, rules) {
     }
     Diff.registry.properties[rules.property] = id;
   }
-}
+};
 
 /**
  * Retrieves a custom element for a given set of rules, or the default element if none is found.
@@ -59,7 +59,7 @@ Diff.getElement = function(rules) {
     id = Diff.registry.types[rules.type];
   }
   return id || Diff.registry.default;
-}
+};
 
 /**
 `nuxeo-object-diff`
@@ -68,11 +68,10 @@ Diff.getElement = function(rules) {
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-diff-styles">
-    </style>
+    <style include="nuxeo-diff-styles"></style>
 
     <div id="container"></div>
-`,
+  `,
 
   is: 'nuxeo-object-diff',
   behaviors: [DiffBehavior],
@@ -83,8 +82,7 @@ Polymer({
       // XXX: use a method observer per property to keep databinding between the object diff and it's child
       // Note: we're not using a property observer here because we need to pass not only the value but also the
       // property name, in order to be able to set it on the child.
-      this._createMethodObserver(`_forwardProp("${  prop  }", ${  prop  })`);
-
+      this._createMethodObserver(`_forwardProp("${prop}", ${prop})`);
     });
   },
 
@@ -97,8 +95,12 @@ Polymer({
   _updateContainer(type, property) {
     // retrieve a custom element for the given type and property combination,
     // or the default element if none is found.
-    this._instance = document.createElement(Diff.getElement({type,
-      property: [this.schema && (this.schema.prefix || this.schema.name), property].filter(Boolean).join(':')}));
+    this._instance = document.createElement(
+      Diff.getElement({
+        type,
+        property: [this.schema && (this.schema.prefix || this.schema.name), property].filter(Boolean).join(':'),
+      }),
+    );
 
     Object.keys(this.properties).forEach((prop) => {
       this._instance[prop] = this[prop];

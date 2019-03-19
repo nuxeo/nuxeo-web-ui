@@ -43,7 +43,7 @@ Polymer({
       </div>
       <nuxeo-tooltip for="removeButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-collection-remove-action',
   behaviors: [I18nBehavior],
@@ -78,8 +78,8 @@ Polymer({
   remove() {
     if (this.members && this.members.length > 0) {
       const uids = this.members.map((doc) => doc.uid).join(',');
-      this.$.removeOp.input = `docs:${  uids}`;
-      this.$.removeOp.params = {collection: this.collection.uid};
+      this.$.removeOp.input = `docs:${uids}`;
+      this.$.removeOp.params = { collection: this.collection.uid };
       this.$.removeOp.execute().then(() => {
         this.members = [];
         this.fire('refresh');

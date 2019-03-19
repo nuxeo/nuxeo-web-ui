@@ -17,7 +17,6 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-
 /*
   Styles module to be used by elements extending `Nuxeo.DiffBehavior`, providing styles to represent arrays and both
   simple and complex objects.
@@ -34,119 +33,120 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
   `--nuxeo-complex-diff-deleted` | Mixin applied to the deletions of complex objects | {}
 */
 const template = html`
-<dom-module id="nuxeo-diff-styles">
-  <template>
-    <style include="iron-flex iron-flex-alignment nuxeo-styles">
-      :host {
-        display: block;
-      }
+  <dom-module id="nuxeo-diff-styles">
+    <template>
+      <style include="iron-flex iron-flex-alignment nuxeo-styles">
+        :host {
+          display: block;
+        }
 
-      :host([is-array-item]) .label {
-        margin-right: 8px;
-        @apply --layout-flex-none;
-      }
+        :host([is-array-item]) .label {
+          margin-right: 8px;
+          @apply --layout-flex-none;
+        }
 
-      span {
-        word-break: break-all;
-      }
+        span {
+          word-break: break-all;
+        }
 
-      span.added {
-        display: inline;
-        word-break: break-all;
-        background-color: var(--nuxeo-diff-added-color, #B4EFCB);
-        @apply --nuxeo-string-diff-added;
-      }
+        span.added {
+          display: inline;
+          word-break: break-all;
+          background-color: var(--nuxeo-diff-added-color, #b4efcb);
+          @apply --nuxeo-string-diff-added;
+        }
 
-      span.deleted {
-        display: inline;
-        word-break: break-all;
-        background-color: var(--nuxeo-diff-deleted-color, #E6B1B1);
-        @apply --nuxeo-string-diff-deleted;
-      }
+        span.deleted {
+          display: inline;
+          word-break: break-all;
+          background-color: var(--nuxeo-diff-deleted-color, #e6b1b1);
+          @apply --nuxeo-string-diff-deleted;
+        }
 
-      .addition, .deletion {
-        display: inherit;
-      }
+        .addition,
+        .deletion {
+          display: inherit;
+        }
 
-      .deletion ~ .addition {
-        margin-left: 8px;
-      }
+        .deletion ~ .addition {
+          margin-left: 8px;
+        }
 
-      .addition > :not(span):not(div):not(a) {
-        border-left: 4px solid var(--nuxeo-diff-added-color, #B4EFCB);
-        padding-left: 2px;
-        @apply --nuxeo-complex-diff-added;
-      }
+        .addition > :not(span):not(div):not(a) {
+          border-left: 4px solid var(--nuxeo-diff-added-color, #b4efcb);
+          padding-left: 2px;
+          @apply --nuxeo-complex-diff-added;
+        }
 
-      .deletion > :not(span):not(div):not(a) {
-        border-left: 4px solid var(--nuxeo-diff-deleted-color, #E6B1B1);
-        padding-left: 2px;
-        @apply --nuxeo-complex-diff-deleted;
-      }
+        .deletion > :not(span):not(div):not(a) {
+          border-left: 4px solid var(--nuxeo-diff-deleted-color, #e6b1b1);
+          padding-left: 2px;
+          @apply --nuxeo-complex-diff-deleted;
+        }
 
-      .label {
-        @apply --layout-flex;
-        max-width: 150px;
-        color: var(--nuxeo-diff-label-color, #D4D4D9);
-        @apply --nuxeo-diff-label;
-      }
+        .label {
+          @apply --layout-flex;
+          max-width: 150px;
+          color: var(--nuxeo-diff-label-color, #d4d4d9);
+          @apply --nuxeo-diff-label;
+        }
 
-      .simple .label {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
+        .simple .label {
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
 
-      .value.simple {
-        display: inherit;
-      }
+        .value.simple {
+          display: inherit;
+        }
 
-      :host(:not([is-array-item])) .value.simple {
-        @apply --layout-flex-2;
-      }
+        :host(:not([is-array-item])) .value.simple {
+          @apply --layout-flex-2;
+        }
 
-      .text.diff {
-        word-break: break-all;
-      }
+        .text.diff {
+          word-break: break-all;
+        }
 
-      .array.complex {
-        @apply --layout-vertical;
-        display: block;
-      }
+        .array.complex {
+          @apply --layout-vertical;
+          display: block;
+        }
 
-      .array.simple {
-        @apply --layout-horizontal;
-        @apply --layout-flex;
-        @apply --layout-wrap;
-      }
+        .array.simple {
+          @apply --layout-horizontal;
+          @apply --layout-flex;
+          @apply --layout-wrap;
+        }
 
-      .array.diff.simple .sep {
-        margin: 0 8px 0 4px;
-      }
+        .array.diff.simple .sep {
+          margin: 0 8px 0 4px;
+        }
 
-      .array.simple .item:not(:last-of-type)::after {
-        content: ",";
-        margin-left: 4px;
-      }
+        .array.simple .item:not(:last-of-type)::after {
+          content: ',';
+          margin-left: 4px;
+        }
 
-      .array.simple .item:not(:last-child) {
-        margin-right: 8px;
-      }
+        .array.simple .item:not(:last-child) {
+          margin-right: 8px;
+        }
 
-      .item {
-        @apply --layout-horizontal;
-      }
+        .item {
+          @apply --layout-horizontal;
+        }
 
-      .array.complex .item ~ .item {
-        margin-top: 12px;
-      }
+        .array.complex .item ~ .item {
+          margin-top: 12px;
+        }
 
-      .array .item nuxeo-object-diff {
-        @apply --layout-flex;
-      }
-    </style>
-  </template>
-</dom-module>
+        .array .item nuxeo-object-diff {
+          @apply --layout-flex;
+        }
+      </style>
+    </template>
+  </dom-module>
 `;
 
 document.head.appendChild(template.content);

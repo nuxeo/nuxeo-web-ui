@@ -49,20 +49,26 @@ Polymer({
         @apply --nuxeo-liveconnect-anchor-layout;
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
       }
     </style>
 
-    <nuxeo-liveconnect-box-provider id="provider" is-available="{{isProviderAvailable}}"></nuxeo-liveconnect-box-provider>
+    <nuxeo-liveconnect-box-provider
+      id="provider"
+      is-available="{{isProviderAvailable}}"
+    ></nuxeo-liveconnect-box-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
       <a href="javascript:undefined" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/box.png"></iron-icon>
         [[i18n('liveconnectImportActions.box', 'Box')]]
       </a>
     </template>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-box-link',
   behaviors: [I18nBehavior],

@@ -32,11 +32,10 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation id="aRenderOp" op="Document.ARenderGetPreviewerUrl" input="[[document.uid]]">
-    </nuxeo-operation>
+    <nuxeo-operation id="aRenderOp" op="Document.ARenderGetPreviewerUrl" input="[[document.uid]]"></nuxeo-operation>
 
     <iframe src="[[aRenderUrl]]"></iframe>
-`,
+  `,
 
   is: 'nuxeo-arender-page',
 
@@ -53,18 +52,19 @@ Polymer({
     },
   },
 
-  observers: [
-    '_observeDocument(document, visible)',
-  ],
+  observers: ['_observeDocument(document, visible)'],
 
   _observeDocument() {
     this.aRenderUrl = '';
     if (this.visible && this.document) {
-      this.$.aRenderOp.execute().then((res) => {
-        this.set('aRenderUrl', res.previewerUrl);
-      }).catch((err) => {
-        console.error(err);
-      });
+      this.$.aRenderOp
+        .execute()
+        .then((res) => {
+          this.set('aRenderUrl', res.previewerUrl);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
   },
 });

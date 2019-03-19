@@ -49,9 +49,9 @@ Polymer({
 
       .dates input {
         border: 1px solid #c6c6c6;
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.0);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0);
         border-radius: 3px;
-        margin-left: .5em;
+        margin-left: 0.5em;
         width: 125px;
       }
 
@@ -83,11 +83,12 @@ Polymer({
         margin-top: 50px;
       }
 
-      chart-bar, chart-pie {
+      chart-bar,
+      chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
         display: block;
-        font-size: .8rem;
+        font-size: 0.8rem;
       }
 
       @media (max-width: 1024px) {
@@ -95,15 +96,18 @@ Polymer({
           flex: 1 0 calc(100% - 2em);
         }
       }
-
     </style>
 
-    <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse">
-    </nuxeo-resource>
+    <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse"></nuxeo-resource>
 
     <nuxeo-card class="dates">
       <div class="horizontal flex end-justified layout center wrap">
-        <nuxeo-select label="[[i18n('analytics.workflow')]]" placeholder="[[i18n('analytics.workflow')]]" selected="{{workflow}}" options="[[workflows]]"></nuxeo-select>
+        <nuxeo-select
+          label="[[i18n('analytics.workflow')]]"
+          placeholder="[[i18n('analytics.workflow')]]"
+          selected="{{workflow}}"
+          options="[[workflows]]"
+        ></nuxeo-select>
         <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
         <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
       </div>
@@ -111,7 +115,14 @@ Polymer({
 
     <div class="flex-layout">
       <!-- Average wf duration -->
-      <nuxeo-workflow-data workflow="[[workflow]]" event="afterWorkflowFinish" metrics="avg(timeSinceWfStarted)" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{avgWorkflowLength}}">
+      <nuxeo-workflow-data
+        workflow="[[workflow]]"
+        event="afterWorkflowFinish"
+        metrics="avg(timeSinceWfStarted)"
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        data="{{avgWorkflowLength}}"
+      >
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]">
@@ -120,40 +131,74 @@ Polymer({
       </nuxeo-card>
 
       <!-- Wf initiators -->
-      <nuxeo-workflow-data workflow="[[workflow]]" event="afterWorkflowStarted" grouped-by="workflowInitiator" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{initiators}}">
+      <nuxeo-workflow-data
+        workflow="[[workflow]]"
+        event="afterWorkflowStarted"
+        grouped-by="workflowInitiator"
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        data="{{initiators}}"
+      >
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
-        <chart-pie values="[[_values(initiators)]]" labels="[[_series(initiators)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-pie
+          values="[[_values(initiators)]]"
+          labels="[[_series(initiators)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-pie>
       </nuxeo-card>
 
       <!-- Actions per user -->
-      <nuxeo-workflow-data workflow="[[workflow]]" event="afterWorkflowTaskEnded" grouped-by="taskActor, action" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{numberOfActionsPerUser}}">
+      <nuxeo-workflow-data
+        workflow="[[workflow]]"
+        event="afterWorkflowTaskEnded"
+        grouped-by="taskActor, action"
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        data="{{numberOfActionsPerUser}}"
+      >
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
-        <chart-bar labels="[[_labels(numberOfActionsPerUser)]]" series="[[_series(numberOfActionsPerUser)]]" values="[[_values(numberOfActionsPerUser)]]" options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'>
+        <chart-bar
+          labels="[[_labels(numberOfActionsPerUser)]]"
+          series="[[_series(numberOfActionsPerUser)]]"
+          values="[[_values(numberOfActionsPerUser)]]"
+          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+        >
         </chart-bar>
       </nuxeo-card>
 
       <!-- Average task duration per user -->
-      <nuxeo-workflow-data workflow="[[workflow]]" event="afterWorkflowTaskEnded" grouped-by="taskActor" metrics="avg(timeSinceTaskStarted)" start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]" data="{{avgTaskDurationPerUser}}">
+      <nuxeo-workflow-data
+        workflow="[[workflow]]"
+        event="afterWorkflowTaskEnded"
+        grouped-by="taskActor"
+        metrics="avg(timeSinceTaskStarted)"
+        start-date="[[startDate]]"
+        end-date="[[_extendEndDate(endDate)]]"
+        data="{{avgTaskDurationPerUser}}"
+      >
       </nuxeo-workflow-data>
 
       <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
         <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
           <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">
-            <template>[[item.key]]</template>
+            <template
+              >[[item.key]]</template
+            >
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.duration')]]">
-            <template>[[item.value]]</template>
+            <template
+              >[[item.value]]</template
+            >
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
-
     </div>
-`,
+  `,
 
   is: 'nuxeo-workflow-analytics',
   behaviors: [ChartDataBehavior, I18nBehavior],
@@ -173,18 +218,21 @@ Polymer({
   },
 
   ready() {
-    this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
+    this.startDate = moment()
+      .subtract(1, 'month')
+      .format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 
   // override _labels and _values from nuxeo-chart-data-behavior.html
   _labels(data) {
-    if (!data) { return []; }
+    if (!data) {
+      return [];
+    }
     if (data.value) {
       return data.value.map((obj) => obj.key);
-    } 
-      return this._labels(data[0]);
-    
+    }
+    return this._labels(data[0]);
   },
 
   _values(data) {
@@ -201,31 +249,31 @@ Polymer({
 
   _asDuration(duration) {
     let seconds = Math.floor(duration / 1000);
-        let minutes = Math.floor(seconds / 60);
-        let hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-        let result = '';
-    hours -= (days * 24);
-    minutes = minutes - (days * 24 * 60) - (hours * 60);
-    seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    let result = '';
+    hours -= days * 24;
+    minutes = minutes - days * 24 * 60 - hours * 60;
+    seconds = seconds - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60;
     if (days > 0) {
-      result += `${days  } Days `;
+      result += `${days} Days `;
     }
     if (hours > 0) {
-      result += `${hours  }h `;
+      result += `${hours}h `;
     }
     if (minutes > 0) {
-      result += `${minutes  }m `;
+      result += `${minutes}m `;
     }
     if (seconds > 0) {
-      result += `${seconds  }s `;
+      result += `${seconds}s `;
     }
     return result;
   },
 
   _table(data) {
     return data.map((e) => {
-      return {key: e.key, value: this._asDuration(e.value)};
+      return { key: e.key, value: this._asDuration(e.value) };
     });
   },
 
@@ -235,7 +283,7 @@ Polymer({
       return {
         id: wfm.name,
         label: this.i18n(wfm.title),
-      }
+      };
     });
     this.workflow = this.workflows[0].id;
   },

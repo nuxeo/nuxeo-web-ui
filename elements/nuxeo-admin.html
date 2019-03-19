@@ -53,7 +53,7 @@ limitations under the License.
       },
 
       _actionContext() {
-        return {user: this.user, routeParams: this.routeParams};
+        return { user: this.user, routeParams: this.routeParams };
       },
 
       _errorUrl() {
@@ -63,7 +63,7 @@ limitations under the License.
       _checkError() {
         // XXX: removed fallback-selection="error"
         if (this.selected === 'error') {
-          this.fire('error', {code: 404});
+          this.fire('error', { code: 404 });
         }
       },
     });

@@ -50,18 +50,30 @@ Polymer({
       <div class="heading">
         <h2>[[i18n('shareButton.dialog.heading')]]</h2>
       </div>
-      <nuxeo-input id="permalink" label="[[i18n('easyshare.copy.label', document.properties.dc:title)]]" value="[[_buildPermalink(document)]]" autofocus readonly>
+      <nuxeo-input
+        id="permalink"
+        label="[[i18n('easyshare.copy.label', document.properties.dc:title)]]"
+        value="[[_buildPermalink(document)]]"
+        autofocus
+        readonly
+      >
       </nuxeo-input>
 
       <template is="dom-if" if="[[_isEasyshare(document)]]">
-        <nuxeo-input id="easyshareLink" label="[[i18n('easysharefolder.share', document.properties.dc:title)]]" value="[[_buildEasysharelink(document)]]" autofocus readonly>
+        <nuxeo-input
+          id="easyshareLink"
+          label="[[i18n('easysharefolder.share', document.properties.dc:title)]]"
+          value="[[_buildEasysharelink(document)]]"
+          autofocus
+          readonly
+        >
         </nuxeo-input>
       </template>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('shareButton.dialog.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-easyshare-share-link',
   behaviors: [I18nBehavior],
@@ -105,11 +117,11 @@ Polymer({
   },
 
   _buildPermalink(document) {
-    return document ? `${ window.location.origin + window.location.pathname }#!/doc/${ document.uid }` : '';
+    return document ? `${window.location.origin + window.location.pathname}#!/doc/${document.uid}` : '';
   },
 
   _buildEasysharelink(document) {
     const baseUrl = window.location.origin + this.$.nxcon.url;
-    return document ? `${ baseUrl }/site/easyshare/${ this.document.uid }` : '';
+    return document ? `${baseUrl}/site/easyshare/${this.document.uid}` : '';
   },
 });

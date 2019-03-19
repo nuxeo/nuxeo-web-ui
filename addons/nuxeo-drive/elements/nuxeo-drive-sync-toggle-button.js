@@ -51,7 +51,7 @@ Polymer({
       </div>
       <paper-tooltip for="syncBut">[[_label]]</paper-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-drive-sync-toggle-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -83,7 +83,7 @@ Polymer({
 
   toggle() {
     const enable = !this.synchronized;
-    this.$.op.params = {enable: !this.synchronized};
+    this.$.op.params = { enable: !this.synchronized };
     return this.$.op.execute().then(() => {
       // update our root cache
       const idx = roots.indexOf(this.document.uid);
@@ -112,8 +112,9 @@ Polymer({
   },
 
   _computeLabel(synchronized) {
-    return synchronized ? this.i18n('driveSyncToggleButton.unsync','Unsynchronize')
-                        : this.i18n('driveSyncToggleButton.sync','Synchronize');
+    return synchronized
+      ? this.i18n('driveSyncToggleButton.unsync', 'Unsynchronize')
+      : this.i18n('driveSyncToggleButton.sync', 'Synchronize');
   },
 
   _icon(synchronized) {
@@ -124,7 +125,7 @@ Polymer({
     if (!this.document || !roots) {
       return;
     }
-    this.synchronized = (roots.indexOf(this.document.uid) !== -1);
+    this.synchronized = roots.indexOf(this.document.uid) !== -1;
 
     // determine synchronization root (closest synchronized ancestor)
     const breadcrumb = this.document.contextParameters.breadcrumb.entries;

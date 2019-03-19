@@ -58,7 +58,12 @@ Polymer({
       <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
-      <paper-menu-button no-animations horizontal-align="right" vertical-offset="40" hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-menu-button
+        no-animations
+        horizontal-align="right"
+        vertical-offset="40"
+        hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]"
+      >
         <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-listbox slot="dropdown-content">
           <paper-item on-tap="_renameSearch">
@@ -73,7 +78,7 @@ Polymer({
         </paper-listbox>
       </paper-menu-button>
     </div>
-`,
+  `,
 
   is: 'nuxeo-saved-search-actions',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -141,7 +146,9 @@ Polymer({
   },
 
   _hasPermissions() {
-    return this.searchDoc ? (this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
-            this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1) : false;
+    return this.searchDoc
+      ? this.searchDoc.contextParameters.permissions.indexOf('Write') > -1 ||
+          this.searchDoc.contextParameters.permissions.indexOf('Everything') > -1
+      : false;
   },
 });

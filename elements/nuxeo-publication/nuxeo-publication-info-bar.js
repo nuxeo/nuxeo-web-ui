@@ -44,13 +44,12 @@ Polymer({
       }
 
       iron-icon {
-        margin: 0 .5em;
+        margin: 0 0.5em;
         width: 1.5em;
       }
     </style>
 
-    <nuxeo-document id="srcDoc" loading="{{loadingSrc}}">
-    </nuxeo-document>
+    <nuxeo-document id="srcDoc" loading="{{loadingSrc}}"></nuxeo-document>
 
     <div class="layout horizontal" hidden$="[[loadingSrc]]">
       <iron-icon icon="icons:info"></iron-icon>
@@ -61,7 +60,7 @@ Polymer({
       </div>
     </div>
     <nuxeo-unpublish-button document="[[document]]"></nuxeo-unpublish-button>
-`,
+  `,
 
   is: 'nuxeo-publication-info-bar',
   behaviors: [I18nBehavior, FiltersBehavior, RoutingBehavior],
@@ -88,29 +87,34 @@ Polymer({
     this._srcDeleted = false;
     if (this.document && this.document.isProxy) {
       this.$.srcDoc.docId = this.document.properties['rend:sourceId'] || this.document.versionableId;
-      this.$.srcDoc.get().then((src) => {
-        this._src = src;
-        this._redirectDoc =
-          (this.document.contextParameters && this.document.contextParameters.firstAccessibleAncestor) || src;
-      }).catch((err) => {
-        if (err.status === 404) {
-          this._srcDeleted = true;
-          return;
-        }
-        throw err;
-      });
+      this.$.srcDoc
+        .get()
+        .then((src) => {
+          this._src = src;
+          this._redirectDoc =
+            (this.document.contextParameters && this.document.contextParameters.firstAccessibleAncestor) || src;
+        })
+        .catch((err) => {
+          if (err.status === 404) {
+            this._srcDeleted = true;
+            return;
+          }
+          throw err;
+        });
     }
   },
 
   _redirect() {
-    this.fire('navigate', {'doc': this._redirectDoc});
+    this.fire('navigate', { doc: this._redirectDoc });
   },
 
   _infoLabel() {
-    return this._srcDeleted ? this.i18n('publication.info.deleted'): this.i18n('publication.info', this.document.title);
+    return this._srcDeleted
+      ? this.i18n('publication.info.deleted')
+      : this.i18n('publication.info', this.document.title);
   },
 
   _srcUrl() {
-    return this._src ? this.urlFor('browse', this._src.path): null;
+    return this._src ? this.urlFor('browse', this._src.path) : null;
   },
 });

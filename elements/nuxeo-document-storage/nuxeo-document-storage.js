@@ -39,7 +39,7 @@ Polymer({
 
     <iron-localstorage id="storage" name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
     </iron-localstorage>
-`,
+  `,
 
   is: 'nuxeo-document-storage',
 
@@ -70,7 +70,7 @@ Polymer({
       lastViewed: new Date(),
     };
     if (doc.contextParameters && doc.contextParameters.thumbnail && doc.contextParameters.thumbnail.url) {
-      document.contextParameters = {thumbnail: {url: doc.contextParameters.thumbnail.url}}
+      document.contextParameters = { thumbnail: { url: doc.contextParameters.thumbnail.url } };
     }
     return this.unshift('documents', document);
   },
@@ -90,7 +90,7 @@ Polymer({
     const index = this._indexOf(doc);
     if (index !== -1) {
       Object.keys(properties).forEach((key) => {
-        this.set(`documents.${  index  }.${  key}`, properties[key]);
+        this.set(`documents.${index}.${key}`, properties[key]);
       });
     }
   },
@@ -109,7 +109,7 @@ Polymer({
 
   ready() {
     this.$.nxcon.connect().then((res) => {
-      this.name = `${res.id  }-${  this.name}`;
+      this.name = `${res.id}-${this.name}`;
     });
   },
 

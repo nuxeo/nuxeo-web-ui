@@ -24,26 +24,31 @@ export const ChartDataBehavior = {
     return data.map(function(entry) {
       if (Array.isArray(entry.value)) {
         return entry.value.map(this._labels.bind(this));
-      } 
-        return entry.key;
-      
+      }
+      return entry.key;
     });
   },
   _series(data) {
     return data.map((obj) => obj.key);
   },
   _values(data) {
-    return [data.map(function(entry) {
-      if (Array.isArray(entry.value)) {
-        return entry.value.map(this._values.bind(this));
-      } 
+    return [
+      data.map(function(entry) {
+        if (Array.isArray(entry.value)) {
+          return entry.value.map(this._values.bind(this));
+        }
         return entry.value;
-      
-    })];
+      }),
+    ];
   },
   _extendEndDate(date) {
     if (date && moment) {
-      return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());
+      return this._formatDate(
+        moment(date)
+          .add(1, 'days')
+          .subtract(1, 'ms')
+          .toJSON(),
+      );
     }
     return date;
   },

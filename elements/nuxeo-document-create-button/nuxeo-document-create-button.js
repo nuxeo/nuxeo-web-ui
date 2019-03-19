@@ -82,14 +82,14 @@ Polymer({
       </div>
 
       <paper-fab id="createBtn" noink icon="nuxeo:add" on-tap="_displayWizard"></paper-fab>
-       <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
-       <paper-tooltip for="createBtn" position="left">[[i18n('documentCreateButton.tooltip')]]</paper-tooltip>
+      <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
+      <paper-tooltip for="createBtn" position="left">[[i18n('documentCreateButton.tooltip')]]</paper-tooltip>
     </div>
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
 
     <nuxeo-keys keys="c" on-pressed="_displayWizard"></nuxeo-keys>
-`,
+  `,
 
   is: 'nuxeo-document-create-button',
   behaviors: [I18nBehavior],
@@ -121,15 +121,20 @@ Polymer({
 
   _parentChanged() {
     if (this.parent) {
-      if (!this.parent.contextParameters || !this.parent.contextParameters.subtypes ||
-        !this.parent.contextParameters.permissions) {
+      if (
+        !this.parent.contextParameters ||
+        !this.parent.contextParameters.subtypes ||
+        !this.parent.contextParameters.permissions
+      ) {
         this.$.defaultDoc.get();
       } else {
-        const subtypes = (this.parent.contextParameters && this.parent.contextParameters.subtypes) ?
-          this.parent.contextParameters.subtypes.map((type) => {
-            type.id = type.type.toLowerCase();
-            return type;
-          }) : [];
+        const subtypes =
+          this.parent.contextParameters && this.parent.contextParameters.subtypes
+            ? this.parent.contextParameters.subtypes.map((type) => {
+                type.id = type.type.toLowerCase();
+                return type;
+              })
+            : [];
         const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
           subtypes.forEach((type) => {
@@ -145,15 +150,16 @@ Polymer({
 
   _canCreateIn(document) {
     if (document && document.contextParameters && document.contextParameters.permissions) {
-      return document.contextParameters.permissions.indexOf('Write') > -1 ||
-        document.contextParameters.permissions.indexOf('Everything') > -1;
-    } 
-      return false;
-    
+      return (
+        document.contextParameters.permissions.indexOf('Write') > -1 ||
+        document.contextParameters.permissions.indexOf('Everything') > -1
+      );
+    }
+    return false;
   },
 
   _actionContext() {
-    return {hostVisible: this.shortcutsVisible, subtypes: this.subtypes};
+    return { hostVisible: this.shortcutsVisible, subtypes: this.subtypes };
   },
 
   _showShortcuts() {

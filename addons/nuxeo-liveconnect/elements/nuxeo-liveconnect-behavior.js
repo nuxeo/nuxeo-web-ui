@@ -52,27 +52,27 @@ export const LiveConnectBehavior = {
     if (!fileId) {
       throw new Error('failed to generate key: fileId not defined');
     }
-    return `${this.providerId  }:${  this.userId  }:${  fileId}`;
+    return `${this.providerId}:${this.userId}:${fileId}`;
   },
 
   notifyBlobPick(blobs) {
-    this.fire('nx-blob-picked', {blobs: Array.isArray(blobs) ? blobs : [blobs]});
+    this.fire('nx-blob-picked', { blobs: Array.isArray(blobs) ? blobs : [blobs] });
   },
 
   openPopup(url, options) {
     const settings = {
-      'width': '1000',
-      'height': '650',
-      'onClose': function() {},
-      'onMessageReceive': function() {},
+      width: '1000',
+      height: '650',
+      onClose() {},
+      onMessageReceive() {},
     };
 
     if (options) {
       Object.assign(settings, options);
     }
 
-    const left = window.screenX + (window.outerWidth / 2) - (settings.width / 2);
-    const top = window.screenY + (window.outerHeight / 2) - (settings.height / 2);
+    const left = window.screenX + window.outerWidth / 2 - settings.width / 2;
+    const top = window.screenY + window.outerHeight / 2 - settings.height / 2;
 
     let listener;
     if (typeof settings.onMessageReceive === 'function') {
@@ -82,11 +82,11 @@ export const LiveConnectBehavior = {
       window.addEventListener('message', listener);
     }
 
-    const popup = window.open(url, 'popup',
-      `height=${  settings.height
-      },width=${  settings.width
-      },top=${  top
-      },left=${  left}`);
+    const popup = window.open(
+      url,
+      'popup',
+      `height=${settings.height},width=${settings.width},top=${top},left=${left}`,
+    );
 
     const checkCompleted = setInterval(() => {
       if (!popup || !popup.closed) {
@@ -105,7 +105,7 @@ export const LiveConnectBehavior = {
     if (!this.$.oauth2) {
       throw new Error('Missing OAuth2 resource');
     }
-    this.$.oauth2.path = `oauth2/provider/${  this.providerId}`;
+    this.$.oauth2.path = `oauth2/provider/${this.providerId}`;
     return this.$.oauth2.get().then((response) => {
       this.clientId = response.clientId;
       this.authorizationURL = response.authorizationURL;
@@ -119,7 +119,7 @@ export const LiveConnectBehavior = {
     if (!this.$.oauth2) {
       throw new Error('Missing OAuth2 resource');
     }
-    this.$.oauth2.path = `oauth2/provider/${  this.providerId  }/token`;
+    this.$.oauth2.path = `oauth2/provider/${this.providerId}/token`;
     return this.$.oauth2.get();
   },
 

@@ -41,14 +41,34 @@ Polymer({
       <div class="header" slot="header">
         <span class="title">[[i18n(heading)]]</span>
         <template is="dom-if" if="[[showSavedSearchActions]]">
-          <nuxeo-saved-search-actions id="actions" class="actions" search-form="[[searchForm]]"></nuxeo-saved-search-actions>
+          <nuxeo-saved-search-actions
+            id="actions"
+            class="actions"
+            search-form="[[searchForm]]"
+          ></nuxeo-saved-search-actions>
         </template>
       </div>
       <div class="content">
-        <nuxeo-results-view provider="[[provider]]" page-size="[[pageSize]]" params="[[params]]" quick-filters="{{quickFilters}}" schemas="[[schemas]]" enrichers="[[enrichers]]" headers="[[headers]]" loading="[[loading]]" search-name="[[searchName]]" aggregations="{{aggregations}}" visible="[[visible]]" auto="[[auto]]" show-filters="[[showFilters]]" opened="[[opened]]" search-form="[[searchForm]]"></nuxeo-results-view>
+        <nuxeo-results-view
+          provider="[[provider]]"
+          page-size="[[pageSize]]"
+          params="[[params]]"
+          quick-filters="{{quickFilters}}"
+          schemas="[[schemas]]"
+          enrichers="[[enrichers]]"
+          headers="[[headers]]"
+          loading="[[loading]]"
+          search-name="[[searchName]]"
+          aggregations="{{aggregations}}"
+          visible="[[visible]]"
+          auto="[[auto]]"
+          show-filters="[[showFilters]]"
+          opened="[[opened]]"
+          search-form="[[searchForm]]"
+        ></nuxeo-results-view>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-search-page',
   behaviors: [I18nBehavior],

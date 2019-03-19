@@ -104,7 +104,9 @@ Polymer({
                 <template class="format-info-element" is="dom-if" if="{{!format.info.geometry_lod_success}}">
                   <iron-icon icon="icons:warning"></iron-icon>
                 </template>
-                <span class="layout flex format-info-element">[[_getPolyNumber(format)]] [[i18n('threeDViewLayout.unit.polygons')]]</span>
+                <span class="layout flex format-info-element"
+                  >[[_getPolyNumber(format)]] [[i18n('threeDViewLayout.unit.polygons')]]</span
+                >
               </div>
               <div class="format-textures item">
                 <template is="dom-if" if="{{_hasTextures(format)}}">
@@ -137,7 +139,7 @@ Polymer({
     <template is="dom-if" if="{{!_hasItems(document.properties.threed:transmissionFormats)}}">
       <p>[[i18n('threeDViewLayout.transmissionFormats.notAvailable')]]</p>
     </template>
-`,
+  `,
 
   is: 'nuxeo-3d-transmission-formats',
 
@@ -160,17 +162,17 @@ Polymer({
   _formatAsReadable(value, base, unit) {
     value = Number(value);
     if (value < base) {
-      return `${value  } ${  unit}`;
+      return `${value} ${unit}`;
     }
-    const exp = parseInt((Math.log(value) / Math.log(base)), 0);
-    const pre = String(('kMGTPE').charAt(exp - 1));
-    return `${Math.round(value / (base ** exp) * 10) / 10  } ${  pre  }${unit}`;
+    const exp = parseInt(Math.log(value) / Math.log(base), 0);
+    const pre = String('kMGTPE'.charAt(exp - 1));
+    return `${Math.round((value / base ** exp) * 10) / 10} ${pre}${unit}`;
   },
 
   _getPolyInfo(f) {
-    const perc = f.percPoly == null ? '' : `${f.percPoly  } %`;
-    const max = f.maxPoly == null ? '' : `< ${  this._formatAsReadable(f.maxPoly, 1000, '')}`;
-    return f.percPoly != null && f.maxPoly != null ? `${perc  } | ${  max}` : perc + max;
+    const perc = f.percPoly == null ? '' : `${f.percPoly} %`;
+    const max = f.maxPoly == null ? '' : `< ${this._formatAsReadable(f.maxPoly, 1000, '')}`;
+    return f.percPoly != null && f.maxPoly != null ? `${perc} | ${max}` : perc + max;
   },
 
   _getPolyNumber(f) {
@@ -182,9 +184,9 @@ Polymer({
   },
 
   _getTexInfo(f) {
-    const perc = f.percTex == null ? '' : `${f.percTex  } %`;
-    const max = f.maxTex == null ? '' : `< ${  f.maxTex}`;
-    return f.percTex != null && f.maxTex != null ? `${perc  } | ${  max}` : perc + max;
+    const perc = f.percTex == null ? '' : `${f.percTex} %`;
+    const max = f.maxTex == null ? '' : `< ${f.maxTex}`;
+    return f.percTex != null && f.maxTex != null ? `${perc} | ${max}` : perc + max;
   },
 
   _getTexSize(f) {

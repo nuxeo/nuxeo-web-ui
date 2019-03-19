@@ -106,20 +106,20 @@ Polymer({
       paper-menu-button {
         --paper-menu-button: {
           padding: 0;
-        };
+        }
       }
 
       paper-listbox {
         --paper-listbox: {
           padding: 0;
-        };
+        }
       }
 
       paper-icon-button {
         opacity: 0;
         --paper-icon-button: {
           padding: 0;
-        };
+        }
       }
 
       paper-icon-item {
@@ -127,14 +127,14 @@ Polymer({
           padding: 5px 5px;
           display: flex;
           cursor: pointer;
-        };
+        }
 
         --paper-item-min-height: 24px;
 
         --paper-item-icon: {
           width: 1.75em;
           margin-right: 10px;
-        };
+        }
 
         --paper-item-selected-weight: normal;
 
@@ -142,7 +142,6 @@ Polymer({
           background-color: transparent;
         }
       }
-
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
@@ -152,18 +151,28 @@ Polymer({
       <div>[[_computeConfirmationLabel(comment.numberOfReplies)]]</div>
       <div class="buttons">
         <paper-button name="dismiss" dialog-dismiss>[[i18n('comments.deletion.dialog.buttons.cancel')]]</paper-button>
-        <paper-button name="confirm" dialog-confirm on-click="_deleteComment">[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button>
+        <paper-button name="confirm" dialog-confirm on-click="_deleteComment"
+          >[[i18n('comments.deletion.dialog.buttons.delete')]]</paper-button
+        >
       </div>
     </nuxeo-dialog>
 
     <div class="horizontal">
-      <nuxeo-user-avatar user="[[comment.author]]" height="[[_computeAvatarDimensions(level)]]" width="[[_computeAvatarDimensions(level)]]" border-radius="50" font-size="[[_computeAvatarFontSize(level)]]">
+      <nuxeo-user-avatar
+        user="[[comment.author]]"
+        height="[[_computeAvatarDimensions(level)]]"
+        width="[[_computeAvatarDimensions(level)]]"
+        border-radius="50"
+        font-size="[[_computeAvatarFontSize(level)]]"
+      >
       </nuxeo-user-avatar>
       <div class="info">
         <div id="body">
           <div class="horizontal">
             <span class="author">[[comment.author]]</span>
-            <span class="smaller opaque">[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate, i18n)]]</span>
+            <span class="smaller opaque"
+              >[[_computeDateLabel(comment, comment.creationDate, comment.modificationDate, i18n)]]</span
+            >
             <template is="dom-if" if="[[_areExtendedOptionsAvailable(comment.author, currentUser)]]">
               <paper-menu-button id="options" no-animations close-on-activate>
                 <paper-icon-button class="main-option" icon="more-vert" slot="dropdown-trigger" alt="menu">
@@ -187,12 +196,20 @@ Polymer({
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
             <template is="dom-if" if="[[!truncated]]">
-              <iron-icon name="reply" class="main-option opaque" icon="reply" on-tap="_reply" hidden$="[[!_isRootElement(level)]]"></iron-icon>
+              <iron-icon
+                name="reply"
+                class="main-option opaque"
+                icon="reply"
+                on-tap="_reply"
+                hidden$="[[!_isRootElement(level)]]"
+              ></iron-icon>
             </template>
           </div>
           <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">
             <div id="summary" class="horizontal smaller">
-              <span class="more-content link no-selection" on-tap="_expand">[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span>
+              <span class="more-content link no-selection" on-tap="_expand"
+                >[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span
+              >
               <span class="separator opaque">•</span>
               <span class="opaque">[[_computeDateLabel(comment, 'lastReplyDate', comment.lastReplyDate, i18n)]]</span>
             </div>
@@ -205,7 +222,7 @@ Polymer({
         </template>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-comment',
   behaviors: [FormatBehavior],
@@ -241,20 +258,20 @@ Polymer({
   },
 
   _deleteComment() {
-    this.fire('delete-comment', {commentId: this.comment.id});
+    this.fire('delete-comment', { commentId: this.comment.id });
   },
 
   _editComment() {
-    this.fire('edit-comment', {commentId: this.comment.id});
+    this.fire('edit-comment', { commentId: this.comment.id });
   },
 
-  _expand () {
+  _expand() {
     this.set('comment.expanded', true);
   },
 
   _handleRepliesChange(event) {
     const numberOfReplies = event.detail.total;
-    if(numberOfReplies === 0) {
+    if (numberOfReplies === 0) {
       this.set('comment.expanded', false);
     }
     this.set('comment.numberOfReplies', numberOfReplies);
@@ -286,31 +303,32 @@ Polymer({
     return this._isRootElement(level) ? 13 : 11;
   },
 
-  _computeConfirmationLabel (replies) {
-    return this.i18n(`comments.deletion.dialog.message.${  replies > 0 ? 'withReplies' : 'withoutReplies'}`);
+  _computeConfirmationLabel(replies) {
+    return this.i18n(`comments.deletion.dialog.message.${replies > 0 ? 'withReplies' : 'withoutReplies'}`);
   },
 
-  _computeDateLabel (item, option) {
+  _computeDateLabel(item, option) {
     if (item) {
       let date = this.formatDate(item.creationDate, 'relative');
-      if(option === 'lastReplyDate') {
+      if (option === 'lastReplyDate') {
         date = this.formatDate(item.lastReplyDate, 'relative');
         return this.i18n('comments.lastReply', date);
-      } if (item.modificationDate) {
-        return this.i18n('comments.edited', date)
+      }
+      if (item.modificationDate) {
+        return this.i18n('comments.edited', date);
       }
       return date;
     }
   },
 
-  _computeSubLevel (level) {
+  _computeSubLevel(level) {
     return level + 1;
   },
 
   _computeTextToDisplay(text, maxChars, truncated) {
     let parsedText = text;
-    if(truncated){
-      parsedText = `${text.substring(0, maxChars - 1)  }…`;
+    if (truncated) {
+      parsedText = `${text.substring(0, maxChars - 1)}…`;
     }
     return parsedText;
   },
@@ -321,15 +339,15 @@ Polymer({
 
   /** Visibility Methods * */
 
-  _areExtendedOptionsAvailable (author, currentUser) {
+  _areExtendedOptionsAvailable(author, currentUser) {
     return currentUser && (currentUser.properties.username === author || currentUser.isAdministrator);
   },
 
-  _isRootElement (level) {
+  _isRootElement(level) {
     return level === 1;
   },
 
-  _isSummaryVisible (expanded, total) {
+  _isSummaryVisible(expanded, total) {
     return !expanded && total > 0;
   },
 });

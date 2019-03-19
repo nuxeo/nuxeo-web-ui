@@ -47,7 +47,7 @@ Polymer({
         display: block;
         --paper-input-container-underline: {
           display: none;
-        };
+        }
       }
 
       nuxeo-object-diff[unified] ~ nuxeo-object-diff[unified],
@@ -66,7 +66,8 @@ Polymer({
         margin-bottom: 12px;
       }
 
-      #diffContainer, #diffPane {
+      #diffContainer,
+      #diffPane {
         @apply --layout-vertical;
       }
 
@@ -151,7 +152,9 @@ Polymer({
       <div id="controls">
         <paper-checkbox class="control" checked="{{showAll}}">[[i18n('diff.controls.showAll')]]</paper-checkbox>
         <template is="dom-if" if="[[_showUnifiedViewControl]]">
-          <paper-toggle-button class="control" checked="{{_unifiedView}}">[[i18n('diff.controls.unifiedView')]]</paper-toggle-button>
+          <paper-toggle-button class="control" checked="{{_unifiedView}}"
+            >[[i18n('diff.controls.unifiedView')]]</paper-toggle-button
+          >
         </template>
       </div>
       <div id="diffPickerPane">
@@ -164,7 +167,11 @@ Polymer({
             </nuxeo-select>
           </div>
           <div class="switchSides">
-            <paper-icon-button id="switchSidesButtonH" icon="nuxeo:switch-sides" on-tap="_switchSides"></paper-icon-button>
+            <paper-icon-button
+              id="switchSidesButtonH"
+              icon="nuxeo:switch-sides"
+              on-tap="_switchSides"
+            ></paper-icon-button>
             <nuxeo-tooltip for="switchSidesButtonH">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
           </div>
           <div class="diffPicker">
@@ -176,24 +183,69 @@ Polymer({
           </div>
         </div>
         <div class="switchSides">
-          <paper-icon-button id="switchSidesButtonV" icon="nuxeo:switch-sides" on-tap="_switchSides"></paper-icon-button>
+          <paper-icon-button
+            id="switchSidesButtonV"
+            icon="nuxeo:switch-sides"
+            on-tap="_switchSides"
+          ></paper-icon-button>
           <nuxeo-tooltip for="switchSidesButtonV">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
         </div>
       </div>
       <div id="diffPane">
-        <template is="dom-repeat" items="[[_getCommonSchemas(_schemas, showAll, _delta)]]" as="schema" sort="_sortSchemas">
+        <template
+          is="dom-repeat"
+          items="[[_getCommonSchemas(_schemas, showAll, _delta)]]"
+          as="schema"
+          sort="_sortSchemas"
+        >
           <nuxeo-card heading="[[schema.name]]" collapsible opened>
             <div class="deltaPane">
               <template is="dom-repeat" items="[[_getCommonSchemaProperties(schema, showAll, _delta)]]" as="property">
                 <!-- unified view -->
                 <template is="dom-if" if="[[unifiedView]]">
-                  <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" unified display-label></nuxeo-object-diff>
+                  <nuxeo-object-diff
+                    property="[[_getPropertyName(schema, property)]]"
+                    label="[[_computeLabel(schema, property)]]"
+                    schema="[[schema]]"
+                    left-uid="[[leftUid]]"
+                    right-uid="[[rightUid]]"
+                    delta="[[_getPropertyDiff(_delta, property)]]"
+                    original-value="[[_getDocumentProperty(property, left)]]"
+                    new-value="[[_getDocumentProperty(property, right)]]"
+                    show-all="[[showAll]]"
+                    unified
+                    display-label
+                  ></nuxeo-object-diff>
                 </template>
                 <!-- side-by-side view -->
                 <template is="dom-if" if="[[!unifiedView]]">
                   <div class="side-by-side">
-                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-additions display-label></nuxeo-object-diff>
-                    <nuxeo-object-diff property="[[_getPropertyName(schema, property)]]" label="[[_computeLabel(schema, property)]]" schema="[[schema]]" left-uid="[[leftUid]]" right-uid="[[rightUid]]" delta="[[_getPropertyDiff(_delta, property)]]" original-value="[[_getDocumentProperty(property, left)]]" new-value="[[_getDocumentProperty(property, right)]]" show-all="[[showAll]]" hide-deletions display-label></nuxeo-object-diff>
+                    <nuxeo-object-diff
+                      property="[[_getPropertyName(schema, property)]]"
+                      label="[[_computeLabel(schema, property)]]"
+                      schema="[[schema]]"
+                      left-uid="[[leftUid]]"
+                      right-uid="[[rightUid]]"
+                      delta="[[_getPropertyDiff(_delta, property)]]"
+                      original-value="[[_getDocumentProperty(property, left)]]"
+                      new-value="[[_getDocumentProperty(property, right)]]"
+                      show-all="[[showAll]]"
+                      hide-additions
+                      display-label
+                    ></nuxeo-object-diff>
+                    <nuxeo-object-diff
+                      property="[[_getPropertyName(schema, property)]]"
+                      label="[[_computeLabel(schema, property)]]"
+                      schema="[[schema]]"
+                      left-uid="[[leftUid]]"
+                      right-uid="[[rightUid]]"
+                      delta="[[_getPropertyDiff(_delta, property)]]"
+                      original-value="[[_getDocumentProperty(property, left)]]"
+                      new-value="[[_getDocumentProperty(property, right)]]"
+                      show-all="[[showAll]]"
+                      hide-deletions
+                      display-label
+                    ></nuxeo-object-diff>
                   </div>
                 </template>
               </template>
@@ -202,7 +254,7 @@ Polymer({
         </template>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-diff',
   behaviors: [I18nBehavior, FiltersBehavior, IronResizableBehavior],
@@ -253,7 +305,7 @@ Polymer({
      */
     headers: {
       type: String,
-      value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'},
+      value: { 'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label' },
     },
     /**
      * The schemas passed on to `provider`.
@@ -288,7 +340,7 @@ Polymer({
       type: Object,
       notify: true,
     },
-    right:  {
+    right: {
       type: Object,
       notify: true,
     },
@@ -301,9 +353,7 @@ Polymer({
 
   importMeta: import.meta,
 
-  observers: [
-    '_docIdsChanged(docIds.*)',
-  ],
+  observers: ['_docIdsChanged(docIds.*)'],
 
   listeners: {
     'iron-resize': '_resize',
@@ -350,15 +400,19 @@ Polymer({
   },
 
   _computeLabel(schema, property) {
-    const key = `diffObject.property.label.${  property}`;
+    const key = `diffObject.property.label.${property}`;
     const translation = this.i18n(key);
     return key !== translation ? translation : this._getPropertyName(schema, property);
   },
 
   _title(document) {
-    return document && (document.title + (this._hasVersions && !document.isCheckedOut ?
-      (` (v${  document.properties['uid:major_version']  }.${  document.properties['uid:minor_version']  })`)
-      : ''));
+    return (
+      document &&
+      document.title +
+        (this._hasVersions && !document.isCheckedOut
+          ? ` (v${document.properties['uid:major_version']}.${document.properties['uid:minor_version']})`
+          : '')
+    );
   },
 
   /* DOM-repeat filters and sort functions */
@@ -366,18 +420,19 @@ Polymer({
   _filterUid(uid) {
     return function(document) {
       return document.uid !== uid;
-    }
+    };
   },
 
   _sortSchemas(schema1, schema2) {
     const schema1properties = this._getCommonProperties(this.left, this.right, schema1, this._delta);
     const schema2properties = this._getCommonProperties(this.left, this.right, schema2, this._delta);
-    if ((schema1properties.length === 0 && schema1properties.length === schema2properties.length) ||
-        (schema1properties.length > 0 && schema2properties.length > 0))  {
+    if (
+      (schema1properties.length === 0 && schema1properties.length === schema2properties.length) ||
+      (schema1properties.length > 0 && schema2properties.length > 0)
+    ) {
       return schema1.name > schema2.name;
     }
-      return schema1properties.length < schema2properties.length;
-
+    return schema1properties.length < schema2properties.length;
   },
 
   /* fetchers */
@@ -408,11 +463,11 @@ Polymer({
   },
 
   _fetchSchemas(document) {
-    const {type} = document;
+    const { type } = document;
     if (typeDataCache[type]) {
       return Promise.resolve(typeDataCache[type]);
     }
-    this.$.schema.path = `config/types/${  type}`;
+    this.$.schema.path = `config/types/${type}`;
     return this.$.schema.get().then((response) => {
       typeDataCache[response.name] = response; // cache response
       return response;
@@ -424,13 +479,23 @@ Polymer({
     if (left && right && left.type === right.type) {
       return this._fetchSchemas(left).then((response) => response.schemas);
     }
-    return this._fetchSchemas(left).then((response1) => this._fetchSchemas(right).then((response2) => response1.schemas.filter((schema1) => !!response2.schemas.find((schema2) => schema1.name === schema2.name))));
+    return this._fetchSchemas(left).then((response1) =>
+      this._fetchSchemas(right).then((response2) =>
+        response1.schemas.filter((schema1) => !!response2.schemas.find((schema2) => schema1.name === schema2.name)),
+      ),
+    );
   },
 
   _getCommonProperties(left, right, schema, delta) {
-    return Object.keys(left.properties).filter((leftPropName) => !!Object.keys(right.properties).find((rightPropName) => leftPropName === rightPropName &&
-               (schema ? leftPropName.startsWith(`${schema.prefix ? schema.prefix : schema.name  }:`) : true) &&
-               (delta ? delta[leftPropName] : true)));
+    return Object.keys(left.properties).filter(
+      (leftPropName) =>
+        !!Object.keys(right.properties).find(
+          (rightPropName) =>
+            leftPropName === rightPropName &&
+            (schema ? leftPropName.startsWith(`${schema.prefix ? schema.prefix : schema.name}:`) : true) &&
+            (delta ? delta[leftPropName] : true),
+        ),
+    );
   },
 
   _getCommonSchemaProperties(schema, showAll, delta) {
@@ -441,7 +506,11 @@ Polymer({
     if (!schemas) {
       return;
     }
-    return showAll ? schemas : schemas.filter((schema) => this._getCommonProperties(this.left, this.right, schema, showAll ? null : this._delta).length > 0);
+    return showAll
+      ? schemas
+      : schemas.filter(
+          (schema) => this._getCommonProperties(this.left, this.right, schema, showAll ? null : this._delta).length > 0,
+        );
   },
 
   /* comparison */
@@ -458,7 +527,7 @@ Polymer({
     if (!property || !schema) {
       return;
     }
-    return property.replace(new RegExp(`^${  schema.prefix ? schema.prefix : schema.name  }:`), '');
+    return property.replace(new RegExp(`^${schema.prefix ? schema.prefix : schema.name}:`), '');
   },
 
   _diff() {
@@ -487,16 +556,18 @@ Polymer({
     const path = parentPath || '';
     // if it's an array diff
     if (delta._t && delta._t === 'a') {
-      Object.keys(delta).filter((key) => key !== '_t').forEach((key) => {
-        const subpath = path ? [path, key].join('.') : key;
-        const deltaObj = (Array.isArray(delta[key]) && delta[key].length > 0) ? delta[key][0] : delta[key];
-        this._filterDelta(deltaObj, schema, subpath);
-        if (Object.keys(delta[key]).length === 0) {
-          delete delta[key];
-        }
-      });
+      Object.keys(delta)
+        .filter((key) => key !== '_t')
+        .forEach((key) => {
+          const subpath = path ? [path, key].join('.') : key;
+          const deltaObj = Array.isArray(delta[key]) && delta[key].length > 0 ? delta[key][0] : delta[key];
+          this._filterDelta(deltaObj, schema, subpath);
+          if (Object.keys(delta[key]).length === 0) {
+            delete delta[key];
+          }
+        });
     } else {
-      const deltaObj = (Array.isArray(delta) && delta.length > 0) ? delta[0] : delta;
+      const deltaObj = Array.isArray(delta) && delta.length > 0 ? delta[0] : delta;
       const properties = parentPath ? Object.keys(deltaObj) : this._getCommonSchemaProperties(schema, false, deltaObj);
       for (let i = 0; i < properties.length; i++) {
         const key = properties[i];

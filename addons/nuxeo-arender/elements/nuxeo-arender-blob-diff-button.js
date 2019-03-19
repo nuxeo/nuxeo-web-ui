@@ -68,8 +68,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation id="aRenderDiffOp" op="Document.ARenderGetDiffUrl">
-    </nuxeo-operation>
+    <nuxeo-operation id="aRenderDiffOp" op="Document.ARenderGetDiffUrl"></nuxeo-operation>
 
     <div class="action" on-tap="_openDialog">
       <paper-icon-button noink id="aRenderblobDiffButton" icon="[[icon]]"></paper-icon-button>
@@ -82,7 +81,7 @@ Polymer({
         <paper-icon-button id="close-icon" icon="nuxeo:clear" on-click="_closeDialog" noink></paper-icon-button>
       </template>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-arender-blob-diff-button',
   behaviors: [I18nBehavior],
@@ -107,7 +106,7 @@ Polymer({
       rightDocId: this.rightUid,
       leftBlobXPath: this.xpath,
       rightBlobXPath: this.xpath,
-    }
+    };
     this.$.aRenderDiffOp.execute().then((res) => {
       this.set('_aRenderUrl', res.previewerUrl);
       this.$.aRenderBlobDiffDialog.open();

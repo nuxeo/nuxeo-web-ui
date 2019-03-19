@@ -67,7 +67,7 @@ Polymer({
       }
 
       iron-icon {
-        margin: 0 .5em;
+        margin: 0 0.5em;
         width: 1.5em;
       }
     </style>
@@ -91,7 +91,9 @@ Polymer({
         </div>
         <a class="viewGraph" on-tap="_toggleGraphDialog">[[i18n('documentPage.route.view.graph')]]</a>
         <template is="dom-if" if="[[_hasPermissionToAbandon(workflow.initiator, currentUser)]]">
-          <paper-button class="primary" on-tap="_abandonWorkflow" noink>[[i18n('documentPage.abandon.workflow')]]</paper-button>
+          <paper-button class="primary" on-tap="_abandonWorkflow" noink
+            >[[i18n('documentPage.abandon.workflow')]]</paper-button
+          >
         </template>
       </div>
     </template>
@@ -101,7 +103,8 @@ Polymer({
       <div class="bar task">
         <div class="item">
           <iron-icon class="icon" icon="icons:assignment-turned-in"></iron-icon>
-          <span>[[i18n('documentPage.to.process')]]
+          <span
+            >[[i18n('documentPage.to.process')]]
             <nuxeo-date datetime="[[task.dueDate]]"></nuxeo-date>
           </span>
         </div>
@@ -133,7 +136,10 @@ Polymer({
       <div id="versionInfoBar" class="bar version">
         <div class="layout horizontal center">
           <iron-icon icon="icons:info"></iron-icon>
-          <span>[[i18n('versions.info', document.properties.uid:major_version, document.properties.uid:minor_version)]]</span>
+          <span
+            >[[i18n('versions.info', document.properties.uid:major_version,
+            document.properties.uid:minor_version)]]</span
+          >
         </div>
         <nuxeo-restore-version-button document="[[document]]"></nuxeo-restore-version-button>
       </div>
@@ -143,7 +149,7 @@ Polymer({
     <template is="dom-if" if="[[isPublication(document)]]">
       <nuxeo-publication-info-bar document="[[document]]"></nuxeo-publication-info-bar>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-info-bar',
   behaviors: [LayoutBehavior],
@@ -164,13 +170,13 @@ Polymer({
   },
 
   _tasks(doc) {
-    return doc && doc.contextParameters && doc.contextParameters.pendingTasks
-      ? doc.contextParameters.pendingTasks : [];
+    return doc && doc.contextParameters && doc.contextParameters.pendingTasks ? doc.contextParameters.pendingTasks : [];
   },
 
   _workflows(doc) {
     return doc && doc.contextParameters && doc.contextParameters.runningWorkflows
-      ? doc.contextParameters.runningWorkflows : [];
+      ? doc.contextParameters.runningWorkflows
+      : [];
   },
 
   _processTask(e) {
@@ -180,7 +186,7 @@ Polymer({
   ready() {
     this.$.nxcon.connect().then((user) => {
       this.currentUser = user;
-    })
+    });
   },
 
   _isCurrentUser(userId) {
@@ -191,13 +197,12 @@ Polymer({
     if (this._isCurrentUser(workflow.initiator)) {
       return this.i18n('documentPage.initiated.workflow.currentUser', this.i18n(workflow.title));
     }
-      return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
-
+    return this.i18n('documentPage.initiated.workflow', this.i18n(workflow.title));
   },
 
   _abandonWorkflow(e) {
     if (window.confirm(this.i18n('documentPage.abandon.workflow.confirm'))) {
-      this.$.worfklow.path = `/workflow/${  e.model.workflow.id}`;
+      this.$.worfklow.path = `/workflow/${e.model.workflow.id}`;
       this.$.worfklow.remove().then(() => {
         this.fire('workflowAbandoned', { workflow: e.model.workflow });
       });
@@ -212,6 +217,6 @@ Polymer({
   },
 
   _toggleGraphDialog(e) {
-    this.$$(`#graph-${  e.model.workflow.id}`).show();
+    this.$$(`#graph-${e.model.workflow.id}`).show();
   },
 });

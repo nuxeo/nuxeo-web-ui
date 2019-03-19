@@ -51,15 +51,16 @@ Polymer({
         z-index: 100;
       }
 
-      .options, .summary {
+      .options,
+      .summary {
         margin: 1rem 32px;
       }
 
       .file-to-import {
         min-height: 3em;
-        margin: 0 .3em .8em;
+        margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
-        padding: .8em 1em;
+        padding: 0.8em 1em;
         background-color: white;
         border: 1px solid var(--divider-color);
         position: relative;
@@ -90,7 +91,7 @@ Polymer({
       }
 
       #dropzone {
-        background-color: #F7F6F6;
+        background-color: #f7f6f6;
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
       }
@@ -106,9 +107,9 @@ Polymer({
       }
 
       .size {
-        font-size: .75em;
+        font-size: 0.75em;
         color: var(--nuxeo-text-light, #aaa);
-        padding: .1em .5em;
+        padding: 0.1em 0.5em;
         white-space: nowrap;
       }
 
@@ -123,11 +124,11 @@ Polymer({
         color: #fff;
         position: absolute;
         right: 1.5em;
-        top: .8em;
+        top: 0.8em;
         text-align: center;
       }
 
-      .complete iron-icon  {
+      .complete iron-icon {
         width: 1.2em;
         height: 1.3em;
       }
@@ -149,7 +150,7 @@ Polymer({
       }
 
       .clear paper-icon-button {
-        padding: 0 0 1em .5em;
+        padding: 0 0 1em 0.5em;
       }
 
       .file-to-import:hover .clear {
@@ -221,7 +222,7 @@ Polymer({
       .item {
         cursor: pointer;
         padding: 16px 22px;
-        border-bottom: 1px solid #DDD;
+        border-bottom: 1px solid #ddd;
       }
 
       .vertical {
@@ -241,7 +242,6 @@ Polymer({
       .list-item-info div:last-child {
         margin-right: 0;
       }
-
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -251,22 +251,28 @@ Polymer({
     <nuxeo-operation id="cvsImportLogOp" op="CSV.ImportLog"></nuxeo-operation>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name">
-
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical">
         <div class="suggester">
-          <nuxeo-path-suggestion id="pathSuggesterUpload" label="[[i18n('documentImportForm.location')]]" value="{{targetPath}}" parent="{{suggesterParent}}" enrichers="permissions, subtypes" children="{{suggesterChildren}}" disabled always-float-label></nuxeo-path-suggestion>
+          <nuxeo-path-suggestion
+            id="pathSuggesterUpload"
+            label="[[i18n('documentImportForm.location')]]"
+            value="{{targetPath}}"
+            parent="{{suggesterParent}}"
+            enrichers="permissions, subtypes"
+            children="{{suggesterChildren}}"
+            disabled
+            always-float-label
+          ></nuxeo-path-suggestion>
           <span class="error">[[targetLocationError]]</span>
         </div>
 
-
         <div id="dropzone" class="vertical layout flex step">
-          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv">
+          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv" />
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('csv.import.clickOrDrop')]]</a>
+                <a href="javascript:undefined" on-tap="_showUploadDialog"> [[i18n('csv.import.clickOrDrop')]]</a>
               </div>
             </div>
           </template>
@@ -311,18 +317,24 @@ Polymer({
 
         <div class="options">
           <div class="layout vertical">
-            <paper-toggle-button checked="{{receiveEmailReport}}">[[i18n('csv.import.option.emailReport')]]</paper-toggle-button>
-            <paper-toggle-button checked="{{enableImportMode}}">[[i18n('csv.import.option.useImportMode')]]</paper-toggle-button>
+            <paper-toggle-button checked="{{receiveEmailReport}}"
+              >[[i18n('csv.import.option.emailReport')]]</paper-toggle-button
+            >
+            <paper-toggle-button checked="{{enableImportMode}}"
+              >[[i18n('csv.import.option.useImportMode')]]</paper-toggle-button
+            >
           </div>
         </div>
 
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel" disabled$="[[_creating]]">[[i18n('command.cancel')]]</paper-button>
+            <paper-button dialog-dismiss on-tap="_cancel" disabled$="[[_creating]]"
+              >[[i18n('command.cancel')]]</paper-button
+            >
           </div>
           <paper-button noink class="primary" on-tap="_import" disabled$="[[!_canImport(_creating,hasFile)]]">
-                        [[i18n('command.create')]]
-                      </paper-button>
+            [[i18n('command.create')]]
+          </paper-button>
           <div class="layout" hidden$="[[!_creating]]">
             <span class="importing-label">[[i18n('documentImport.importing')]]</span>
             <paper-spinner-lite active></paper-spinner-lite>
@@ -336,7 +348,14 @@ Polymer({
             <div hidden$="[[_error]]">
               <div class="name status">[[progressLabel]]</div>
               <div class="status">
-                <paper-progress id="importProgress" value="[[_count]]" min="0" max="[[_total]]" class="blue" indeterminate>
+                <paper-progress
+                  id="importProgress"
+                  value="[[_count]]"
+                  min="0"
+                  max="[[_total]]"
+                  class="blue"
+                  indeterminate
+                >
                 </paper-progress>
               </div>
             </div>
@@ -371,8 +390,12 @@ Polymer({
                     <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">
                       [[i18n('csv.import.report.line')]] [[item.line]]
                     </div>
-                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">[[item.status]]</div>
-                    <div class="flex-3 list-item-detail">[[_i18n(item.localizedMessage, item.localizedMessageParams)]]</div>
+                    <div class="flex-1" failed$="[[_isError(item)]]" skipped$="[[_isSkipped(item)]]">
+                      [[item.status]]
+                    </div>
+                    <div class="flex-3 list-item-detail">
+                      [[_i18n(item.localizedMessage, item.localizedMessageParams)]]
+                    </div>
                   </div>
                 </div>
               </template>
@@ -381,17 +404,16 @@ Polymer({
         </div>
 
         <div class="buttons horizontal end-justified layout">
-         <paper-button noink on-tap="_clear" disabled$="[[!_hasResult]]">
-                        [[i18n('csv.import.new')]]
+          <paper-button noink on-tap="_clear" disabled$="[[!_hasResult]]">
+            [[i18n('csv.import.new')]]
           </paper-button>
           <paper-button dialog-dismiss on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>
         </div>
       </div>
-
     </iron-pages>
 
     <paper-toast id="toast"></paper-toast>
-`,
+  `,
 
   is: 'nuxeo-document-import-csv',
   behaviors: [I18nBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior, RoutingBehavior],
@@ -480,32 +502,27 @@ Polymer({
     'nx-document-creation-parent-validated': '_parentValidated',
   },
 
-  observers: [
-    '_observeFiles(files.*)',
-    '_visibleOnStage(visible,stage)',
-    '_observeVisible(visible)',
-  ],
+  observers: ['_observeFiles(files.*)', '_visibleOnStage(visible,stage)', '_observeVisible(visible)'],
 
-  _i18n(label, params){
+  _i18n(label, params) {
     if (!params || params.length === 0) {
       return this.i18n(label);
     }
     if (params.length === 1) {
       return this.i18n(label, params[0]);
     }
-    return this.i18n(label, params[0], params[1])
+    return this.i18n(label, params[0], params[1]);
   },
 
-  _filterLogs(items){
+  _filterLogs(items) {
     return items.filter((item) => this._isError(item) || this._isSkipped(item));
-
   },
 
-  _isError(log){
+  _isError(log) {
     return log.status === 'ERROR';
   },
 
-  _isSkipped(log){
+  _isSkipped(log) {
     return log.status === 'SKIPPED';
   },
 
@@ -519,10 +536,17 @@ Polymer({
 
   _parentValidated() {
     if (this.isValidTargetPath) {
-      if (this.suggesterParent && this.suggesterParent.contextParameters && this.suggesterParent.contextParameters.permissions) {
-        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren, so we had to rely on Write.
-        if (this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
-               this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1) {
+      if (
+        this.suggesterParent &&
+        this.suggesterParent.contextParameters &&
+        this.suggesterParent.contextParameters.permissions
+      ) {
+        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
+        // so we had to rely on Write.
+        if (
+          this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
+          this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1
+        ) {
           this.set('targetLocationError', '');
           return;
         }
@@ -532,7 +556,7 @@ Polymer({
   },
 
   _removeBlob() {
-    this.$.csvImportRes.path = `upload/${  this.batchId  }/0`;
+    this.$.csvImportRes.path = `upload/${this.batchId}/0`;
     this.$.csvImportRes.remove().then(() => {
       this.file = {};
       this.hasFile = false;
@@ -554,7 +578,7 @@ Polymer({
     if (changeRecord) {
       if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
         if (this.files && this.files.length > 0) {
-          [ this.file ] = this.files;
+          [this.file] = this.files;
           this.hasFile = true;
           this._creating = true;
         }
@@ -596,7 +620,7 @@ Polymer({
   },
 
   _handleError(error) {
-    this._toast(`ERROR: ${  error.message}`);
+    this._toast(`ERROR: ${error.message}`);
   },
 
   _toast(msg) {
@@ -605,7 +629,7 @@ Polymer({
   },
 
   _cancel() {
-  if (this.batchId) {
+    if (this.batchId) {
       this.cancelBatch();
     }
     this._clear();
@@ -614,7 +638,7 @@ Polymer({
   },
 
   _import() {
-    this.$.csvImportRes.path = `upload/${  this.batchId  }/0/execute/CSV.Import`;
+    this.$.csvImportRes.path = `upload/${this.batchId}/0/execute/CSV.Import`;
     this.$.csvImportRes.data = {
       params: {
         path: this.targetPath,
@@ -636,7 +660,7 @@ Polymer({
       if (this._total >= 0) {
         this.$.importProgress.indeterminate = false;
       }
-      if(status.state === 'ERROR') {
+      if (status.state === 'ERROR') {
         this._error = true;
       } else if (status.state === 'RUNNING' || status.state === 'SCHEDULED') {
         this._count = status.numberOfProcessedDocument;
@@ -665,10 +689,9 @@ Polymer({
           });
         }
       } else {
-        this._handleError({message: 'Error while processing: unknown status.'})
+        this._handleError({ message: 'Error while processing: unknown status.' });
       }
-
-    }, this._handleError.bind(this))
+    }, this._handleError.bind(this));
   },
 
   _close() {

@@ -60,21 +60,19 @@ Polymer({
         white-space: nowrap;
         display: block;
       }
-
     </style>
 
-    <nuxeo-operation op="Collection.RemoveFromCollection" input="[[document.uid]]" id="op">
-    </nuxeo-operation>
+    <nuxeo-operation op="Collection.RemoveFromCollection" input="[[document.uid]]" id="op"></nuxeo-operation>
 
     <template is="dom-repeat" items="[[document.contextParameters.collections]]">
       <nuxeo-tag>
-       <div class="item">
-         <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
-         <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid$="[[item.uid]]"></iron-icon>
-       </div>
-     </nuxeo-tag>
+        <div class="item">
+          <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+          <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid$="[[item.uid]]"></iron-icon>
+        </div>
+      </nuxeo-tag>
     </template>
-`,
+  `,
 
   is: 'nuxeo-document-collections',
   behaviors: [RoutingBehavior],
@@ -84,12 +82,12 @@ Polymer({
   },
 
   remove(evt) {
-    const {op} = this.$;
+    const { op } = this.$;
     op.params = {
-      'collection': evt.currentTarget.dataset.uid,
+      collection: evt.currentTarget.dataset.uid,
     };
     op.execute().then(() => {
-      this.fire('removed-from-collection', {doc: this.document, collectionId: evt.target.dataset.uid});
+      this.fire('removed-from-collection', { doc: this.document, collectionId: evt.target.dataset.uid });
     });
   },
 });

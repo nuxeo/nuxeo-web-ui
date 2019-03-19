@@ -56,7 +56,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 Polymer({
   _template: html`
     <style>
-
       :host([loading]) .resultsCount {
         opacity: 0.1;
         transition: opacity 300ms ease-in-out;
@@ -74,12 +73,15 @@ Polymer({
         @apply --layout-vertical;
       }
 
-      .resultActions, .viewModes, .rightHand {
+      .resultActions,
+      .viewModes,
+      .rightHand {
         @apply --layout-horizontal;
         @apply --layout-center;
       }
 
-      .resultActions, .rightHand {
+      .resultActions,
+      .rightHand {
         @apply --layout-wrap;
       }
 
@@ -96,7 +98,7 @@ Polymer({
       .resultActions paper-icon-button {
         width: 2em;
         height: 2em;
-        padding: .3em;
+        padding: 0.3em;
         margin-left: 4px;
       }
 
@@ -118,32 +120,39 @@ Polymer({
       nuxeo-quick-filters {
         margin-right: 16px;
       }
-
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
     <div class="main">
-
-      <nuxeo-selection-toolbar id="toolbar" selected-items="[[selectedItems]]" class="toolbar" on-refresh="_refreshAndFetch" on-refresh-display="_refreshDisplay" on-clear-selected-items="_clearSelectedItems">
-
+      <nuxeo-selection-toolbar
+        id="toolbar"
+        selected-items="[[selectedItems]]"
+        class="toolbar"
+        on-refresh="_refreshAndFetch"
+        on-refresh-display="_refreshDisplay"
+        on-clear-selected-items="_clearSelectedItems"
+      >
         <nuxeo-actions-menu>
           <slot name="selectionActions"></slot>
           <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
         </nuxeo-actions-menu>
-
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
-
         <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
-          <nuxeo-sort-select options="[[_sortOptions(view, sortOptions)]]" selected="{{sortSelected}}" on-sort-order-changed="_sortChanged"></nuxeo-sort-select>
+          <nuxeo-sort-select
+            options="[[_sortOptions(view, sortOptions)]]"
+            selected="{{sortSelected}}"
+            on-sort-order-changed="_sortChanged"
+          ></nuxeo-sort-select>
         </template>
         <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
-          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch">
-          </nuxeo-quick-filters>
+          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch"></nuxeo-quick-filters>
         </template>
-        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[i18n('results.heading.count', resultsCount)]]</span>
+        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]"
+          >[[i18n('results.heading.count', resultsCount)]]</span
+        >
 
         <div class="rightHand">
           <slot name="actions"></slot>
@@ -155,23 +164,41 @@ Polymer({
 
           <div class="viewModes">
             <template is="dom-repeat" items="[[_displayModes]]">
-              <paper-icon-button class="displayMode" icon="[[item.icon]]" title$="[[_displayModeTitle(item, i18n)]]" selected$="[[_isCurrentDisplayMode(item, displayMode)]]" disabled$="[[_isCurrentDisplayMode(item, displayMode)]]" on-tap="_toggleDisplayMode">
+              <paper-icon-button
+                class="displayMode"
+                icon="[[item.icon]]"
+                title$="[[_displayModeTitle(item, i18n)]]"
+                selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                on-tap="_toggleDisplayMode"
+              >
               </paper-icon-button>
             </template>
           </div>
         </div>
-
       </div>
 
-      <iron-pages id="views" attr-for-selected="name" selected="{{displayMode}}" selected-item="{{view}}" on-iron-items-changed="_updateViews">
+      <iron-pages
+        id="views"
+        attr-for-selected="name"
+        selected="{{displayMode}}"
+        selected-item="{{view}}"
+        on-iron-items-changed="_updateViews"
+      >
         <slot></slot>
       </iron-pages>
-
     </div>
 
-    <iron-localstorage id="prefStorage" name="[[_localStorageName]]" value="{{_settings}}" on-iron-localstorage-load="restoreSettings" on-iron-localstorage-load-empty="initializeSettings" auto-save-disabled>
+    <iron-localstorage
+      id="prefStorage"
+      name="[[_localStorageName]]"
+      value="{{_settings}}"
+      on-iron-localstorage-load="restoreSettings"
+      on-iron-localstorage-load-empty="initializeSettings"
+      auto-save-disabled
+    >
     </iron-localstorage>
-`,
+  `,
 
   is: 'nuxeo-results',
   behaviors: [RoutingBehavior, FormatBehavior],
@@ -289,11 +316,9 @@ Polymer({
       value: false,
     },
 
-
-    _displayModes:  Array,
+    _displayModes: Array,
 
     _localStorageName: String,
-
   },
 
   observers: [
@@ -314,7 +339,7 @@ Polymer({
       return this.view.items;
     }
     // XXX: this.view.items is not working
-    return (this.view && this.view.$.list) ? this.view.$.list.items : [];
+    return this.view && this.view.$.list ? this.view.$.list.items : [];
   },
 
   detached() {
@@ -329,8 +354,11 @@ Polymer({
 
   _displayQuickFilters() {
     // XXX check previous view properties for compatibility
-    return this.view && !this.view.handlesFiltering &&
-      (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters);
+    return (
+      this.view &&
+      !this.view.handlesFiltering &&
+      (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters)
+    );
   },
 
   _displaySort() {
@@ -360,15 +388,22 @@ Polymer({
   },
 
   fetch() {
-    return new Promise(((resolve, error) => {
-      this.debounce('fetch', () => {
-        if (this.view) {
-          this.view.fetch().then(resolve).catch(error);
-        } else {
-          resolve();
-        }
-      }, 100);
-    }));
+    return new Promise((resolve, error) => {
+      this.debounce(
+        'fetch',
+        () => {
+          if (this.view) {
+            this.view
+              .fetch()
+              .then(resolve)
+              .catch(error);
+          } else {
+            resolve();
+          }
+        },
+        100,
+      );
+    });
   },
 
   reset() {
@@ -411,7 +446,7 @@ Polymer({
       // update view
       this.reset();
       this.fetch();
-      this.fire('search-results-view', {view, name: this.name});
+      this.fire('search-results-view', { view, name: this.name });
     }
   },
 
@@ -419,8 +454,8 @@ Polymer({
     let hasDisplayMode;
     this._displayModes = [];
     this.$.views.items.forEach((view) => {
-      const name = view.getAttribute("name");
-          const icon = view.getAttribute("icon");
+      const name = view.getAttribute('name');
+      const icon = view.getAttribute('icon');
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
         view.settings = this._settings[name];
@@ -428,18 +463,17 @@ Polymer({
       if (name === this.displayMode) {
         hasDisplayMode = true;
       }
-      this.push('_displayModes', {name, icon});
+      this.push('_displayModes', { name, icon });
     });
 
     // if current selected display mode is not available use the first one
     if (!hasDisplayMode) {
       this.displayMode = this._displayModes[0] && this._displayModes[0].name;
     }
-
   },
 
   _displayModeTitle(item) {
-    return this.i18n(`displayModeButton.display.${  item.name}`);
+    return this.i18n(`displayModeButton.display.${item.name}`);
   },
 
   _isCurrentDisplayMode(item) {
@@ -459,7 +493,7 @@ Polymer({
 
   _updateStorage() {
     if (this.$.nxcon.user && this.name) {
-      this._localStorageName = `${this.$.nxcon.user.id  }-nuxeo-results-${  this.name}`;
+      this._localStorageName = `${this.$.nxcon.user.id}-nuxeo-results-${this.name}`;
     }
   },
 
@@ -544,7 +578,7 @@ Polymer({
 
   _saveViewSettings() {
     if (this.view.settings) {
-      this.set(`_settings.${  this.displayMode}`, this.view.settings);
+      this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
   },

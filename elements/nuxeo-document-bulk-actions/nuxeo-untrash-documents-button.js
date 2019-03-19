@@ -44,7 +44,7 @@ Polymer({
       </div>
       <nuxeo-tooltip position="[[tooltipPosition]]">[[i18n(_label)]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-untrash-documents-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -79,23 +79,24 @@ Polymer({
     if (this.docsHavePermissions && window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
       if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
-        this.$.operation.input = `docs:${  uids}`;
+        this.$.operation.input = `docs:${uids}`;
         const uidsArray = this.documents.map((doc) => doc.uid);
-        this.$.operation.execute().then(() => {
-          this.fire('nuxeo-documents-untrashed', {documentIds: uidsArray});
-          this.documents = [];
-          this.fire('refresh');
-        },
-        (error) => {
-          this.fire('nuxeo-documents-untrashed', {error,  documents: uidsArray});
-        });
+        this.$.operation.execute().then(
+          () => {
+            this.fire('nuxeo-documents-untrashed', { documentIds: uidsArray });
+            this.documents = [];
+            this.fire('refresh');
+          },
+          (error) => {
+            this.fire('nuxeo-documents-untrashed', { error, documents: uidsArray });
+          },
+        );
       }
     }
   },
 
   _isAvailable() {
-    return this.documents && this.documents.length > 0 && this._checkDocsPermissions()
-        && this._checkDocsAreTrashed();
+    return this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed();
   },
 
   _checkDocsAreTrashed() {
@@ -103,8 +104,7 @@ Polymer({
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = !(this.documents.some(
-      (document) => !this._docHasPermissions(document)));
+    this.docsHavePermissions = !this.documents.some((document) => !this._docHasPermissions(document));
     return this.docsHavePermissions;
   },
 

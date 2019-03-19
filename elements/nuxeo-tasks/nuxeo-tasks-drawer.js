@@ -31,7 +31,7 @@ Polymer({
   _template: html`
     <style include="nuxeo-styles">
       .tasks-dashboard {
-        padding: .7em 1em;
+        padding: 0.7em 1em;
         display: block;
         border-top: 1px solid var(--nuxeo-border);
       }
@@ -42,7 +42,7 @@ Polymer({
     <div class="tasks-dashboard">
       <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTasksDashboard')]]</a>
     </div>
-`,
+  `,
 
   is: 'nuxeo-tasks-drawer',
   behaviors: [RoutingBehavior, I18nBehavior],

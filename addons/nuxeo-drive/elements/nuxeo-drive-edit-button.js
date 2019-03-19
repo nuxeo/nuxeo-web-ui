@@ -49,7 +49,7 @@ Polymer({
         <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-drive-edit-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -59,8 +59,8 @@ Polymer({
     document: Object,
     blob: Object,
     /**
-      * `true` if the action should display the label, `false` otherwise.
-      */
+     * `true` if the action should display the label, `false` otherwise.
+     */
     showLabel: {
       type: Boolean,
       reflectToAttribute: true,
@@ -81,7 +81,6 @@ Polymer({
       }
       window.open(this.driveEditURL, '_top');
     });
-
   },
 
   get driveEditURL() {
@@ -91,15 +90,21 @@ Polymer({
 
     const parts = this.blob.data.split('/nxfile/');
     const baseUrl = parts[0];
-    const downloadUrl = `nxfile/${  parts[1]}`;
+    const downloadUrl = `nxfile/${parts[1]}`;
 
     return [
       'nxdrive://edit',
       baseUrl.replace('://', '/'), // XXX replaceFirst
-      'user', this.user.id,
-      'repo', this.document.repository,
-      'nxdocid', this.document.uid,
-      'filename', encodeURIComponent(this.blob.name),
-      'downloadUrl', downloadUrl].join('/');
+      'user',
+      this.user.id,
+      'repo',
+      this.document.repository,
+      'nxdocid',
+      this.document.uid,
+      'filename',
+      encodeURIComponent(this.blob.name),
+      'downloadUrl',
+      downloadUrl,
+    ].join('/');
   },
 });

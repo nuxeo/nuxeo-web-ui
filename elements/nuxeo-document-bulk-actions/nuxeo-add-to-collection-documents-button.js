@@ -48,7 +48,7 @@ Polymer({
       paper-dialog-scrollable {
         --paper-dialog-scrollable: {
           -webkit-overflow-scrolling: auto;
-        };
+        }
       }
     </style>
 
@@ -66,10 +66,27 @@ Polymer({
     <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>
       <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
-
-        <nuxeo-selectivity id="nxSelect" label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]" operation="Collection.Suggestion" min-chars="0" placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]" value="{{collection}}" tagging="true" query-results-filter="[[resultsFilter]]" result-formatter="[[resultAndSelectionFormatter]]" selection-formatter="[[resultAndSelectionFormatter]]" new-entry-formatter="[[newEntryFormatter]]" required>
+        <nuxeo-selectivity
+          id="nxSelect"
+          label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]"
+          operation="Collection.Suggestion"
+          min-chars="0"
+          placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
+          value="{{collection}}"
+          tagging="true"
+          query-results-filter="[[resultsFilter]]"
+          result-formatter="[[resultAndSelectionFormatter]]"
+          selection-formatter="[[resultAndSelectionFormatter]]"
+          new-entry-formatter="[[newEntryFormatter]]"
+          required
+        >
         </nuxeo-selectivity>
-        <nuxeo-textarea label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]" value="{{description::input}}" hidden$="[[!_isNew(collection)]]" always-float-label>
+        <nuxeo-textarea
+          label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
+          value="{{description::input}}"
+          hidden$="[[!_isNew(collection)]]"
+          always-float-label
+        >
         </nuxeo-textarea>
       </paper-dialog-scrollable>
 
@@ -80,7 +97,7 @@ Polymer({
         </paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-add-to-collection-documents-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -154,28 +171,27 @@ Polymer({
       const name = this.$.nxSelect.selectedItem.displayLabel;
       op.input = undefined;
       op.params = {
-        'name': name,
-        'description': this.description,
+        name,
+        description: this.description,
       };
       return op.execute().then((response) => {
         this.collection = response.uid;
         this._addToCollection();
       });
-    } 
-      this._addToCollection();
-    
+    }
+    this._addToCollection();
   },
 
   _addToCollection() {
     const op = this.$$('#addToCollectionOp');
     op.params = {
-      'collection': this.collection,
+      collection: this.collection,
     };
     const uids = this.documents.map((doc) => doc.uid);
     const uidsString = uids.join(',');
-    op.input = `docs:${  uidsString}`;
+    op.input = `docs:${uidsString}`;
     return op.execute().then(() => {
-      this.fire('added-to-collection', {docIds: uids, collectionId: this.collection});
+      this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
       this._resetPopup();
       this._toggleDialog();
     });
@@ -193,7 +209,7 @@ Polymer({
   },
 
   _newEntryFormatter(term) {
-    return {id: -1, displayLabel: term};
+    return { id: -1, displayLabel: term };
   },
 
   _isValid() {

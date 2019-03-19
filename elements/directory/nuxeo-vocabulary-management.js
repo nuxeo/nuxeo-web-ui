@@ -73,7 +73,7 @@ Polymer({
         }
       }
 
-     nuxeo-dialog .buttons {
+      nuxeo-dialog .buttons {
         @apply --layout-horizontal;
         @apply --layout-justified;
         margin-top: 16px;
@@ -91,7 +91,12 @@ Polymer({
 
       <div>
         <nuxeo-card>
-          <nuxeo-select label="[[i18n('vocabularyManagement.vocabulary')]]" placeholder="[[i18n('vocabularyManagement.select')]]" selected="{{selectedVocabulary}}" attr-for-selected="name">
+          <nuxeo-select
+            label="[[i18n('vocabularyManagement.vocabulary')]]"
+            placeholder="[[i18n('vocabularyManagement.select')]]"
+            selected="{{selectedVocabulary}}"
+            attr-for-selected="name"
+          >
             <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
               <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
             </template>
@@ -104,7 +109,11 @@ Polymer({
               <span>+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
-          <nuxeo-data-table id="table" empty-label="[[i18n('vocabularyManagement.noEntry')]]" empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]">
+          <nuxeo-data-table
+            id="table"
+            empty-label="[[i18n('vocabularyManagement.noEntry')]]"
+            empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]"
+          >
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
                 <template>
@@ -112,10 +121,23 @@ Polymer({
                     [[_value(index, column.key)]]
                   </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
-                    <paper-icon-button id="edit-button-[[index]]" icon="nuxeo:edit" on-tap="_editEntry"></paper-icon-button>
-                    <nuxeo-tooltip for="edit-button-[[index]]">[[i18n('vocabularyManagement.editEntry')]]</nuxeo-tooltip>
-                    <paper-icon-button id="delete-button-[[index]]" name="delete" icon="nuxeo:delete" on-tap="_deleteEntry"></paper-icon-button>
-                    <nuxeo-tooltip for="delete-button-[[index]]">[[i18n('vocabularyManagement.deleteEntry')]]</nuxeo-tooltip>
+                    <paper-icon-button
+                      id="edit-button-[[index]]"
+                      icon="nuxeo:edit"
+                      on-tap="_editEntry"
+                    ></paper-icon-button>
+                    <nuxeo-tooltip for="edit-button-[[index]]"
+                      >[[i18n('vocabularyManagement.editEntry')]]</nuxeo-tooltip
+                    >
+                    <paper-icon-button
+                      id="delete-button-[[index]]"
+                      name="delete"
+                      icon="nuxeo:delete"
+                      on-tap="_deleteEntry"
+                    ></paper-icon-button>
+                    <nuxeo-tooltip for="delete-button-[[index]]"
+                      >[[i18n('vocabularyManagement.deleteEntry')]]</nuxeo-tooltip
+                    >
                   </template>
                 </template>
               </nuxeo-data-table-column>
@@ -129,7 +151,13 @@ Polymer({
       <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
       <iron-form id="form">
         <form>
-          <nuxeo-layout id="layout" href="[[_layoutHref(_selectedSchema)]]" model="[[_layoutModel(_selectedEntry)]]" error="[[i18n('documentVocabularyManagement.layoutNotFound', _selectedSchema)]]" on-element-changed="_elementChanged">
+          <nuxeo-layout
+            id="layout"
+            href="[[_layoutHref(_selectedSchema)]]"
+            model="[[_layoutModel(_selectedEntry)]]"
+            error="[[i18n('documentVocabularyManagement.layoutNotFound', _selectedSchema)]]"
+            on-element-changed="_elementChanged"
+          >
           </nuxeo-layout>
         </form>
       </iron-form>
@@ -138,7 +166,7 @@ Polymer({
         <paper-button name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-vocabulary-management',
   behaviors: [I18nBehavior],
@@ -167,9 +195,7 @@ Polymer({
     },
   },
 
-  observers: [
-    '_refresh(selectedVocabulary)',
-  ],
+  observers: ['_refresh(selectedVocabulary)'],
 
   _visibleChanged() {
     if (this.visible && !this.vocabularies) {
@@ -184,7 +210,7 @@ Polymer({
    */
   _layoutHref(schema) {
     const lowerCaseSchema = schema.toLowerCase();
-    return this.resolveUrl(`${lowerCaseSchema  }/nuxeo-${  lowerCaseSchema  }-edit-layout.html`);
+    return this.resolveUrl(`${lowerCaseSchema}/nuxeo-${lowerCaseSchema}-edit-layout.html`);
   },
 
   _layoutModel() {
@@ -228,22 +254,22 @@ Polymer({
   },
 
   _entryActions(o) {
-    return o  === 'actions';
+    return o === 'actions';
   },
 
   _refresh() {
     if (this._isVocabularySelected()) {
-      this.$.directory.path = `/directory/${  this.selectedVocabulary}`;
+      this.$.directory.path = `/directory/${this.selectedVocabulary}`;
       this.entries = [];
       this.colDef = [];
       this.$.directory.get().then((resp) => {
         let tmp = [];
         if (resp.entries.length > 0) {
           tmp = Object.keys(resp.entries[0].properties).map((key) => {
-            return {key, name: `vocabularyManagement.edit.${  key}`, pos: this._computeColPos(key)};
+            return { key, name: `vocabularyManagement.edit.${key}`, pos: this._computeColPos(key) };
           });
         }
-        tmp.push({key: 'actions', name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true});
+        tmp.push({ key: 'actions', name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true });
         tmp.sort((a, b) => a.pos - b.pos);
         this.colDef = tmp;
         this.entries = resp.entries;
@@ -263,40 +289,50 @@ Polymer({
       }
       return entry.properties[prop];
     }
-      return 'N/A';
-
+    return 'N/A';
   },
 
   _computeColPos(key) {
     if (key === 'parent') {
       return 1;
-    } if (key === 'id') {
+    }
+    if (key === 'id') {
       return 2;
-    } if (key === 'obsolete') {
+    }
+    if (key === 'obsolete') {
       return 98;
-    } if (key === 'ordering') {
+    }
+    if (key === 'ordering') {
       return 99;
     }
-      return 50;
-
+    return 50;
   },
 
   _deleteEntry(e) {
     if (window.confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
-      const {item} = e.target.parentNode;
-      this.$.directory.path = `/directory/${  item.directoryName  }/${  item.properties.id}`;
-      this.$.directory.remove().then(() => {
-        this._refresh();
-        this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyDeleted')});
-      }, (err) => {
-        if (err.status === 401) {
-          this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
-              this.i18n('vocabularyManagement.cannotDelete.referencedEntry')}`});
-        } else {
-          this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
-              this.i18n('vocabularyManagement.cannotDelete.error')}`});
-        }
-      });
+      const { item } = e.target.parentNode;
+      this.$.directory.path = `/directory/${item.directoryName}/${item.properties.id}`;
+      this.$.directory.remove().then(
+        () => {
+          this._refresh();
+          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyDeleted') });
+        },
+        (err) => {
+          if (err.status === 401) {
+            this.fire('notify', {
+              message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
+                'vocabularyManagement.cannotDelete.referencedEntry',
+              )}`,
+            });
+          } else {
+            this.fire('notify', {
+              message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
+                'vocabularyManagement.cannotDelete.error',
+              )}`,
+            });
+          }
+        },
+      );
     }
   },
 
@@ -318,30 +354,37 @@ Polymer({
     }
     this.$.directory.data = this._selectedEntry;
     if (this._new) {
-      this.$.directory.path = `/directory/${  this._selectedEntry.directoryName}`;
-      this.$.directory.post().then(() => {
-        this.$.vocabularyEditDialog.toggle();
-        this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyCreated')});
-        this._refresh();
-      },
+      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}`;
+      this.$.directory.post().then(
+        () => {
+          this.$.vocabularyEditDialog.toggle();
+          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyCreated') });
+          this._refresh();
+        },
         (err) => {
-          this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
-              err.message && err.message.length > 0 ? err.message :
-                this.i18n('vocabularyManagement.cannotCreate')}`});
-        });
+          this.fire('notify', {
+            message: `${this.i18n('label.error').toUpperCase()}: ${
+              err.message && err.message.length > 0 ? err.message : this.i18n('vocabularyManagement.cannotCreate')
+            }`,
+          });
+        },
+      );
     } else {
-      this.$.directory.path = `/directory/${  this._selectedEntry.directoryName
-        }/${  this._selectedEntry.properties.id}`;
-      this.$.directory.put().then(() => {
-        this.$.vocabularyEditDialog.toggle();
-        this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyEdited')});
-        this._refresh();
-      },
+      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}/${this._selectedEntry.properties.id}`;
+      this.$.directory.put().then(
+        () => {
+          this.$.vocabularyEditDialog.toggle();
+          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyEdited') });
+          this._refresh();
+        },
         (err) => {
-          this.fire('notify', {message: `${this.i18n('label.error').toUpperCase()  }: ${
-              err.message && err.message.length > 0 ? err.message :
-                this.i18n('vocabularyManagement.cannotEdit')}`});
-        });
+          this.fire('notify', {
+            message: `${this.i18n('label.error').toUpperCase()}: ${
+              err.message && err.message.length > 0 ? err.message : this.i18n('vocabularyManagement.cannotEdit')
+            }`,
+          });
+        },
+      );
     }
   },
 
@@ -370,23 +413,25 @@ Polymer({
     const schema = this._selectedSchema;
     if (schemaDataCache[schema]) {
       return Promise.resolve(schemaDataCache[schema]);
-    } if (this.entries.length > 0) {
+    }
+    if (this.entries.length > 0) {
       const fields = Object.keys(this.entries[0].properties);
       schemaDataCache[schema] = fields;
       return Promise.resolve(fields);
     }
-      this.$.schema.path = `/config/schemas/${  schema}`;
-      return this.$.schema.get()
-        .then((response) => {
-          const fields = Object.keys(response.fields);
-          schemaDataCache[schema] = fields;
-          return fields;
-        }).catch(function(error) {
-          this.fire('notify', {message: this.i18n('vocabularyManagement.cannotGetSchema')});
-          if (error.status !== 404) {
-            throw error;
-          }
-        });
-
+    this.$.schema.path = `/config/schemas/${schema}`;
+    return this.$.schema
+      .get()
+      .then((response) => {
+        const fields = Object.keys(response.fields);
+        schemaDataCache[schema] = fields;
+        return fields;
+      })
+      .catch(function(error) {
+        this.fire('notify', { message: this.i18n('vocabularyManagement.cannotGetSchema') });
+        if (error.status !== 404) {
+          throw error;
+        }
+      });
   },
 });

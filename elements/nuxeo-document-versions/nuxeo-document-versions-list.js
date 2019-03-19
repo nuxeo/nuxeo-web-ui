@@ -51,13 +51,11 @@ Polymer({
     <div id="list-actions">
       <slot name="actions"></slot>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-versions-list',
 
-  behaviors: [
-    IronOverlayBehavior,
-  ],
+  behaviors: [IronOverlayBehavior],
 
   ready() {
     this.horizontalAlign = 'left';

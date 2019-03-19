@@ -31,7 +31,7 @@ Polymer({
         display: block;
       }
     </style>
-`,
+  `,
 
   is: 'nuxeo-document-task-review-result',
 

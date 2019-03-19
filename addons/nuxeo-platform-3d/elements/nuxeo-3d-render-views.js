@@ -69,7 +69,7 @@ Polymer({
       <div class="render-views">
         <template is="dom-repeat" items="[[document.properties.threed:renderViews]]" as="renderView">
           <div class="item">
-            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords">
+            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords" />
             <div>
               <label class="layout flex-2">[[renderView.title]]</label>
               <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink></paper-icon-button>
@@ -82,7 +82,7 @@ Polymer({
     <template is="dom-if" if="{{!_hasItems(document.properties.threed:renderViews)}}">
       <p>[[i18n('threeDViewLayout.renderViews.notAvailable')]]</p>
     </template>
-`,
+  `,
 
   is: 'nuxeo-3d-render-views',
 

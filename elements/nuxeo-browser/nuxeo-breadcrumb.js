@@ -38,14 +38,14 @@ Polymer({
       }
 
       .breadcrumb {
-        margin: .5em 1em 0 0;
+        margin: 0.5em 1em 0 0;
         @apply --layout-horizontal;
       }
 
       .ancestors {
         display: block;
         line-height: 2em;
-        font-size: .75rem;
+        font-size: 0.75rem;
         margin-top: -3px;
       }
 
@@ -63,15 +63,15 @@ Polymer({
       .current-icon iron-icon {
         width: 1.6rem;
         height: 1.5rem;
-        margin: .3em .5rem 0 0;
-        background-color: rgba(255,255,255,0.7);
-        padding: .2em;
+        margin: 0.3em 0.5rem 0 0;
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 0.2em;
         border-radius: 2px;
       }
 
       .ancestors a,
       .breadcrumb-divider {
-        opacity: .5;
+        opacity: 0.5;
         font-weight: 300;
       }
 
@@ -88,7 +88,8 @@ Polymer({
         opacity: 1;
       }
 
-      .doc-path, .ancestors {
+      .doc-path,
+      .ancestors {
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -99,9 +100,8 @@ Polymer({
         display: none;
       }
 
-      a.breadcrumb-item-ancestor:nth-last-child(-n+1),
-      a.breadcrumb-item-ancestor:nth-last-child(-n+2)
-      a.breadcrumb-item-ancestor:nth-last-child(-n+3) {
+      a.breadcrumb-item-ancestor:nth-last-child(-n + 1),
+      a.breadcrumb-item-ancestor:nth-last-child(-n + 2) a.breadcrumb-item-ancestor:nth-last-child(-n + 3) {
         display: inline-block;
       }
 
@@ -110,7 +110,6 @@ Polymer({
           display: none;
         }
       }
-
     </style>
 
     <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
@@ -135,7 +134,7 @@ Polymer({
         </div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-breadcrumb',
   behaviors: [RoutingBehavior, I18nBehavior],
@@ -156,28 +155,28 @@ Polymer({
     if (this._enrichers) {
       if (index === this._enrichers.breadcrumb.entries.length - 1) {
         return 'breadcrumb-item-current';
-      } if (index === this._enrichers.breadcrumb.entries.length - 2) {
+      }
+      if (index === this._enrichers.breadcrumb.entries.length - 2) {
         return 'breadcrumb-item-parent';
-      } if (index === this._enrichers.breadcrumb.entries.length - 3) {
+      }
+      if (index === this._enrichers.breadcrumb.entries.length - 3) {
         return 'breadcrumb-item-grand-parent';
       }
-        return 'breadcrumb-item-ancestor';
-
+      return 'breadcrumb-item-ancestor';
     }
   },
 
   _title(document) {
     if (document) {
-      return (document.type === 'Root') ? this.i18n('browse.root') : document.title;
+      return document.type === 'Root' ? this.i18n('browse.root') : document.title;
     }
   },
 
-  _icon(document, url)  {
+  _icon(document, url) {
     if (document && document.properties && document.properties['common:icon']) {
       return url ? url + document.properties['common:icon'] : '';
     }
-      return '';
-
+    return '';
   },
 
   get _enrichers() {

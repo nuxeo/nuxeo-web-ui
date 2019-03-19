@@ -21,183 +21,185 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
 /**
  * @polymerBehavior Nuxeo.DocumentContentBehavior
  */
-export const DocumentContentBehavior = [IronResizableBehavior, LayoutBehavior, {
-  properties: {
-    /**
-     * The document to be displayed.
-     */
-    document: Object,
-    /**
-     * `true` if the current element is visible, `false` otherwise.
-     */
-    visible: {
-      type: Boolean,
-      value: false,
-    },
-    /**
-     * The currently selected items in the results view.
-     */
-    selectedItems: {
-      type: Array,
-      notify: true,
-    },
-    params: {
-      type: Object,
-      computed: '_computeParams(document)',
-    },
-    /**
-     * The sort options.
-     */
-    sortOptions: {
-      type: Array,
-      computed: '_computeSortOptions(i18n)',
-    },
-    _dropTargetFilter: {
-      type: Function,
-      value() {
-        return this._dropTargetFilter.bind(this);
+export const DocumentContentBehavior = [
+  IronResizableBehavior,
+  LayoutBehavior,
+  {
+    properties: {
+      /**
+       * The document to be displayed.
+       */
+      document: Object,
+      /**
+       * `true` if the current element is visible, `false` otherwise.
+       */
+      visible: {
+        type: Boolean,
+        value: false,
+      },
+      /**
+       * The currently selected items in the results view.
+       */
+      selectedItems: {
+        type: Array,
+        notify: true,
+      },
+      params: {
+        type: Object,
+        computed: '_computeParams(document)',
+      },
+      /**
+       * The sort options.
+       */
+      sortOptions: {
+        type: Array,
+        computed: '_computeSortOptions(i18n)',
+      },
+      _dropTargetFilter: {
+        type: Function,
+        value() {
+          return this._dropTargetFilter.bind(this);
+        },
       },
     },
-  },
 
-  listeners: {
-    'document-created': '_handleDocumentCreated',
-    'iron-resize': '_computeVisible',
-  },
+    listeners: {
+      'document-created': '_handleDocumentCreated',
+      'iron-resize': '_computeVisible',
+    },
 
-  observers: [
-    '_refresh(params, visible)',
-  ],
+    observers: ['_refresh(params, visible)'],
 
-  attached() {
-    this.nxProvider = this.pageProvider;
-    this._dragoverHandler = this._dragoverImport.bind(this);
-    this._dragleaveHandler = this._dragleaveImport.bind(this);
-    this._dropHandler = this._dropImport.bind(this);
-    this._setupDnD();
-  },
+    attached() {
+      this.nxProvider = this.pageProvider;
+      this._dragoverHandler = this._dragoverImport.bind(this);
+      this._dragleaveHandler = this._dragleaveImport.bind(this);
+      this._dropHandler = this._dropImport.bind(this);
+      this._setupDnD();
+    },
 
-  detached() {
-    this._teardownDnD();
-    this._dragoverHandler = null;
-    this._dragleaveHandler = null;
-    this._dropHandler = null;
-    this.nxProvider = null;
-  },
+    detached() {
+      this._teardownDnD();
+      this._dragoverHandler = null;
+      this._dragleaveHandler = null;
+      this._dropHandler = null;
+      this.nxProvider = null;
+    },
 
-  /**
-   * Gets the currently selected view.
-   */
-  get view() {
-    return this.$$('.results.iron-selected');
-  },
+    /**
+     * Gets the currently selected view.
+     */
+    get view() {
+      return this.$$('.results.iron-selected');
+    },
 
-  /**
-   * The `nuxeo-results` element.
-   */
-  get results() {
-    return this.$$('nuxeo-results');
-  },
+    /**
+     * The `nuxeo-results` element.
+     */
+    get results() {
+      return this.$$('nuxeo-results');
+    },
 
-  /**
-   * The `nuxeo-page-provider` element.
-   */
-  get pageProvider() {
-    return this.$$('nuxeo-page-provider');
-  },
+    /**
+     * The `nuxeo-page-provider` element.
+     */
+    get pageProvider() {
+      return this.$$('nuxeo-page-provider');
+    },
 
-  _navigate(e) {
-    this.fire('navigate', {doc: (e.model || e.detail).item});
-    e.stopPropagation();
-  },
+    _navigate(e) {
+      this.fire('navigate', { doc: (e.model || e.detail).item });
+      e.stopPropagation();
+    },
 
-  _refresh() {
-    if (this.document && this.visible) {
-      this.results.fetch();
-    }
-  },
+    _refresh() {
+      if (this.document && this.visible) {
+        this.results.fetch();
+      }
+    },
 
-  _canSort(document, options) {
-    return !(document && this.hasFacet(document, 'Orderable')) && Array.isArray(options) && options.length > 0;
-  },
+    _canSort(document, options) {
+      return !(document && this.hasFacet(document, 'Orderable')) && Array.isArray(options) && options.length > 0;
+    },
 
-  _displaySort(document, field) {
-    return this._canSort(document) ? field : undefined;
-  },
+    _displaySort(document, field) {
+      return this._canSort(document) ? field : undefined;
+    },
 
-  // function used by nuxeo-data-grid and nuxeo-data-table to check if a list item is a drop target
-  _dropTargetFilter(el, model) {
-    return model && (this.hasFacet(model.item, 'Folderish') || this.hasFacet(model.item, 'Collection'));
-  },
+    // function used by nuxeo-data-grid and nuxeo-data-table to check if a list item is a drop target
+    _dropTargetFilter(el, model) {
+      return model && (this.hasFacet(model.item, 'Folderish') || this.hasFacet(model.item, 'Collection'));
+    },
 
-  _hasWritePermission (doc) {
-    return doc && this.hasPermission(doc, 'Write');
-  },
+    _hasWritePermission(doc) {
+      return doc && this.hasPermission(doc, 'Write');
+    },
 
-  _handleDocumentCreated() {
-    this.fire('document-updated');
-  },
+    _handleDocumentCreated() {
+      this.fire('document-updated');
+    },
 
-  _computeVisible() {
-    this.visible = Boolean(this.offsetWidth || this.offsetHeight);
-  },
+    _computeVisible() {
+      this.visible = Boolean(this.offsetWidth || this.offsetHeight);
+    },
 
-  _dragoverImport(e) {
-    e.preventDefault();
-    this.fire('notify', { message: this.i18n('documentContentView.drag.import'), duration: 0 });
-    this._toggleDragging(true);
-  },
+    _dragoverImport(e) {
+      e.preventDefault();
+      this.fire('notify', { message: this.i18n('documentContentView.drag.import'), duration: 0 });
+      this._toggleDragging(true);
+    },
 
-  _dragleaveImport() {
-    this.fire('notify', { close: true });
-    this._toggleDragging(false);
-  },
+    _dragleaveImport() {
+      this.fire('notify', { close: true });
+      this._toggleDragging(false);
+    },
 
-  _dropImport(e) {
-    e.preventDefault();
-    this.fire('notify', { close: true });
-    this._toggleDragging(false);
-    this.fire('create-document', { files: e.dataTransfer.files });
-  },
+    _dropImport(e) {
+      e.preventDefault();
+      this.fire('notify', { close: true });
+      this._toggleDragging(false);
+      this.fire('create-document', { files: e.dataTransfer.files });
+    },
 
-  _toggleDragging(flag) {
-    const {view} = this;
-    if (view) {
-      this.toggleClass('dragging', flag, view);
-    }
-  },
+    _toggleDragging(flag) {
+      const { view } = this;
+      if (view) {
+        this.toggleClass('dragging', flag, view);
+      }
+    },
 
-  _setupDnD() {
-    const {results} = this;
-    if (results) {
-      results.addEventListener('dragover', this._dragoverHandler);
-      results.addEventListener('dragleave', this._dragleaveHandler);
-      results.addEventListener('drop', this._dropHandler);
-    }
-  },
+    _setupDnD() {
+      const { results } = this;
+      if (results) {
+        results.addEventListener('dragover', this._dragoverHandler);
+        results.addEventListener('dragleave', this._dragleaveHandler);
+        results.addEventListener('drop', this._dropHandler);
+      }
+    },
 
-  _teardownDnD() {
-    const {results} = this;
-    if (results) {
-      results.removeEventListener('dragover', this._dragoverHandler);
-      results.removeEventListener('dragleave', this._dragleaveHandler);
-      results.removeEventListener('drop', this._dropHandler);
-    }
-  },
+    _teardownDnD() {
+      const { results } = this;
+      if (results) {
+        results.removeEventListener('dragover', this._dragoverHandler);
+        results.removeEventListener('dragleave', this._dragleaveHandler);
+        results.removeEventListener('drop', this._dropHandler);
+      }
+    },
 
-  _computeParams(document) {
-    return document ? { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) } : {};
-  },
+    _computeParams(document) {
+      return document ? { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) } : {};
+    },
 
-  _computeSortOptions() {
-    return [
-      {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
-      {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true},
-      {field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc'},
-      {field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc'},
-      {field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc'},
-      {field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc'},
-      {field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc'},
-    ];
+    _computeSortOptions() {
+      return [
+        { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc' },
+        { field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true },
+        { field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc' },
+        { field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc' },
+        { field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc' },
+        { field: 'dc:nature', label: this.i18n('searchResults.sort.field.nature'), order: 'asc' },
+        { field: 'dc:coverage', label: this.i18n('searchResults.sort.field.coverage'), order: 'asc' },
+      ];
+    },
   },
-}];
+];

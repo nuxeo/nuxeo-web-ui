@@ -22,7 +22,6 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 const serializer = new XMLSerializer();
 const parser = new DOMParser();
 
-
 /**
 `nuxeo-template-param-editor`
 @group Nuxeo UI
@@ -42,7 +41,7 @@ Polymer({
       .buttons {
         @apply --buttons-bar;
         @apply --layout-horizontal;
-        @apply --layout-end-justified
+        @apply --layout-end-justified;
       }
 
       #form {
@@ -159,8 +158,7 @@ Polymer({
           <div class="horizontal-layout start-justified">
             <label>[[i18n('templateRenderingPage.parameters.value')]]</label>
           </div>
-          <div class="horizontal-layout start-justified">
-          </div>
+          <div class="horizontal-layout start-justified"></div>
         </div>
         <template is="dom-repeat" items="[[_getParams(params)]]" as="param">
           <div class$="horizontal-layout signature justified [[_formatSignature(param, params)]]">
@@ -174,11 +172,25 @@ Polymer({
               <span>[[_getParamValueWithLoop(param, params)]]</span>
             </div>
             <div class="horizontal-layout end-justified">
-              <paper-icon-button id="[[_computeBtnId(param, 'edit')]]" icon="icons:create" on-tap="_editParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
-              <paper-tooltip for="[[_computeBtnId(param, 'edit')]]">[[i18n('templateRenderingPage.parameters.edit.tooltip')]]</paper-tooltip>
+              <paper-icon-button
+                id="[[_computeBtnId(param, 'edit')]]"
+                icon="icons:create"
+                on-tap="_editParam"
+                disabled="[[!_canEdit(param, params)]]"
+              ></paper-icon-button>
+              <paper-tooltip for="[[_computeBtnId(param, 'edit')]]"
+                >[[i18n('templateRenderingPage.parameters.edit.tooltip')]]</paper-tooltip
+              >
               <div hidden$="[[!allowDelete]]">
-                <paper-icon-button id="[[_computeBtnId(param, 'remove')]]" icon="icons:delete" on-tap="_deleteParam" disabled="[[!_canEdit(param, params)]]"></paper-icon-button>
-                <paper-tooltip for="[[_computeBtnId(param, 'remove')]]">[[i18n('templateRenderingPage.parameters.remove.tooltip')]]</paper-tooltip>
+                <paper-icon-button
+                  id="[[_computeBtnId(param, 'remove')]]"
+                  icon="icons:delete"
+                  on-tap="_deleteParam"
+                  disabled="[[!_canEdit(param, params)]]"
+                ></paper-icon-button>
+                <paper-tooltip for="[[_computeBtnId(param, 'remove')]]"
+                  >[[i18n('templateRenderingPage.parameters.remove.tooltip')]]</paper-tooltip
+                >
               </div>
             </div>
           </div>
@@ -195,10 +207,22 @@ Polymer({
         <form class="vertical flex">
           <div class="container vertical">
             <span class="heading">[[i18n('templateRenderingPage.editParamDialog.heading')]]</span>
-            <paper-input label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]" pattern="[[_computeParamNamePattern(param, params)]]" error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]" value="{{selectedParamProperties.name}}" auto-validate always-float-label required></paper-input>
+            <paper-input
+              label="[[i18n('templateRenderingPage.editParamDialog.paramName.label')]]"
+              pattern="[[_computeParamNamePattern(param, params)]]"
+              error-message="[[i18n('templateRenderingPage.editParamDialog.paramName.error')]]"
+              value="{{selectedParamProperties.name}}"
+              auto-validate
+              always-float-label
+              required
+            ></paper-input>
 
             <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.type')]]" always-float-label>
-              <paper-listbox slot="dropdown-content" selected="{{selectedParamProperties.type}}" attr-for-selected="name">
+              <paper-listbox
+                slot="dropdown-content"
+                selected="{{selectedParamProperties.type}}"
+                attr-for-selected="name"
+              >
                 <template is="dom-repeat" items="[[paramTypes]]">
                   <paper-item name="[[item]]">[[item]]</paper-item>
                 </template>
@@ -206,7 +230,11 @@ Polymer({
             </paper-dropdown-menu>
 
             <template is="dom-if" if="[[_isSelectedParamType('String', selectedParamProperties.type)]]">
-              <paper-textarea label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-textarea>
+              <paper-textarea
+                label="[[i18n('templateRenderingPage.parameters.value')]]"
+                value="{{selectedParamProperties.value}}"
+                always-float-label
+              ></paper-textarea>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('Boolean', selectedParamProperties.type)]]">
               <div class="horizontal-layout">
@@ -216,13 +244,20 @@ Polymer({
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('Date', selectedParamProperties.type)]]">
               <div class="horizontal-layout">
-                <nuxeo-date-picker label="[[i18n('templateRenderingPage.parameters.value')]]" value="{{selectedParamProperties.value}}">
+                <nuxeo-date-picker
+                  label="[[i18n('templateRenderingPage.parameters.value')]]"
+                  value="{{selectedParamProperties.value}}"
+                >
                 </nuxeo-date-picker>
               </div>
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('source', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
+                <paper-input
+                  label="[[i18n('templateRenderingPage.parameters.xpath')]]"
+                  value="{{selectedParamProperties.value}}"
+                  always-float-label
+                ></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -231,7 +266,11 @@ Polymer({
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('picture', selectedParamProperties.type)]]">
               <div class="vertical">
-                <paper-input label="[[i18n('templateRenderingPage.parameters.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
+                <paper-input
+                  label="[[i18n('templateRenderingPage.parameters.xpath')]]"
+                  value="{{selectedParamProperties.value}}"
+                  always-float-label
+                ></paper-input>
                 <div class="horizontal-layout">
                   <label>[[i18n('templateRenderingPage.parameters.autoloop')]]</label>
                   <paper-checkbox checked="{{selectedParamProperties.loop}}"></paper-checkbox>
@@ -240,14 +279,22 @@ Polymer({
             </template>
             <template is="dom-if" if="[[_isSelectedParamType('content', selectedParamProperties.type)]]">
               <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label>
-                <paper-listbox class="dropdown-content" selected="{{selectedParamProperties.contentType}}" attr-for-selected="name">
+                <paper-listbox
+                  class="dropdown-content"
+                  selected="{{selectedParamProperties.contentType}}"
+                  attr-for-selected="name"
+                >
                   <template is="dom-repeat" items="[[contentTypes]]">
                     <paper-item name="[[item]]">[[_getContentTypeLabel(item)]]</paper-item>
                   </template>
                 </paper-listbox>
               </paper-dropdown-menu>
               <template is="dom-if" if="[[_isSelectedContentTypeXPath(selectedParamProperties.contentType)]]">
-                <paper-input label="[[i18n('templateRenderingPage.paramType.content.xpath')]]" value="{{selectedParamProperties.value}}" always-float-label></paper-input>
+                <paper-input
+                  label="[[i18n('templateRenderingPage.paramType.content.xpath')]]"
+                  value="{{selectedParamProperties.value}}"
+                  always-float-label
+                ></paper-input>
               </template>
             </template>
           </div>
@@ -262,7 +309,7 @@ Polymer({
         </form>
       </iron-form>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-template-param-editor',
   behaviors: [I18nBehavior, FormatBehavior],
@@ -331,16 +378,25 @@ Polymer({
   },
 
   _getParamTypeLabel(type) {
-    return this.i18n(`templateRenderingPage.paramType.${  type}`);
+    return this.i18n(`templateRenderingPage.paramType.${type}`);
   },
 
   _getContentTypeLabel(type) {
-    return this.i18n(`templateRenderingPage.paramType.content.${  type}`);
+    return this.i18n(`templateRenderingPage.paramType.content.${type}`);
   },
 
   _readTemplateParams() {
-    this.set('params', dom(parser.parseFromString(this.templateData ? this.templateData :
-        '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>', 'text/xml')));
+    this.set(
+      'params',
+      dom(
+        parser.parseFromString(
+          this.templateData
+            ? this.templateData
+            : '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>',
+          'text/xml',
+        ),
+      ),
+    );
   },
 
   _getParams() {
@@ -399,15 +455,14 @@ Polymer({
 
   _getParamValueWithLoop(param) {
     const loop = this._getParamAttribute(param, 'autoloop');
-    return this._getParamValue(param) + (loop ?
-        ` (${  this.i18n('templateRenderingPage.parameters.autoloop')  })` : '')
+    return this._getParamValue(param) + (loop ? ` (${this.i18n('templateRenderingPage.parameters.autoloop')})` : '');
   },
 
   _refreshParams() {
     // because this.params is a complex element, using this.set won't notify changes for sub-properties, which in
     // this case are inner elements. We need to override dirty checking:
     // https://www.polymer-project.org/1.0/docs/devguide/model-data#override-dirty-check
-    const {params} = this;
+    const { params } = this;
     this.set('params', null);
     this.set('params', params);
   },
@@ -422,12 +477,12 @@ Polymer({
     this.set('selectedParamProperties.name', this._getParamAttribute(this.param, 'name'));
     this.set('selectedParamProperties.type', this._getParamAttribute(this.param, 'type'));
     const loop = this._getParamAttribute(this.param, 'autoloop');
-    this.set('selectedParamProperties.loop', !((!loop || loop === 'false')));
+    this.set('selectedParamProperties.loop', !(!loop || loop === 'false'));
     let value = this._getParamValue(this.param);
     if (this.selectedParamProperties.type === 'Date') {
-      value = this.formatDate(value, 'yyyy-MM-ddTHH:mm:ss')
+      value = this.formatDate(value, 'yyyy-MM-ddTHH:mm:ss');
     } else if (this.selectedParamProperties.type === 'Boolean') {
-      value = !((!value || value === 'false'));
+      value = !(!value || value === 'false');
     }
     if (this.selectedParamProperties.type === 'content') {
       if (value !== 'htmlPreview' && value !== 'blobContent') {
@@ -468,18 +523,20 @@ Polymer({
   _submitSaveParam() {
     this._setParamAttribute(this.param, 'name', this.selectedParamProperties.name);
     this._setParamAttribute(this.param, 'type', this.selectedParamProperties.type);
-    if ((this.selectedParamProperties.type === 'source' ||
-            this.selectedParamProperties.type === 'picture') &&
-        this.selectedParamProperties.loop === true) {
+    if (
+      (this.selectedParamProperties.type === 'source' || this.selectedParamProperties.type === 'picture') &&
+      this.selectedParamProperties.loop === true
+    ) {
       this._setParamAttribute(this.param, 'autoloop', this.selectedParamProperties.loop);
     } else {
       this._removeParamAttribute(this.param, 'autoloop');
     }
     if (this.selectedParamProperties.type === 'Date') {
-      this._setParamValue(this.param,
-          this.formatDate(this.selectedParamProperties.value, 'yyyy-MM-dd HH:mm:ss.SSS'));
-    } else if (this.selectedParamProperties.type === 'content' &&
-        this.selectedParamProperties.contentType !== 'xpath') {
+      this._setParamValue(this.param, this.formatDate(this.selectedParamProperties.value, 'yyyy-MM-dd HH:mm:ss.SSS'));
+    } else if (
+      this.selectedParamProperties.type === 'content' &&
+      this.selectedParamProperties.contentType !== 'xpath'
+    ) {
       this._setParamValue(this.param, this.selectedParamProperties.contentType);
     } else {
       this._setParamValue(this.param, this.selectedParamProperties.value);
@@ -494,19 +551,22 @@ Polymer({
   },
 
   _computeBtnId(param, action) {
-    return `${action  }_btn_${  param.attributes.item('name').value}`;
+    return `${action}_btn_${param.attributes.item('name').value}`;
   },
 
   _computeParamNamePattern() {
     const params = this._getParams();
     if (params && params.length > 0) {
-      const fiteredParams = Array.from(this._getParams()).filter((param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'));
+      const fiteredParams = Array.from(this._getParams()).filter(
+        (param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'),
+      );
       if (fiteredParams.length > 0) {
         // return a pattern that prevents the name from being equal to the name of an already existing parameter
         // ex: /^((?!(^name1$|^name2$|^name3$)).)*$/g
-        return `^((?!(${  Array.from(this._getParams())
-            .filter((param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'))
-            .map((param) => `^${  this._getParamAttribute(param, 'name')  }$`).join('|')  })).)*$`
+        return `^((?!(${Array.from(this._getParams())
+          .filter((param) => this._getParamAttribute(param, 'name') !== this._getParamAttribute(this.param, 'name'))
+          .map((param) => `^${this._getParamAttribute(param, 'name')}$`)
+          .join('|')})).)*$`;
       }
     }
     return '.*';

@@ -12,14 +12,13 @@ document.head.appendChild(tmpl.content);
 
 // load addons / bundles
 // NXP-26977: await loading of addons
-Promise.all(Nuxeo.UI.bundles.map((url) => {
-  if (url.endsWith('.html')) {
-    return new Promise((resolve, reject) => importHref(url, resolve, reject));
-  }
-    return import(
-      /* webpackChunkName: "[request]" */
-      /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
-      `./addons/${url}` // eslint-disable-line comma-dangle
-    );
-
-})).then(() => import(/* webpackMode: "eager" */ './elements/routing.js'));
+Promise.all(
+  Nuxeo.UI.bundles.map((url) => {
+    if (url.endsWith('.html')) {
+      return new Promise((resolve, reject) => importHref(url, resolve, reject));
+    }
+    return import(/* webpackChunkName: "[request]" */
+    /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
+    `./addons/${url}`);
+  }),
+).then(() => import(/* webpackMode: "eager" */ './elements/routing.js'));

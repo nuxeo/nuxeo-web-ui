@@ -51,13 +51,12 @@ Polymer({
     </style>
 
     <div>[[i18n(label)]]</div>
-`,
+  `,
 
   is: 'nuxeo-page-item',
   behaviors: [I18nBehavior],
 
   properties: {
-
     /**
      * Item name
      */

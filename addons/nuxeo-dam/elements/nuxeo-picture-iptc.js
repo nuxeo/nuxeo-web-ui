@@ -62,7 +62,7 @@ Polymer({
         <div class="text-area">[[document.properties.imd:image_description]]</div>
       </div>
     </div>
-`,
+  `,
 
   is: 'nuxeo-picture-iptc',
   behaviors: [I18nBehavior, FormatBehavior],

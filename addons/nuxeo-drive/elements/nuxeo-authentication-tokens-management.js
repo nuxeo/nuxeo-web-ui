@@ -78,19 +78,27 @@ Polymer({
         color: var(--nuxeo-text-light, #939caa);
         display: block;
         font-weight: 300;
-        padding: 1.5em .7em;
+        padding: 1.5em 0.7em;
         text-align: center;
         font-size: 1.1em;
       }
     </style>
 
-    <nuxeo-resource auto id="tokens" path="/token" params="[[_params(application)]]" on-response="_handleTokens"></nuxeo-resource>
+    <nuxeo-resource
+      auto
+      id="tokens"
+      path="/token"
+      params="[[_params(application)]]"
+      on-response="_handleTokens"
+    ></nuxeo-resource>
 
     <nuxeo-resource id="token" path="/token"></nuxeo-resource>
 
     <template is="dom-if" if="[[_empty(tokens)]]">
       <div class="table-row">
-        <div class="emptyResult">[[i18n('authenticationTokensManagement.empty', "You currently don't have any token.")]]</div>
+        <div class="emptyResult">
+          [[i18n('authenticationTokensManagement.empty', "You currently don't have any token.")]]
+        </div>
       </div>
     </template>
 
@@ -114,7 +122,11 @@ Polymer({
             <div class="flex">[[token.permission]]</div>
             <div class="flex"><nuxeo-date datetime="[[token.creationDate]]"></nuxeo-date></div>
             <div class="actions">
-              <paper-icon-button icon="icons:clear" title="[[i18n('authenticationTokensManagement.revoke', 'Revoke)]]" on-tap="_revoke">
+              <paper-icon-button
+                icon="icons:clear"
+                title="[[i18n('authenticationTokensManagement.revoke', 'Revoke)]]"
+                on-tap="_revoke"
+              >
               </paper-icon-button>
             </div>
           </div>
@@ -123,7 +135,7 @@ Polymer({
     </template>
 
     <paper-toast id="toast">[[i18n('authenticationTokensManagement.revoked', 'Token revoked')]]</paper-toast>
-`,
+  `,
 
   is: 'nuxeo-authentication-tokens-management',
 
@@ -138,7 +150,7 @@ Polymer({
   behaviors: [I18nBehavior],
 
   _params(application) {
-    return {'application': application};
+    return { application };
   },
 
   _handleTokens(e) {
@@ -146,8 +158,9 @@ Polymer({
   },
 
   _revoke(e) {
-    this.$.token.path = `/token/${  e.model.token.id}`;
-    this.$.token.remove()
+    this.$.token.path = `/token/${e.model.token.id}`;
+    this.$.token
+      .remove()
       .then(this.refresh.bind(this))
       .then(() => {
         this.$.toast.open();

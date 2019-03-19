@@ -48,7 +48,6 @@ Polymer({
         min-width: 90px;
         font-size: 12px;
       }
-
     </style>
 
     <div class="item" name="process" hidden$="[[!_showProcess]]">
@@ -96,7 +95,7 @@ Polymer({
       <label>[[i18n('documentInfo.contributors')]]</label>
       <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
     </div>
-`,
+  `,
 
   is: 'nuxeo-document-info',
   behaviors: [LayoutBehavior],
@@ -114,13 +113,20 @@ Polymer({
   },
 
   _showPub(doc) {
-    return doc && doc.contextParameters &&
-      doc.contextParameters.publications && doc.contextParameters.publications.resultsCount > 0;
+    return (
+      doc &&
+      doc.contextParameters &&
+      doc.contextParameters.publications &&
+      doc.contextParameters.publications.resultsCount > 0
+    );
   },
 
   _documentChanged() {
-    this._showProcess = this.document && this.document.contextParameters &&
-      this.document.contextParameters.runningWorkflows && this.document.contextParameters.runningWorkflows.length > 0;
+    this._showProcess =
+      this.document &&
+      this.document.contextParameters &&
+      this.document.contextParameters.runningWorkflows &&
+      this.document.contextParameters.runningWorkflows.length > 0;
   },
 
   _urlForPub() {

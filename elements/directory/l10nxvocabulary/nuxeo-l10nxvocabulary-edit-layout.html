@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-l10nxvocabulary-edit-layout">
   <template>
     <style include="iron-flex iron-positioning nuxeo-styles">
-      *[role=widget] {
+      *[role='widget'] {
         margin-bottom: 16px;
       }
 
@@ -33,13 +33,13 @@ limitations under the License.
           color: var(--nuxeo-drawer-text);
           max-height: 300px;
           overflow: auto;
-        };
+        }
         --nuxeo-tree-node-theme: {
           min-height: 24px;
-        };
+        }
         --nuxeo-tree-children-theme: {
           padding-left: 1em;
-        };
+        }
         --nuxeo-tree-node-more-theme: {
           line-height: 1.3em;
           display: inline-block;
@@ -70,7 +70,7 @@ limitations under the License.
       }
 
       iron-icon {
-        opacity: .3;
+        opacity: 0.3;
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
@@ -79,7 +79,6 @@ limitations under the License.
       [toggle] {
         cursor: pointer;
       }
-
     </style>
 
     <div role="widget">
@@ -90,7 +89,7 @@ limitations under the License.
         <iron-form id="form">
           <form>
             <nuxeo-tree id="tree" data="[[_root]]" controller="[[controller]]" node-key="id" on-select="_selectParent">
-              <template  class="horizontal layout">
+              <template class="horizontal layout">
                 <div name$="[[item.properties.id]]">
                   <template class="flex" is="dom-if" if="[[!isLeaf]]">
                     <iron-icon icon="[[_expandIcon(opened)]]" toggle></iron-icon>
@@ -109,41 +108,46 @@ limitations under the License.
       </nuxeo-dialog>
     </div>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.id')]]"
-                 name="id"
-                 value="{{entry.properties.id::change}}"
-                 readonly$="[[!new]]"
-                 required>
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.id')]]"
+      name="id"
+      value="{{entry.properties.id::change}}"
+      readonly$="[[!new]]"
+      required
+    >
     </nuxeo-input>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.label_en')]]"
-                 name="label"
-                 value="{{entry.properties.label_en::change}}">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.label_en')]]"
+      name="label"
+      value="{{entry.properties.label_en::change}}"
+    >
     </nuxeo-input>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.label_fr')]]"
-                 name="label"
-                 value="{{entry.properties.label_fr::change}}">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.label_fr')]]"
+      name="label"
+      value="{{entry.properties.label_fr::change}}"
+    >
     </nuxeo-input>
 
     <div role="widget">
       <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
-      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]"
-                           on-change="_obsoleteChanged"
-                           noink>
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]" on-change="_obsoleteChanged" noink>
       </paper-toggle-button>
     </div>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('vocabularyManagement.edit.ordering')]]"
-                 name="ordering"
-                 type="number"
-                 value="{{entry.properties.ordering::change}}" >
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.ordering')]]"
+      name="ordering"
+      type="number"
+      value="{{entry.properties.ordering::change}}"
+    >
     </nuxeo-input>
-
   </template>
 
   <script>
@@ -173,7 +177,7 @@ limitations under the License.
 
         _root: {
           type: Object,
-          value: {properties: {id: '', parent: ''}, root: true, id: 'root'},
+          value: { properties: { id: '', parent: '' }, root: true, id: 'root' },
         },
       },
 
@@ -201,26 +205,22 @@ limitations under the License.
           if (this.entries) {
             this.controller = {
               getChildren: function(node) {
-                return new Promise(((resolve) => {
-              const targetParentId = !node ? '' : node.properties.id;
-              const children = this.entries.filter(
-                (e) => {
-              if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
-                e.id = e.properties.id;
-                return true;
-              }
-              return false;
-            },
-              );
-              resolve(children);
-            }));
+                return new Promise((resolve) => {
+                  const targetParentId = !node ? '' : node.properties.id;
+                  const children = this.entries.filter((e) => {
+                    if (e.properties.parent === targetParentId && e.properties.id !== this.entry.properties.id) {
+                      e.id = e.properties.id;
+                      return true;
+                    }
+                    return false;
+                  });
+                  resolve(children);
+                });
               }.bind(this),
 
               isLeaf: function(node) {
                 const lookedUpId = node.properties.id;
-                const isNotLeaf = this.entries.some(
-                  (e) => e.properties.parent === lookedUpId,
-                );
+                const isNotLeaf = this.entries.some((e) => e.properties.parent === lookedUpId);
                 return !isNotLeaf && node.root !== true;
               }.bind(this),
             };
@@ -230,7 +230,7 @@ limitations under the License.
       },
 
       _expandIcon(opened) {
-        return `hardware:keyboard-arrow-${  opened ? 'down' : 'right'}`;
+        return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
       },
 
       _selectParent(e) {
@@ -242,7 +242,6 @@ limitations under the License.
       _toggleParent() {
         this.$.parentDialog.toggle();
       },
-
     });
   </script>
 </dom-module>

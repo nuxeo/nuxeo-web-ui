@@ -41,8 +41,14 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
  */
 Polymer({
   _template: html`
-    <nuxeo-layout id="layout" href="[[_formHref(provider, searchName)]]" model="[[_formModel(provider, aggregations, params)]]" error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]" on-element-changed="_formChanged"></nuxeo-layout>
-`,
+    <nuxeo-layout
+      id="layout"
+      href="[[_formHref(provider, searchName)]]"
+      model="[[_formModel(provider, aggregations, params)]]"
+      error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
+      on-element-changed="_formChanged"
+    ></nuxeo-layout>
+  `,
 
   is: 'nuxeo-search-form-layout',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -81,13 +87,13 @@ Polymer({
      */
     model: {
       type: Object,
-      value() { return {}; },
+      value() {
+        return {};
+      },
     },
   },
 
-  observers: [
-    '_paramsChanged(params.*)',
-  ],
+  observers: ['_paramsChanged(params.*)'],
 
   get element() {
     return this.$.layout.element;
@@ -99,18 +105,18 @@ Polymer({
     }
   },
 
-  _aggregationsChanged () {
+  _aggregationsChanged() {
     if (this.element) {
       this.element.aggregations = this.aggregations;
     }
   },
 
-  _formHref (provider, searchName) {
+  _formHref(provider, searchName) {
     const name = (searchName || provider).toLowerCase();
-    return this.resolveUrl(`${name  }/${  ['nuxeo', name, 'search-form'].join('-')  }.html`);
+    return this.resolveUrl(`${name}/${['nuxeo', name, 'search-form'].join('-')}.html`);
   },
 
-  _formModel () {
+  _formModel() {
     return {
       provider: this.provider,
       params: this.params,
@@ -118,7 +124,7 @@ Polymer({
     };
   },
 
-  _formChanged (e) {
+  _formChanged(e) {
     this.fire('search-form-layout-changed', e.detail);
     // forward params change events
     this.element.addEventListener('params-changed', (evt) => {

@@ -45,7 +45,7 @@ Polymer({
     <div id="shortcuts"></div>
 
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
-`,
+  `,
 
   is: 'nuxeo-document-create-shortcuts',
   behaviors: [FormatBehavior],
@@ -79,7 +79,7 @@ Polymer({
       if (this.subtypes && this.subtypes.indexOf(type) > -1) {
         const el = document.createElement('nuxeo-document-create-shortcut');
         el.type = type;
-        el.icon =  `images/doctypes/${  type  }.svg`;
+        el.icon = `images/doctypes/${type}.svg`;
         el.label = this.formatDocType(type);
         shorcuts.push(el);
       }

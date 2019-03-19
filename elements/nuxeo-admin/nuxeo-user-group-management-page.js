@@ -45,7 +45,7 @@ Polymer({
         </template>
       </div>
     </nuxeo-page>
-`,
+  `,
 
   is: 'nuxeo-user-group-management-page',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -83,9 +83,9 @@ Polymer({
   },
 
   listeners: {
-    'goHome': '_handleUGMgoHome',
-    'manageUser': '_handleUGMmanageUser',
-    'manageGroup': '_handleUGMmanageGroup',
+    goHome: '_handleUGMgoHome',
+    manageUser: '_handleUGMmanageUser',
+    manageGroup: '_handleUGMmanageGroup',
   },
 
   _routeParamsChanged(route) {
@@ -136,18 +136,18 @@ Polymer({
   },
 
   _handleUGMmanageUser(e) {
-    this.entity = {type: 'user', id: e.detail.user};
-    const url = `${ 'user-group-management' }/${ this.entity.type }/${ this.entity.id }`;
+    this.entity = { type: 'user', id: e.detail.user };
+    const url = `${'user-group-management'}/${this.entity.type}/${this.entity.id}`;
     this.navigateTo(this.route, url);
   },
 
   _handleUGMmanageGroup(e) {
-    this.entity = {type: 'group', id: e.detail.group};
-    const url = `${ 'user-group-management' }/${ this.entity.type }/${ this.entity.id }`;
+    this.entity = { type: 'group', id: e.detail.group };
+    const url = `${'user-group-management'}/${this.entity.type}/${this.entity.id}`;
     this.navigateTo(this.route, url);
   },
 
   _observePage() {
-    this._displayLatest = this.page === "search";
+    this._displayLatest = this.page === 'search';
   },
 });

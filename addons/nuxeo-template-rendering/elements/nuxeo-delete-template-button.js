@@ -60,7 +60,7 @@ Polymer({
         </paper-button>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-delete-template-button',
   behaviors: [I18nBehavior, RoutingBehavior],
@@ -85,9 +85,11 @@ Polymer({
 
   _delete() {
     this.$.deleteTemplatesOp.input = this.document.uid;
-    this.$.deleteTemplatesOp.execute().then(this.$.template.remove.bind(this.$.template))
-                                      .then(() => {
-                                        window.location = this.urlFor('document', this.document.parentRef);
-                                      });
+    this.$.deleteTemplatesOp
+      .execute()
+      .then(this.$.template.remove.bind(this.$.template))
+      .then(() => {
+        window.location = this.urlFor('document', this.document.parentRef);
+      });
   },
 });

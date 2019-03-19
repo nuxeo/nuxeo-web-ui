@@ -49,20 +49,26 @@ Polymer({
         @apply --nuxeo-liveconnect-anchor-layout;
       }
 
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
       }
     </style>
 
-    <nuxeo-liveconnect-onedrive-provider id="provider" is-available="{{isProviderAvailable}}"></nuxeo-liveconnect-onedrive-provider>
+    <nuxeo-liveconnect-onedrive-provider
+      id="provider"
+      is-available="{{isProviderAvailable}}"
+    ></nuxeo-liveconnect-onedrive-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
       <a href="javascript:undefined" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/OneDrive.png"></iron-icon>
         [[i18n('liveconnectImportActions.onedrive', 'OneDrive')]]
       </a>
     </template>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-onedrive-link',
   behaviors: [I18nBehavior],

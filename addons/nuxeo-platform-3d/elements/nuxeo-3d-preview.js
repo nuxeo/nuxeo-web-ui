@@ -41,8 +41,8 @@ Polymer({
       }
 
       nuxeo-3d-viewer {
-         width: 100%;
-         height: 40vh;
+        width: 100%;
+        height: 40vh;
       }
 
       .title {
@@ -83,7 +83,7 @@ Polymer({
         </p>
       </template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-3d-preview',
 

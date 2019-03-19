@@ -35,7 +35,7 @@ Polymer({
     </style>
 
     <nuxeo-document-layout document="[[document]]" layout="metadata"></nuxeo-document-layout>
-`,
+  `,
 
   is: 'nuxeo-document-metadata',
 

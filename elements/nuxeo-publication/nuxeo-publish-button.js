@@ -73,7 +73,8 @@ Polymer({
       }
 
       /* IE11 fix (NXP-23550) */
-      *::-ms-backdrop, iron-pages * {
+      *::-ms-backdrop,
+      iron-pages * {
         height: 80vh;
       }
     </style>
@@ -96,7 +97,7 @@ Polymer({
         </iron-pages>
       </div>
     </nuxeo-dialog>
-`,
+  `,
 
   is: 'nuxeo-publish-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -113,8 +114,8 @@ Polymer({
     documents: Object,
 
     /**
-      * Icon to use (iconset_name:icon_name).
-      */
+     * Icon to use (iconset_name:icon_name).
+     */
     icon: {
       type: String,
       value: 'editor:publish',
@@ -143,7 +144,7 @@ Polymer({
 
   listeners: {
     'nx-publish-success': '_close',
-    'cancel': '_close',
+    cancel: '_close',
   },
 
   _toggleDialog() {
@@ -155,7 +156,7 @@ Polymer({
   },
 
   _publishContext() {
-    return this.opened ? {document: this.document, documents: this.documents, i18n: this.i18n} : {};
+    return this.opened ? { document: this.document, documents: this.documents, i18n: this.i18n } : {};
   },
 
   _computeLabel() {
@@ -163,13 +164,14 @@ Polymer({
   },
 
   _isAvailable() {
-    return (this.document && this.isPublishable(this.document)) || (this.documents && this.documents.every(
-      (doc) => this.isPublishable(doc)));
+    return (
+      (this.document && this.isPublishable(this.document)) ||
+      (this.documents && this.documents.every((doc) => this.isPublishable(doc)))
+    );
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = this.documents && !(this.documents.some(
-      (document) => !this._docHasPermissions(document)));
+    this.docsHavePermissions = this.documents && !this.documents.some((document) => !this._docHasPermissions(document));
     return this.docsHavePermissions;
   },
 });

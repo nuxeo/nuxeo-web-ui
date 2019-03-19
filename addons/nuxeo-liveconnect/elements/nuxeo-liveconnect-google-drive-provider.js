@@ -21,8 +21,8 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LiveConnectBehavior } from './nuxeo-liveconnect-behavior.js';
 
 // load GAPI client
-const script = document.createElement('script')
-script.src = 'https://apis.google.com/js/client.js'
+const script = document.createElement('script');
+script.src = 'https://apis.google.com/js/client.js';
 document.head.appendChild(script); /* global google gapi */
 
 /**
@@ -39,7 +39,7 @@ Polymer({
     </style>
 
     <nuxeo-resource id="oauth2"></nuxeo-resource>
-`,
+  `,
 
   is: 'nuxeo-liveconnect-google-drive-provider',
   behaviors: [LiveConnectBehavior],
@@ -52,7 +52,7 @@ Polymer({
 
   openPicker() {
     gapi.load('picker', {
-      'callback': this._init.bind(this),
+      callback: this._init.bind(this),
     });
   },
 
@@ -109,11 +109,12 @@ Polymer({
   _handleAuthResult(token) {
     if (token) {
       const xhr = document.createElement('iron-request');
-      xhr.send({url:`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ${  token}`, handleAs: 'json'})
-          .then(() => {
-            this.userId = xhr.response.email;
-            this._showPicker(token);
-          });
+      xhr
+        .send({ url: `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token= ${token}`, handleAs: 'json' })
+        .then(() => {
+          this.userId = xhr.response.email;
+          this._showPicker(token);
+        });
     } else {
       this._checkAuth(false);
     }
@@ -124,13 +125,13 @@ Polymer({
     view.setIncludeFolders(true);
     view.setOwnedByMe(true);
     new google.picker.PickerBuilder()
-        .setOAuthToken(accessToken)
-        .setAppId(this.clientId)
-        .addView(view)
-        .setCallback(this._pickerCallback.bind(this))
-        .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-        .build()
-        .setVisible(true);
+      .setOAuthToken(accessToken)
+      .setAppId(this.clientId)
+      .addView(view)
+      .setCallback(this._pickerCallback.bind(this))
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .build()
+      .setVisible(true);
   },
 
   _pickerCallback(data) {

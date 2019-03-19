@@ -35,15 +35,14 @@ Polymer({
     <style include="nuxeo-action-button-styles"></style>
 
     <template is="dom-if" if="[[hasVersions(document)]]">
-      <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]">
-      </nuxeo-operation>
+      <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]"></nuxeo-operation>
       <div class="action" on-tap="_doDiff">
         <paper-icon-button noink id="diff" icon="nuxeo:compare"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
       </div>
       <nuxeo-tooltip for="diff" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
-`,
+  `,
 
   is: 'nuxeo-versions-diff-button',
   behaviors: [I18nBehavior, FiltersBehavior],
@@ -71,29 +70,34 @@ Polymer({
   },
 
   _doDiff() {
-    this.$$('#opGetVersions').execute().then((result) => {
-      // sort the versions from the most to the least recent
-      const versions = result.entries.reverse();
-      const currentIndex = versions.findIndex((doc) => this._getMajor(doc) === this._getMajor(this.document) &&
-               this._getMinor(doc) === this._getMinor(this.document));
-      // and put the current one if the beginning of the list
-      if (currentIndex > 0) {
-        const current = versions[currentIndex];
-        versions.splice(currentIndex, 1);
-        versions.unshift(current);
-      }
-      if (this.document.isCheckedOut) {
-        versions.unshift(this.document);
-      }
-      // check if there is at least two versions to be compared
-      if (versions.length < 2) {
-        this.fire('notify', { message: this.i18n('versionsDiffButton.nothingToCompare')} );
-        return;
-      }
-      this.fire('nuxeo-diff-documents', {
-        documents: versions,
+    this.$$('#opGetVersions')
+      .execute()
+      .then((result) => {
+        // sort the versions from the most to the least recent
+        const versions = result.entries.reverse();
+        const currentIndex = versions.findIndex(
+          (doc) =>
+            this._getMajor(doc) === this._getMajor(this.document) &&
+            this._getMinor(doc) === this._getMinor(this.document),
+        );
+        // and put the current one if the beginning of the list
+        if (currentIndex > 0) {
+          const current = versions[currentIndex];
+          versions.splice(currentIndex, 1);
+          versions.unshift(current);
+        }
+        if (this.document.isCheckedOut) {
+          versions.unshift(this.document);
+        }
+        // check if there is at least two versions to be compared
+        if (versions.length < 2) {
+          this.fire('notify', { message: this.i18n('versionsDiffButton.nothingToCompare') });
+          return;
+        }
+        this.fire('nuxeo-diff-documents', {
+          documents: versions,
+        });
       });
-    });
   },
 
   _getMajor(document) {

@@ -32,7 +32,10 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 Polymer({
   _template: html`
     <style include="iron-flex">
-      a, a:active, a:visited, a:focus {
+      a,
+      a:active,
+      a:visited,
+      a:focus {
         @apply --nuxeo-link;
       }
       a:hover {
@@ -56,7 +59,7 @@ Polymer({
         </template>
       </template>
     </div>
-`,
+  `,
 
   is: 'nuxeo-video-conversions',
   behaviors: [I18nBehavior, FormatBehavior],

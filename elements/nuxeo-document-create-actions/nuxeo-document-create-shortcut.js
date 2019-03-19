@@ -50,12 +50,11 @@ Polymer({
           filter: brightness(100);
         }
       }
-
     </style>
 
     <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
     <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
-`,
+  `,
 
   is: 'nuxeo-document-create-shortcut',
   behaviors: [I18nBehavior],
@@ -67,6 +66,6 @@ Polymer({
   },
 
   _tap() {
-    this.fire('create-document', {type: this.type});
+    this.fire('create-document', { type: this.type });
   },
 });

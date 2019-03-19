@@ -48,13 +48,12 @@ Polymer({
     </style>
 
     <paper-progress indeterminate hidden$="[[!visible]]"></paper-progress>
-`,
+  `,
 
   is: 'nuxeo-progress-indicator',
   behaviors: [NeonAnimatableBehavior, NeonAnimationRunnerBehavior],
 
   properties: {
-
     visible: {
       type: Boolean,
       value: false,
@@ -66,11 +65,13 @@ Polymer({
       type: Object,
       value() {
         return {
-          'fadein': [{
-            name: 'fade-in-animation',
-            timing: {delay: 1000, duration: 1500},
-            node: this,
-          }],
+          fadein: [
+            {
+              name: 'fade-in-animation',
+              timing: { delay: 1000, duration: 1500 },
+              node: this,
+            },
+          ],
         };
       },
     },

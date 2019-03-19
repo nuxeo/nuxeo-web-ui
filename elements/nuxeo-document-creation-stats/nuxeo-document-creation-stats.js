@@ -35,9 +35,15 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <iron-localstorage id="storage" name="[[name]]" value="{{creationStats}}" on-iron-localstorage-load-empty="initialize" auto-save-disabled>
+    <iron-localstorage
+      id="storage"
+      name="[[name]]"
+      value="{{creationStats}}"
+      on-iron-localstorage-load-empty="initialize"
+      auto-save-disabled
+    >
     </iron-localstorage>
-`,
+  `,
 
   is: 'nuxeo-document-creation-stats',
 
@@ -55,7 +61,7 @@ Polymer({
 
   ready() {
     this.$.nxcon.connect().then((res) => {
-      this.name =  `${res.id  }-document-creation-stats`;
+      this.name = `${res.id}-document-creation-stats`;
     });
   },
 
@@ -74,11 +80,11 @@ Polymer({
       this.splice('creationStats.recency', 0, 1);
     }
     if (!(type in this.creationStats.frequency)) {
-      this.set(`creationStats.frequency.${  type}`, 0);
+      this.set(`creationStats.frequency.${type}`, 0);
     }
 
     this.push('creationStats.recency', type);
-    this.set(`creationStats.frequency.${  type}`, this.creationStats.frequency[type] + 1);
+    this.set(`creationStats.frequency.${type}`, this.creationStats.frequency[type] + 1);
     this.set('creationStats.total', this.creationStats.total + 1);
     this.$.storage.save();
   },
@@ -93,7 +99,9 @@ Polymer({
 
   mostCommonType(n) {
     this.$.storage.reload();
-    const sorted = Object.keys(this.creationStats.frequency).sort((a, b) => this.creationStats.frequency[a] < this.creationStats.frequency[b]).filter((elem, index, self) => index === self.indexOf(elem));
-    return sorted.slice(0, Math.min((n || 1), sorted.length));
+    const sorted = Object.keys(this.creationStats.frequency)
+      .sort((a, b) => this.creationStats.frequency[a] < this.creationStats.frequency[b])
+      .filter((elem, index, self) => index === self.indexOf(elem));
+    return sorted.slice(0, Math.min(n || 1, sorted.length));
   },
 });

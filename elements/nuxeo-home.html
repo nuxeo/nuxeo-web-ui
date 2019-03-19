@@ -23,7 +23,6 @@ limitations under the License.
 <dom-module id="nuxeo-home">
   <template>
     <style include="nuxeo-styles">
-
       .dashboard {
         display: flex;
         flex-direction: row;
@@ -42,7 +41,8 @@ limitations under the License.
         }
       }
 
-      nuxeo-data-table, nuxeo-tasks-list {
+      nuxeo-data-table,
+      nuxeo-tasks-list {
         height: 350px;
       }
 
@@ -53,14 +53,12 @@ limitations under the License.
         display: block;
         width: calc(100% - 38px);
       }
-
     </style>
 
     <nuxeo-page>
       <div slot="header">[[i18n('home.dashboard')]]</div>
       <div>
         <section name="dashboard" class="dashboard">
-
           <!-- recently edited -->
           <nuxeo-card icon="nuxeo:edit" heading="[[i18n('home.latestDocumentsEdited')]]">
             <nuxeo-page-provider
@@ -70,12 +68,16 @@ limitations under the License.
               schemas="dublincore,common,uid"
               enrichers="thumbnail"
               params='{"queryParams": "/"}'
-              headers='{"X-NXfetch.document": "properties"}'>
+              headers='{"X-NXfetch.document": "properties"}'
+            >
             </nuxeo-page-provider>
-            <nuxeo-data-table id="latestEditedDocs" max-items="15"
+            <nuxeo-data-table
+              id="latestEditedDocs"
+              max-items="15"
               nx-provider="latestQuery"
               empty-label="[[i18n('queryWidget.noDocuments')]]"
-              on-row-clicked="_navigate">
+              on-row-clicked="_navigate"
+            >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -87,7 +89,10 @@ limitations under the License.
                   <nuxeo-date datetime="[[item.properties.dc:modified]]" format="relative"></nuxeo-date>
                 </template>
               </nuxeo-data-table-column>
-              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+              <nuxeo-data-table-column
+                name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
+                flex="50"
+              >
                 <template>
                   <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
                 </template>
@@ -102,13 +107,19 @@ limitations under the License.
 
           <!-- recently viewed -->
           <nuxeo-card icon="nuxeo:recent" heading="[[i18n('app.recentlyViewed')]]">
-            <nuxeo-document-storage id="recentStorage" name="nuxeo-recent-documents" documents="{{_recentDocuments}}"></nuxeo-document-storage>
+            <nuxeo-document-storage
+              id="recentStorage"
+              name="nuxeo-recent-documents"
+              documents="{{_recentDocuments}}"
+            ></nuxeo-document-storage>
             <nuxeo-page-provider id="recentProvider" page-size="15" schemas="uid"></nuxeo-page-provider>
-            <nuxeo-data-table id="latestViewedDocs"
-                              max-items="15"
-                              empty-label="[[i18n('recentDocuments.empty')]]"
-                              empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
-                              on-row-clicked="_navigate">
+            <nuxeo-data-table
+              id="latestViewedDocs"
+              max-items="15"
+              empty-label="[[i18n('recentDocuments.empty')]]"
+              empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
+              on-row-clicked="_navigate"
+            >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -131,17 +142,22 @@ limitations under the License.
           <!-- favorites -->
           <nuxeo-card icon="nuxeo:favorites" heading="[[i18n('home.favorites')]]">
             <nuxeo-operation id="fetchFavOp" op="Favorite.Fetch" response="favorite"></nuxeo-operation>
-            <nuxeo-page-provider id="favoritesProvider"
-               provider="default_content_collection"
-               page-size="20"
-               schemas="dublincore,common,uid"
-               headers='{"X-NXfetch.document": "properties"}'
-               enrichers="thumbnail">
+            <nuxeo-page-provider
+              id="favoritesProvider"
+              provider="default_content_collection"
+              page-size="20"
+              schemas="dublincore,common,uid"
+              headers='{"X-NXfetch.document": "properties"}'
+              enrichers="thumbnail"
+            >
             </nuxeo-page-provider>
-            <nuxeo-data-table id="favoriteDocs" max-items="15"
+            <nuxeo-data-table
+              id="favoriteDocs"
+              max-items="15"
               nx-provider="favoritesProvider"
               empty-label="[[i18n('favorites.empty')]]"
-              on-row-clicked="_navigate">
+              on-row-clicked="_navigate"
+            >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -153,7 +169,10 @@ limitations under the License.
                   <nuxeo-date datetime="[[item.properties.dc:modified]]" format="relative"></nuxeo-date>
                 </template>
               </nuxeo-data-table-column>
-              <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]" flex="50">
+              <nuxeo-data-table-column
+                name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
+                flex="50"
+              >
                 <template>
                   <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
                 </template>
@@ -163,7 +182,6 @@ limitations under the License.
         </section>
       </div>
     </nuxeo-page>
-
   </template>
 
   <script>
@@ -228,8 +246,8 @@ limitations under the License.
         if (docs && docs.length > 0) {
           const storage = this.$.recentStorage;
           const provider = this.$.recentProvider;
-          const ids = docs.map((doc) => `'${  doc.uid  }'`).join(',');
-          provider.query = `SELECT * FROM Document WHERE ecm:uuid IN (${  ids  }) AND ecm:isTrashed = 0`;
+          const ids = docs.map((doc) => `'${doc.uid}'`).join(',');
+          provider.query = `SELECT * FROM Document WHERE ecm:uuid IN (${ids}) AND ecm:isTrashed = 0`;
           provider.fetch().then((result) => {
             docs.forEach((doc) => {
               if (result.entries.findIndex((entry) => entry.uid === doc.uid) === -1) {
@@ -241,8 +259,6 @@ limitations under the License.
           });
         }
       },
-
     });
   </script>
-
 </dom-module>

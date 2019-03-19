@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
@@ -16,113 +16,113 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <html lang="">
-<head>
-  <meta charset="utf-8">
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="generator" content="Polymer Starter Kit" />
-  <title>Nuxeo</title>
-  <!-- Place favicon.ico in the `app/` directory -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content="Polymer Starter Kit" />
+    <title>Nuxeo</title>
+    <!-- Place favicon.ico in the `app/` directory -->
 
-  <!-- Chrome for Android theme color -->
-  <meta name="theme-color" content="#2E3AA1">
+    <!-- Chrome for Android theme color -->
+    <meta name="theme-color" content="#2E3AA1" />
 
-  <!-- Web Application Manifest -->
-  <link rel="manifest" href="manifest.json" crossOrigin="use-credentials">
+    <!-- Web Application Manifest -->
+    <link rel="manifest" href="manifest.json" crossorigin="use-credentials" />
 
-  <!-- Tile color for Win8 -->
-  <meta name="msapplication-TileColor" content="#3372DF">
+    <!-- Tile color for Win8 -->
+    <meta name="msapplication-TileColor" content="#3372DF" />
 
-  <!-- Add to homescreen for Chrome on Android -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Nuxeo">
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Nuxeo" />
 
-  <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png">
-  <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png">
-  <link rel="shortcut icon" href="favicon.ico">
-  <!-- Safari pinned tab icon -->
-  <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg" color="#0066ff">
+    <link rel="icon" sizes="32x32" href="images/touch/favicon-32x32.png" />
+    <link rel="icon" sizes="16x16" href="images/touch/favicon-16x16.png" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <!-- Safari pinned tab icon -->
+    <link rel="mask-icon" href="images/touch/safari-pinned-tab.svg" color="#0066ff" />
 
-  <!-- Add to homescreen for Safari on iOS -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Nuxeo">
-  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Nuxeo" />
+    <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png" />
 
-  <!-- Tile icon for Win8 (144x144) -->
-  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+    <!-- Tile icon for Win8 (144x144) -->
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png" />
 
-  <!-- XXX: disable zoom on mobile (fix for NXP-26424) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <!-- XXX: disable zoom on mobile (fix for NXP-26424) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
-  <link rel="stylesheet" type="text/css" href="index.css">
-</head>
+    <link rel="stylesheet" type="text/css" href="index.css" />
+  </head>
 
-<body>
+  <body>
+    <nuxeo-connection url="/nuxeo"></nuxeo-connection>
 
-  <nuxeo-connection url="/nuxeo"></nuxeo-connection>
-
-  <nuxeo-app base-url="/" unresolved>
-    <div id="sidebar">
-      <img src="themes/default/logo.png">
-    </div>
-    <div id="container">
-      <div id="toolbar">
+    <nuxeo-app base-url="/" unresolved>
+      <div id="sidebar">
+        <img src="themes/default/logo.png" />
       </div>
-      <span id="loading"></span>
-    </div>
-  </nuxeo-app>
+      <div id="container">
+        <div id="toolbar"></div>
+        <span id="loading"></span>
+      </div>
+    </nuxeo-app>
 
-  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script src="vendor/html-imports/html-imports.min.js"></script>
+    <script src="vendor/html-imports/html-imports.min.js"></script>
 
-  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
+    <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script defer src="vendor/alloy/alloy-editor-all.js"></script>
+    <script defer src="vendor/alloy/alloy-editor-all.js"></script>
 
-  <script>
-    /* eslint-disable no-var, no-unused-vars */
-    var Nuxeo = {
-      UI: {
-        bundles: [/* 'nuxeo-dam', ... */],
-        config: {
-          fetch: {
-            document: ['properties'],
+    <script>
+      /* eslint-disable no-var, no-unused-vars */
+      var Nuxeo = {
+        UI: {
+          bundles: [
+            /* 'nuxeo-dam', ... */
+          ],
+          config: {
+            fetch: {
+              document: ['properties'],
+            },
+            enrichers: {
+              document: [
+                'hasContent',
+                'firstAccessibleAncestor',
+                'permissions',
+                'breadcrumb',
+                'preview',
+                'favorites',
+                'subscribedNotifications',
+                'thumbnail',
+                'renditions',
+                'pendingTasks',
+                'runnableWorkflows',
+                'runningWorkflows',
+                'collections',
+                'audit',
+                'subtypes',
+                'tags',
+                'publications',
+              ],
+              blob: ['appLinks'],
+            },
+            dateFormat: 'LL',
+            dateTimeFormat: 'LLL',
           },
-          enrichers: {
-            document: [
-              'hasContent',
-              'firstAccessibleAncestor',
-              'permissions',
-              'breadcrumb',
-              'preview',
-              'favorites',
-              'subscribedNotifications',
-              'thumbnail',
-              'renditions',
-              'pendingTasks',
-              'runnableWorkflows',
-              'runningWorkflows',
-              'collections',
-              'audit',
-              'subtypes',
-              'tags',
-              'publications',
-            ],
-            blob: ['appLinks'],
-          },
-          dateFormat: 'LL',
-          dateTimeFormat: 'LLL',
         },
-      },
-    };
-    /* eslint-enable no-var, no-unused-vars */
-  </script>
+      };
+      /* eslint-enable no-var, no-unused-vars */
+    </script>
 
-  <script src="main.bundle.js"></script>
+    <script src="main.bundle.js"></script>
 
-  <!--
+    <!--
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
@@ -130,7 +130,5 @@ limitations under the License.
       });
     }
   </script>
-  -->
-</body>
-
+  --></body>
 </html>
