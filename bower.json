@@ -4,7 +4,7 @@
   "dependencies": {
     "Chart.js": "https://github.com/nnnick/Chart.js.git#2.7.3",
     "app-layout": "https://github.com/PolymerElements/app-layout.git#2.1.1",
-    "chart-elements": "https://github.com/nuxeo/chart-elements.git#41ebfa0e6f",
+    "chart-elements": "https://github.com/nuxeo/chart-elements.git#b95ea4ac9a",
     "cropperjs": "https://github.com/fengyuanchen/cropperjs.git#0.5.6",
     "d3": "https://github.com/mbostock-bower/d3-bower.git#3.5.17",
     "es6-promise": "https://github.com/components/es6-promise.git#2.2.0",
@@ -107,7 +107,7 @@
   "resolutions": {
     "Chart.js": "2.7.3",
     "app-layout": "2.1.1",
-    "chart-elements": "41ebfa0e6f",
+    "chart-elements": "b95ea4ac9a",
     "cropperjs": "0.5.6",
     "d3": "3.5.17",
     "es6-promise": "2.2.0",
