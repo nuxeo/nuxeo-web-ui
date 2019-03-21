@@ -60,6 +60,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
+import { ChartDataBehavior } from './nuxeo-admin/nuxeo-chart-data-behavior.js';
 import './nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-recent-documents/nuxeo-recent-documents.js';
@@ -97,6 +98,7 @@ Nuxeo.FiltersBehavior = FiltersBehavior;
 Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
 Nuxeo.FormatBehavior = FormatBehavior;
+Nuxeo.ChartDataBehavior = ChartDataBehavior;
 
 // Export Polymer and PolymerElement for 1.x and 2.x compat
 window.Polymer = Polymer;
