@@ -827,7 +827,7 @@
   "searchForm.renamePopup.heading": "Renommer la recherche",
   "searchForm.renamePopup.label": "Tapez un nouveau nom pour la recherche",
   "searchForm.savePopup.heading": "Enregistrer la recherche",
-  "searchForm.savePopup.label": "Tapez une nom pour la recherche",
+  "searchForm.savePopup.label": "Tapez un nom pour la recherche",
   "searchForm.searchFilters": "Filtres",
   "searchForm.shared.heading": "Partager la recherche",
   "searchResults.noResults": "Aucun document ne correspond aux critères sélectionnés.",
