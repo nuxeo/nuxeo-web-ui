@@ -60,7 +60,6 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
-import { ChartDataBehavior } from './nuxeo-admin/nuxeo-chart-data-behavior.js';
 import './nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-recent-documents/nuxeo-recent-documents.js';
@@ -78,6 +77,7 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
+import { ChartDataBehavior } from './nuxeo-admin/nuxeo-chart-data-behavior.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
