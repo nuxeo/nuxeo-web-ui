@@ -14,8 +14,13 @@ const tmp = [{ from: `.tmp`, to: join(TARGET) }];
 
 const polyfills = [
   {
-    from: 'node_modules/@webcomponents/webcomponentsjs/*.{js,map}',
+    from: 'node_modules/@webcomponents/webcomponentsjs/webcomponents-*.{js,map}',
     to: join(TARGET, 'vendor/webcomponentsjs'),
+    flatten: true,
+  },
+  {
+    from: 'node_modules/@webcomponents/webcomponentsjs/bundles/*.{js,map}',
+    to: join(TARGET, 'vendor/webcomponentsjs/bundles'),
     flatten: true,
   },
   {
