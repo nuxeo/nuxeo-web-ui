@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<link rel="import" href="nuxeo-mailfolder-list-item.html">
+<link rel="import" href="nuxeo-mailfolder-list-item.html" />
 
 <!--
 `nuxeo-mailfolder-view-layout`
@@ -30,19 +30,37 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-page-provider id="nxProvider"
-                         provider="advanced_document_content"
-                         page-size="20"
-                         enrichers="thumbnail, permissions"
-                         params="[[params]]"></nuxeo-page-provider>
+    <nuxeo-page-provider
+      id="nxProvider"
+      provider="advanced_document_content"
+      page-size="20"
+      enrichers="thumbnail, permissions"
+      params="[[params]]"
+    ></nuxeo-page-provider>
 
-    <nuxeo-results id="results" nx-provider="[[nxProvider]]" name="[[document.uid]]" display-mode="list"
-                   selected-items="{{selectedItems}}">
-      <nuxeo-data-list name="list" selection-enabled multi-selection display-sort
-                       sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]">
+    <nuxeo-results
+      id="results"
+      nx-provider="[[nxProvider]]"
+      name="[[document.uid]]"
+      display-mode="list"
+      selected-items="{{selectedItems}}"
+    >
+      <nuxeo-data-list
+        name="list"
+        selection-enabled
+        multi-selection
+        display-sort
+        sort-label="[[i18n('searchResults.sort.label')]]"
+        sort-options="[[sortOptions]]"
+      >
         <template>
-          <nuxeo-mailfolder-list-item selected$="{{selected}}" item="[[item]]" index="[[index]]"
-                                      on-navigate="_navigate" selected-items="[[selectedItems]]">
+          <nuxeo-mailfolder-list-item
+            selected$="{{selected}}"
+            item="[[item]]"
+            index="[[index]]"
+            on-navigate="_navigate"
+            selected-items="[[selectedItems]]"
+          >
           </nuxeo-mailfolder-list-item>
         </template>
       </nuxeo-data-list>
@@ -58,49 +76,49 @@ limitations under the License.
          */
         document: {
           type: Object,
-          observer: '_documentChanged'
+          observer: '_documentChanged',
         },
 
         params: {
           type: Object,
-          observer: '_paramsChanged'
+          observer: '_paramsChanged',
         },
 
         sortOptions: {
           type: Array,
-          value: []
-        }
+          value: [],
+        },
       },
 
-      ready: function() {
+      ready() {
         this.nxProvider = this.$.nxProvider;
         this.sortOptions = [
           {
             field: 'mail:sending_date',
             label: this.i18n('mailfolder.sort.field.sending_date'),
             order: 'desc',
-            selected: true
+            selected: true,
           },
-          {field: 'mail:sender', label: this.i18n('mailfolder.sort.field.sender'), order: 'asc'},
-          {field: 'dc:title', label: this.i18n('mailfolder.sort.field.subject'), order: 'asc'}
+          { field: 'mail:sender', label: this.i18n('mailfolder.sort.field.sender'), order: 'asc' },
+          { field: 'dc:title', label: this.i18n('mailfolder.sort.field.subject'), order: 'asc' },
         ];
       },
 
-      _documentChanged: function() {
+      _documentChanged() {
         if (this.document) {
-          this.set('params', {'ecm_parentId': this.document.uid});
+          this.set('params', { ecm_parentId: this.document.uid });
         }
       },
 
-      _paramsChanged: function() {
+      _paramsChanged() {
         if (this.document && this.$.results.view) {
           this.$.results.view.fetch();
         }
       },
 
-      _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
-      }
+      _navigate(e) {
+        this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.model || e.detail).index });
+      },
     });
   </script>
 </dom-module>
