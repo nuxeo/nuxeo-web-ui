@@ -56,7 +56,7 @@ limitations under the License.
 
       .list-item .select paper-icon-button {
         margin: 0;
-        padding: .3em;
+        padding: 0.3em;
         box-sizing: border-box;
       }
 
@@ -113,22 +113,24 @@ limitations under the License.
       .text {
         @apply --layout-flex;
         @apply --layout-self-end;
-        color: #BCBFBF;
+        color: #bcbfbf;
         margin: 0 24px;
       }
 
-      .subject, .text, .date {
-        font-size: .9rem;
+      .subject,
+      .text,
+      .date {
+        font-size: 0.9rem;
       }
 
       .date {
         @apply --layout-vertical;
-        color: #BCBFBF;
+        color: #bcbfbf;
         text-align: right;
       }
 
       iron-icon {
-        color: #7F8284;
+        color: #7f8284;
         margin-right: 24px;
       }
 
@@ -160,80 +162,78 @@ limitations under the License.
       is: 'nuxeo-mailfolder-list-item',
       properties: {
         item: {
-          type: Object
+          type: Object,
         },
 
         selected: {
           type: Boolean,
           value: false,
-          reflectToAttribute: true
+          reflectToAttribute: true,
         },
 
         selectedItems: {
           type: Array,
-          value: []
+          value: [],
         },
 
         index: {
-          type: Number
-        }
+          type: Number,
+        },
       },
 
-      observers: [
-        '_selectedItemsChanged(selectedItems.splices)'
-      ],
+      observers: ['_selectedItemsChanged(selectedItems.splices)'],
 
-      handleClick: function(e) {
+      handleClick(e) {
         if (this.selectionMode) {
           this._toogleSelect(e);
         } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
-          this.fire('navigate', {item: this.doc, index: this.index});
+          this.fire('navigate', { item: this.doc, index: this.index });
         }
       },
 
-      _onCheckBoxTap: function(e) {
+      _onCheckBoxTap(e) {
         this._toogleSelect(e);
       },
 
-      _toogleSelect: function(e) {
+      _toogleSelect(e) {
         this.selected = !this.selected;
-        this.fire('selected', {index: this.index, shiftKey: e.detail.sourceEvent.shiftKey});
+        this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
       },
 
-      _selectedItemsChanged: function() {
+      _selectedItemsChanged() {
         this.selectionMode = this.selectedItems && this.selectedItems.length > 0;
       },
 
-      _computeSender: function(item) {
-        var match = this._getSenderRegexParts(item);
+      _computeSender(item) {
+        const match = this._getSenderRegexParts(item);
         if (match && match.length > 2) {
-          var alias = match[1];
+          const alias = match[1];
           // return the email (match[2]) if the alias is null
           return alias === 'null' ? match[2] : match[1];
         }
       },
 
-      _computeSenderEmail: function(item) {
-        var match = this._getSenderRegexParts(item);
+      _computeSenderEmail(item) {
+        const match = this._getSenderRegexParts(item);
         if (match && match.length > 2) {
           return match[2];
         }
       },
 
-      _getSenderRegexParts: function(item) {
+      _getSenderRegexParts(item) {
         if (item && item.properties) {
-          var regex = /(.*)<([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})>/i;
+          const regex = /(.*)<([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})>/i;
           return regex.exec(item.properties['mail:sender']);
         }
       },
 
-      _computedAttachmentClass: function(item) {
+      _computedAttachmentClass(item) {
         return this._hasAttachments(item) ? '' : 'invisible';
       },
 
-      _hasAttachments: function(item) {
+      _hasAttachments(item) {
         return item && item.properties && item.properties['files:files'] && item.properties['files:files'].length > 0;
-      }
+      },
     });
   </script>
 </dom-module>

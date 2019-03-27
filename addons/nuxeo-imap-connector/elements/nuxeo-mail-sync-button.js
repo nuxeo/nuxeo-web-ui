@@ -25,10 +25,18 @@ import './nuxeo-mail-icons.js';
 */
 Polymer({
   _template: html`
-    <nuxeo-operation-button operation="Mail.CheckInbox" input="[[document.uid]]" event="document-updated" notification="[[i18n('mailfolder.sync.success')]]" icon="nuxeo-mail:sync" label="[[i18n('mailfolder.sync')]]" on-tap="_showNotification"></nuxeo-operation-button>
+    <nuxeo-operation-button
+      operation="Mail.CheckInbox"
+      input="[[document.uid]]"
+      event="document-updated"
+      notification="[[i18n('mailfolder.sync.success')]]"
+      icon="nuxeo-mail:sync"
+      label="[[i18n('mailfolder.sync')]]"
+      on-tap="_showNotification"
+    ></nuxeo-operation-button>
 
     <paper-toast id="toast" text="[[i18n('mailfolder.sync.checking')]]" duration="0"></paper-toast>
-`,
+  `,
 
   is: 'nuxeo-mail-sync-button',
   behaviors: [I18nBehavior],
@@ -37,18 +45,18 @@ Polymer({
     /**
      * Input document
      */
-    document: Object
+    document: Object,
   },
 
   listeners: {
-    'document-updated': '_closeNotification'
+    'document-updated': '_closeNotification',
   },
 
-  _showNotification: function() {
+  _showNotification() {
     this.$.toast.open();
   },
 
-  _closeNotification: function() {
+  _closeNotification() {
     this.$.toast.hide();
-  }
+  },
 });

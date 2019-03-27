@@ -26,40 +26,81 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-input role="widget" value="{{document.properties.dc:title}}" label="[[i18n('title')]]" type="text"
-                 required></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="[[i18n('title')]]"
+      type="text"
+      required
+    ></nuxeo-input>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:email}}" label="[[i18n('label.mail.folder.email')]]"
-                 type="email" required></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:email}}"
+      label="[[i18n('label.mail.folder.email')]]"
+      type="email"
+      required
+    ></nuxeo-input>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:password}}"
-                 label="[[i18n('label.mail.folder.password')]]" type="password" required></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:password}}"
+      label="[[i18n('label.mail.folder.password')]]"
+      type="password"
+      required
+    ></nuxeo-input>
 
-    <nuxeo-select role="widget" label="[[i18n('label.mail.folder.protocol_type')]]" options="[[protocols]]"
-                  selected="{{document.properties.prot:protocol_type}}" required></nuxeo-select>
+    <nuxeo-select
+      role="widget"
+      label="[[i18n('label.mail.folder.protocol_type')]]"
+      options="[[protocols]]"
+      selected="{{document.properties.prot:protocol_type}}"
+      required
+    ></nuxeo-select>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:host}}" label="[[i18n('label.mail.folder.host')]]"
-                 type="text"></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:host}}"
+      label="[[i18n('label.mail.folder.host')]]"
+      type="text"
+    ></nuxeo-input>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:port}}" label="[[i18n('label.mail.folder.port')]]"
-                 type="number"></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:port}}"
+      label="[[i18n('label.mail.folder.port')]]"
+      type="number"
+    ></nuxeo-input>
 
     <paper-checkbox role="widget" noink checked="{{document.properties.prot:socket_factory_fallback}}">
       [[i18n('label.mail.folder.socket_factory_fallback')]]
     </paper-checkbox>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:socket_factory_port}}"
-                 label="[[i18n('label.mail.folder.socket_factory_port')]]" type="number"></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:socket_factory_port}}"
+      label="[[i18n('label.mail.folder.socket_factory_port')]]"
+      type="number"
+    ></nuxeo-input>
 
     <paper-checkbox role="widget" noink checked="{{document.properties.prot:starttls_enable}}">
       [[i18n('label.mail.folder.starttls_enable')]]
     </paper-checkbox>
 
-    <nuxeo-select role="widget" label="[[i18n('label.mail.folder.ssl_protocols')]]" options="[[ssl_protocols]]"
-                  selected="{{document.properties.prot:ssl_protocols}}"></nuxeo-select>
+    <nuxeo-select
+      role="widget"
+      label="[[i18n('label.mail.folder.ssl_protocols')]]"
+      options="[[ssl_protocols]]"
+      selected="{{document.properties.prot:ssl_protocols}}"
+    ></nuxeo-select>
 
-    <nuxeo-input role="widget" value="{{document.properties.prot:emails_limit}}"
-                 label="[[i18n('label.mail.folder.emails_limit')]]" type="number" required></nuxeo-input>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.prot:emails_limit}}"
+      label="[[i18n('label.mail.folder.emails_limit')]]"
+      type="number"
+      required
+    ></nuxeo-input>
   </template>
   <script>
     Polymer({
@@ -73,24 +114,24 @@ limitations under the License.
 
         protocols: Array,
 
-        ssl_protocols: Array
+        ssl_protocols: Array,
       },
 
-      ready: function() {
+      ready() {
         this.protocols = [
           { id: 'imap', label: 'IMAP' },
           { id: 'pop3', label: 'POP3' },
           { id: 'imaps', label: 'IMAPS' },
-          { id: 'pop3s', label: 'POP3S' }
+          { id: 'pop3s', label: 'POP3S' },
         ];
         this.ssl_protocols = [
           { id: 'SSLv3', label: 'SSLv3' },
           { id: 'TLSv1.2', label: 'TLSv1.2' },
           { id: 'TLSv1.1', label: 'TLSv1.1' },
           { id: 'TLSv1', label: 'TLSv1' },
-          { id: 'SSLv2Hello', label: 'SSLv2Hello' }
+          { id: 'SSLv2Hello', label: 'SSLv2Hello' },
         ];
-      }
+      },
     });
   </script>
 </dom-module>
