@@ -85,6 +85,8 @@ const common = merge([
     entry: './index.js',
     resolve: {
       extensions: ['.js', '.html'],
+      // set absolute modules path to avoid duplicates
+      modules: [resolve(__dirname, 'node_modules')],
     },
     output: {
       filename: '[name].bundle.js',

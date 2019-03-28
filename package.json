@@ -23,7 +23,7 @@
     "polymer-cli": "^1.9.0",
     "replace": "^1.0.1",
     "style-loader": "^0.23.1",
-    "webpack": "~4.28.4",
+    "webpack": "^4.29.6",
     "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
