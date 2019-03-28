@@ -120,7 +120,7 @@ timestamps {
                 echo 'No need to build nuxeo-elements'
             }
             def mvnHome = tool 'maven-3.3'
-            def javaHome = tool 'java-8-oracle'
+            def javaHome = tool 'java-11-oracle'
             withEnv(["JAVA_HOME=${javaHome}", "MAVEN=${mvnHome}/bin", "PATH=${env.JAVA_HOME}/bin:${env.MAVEN}:${env.PATH}"]) {
                 stage('nuxeo-web-ui') {
                     timeout(60) {
