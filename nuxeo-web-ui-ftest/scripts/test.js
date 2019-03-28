@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-
-
 /*
  * supported cli arguments:
  *   --cucumberReport: path to file containing the report that will be used by cucumber-html-report;
@@ -22,6 +20,9 @@
  *   --wdioConfig: pass a custom wdio config file
  *   --debug: allow node inspector to be attached
  *   --browser: the browser to be used (defaults to chrome)
+ *   --runAll: do not apply fail fast premise which means that a scenario failure won't trigger feature failure
+ *   --bail:  amount of tests that can fail before stopping the runner
+ *            by default set to 0, which means don't bail, run all tests
  */
 
 const fs = require('fs');
@@ -76,6 +77,14 @@ if (argv.tags) {
 
 if (argv.debug) {
   process.env.DEBUG = true;
+}
+
+if (argv.runAll) {
+  process.env.RUN_ALL = true;
+}
+
+if (argv.bail) {
+  process.env.BAIL = argv.bail;
 }
 
 process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';

@@ -145,6 +145,8 @@ exports.config = {
   //
   // Default request retries count
   connectionRetryCount: 3,
+
+  bail: process.env.BAIL ? Number(process.env.BAIL) : 0,
   //
   // Initialize the browser instance with a WebdriverIO plugin. The object should have the
   // plugin name as key and the desired plugin options as properties. Make sure you have
@@ -192,21 +194,20 @@ exports.config = {
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')],        // <string[]> (file/dir) require files before executing features
-    backtrace: true,   // <boolean> show full backtrace for errors
+    require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')], // <string[]> (file/dir) require files before executing features
+    backtrace: true, // <boolean> show full backtrace for errors
     // compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
-    dryRun: false,      // <boolean> invoke formatters without executing steps
-    failFast: true,    // <boolean> abort the run on first failure
-    colors: true,       // <boolean> disable colors in formatter output
-    snippets: true,     // <boolean> hide step definition snippets for pending steps
-    source: false,       // <boolean> hide source uris
-    profile: [],        // <string[]> (name) specify the profile to use
-    strict: true,      // <boolean> fail if there are any undefined or pending steps
-    tagExpression: '',  // <string> (expression) only execute the features or scenarios with tags matching the expression
-    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 20000,     // <number> timeout for step definitions
+    dryRun: false, // <boolean> invoke formatters without executing steps
+    failFast: !process.env.RUN_ALL, // <boolean> abort the run on first failure
+    colors: true, // <boolean> disable colors in formatter output
+    snippets: true, // <boolean> hide step definition snippets for pending steps
+    source: false, // <boolean> hide source uris
+    profile: [], // <string[]> (name) specify the profile to use
+    strict: true, // <boolean> fail if there are any undefined or pending steps
+    tagExpression: '', // <string> (expression) only execute the features or scenarios with tags matching the expression
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 20000, // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
-
   //
   // =====
   // Hooks

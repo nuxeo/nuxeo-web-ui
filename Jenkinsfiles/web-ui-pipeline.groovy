@@ -12,6 +12,8 @@ properties([
             booleanParam(name: 'GENERATE_METRICS', defaultValue: false, description: 'Should the metrics report be generated?'),
             string(name: 'BROWSER', defaultValue: 'chrome', description: 'The browser to use for functional tests.', trim: false),
             string(name: 'BROWSER_BINARY', defaultValue: '', description: 'The path to the browser binary.', trim: false),
+            booleanParam(name: 'RUN_ALL', defaultValue: false, description: 'Should fail fast premise be skipped?', trim: false),
+            string(name: 'BAIL', defaultValue: '0', description: 'Number of failed features to stop test runner (default value 0 means not applicable).', trim: false),
     ]),
     pipelineTriggers([])
 ])
