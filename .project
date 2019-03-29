@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+  <name>nuxeo-web-ui</name>
+  <comment>Nuxeo Web UI - Web application. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects>
+    <project>nuxeo-core-api</project>
+    <project>nuxeo-common</project>
+    <project>nuxeo-core-schema</project>
+    <project>nuxeo-runtime</project>
+    <project>nuxeo-runtime-reload</project>
+    <project>nuxeo-runtime-jtajca</project>
+    <project>nuxeo-runtime-metrics</project>
+    <project>nuxeo-runtime-management</project>
+    <project>nuxeo-runtime-deploy</project>
+    <project>nuxeo-launcher-commons</project>
+    <project>nuxeo-runtime-osgi</project>
+    <project>nuxeo-runtime-launcher</project>
+    <project>nuxeo-runtime-kv</project>
+    <project>nuxeo-platform-url-api</project>
+    <project>nuxeo-core-io</project>
+    <project>nuxeo-runtime-stream</project>
+    <project>nuxeo-stream</project>
+    <project>nuxeo-core-event</project>
+    <project>nuxeo-runtime-datasource</project>
+    <project>nuxeo-core-cache</project>
+    <project>nuxeo-runtime-cluster</project>
+    <project>nuxeo-runtime-pubsub</project>
+    <project>nuxeo-core-query</project>
+    <project>nuxeo-platform-types-api</project>
+    <project>nuxeo-platform-forms-layout-api</project>
+    <project>nuxeo-runtime-test</project>
+    <project>nuxeo-runtime-server</project>
+    <project>nuxeo-platform-url-core</project>
+    <project>nuxeo-platform-types-core</project>
+    <project>nuxeo-core</project>
+    <project>nuxeo-runtime-migration</project>
+    <project>nuxeo-core-el</project>
+    <project>nuxeo-core-bulk</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>
