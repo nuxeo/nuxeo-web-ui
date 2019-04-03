@@ -149,8 +149,14 @@ Polymer({
               ></paper-progress>
             </template>
           </div>
-          <div class="actions" hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]">
-            <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"></paper-icon-button>
+          <div class="actions">
+            <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"
+              hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]"
+            ></paper-icon-button>
+            <div hidden$="[[!_showAbort(uploading)]]">
+              <paper-icon-button noink icon="icons:cancel" on-tap="_abortUpload"></paper-icon-button>
+              <nuxeo-tooltip>[[i18n('dropzone.abort')]]</nuxeo-tooltip>
+            </div>
           </div>
         </div>
       </template>
@@ -470,5 +476,16 @@ Polymer({
       obj[path[0]] = path.length === 1 && value ? value : {};
     }
     return this._createNestedObjectRecursive(obj[path[0]], path.slice(1), value);
+  },
+
+  _abortUpload(e) {
+    if (this.hasAbort()) {
+      this.abort(this.files[e.model.itemsIndex]);
+      this.splice('files', e.model.itemsIndex, 1);
+    }
+  },
+
+  _showAbort(uploading) {
+    return uploading && this.hasAbort();
   },
 });
