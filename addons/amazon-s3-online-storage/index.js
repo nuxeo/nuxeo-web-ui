@@ -137,18 +137,23 @@ class S3Provider {
       });
   }
 
+  hasAbort() {
+    return true;
+  }
+
   hasProgress() {
     return true;
   }
 
+  abort(file) {
+    if (file.managedUpload) {
+      file.managedUpload.abort();
+    }
+  }
+
   cancelBatch() {
     if (this.uploader) {
-      for (let i = 0; i < this.files.length; ++i) {
-        const file = this.files[i];
-        if (file.managedUpload) {
-          file.managedUpload.abort();
-        }
-      }
+      this.files.forEach(this.abort);
     }
     this.uploader = null;
     this.batchId = null;
