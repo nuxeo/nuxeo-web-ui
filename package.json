@@ -1,7 +1,7 @@
 {
   "name": "nuxeo-web-ui",
   "description": "Nuxeo Web UI",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "homepage": "http://www.nuxeo.com",
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
