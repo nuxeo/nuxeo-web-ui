@@ -1,0 +1,70 @@
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-element.js';
+{{!-- {{#each imports}} --}}
+{{!-- import '@nuxeo/nuxeo-ui-elements/widgets/{{this}}.js'; --}}
+{{!-- {{/each}} --}}
+
+window.customElements.define('{{element}}', class extends mixinBehaviors([LayoutBehavior], Nuxeo.Element) {
+
+  static get is() {
+    return '{{element}}';
+  }
+
+  static get template() {
+    return html`
+      <style>
+        *[role='widget'] {
+          margin-bottom: 16px;
+        }
+        
+        label {
+          @apply --nuxeo-label;
+        }
+
+        div {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          word-break: break-word;
+          -webkit-hyphens: auto;
+          -moz-hyphens: auto;
+          -ms-hyphens: auto;
+          -o-hyphens: auto;
+          hyphens: auto;
+        }
+
+        div.multiline {
+          white-space: pre-line;
+        }
+
+        nuxeo-document-viewer {
+          @apply --paper-card;
+        }
+
+        nuxeo-note-editor {
+          @apply --paper-card;
+        }
+      </style>
+
+      {{#each elements}}
+      {{#if label}}
+      <div role="widget">
+        <label>[[i18n('{{label}}')]]</label>
+        <{{is}}{{#each attributes}} {{this.name}}="{{{this.value}}}"{{/each}}>{{{content}}}</{{is}}>
+      </div>
+      {{else}}
+      <{{is}} role="widget"{{#each attributes}} {{this.name}}="{{{this.value}}}"{{/each}}>{{{content}}}</{{is}}>
+      {{/if}}
+      {{/each}}
+    `;
+  }
+
+  static get properties() {
+    return {
+      {{#each properties}}
+      {{this.name}}: { type: {{this.type}} },
+      {{/each}}
+    };
+  }
+});

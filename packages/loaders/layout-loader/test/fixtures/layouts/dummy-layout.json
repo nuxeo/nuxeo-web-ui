@@ -1,0 +1,46 @@
+{
+  "element": "dummy-layout",
+  "elements":[
+    {
+      "is": "nuxeo-input",
+      "attributes":[
+        {
+          "name": "name",
+          "value": "title"
+        },
+        {
+          "name": "label",
+          "value": "[[i18n('label.dublincore.title')]]"
+        },
+        {
+          "name":"value",
+          "value":"{{document.properties.dc:title}}"
+        }
+      ]
+    },
+    {
+      "is": "div",
+      "attributes":[
+        {
+          "name": "name",
+          "value": "description"
+        }
+      ],
+      "content": "[[document.properties.dc:description]]",
+      "label": "label.dublincore.description",
+      "hidden": "[[!document.properties.dc:description]]"
+    }
+  ],
+  "properties":[
+    {
+      "name":"document",
+      "type":"Object",
+      "doctype":"Workspace",
+      "schemas":[
+        "dublincore",
+        "common",
+        "uid"
+      ]
+    }
+  ]
+}

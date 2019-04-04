@@ -1,0 +1,23 @@
+{
+  "name": "layout-engine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "layout-engine.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": "nuxeo/nuxeo-web-ui.git",
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/nuxeo/nuxeo-web-ui/issues"
+  },
+  "homepage": "https://github.com/nuxeo/nuxeo-web-ui#readme",
+  "dependencies": {
+    "handlebars": "^4.1.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2"
+  }
+}
