@@ -1,0 +1,26 @@
+{
+  "element": "nuxeo-workspace-view-layout",
+  "elements":[
+    {
+      "is": "nuxeo-document-content",
+      "attributes":[
+        {
+          "name": "document",
+          "value": "[[document]]"
+        }
+      ]
+    }
+  ],
+  "properties":[
+    {
+      "name":"document",
+      "type":"Object",
+      "doctype":"Workspace",
+      "schemas":[
+        "dublincore",
+        "common",
+        "uid"
+      ]
+    }
+  ]
+}

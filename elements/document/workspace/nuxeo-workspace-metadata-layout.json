@@ -1,0 +1,39 @@
+{
+  "element": "nuxeo-workspace-metadata-layout",
+  "elements":[
+    {
+      "is": "div",
+      "label": "label.dublincore.title",
+      "attributes":[
+        {
+          "name": "document",
+          "value": "title"
+        }
+      ],
+      "content": "[[document.properties.dc:title]]"
+    },
+    {
+      "is": "div",
+      "label": "label.dublincore.description",
+      "attributes":[
+        {
+          "name": "document",
+          "value": "description"
+        }
+      ],
+      "content": "[[document.properties.dc:description]]"
+    }
+  ],
+  "properties":[
+    {
+      "name":"document",
+      "type":"Object",
+      "doctype":"Workspace",
+      "schemas":[
+        "dublincore",
+        "common",
+        "uid"
+      ]
+    }
+  ]
+}
