@@ -13,6 +13,8 @@ const TARGET = ENV === 'production' ? resolve('dist') : resolve('.');
 
 const tmp = [{ from: `.tmp`, to: join(TARGET) }];
 
+const NUXEO_PACKAGES = (process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean);
+
 const polyfills = [
   {
     from: 'node_modules/@webcomponents/webcomponentsjs/webcomponents-*.{js,map}',
@@ -115,23 +117,54 @@ const common = merge([
         // fix import.meta
         {
           test: /\.js$/,
-          loader: require.resolve('@open-wc/webpack-import-meta-loader/webpack-import-meta-loader.js'),
-        },
-        {
-          test: /\.html$/,
-          exclude: /index\.html$/,
-          use: {
-            loader: 'html-loader',
-            options: {
-              exportAsEs6Default: true,
+          use: [
+            { loader: require.resolve('@open-wc/webpack-import-meta-loader/webpack-import-meta-loader.js') },
+            {
+              loader: 'ifdef-loader',
+              options: {
+                NO_HTML_IMPORTS: process.env.NO_HTML_IMPORTS,
+              },
             },
-          },
+          ],
         },
         {
           test: /\.css$/,
           use: ['style-loader', 'css-loader'],
         },
-      ],
+      ].concat(
+        process.env.NO_HTML_IMPORTS
+          ? [
+              {
+                test: /\.html$/,
+                include: [resolve(__dirname, 'elements')],
+                use: {
+                  loader: 'polymer-webpack-loader',
+                },
+              },
+              {
+                test: /\.html$/,
+                exclude: [resolve(__dirname, 'elements'), /index\.html$/],
+                use: {
+                  loader: 'html-loader',
+                  options: {
+                    exportAsEs6Default: true,
+                  },
+                },
+              },
+            ]
+          : [
+              {
+                test: /\.html$/,
+                exclude: /index\.html$/,
+                use: {
+                  loader: 'html-loader',
+                  options: {
+                    exportAsEs6Default: true,
+                  },
+                },
+              },
+            ],
+      ),
     },
     plugins: [
       new ProvidePlugin({
@@ -142,7 +175,7 @@ const common = merge([
         title: 'Nuxeo',
         template: 'index.html',
         nuxeo: {
-          packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
+          packages: JSON.stringify(NUXEO_PACKAGES),
           url: process.env.NUXEO_URL || '/nuxeo',
         },
       }),
@@ -153,7 +186,9 @@ const common = merge([
 const development = merge([
   {
     devtool: 'cheap-module-source-map',
-    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty])],
+    plugins: [
+      new CopyWebpackPlugin([...tmp, ...polyfills, ...(!process.env.NO_HTML_IMPORTS ? addons : []), ...thirdparty]),
+    ],
     devServer: {
       contentBase: TARGET,
       compress: true,
@@ -188,8 +223,7 @@ const production = merge([
         ...tmp,
         ...polyfills,
         ...thirdparty,
-        ...layouts,
-        ...addons,
+        ...(!process.env.NO_HTML_IMPORTS ? layouts.concat(addons) : []),
         ...assets,
         { from: 'manifest.json' },
         { from: 'index.css' },
