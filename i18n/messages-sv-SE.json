@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "Du har för närvarande inte någon synkroniseringsrot.",
   "driveSyncToggleButton.sync": "Synkronisera",
   "driveSyncToggleButton.unsync": "Sluta synkronisera",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Lägg till en fil",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "Fil uppladdad",

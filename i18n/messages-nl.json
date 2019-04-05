@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "U hebt momenteel geen synchronisatiehoofdmappen.",
   "driveSyncToggleButton.sync": "Synchroniseren",
   "driveSyncToggleButton.unsync": "Synchronisatie ongedaan maken",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Een bestand toevoegen",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "Bestand geüpload",

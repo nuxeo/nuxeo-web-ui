@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "你目前还没有同步根目录。",
   "driveSyncToggleButton.sync": "同步",
   "driveSyncToggleButton.unsync": "异步",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "添加文件",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "文件已上传",

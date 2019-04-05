@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "Une honetan ez duzu sinkronizazio-errorik.",
   "driveSyncToggleButton.sync": "Sinkronizatu",
   "driveSyncToggleButton.unsync": "Desinkronizatu",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Igo fitxategi nagusia",
   "dropzone.dropFile": "Jaregin fitxategia",
   "dropzone.uploaded": "Fitxategia igota",

@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "Vous n'avez synchronisé aucun espace.",
   "driveSyncToggleButton.sync": "Synchroniser",
   "driveSyncToggleButton.unsync": "Désynchroniser",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Ajouter un fichier principal",
   "dropzone.dropFile": "Déposez votre fichier",
   "dropzone.uploaded": "Fichier chargé",

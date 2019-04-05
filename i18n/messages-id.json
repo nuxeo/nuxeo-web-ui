@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "Saat ini anda tidak memiliki akar sinkronisasi.",
   "driveSyncToggleButton.sync": "Sinkronisasi",
   "driveSyncToggleButton.unsync": "Belum tersinkronisasi",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Tambah sebuah berkas",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "Berkas diunggah",

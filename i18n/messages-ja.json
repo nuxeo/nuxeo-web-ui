@@ -496,6 +496,7 @@
   "driveSyncRootsManagement.roots.empty": "現在、同期のルートがありません。",
   "driveSyncToggleButton.sync": "同期化する",
   "driveSyncToggleButton.unsync": "同期を解除する",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "ファイルを追加",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "ファイルがアップロードされました",
