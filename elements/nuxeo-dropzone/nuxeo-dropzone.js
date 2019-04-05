@@ -150,7 +150,10 @@ Polymer({
             </template>
           </div>
           <div class="actions">
-            <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"
+            <paper-icon-button
+              noink
+              icon="nuxeo:delete"
+              on-tap="_deleteFile"
               hidden$="[[!_areActionsVisible(hasFiles, updateDocument, uploading)]]"
             ></paper-icon-button>
             <div hidden$="[[!_showAbort(uploading)]]">
