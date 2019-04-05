@@ -63,7 +63,7 @@ const thirdparty = [
 const layouts = [
   {
     context: 'elements',
-    from: '+(document|directory|search|workflow|diff)/**/*.html',
+    from: '+(directory|search|workflow|diff)/**/*.html',
     to: TARGET,
   }, // '(document|directory|search|workflow)/**/*.html',
   {
@@ -100,13 +100,16 @@ const common = merge([
   {
     entry: './index.js',
     resolve: {
-      extensions: ['.js', '.html'],
+      extensions: ['.js', '.html', '.json'],
       // set absolute modules path to avoid duplicates
       modules: [resolve(__dirname, 'node_modules')],
     },
     output: {
       filename: '[name].bundle.js',
       path: TARGET,
+    },
+    resolveLoader: {
+      modules: ['node_modules', resolve(__dirname, 'packages/loaders')],
     },
     mode: ENV,
     module: {
@@ -117,7 +120,28 @@ const common = merge([
           loader: require.resolve('@open-wc/webpack/loaders/import-meta-url-loader.js'),
         },
         {
+          type: 'javascript/auto', // skip default json loader
+          test: /\.json$/,
+          include: [resolve(__dirname, 'elements/document')],
+          use: [
+            {
+              loader: 'layout-loader',
+              options: {
+                template: 'layoutPolymer3',
+              },
+            },
+          ],
+        },
+        {
           test: /\.html$/,
+          include: [resolve(__dirname, 'elements/document')],
+          use: {
+            loader: 'polymer-webpack-loader',
+          },
+        },
+        {
+          test: /\.html$/,
+          exclude: [resolve(__dirname, 'elements/document')],
           use: {
             loader: 'html-loader',
             options: {

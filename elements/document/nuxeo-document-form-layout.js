@@ -95,8 +95,7 @@ Polymer({
     if (result) {
       return result;
     }
-    const { layout } = this.$.layout.$;
-    const nodes = layout._getValidatableElements(layout.element.root);
+    const nodes = this.$.layout._getValidatableElements(this.$.layout.element.root);
     const invalidField = nodes.find((node) => node.invalid);
     invalidField.scrollIntoView();
     invalidField.focus();

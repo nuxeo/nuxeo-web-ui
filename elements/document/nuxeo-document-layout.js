@@ -18,9 +18,9 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
+import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 
 /**
 `nuxeo-document-layout`
@@ -28,7 +28,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 @element nuxeo-document-layout
 */
 Polymer({
-  _template: html`
+  /* _template: html`
     <nuxeo-layout
       id="layout"
       href="[[_href]]"
@@ -37,7 +37,7 @@ Polymer({
       on-element-changed="_elementChanged"
     >
     </nuxeo-layout>
-  `,
+  `, */
 
   is: 'nuxeo-document-layout',
   behaviors: [I18nBehavior],
@@ -56,41 +56,80 @@ Polymer({
       notify: true,
       value: {},
     },
-    _href: {
-      type: String,
-      notify: true,
-    },
   },
 
   observers: ['_loadLayout(document, layout)'],
 
-  get element() {
-    return this.$.layout.element;
-  },
-
   validate() {
-    return this.$.layout.validate();
+    if (this.element && typeof this.element.validate === 'function') {
+      return this.element.validate();
+    }
+    // workaroud for https://github.com/PolymerElements/iron-form/issues/218, adapted from iron-form.html
+    let valid = true;
+    if (this.element) {
+      const elements = this._getValidatableElements(this.element.root);
+      for (let el, i = 0; i < elements.length; i++) {
+        el = elements[i];
+        valid = (el.validate ? el.validate() : el.checkValidity()) && valid;
+      }
+    }
+    return valid;
   },
 
   _loadLayout(document, layout) {
     if (document) {
-      if (!this.previousDocument || document.type === this.previousDocument.type) {
+      /* if (!this.previousDocument || document.type === this.previousDocument.type) {
         this._model = { document };
       }
       if (!this.previousDocument || document.uid !== this.previousDocument.uid) {
         this._href = null; // force layout restamp
-      }
+      } */
       const doctype = document.type.toLowerCase();
       const name = ['nuxeo', doctype, layout, 'layout'].join('-');
-      this._href = this.resolveUrl(`${doctype}/${name}.html`);
-    } else if (document === undefined) {
+      this.element = window.document.createElement(name);
+      if (this.hasChildNodes()) {
+        this.replaceChild(this.element, this.firstChild);
+      } else {
+        this.appendChild(this.element);
+      }
+      import(/* webpackChunkName: "[request]" */ `./${doctype}/${name}?entity="document"`).then(() => {
+        this.element.document = this.document;
+        this.element.addEventListener('document-changed', (e) => {
+          this.notifyPath(e.detail.path, e.detail.value);
+        });
+        afterNextRender(this, () => {
+          // fire the `document-layout-changed` event only after flush
+          this.fire('document-layout-changed', {
+            element: this.element,
+            layout: this.layout,
+          });
+        });
+      });
+      /* this._href = this.resolveUrl(`${doctype}/${name}.html`); */
+    } /*  else if (document === undefined) {
       // XXX undefined is used to notify a cancel to inner elements
       this._model = { document };
-    }
-    this.previousDocument = document;
+    } */
+    // this.previousDocument = document;
   },
 
-  _elementChanged() {
+  _getValidatableElements(parent) {
+    const nodes = dom(parent).querySelectorAll('*');
+    const submittable = [];
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (!node.disabled) {
+        if (node.validate || node.checkValidity) {
+          submittable.push(node);
+        } else if (node.root) {
+          Array.prototype.push.apply(submittable, this._getValidatableElements(node.root));
+        }
+      }
+    }
+    return submittable;
+  },
+
+  /* _elementChanged() {
     this._model = { document: this.document };
     // forward document path change events
     this.element.addEventListener('document-changed', (e) => {
@@ -103,5 +142,5 @@ Polymer({
         layout: this.layout,
       });
     });
-  },
+  }, */
 });
