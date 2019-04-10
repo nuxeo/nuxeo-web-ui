@@ -16,6 +16,7 @@ limitations under the License.
 */
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import AWS from 'aws-sdk';
+import uuid from 'uuid/v4';
 
 let _resource;
 
@@ -41,7 +42,7 @@ class S3Provider {
     return new Promise((resolve, reject) => {
       callback({ type: 'uploadStarted', file });
       file.managedUpload = this.uploader.upload({
-        Key: this.extraInfo.baseKey.replace(/^\/+/g, '').concat(file.name),
+        Key: this.extraInfo.baseKey.replace(/^\/+/g, '').concat(uuid()),
         ContentType: file.type,
         Body: file,
       });
