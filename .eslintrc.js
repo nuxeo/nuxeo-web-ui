@@ -45,6 +45,7 @@ module.exports = {
     'no-sequences': 'off',
     'no-underscore-dangle': 'off',
     'padded-blocks': 'off',
+    'spaced-comment': ['error', 'always', { markers: ['/'] }],
   },
   globals: {
     Nuxeo: 'writable',

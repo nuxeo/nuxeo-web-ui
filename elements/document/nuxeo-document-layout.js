@@ -93,14 +93,14 @@ Polymer({
       } else {
         this.appendChild(this.element);
       }
-      if (Nuxeo.UI.config.useHtmlImports) {
-        const href = this.resolveUrl(`${doctype}/${name}.html`);
-        importHref(href, this._onLayoutLoaded.bind(this));
-      } else {
-        import(/* webpackMode: "eager" */
-        /* webpackChunkName: "[request]" */
-        `./${doctype}/${name}?entity="document"`).then(this._onLayoutLoaded.bind(this));
-      }
+      /// #if USE_HTML_IMPORTS
+      const href = this.resolveUrl(`${doctype}/${name}.html`);
+      importHref(href, this._onLayoutLoaded.bind(this));
+      /// #else
+      import(/* webpackMode: "eager" */
+      /* webpackChunkName: "[request]" */
+      `./${doctype}/${name}?entity="document"`).then(this._onLayoutLoaded.bind(this));
+      /// #endif
       /* this._href = this.resolveUrl(`${doctype}/${name}.html`); */
     } /*  else if (document === undefined) {
       // XXX undefined is used to notify a cancel to inner elements

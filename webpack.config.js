@@ -117,7 +117,15 @@ const common = merge([
         // fix import.meta
         {
           test: /\.js$/,
-          loader: require.resolve('@open-wc/webpack/loaders/import-meta-url-loader.js'),
+          use: [
+            { loader: require.resolve('@open-wc/webpack/loaders/import-meta-url-loader.js') },
+            {
+              loader: 'ifdef-loader',
+              options: {
+                USE_HTML_IMPORTS: process.env.USE_HTML_IMPORTS,
+              },
+            },
+          ],
         },
         {
           type: 'javascript/auto', // skip default json loader
