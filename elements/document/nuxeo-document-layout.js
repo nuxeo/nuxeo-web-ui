@@ -21,6 +21,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href';
 
 /**
 `nuxeo-document-layout`
@@ -92,25 +93,34 @@ Polymer({
       } else {
         this.appendChild(this.element);
       }
-      import(/* webpackChunkName: "[request]" */ `./${doctype}/${name}?entity="document"`).then(() => {
-        this.element.document = this.document;
-        this.element.addEventListener('document-changed', (e) => {
-          this.notifyPath(e.detail.path, e.detail.value);
-        });
-        afterNextRender(this, () => {
-          // fire the `document-layout-changed` event only after flush
-          this.fire('document-layout-changed', {
-            element: this.element,
-            layout: this.layout,
-          });
-        });
-      });
+      if (Nuxeo.UI.config.useHtmlImports) {
+        const href = this.resolveUrl(`${doctype}/${name}.html`);
+        importHref(href, this._onLayoutLoaded.bind(this));
+      } else {
+        import(/* webpackMode: "eager" */
+        /* webpackChunkName: "[request]" */
+        `./${doctype}/${name}?entity="document"`).then(this._onLayoutLoaded.bind(this));
+      }
       /* this._href = this.resolveUrl(`${doctype}/${name}.html`); */
     } /*  else if (document === undefined) {
       // XXX undefined is used to notify a cancel to inner elements
       this._model = { document };
     } */
     // this.previousDocument = document;
+  },
+
+  _onLayoutLoaded() {
+    this.element.document = this.document;
+    this.element.addEventListener('document-changed', (e) => {
+      this.notifyPath(e.detail.path, e.detail.value);
+    });
+    afterNextRender(this, () => {
+      // fire the `document-layout-changed` event only after flush
+      this.fire('document-layout-changed', {
+        element: this.element,
+        layout: this.layout,
+      });
+    });
   },
 
   _getValidatableElements(parent) {
