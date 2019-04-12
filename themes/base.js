@@ -375,6 +375,12 @@ const template = html`
 
         --nuxeo-document-blob-actions-menu-max-width: 160px;
 
+        --nuxeo-document-create-popup-height: unset;
+        --nuxeo-document-create-popup-width: unset;
+
+        --nuxeo-document-form-height: unset;
+        --nuxeo-document-form-width: unset;
+
         --nuxeo-action-button-label: {
           padding-right: 8px;
         }
@@ -555,6 +561,8 @@ const template = html`
       @media (max-width: 1024px) {
         html {
           font-size: 14px;
+          --nuxeo-document-create-popup-width: 90%;
+          --nuxeo-document-form-width: 90%;
 
           --nuxeo-dialog: {
             min-width: 0;

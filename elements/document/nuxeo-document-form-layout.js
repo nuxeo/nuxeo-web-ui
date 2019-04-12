@@ -42,7 +42,9 @@ Polymer({
 
       .scrollable {
         padding: 0 24px;
-        max-height: 60vh;
+        /* XXX: max-height is set as a fallback in case height is unset */
+        max-height: calc(var(--nuxeo-document-form-height, 80vh) - 5.9em);
+        height: calc(var(--nuxeo-document-form-height, unset) - 5.9em);
         @apply --layout-scroll;
       }
     </style>

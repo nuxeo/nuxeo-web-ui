@@ -18,14 +18,14 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-dialog-scrollable/paper-dialog-scrollable.js';
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../document/nuxeo-document-form-layout.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
 `nuxeo-document-form-button`
@@ -39,10 +39,10 @@ Polymer({
         margin: 0;
         padding: 24px 0 0 0;
       }
-      @media (min-width: 1024px) {
-        nuxeo-dialog {
-          min-width: 915px;
-        }
+
+      nuxeo-dialog {
+        width: var(--nuxeo-document-form-width, 915px);
+        margin: 0;
       }
     </style>
 
