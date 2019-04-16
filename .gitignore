@@ -1,0 +1,11 @@
+node_modules
+target
+.classpath
+.tmp
+.project
+npm-debug.log
+.settings/
+.DS_Store
+.screenshots/
+*.iml
+.idea
