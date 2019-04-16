@@ -1,0 +1,32 @@
+<!--
+`nuxeo-multistring-view-layout`
+@group Nuxeo UI
+@element nuxeo-multistring-view-layout
+-->
+<dom-module id="nuxeo-multistring-view-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multistring-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @doctype MultiString
+         */
+        document: {
+          type: Object,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

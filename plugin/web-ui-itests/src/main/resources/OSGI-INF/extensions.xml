@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.nuxeo.web.ui.itests.types">
+
+  <require>org.nuxeo.ecm.core.schema.TypeService</require>
+
+  <extension target="org.nuxeo.ecm.core.schema.TypeService" point="schema">
+    <schema name="ftest1" prefix="ft1" override="true" src="data/schemas/ftest1.xsd"/>
+    <schema name="ftest2" prefix="ft2" override="true" src="data/schemas/ftest2.xsd"/>
+    <schema name="ftest3" prefix="ft3" override="true" src="data/schemas/ftest3.xsd"/>
+    <schema name="test_search_pp" prefix="test_search_pp" override="true" src="data/schemas/test_search_pp.xsd"/>
+  </extension>
+  <extension target="org.nuxeo.ecm.core.schema.TypeService" point="doctype">
+    <doctype name="DocSuggestion" extends="Document">
+      <schema name="docsuggestion"/>
+      <schema name="dublincore"/>
+      <schema name="common"/>
+      <schema name="uid"/>
+      <schema name="ftest1"/>
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>DocSuggestion</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>DocSuggestion</type>
+      </subtypes>
+    </doctype>
+    <doctype name="MultiString" extends="Document">
+      <schema name="multistring"/>
+      <schema name="dublincore"/>
+      <schema name="common"/>
+      <schema name="uid"/>
+      <schema name="ftest2"/>
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>MultiString</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>MultiString</type>
+      </subtypes>
+    </doctype>
+    <doctype name="MultiComplex" extends="Document">
+      <schema name="multicomplex"/>
+      <schema name="dublincore"/>
+      <schema name="common"/>
+      <schema name="uid"/>
+      <schema name="ftest3"/>
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>MultiComplex</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>MultiComplex</type>
+      </subtypes>
+    </doctype>
+  </extension>
+  <extension target="org.nuxeo.ecm.core.lifecycle.LifeCycleService" point="types">
+    <types>
+      <type name="DocSuggestion">default</type>
+    </types>
+    <types>
+      <type name="MultiString">default</type>
+    </types>
+  </extension>
+  <extension target="org.nuxeo.ecm.platform.actions.ActionService" point="filters">
+    <filter id="create" append="true">
+      <rule grant="false">
+        <type>DocSuggestion</type>
+        <type>MultiComplex</type>
+        <type>MultiString</type>
+      </rule>
+    </filter>
+  </extension>
+  <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
+    <genericPageProvider class="org.nuxeo.elasticsearch.provider.ElasticSearchNxqlPageProvider" name="test_search">
+      <trackUsage>true</trackUsage>
+      <property name="coreSession">#{documentManager}</property>
+      <whereClause>
+        <predicate parameter="dc:creator" operator="=">
+          <field schema="test_search_pp" name="dublincore_creator"/>
+        </predicate>
+        <fixedPart>ecm:mixinType != 'HiddenInNavigation' AND ecm:isVersion = 0 AND ecm:isTrashed = 0 AND ecm:isProxy = 0</fixedPart>
+      </whereClause>
+      <searchDocumentType>test_search_pp</searchDocumentType>
+      <pageSize>10</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.elasticsearch.provider.ElasticSearchNxqlPageProvider" name="manual-default">
+      <trackUsage>true</trackUsage>
+      <property name="coreSession">#{documentManager}</property>
+      <whereClause>
+        <predicate parameter="ecm:fulltext" operator="FULLTEXT">
+          <field schema="test_search_pp" name="ecm_fulltext" />
+        </predicate>
+        <fixedPart>
+          ecm:primaryType NOT IN ('Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Favorites')
+          AND ecm:mixinType != 'HiddenInNavigation'
+          AND NOT (ecm:mixinType = 'Collection' AND ecm:name = 'Locally Edited')
+          AND ecm:isVersion = 0
+          AND ecm:isTrashed = 0
+          AND ecm:parentId IS NOT NULL
+          AND SORTED_COLUMN IS NOT NULL
+        </fixedPart>
+      </whereClause>
+      <searchDocumentType>test_search_pp</searchDocumentType>
+      <pageSize>10</pageSize>
+    </genericPageProvider>
+
+  </extension>
+  <extension target="org.nuxeo.ecm.core.schema.TypeService" point="doctype">
+    <doctype name="test_search_pp" extends="Document">
+      <facet name="ContentViewDisplay"/>
+      <facet name="SavedSearch"/>
+      <facet name="HiddenInNavigation"/>
+      <schema name="test_search_pp"/>
+    </doctype>
+  </extension>
+</component>

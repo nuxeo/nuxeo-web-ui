@@ -1,0 +1,32 @@
+<!--
+`nuxeo-multicomplex-view-layout`
+@group Nuxeo UI
+@element nuxeo-multicomplex-view-layout
+-->
+<dom-module id="nuxeo-multicomplex-view-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multicomplex-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+           * @doctype MultiComplex
+           */
+        document: {
+          type: Object,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

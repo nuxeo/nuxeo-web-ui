@@ -1,0 +1,100 @@
+<!--
+`manual-default-results`
+@group Nuxeo UI
+@element manual-default-results
+-->
+<dom-module id="nuxeo-manual-default-search-results">
+  <template>
+    <style include="nuxeo-styles">
+      nuxeo-data-table,
+      nuxeo-data-grid,
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: calc(100vh - 130px - var(--nuxeo-app-top));
+      }
+    </style>
+
+    <nuxeo-results name="manual-default" nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-mode="list">
+
+      <nuxeo-data-grid name="grid" icon="nuxeo:view-thumbnails"
+                       empty-label="[[i18n('searchResults.noResults')]]" selection-enabled display-quick-filters
+                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]"
+                       display-navigation>
+        <template>
+          <nuxeo-document-grid-thumbnail tabindex$="{{tabIndex}}" selected$="{{selected}}" doc="[[item]]" index="[[index]]"
+                                         on-navigate="_navigate" selected-items="[[selectedItems]]">
+          </nuxeo-document-grid-thumbnail>
+        </template>
+      </nuxeo-data-grid>
+
+      <nuxeo-data-table name="table" icon="nuxeo:view-list"
+                        settings-enabled
+                        empty-label="[[i18n('searchResults.noResults')]]"
+                        selection-enabled
+                        display-quick-filters
+                        on-row-clicked="_navigate">
+
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title" flex="100">
+          <template>
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('label.type')]]" field="type" hidden>
+          <template>
+            <nuxeo-tag>[[item.type]]</nuxeo-tag>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.modified')]]" field="dc:modified" sort-by="dc:modified" flex="50">
+          <template>
+            <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
+          </template>
+        </nuxeo-data-table-column>
+
+        <nuxeo-data-table-column name="[[i18n('label.dublincore.lastContributor')]]" field="dc:lastContributor" sort-by="dc:lastContributor" flex="50">
+          <template>
+            <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+          </template>
+        </nuxeo-data-table-column>
+
+      </nuxeo-data-table>
+
+      <nuxeo-data-list name="list" icon="nuxeo:view-headline"
+                       empty-label="[[emptyLabel]]" multi-selection
+                       empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
+                       selection-enabled display-quick-filters
+                       display-sort sort-label="[[i18n('searchResults.sort.label')]]" sort-options="[[sortOptions]]"
+                       display-navigation>
+        <template>
+          <nuxeo-document-list-item selected$="{{selected}}" doc="[[item]]" index="[[index]]"
+                                    on-navigate="_navigate" selected-items="[[selectedItems]]">
+          </nuxeo-document-list-item>
+        </template>
+      </nuxeo-data-list>
+
+    </nuxeo-results>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-manual-default-search-results',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        nxProvider: Object,
+
+        sortOptions: {
+          type: Array,
+          value: []
+        }
+      },
+
+      _navigate: function(e) {
+        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
+      }
+    });
+  </script>
+
+</dom-module>

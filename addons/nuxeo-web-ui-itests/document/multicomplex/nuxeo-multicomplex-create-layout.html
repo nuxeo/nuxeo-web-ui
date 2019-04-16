@@ -1,0 +1,84 @@
+<!--
+`nuxeo-multicomplex-create-layout`
+@group Nuxeo UI
+@element nuxeo-multicomplex-create-layout
+-->
+<dom-module id="nuxeo-multicomplex-create-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <nuxeo-input role="widget" required
+      name="title"
+      value="{{document.properties.dc:title}}" label="Title" type="text">
+    </nuxeo-input>
+
+    <nuxeo-data-table items="{{document.properties.ft3:multicomplex}}"
+      name="multiComplex"
+      orderable="true" editable="true" role="widget">
+
+      <nuxeo-data-table-column name="Name" flex="50">
+        <template>
+          [[item.name]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-column name="Date" flex="50">
+        <template>
+          [[formatDate(item.date)]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-column name="Directory" flex="100">
+        <template>
+          <nuxeo-directory-suggestion role="widget" selected-item="[[item.directory]]" readonly="true" directory-name="nature"></nuxeo-directory-suggestion>
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-column name="Document" flex="100">
+        <template>
+          <nuxeo-document-suggestion name="document" selected-item="[[item.document]]" readonly="true">
+          </nuxeo-document-suggestion>
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-column name="User" flex="100">
+        <template>
+          <nuxeo-user-suggestion name="user" selected-item="[[item.user]]" readonly="true" search-type="USER_TYPE">
+          </nuxeo-user-suggestion>
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input name="name" value="{{item.name}}" label="Name" type="text"></nuxeo-input>
+          <nuxeo-date-picker name="date" value="{{item.date}}" label="Date"></nuxeo-date-picker>
+          <nuxeo-directory-suggestion name="nature" selected-item="{{item.directory}}" label="Directory"  directory-name="nature" min-chars="0">
+          </nuxeo-directory-suggestion>
+          <nuxeo-document-suggestion name="document" selected-item="{{item.document}}" label="Document"></nuxeo-document-suggestion>
+          <nuxeo-user-suggestion name="user" selected-item="{{item.user}}" label="User" search-type="USER_TYPE"></nuxeo-user-suggestion>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multicomplex-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+           * @doctype MultiComplex
+           */
+        document: {
+          type: Object,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,56 @@
+<!--
+`nuxeo-docsuggestion-edit-layout`
+@group Nuxeo UI
+@element nuxeo-docsuggestion-edit-layout
+-->
+<dom-module id="nuxeo-docsuggestion-edit-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <nuxeo-input
+      name="title"
+      role="widget" value="{{document.properties.dc:title}}"
+      label="Title" type="text">
+    </nuxeo-input>
+
+    <nuxeo-document-suggestion role="widget"
+      value="{{document.properties.ft1:multipleDocSuggestion}}"
+      label="Multiple Doc Suggestion"
+      multiple="true" min-chars="1">
+    </nuxeo-document-suggestion>
+
+    <nuxeo-document-suggestion role="widget"
+      name="multipleDocSuggestionNoResolver"
+      value="{{document.properties.ft1:multipleDocSuggestionNoResolver}}"
+      id-property="dc:title"
+      label="Multiple Doc Suggestion No Resolver"
+      multiple="true" min-chars="1">
+    </nuxeo-document-suggestion>
+
+    <nuxeo-document-suggestion role="widget"
+      value="{{document.properties.ft1:singleDocSuggestion}}"
+      label="Single Doc Suggestion" min-chars="1">
+    </nuxeo-document-suggestion>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-docsuggestion-edit-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @doctype DocSuggestion
+         */
+        document: {
+          type: Object,
+        }
+
+      }
+    });
+  </script>
+</dom-module>

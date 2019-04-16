@@ -1,0 +1,54 @@
+<!--
+`nuxeo-docsuggestion-metadata-layout`
+@group Nuxeo UI
+@element nuxeo-docsuggestion-metadata-layout
+-->
+<dom-module id="nuxeo-docsuggestion-metadata-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+
+    <div role="widget" name="title">
+      [[document.properties.dc:title]]
+    </div>
+
+    <nuxeo-document-suggestion value="[[document.properties.ft1:multipleDocSuggestion]]"
+      name="multipleDocSuggestion"
+      label="Multiple Doc Suggestion" readonly="true"
+      multiple="true" role="widget" min-chars="3">
+    </nuxeo-document-suggestion>
+
+    <nuxeo-document-suggestion value="[[document.properties.ft1:multipleDocSuggestionNoResolver]]"
+      name="multipleDocSuggestionNoResolver"
+      id-property="dc:title"
+      label="Multiple Doc Suggestion No Resolver" readonly="true"
+      multiple="true" role="widget" min-chars="3">
+    </nuxeo-document-suggestion>
+
+    <nuxeo-document-suggestion value="[[document.properties.ft1:singleDocSuggestion]]"
+      name="singleDocSuggestion"
+      label="Single Doc Suggestion" readonly="true"
+      role="widget" min-chars="3">
+    </nuxeo-document-suggestion>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-docsuggestion-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @doctype DocSuggestion
+         */
+        document: {
+          type: Object,
+        }
+
+      }
+    });
+  </script>
+</dom-module>

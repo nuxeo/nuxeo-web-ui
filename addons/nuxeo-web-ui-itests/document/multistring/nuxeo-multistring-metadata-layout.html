@@ -1,0 +1,44 @@
+<!--
+`nuxeo-multistring-metadata-layout`
+@group Nuxeo UI
+@element nuxeo-multistring-metadata-layout
+-->
+<dom-module id="nuxeo-multistring-metadata-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <div role="widget">
+      <label>Title</label>
+      <div>[[document.properties.dc:title]]</div>
+    </div>
+
+    <nuxeo-data-table role="widget" items="{{document.properties.ft2:multiString}}" name="multiString">
+      <nuxeo-data-table-column name="Multi String">
+        <template>
+          [[item]]
+        </template>
+      </nuxeo-data-table-column>
+    </nuxeo-data-table>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multistring-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @doctype MultiString
+         */
+        document: {
+          type: Object,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,52 @@
+<!--
+`nuxeo-multistring-edit-layout`
+@group Nuxeo UI
+@element nuxeo-multistring-edit-layout
+-->
+<dom-module id="nuxeo-multistring-edit-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+
+    <nuxeo-input name="title"
+      required role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title" type="text">
+    </nuxeo-input>
+
+    <nuxeo-data-table role="widget" items="{{document.properties.ft2:multiString}}" orderable="true" editable="true">
+      <nuxeo-data-table-column name="Multi String">
+        <template>
+          [[item]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item}}" label="Multi String" type="text"></nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multistring-edit-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @doctype MultiString
+         */
+        document: {
+          type: Object,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

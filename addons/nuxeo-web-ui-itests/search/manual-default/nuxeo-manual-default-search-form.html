@@ -1,0 +1,75 @@
+<!--
+`manual-default-form`
+@group Nuxeo UI
+@element manual-default-form
+-->
+<dom-module id="nuxeo-manual-default-search-form">
+  <template>
+    <style>
+      *[role=widget] {
+        margin-bottom: 16px;
+      }
+
+      label {
+        @apply --nuxeo-label;
+      }
+    </style>
+
+    <nuxeo-input role="widget"
+                 id="searchInput"
+                 type="search"
+                 label="[[i18n('defaultSearch.fullText')]]"
+                 value="{{searchTerm}}"
+                 placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+                 autofocus
+                 on-keydown="_checkForEnter">
+    </nuxeo-input>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-manual-default-search-form',
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.I18nBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true
+        },
+        searchTerm: {
+          type: String,
+          notify: true
+        }
+      },
+
+      clear: function() {
+        this.searchTerm = '';
+        this._search();
+      },
+
+      _search: function() {
+        if (this.searchTerm) {
+          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm) + '*');
+          this.set('params.highlight',
+            'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name');
+        } else if (this.params.ecm_fulltext) {
+          this.set('params.ecm_fulltext', '');
+          delete this.params.ecm_fulltext;
+          delete this.params.highlight;
+        }
+      },
+
+      _checkForEnter: function(e) {
+        if (e.keyCode === 13) {
+          this._search();
+        }
+      }
+
+    });
+  </script>
+</dom-module>

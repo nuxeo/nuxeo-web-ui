@@ -1,0 +1,49 @@
+<!--
+`nuxeo-test_search-search-form`
+@group Nuxeo UI
+@element nuxeo-test_search-search-form
+-->
+<dom-module id="nuxeo-test_search-search-form">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+    <div role="widget">
+      <nuxeo-user-suggestion role="widget"
+                             name="author"
+                             label="Creator"
+                             min-chars="1"
+                             search-type="USER_TYPE"
+                             value="{{params.dublincore_creator}}">
+      </nuxeo-user-suggestion>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-test_search-search-form',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+         * @search test_search
+         */
+        params: {
+          type: Object,
+          value: {},
+          notify: true,
+        },
+
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true,
+        },
+
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,55 @@
+<!--
+`nuxeo-multistring-create-layout`
+@group Nuxeo UI
+@element nuxeo-multistring-create-layout
+-->
+<dom-module id="nuxeo-multistring-create-layout">
+  <template>
+    <style>
+      *[role=widget] {
+        padding: 5px;
+      }
+    </style>
+
+    <nuxeo-input name="title"
+      required role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title" type="text">
+    </nuxeo-input>
+
+    <nuxeo-data-table role="widget" items="{{document.properties.ft2:multiString}}"
+      name="multiString"
+      orderable="true" editable="true">
+      <nuxeo-data-table-column name="Multi String">
+        <template>
+          [[item]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input name="string" value="{{item}}" label="Multi String" type="text">
+          </nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-multistring-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+
+        /**
+           * @doctype MultiString
+           */
+        document: {
+          type: Object,
+        }
+
+      }
+    });
+  </script>
+</dom-module>
