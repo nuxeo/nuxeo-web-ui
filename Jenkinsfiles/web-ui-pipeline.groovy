@@ -2,7 +2,7 @@ properties([
     [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
             string(name: 'BRANCH', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', trim: false),
-            choice(name: 'BASE_BRANCH', choices: ['master', '10.10', '9.10'], description: 'The branch to fallback on when $BRANCH is not found.'),
+            choice(name: 'BASE_BRANCH', choices: ['master'], description: 'The branch to fallback on when $BRANCH is not found.'),
             string(name: 'SLAVE', defaultValue: 'SLAVE', description: 'Slave label to be used.', trim: false),
             booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm cache clean?'),
             booleanParam(name: 'SAUCE_LAB', defaultValue: true, description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?'),
@@ -78,7 +78,6 @@ timestamps {
             deleteDir()
             def VERSIONS_MAPPING = ['10.10': '2.4', '9.10': '2.2']
             def ELEMENTS_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "maintenance-${VERSIONS_MAPPING.get(BASE_BRANCH)}.x" : BASE_BRANCH
-            def MP_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "${VERSIONS_MAPPING.get(BASE_BRANCH)}_${BASE_BRANCH}" : BASE_BRANCH
             def el, datavizel, uiel, webui, webuiitests, plugin
             if (params.CLEAN) {
                 sh 'npm cache clean --force'
@@ -141,45 +140,17 @@ timestamps {
                                     sh "npm install --no-package-lock ../nuxeo-elements/ui/${uiel}"
                                 }
                                 withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
-                                    sh 'mvn install -DskipInstall'
+                                    def profiles = []
+                                    if (!params.SKIP_IT_TESTS) profiles.add('ftest')
+                                    if (params.GENERATE_METRICS) profiles.add('metrics')
+                                    withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
+                                        sh "mvn clean install ${profiles.isEmpty() ? "" : "-P" + profiles.join(",")} -DskipInstall"
+                                    }
                                 }
-                                archive 'target/*.jar'
+                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/marketplace-itests/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
                             }
                         } else {
                             echo 'No need to build nuxeo-web-ui'
-                        }
-                    }
-                }
-                stage('nuxeo-web-ui-itests') {
-                    timeout(30) {
-                        webuiitests = cloneRebaseAndDir('nuxeo-web-ui-itests')
-                        if (webuiitests) {
-                            echo 'Need to nuxeo-web-ui-itests'
-                            dir('nuxeo-web-ui-itests') {
-                                sh 'mvn clean install'
-                                archive 'target/*.jar'
-                            }
-                        } else {
-                            echo 'No need to build nuxeo-web-ui-itests'
-                        }
-                    }
-                }
-                stage('plugin-nuxeo-web-ui') {
-                    timeout(60) {
-                        plugin = cloneRebaseAndDir('plugin-nuxeo-web-ui', BRANCH, MP_BASE_BRANCH)
-                        if (plugin || el || uiel || webuiitests || webui) {
-                            echo 'Need to plugin-nuxeo-web-ui'
-                            dir('plugin-nuxeo-web-ui') {
-                                def profiles = []
-                                if (!params.SKIP_IT_TESTS) profiles.add('ftest')
-                                if (params.GENERATE_METRICS) profiles.add('metrics')
-                                withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-                                    sh "mvn clean install ${profiles.isEmpty() ? "" : "-P" + profiles.join(",")}"
-                                }
-                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip, metrics/target/report/*'
-                            }
-                        } else {
-                            echo 'No need to build plugin-nuxeo-web-ui'
                         }
                     }
                 }
@@ -193,12 +164,6 @@ timestamps {
                         }
                         if (webui) {
                             createPullRequest('nuxeo-web-ui')
-                        }
-                        if (webuiitests) {
-                            createPullRequest('nuxeo-web-ui-itests')
-                        }
-                        if (plugin) {
-                            createPullRequest('plugin-nuxeo-web-ui', BRANCH, MP_BASE_BRANCH)
                         }
                     }
                     slackSend channel: '#webui-qa-ci', color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} - $BRANCH Build success (<${env.BUILD_URL}|Open>)"
