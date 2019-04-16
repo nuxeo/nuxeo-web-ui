@@ -156,11 +156,8 @@ timestamps {
                 }
                 stage('post-build') {
                     if (params.CREATE_PR) {
-                        if (el) {
+                        if (el || datavizel || uiel) {
                             createPullRequest('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
-                        }
-                        if (uiel) {
-                            createPullRequest('nuxeo-ui-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                         }
                         if (webui) {
                             createPullRequest('nuxeo-web-ui')
