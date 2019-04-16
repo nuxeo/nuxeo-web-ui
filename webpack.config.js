@@ -8,7 +8,7 @@ const { ProvidePlugin } = require('webpack');
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
 // we can copy things to 'src' in dev mode since if uses a mem fs
-const TARGET = ENV === 'production' ? resolve('target/classes/web/nuxeo.war/ui') : resolve('.');
+const TARGET = ENV === 'production' ? resolve('plugin/web-ui-core/target/classes/web/nuxeo.war/ui') : resolve('.');
 
 const tmp = [{ from: `.tmp`, to: join(TARGET) }];
 

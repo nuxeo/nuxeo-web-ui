@@ -2,17 +2,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.nuxeo</groupId>
-    <artifactId>nuxeo-addons-parent</artifactId>
-    <version>11.1-SNAPSHOT</version>
+    <groupId>org.nuxeo.web.ui</groupId>
+    <artifactId>nuxeo-web-ui-parent</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <groupId>org.nuxeo.web.ui</groupId>
   <artifactId>nuxeo-web-ui-itests</artifactId>
-  <name>Nuxeo Web UI itests</name>
+  <name>Nuxeo Web UI - Web Application Sample for Functional tests</name>
   <description>
-    A Nuxeo Web UI extension which provides doc types, layouts, etc.
-    leveraging features, widgets, etc. not available in the default Web UI
+    A Nuxeo Web UI extension which provides doc types, schemas, etc.
+    leveraging features not available in the default Web UI
     for functional testing purpose.
   </description>
 

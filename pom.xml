@@ -14,27 +14,39 @@
   <version>3.0.0-SNAPSHOT</version>
 
   <modules>
-    <module>marketplace</module>
+    <module>plugin/web-ui-core</module>
+    <module>plugin/marketplace</module>
   </modules>
 
   <profiles>
     <profile>
       <id>ftest</id>
       <modules>
-        <module>marketplace-itests</module>
+        <module>plugin/web-ui-itests</module>
+        <module>plugin/marketplace-itests</module>
         <module>ftest/web-ui/webdriver</module>
       </modules>
     </profile>
     <profile>
       <id>metrics</id>
       <modules>
-        <module>metrics</module>
+        <module>plugin/metrics</module>
       </modules>
     </profile>
   </profiles>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.nuxeo.web.ui</groupId>
+        <artifactId>nuxeo-web-ui</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.web.ui</groupId>
+        <artifactId>nuxeo-web-ui-itests</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.nuxeo.web.ui</groupId>
         <artifactId>nuxeo-web-ui-marketplace</artifactId>
