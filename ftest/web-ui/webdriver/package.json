@@ -8,6 +8,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@nuxeo/nuxeo-web-ui-ftest": "file:../../../nuxeo-web-ui-ftest"
+    "@nuxeo/nuxeo-web-ui-ftest": "file:../../../packages/nuxeo-web-ui-ftest"
   }
 }
