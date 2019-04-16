@@ -258,6 +258,12 @@ limitations under the License.
       min-width: 480px;
     };
 
+    --nuxeo-document-create-popup-height: unset;
+    --nuxeo-document-create-popup-width: unset;
+
+    --nuxeo-document-form-height: unset;
+    --nuxeo-document-form-width: unset;
+
     --nuxeo-selectivity-label: {
       @apply --nuxeo-label;
     };
@@ -443,6 +449,8 @@ limitations under the License.
   @media (max-width: 1024px) {
 	  html {
       font-size: 14px;
+      --nuxeo-document-create-popup-width: 90%;
+      --nuxeo-document-form-width: 90%;
 
       --nuxeo-dialog: {
         min-width: 0;

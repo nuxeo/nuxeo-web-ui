@@ -42,14 +42,8 @@ limitations under the License.
       }
 
       nuxeo-dialog {
-        min-width: 915px;
-      }
-
-      @media (max-width: 1024px) {
-        nuxeo-dialog {
-          min-width: 0;
-          width: 90%;
-        }
+        width: var(--nuxeo-document-form-width, 915px);
+        margin: 0;
       }
     </style>
 
