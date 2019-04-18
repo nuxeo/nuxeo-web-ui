@@ -7,8 +7,20 @@ export default class CloudServices extends BasePage {
     return this.el.element('nuxeo-cloud-tokens');
   }
 
+  get nuxeoCloudTokensAuthorizedApplications() {
+    return this.el.element('nuxeo-oauth2-provided-tokens');
+  }
+
+  get nuxeoCloudTokensCloudAccount() {
+    return this.el.element('nuxeo-oauth2-consumed-tokens');
+  }
+
   get nuxeoCloudProviders() {
     return this.el.element('nuxeo-cloud-providers');
+  }
+
+  get nuxeoCloudConsumers() {
+    return this.el.element('nuxeo-cloud-consumers');
   }
 
   addProvider(provider) {
@@ -76,5 +88,70 @@ export default class CloudServices extends BasePage {
       }
     }, reverse ? 'The cloud services does have such provider' : 'The cloud services does not have such provider');
     return true;
+  }
+
+  waitForHasClient(id, reverse) {
+    const el = this.el;
+    driver.waitUntil(() => {
+      const clients = el.elements('[name="id"').value;
+      if (reverse) {
+        return clients.every(client => client.getText().trim() !== id);
+      } else {
+        return clients.some(client => client.getText().trim() === id);
+      }
+    }, reverse ? 'The cloud services does have such client' : 'The cloud services does not have such client');
+    return true;
+  }
+
+  fillClientDetails(client) {
+    client.rows().forEach((row) => {
+      this.el.element(`#dialog:not([aria-hidden]) input[name="${row[0]}"`).setValue(row[1]);
+    });
+  }
+
+  clickOnSaveClientBtn() {
+    this.el.click('#dialog:not([aria-hidden]) paper-button[id="save"]');
+  }
+
+  addClient(client) {
+    driver.waitForVisible('#addClient');
+    this.el.element('#addClient').click();
+    driver.waitForVisible('#dialog:not([aria-hidden])');
+    this.fillClientDetails(client);
+    this.clickOnSaveClientBtn();
+  }
+
+  editClient(currentClientId, newDetails) {
+    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const edited = rows.some((row) => {
+      if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === currentClientId) {
+        row.click('[name="edit"]');
+        driver.waitForVisible('#dialog:not([aria-hidden])');
+        this.fillClientDetails(newDetails);
+        this.clickOnSaveClientBtn();
+        return true;
+      }
+      return false;
+    });
+    if (!edited) {
+      throw new Error(`no client found with id "${currentClientId}"`);
+    }
+  }
+
+  deleteClient(clientId) {
+    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const deleted = rows.some((row) => {
+      if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === clientId) {
+        row.click('[name="delete"]');
+        driver.alertAccept();
+        return true;
+      }
+      return false;
+    });
+    if (!deleted) {
+      throw new Error(`no client found with Id "${clientId}"`);
+    }
   }
 }

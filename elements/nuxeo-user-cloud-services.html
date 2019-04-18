@@ -23,8 +23,8 @@ limitations under the License.
 <dom-module id="nuxeo-user-cloud-services">
   <template>
     <style include="nuxeo-styles iron-flex">
-      nuxeo-oauth2-tokens {
-        --nuxeo-oauth2-tokens-table-height: calc(100vh - 368px);
+      nuxeo-oauth2-consumed-tokens {
+        --nuxeo-oauth2-consumed-tokens-table-height: calc(100vh - 368px);
       }
 
       .buttons {
@@ -37,18 +37,13 @@ limitations under the License.
     </style>
 
     <nuxeo-resource id="providers" path="oauth2/provider/"></nuxeo-resource>
-    <nuxeo-resource id="tokens" path="oauth2/token/provider"></nuxeo-resource>
 
     <nuxeo-page>
       <div slot="header">
         <span class="flex">[[i18n('userCloudServices.heading')]]</span>
       </div>
       <nuxeo-card heading="[[i18n('userCloudServices.connectedAccounts')]]">
-        <nuxeo-oauth2-tokens
-          tokens="[[tokens]]"
-          on-oauth2-token-saved="refreshTokens"
-          on-oauth2-token-deleted="refreshTokens"
-        ></nuxeo-oauth2-tokens>
+        <nuxeo-oauth2-consumed-tokens id="consumedTokens" path="oauth2/token/provider"></nuxeo-oauth2-consumed-tokens>
       </nuxeo-card>
       <template is="dom-if" if="[[_showConnectTo(providers.*)]]">
         <nuxeo-card heading="[[i18n('userCloudServices.connectTo')]]">
@@ -77,17 +72,10 @@ limitations under the License.
           type: Array,
           value: [],
         },
-
-        tokens: {
-          type: Array,
-          value: [],
-        },
       },
 
       refreshTokens() {
-        this.$.tokens.get().then((response) => {
-          this.tokens = response.entries;
-        });
+        this.$.consumedTokens.refresh();
       },
 
       _visibleChanged() {
