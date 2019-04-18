@@ -59,12 +59,14 @@ Polymer({
         <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
           <nuxeo-page-item name="providers" label="cloudServices.providers"></nuxeo-page-item>
           <nuxeo-page-item name="tokens" label="cloudServices.tokens"></nuxeo-page-item>
+          <nuxeo-page-item name="consumers" label="cloudServices.consumers"></nuxeo-page-item>
         </paper-listbox>
       </div>
       <div>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
           <nuxeo-cloud-providers id="providers" name="providers"></nuxeo-cloud-providers>
           <nuxeo-cloud-tokens id="tokens" name="tokens"></nuxeo-cloud-tokens>
+          <nuxeo-cloud-consumers id="consumers" name="consumers"></nuxeo-cloud-consumers>
         </iron-pages>
       </div>
     </nuxeo-page>

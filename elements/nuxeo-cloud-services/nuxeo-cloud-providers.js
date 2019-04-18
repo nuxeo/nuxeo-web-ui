@@ -20,7 +20,6 @@ import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@polymer/paper-dialog-scrollable/paper-dialog-scrollable.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
@@ -61,27 +60,19 @@ Polymer({
         empty-label="[[i18n('cloudProviders.emptyResult')]]"
         items="[[oauth2Providers]]"
       >
-        <nuxeo-data-table-column
-          name="[[i18n('cloudProviders.serviceName')]]"
-          field="serviceName"
-          sort-by="serviceName"
-        >
+        <nuxeo-data-table-column name="[[i18n('cloudProviders.serviceName')]]" field="serviceName">
           <template>
             <span name="serviceName">[[item.serviceName]]</span>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column
-          name="[[i18n('cloudProviders.description')]]"
-          field="description"
-          sort-by="description"
-        >
+        <nuxeo-data-table-column name="[[i18n('cloudProviders.description')]]" field="description">
           <template>
             <span>[[item.description]]</span>
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('cloudProviders.enabled')]]" field="isEnabled" sort-by="isEnabled">
+        <nuxeo-data-table-column name="[[i18n('cloudProviders.enabled')]]" field="isEnabled">
           <template>
             <paper-checkbox noink checked="[[item.isEnabled]]" disabled></paper-checkbox>
           </template>
@@ -108,71 +99,69 @@ Polymer({
 
     <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('cloudProviders.popup.editEntry')]]</h2>
-      <paper-dialog-scrollable>
-        <iron-form id="form">
-          <form>
-            <nuxeo-input
-              required
-              label="[[i18n('cloudProviderEdit.serviceName')]]"
-              name="serviceName"
-              value="{{_selectedEntry.serviceName}}"
-            >
-            </nuxeo-input>
+      <iron-form id="form">
+        <form>
+          <nuxeo-input
+            required
+            label="[[i18n('cloudProviderEdit.serviceName')]]"
+            name="serviceName"
+            value="{{_selectedEntry.serviceName}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.description')]]"
-              name="description"
-              value="{{_selectedEntry.description}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.description')]]"
+            name="description"
+            value="{{_selectedEntry.description}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.clientId')]]"
-              name="clientId"
-              value="{{_selectedEntry.clientId}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.clientId')]]"
+            name="clientId"
+            value="{{_selectedEntry.clientId}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.clientSecret')]]"
-              name="clientSecret"
-              value="{{_selectedEntry.clientSecret}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.clientSecret')]]"
+            name="clientSecret"
+            value="{{_selectedEntry.clientSecret}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.authorizationServerURL')]]"
-              name="authorizationServerURL"
-              pattern="(http[s]?:\\/\\/).*"
-              value="{{_selectedEntry.authorizationServerURL}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.authorizationServerURL')]]"
+            name="authorizationServerURL"
+            pattern="(http[s]?:\\/\\/).*"
+            value="{{_selectedEntry.authorizationServerURL}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.tokenServerURL')]]"
-              name="tokenServerURL"
-              pattern="(http[s]?:\\/\\/).*"
-              value="{{_selectedEntry.tokenServerURL}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.tokenServerURL')]]"
+            name="tokenServerURL"
+            pattern="(http[s]?:\\/\\/).*"
+            value="{{_selectedEntry.tokenServerURL}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input
-              label="[[i18n('cloudProviderEdit.userAuthorizationURL')]]"
-              name="userAuthorizationURL"
-              pattern="(http[s]?:\\/\\/).*"
-              value="{{_selectedEntry.userAuthorizationURL}}"
-            >
-            </nuxeo-input>
+          <nuxeo-input
+            label="[[i18n('cloudProviderEdit.userAuthorizationURL')]]"
+            name="userAuthorizationURL"
+            pattern="(http[s]?:\\/\\/).*"
+            value="{{_selectedEntry.userAuthorizationURL}}"
+          >
+          </nuxeo-input>
 
-            <nuxeo-input label="[[i18n('cloudProviderEdit.scopes')]]" name="scopes" value="{{_selectedEntry.scopes}}">
-            </nuxeo-input>
+          <nuxeo-input label="[[i18n('cloudProviderEdit.scopes')]]" name="scopes" value="{{_selectedEntry.scopes}}">
+          </nuxeo-input>
 
-            <paper-checkbox noink id="isEnabled" checked="{{_selectedEntry.isEnabled}}">
-              [[i18n('cloudProviderEdit.isEnabled')]]
-            </paper-checkbox>
-          </form>
-        </iron-form>
-      </paper-dialog-scrollable>
+          <paper-checkbox noink id="isEnabled" checked="{{_selectedEntry.isEnabled}}">
+            [[i18n('cloudProviderEdit.isEnabled')]]
+          </paper-checkbox>
+        </form>
+      </iron-form>
       <div class="buttons">
         <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         <paper-button id="save" name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>

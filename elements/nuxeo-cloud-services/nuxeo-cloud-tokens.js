@@ -1,58 +1,58 @@
 /**
-@license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+ @license
+ (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
-import './nuxeo-oauth2-tokens.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import './nuxeo-oauth2-provided-tokens';
+import './nuxeo-oauth2-consumed-tokens';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
-`nuxeo-cloud-tokens`
-@group Nuxeo UI
-@element nuxeo-cloud-tokens
-*/
-Polymer({
-  _template: html`
-    <nuxeo-resource id="tokens" path="oauth2/token/"></nuxeo-resource>
-    <nuxeo-card heading="[[i18n('cloudTokens.OAuth2Tokens')]]">
-      <nuxeo-oauth2-tokens
-        tokens="[[tokens]]"
-        on-oauth2-token-saved="refresh"
-        on-oauth2-token-deleted="refresh"
-      ></nuxeo-oauth2-tokens>
-    </nuxeo-card>
-  `,
+ * `nuxeo-cloud-tokens` allows declaring a Nuxeo cloud tokens.
+ *     <nuxeo-cloud-tokens id="cloudTokens" name="cloudTokens">
+ *     </nuxeo-cloud-tokens>
+ *
+ * @memberof Nuxeo
+ */
+class CloudTokens extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <nuxeo-card heading="[[i18n('cloudTokens.OAuth2Tokens.provided')]]">
+        <nuxeo-oauth2-provided-tokens id="providedTokens" />
+      </nuxeo-card>
 
-  is: 'nuxeo-cloud-tokens',
-  behaviors: [I18nBehavior],
+      <nuxeo-card heading="[[i18n('cloudTokens.OAuth2Tokens.consumed')]]">
+        <nuxeo-oauth2-consumed-tokens id="consumedTokens" />
+      </nuxeo-card>
+    `;
+  }
 
-  properties: {
-    tokens: {
-      type: Array,
-      value: [],
-    },
-  },
+  static get is() {
+    return 'nuxeo-cloud-tokens';
+  }
 
   refresh() {
-    this.$.tokens.get().then((response) => {
-      this.tokens = response.entries;
-    });
-  },
-});
+    this.$.providedTokens.refresh();
+    this.$.consumedTokens.refresh();
+  }
+}
+
+customElements.define(CloudTokens.is, CloudTokens);
+Nuxeo.CloudTokens = CloudTokens;
