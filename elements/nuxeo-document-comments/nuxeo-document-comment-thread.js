@@ -26,6 +26,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-avatar.js';
+// eslint-disable-next-line import/no-cycle
 import './nuxeo-document-comment.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';

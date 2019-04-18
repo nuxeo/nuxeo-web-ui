@@ -23,6 +23,7 @@ import '@polymer/paper-input/paper-textarea.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
+// eslint-disable-next-line import/no-cycle
 import './nuxeo-document-comment-thread.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
