@@ -1,2 +1,6 @@
+metrics/
+node_modules/
+packages/nuxeo-web-ui-ftest/*
+plugin/
 target/
 .tmp/
