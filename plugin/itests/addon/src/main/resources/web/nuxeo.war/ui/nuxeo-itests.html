@@ -1,0 +1,51 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<nuxeo-slot-content name="test_search" slot="DRAWER_ITEMS" order="34">
+  <template>
+    <nuxeo-menu-icon label="Test Search" name="test_search" icon="icons:bug-report"></nuxeo-menu-icon>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="test_search" slot="DRAWER_PAGES">
+  <template>
+    <nuxeo-search-form
+      provider="test_search"
+      auto
+      schemas="dublincore,common"
+      search-name="test_search"
+      page-size="40"
+      selected-search-idx="0"
+      name="test_search"
+    ></nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="manualSearchMenuButton" slot="DRAWER_ITEMS" order="35">
+  <template>
+    <nuxeo-menu-icon name="manualSearch" icon="icons:send" label="Manual Search"></nuxeo-menu-icon>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="manualSearchMenuPage" slot="DRAWER_PAGES">
+  <template>
+    <nuxeo-search-form
+      name="manualSearch"
+      search-name="manual-default"
+      page-size="10"
+      provider="manual-default"
+      schemas="dublincore,common,uid"
+    ></nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>

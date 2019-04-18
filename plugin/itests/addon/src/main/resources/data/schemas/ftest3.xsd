@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:nxs="http://www.nuxeo.org/ecm/project/schemas/grenard-SANDBOX/ftest3" xmlns:nxsv="http://www.nuxeo.org/ecm/schemas/core/validation/" xmlns:ref="http://www.nuxeo.org/ecm/schemas/core/external-references/" targetNamespace="http://www.nuxeo.org/ecm/project/schemas/grenard-SANDBOX/ftest3">
+  <!-- helper XSD definitions for list types -->
+  <xs:complexType name="content">
+    <xs:sequence>
+      <xs:element name="encoding" type="xs:string"/>
+      <xs:element name="mime-type" type="xs:string"/>
+      <xs:element name="data" type="xs:base64Binary"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="length" type="xs:long"/>
+      <xs:element name="digest" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="stringList">
+    <xs:list itemType="xs:string"/>
+  </xs:simpleType>
+  <xs:simpleType name="doubleList">
+    <xs:list itemType="xs:double"/>
+  </xs:simpleType>
+  <xs:simpleType name="dateList">
+    <xs:list itemType="xs:date"/>
+  </xs:simpleType>
+  <xs:simpleType name="integerList">
+    <xs:list itemType="xs:integer"/>
+  </xs:simpleType>
+  <xs:simpleType name="booleanList">
+    <xs:list itemType="xs:boolean"/>
+  </xs:simpleType>
+  <xs:complexType name="blobList">
+    <xs:sequence>
+      <xs:element name="item" type="nxs:content" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="multicomplex" type="nxs:ft3_multicomplexListType"/>
+  <xs:complexType name="ft3_multicomplexListType">
+    <xs:sequence>
+      <xs:element name="item" type="nxs:ft3_multicomplexType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ft3_multicomplexType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="date" type="xs:date"/>
+      <xs:element name="directory">
+      <xs:simpleType>
+        <xs:restriction base="xs:string" ref:resolver="directoryResolver" ref:directory="nature"/>
+      </xs:simpleType>
+      </xs:element>
+      <xs:element name="document">
+        <xs:simpleType>
+          <xs:restriction base="xs:string" ref:resolver="documentResolver" ref:store="id"/>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="user">
+        <xs:simpleType>
+          <xs:restriction base="xs:string" ref:resolver="userManagerResolver" ref:type="all"/>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

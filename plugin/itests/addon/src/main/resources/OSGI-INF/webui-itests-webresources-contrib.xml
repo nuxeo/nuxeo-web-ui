@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<component name="org.nuxeo.web.ui.itests.resources.contrib">
+
+  <extension target="org.nuxeo.ecm.platform.WebResources" point="resources">
+    <resource name="nuxeo-itests.html" type="import">
+      <uri>/ui/nuxeo-itests.html</uri>
+    </resource>
+  </extension>
+
+  <extension target="org.nuxeo.ecm.platform.WebResources" point="bundles">
+    <bundle name="web-ui">
+      <resources append="true">
+        <resource>nuxeo-itests.html</resource>
+      </resources>
+    </bundle>
+  </extension>
+
+</component>
