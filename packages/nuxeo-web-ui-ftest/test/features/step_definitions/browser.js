@@ -111,7 +111,7 @@ Then('I can publish selection to {string}', function (target) {
   this.ui.browser.selectionToolbar.publishDialog.publish(target);
 });
 
-Then(/^I can perform the following publications$/, function (table) {
+Then(/^I can perform the following publications$/, { wrapperOptions: { retry: 3 } }, function (table) {
   table.rows().forEach((row) => {
     this.ui.browser.publishDialog.publish(row[0], row[1], row[2], row[3]);
   });
