@@ -21,6 +21,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
+import { AggregationBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-aggregation-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
@@ -54,7 +55,6 @@ import './nuxeo-app/nuxeo-page-item.js';
 import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
-import './nuxeo-results/nuxeo-document-content-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
@@ -63,6 +63,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import './nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-recent-documents/nuxeo-recent-documents.js';
+import './nuxeo-results/nuxeo-results.js'
 import '../i18n/i18n.js';
 import '../themes/base.js';
 import '../themes/loader.js';
@@ -78,6 +79,7 @@ import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { ChartDataBehavior } from './nuxeo-admin/nuxeo-chart-data-behavior.js';
+import { DocumentContentBehavior } from './nuxeo-results/nuxeo-document-content-behavior.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
@@ -91,6 +93,7 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
 ];
 
 // expose behaviors for compat
+Nuxeo.AggregationBehavior = AggregationBehavior;
 Nuxeo.I18nBehavior = I18nBehavior;
 Nuxeo.RoutingBehavior = RoutingBehavior;
 Nuxeo.LayoutBehavior = LayoutBehavior;
@@ -99,6 +102,7 @@ Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
 Nuxeo.FormatBehavior = FormatBehavior;
 Nuxeo.ChartDataBehavior = ChartDataBehavior;
+Nuxeo.DocumentContentBehavior = DocumentContentBehavior;
 
 // Export Polymer and PolymerElement for 1.x and 2.x compat
 window.Polymer = Polymer;
