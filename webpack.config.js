@@ -3,6 +3,7 @@ const merge = require('webpack-merge');
 // const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
 
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
@@ -114,10 +115,11 @@ const common = merge([
         // fix import.meta
         {
           test: /\.js$/,
-          loader: require.resolve('@open-wc/webpack/loaders/import-meta-url-loader.js'),
+          loader: require.resolve('@open-wc/webpack-import-meta-loader/webpack-import-meta-loader.js'),
         },
         {
           test: /\.html$/,
+          exclude: /index\.html$/,
           use: {
             loader: 'html-loader',
             options: {
@@ -136,6 +138,14 @@ const common = merge([
         THREE: 'three',
         jQuery: 'jquery',
       }),
+      new HtmlWebpackPlugin({
+        title: 'Nuxeo',
+        template: 'index.html',
+        nuxeo: {
+          packages: JSON.stringify(process.env.NUXEO_PACKAGES || '').split().filter(Boolean),
+          url: process.env.NUXEO_URL || '/nuxeo',
+        },
+      }),
     ],
   },
 ]);
@@ -143,7 +153,7 @@ const common = merge([
 const development = merge([
   {
     devtool: 'cheap-module-source-map',
-    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty], { debug: 'info' })],
+    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty])],
     devServer: {
       contentBase: TARGET,
       compress: true,
@@ -152,7 +162,7 @@ const development = merge([
       host: '0.0.0.0',
       historyApiFallback: true,
       proxy: {
-        '/nuxeo': 'http://localhost:8080/',
+        '/nuxeo': `http://${process.env.NUXEO_HOST || 'localhost:8080'}/`,
       },
     },
   },
