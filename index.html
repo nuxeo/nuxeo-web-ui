@@ -21,7 +21,7 @@ limitations under the License.
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content="Polymer Starter Kit" />
-    <title>Nuxeo</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
     <!-- Place favicon.ico in the `app/` directory -->
 
     <!-- Chrome for Android theme color -->
@@ -59,7 +59,7 @@ limitations under the License.
   </head>
 
   <body>
-    <nuxeo-connection url="/nuxeo"></nuxeo-connection>
+    <nuxeo-connection url="<%= htmlWebpackPlugin.options.nuxeo.url %>"></nuxeo-connection>
 
     <nuxeo-app base-url="/" unresolved>
       <div id="sidebar">
@@ -78,14 +78,11 @@ limitations under the License.
     <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
     <script defer src="vendor/alloy/alloy-editor-all.js"></script>
-
     <script>
       /* eslint-disable no-var, no-unused-vars */
       var Nuxeo = {
         UI: {
-          bundles: [
-            /* 'nuxeo-dam', ... */
-          ],
+          bundles: <%= htmlWebpackPlugin.options.nuxeo.packages %>,
           config: {
             fetch: {
               document: ['properties'],
@@ -119,16 +116,5 @@ limitations under the License.
       };
       /* eslint-enable no-var, no-unused-vars */
     </script>
-
-    <script src="main.bundle.js"></script>
-
-    <!--
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js');
-      });
-    }
-  </script>
-  --></body>
+  </body>
 </html>

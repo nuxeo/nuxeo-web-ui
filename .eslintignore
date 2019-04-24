@@ -5,3 +5,4 @@ packages/nuxeo-web-ui-ftest/*
 plugin/
 target/
 .tmp/
+index.html
