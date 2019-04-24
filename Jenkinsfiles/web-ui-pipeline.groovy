@@ -20,20 +20,6 @@ properties([
 
 currentBuild.setDescription("Branch: $BRANCH -> $BASE_BRANCH")
 
-def runSauceLabTests(repo, sauceCredentialId) {
-    if (params.SKIP_UNIT_TESTS) {
-        echo 'Tests are skipped'
-    } else {
-        if (params.SAUCE_LAB) {
-            withCredentials([usernamePassword(credentialsId: "$sauceCredentialId", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-                sh "./node_modules/.bin/polymer test --npm --plugin sauce --job-name ${repo}-pipeline-$BRANCH --build-number $BUILD_NUMBER"
-            }
-        } else {
-            sh 'npm run test'
-        }
-    }
-}
-
 def createPullRequest(repo, branch = BRANCH, base = BASE_BRANCH) {
     withCredentials([usernamePassword(credentialsId: 'eea4e470-2c5e-468f-ab3a-e6c81fde94c0', passwordVariable: 'GITHUB_PASSWD', usernameVariable: 'GITHUB_TOKEN')]) {
         sh "curl -u \"$GITHUB_TOKEN:$GITHUB_PASSWD\" -H \"Accept: application/vnd.github.symmetra-preview+json\" -d '{\"title\":\"${branch}\",\"base\":\"${base}\", \"head\":\"${branch}\", \"body\": \"This Pull Request looks good!\"}'  https://api.github.com/repos/nuxeo/${repo}/pulls"
@@ -89,35 +75,32 @@ timestamps {
                         dir('nuxeo-elements') {
                             sh 'npm install --no-package-lock && npm run bootstrap -- --no-ci'
                             sh 'npm run lint'
-                            stage('nuxeo-elements/core') {
+                            if (params.SKIP_UNIT_TESTS) {
+                                echo 'Tests are skipped'
+                            } else {
                                 timeout(30) {
-                                    dir('core') {
-                                        el = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
-                                        runSauceLabTests('nuxeo-elements', 'SAUCE_ELEMENTS_ACCESS_KEY')
+                                    if (params.SAUCE_LAB) {
+                                        withCredentials([usernamePassword(credentialsId: "SAUCE_ELEMENTS_ACCESS_KEY", passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
+                                            sh 'npm run test'
+                                        }
+                                    } else {
+                                        sh 'npm run test'
                                     }
                                 }
                             }
-                            stage('nuxeo-elements/dataviz') {
-                                timeout(30) {
-                                    dir('dataviz') {
-                                        datavizel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
-                                        runSauceLabTests('nuxeo-dataviz-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
-                                    }
-                                }
+                            dir('core') {
+                                el = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
                             }
-                            stage('nuxeo-elements/ui') {
-                                timeout(30) {
-                                    dir('ui') {
-                                        uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
-                                        runSauceLabTests('nuxeo-ui-elements', 'SAUCE_UI_ELEMENTS_ACCESS_KEY')
-                                    }
-                                }
+                            dir('dataviz') {
+                                datavizel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
+                            }
+                            dir('ui') {
+                                uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
                             }
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 echo 'No need to build nuxeo-elements'
             }
             def mvnHome = tool 'maven-3.3'
