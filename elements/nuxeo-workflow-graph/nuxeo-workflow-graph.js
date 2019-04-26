@@ -24,7 +24,7 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-// import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 
 import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb */
 
@@ -347,7 +347,6 @@ Polymer({
       }
       nodes.push(source);
 
-      /*
       const target = transition.nodeTargetId;
       // determine anchors for transition node
       const anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
@@ -356,7 +355,7 @@ Polymer({
             anchors[anchorIndex]);
           const endPointTarget = this._addTargetEndpoint(dom(this.$.container).querySelector(`#${  target}`));
 
-      const connection = this._jsPlumbInstance.connect({
+      this._jsPlumbInstance.connect({
         connector: 'Flowchart',
         source: endPointSource,
         target: endPointTarget,
@@ -366,28 +365,10 @@ Polymer({
           stroke: this.connectionColors[anchorIndex],
           outlineWidth: 2,
           outlineStroke: 'white',
-          joinstyle: 'round'
+          joinstyle: 'round',
         },
-        detachable: false
+        detachable: false,
       });
-      */
-
-      // TODO: fix transition path
-      // prepare the transition's path
-      // ignore paths with only one segment
-      /*
-      var segments = connection.connector.getSegments();
-
-      segments.length = 0;
-      if (transition.path && transition.path.length > 2) {
-        for (var i = 1; i < transition.path.length; i++) {
-          segments.push(new jsPlumb.Segments.Straight({
-            x1: transition.path[i - 1].x, y1: transition.path[i - 1].y,
-            x2: transition.path[i].x, y2: transition.path[i].y
-          }));
-        }
-      }
-      */
     });
   },
 
