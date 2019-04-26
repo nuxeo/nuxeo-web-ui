@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import Nuxeo, { Blob } from 'nuxeo';
 
-export default new Nuxeo({ auth: { method: 'basic', username: 'Administrator', password: 'Administrator' } });
+export default new Nuxeo({
+  auth: { method: 'basic', username: 'Administrator', password: 'Administrator' },
+  baseURL: process.env.NUXEO_URL,
+});
 
 export class BlobHelper {
   static fromPath(blobPath) {

@@ -132,7 +132,7 @@ exports.config = {
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
-  baseUrl: process.env.NUXEO_URL ? 'http://localhost:5000/' : 'http://localhost:8080/nuxeo/',
+  baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://localhost:8080/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: 10000,

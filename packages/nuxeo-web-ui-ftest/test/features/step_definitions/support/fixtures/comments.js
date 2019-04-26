@@ -14,7 +14,10 @@ fixtures.comments = {
         text,
       },
     };
-    const nuxeo = new Nuxeo({ auth: { method: 'basic', username: author, password: users[author] } });
+    const nuxeo = new Nuxeo({
+      auth: { method: 'basic', username: author, password: users[author] },
+      baseURL: process.env.NUXEO_URL,
+    });
     return nuxeo.request(`/id/${parentId}/@comment`).post(params)
       .then((response) => {
         if (response.ancestorIds.length === 1) {

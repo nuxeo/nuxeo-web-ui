@@ -8,7 +8,8 @@
  *               by default set to ./test/features/*.feature
  *   --junitReport: path to file containing the junit report generated from the cucumber report;
  *                  by default set to ./target/surefire-reports/TEST-report.xml
- *   --nuxeoUrl: the url of the nuxeo instance to test
+ *   --nuxeoUrl: the url of the nuxeo platform server instance to test, fall back on --url or http://localhost:8080
+ *   --url: the url of the nuxeo ui instance to test
  *   --report: generate cucumber and junit reports
  *   --screenshots: save screenshots on error
  *   --screenshotPath: path to to which the screenshots will be saved;
@@ -38,6 +39,11 @@ const args = [argv.wdioConfig ? argv.wdioConfig : path.join(__dirname, '../wdio.
 
 if (argv.features) {
   args.push(`--specs=${argv.features}`);
+}
+
+if (argv.url) {
+  process.env.NUXEO_WEB_UI_URL = argv.url;
+  process.env.NUXEO_URL = argv.url;
 }
 
 if (argv.nuxeoUrl) {
