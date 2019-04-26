@@ -290,6 +290,9 @@ Polymer({
     if (node.isEndNode) {
       return 'workflow_end_node';
     }
+    if (node.isForkNode) {
+      return 'workflow_fork_node';
+    }
     if (node.isMerge) {
       return 'workflow_merge_node';
     }
