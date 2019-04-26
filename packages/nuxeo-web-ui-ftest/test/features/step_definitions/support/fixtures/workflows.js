@@ -15,6 +15,7 @@ fixtures.workflows = {
         username: initiator,
         password: fixtures.users.DEFAULT_PASSWORD,
       },
+      baseURL: process.env.NUXEO_URL,
     });
 
     const workflowOptions = {
