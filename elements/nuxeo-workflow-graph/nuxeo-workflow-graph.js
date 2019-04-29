@@ -24,9 +24,32 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-// import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 
-import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb */
+import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb jsPlumbUtil */
+
+(() => {
+  const nxFlowchart = function(params, ...args) {
+    params = params || {};
+    const _super = jsPlumb.Connectors.AbstractConnector.apply(this, args);
+    this.type = 'nxFlowchart';
+
+    const { segments } = params;
+
+    this._compute = () => {
+      for (let i = 1; i < segments.length; i++) {
+        _super.addSegment(this, 'Straight', {
+          x1: segments[i - 1].x,
+          y1: segments[i - 1].y,
+          x2: segments[i].x,
+          y2: segments[i].y,
+        });
+      }
+    };
+  };
+  jsPlumbUtil.extend(nxFlowchart, jsPlumb.Connectors.AbstractConnector);
+  jsPlumb.Connectors.nxFlowchart = nxFlowchart;
+})();
 
 /**
 `nuxeo-workflow-graph`
@@ -350,17 +373,18 @@ Polymer({
       }
       nodes.push(source);
 
-      /*
       const target = transition.nodeTargetId;
       // determine anchors for transition node
       const anchors = this.dynamicAnchors.slice(0, sourceEndpoints[source]).sort();
       // add endpoints
-      const endPointSource = this._addSourceEndpoint(dom(this.$.container).querySelector(`#${  source}`),
-            anchors[anchorIndex]);
-          const endPointTarget = this._addTargetEndpoint(dom(this.$.container).querySelector(`#${  target}`));
+      const endPointSource = this._addSourceEndpoint(
+        dom(this.$.container).querySelector(`#${source}`),
+        anchors[anchorIndex],
+        transition.path,
+      );
+      const endPointTarget = this._addTargetEndpoint(dom(this.$.container).querySelector(`#${target}`));
 
-      const connection = this._jsPlumbInstance.connect({
-        connector: 'Flowchart',
+      this._jsPlumbInstance.connect({
         source: endPointSource,
         target: endPointTarget,
         overlays: this._transitionOverlay(transition),
@@ -369,28 +393,10 @@ Polymer({
           stroke: this.connectionColors[anchorIndex],
           outlineWidth: 2,
           outlineStroke: 'white',
-          joinstyle: 'round'
+          joinstyle: 'round',
         },
-        detachable: false
+        detachable: false,
       });
-      */
-
-      // TODO: fix transition path
-      // prepare the transition's path
-      // ignore paths with only one segment
-      /*
-      var segments = connection.connector.getSegments();
-
-      segments.length = 0;
-      if (transition.path && transition.path.length > 2) {
-        for (var i = 1; i < transition.path.length; i++) {
-          segments.push(new jsPlumb.Segments.Straight({
-            x1: transition.path[i - 1].x, y1: transition.path[i - 1].y,
-            x2: transition.path[i].x, y2: transition.path[i].y
-          }));
-        }
-      }
-      */
     });
   },
 
@@ -398,9 +404,10 @@ Polymer({
     return this._jsPlumbInstance.addEndpoint(target, { anchor: 'TopCenter' }, this.targetEndpointOptions);
   },
 
-  _addSourceEndpoint(source, pos) {
+  _addSourceEndpoint(source, pos, segments) {
     const anchor = [pos, 1, 0, 1];
-    return this._jsPlumbInstance.addEndpoint(source, { anchor }, this.sourceEndpointOptions);
+    const connector = segments && segments.length > 2 ? ['nxFlowchart', { segments }] : 'Flowchart';
+    return this._jsPlumbInstance.addEndpoint(source, { anchor, connector }, this.sourceEndpointOptions);
   },
 
   _resize() {
