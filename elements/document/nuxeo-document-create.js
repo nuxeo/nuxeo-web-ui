@@ -85,8 +85,6 @@ Polymer({
       .typeSelection iron-icon {
         width: var(--nuxeo-document-creation-form-icon-width, 42px);
         height: var(--nuxeo-document-creation-form-icon-height, 42px);
-        filter: brightness(1.5);
-        -webkit-filter: brightness(1.5);
       }
 
       .container {
