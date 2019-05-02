@@ -285,20 +285,27 @@ export default class Browser extends BasePage {
   }
 
   clickDocumentActionMenu(selector) {
-    let action = this.el.element(selector);
-    action.waitForExist();
-    if (!action.isVisible()) {
-      const menu = this.el.element('nuxeo-actions-menu ');
-      menu.waitForVisible('#dropdownButton');
-      menu.click('#dropdownButton');
-      menu.waitForVisible('paper-listbox');
-      menu.waitForVisible('[slot="dropdown"] .label');
-      menu.waitForEnabled('[slot="dropdown"] .label');
-    }
-    action = this.el.element(selector);
-    action.waitForVisible();
-    action.waitForEnabled();
-    action.click();
+    return driver.waitUntil(() => {
+      try {
+        let action = this.el.element(selector);
+        action.waitForExist();
+        if (!action.isVisible()) {
+          const menu = this.el.element('nuxeo-actions-menu ');
+          menu.waitForVisible('#dropdownButton');
+          menu.click('#dropdownButton');
+          menu.waitForVisible('paper-listbox');
+          menu.waitForVisible('[slot="dropdown"] .label');
+          menu.waitForEnabled('[slot="dropdown"] .label');
+        }
+        action = this.el.element(selector);
+        action.waitForVisible();
+        action.waitForEnabled();
+        action.click();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }, 'Cannot click document action');
   }
 
   startWorkflow(workflow) {
