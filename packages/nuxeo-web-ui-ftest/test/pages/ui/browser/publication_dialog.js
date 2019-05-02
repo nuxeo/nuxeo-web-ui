@@ -27,7 +27,6 @@ export default class PublicationDialog extends BasePage {
         }
         this.el.waitForEnabled('#publish');
         this.el.click('#publish');
-        console.log('publish_end');
         return true;
       } catch (e) {
         return false;
