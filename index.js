@@ -17,8 +17,10 @@ Promise.all(
     if (url.endsWith('.html')) {
       return new Promise((resolve, reject) => importHref(url, resolve, reject));
     }
-    return import(/* webpackChunkName: "[request]" */
-    /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
-    `./addons/${url}`);
+    return import(
+      /* webpackChunkName: "[request]" */
+      /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
+      `./addons/${url}`
+    );
   }),
 ).then(() => import(/* webpackMode: "eager" */ './elements/routing.js'));
