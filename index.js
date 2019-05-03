@@ -20,6 +20,7 @@ Promise.all(
     return import(
       /* webpackChunkName: "[request]" */
       /* webpackInclude: /addons\/[^\/]+\/[^\/]+\.js$/ */
+      // eslint-disable-next-line comma-dangle
       `./addons/${url}`
     );
   }),
