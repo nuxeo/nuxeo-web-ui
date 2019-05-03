@@ -13,12 +13,6 @@ exports.capabilities = {
           version: '',
       }
   },
-  safari: {
-      desiredCapabilities: {
-          browserName: 'safari',
-          version: '',
-      }
-  },
   edge: {
       desiredCapabilities: {
           browserName: 'microsoftedge',
