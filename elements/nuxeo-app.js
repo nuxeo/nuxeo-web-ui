@@ -329,6 +329,8 @@ export const Performance = {
   },
 };
 
+Nuxeo.Performance = Performance;
+
 setPassiveTouchGestures(true);
 /**
 `nuxeo-app`
