@@ -41,7 +41,7 @@ Polymer({
       }
 
       nuxeo-dialog {
-        width: var(--nuxeo-document-form-width, 915px);
+        min-width: var(--nuxeo-document-form-min-width, 915px);
         margin: 0;
       }
     </style>

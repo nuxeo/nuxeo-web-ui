@@ -42,6 +42,8 @@ Polymer({
       }
 
       nuxeo-dialog {
+        display: flex;
+        flex-direction: column;
         height: var(--nuxeo-document-create-popup-height, 80vh);
         width: var(--nuxeo-document-create-popup-width, 65vw);
         margin: 0;
@@ -68,8 +70,8 @@ Polymer({
       }
 
       #holder {
-        height: calc(100% - 48px);
-        width: 100%;
+        min-height: calc(100% - 48px);
+        min-width: 100%;
       }
 
       iron-pages {

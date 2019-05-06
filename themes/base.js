@@ -375,11 +375,11 @@ const template = html`
 
         --nuxeo-document-blob-actions-menu-max-width: 160px;
 
-        --nuxeo-document-create-popup-height: unset;
-        --nuxeo-document-create-popup-width: unset;
+        --nuxeo-document-create-popup-height: 85vh;
+        --nuxeo-document-create-popup-width: 65vw;
 
-        --nuxeo-document-form-height: unset;
-        --nuxeo-document-form-width: unset;
+        --nuxeo-document-form-max-height: 60vh;
+        --nuxeo-document-form-min-width: 915px;
 
         --nuxeo-action-button-label: {
           padding-right: 8px;
@@ -562,7 +562,7 @@ const template = html`
         html {
           font-size: 14px;
           --nuxeo-document-create-popup-width: 90%;
-          --nuxeo-document-form-width: 90%;
+          --nuxeo-document-form-min-width: 90%;
 
           --nuxeo-dialog: {
             min-width: 0;
