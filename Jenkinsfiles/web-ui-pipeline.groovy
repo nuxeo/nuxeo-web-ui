@@ -71,7 +71,7 @@ timestamps {
             if (cloneRebaseAndDir('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)) {
                 echo 'Need to build nuxeo-elements'
                 stage('nuxeo-elements') {
-                    withEnv(["LAUNCHPAD_FIREFOX=/opt/build/tools/firefox-63/firefox"]) {
+                    withEnv(["FIREFOX_BIN=/opt/build/tools/firefox-63/firefox"]) {
                         dir('nuxeo-elements') {
                             sh 'npm install --no-package-lock && npm run bootstrap -- --no-ci'
                             sh 'npm run lint'
