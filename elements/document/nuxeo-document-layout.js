@@ -74,11 +74,11 @@ Polymer({
 
   _loadLayout(document, layout) {
     if (document) {
-      if (!this.previousDocument || document.type === this.previousDocument.type) {
-        this._model = { document };
-      }
       if (!this.previousDocument || document.uid !== this.previousDocument.uid) {
         this._href = null; // force layout restamp
+      }
+      if (!this.previousDocument || document.type === this.previousDocument.type) {
+        this._model = { document };
       }
       const doctype = document.type.toLowerCase();
       const name = ['nuxeo', doctype, layout, 'layout'].join('-');
@@ -93,9 +93,11 @@ Polymer({
   _elementChanged() {
     this._model = { document: this.document };
     // forward document path change events
-    this.element.addEventListener('document-changed', (e) => {
-      this.notifyPath(e.detail.path, e.detail.value);
-    });
+    if (this.element) {
+      this.element.addEventListener('document-changed', (e) => {
+        this.notifyPath(e.detail.path, e.detail.value);
+      });
+    }
     afterNextRender(this, () => {
       // fire the `document-layout-changed` event only after flush
       this.fire('document-layout-changed', {
