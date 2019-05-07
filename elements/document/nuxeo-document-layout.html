@@ -67,11 +67,11 @@ limitations under the License.
 
       _loadLayout: function(document, layout) {
         if (document) {
-          if (!this.previousDocument || (document.type === this.previousDocument.type)) {
-            this._model = {document: document};
-          }
           if (!this.previousDocument || (document.uid !== this.previousDocument.uid)) {
             this._href = null; // force layout restamp
+          }
+          if (!this.previousDocument || (document.type === this.previousDocument.type)) {
+            this._model = {document: document};
           }
           var doctype = document.type.toLowerCase();
           var name = ['nuxeo', doctype, layout, 'layout'].join('-');
@@ -86,16 +86,18 @@ limitations under the License.
       _elementChanged: function() {
         this._model = {document: this.document};
         // forward document path change events
-        this.element.addEventListener('document-changed', function(e) {
-          this.notifyPath(e.detail.path, e.detail.value);
-        }.bind(this));
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          // fire the `document-layout-changed` event only after flush
-          this.fire('document-layout-changed', {
-            element: this.element,
-            layout: this.layout
-          });
-        }.bind(this));
+        if (this.element) {
+          this.element.addEventListener('document-changed', function(e) {
+            this.notifyPath(e.detail.path, e.detail.value);
+          }.bind(this));
+          Polymer.RenderStatus.afterNextRender(this, function() {
+            // fire the `document-layout-changed` event only after flush
+            this.fire('document-layout-changed', {
+              element: this.element,
+              layout: this.layout
+            });
+          }.bind(this));
+        }
       }
 
     });
